@@ -46,7 +46,7 @@ SELECT * FROM param.f_inserta_documento('TES', 'PGD', 'Pago Directo', 'periodo',
 SELECT * FROM param.f_inserta_documento('TES', 'SPG', 'Solicitud de Pago', 'periodo', NULL, 'depto', NULL);
 
 
-
+/***********************************F-DAT-GSS-TES-45-02/04/2013*******************************************************/
 
 /********************************************I-DAT-GSS-TES-14-12/04/2013**********************************************/
 
