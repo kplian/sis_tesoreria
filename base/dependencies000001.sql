@@ -74,5 +74,7 @@ ALTER TABLE tes.tchequera
     ON UPDATE NO ACTION
     NOT DEFERRABLE;
     
+
 /***********************************F-DEP-GSS-TES-121-24/04/2013****************************************/
+
 
