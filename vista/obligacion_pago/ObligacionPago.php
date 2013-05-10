@@ -683,12 +683,11 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                 
                 if (data['estado']== 'en_pago'){
                     this.TabPanelSouth.get(1).enable()
-                    this.getBoton('ant_estado').disable();
+                    this.getBoton('ant_estado').enable();
                 }
               
              
               this.getBoton('edit').disable();
-              this.getBoton('new').disable();
               this.getBoton('del').disable();
           }
      },
