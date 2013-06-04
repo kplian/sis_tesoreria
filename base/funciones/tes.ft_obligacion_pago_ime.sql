@@ -323,7 +323,7 @@ BEGIN
                   op.id_estado_wf
                 into v_registros  
                  from  tes.tobligacion_pago op 
-                 where  op.id_obligacion_pago = pp.id_obligacion_pago;
+                 where  op.id_obligacion_pago = v_parametros.id_obligacion_pago;
                  
                  
                 IF v_registros.estado!='borrador'  THEN
@@ -353,19 +353,22 @@ BEGIN
                END IF;
               
               
-               -- pasamos la cotizacion al siguiente estado
+               -- pasamos la obligacion al estado anulado
+               
+               
            
                v_id_estado_actual =  wf.f_registra_estado_wf(v_id_tipo_estado, 
                                                            NULL, 
                                                            v_registros.id_estado_wf, 
                                                            v_registros.id_proceso_wf,
                                                            p_id_usuario,
-                                                           v_registros.id_depto);
+                                                           v_registros.id_depto,
+                                                           'Obligacion de Pago Anulada');
             
             
                -- actualiza estado en la cotizacion
               
-               update tes.tolbigacion_pago  op set 
+               update tes.tobligacion_pago  op set 
                  id_estado_wf =  v_id_estado_actual,
                  estado = 'anulado',
                  id_usuario_mod=p_id_usuario,
@@ -376,29 +379,88 @@ BEGIN
                
                --inactiva el datalle de la solicitud
                update tes.tobligacion_det od set  
-                estado_reg= 'activo'
+                estado_reg= 'inactivo'
                where  od.id_obligacion_pago = v_parametros.id_obligacion_pago;
                
-               --si esta integrado con adquisiciones libera la cotizacion 
                
+               ----------------------------------------------------------------
+               ---si esta integrado con adquisiciones libera la cotizacion ----
+               -----------------------------------------------------------------
+                
                 IF  exists (select 1 
                             from adq.tcotizacion cot 
                             where cot.id_obligacion_pago = v_parametros.id_obligacion_pago)  THEN
                 
-                    -- retroceder el estado de la cotizacion
-                    
+                     
+                         -- retroceder el estado de la cotizacion
+                        
+                          Select     
+                          c.id_cotizacion,
+                          c.id_proceso_wf,
+                          c.id_estado_wf,
+                          c.estado
+                          into
+                          v_registros
+                          
+                          from adq.tcotizacion c 
+                          where c.id_obligacion_pago = v_parametros.id_obligacion_pago;   
+                              
+                         --recuperaq estado anterior segun Log del WF
+                          
+                            SELECT  
+                               ps_id_tipo_estado,
+                               ps_id_funcionario,
+                               ps_id_usuario_reg,
+                               ps_id_depto,
+                               ps_codigo_estado,
+                               ps_id_estado_wf_ant
+                            into
+                               v_id_tipo_estado,
+                               v_id_funcionario,
+                               v_id_usuario_reg,
+                               v_id_depto,
+                               v_codigo_estado,
+                               v_id_estado_wf_ant 
+                            FROM wf.f_obtener_estado_ant_log_wf(v_registros.id_estado_wf);
+                                                   
+                
+                          
+                          
+                          -- registra nuevo estado
+                          
+                          v_id_estado_actual = wf.f_registra_estado_wf(
+                              v_id_tipo_estado, 
+                              v_id_funcionario, 
+                              v_registros.id_estado_wf, 
+                              v_registros.id_proceso_wf, 
+                              p_id_usuario,
+                              v_id_depto,
+                              'El estado  retrocede por anulacion de la obligacion en tesoreria');
+                          
+                        
+                          
+                            -- actualiza estado en la solicitud
+                            update adq.tcotizacion  s set 
+                               id_estado_wf =  v_id_estado_actual,
+                               estado = v_codigo_estado,
+                               id_usuario_mod=p_id_usuario,
+                               fecha_mod=now(),
+                               id_obligacion_pago = NULL
+                             where id_cotizacion = v_registros.id_cotizacion;    
                     
                     --romper relacion con obligacion det
+                           update adq.tcotizacion_det  s set 
+                                   id_obligacion_det = NULL
+                             where id_cotizacion = v_registros.id_cotizacion; 
                 
+                  v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligaciones de Pago eliminado(a), y cotizacion retrocedida'); 
                 
-                
-                
+                ELSE
+                  v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligaciones de Pago eliminado(a)'); 
                 END IF; 
-               
-               
               
             --Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligaciones de Pago eliminado(a)'); 
+          
             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_parametros.id_obligacion_pago::varchar);
               
             --Devuelve la respuesta
