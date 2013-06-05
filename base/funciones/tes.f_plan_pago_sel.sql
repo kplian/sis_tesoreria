@@ -29,7 +29,7 @@ DECLARE
 	v_parametros  		record;
 	v_nombre_funcion   	text;
 	v_resp				varchar;
-			    
+  
 BEGIN
 
 	v_nombre_funcion = 'tes.f_plan_pago_sel';
@@ -45,6 +45,10 @@ BEGIN
 	if(p_transaccion='TES_PLAPA_SEL')then
      				
     	begin
+        
+          
+        
+        
     		--Sentencia de la consulta
 			v_consulta:='select
 						plapa.id_plan_pago,
@@ -93,7 +97,7 @@ BEGIN
                         inner join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
 						inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
-				        where  plapa.estado_reg=''activo''  and  ';
+				        where  plapa.estado_reg=''activo''  and ';
 			
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
@@ -114,13 +118,16 @@ BEGIN
 	elsif(p_transaccion='TES_PLAPA_CONT')then
 
 		begin
+        
+         
+        
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(id_plan_pago)
 						from tes.tplan_pago plapa
                         inner join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
 					    inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
-					    where ';
+					       where  plapa.estado_reg=''activo''   and ';
 			
 			--Definicion de la respuesta		    
 			v_consulta:=v_consulta||v_parametros.filtro;

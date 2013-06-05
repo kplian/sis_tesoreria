@@ -29,6 +29,8 @@ DECLARE
 	v_parametros  		record;
 	v_nombre_funcion   	text;
 	v_resp				varchar;
+    v_filadd 			varchar;
+    va_id_depto 		integer[];
 			    
 BEGIN
 
@@ -45,6 +47,21 @@ BEGIN
 	if(p_transaccion='TES_OBPG_SEL')then
      				
     	begin
+        
+          v_filadd='';
+        
+           IF   p_administrador != 1 THEN
+           
+             select  
+                 pxp.aggarray(depu.id_depto)
+              into 
+                 va_id_depto
+             from param.tdepto_usuario depu 
+             where depu.id_usuario =  p_id_usuario; 
+        
+           v_filadd='(obpg.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||')) and';
+          
+          END IF;
         
         
     		--Sentencia de la consulta
@@ -92,12 +109,14 @@ BEGIN
                         inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
 						inner join param.tdepto dep on dep.id_depto=obpg.id_depto
                         left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
-                        where  ';
+                        where  '||v_filadd;
 			
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 
+
+  -- raise notice '%',v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 						
@@ -113,22 +132,40 @@ BEGIN
 	elsif(p_transaccion='TES_OBPG_CONT')then
 
 		begin
+        
+           v_filadd='';
+          
+             IF   p_administrador != 1 THEN
+             
+               select  
+                   pxp.aggarray(depu.id_depto)
+                into 
+                   va_id_depto
+               from param.tdepto_usuario depu 
+               where depu.id_usuario =  p_id_usuario; 
+          
+             v_filadd='(obpg.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||')) and';
+            
+            END IF;
+        
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(id_obligacion_pago)
 					    from tes.tobligacion_pago obpg
-					    inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
+						inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
-					    inner join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
+                        left join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
                         inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
-				        left join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
-				        left join param.tdepto dep on dep.id_depto=obpg.id_depto
+                        inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
+						inner join param.tdepto dep on dep.id_depto=obpg.id_depto
                         left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
-                        where ';
+                        where  '||v_filadd;
 			
 			--Definicion de la respuesta		    
 			v_consulta:=v_consulta||v_parametros.filtro;
 
 			--Devuelve la respuesta
+            
+            raise notice '%',v_consulta;
 			return v_consulta;
 
 		end;
@@ -150,7 +187,7 @@ EXCEPTION
 END;
 $body$
 LANGUAGE 'plpgsql'
-VOLATILE
+STABLE
 CALLED ON NULL INPUT
 SECURITY INVOKER
 COST 100;
