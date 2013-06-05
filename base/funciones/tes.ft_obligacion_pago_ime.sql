@@ -67,6 +67,8 @@ DECLARE
     v_monto_total numeric;
     v_id_obligacion_det integer;
     v_factor numeric;
+    
+    v_registros    record;
 			    
 BEGIN
 
@@ -310,12 +312,155 @@ BEGIN
 	elsif(p_transaccion='TES_OBPG_ELI')then
 
 		begin
-			--Sentencia de la eliminacion
-			delete from tes.tobligacion_pago
-            where id_obligacion_pago=v_parametros.id_obligacion_pago;
+        
+            -- obtiene datos de la obligacion
+           
+                select
+                  op.estado,
+                  op.id_proceso_wf,
+                  op.id_obligacion_pago,
+                  op.id_depto,
+                  op.id_estado_wf
+                into v_registros  
+                 from  tes.tobligacion_pago op 
+                 where  op.id_obligacion_pago = v_parametros.id_obligacion_pago;
+                 
+                 
+                IF v_registros.estado!='borrador'  THEN
+                
+                   raise exception 'Solo se pueden anular obligaciones en estado borrador';
+                
+                END IF; 
+            
+               --recuperamos el id_tipo_proceso en el WF para el estado anulado
+               --ya que este es un estado especial que no tiene padres definidos
                
+               
+               select 
+               	te.id_tipo_estado
+               into
+               	v_id_tipo_estado
+               from wf.tproceso_wf pw 
+               inner join wf.ttipo_proceso tp on pw.id_tipo_proceso = tp.id_tipo_proceso
+               inner join wf.ttipo_estado te on te.id_tipo_proceso = tp.id_tipo_proceso and te.codigo = 'anulado'               
+               where pw.id_proceso_wf = v_registros.id_proceso_wf;
+               
+               
+               IF v_id_tipo_estado is NULL THEN
+               
+                  raise exception 'El estado anulado para la obligacion de pago no esta parametrizado en el workflow';  
+               
+               END IF;
+              
+              
+               -- pasamos la obligacion al estado anulado
+               
+               
+           
+               v_id_estado_actual =  wf.f_registra_estado_wf(v_id_tipo_estado, 
+                                                           NULL, 
+                                                           v_registros.id_estado_wf, 
+                                                           v_registros.id_proceso_wf,
+                                                           p_id_usuario,
+                                                           v_registros.id_depto,
+                                                           'Obligacion de Pago Anulada');
+            
+            
+               -- actualiza estado en la cotizacion
+              
+               update tes.tobligacion_pago  op set 
+                 id_estado_wf =  v_id_estado_actual,
+                 estado = 'anulado',
+                 id_usuario_mod=p_id_usuario,
+                 fecha_mod=now(),
+                 estado_reg='inactivo'
+               where op.id_obligacion_pago  = v_parametros.id_obligacion_pago;
+               
+               
+               --inactiva el datalle de la solicitud
+               update tes.tobligacion_det od set  
+                estado_reg= 'inactivo'
+               where  od.id_obligacion_pago = v_parametros.id_obligacion_pago;
+               
+               
+               ----------------------------------------------------------------
+               ---si esta integrado con adquisiciones libera la cotizacion ----
+               -----------------------------------------------------------------
+                
+                IF  exists (select 1 
+                            from adq.tcotizacion cot 
+                            where cot.id_obligacion_pago = v_parametros.id_obligacion_pago)  THEN
+                
+                     
+                         -- retroceder el estado de la cotizacion
+                        
+                          Select     
+                          c.id_cotizacion,
+                          c.id_proceso_wf,
+                          c.id_estado_wf,
+                          c.estado
+                          into
+                          v_registros
+                          
+                          from adq.tcotizacion c 
+                          where c.id_obligacion_pago = v_parametros.id_obligacion_pago;   
+                              
+                         --recuperaq estado anterior segun Log del WF
+                          
+                            SELECT  
+                               ps_id_tipo_estado,
+                               ps_id_funcionario,
+                               ps_id_usuario_reg,
+                               ps_id_depto,
+                               ps_codigo_estado,
+                               ps_id_estado_wf_ant
+                            into
+                               v_id_tipo_estado,
+                               v_id_funcionario,
+                               v_id_usuario_reg,
+                               v_id_depto,
+                               v_codigo_estado,
+                               v_id_estado_wf_ant 
+                            FROM wf.f_obtener_estado_ant_log_wf(v_registros.id_estado_wf);
+                                                   
+                
+                          
+                          
+                          -- registra nuevo estado
+                          
+                          v_id_estado_actual = wf.f_registra_estado_wf(
+                              v_id_tipo_estado, 
+                              v_id_funcionario, 
+                              v_registros.id_estado_wf, 
+                              v_registros.id_proceso_wf, 
+                              p_id_usuario,
+                              v_id_depto,
+                              'El estado  retrocede por anulacion de la obligacion en tesoreria');
+                          
+                        
+                          
+                            -- actualiza estado en la solicitud
+                            update adq.tcotizacion  s set 
+                               id_estado_wf =  v_id_estado_actual,
+                               estado = v_codigo_estado,
+                               id_usuario_mod=p_id_usuario,
+                               fecha_mod=now(),
+                               id_obligacion_pago = NULL
+                             where id_cotizacion = v_registros.id_cotizacion;    
+                    
+                    --romper relacion con obligacion det
+                           update adq.tcotizacion_det  s set 
+                                   id_obligacion_det = NULL
+                             where id_cotizacion = v_registros.id_cotizacion; 
+                
+                  v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligaciones de Pago eliminado(a), y cotizacion retrocedida'); 
+                
+                ELSE
+                  v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligaciones de Pago eliminado(a)'); 
+                END IF; 
+              
             --Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligaciones de Pago eliminado(a)'); 
+          
             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_parametros.id_obligacion_pago::varchar);
               
             --Devuelve la respuesta
@@ -514,7 +659,24 @@ BEGIN
         -------------------------------------------------
          IF  v_parametros.operacion = 'cambiar' THEN
                      
-               
+                       --validaciones
+                       
+                       IF v_codigo_estado= 'en_pago' THEN
+                       --verificar que no tenga plnes de pago
+                       
+                         IF  EXISTS(select 1
+                         from tes.tplan_pago pp
+                         where pp.id_obligacion_pago = v_parametros.id_obligacion_pago
+                               and pp.estado_reg='activo') THEN
+                       
+                            raise exception 'Para retroceder no debe tener planes de pago activos';
+                          
+                         END IF;
+                       
+                       
+                       END IF;      
+         
+         
               
                       --recuperaq estado anterior segun Log del WF
                       

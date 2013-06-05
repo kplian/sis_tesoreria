@@ -46,6 +46,7 @@ SELECT * FROM param.f_inserta_documento('TES', 'PGD', 'Pago Directo', 'periodo',
 SELECT * FROM param.f_inserta_documento('TES', 'SPG', 'Solicitud de Pago', 'periodo', NULL, 'depto', NULL);
 
 
+/***********************************F-DAT-GSS-TES-45-02/04/2013*******************************************************/
 
 
 /********************************************I-DAT-GSS-TES-14-12/04/2013**********************************************/
@@ -59,8 +60,9 @@ SELECT * FROM param.f_inserta_documento('TES', 'SPG', 'Solicitud de Pago', 'peri
 
 select wf.f_insert_tproceso_macro ('TES-PD', 'Pago Directo', 'si', 'activo', 'Sistema de Tesoreria');
 select wf.f_insert_ttipo_proceso ('', 'Obligacion de Pago', 'TOPD', 'tes.tobligacion_pago', 'id_obligacion_pago', 'activo', 'si', 'TES-PD');
-select wf.f_insert_ttipo_proceso ('En Pago', 'Tesoreria Plan Pago', 'TPLAP', '', '', 'activo', 'no', 'TES-PD');
-select wf.f_insert_ttipo_estado ('en_pago', 'En pago', 'no', 'si', 'no', 'anterior', '', 'anterior', '', '', 'activo', 'TOPD', 'APLAD');
+
+select wf.f_insert_ttipo_proceso ('En pago', 'Tesoreria Plan Pago', 'TPLAP', '', '', 'activo', 'no', 'TES-PD');
+select wf.f_insert_ttipo_estado ('en_pago', 'En pago', 'no', 'si', 'no', 'anterior', '', 'anterior', '', '', 'activo', 'TOPD', 'TPLAP');
 select wf.f_insert_ttipo_estado ('borrador', 'Borrador', 'si', 'no', 'no', 'listado', '', 'depto_listado', '', '', 'activo', 'TOPD', '');
 select wf.f_insert_ttipo_estado ('registrado', 'Registrado', 'no', 'si', 'no', 'anterior', '', 'anterior', '', '', 'activo', 'TOPD', '');
 select wf.f_insert_ttipo_estado ('finalizado', 'Finalizado', 'no', 'no', 'si', 'anterior', '', 'anterior', '', '', 'activo', 'TOPD', '');

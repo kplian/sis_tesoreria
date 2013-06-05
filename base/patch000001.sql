@@ -26,7 +26,7 @@ CREATE TABLE tes.tobligacion_pago (
   nro_cuota_vigente NUMERIC(1,0) DEFAULT 0 NOT NULL,
   total_pago NUMERIC(19,2),  
   CONSTRAINT pk_tobligacion_pago__id_obligacion_pago PRIMARY KEY(id_obligacion_pago), 
-  CONSTRAINT chk_tobligacion_pago__estado CHECK ((estado)::text = ANY (ARRAY[('borrador'::character varying)::text, ('registrado'::character varying)::text,('en_pago'::character varying)::text, ('finalizado'::character varying)::text])), 
+  CONSTRAINT chk_tobligacion_pago__estado CHECK ((estado)::text = ANY (ARRAY[('borrador'::character varying)::text, ('registrado'::character varying)::text,('en_pago'::character varying)::text, ('finalizado'::character varying)::text,('anulado'::character varying)::text])), 
   CONSTRAINT chk_tobligacion_pago__tipo_obligacion CHECK ((tipo_obligacion)::text = ANY ((ARRAY['adquisiciones'::character varying, 'caja_chica'::character varying, 'viaticos'::character varying, 'fondos_en_avance'::character varying])::text[]))
 ) INHERITS (pxp.tbase)
 WITHOUT OIDS;
@@ -122,7 +122,7 @@ CREATE TABLE tes.tplan_pago(
 
 /***********************************F-SCP-GSS-TES-45-01/04/2013****************************************/
 
-/***********************************I-SCP-GSS-TES-121-24/04/2013****************************************/
+/***********************************I-SCP-GSS-TES-121-24/04/2013***************************************/
 --tabla tes.tplan_pago
 
 CREATE TABLE tes.tcuenta_bancaria (
@@ -148,4 +148,20 @@ CREATE TABLE tes.tchequera (
 ) INHERITS (pxp.tbase)
 WITHOUT OIDS;
 
-/***********************************F-SCP-GSS-TES-121-24/04/2013****************************************/
+/***********************************F-SCP-GSS-TES-121-24/04/2013***************************************/
+
+
+
+/***********************************I-SCP-RAC-TES-0-04/06/2013***************************************/
+
+
+-- object recreation
+ALTER TABLE tes.tobligacion_pago
+  DROP CONSTRAINT chk_tobligacion_pago__estado RESTRICT;
+
+ALTER TABLE tes.tobligacion_pago
+  ADD CONSTRAINT chk_tobligacion_pago__estado CHECK ((estado)::text = ANY (ARRAY[('borrador'::character varying)::text, ('registrado'::character varying)::text, ('en_pago'::character varying)::text, ('finalizado'::character varying)::text, ('anulado'::character varying)::text]));
+  
+
+/***********************************F-SCP-RAC-TES-0-04/06/2013***************************************/
+

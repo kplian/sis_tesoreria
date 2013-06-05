@@ -80,6 +80,7 @@ select pxp.f_insert_trol_procedimiento_gui ('Responsable Obligacion de Pago', 'T
 select pxp.f_insert_trol_procedimiento_gui ('Responsable Obligacion de Pago', 'TES_PLAPA_ELI', 'OBPG');
 select pxp.f_insert_trol_procedimiento_gui ('Responsable Obligacion de Pago', 'TES_PRO_MOD', 'OBPG');
 
+select pxp.f_insert_trol_procedimiento_gui ('Responsable Obligacion de Pago', 'TES_ANTEOB_IME', 'OBPG');
 -------------------------------------------
 -- FIN ROLES 
 -- Autor Gonzalo Sarmiento Sejas

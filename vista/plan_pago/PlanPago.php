@@ -820,8 +820,13 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
        Phx.CP.loadingHide();
             var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
             if(!reg.ROOT.error){
-                
-                this.cmpMonto.setValue(reg.ROOT.datos.monto_total_faltante);
+                if(reg.ROOT.datos.monto_total_faltante > 0){
+                    this.cmpMonto.setValue(reg.ROOT.datos.monto_total_faltante);
+                }
+                else{
+                    
+                    this.cmpMonto.setValue(0);
+                }
                 this.calculaMontoPago();
             }else{
                 
