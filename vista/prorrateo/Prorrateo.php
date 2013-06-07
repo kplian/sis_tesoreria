@@ -227,6 +227,23 @@ Phx.vista.Prorrateo=Ext.extend(Phx.gridInterfaz,{
         this.load({params:{start:0, limit:this.tam_pag}})
        
     },
+    
+     preparaMenu:function(n){
+          var data = this.getSelectedData();
+          var tb =this.tbar;
+          Phx.vista.Prorrateo.superclass.preparaMenu.call(this,n); 
+          
+          if(this.maestro.estado == 'borrador'  && this.maestro.tipo != 'pagado'){
+              
+               this.getBoton('edit').enable();
+          }
+          else{
+               this.getBoton('edit').disable();
+              
+          }
+          
+          
+    },
 	sortInfo:{
 		field: 'id_prorrateo',
 		direction: 'ASC'

@@ -62,6 +62,8 @@ class MODPlanPago extends MODbase{
 		$this->captura('desc_plantilla','varchar');
 		$this->captura('liquido_pagable','numeric');
 		$this->captura('total_prorrateado','numeric');
+		$this->captura('total_pagado','numeric');
+        
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -74,10 +76,25 @@ class MODPlanPago extends MODbase{
 	function insertarPlanPago(){
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.f_plan_pago_ime';
-		$this->transaccion='TES_PLAPA_INS';
+		
+		if ($this->objParam->getParametro('id_plan_pago_fk') != ''){
+		   //insercion de cuota de pago         
+		    $this->transaccion='TES_PLAPAPA_INS';    
+		    
+		}
+        else{
+          //insercion de cuota de devengado        
+          $this->transaccion='TES_PLAPA_INS';      
+            
+        }
+			
+		
+		
 		$this->tipo_procedimiento='IME';
 				
 		//Define los parametros para la funcion
+		
+		
 		$this->setParametro('tipo_pago','tipo_pago','varchar');
 		$this->setParametro('monto_ejecutar_total_mo','monto_ejecutar_total_mo','numeric');
 		$this->setParametro('obs_descuentos_anticipo','obs_descuentos_anticipo','text');
@@ -159,6 +176,23 @@ class MODPlanPago extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+	
+	function solicitarDevPag(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.f_plan_pago_ime';
+        $this->transaccion='TES_SOLDEVPAG_IME';
+        $this->tipo_procedimiento='IME';
+                
+        //Define los parametros para la funcion
+        $this->setParametro('id_plan_pago','id_plan_pago','int4');
+
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
 			
 }
 ?>

@@ -104,23 +104,25 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:true
         },
-        {
+         {
             config:{
-                name: 'id_centro_costo',
-                fieldLabel: 'Centro Costo',
-                allowBlank: true,
-                tinit:false,
-                origen:'CENTROCOSTO',
-                gdisplayField: 'codigo_cc',
-                anchor: '80%',
-                gwidth: 300
-            },
+                    name:'id_centro_costo',
+                    origen:'CENTROCOSTO',
+                   // baseParams:{filtrar:'grupo_ep'},
+                    fieldLabel: 'Centro de Costos',
+                    url: '../../sis_parametros/control/CentroCosto/listarCentroCostoFiltradoXDepto',
+                    emptyText : 'Centro Costo...',
+                    allowBlank:false,
+                    gdisplayField:'codigo_cc',//mapea al store del grid
+                    gwidth:200,
+                },
             type:'ComboRec',
+            id_grupo:0,
             filters:{pfiltro:'cc.codigo_cc',type:'string'},
-            id_grupo:1,
             grid:true,
             form:true
-        },
+        }
+        ,
 		{
  			config:{
  				name:'id_cuenta',
@@ -465,8 +467,9 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
         
         this.getBoton('new').disable();
         
-        this.cmpCentroCostos.store.baseParams.id_gestion=this.maestro.id_gestion
-        this.cmpCentroCostos.modificado=true;
+        this.Cmp.id_centro_costo.store.baseParams.id_gestion=this.maestro.id_gestion
+        this.Cmp.id_centro_costo.store.baseParams.id_depto =this.maestro.id_depto;
+        this.Cmp.id_centro_costo.modificado=true;
         
         this.cmpPartida.store.baseParams.id_gestion=this.maestro.id_gestion
         this.cmpPartida.modificado=true;

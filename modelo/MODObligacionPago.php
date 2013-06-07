@@ -184,6 +184,7 @@ class MODObligacionPago extends MODbase{
         //Define los parametros para la funcion
         $this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
         $this->setParametro('ope_filtro','ope_filtro','varchar');
+        $this->setParametro('id_plan_pago','id_plan_pago','integer');
         
         //Ejecuta la instruccion
         $this->armarConsulta();

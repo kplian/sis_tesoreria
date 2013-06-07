@@ -126,3 +126,4 @@ select pxp.f_insert_tprocedimiento ('TES_CTABAN_CONT', 'Conteo de registros', 's
 select pxp.f_insert_testructura_gui ('CTABAN', 'TES');
 
 /***********************************F-DAT-GSS-TES-121-24/04/2013*****************************************/
+

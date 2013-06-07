@@ -161,6 +161,13 @@ ALTER TABLE tes.tobligacion_pago
 
 ALTER TABLE tes.tobligacion_pago
   ADD CONSTRAINT chk_tobligacion_pago__estado CHECK ((estado)::text = ANY (ARRAY[('borrador'::character varying)::text, ('registrado'::character varying)::text, ('en_pago'::character varying)::text, ('finalizado'::character varying)::text, ('anulado'::character varying)::text]));
+
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN total_pagado NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tplan_pago.total_pagado
+IS 'ESta columana acumula el total de pago registrados, solo es util para cuotas del tipo devengado o devengado_pago';
   
 
 /***********************************F-SCP-RAC-TES-0-04/06/2013***************************************/

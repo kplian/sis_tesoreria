@@ -36,6 +36,8 @@ DECLARE
     v_monto_registrado numeric;
     v_pago_variable varchar;
     v_monto_ejecutar_total_mo numeric;
+    v_tipo varchar;
+    v_estado varchar;
 			    
 BEGIN
 
@@ -60,26 +62,41 @@ BEGIN
             into
             v_registros
             from tes.tprorrateo pro
-            where pro.id_prorrateo = v_parametros.id_prorrateo ;
+            where pro.id_prorrateo = v_parametros.id_prorrateo;
             
             
             select 
              op.pago_variable,
-             pp.monto_ejecutar_total_mo
+             pp.monto_ejecutar_total_mo,
+             pp.tipo,
+             pp.estado,
+             pp.estado
             into
              v_pago_variable,
-             v_monto_ejecutar_total_mo
+             v_monto_ejecutar_total_mo,
+             v_tipo,
+             v_estado
             from tes.tobligacion_pago op
             inner join tes.tplan_pago pp  on op.id_obligacion_pago = pp.id_obligacion_pago
             where pp.id_plan_pago = v_parametros.id_plan_pago;
                
            
             -- la edicion del prorrateo solo es valido para obligaciones variables
+            IF v_tipo = 'pagado' THEN
            
+             raise exception 'No puede editarce el prorrateo de cuotas de pago';
+           
+           END IF;
            
            IF v_pago_variable = 'no' THEN
            
              raise exception 'Solo se admite edicion de prorrateo en pago variables';
+           
+           END IF;
+           
+            IF v_estado != 'borrador' THEN
+           
+             raise exception 'Solo puede editarce cuotas en estado  borrador';
            
            END IF;
            

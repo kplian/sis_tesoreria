@@ -18,6 +18,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		Phx.vista.PlanPago.superclass.constructor.call(this,config);
 		this.init();
 		this.iniciarEventos();
+		this.addButton('SolDevPag',{text:'Solicitar Devengado/Pago',iconCls: 'bpagar',disabled:true,handler:this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente, devengado o pago  '});
+        
+		
 		 //si la interface es pestanha este código es para iniciar 
           var dataPadre = Phx.CP.getPagina(this.idContenedorPadre).getSelectedData()
           if(dataPadre){
@@ -54,7 +57,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 name: 'id_plan_pago_fk',
                 inputType:'hidden',
             },
-            type:'NumberField',
+            type:'Field',
             form:true
         } ,
         {
@@ -64,12 +67,32 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 allowBlank: true,
                 gwidth: 100,
                 renderer:function(value,p,record){
-                       if(record.data.total_prorrateado!=record.data.monto_ejecutar_total_mo ){
-                             return String.format('<b><font color="red">{0}</font></b>', value);
+                       if(record.data.total_pagado==record.data.monto_ejecutar_total_mo ){
+                             return String.format('<b><font color="green">{0}</font></b>', value);
                          }
-                          else{
-                            return String.format('{0}', value);
-                        }},
+                        else {
+                            
+                                if(record.data.total_prorrateado!=record.data.monto_ejecutar_total_mo ){
+                                  return String.format('<b><font color="red">{0}</font></b>', value);
+                                 }
+                                 else{
+                                         if(record.data.total_pagado!=record.data.monto_ejecutar_total_mo 
+                                             && (record.data.tipo=='devengado'  || record.data.tipo=='devengado_pagado')){
+                                             return String.format('<b><font color="yellow">{0}</font></b>', value);
+                                         }
+                                         else{
+                                             if(record.data.tipo=='pagado'){
+                                                 return String.format('--> {0}', value);  
+                                             } 
+                                             else{
+                                                return String.format('{0}', value);   
+                                             }
+                                           
+                                         }
+                                   
+                                }
+                        }
+                      },
                 maxLength:4
             },
             type:'NumberField',
@@ -171,7 +194,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 			type:'TextField',
 			filters:{pfiltro:'plapa.nro_sol_pago',type:'string'},
 			id_grupo:1,
-			grid:true,
+			grid:false,
 			form:false
 		},
         {
@@ -188,52 +211,6 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             id_grupo:1,
             grid:true,
             form:true
-        },
-		{
-			config:{
-				name: 'fecha_dev',
-				fieldLabel: 'Fecha Dev.',
-				allowBlank: true,
-				anchor: '80%',
-				gwidth: 100,
-						format: 'd/m/Y', 
-						renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
-			},
-			type:'DateField',
-			filters:{pfiltro:'plapa.fecha_dev',type:'date'},
-			id_grupo:1,
-			grid:true,
-			form:false
-		},
-        {
-            config:{
-                name: 'fecha_pag',
-                fieldLabel: 'Fecha Pago',
-                allowBlank: true,
-                anchor: '80%',
-                gwidth: 100,
-                        format: 'd/m/Y', 
-                        renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
-            },
-            type:'DateField',
-            filters:{pfiltro:'plapa.fecha_pag',type:'date'},
-            id_grupo:1,
-            grid:true,
-            form:false
-        },
-        {
-            config:{
-                name: 'tipo_cambio',
-                fieldLabel: 'Tip Cambio',
-                allowBlank: false,
-                gwidth: 100,
-                maxLength:1245186
-            },
-            type:'NumberField',
-            filters:{pfiltro:'plapa.tipo_cambio',type:'numeric'},
-            id_grupo:1,
-            grid:true,
-            form:false
         },{
             config:{
                 name: 'id_plantilla',
@@ -312,18 +289,17 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         },
         {
             config:{
-                name: 'id_cuenta_bancaria',
-                fieldLabel: 'Cuenta Bancaria Origen',
-                allowBlank: true,
-                anchor: '80%',
+                name: 'tipo_cambio',
+                fieldLabel: 'Tip Cambio',
+                allowBlank: false,
                 gwidth: 100,
-                maxLength:4
+                maxLength:1245186
             },
             type:'NumberField',
-            filters:{pfiltro:'plapa.id_cuenta_bancaria',type:'numeric'},
+            filters:{pfiltro:'plapa.tipo_cambio',type:'numeric'},
             id_grupo:1,
             grid:true,
-            form:true
+            form:false
         },
         {
             config:{
@@ -341,38 +317,38 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:true
         },
-		/*{
-			config:{
-				name: 'descuento_anticipo',
-				currencyChar:' ',
-				fieldLabel: 'Desc. Anticipo',
-				allowBlank: true,
-				allowNegative:false,
-				gwidth: 100,
-				maxLength:1245186
-			},
-			type:'MoneyField',
-			filters:{pfiltro:'plapa.descuento_anticipo',type:'numeric'},
-			id_grupo:1,
-			grid:true,
-			form:true
-		},*/
-		{
-			config:{
-				name: 'monto_no_pagado',
-				currencyChar:' ',
-				fieldLabel: 'Monto no pagado',
-				allowBlank: true,
-				allowNegative:false,
-				gwidth: 100,
-				maxLength:1245186
-			},
-			type:'MoneyField',
-			filters:{pfiltro:'plapa.monto_no_pagado',type:'numeric'},
-			id_grupo:1,
-			grid:true,
-			form:true
-		},
+        /*{
+            config:{
+                name: 'descuento_anticipo',
+                currencyChar:' ',
+                fieldLabel: 'Desc. Anticipo',
+                allowBlank: true,
+                allowNegative:false,
+                gwidth: 100,
+                maxLength:1245186
+            },
+            type:'MoneyField',
+            filters:{pfiltro:'plapa.descuento_anticipo',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },*/
+        {
+            config:{
+                name: 'monto_no_pagado',
+                currencyChar:' ',
+                fieldLabel: 'Monto no pagado',
+                allowBlank: true,
+                allowNegative:false,
+                gwidth: 100,
+                maxLength:1245186
+            },
+            type:'MoneyField',
+            filters:{pfiltro:'plapa.monto_no_pagado',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
         {
             config:{
                 name: 'otros_descuentos',
@@ -418,6 +394,53 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             id_grupo:1,
             grid:true,
             form:true
+        },
+        {
+            config:{
+                name: 'id_cuenta_bancaria',
+                fieldLabel: 'Cuenta Bancaria Origen',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 100,
+                maxLength:4
+            },
+            type:'NumberField',
+            filters:{pfiltro:'plapa.id_cuenta_bancaria',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
+        {
+            config:{
+                name: 'fecha_dev',
+                fieldLabel: 'Fecha Dev.',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 100,
+                        format: 'd/m/Y', 
+                        renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+            },
+            type:'DateField',
+            filters:{pfiltro:'plapa.fecha_dev',type:'date'},
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
+        {
+            config:{
+                name: 'fecha_pag',
+                fieldLabel: 'Fecha Pago',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 100,
+                        format: 'd/m/Y', 
+                        renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+            },
+            type:'DateField',
+            filters:{pfiltro:'plapa.fecha_pag',type:'date'},
+            id_grupo:1,
+            grid:true,
+            form:false
         },
         /*{
             config:{
@@ -590,7 +613,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'usr_reg', type: 'string'},
-		{name:'usr_mod', type: 'string'},'liquido_pagable','desc_plantilla'
+		{name:'usr_mod', type: 'string'},
+		'liquido_pagable',
+		{name:'total_pagado', type: 'numeric'},
+		'desc_plantilla',''
 		
 	],
 	iniciarEventos:function(){
@@ -700,8 +726,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
      enableDisable:function(val){
       if(val =='devengado'){
             
-            this.cmpPlantilla.disable();
-            this.ocultarComponente(this.cmpPlantilla);
+            //this.cmpPlantilla.enable();
+            //this.ocultarComponente(this.cmpPlantilla);
             this.cmpNombrePago.disable();
             this.ocultarComponente(this.cmpNombrePago);
             this.cmpFormaPago.disable();
@@ -715,8 +741,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             
         }
         else{
-            this.cmpPlantilla.enable();
-            this.mostrarComponente(this.cmpPlantilla);
+            //this.cmpPlantilla.enable();
+            //this.mostrarComponente(this.cmpPlantilla);
             this.cmpNombrePago.enable();
             this.mostrarComponente(this.cmpNombrePago);
             this.cmpFormaPago.enable();
@@ -761,30 +787,106 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
     
     
     onButtonNew:function(){
-        Phx.vista.PlanPago.superclass.onButtonNew.call(this); 
-        this.cmpObligacionPago.setValue(this.maestro.id_obligacion_pago);
         
-        if(this.maestro.nro_cuota_vigente ==0){
-            this.cmpTipoPago.setValue('normal');
-            this.cmpTipoPago.enable();
-        }
-        else{
-             this.cmpTipoPago.setValue('normal');
-              this.cmpTipoPago.disable();
-        }
-         this.setTipoPagoNormal();
-        this.cmpFechaTentativa.minValue=new Date();
-        this.cmpFechaTentativa.setValue(new Date());
-        this.cmpNombrePago.setValue(this.maestro.desc_proveedor);
-        this.cmpMonto.setValue(0);
-       // this.cmpDescuentoAnticipo.setValue(0);
-        this.cmpMontoNoPagado.setValue(0);
-        this.cmpOtrosDescuentos.setValue(0);
-        this.cmpLiquidoPagable.setValue(0);
-        this.cmpMontoEjecutarTotalMo.setValue(0);
-        this.cmpLiquidoPagable.disable();
-        this.cmpMontoEjecutarTotalMo.disable();
-        this.obtenerFaltante('registrado');
+         var data = this.getSelectedData();
+         
+         if(data){
+         // para habilitar registros de cuotas de pago    
+            if(data.monto_ejecutar_total_mo  > data.total_pagado  && data.estado =='devengado'){
+                Phx.vista.PlanPago.superclass.onButtonNew.call(this); 
+                this.cmpObligacionPago.setValue(this.maestro.id_obligacion_pago);
+                this.Cmp.id_plan_pago_fk.setValue(data.id_plan_pago);
+                
+                console.log('ID PLAN PAGO',data.id_plan_pago)
+                this.cmpTipoPago.disable();
+                this.ocultarComponente(this.cmpTipoPago);
+                
+                this.cmpTipo.disable();
+                this.ocultarComponente(this.cmpTipo);
+                
+                this.cmpPlantilla.disable();
+                this.ocultarComponente(this.cmpPlantilla);
+                
+                this.cmpNombrePago.enable();
+                this.mostrarComponente(this.cmpNombrePago);
+                this.cmpFormaPago.enable();
+                this.mostrarComponente(this.cmpFormaPago);
+                this.cmpFormaPago.enable();
+                this.mostrarComponente(this.cmpFormaPago);
+                this.cmpCuentaBancaria.enable()
+                this.mostrarComponente(this.cmpCuentaBancaria);
+                this.habilitarDescuentos();
+                
+                this.cmpMontoNoPagado.disable();
+                this.ocultarComponente(this.cmpMontoNoPagado);
+                this.cmpObsMontoNoPagado.disable();
+                this.ocultarComponente(this.cmpObsMontoNoPagado);
+                
+                this.obtenerFaltante('registrado_pagado',data.id_plan_pago);
+            }
+            else{
+                if(data.estado!=devengado){
+                    
+                    alert('El devengado no fue completado');
+                }
+                else{
+                    alert('No queda nada por pagar');
+                }
+            
+            }
+            
+             
+         }
+         else{
+           //para habilitar registros de cuota de devengado  
+                Phx.vista.PlanPago.superclass.onButtonNew.call(this); 
+                this.cmpObligacionPago.setValue(this.maestro.id_obligacion_pago);
+                 this.mostrarComponente(this.cmpTipoPago);
+               if(this.maestro.nro_cuota_vigente ==0){
+                    this.cmpTipoPago.setValue('normal');
+                    this.cmpTipoPago.enable();
+                }
+                else{
+                     this.cmpTipoPago.setValue('normal');
+                      this.cmpTipoPago.disable();
+                }
+                this.setTipoPagoNormal();
+               
+                this.cmpTipo.enable();
+                this.mostrarComponente(this.cmpTipo);
+                console.log('mostrar tipoooo')
+                
+                
+                 
+                this.cmpPlantilla.enable();
+                this.mostrarComponente(this.cmpPlantilla);
+                
+                this.cmpMontoNoPagado.enable();
+                this.mostrarComponente(this.cmpMontoNoPagado);
+                 
+                this.cmpObsMontoNoPagado.enable();
+                this.mostrarComponente(this.cmpObsMontoNoPagado);
+                
+              
+                
+                this.obtenerFaltante('registrado',undefined);
+                
+           }
+           
+            this.cmpFechaTentativa.minValue=new Date();
+            this.cmpFechaTentativa.setValue(new Date());
+            this.cmpNombrePago.setValue(this.maestro.desc_proveedor);
+            this.cmpMonto.setValue(0);
+           // this.cmpDescuentoAnticipo.setValue(0);
+            this.cmpMontoNoPagado.setValue(0);
+            this.cmpOtrosDescuentos.setValue(0);
+            this.cmpLiquidoPagable.setValue(0);
+            this.cmpMontoEjecutarTotalMo.setValue(0);
+            this.cmpLiquidoPagable.disable();
+            this.cmpMontoEjecutarTotalMo.disable();
+           
+           
+           
      },
      
       onButtonEdit:function(){
@@ -792,21 +894,20 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
           Phx.vista.PlanPago.superclass.onButtonEdit.call(this); 
           this.cmpFechaTentativa.disable();
           this.cmpTipo.disable();
-          this.cmpTipo.disable();
           this.cmpTipoPago.disable();
-          
-          
-          
-      
-      
-      },
+       },
     
-    obtenerFaltante:function(filtro){
+    obtenerFaltante:function(_filtro,_id_plan_pago){
+        
        Phx.CP.loadingShow();
+       
+        
             Ext.Ajax.request({
                     // form:this.form.getForm().getEl(),
                     url:'../../sis_tesoreria/control/ObligacionPago/obtenerFaltante',
-                    params:{ope_filtro:filtro, id_obligacion_pago: this.maestro.id_obligacion_pago},
+                    params:{ope_filtro:_filtro, 
+                            id_obligacion_pago: this.maestro.id_obligacion_pago,
+                            id_plan_pago:_id_plan_pago},
                     success:this.successOF,
                     failure: this.conexionFailure,
                     timeout:this.timeout,
@@ -817,15 +918,19 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
     },
     
      successOF:function(resp){
+         
        Phx.CP.loadingHide();
-            var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+        var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+            
             if(!reg.ROOT.error){
                 if(reg.ROOT.datos.monto_total_faltante > 0){
                     this.cmpMonto.setValue(reg.ROOT.datos.monto_total_faltante);
+                
                 }
                 else{
                     
                     this.cmpMonto.setValue(0);
+                    
                 }
                 this.calculaMontoPago();
             }else{
@@ -884,13 +989,26 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
           Phx.vista.PlanPago.superclass.preparaMenu.call(this,n); 
           if (data['estado']== 'borrador'){
               this.getBoton('edit').enable();
-              this.getBoton('new').enable();
-              this.getBoton('del').enable();    
+              
+              this.getBoton('del').enable(); 
+              this.getBoton('SolDevPag').enable(); 
+              this.getBoton('new').disable(); 
+                 
           }
           else{
-              this.getBoton('edit').disable();
-              this.getBoton('new').disable();
-              this.getBoton('del').disable();
+              
+            if (data['estado']== 'devengado'  && data.monto_ejecutar_total_mo  > data.total_pagado ){ 
+                
+                this.getBoton('new').enable();
+            
+            }
+            else{
+                this.getBoton('new').disable(); 
+                
+            }
+             this.getBoton('edit').disable();
+             this.getBoton('del').disable();
+             this.getBoton('SolDevPag').disable(); 
           }
      },
      
@@ -898,7 +1016,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         var tb = Phx.vista.PlanPago.superclass.liberaMenu.call(this);
         if(tb){
            
-           
+            this.getBoton('SolDevPag').disable();
 
         }
       
@@ -913,9 +1031,37 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 
     
 	sortInfo:{
-		field: 'id_plan_pago',
+		field: 'nro_cuota',
 		direction: 'ASC'
 	},
+    onBtnDevPag:function()
+        {                   
+            var d= this.sm.getSelected().data;
+           
+            Phx.CP.loadingShow();
+            
+            Ext.Ajax.request({
+                // form:this.form.getForm().getEl(),
+                url:'../../sis_tesoreria/control/PlanPago/solicitarDevPag',
+                params:{id_plan_pago:d.id_plan_pago},
+                success:this.successSinc,
+                failure: this.conexionFailure,
+                timeout:this.timeout,
+                scope:this
+            });     
+      }, 
+     successSinc:function(resp){
+            Phx.CP.loadingHide();
+             var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+            if(!reg.ROOT.error){
+                
+                this.reload();
+             }else{
+                alert('ocurrio un error durante el proceso')
+            }
+     },
+	
+	
 	bdel:true,
 	bedit:true,
 	bsave:true

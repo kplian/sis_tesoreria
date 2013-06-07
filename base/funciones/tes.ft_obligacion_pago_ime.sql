@@ -794,7 +794,7 @@ BEGIN
 
 		begin
 			
-            v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, v_parametros.ope_filtro);
+            v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, v_parametros.ope_filtro, v_parametros.id_plan_pago);
             
             
             --Definicion de la respuesta

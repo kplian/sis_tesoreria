@@ -45,7 +45,9 @@ BEGIN
                      from tes.tprorrateo p
                      inner join tes.tplan_pago pp on p.id_plan_pago = pp.id_plan_pago 
                                                   and pp.estado != 'anulado' and pp.estado_reg='activo' 
-                     where  p.estado_reg='activo' and p.id_obligacion_det = p_id_obligacion_det;       
+                     where  p.estado_reg='activo' 
+                         and p.id_obligacion_det = p_id_obligacion_det
+                             and pp.tipo != 'pagado';       
             
             
                       v_monto_total= COALESCE(v_registros.monto_pago_mo,0)-COALESCE(v_monto_total_registrado,0);

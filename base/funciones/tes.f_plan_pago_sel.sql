@@ -92,9 +92,10 @@ BEGIN
                         plapa.fecha_tentativa,
                         pla.desc_plantilla,
                         plapa.liquido_pagable,
-                        plapa.total_prorrateado
+                        plapa.total_prorrateado,
+                        plapa.total_pagado                        
 						from tes.tplan_pago plapa
-                        inner join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
+                        left join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
 						inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
 				        where  plapa.estado_reg=''activo''  and ';
@@ -124,7 +125,7 @@ BEGIN
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(id_plan_pago)
 						from tes.tplan_pago plapa
-                        inner join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
+                        left join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
 					    inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
 					       where  plapa.estado_reg=''activo''   and ';

@@ -45,6 +45,12 @@ class ACTPlanPago extends ACTbase{
 		$this->res=$this->objFunc->eliminarPlanPago($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	
+	function solicitarDevPag(){
+        $this->objFunc=$this->create('MODPlanPago');  
+        $this->res=$this->objFunc->solicitarDevPag($this->objParam);
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
 			
 }
 
