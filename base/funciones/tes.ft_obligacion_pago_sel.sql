@@ -31,6 +31,7 @@ DECLARE
 	v_resp				varchar;
     v_filadd 			varchar;
     va_id_depto 		integer[];
+    v_obligaciones      record;
 			    
 BEGIN
 
@@ -121,6 +122,60 @@ BEGIN
 			return v_consulta;
 						
 		end;
+     
+   /*********************************    
+ 	#TRANSACCION:  'TES_ESTOBPG_SEL'
+ 	#DESCRIPCION:	Consulta de registros para los reportes
+ 	#AUTOR:		Gonzalo Sarmiento Sejas	
+ 	#FECHA:		31-05-2013
+	***********************************/
+	elsif (p_transaccion='TES_ESTOBPG_SEL')then
+    	begin
+         create temporary table flujo_obligaciones(
+        	funcionario text,
+            nombre text,
+            nombre_estado varchar,
+            fecha_reg date,
+            id_tipo_estado int4,
+            id_estado_wf int4,
+            id_estado_anterior int4
+        ) on commit drop;   
+    
+    	--recupera el flujo de control de las obligaciones
+        
+    	FOR v_obligaciones IN( 
+            select op.id_estado_wf
+            from tes.tobligacion_pago op
+            where op.id_obligacion_pago=v_parametros.id_obligacion_pago
+        )LOOP
+        		raise  notice 'estasd %', v_obligaciones.id_estado_wf;
+        	   INSERT INTO flujo_obligaciones(
+               WITH RECURSIVE estados_obligaciones(id_depto, id_proceso_wf, id_tipo_estado,id_estado_wf, id_estado_anterior, fecha_reg)AS(
+                   SELECT et.id_depto, et.id_proceso_wf, et.id_tipo_estado, et.id_estado_wf, et.id_estado_anterior, et.fecha_reg
+                   FROM wf.testado_wf et
+                   WHERE et.id_estado_wf=v_obligaciones.id_estado_wf
+                UNION ALL        
+                   SELECT et.id_depto, et.id_proceso_wf, et.id_tipo_estado, et.id_estado_wf, et.id_estado_anterior, et.fecha_reg
+                   FROM wf.testado_wf et, estados_obligaciones
+                   WHERE et.id_estado_wf=estados_obligaciones.id_estado_anterior         
+                )SELECT dep.nombre::text, tp.nombre||'-'||prv.desc_proveedor, te.nombre_estado, eo.fecha_reg, eo.id_tipo_estado, eo.id_estado_wf, COALESCE(eo.id_estado_anterior,NULL) as id_estado_anterior
+                 FROM estados_obligaciones eo
+                 INNER JOIN wf.ttipo_estado te on te.id_tipo_estado= eo.id_tipo_estado
+                 INNER JOIN wf.tproceso_wf pwf on pwf.id_proceso_wf=eo.id_proceso_wf
+                 INNER JOIN wf.ttipo_proceso tp on tp.id_tipo_proceso=pwf.id_tipo_proceso         
+                 INNER JOIN tes.tobligacion_pago op on op.id_proceso_wf=pwf.id_proceso_wf
+                 INNER JOIN param.vproveedor prv on prv.id_proveedor=op.id_proveedor
+                 LEFT JOIN param.tdepto dep on dep.id_depto=eo.id_depto
+                 ORDER BY eo.id_estado_wf ASC
+                 );      
+        END LOOP;    
+        
+              v_consulta:='select * from flujo_obligaciones';
+              --Devuelve la respuesta
+              return v_consulta;
+       
+        
+        end;
 
 	/*********************************    
  	#TRANSACCION:  'TES_OBPG_CONT'
