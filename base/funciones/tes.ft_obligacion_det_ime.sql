@@ -83,9 +83,9 @@ BEGIN
         	--Sentencia de la insercion
         	insert into tes.tobligacion_det(
 			estado_reg,
-			id_cuenta,
+			--id_cuenta,
 			id_partida,
-			id_auxiliar,
+			--id_auxiliar,
 			id_concepto_ingas,
 			monto_pago_mo,
 			id_obligacion_pago,
@@ -99,9 +99,9 @@ BEGIN
 			id_usuario_mod
           	) values(
 			'activo',
-			v_parametros.id_cuenta,
+			--v_parametros.id_cuenta,
 			v_parametros.id_partida,
-			v_parametros.id_auxiliar,
+			--v_parametros.id_auxiliar,
 			v_parametros.id_concepto_ingas,
 			v_parametros.monto_pago_mo,
 			v_parametros.id_obligacion_pago,

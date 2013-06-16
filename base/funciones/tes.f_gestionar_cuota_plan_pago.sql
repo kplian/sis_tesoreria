@@ -39,6 +39,14 @@ DECLARE
     
     v_tipo_sol   varchar;
     
+    v_nro_cuota numeric;
+    
+     v_id_proceso_wf integer;
+     v_id_estado_wf integer;
+     v_codigo_estado varchar;
+     v_id_plan_pago integer;
+     v_verficacion  boolean;
+    
 BEGIN
 
 	v_nombre_funcion = 'tes.f_gestionar_cuota_plan_pago';
@@ -58,13 +66,18 @@ BEGIN
       pp.nro_cuota,
       pp.id_plantilla,
       pp.monto_ejecutar_total_mo,
-      pp.monto_ejecutar_total_mb,
       pp.monto_no_pagado,
-      pp.monto_no_pagado_mb,
-      pp.obs_descuentos_anticipo,
-      pp.obs_monto_no_pagado,
-      pp.obs_otros_descuentos,
-      op.id_depto  
+      pp.liquido_pagable,
+     
+      op.id_depto ,
+      op.pago_variable,
+      pp.id_cuenta_bancaria ,
+      pp.nombre_pago,
+      pp.forma_pago,
+      pp.tipo_cambio,
+      pp.tipo_pago,
+      pp.fecha_tentativa,
+      pp.otros_descuentos
       into
       v_registros
       from  tes.tplan_pago pp
@@ -83,114 +96,12 @@ BEGIN
     
     
     
-    -- 3)  Si es devengado_pagado o   devengado, se identifica  con id_plan_pago_fk = null
+     -- 3)  Si es devengado_pagado o   devengado, se identifica  con id_plan_pago_fk = null
     
     
     IF  v_registros.id_plan_pago_fk is NULL  THEN
     
-        -- 3.1)  si es tipo es devengado_pago
-           IF   v_registros.tipo = 'devengado_pago' THEN
            
-                 
-         	-- 3.1.1) genera la cuota de pago.
-       
-                   /* INSERT INTO 
-                        tes.tplan_pago
-                      (
-                        id_usuario_reg,
-                        id_usuario_mod,
-                        fecha_reg,
-                        fecha_mod,
-                        estado_reg,
-                        id_plan_pago,
-                        id_obligacion_pago,
-                        id_plantilla,
-                        id_plan_pago_fk,
-                        id_cuenta_bancaria,
-                        id_comprobante,
-                        id_estado_wf,
-                        id_proceso_wf,
-                        estado,
-                        nro_sol_pago,
-                        nro_cuota,
-                        nombre_pago,
-                        forma_pago,
-                        tipo_pago,
-                        tipo,
-                        fecha_tentativa,
-                        fecha_dev,
-                        fecha_pag,
-                        tipo_cambio,
-                        obs_descuentos_anticipo,
-                        obs_monto_no_pagado,
-                        obs_otros_descuentos,
-                        monto,
-                        descuento_anticipo,
-                        monto_no_pagado,
-                        otros_descuentos,
-                        monto_mb,
-                        descuento_anticipo_mb,
-                        monto_no_pagado_mb,
-                        otros_descuentos_mb,
-                        monto_ejecutar_total_mo,
-                        monto_ejecutar_total_mb,
-                        total_prorrateado,
-                        liquido_pagable,
-                        liquido_pagable_mb
-                      ) 
-                      VALUES (
-                        :id_usuario_reg,
-                        :id_usuario_mod,
-                        :fecha_reg,
-                        :fecha_mod,
-                        :estado_reg,
-                        :id_plan_pago,
-                        :id_obligacion_pago,
-                        :id_plantilla,
-                        :id_plan_pago_fk,
-                        :id_cuenta_bancaria,
-                        :id_comprobante,
-                        :id_estado_wf,
-                        :id_proceso_wf,
-                        :estado,
-                        :nro_sol_pago,
-                        :nro_cuota,
-                        :nombre_pago,
-                        :forma_pago,
-                        :tipo_pago,
-                        :tipo,
-                        :fecha_tentativa,
-                        :fecha_dev,
-                        :fecha_pag,
-                        :tipo_cambio,
-                        :obs_descuentos_anticipo,
-                        :obs_monto_no_pagado,
-                        :obs_otros_descuentos,
-                        :monto,
-                        :descuento_anticipo,
-                        :monto_no_pagado,
-                        :otros_descuentos,
-                        :monto_mb,
-                        :descuento_anticipo_mb,
-                        :monto_no_pagado_mb,
-                        :otros_descuentos_mb,
-                        :monto_ejecutar_total_mo,
-                        :monto_ejecutar_total_mb,
-                        :total_prorrateado,
-                        :liquido_pagable,
-                        :liquido_pagable_mb
-                      );
-                    */
-            
-            
-            
-            -- 3.1.2)  cambiar el estado de la cuota recien creada, lo pasa a pendiente   
-              
-              
-            --  3.2.3) llamada a la generacion del comprobante de pago  
-      
-    
-            END IF;
          
         
          v_tipo_sol  = 'Devengado';
@@ -276,6 +187,127 @@ BEGIN
                    where id_plan_pago  = v_registros.id_plan_pago;    
              
               END IF;
+    
+     
+    
+     -- 3.1)  si es tipo es devengado_pago
+           IF   v_registros.tipo = 'devengado_pagado' THEN
+           
+              --determinar el numero de cuota
+              
+                v_nro_cuota = (((v_registros.nro_cuota::INTEGER)::varchar)||'.01'):: numeric;
+           
+              -------------------------------------
+              --  Manejo de estados con el WF
+             -------------------------------------
+            
+         
+           SELECT
+                     ps_id_proceso_wf,
+                     ps_id_estado_wf,
+                     ps_codigo_estado
+               into
+                     v_id_proceso_wf,
+                     v_id_estado_wf,
+                     v_codigo_estado
+            FROM wf.f_registra_proceso_disparado_wf(
+                     p_id_usuario,
+                     v_id_estado_actual, 
+                     NULL, 
+                     v_registros.id_depto);
+           
+           
+         	-- 3.1.1) genera la cuota de pago.
+       
+                    INSERT INTO 
+                        tes.tplan_pago
+                      (
+                        id_usuario_reg,
+                        fecha_reg,
+                        estado_reg,
+                        id_obligacion_pago,
+                        id_plan_pago_fk,
+                        id_cuenta_bancaria,
+                      
+                        id_estado_wf,
+                        id_proceso_wf,
+                        estado,
+                       
+                        nro_cuota,
+                        nombre_pago,
+                        forma_pago,
+                        tipo,
+                        fecha_tentativa,
+                        fecha_pag,
+                        tipo_cambio,
+                        monto,
+                        otros_descuentos,
+                        monto_ejecutar_total_mo,
+                        liquido_pagable
+                       
+                      ) 
+                      VALUES (
+                        p_id_usuario,
+                        now(),
+                        'activo',
+                        v_registros.id_obligacion_pago,
+                        v_registros.id_plan_pago, --id_plan_pago_fk
+                        v_registros.id_cuenta_bancaria,
+                     
+                        v_id_estado_wf,
+                        v_id_proceso_wf,
+                        v_codigo_estado,
+                       
+                        v_nro_cuota,
+                        v_registros.nombre_pago,
+                        v_registros.forma_pago,
+                       'pagado',
+                        v_registros.fecha_tentativa,
+                        now(),
+                        v_registros.tipo_cambio,
+                        v_registros.monto_ejecutar_total_mo,  --monto
+                        v_registros.otros_descuentos,
+                        v_registros.monto_ejecutar_total_mo,
+                        v_registros.liquido_pagable
+                       
+                      )RETURNING id_plan_pago into v_id_plan_pago;
+                    
+           
+            --------------------------------------------------
+            -- Inserta prorrateo automatico del pago
+            ------------------------------------------------
+           IF not ( SELECT * FROM tes.f_prorrateo_plan_pago( v_id_plan_pago,
+               										 v_registros.id_obligacion_pago, 
+                                                     v_registros.pago_variable, 
+                                                     v_registros.monto_ejecutar_total_mo,
+                                                     p_id_usuario,
+                                                     v_registros.id_plan_pago)) THEN
+                                                     
+                  
+              raise exception 'Error al prorratear';
+                     
+			END IF;  
+            
+            
+            --actualiza el total de pagos registrados en el plan de pago padre
+             update tes.tplan_pago  pp set 
+                 total_pagado = COALESCE(total_pagado,0) + v_registros.monto_ejecutar_total_mo,
+                 fecha_mod=now()
+               where pp.id_plan_pago  = v_registros.id_plan_pago;
+            
+              
+              -- solicitar negeracion de comprobantes de pago
+              
+              v_verficacion = tes.f_generar_comprobante(p_id_usuario, v_id_plan_pago);
+             
+              IF not v_verficacion  THEN
+              
+                raise exception 'Error al generar el comprobante de pago';
+              
+              END IF;
+           
+    
+            END IF;
     
   
 RETURN  TRUE;

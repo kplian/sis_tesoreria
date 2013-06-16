@@ -298,13 +298,13 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 			type:'NumberField',
 			filters:{pfiltro:'obpg.porc_anticipo',type:'numeric'},
 			id_grupo:1,
-			grid:true,
-			form:true
+			grid:false,
+			form:false
 		},
 		{
 			config:{
 				name: 'porc_retgar',
-				fieldLabel: 'Porc. Retgar',
+				fieldLabel: '%. Retgar',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
@@ -461,7 +461,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 	    this.cmpDepto=this.getComponente('id_depto');
 	    this.cmpTipoCambioConv=this.getComponente('tipo_cambio_conv');
 	    
-	    this.cmpPorcAnticipo=this.getComponente('porc_anticipo');
+	   // this.cmpPorcAnticipo=this.getComponente('porc_anticipo');
 	    this.cmpPorcRetgar=this.getComponente('porc_retgar');
 		
 		this.ocultarComponente(this.cmpProveedor);
@@ -548,7 +548,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
     
     onButtonNew:function(){
         Phx.vista.ObligacionPago.superclass.onButtonNew.call(this);
-        this.cmpPorcAnticipo.setValue(0);
+        //this.cmpPorcAnticipo.setValue(0);
         this.cmpPorcRetgar.setValue(0);
        
         this.ocultarComponente(this.cmpProveedor);
@@ -684,6 +684,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                 if (data['estado']== 'en_pago'){
                     this.TabPanelSouth.get(1).enable()
                     this.getBoton('ant_estado').enable();
+                    this.getBoton('fin_registro').enable();
                 }
                 
                 if (data['estado']== 'anulado'){

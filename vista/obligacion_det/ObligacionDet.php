@@ -162,8 +162,8 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
  						pfiltro:'cta.nombre_cuenta',
  						type:'string'
  					},
- 			grid:true,
- 			form:true
+ 			grid:false,
+ 			form:false
  	    },		
 		{
  			config:{
@@ -248,8 +248,8 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
  						pfiltro:'codigo_auxiliar#nombre_auxiliar',
  						type:'string'
  					},
- 			grid:true,
- 			form:true
+ 			grid:false,
+ 			form:false
  	    },
 		{
 			config:{
@@ -474,8 +474,8 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
         this.cmpPartida.store.baseParams.id_gestion=this.maestro.id_gestion
         this.cmpPartida.modificado=true;
         
-        this.cmpCuenta.store.baseParams.id_gestion=this.maestro.id_gestion
-        this.cmpCuenta.modificado=true;
+       /* this.cmpCuenta.store.baseParams.id_gestion=this.maestro.id_gestion
+        this.cmpCuenta.modificado=true;*/
         
         
         this.store.baseParams={id_obligacion_pago:this.maestro.id_obligacion_pago};

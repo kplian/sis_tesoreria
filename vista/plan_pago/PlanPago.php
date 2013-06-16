@@ -797,7 +797,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 this.cmpObligacionPago.setValue(this.maestro.id_obligacion_pago);
                 this.Cmp.id_plan_pago_fk.setValue(data.id_plan_pago);
                 
-                console.log('ID PLAN PAGO',data.id_plan_pago)
+              
                 this.cmpTipoPago.disable();
                 this.ocultarComponente(this.cmpTipoPago);
                 
@@ -854,7 +854,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                
                 this.cmpTipo.enable();
                 this.mostrarComponente(this.cmpTipo);
-                console.log('mostrar tipoooo')
+            
                 
                 
                  
@@ -868,11 +868,12 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 this.mostrarComponente(this.cmpObsMontoNoPagado);
                 
               
-                
-                this.obtenerFaltante('registrado',undefined);
+              
+                this.obtenerFaltante('registrado');
+              
                 
            }
-           
+          
             this.cmpFechaTentativa.minValue=new Date();
             this.cmpFechaTentativa.setValue(new Date());
             this.cmpNombrePago.setValue(this.maestro.desc_proveedor);
@@ -884,25 +885,65 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             this.cmpMontoEjecutarTotalMo.setValue(0);
             this.cmpLiquidoPagable.disable();
             this.cmpMontoEjecutarTotalMo.disable();
-           
-           
-           
-     },
+      },
      
       onButtonEdit:function(){
        
-          Phx.vista.PlanPago.superclass.onButtonEdit.call(this); 
-          this.cmpFechaTentativa.disable();
-          this.cmpTipo.disable();
-          this.cmpTipoPago.disable();
+         var data = this.getSelectedData();
+         Phx.vista.PlanPago.superclass.onButtonEdit.call(this); 
+         if(data.tipo=='pagado'){
+             
+                this.cmpTipoPago.disable();
+                this.ocultarComponente(this.cmpTipoPago);
+                
+                this.cmpTipo.disable();
+                this.ocultarComponente(this.cmpTipo);
+                
+                this.cmpPlantilla.disable();
+                this.ocultarComponente(this.cmpPlantilla);
+                
+                this.cmpNombrePago.enable();
+                this.mostrarComponente(this.cmpNombrePago);
+                this.cmpFormaPago.enable();
+                this.mostrarComponente(this.cmpFormaPago);
+                this.cmpFormaPago.enable();
+                this.mostrarComponente(this.cmpFormaPago);
+                this.cmpCuentaBancaria.enable()
+                this.mostrarComponente(this.cmpCuentaBancaria);
+                this.habilitarDescuentos();
+                
+                this.cmpMontoNoPagado.disable();
+                this.ocultarComponente(this.cmpMontoNoPagado);
+                this.cmpObsMontoNoPagado.disable();
+                this.ocultarComponente(this.cmpObsMontoNoPagado);
+         
+         
+         }
+         else{
+                this.mostrarComponente(this.cmpTipoPago);
+                this.cmpTipo.enable();
+                this.mostrarComponente(this.cmpTipo);
+               
+                
+                this.cmpPlantilla.enable();
+                this.mostrarComponente(this.cmpPlantilla);
+                
+                this.cmpMontoNoPagado.enable();
+                this.mostrarComponente(this.cmpMontoNoPagado);
+                 
+                this.cmpObsMontoNoPagado.enable();
+                this.mostrarComponente(this.cmpObsMontoNoPagado);
+         }
+       
+           this.cmpFechaTentativa.disable();
+           this.cmpTipo.disable();
+           this.cmpTipoPago.disable(); 
        },
     
     obtenerFaltante:function(_filtro,_id_plan_pago){
         
        Phx.CP.loadingShow();
-       
-        
-            Ext.Ajax.request({
+          Ext.Ajax.request({
                     // form:this.form.getForm().getEl(),
                     url:'../../sis_tesoreria/control/ObligacionPago/obtenerFaltante',
                     params:{ope_filtro:_filtro, 
@@ -913,26 +954,19 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                     timeout:this.timeout,
                     scope:this
              });
-    
-        
     },
     
      successOF:function(resp){
-         
        Phx.CP.loadingHide();
         var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
-            
             if(!reg.ROOT.error){
                 if(reg.ROOT.datos.monto_total_faltante > 0){
                     this.cmpMonto.setValue(reg.ROOT.datos.monto_total_faltante);
-                
                 }
                 else{
-                    
                     this.cmpMonto.setValue(0);
-                    
                 }
-                this.calculaMontoPago();
+               this.calculaMontoPago();
             }else{
                 
                 alert('error al obtener saldo por registrar')
@@ -940,7 +974,6 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
     },
     
      obtenerTipoCambio:function(){
-         
          var fecha = this.cmpFechaDev.getValue().dateFormat(this.cmpFechaDev.format);
          var id_moneda = this.maestro.id_moneda;
             Phx.CP.loadingShow();
@@ -974,7 +1007,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
     
     successSave: function(resp) {
        Phx.CP.getPagina(this.idContenedorPadre).reload();  
-      Phx.vista.PlanPago.superclass.successSave.call(this,resp);
+       Phx.vista.PlanPago.superclass.successSave.call(this,resp);
         
         
     },
@@ -989,7 +1022,6 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
           Phx.vista.PlanPago.superclass.preparaMenu.call(this,n); 
           if (data['estado']== 'borrador'){
               this.getBoton('edit').enable();
-              
               this.getBoton('del').enable(); 
               this.getBoton('SolDevPag').enable(); 
               this.getBoton('new').disable(); 
@@ -998,13 +1030,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
           else{
               
             if (data['estado']== 'devengado'  && data.monto_ejecutar_total_mo  > data.total_pagado ){ 
-                
                 this.getBoton('new').enable();
-            
             }
             else{
                 this.getBoton('new').disable(); 
-                
             }
              this.getBoton('edit').disable();
              this.getBoton('del').disable();
@@ -1015,11 +1044,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
       liberaMenu:function(){
         var tb = Phx.vista.PlanPago.superclass.liberaMenu.call(this);
         if(tb){
-           
-            this.getBoton('SolDevPag').disable();
-
-        }
-      
+           this.getBoton('SolDevPag').disable();
+          }
        return tb
     }, 
     east:{
@@ -1028,9 +1054,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
           width:400,
           cls:'Prorrateo'
      },
-
     
-	sortInfo:{
+    sortInfo:{
 		field: 'nro_cuota',
 		direction: 'ASC'
 	},
@@ -1064,7 +1089,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 	
 	bdel:true,
 	bedit:true,
-	bsave:true
+	bsave:false
 	}
 )
 </script>

@@ -80,6 +80,9 @@ DECLARE
     v_monto_ejecutar_mo numeric;
     
     v_count integer;
+    v_registros_pp record;
+    
+    v_verficacion boolean;
   
     
     
@@ -630,7 +633,7 @@ BEGIN
 
 	/*********************************    
  	#TRANSACCION:  'TES_PLAPA_MOD'
- 	#DESCRIPCION:	Modificacion de registros
+ 	#DESCRIPCION:	Modificacion de cuotas de devegando y pago
  	#AUTOR:		admin	
  	#FECHA:		10-04-2013 15:43:23
 	***********************************/
@@ -649,7 +652,7 @@ BEGIN
            END IF;
            
            
-           --obtiene datos de la obligacion
+          --  obtiene datos de la obligacion
            
           select
             op.porc_anticipo,
@@ -668,11 +671,15 @@ BEGIN
            
            select   
             pp.monto,
-            pp.estado
+            pp.estado,
+            pp.tipo,
+            pp.id_plan_pago_fk,
+            ppfk.monto_ejecutar_total_mo 
+           
            into
-             v_monto,
-             v_codigo_estado
+             v_registros_pp
            from tes.tplan_pago pp 
+           inner join tes.tplan_pago ppfk  on ppfk.id_plan_pago = pp.id_plan_pago_fk
            where pp.estado_reg='activo'
            and  pp.id_plan_pago= v_parametros.id_plan_pago ;
            
@@ -683,37 +690,74 @@ BEGIN
            
            END IF;
            
-           
-           
-            --si es un proceso variable, verifica que el registro no sobrepase el total a pagar
-           
-           IF v_registros.pago_variable='no' THEN
-              v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado');
-           
-              IF (v_monto_total + v_monto)  <  v_parametros.monto  THEN
-              
-                  raise exception 'No puede exceder el total a pagar en obligaciones no variables';
-              
-              END IF;
-           
-           END IF;
-        
-        
-            -- calcula el liquido pagable y el monto a ejecutar presupeustaria mente
-           
-           IF  v_parametros.monto <0 or v_parametros.monto_no_pagado <0 or v_parametros.otros_descuentos  <0 THEN
           
+           --valida que los valores no sean negativos
+                 
+           IF  v_parametros.monto <0 or v_parametros.monto_no_pagado <0 or v_parametros.otros_descuentos  <0 THEN
+                  
                raise exception 'No se admiten cifras negativas'; 
            END IF;
            
-           v_liquido_pagable = COALESCE(v_parametros.monto,0) - COALESCE(v_parametros.monto_no_pagado,0) - COALESCE(v_parametros.otros_descuentos,0);-- - COALESCE(v_parametros.descuento_anticipo,0);
-           v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0) -  COALESCE(v_parametros.monto_no_pagado,0);
+           --Si es una cuota de devengado
            
-           IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
-                raise exception ' Ni el  monto a ejecutar   ni el liquido pagable  puede ser menor a cero';
-           END IF;
+           IF v_registros_pp.tipo != 'pagado' THEN
+            
+                    --si es un proceso variable, verifica que el registro no sobrepase el total a pagar
+                   
+                   IF v_registros.pago_variable='no' THEN
+                      v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado');
+                   
+                      IF (v_monto_total + v_registros_pp.monto)  <  v_parametros.monto  THEN
+                      
+                          raise exception 'No puede exceder el total a pagar en obligaciones no variables';
+                      
+                      END IF;
+                   
+                   END IF;
+                
+                
+                   
+                     -- calcula el liquido pagable y el monto a ejecutar presupeustaria mente
+                   v_liquido_pagable = COALESCE(v_parametros.monto,0) - COALESCE(v_parametros.monto_no_pagado,0) - COALESCE(v_parametros.otros_descuentos,0);-- - COALESCE(v_parametros.descuento_anticipo,0);
+                   v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0) -  COALESCE(v_parametros.monto_no_pagado,0);
+                   
+                   IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
+                        raise exception ' Ni el  monto a ejecutar   ni el liquido pagable  puede ser menor a cero';
+                   END IF;
            
+           ELSE
+           --si es una cuota de pago
            
+                    --verifica el el registro que falta por pagar
+                    
+                    
+                    v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado_pagado', v_registros_pp.id_plan_pago_fk);
+                   
+                    IF (v_monto_total + v_registros_pp.monto)  <  v_parametros.monto  THEN
+                      
+                        raise exception 'No puede exceder el total a pagar en obligaciones no variables';
+                      
+                    END IF;
+                
+                    -- calcula el liquido pagable y el monto a ejecutar presupeustaria mente
+                    --  en cuota de pago el monoto no pagado no se considera
+                    --TO DO,  mas delante es necesario considerar la retencon por garantia y por anticipos 
+                   
+                   v_liquido_pagable = COALESCE(v_parametros.monto,0)  - COALESCE(v_parametros.otros_descuentos,0);-- - COALESCE(v_parametros.descuento_anticipo,0);
+                   v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0);
+                   
+                   IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
+                        raise exception ' Ni el  monto a ejecutar   ni el liquido pagable  puede ser menor a cero';
+                   END IF;
+           
+                  --modificamos el total pagado en la cuota padre
+                  
+                  update tes.tplan_pago pp set
+                  total_pagado = total_pagado - v_registros_pp.monto + COALESCE(v_parametros.monto,0)
+                  where id_plan_pago=v_registros_pp.id_plan_pago_fk;
+            
+            
+            END IF;
         
         
 			--Sentencia de la modificacion
@@ -747,7 +791,10 @@ BEGIN
                										 v_parametros.id_obligacion_pago, 
                                                      v_registros.pago_variable, 
                                                      v_monto_ejecutar_total_mo,
-                                                     p_id_usuario)) THEN
+                                                     p_id_usuario,
+                                                     v_registros_pp.id_plan_pago_fk
+                                                     
+                                                     )) THEN
                                                      
                   
               raise exception 'Error al prorratear';
@@ -981,187 +1028,17 @@ BEGIN
         
            
         
-        
-           --  obtinen datos del plan de pagos
+           v_verficacion = tes.f_generar_comprobante(p_id_usuario, v_parametros.id_plan_pago);
            
-           SELECT
-           pp.id_plan_pago,
-           pp.id_plan_pago_fk,
-           pp.id_plantilla,
-           pp.id_estado_wf,
-           pp.estado,
-           pp.id_proceso_wf,
-           op.id_depto,
-           pp.tipo_pago,
-           pp.monto_ejecutar_total_mo,
-           pp.total_prorrateado,
-           pp.nro_cuota,
-           pp.id_obligacion_pago
-           into
-           v_registros
-           FROM tes.tplan_pago pp
-           inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
-           where pp.id_plan_pago = v_parametros.id_plan_pago;
-        
-        
-          IF  v_registros.estado != 'borrador' THEN
-          
-          
-             raise exception 'Solo puede solicitarce el devengado o pago de registros en borrador';
-          
-          
-          END IF;
-          
-          
-          
-          
-          -- obtener el estado de la cuota anterior
-          --validar que no se salte el orden de los devengados
-                
-                IF  EXISTS (SELECT 1 
-                FROM tes.tplan_pago pp 
-                WHERE pp.id_obligacion_pago = v_registros.id_obligacion_pago
-                      and (pp.estado != 'devengado' and pp.estado != 'pagado' and pp.estado != 'anulado')
-                      and pp.estado_reg = 'activo'
-                      and  pp.nro_cuota < v_registros.nro_cuota ) THEN
-                      
-                      
-                    raise exception 'Antes de Finalizar la cuotas anteriores tienes que estar finalizadas';
-                 
-                 
-                 END IF;
-          
-          
-          
-          
-          IF v_registros.id_plan_pago_fk is NULL THEN
-           
-           		v_tipo_sol = 'devengado';
-                
-                --TO DO, generar numero de devengado
-                
-                
-           ELSE
-               --VALIDAR QUE nose se salte el orden de los pagos
-           
-           		v_tipo_sol = 'pago';
-                
-                --TO DO,  generar numero de pago
-           
-           END IF;
-          
-          
-          
-          
-          ------------------------------------
-          -- validacion del prorrateo--    no estoy seguro si funciona la misma idea para el pago
-          ------------------------------------
-            select
-              sum( pro.monto_ejecutar_mo)
-           into
-              v_monto_ejecutar_mo
-            from tes.tprorrateo pro
-            where pro.estado_reg = 'activo' and  
-              pro.id_plan_pago  = v_parametros.id_plan_pago;
-              
-              
-            raise notice 'deberian igualar  ,%,% y %', v_monto_ejecutar_mo ,v_registros.monto_ejecutar_total_mo ,v_registros.total_prorrateado;
             
+            IF not v_verficacion THEN
             
-            IF v_registros.monto_ejecutar_total_mo != v_registros.total_prorrateado THEN
-                      
-              raise exception 'El total prorrateado no iguala con el monto total a ejecutar';
+               raise exception 'Ocurrio un error al generar el comprobante';
             
             END IF;
-            
-            
-             
-          
-          ---------------------------------------
-          ----  Generacion del Comprobante  -----
-          ---------------------------------------
-        
-            IF v_tipo_sol ='devengado' THEN
-            
-                -- TO DO llamda a la generaciond e comprobante de devengado 
-                  
-                 
-           
-            ELSIF v_tipo_sol ='pago' THEN
-                 --TO DO,  llamada a la generacion de comprobante de pago
-            
-            
-            
-                      
-            END IF;
-            
-            
-            --  TO DO, actualiza el id_comprobante en el registro del plan de pago
-            
-            
-            
-            
-                  
-            --------------------------------------------------------
-            ---cambio al siguiente estado de borrador a Pendiente----
-            ---------------------------------------------------------
-            
-             
-             -- obtiene el siguiente estado del flujo 
-             SELECT 
-                 *
-              into
-                va_id_tipo_estado,
-                va_codigo_estado,
-                va_disparador,
-                va_regla,
-                va_prioridad
-            
-            FROM wf.f_obtener_estado_wf(v_registros.id_proceso_wf, v_registros.id_estado_wf,NULL,'siguiente');
-            
-            
-            --raise exception '--  % ,  % ,% ',v_id_proceso_wf,v_id_estado_wf,va_codigo_estado;
-            
-            
-            IF va_codigo_estado[2] is not null THEN
-            
-             raise exception 'El proceso de WF esta mal parametrizado, el estado borrador de la obligacion solo admite un estado ';
-            
-            END IF;
-            
-             IF va_codigo_estado[1] is  null THEN
-            
-             raise exception 'El proceso de WF esta mal parametrizado, no se encuentra el estado siguiente ';
-            
-            END IF;
-            
-            
-          
-            
-            -- hay que recuperar el supervidor que seria el estado inmediato,...
-             v_id_estado_actual =  wf.f_registra_estado_wf(va_id_tipo_estado[1], 
-                                                           NULL, 
-                                                           v_registros.id_estado_wf, 
-                                                           v_registros.id_proceso_wf,
-                                                           p_id_usuario,
-                                                           v_registros.id_depto,
-                                                           'La solicitud de '||v_tipo_sol ||'pasa a Contabilidad');
-            
-            
-            
-             -- actualiza estado en la solicitud
-            
-             update tes.tplan_pago  set 
-               id_estado_wf =  v_id_estado_actual,
-               estado = va_codigo_estado[1],
-               id_usuario_mod=p_id_usuario,
-               fecha_mod=now()
-             where id_plan_pago  = v_parametros.id_plan_pago;
-            
-            
           
            --Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Solitud de generacion de comprobante ('||v_tipo_sol||')'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Solitud de generacion de comprobante desde interface de plan de pagos'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_parametros.id_plan_pago::varchar);
               
             --Devuelve la respuesta

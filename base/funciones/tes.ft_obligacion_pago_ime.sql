@@ -218,7 +218,7 @@ BEGIN
 			id_subsistema,
 			id_funcionario,
 			estado_reg,
-			porc_anticipo,
+			--porc_anticipo,
 			id_estado_wf,
 			id_depto,
 			num_tramite,
@@ -242,7 +242,7 @@ BEGIN
 			v_id_subsistema,
 			v_parametros.id_funcionario,
 			'activo',
-			v_parametros.porc_anticipo,
+			--v_parametros.porc_anticipo,
 			v_id_estado_wf,
 			v_parametros.id_depto,
 			v_num_tramite,
@@ -286,7 +286,7 @@ BEGIN
 			obs = v_parametros.obs,
 			porc_retgar = v_parametros.porc_retgar,
 		    id_funcionario = v_parametros.id_funcionario,
-			porc_anticipo = v_parametros.porc_anticipo,
+			--porc_anticipo = v_parametros.porc_anticipo,
 		    id_depto = v_parametros.id_depto,
 			fecha_mod = now(),
 			id_usuario_mod = p_id_usuario,
@@ -499,25 +499,82 @@ BEGIN
              
              --VALIDACIONES
              
-             IF  v_codigo_estado != 'borrador' THEN
-               raise exception 'Solo se admiten obligaciones  en borrador';
+             IF  v_codigo_estado NOT in  ('borrador','en_pago') THEN
+               raise exception 'Solo se admiten obligaciones  en borrador o en pago';
              END IF;
 			
             
+            IF  v_codigo_estado = 'borrador' THEN
+        
              --validamos que el detalle tenga por lo menos un item con valor
              
-             select 
-              sum(od.monto_pago_mo)
-             into
-              v_total_detalle
-             from tes.tobligacion_det od
-             where od.id_obligacion_pago = v_parametros.id_obligacion_pago and od.estado_reg ='activo'; 
+                   select 
+                    sum(od.monto_pago_mo)
+                   into
+                    v_total_detalle
+                   from tes.tobligacion_det od
+                   where od.id_obligacion_pago = v_parametros.id_obligacion_pago and od.estado_reg ='activo'; 
+                   
+                   IF v_total_detalle = 0 or v_total_detalle is null THEN
+                   
+                       raise exception 'No existe el detalle de obligacion...';
+                   
+                   END IF; 
+                   
+            
+                  ------------------------------------------------------------
+                  --calcula el factor de prorrateo de la obligacion  detalle
+                  -----------------------------------------------------------
+                  
+                  update tes.tobligacion_det set
+                  factor_porcentual = (monto_pago_mo/v_total_detalle)
+                  where estado_reg = 'activo' and id_obligacion_pago=v_parametros.id_obligacion_pago;
+                  
+                  --testeo
+                  select sum(od.factor_porcentual) into v_factor
+                  from tes.tobligacion_det od
+                  where od.id_obligacion_pago = v_parametros.id_obligacion_pago and od.estado_reg='activo';
+                  
+                  
+                  v_factor = v_factor - 1;
+                  
+                  
+                  select od.id_obligacion_det into v_id_obligacion_det
+                  from tes.tobligacion_det od
+                  where od.id_obligacion_pago = v_parametros.id_obligacion_pago
+                  and od.estado_reg = 'activo'
+                  limit 1 offset 0; 
+                  
+                  
+                  --actualiza el factor del primer registro  para que la suma de siempre 1
+                  update tes.tobligacion_det  set
+                  factor_porcentual=  factor_porcentual - v_factor
+                  where estado_reg = 'activo'
+                  and id_obligacion_det= v_id_obligacion_det;
+                  
+                
+            
+            
+            
+            
+            
+            
+             ELSEIF  v_codigo_estado = 'en_pago' THEN
+              
              
-             IF v_total_detalle = 0 or v_total_detalle is null THEN
+                --  validar que el total del detalle de obligacion
+                --  este pagado y no se tengan pendientes
+               
+               
+                --  si tiene relacionado una cotizacion llama a la funcion de finalizar cotizacion              
+                
+               
+             raise exception 'Falta las valiaciones';
              
-                 raise exception 'No existe el detalle de obligacion...';
              
-             END IF; 
+             
+             END IF;
+             
              
               
              -- obtiene el siguiente estado del flujo 
@@ -582,39 +639,7 @@ BEGIN
                fecha_mod=now()
              where id_obligacion_pago  = v_parametros.id_obligacion_pago;
         
-            --------------------------------------
-            --calcula el factor de prorrateo de la obligacion  detalle
-            ---------------------------------------------
-            
-            update tes.tobligacion_det set
-            factor_porcentual = (monto_pago_mo/v_total_detalle)
-            where estado_reg = 'activo' and id_obligacion_pago=v_parametros.id_obligacion_pago;
-            
-            --testeo
-            select sum(od.factor_porcentual) into v_factor
-            from tes.tobligacion_det od
-            where od.id_obligacion_pago = v_parametros.id_obligacion_pago and od.estado_reg='activo';
-            
-            
-            v_factor = v_factor - 1;
-            
-            
-            select od.id_obligacion_det into v_id_obligacion_det
-            from tes.tobligacion_det od
-            where od.id_obligacion_pago = v_parametros.id_obligacion_pago
-            and od.estado_reg = 'activo'
-            limit 1 offset 0; 
-            
-            
-            --actualiza el factor del primer registro  para que la suma de siempre 1
-            update tes.tobligacion_det  set
-            factor_porcentual=  factor_porcentual - v_factor
-            where estado_reg = 'activo'
-            and id_obligacion_det= v_id_obligacion_det;
-            
-            
         
-         
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligacion de pago fin de registro'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_parametros.id_obligacion_pago::varchar);
