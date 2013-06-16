@@ -172,3 +172,25 @@ IS 'ESta columana acumula el total de pago registrados, solo es util para cuotas
 
 /***********************************F-SCP-RAC-TES-0-04/06/2013***************************************/
 
+/***********************************I-SCP-RAC-TES-170-19/06/2013***************************************/
+ALTER TABLE tes.tcuenta_bancaria
+  DROP COLUMN id_cuenta;
+  
+  --------------- SQL ---------------
+
+ALTER TABLE tes.tcuenta_bancaria
+  DROP COLUMN id_auxiliar;
+  
+-------------------------------
+  
+  ALTER TABLE tes.tcuenta_bancaria
+  ADD COLUMN id_moneda INTEGER;
+  
+  
+/***********************************F-SCP-RAC-TES-170-19/06/2013***************************************/
+
+
+
+
+
+

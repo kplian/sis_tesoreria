@@ -398,15 +398,42 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         {
             config:{
                 name: 'id_cuenta_bancaria',
-                fieldLabel: 'Cuenta Bancaria Origen',
-                allowBlank: true,
-                anchor: '80%',
-                gwidth: 100,
-                maxLength:4
-            },
-            type:'NumberField',
-            filters:{pfiltro:'plapa.id_cuenta_bancaria',type:'numeric'},
-            id_grupo:1,
+                fieldLabel: 'Cuenta Bancaria',
+                allowBlank: false,
+                emptyText:'Elija una Cuenta...',
+                store:new Ext.data.JsonStore(
+                {
+                    url: '../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancaria',
+                    id: 'id_cuenta_bancaria',
+                    root:'datos',
+                    sortInfo:{
+                        field:'id_cuenta_bancaria',
+                        direction:'ASC'
+                    },
+                    totalProperty:'total',
+                    fields: ['id_cuenta_bancaria','nro_cuenta','nombre_institucion','codigo_moneda'],
+                    remoteSort: true
+                }),
+                tpl:'<tpl for="."><div class="x-combo-list-item"><p>{nombre_institucion}</p>{nro_cuenta} - {codigo_moneda}</div></tpl>',
+                valueField: 'id_cuenta_bancaria',
+                hiddenValue: 'id_cuenta_bancaria',
+                displayField: 'nro_cuenta',
+                gdisplayField:'desc_cuenta_bancaria',
+                listWidth:'280',
+                forceSelection:true,
+                typeAhead: false,
+                triggerAction: 'all',
+                lazyRender:true,
+                mode:'remote',
+                pageSize:20,
+                queryDelay:500,
+               
+                gwidth: 250,
+                minChars:2
+             },
+            type:'ComboBox',
+            filters:{pfiltro:'cb.nro_cuenta',type:'string'},
+            id_grupo:0,
             grid:true,
             form:true
         },
@@ -616,7 +643,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		{name:'usr_mod', type: 'string'},
 		'liquido_pagable',
 		{name:'total_pagado', type: 'numeric'},
-		'desc_plantilla',''
+		'desc_plantilla','desc_cuenta_bancaria'
 		
 	],
 	iniciarEventos:function(){

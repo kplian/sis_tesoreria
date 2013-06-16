@@ -78,6 +78,7 @@ ALTER TABLE tes.tchequera
 /***********************************F-DEP-GSS-TES-121-24/04/2013****************************************/
 
 
+/***********************************I-DEP-RAC-TES-19-24/06/2013****************************************/
 
 --------------- SQL ---------------
 
@@ -171,3 +172,39 @@ CREATE INDEX tobligacion_pago_idx ON tes.tobligacion_pago
 
 CREATE INDEX tobligacion_pago_idx1 ON tes.tobligacion_pago
   USING btree (id_estado_wf);
+  
+  --------------- SQL ---------------
+
+CREATE OR REPLACE VIEW tes.vcuenta_bancaria(
+    id_cuenta_bancaria,
+    estado_reg,
+    fecha_baja,
+    nro_cuenta,
+    fecha_alta,
+    id_institucion,
+    nombre_institucion,
+    fecha_reg,
+    id_usuario_reg,
+    fecha_mod,
+    id_usuario_mod,
+    id_moneda,
+    codigo_moneda)
+AS
+  SELECT ctaban.id_cuenta_bancaria,
+         ctaban.estado_reg,
+         ctaban.fecha_baja,
+         ctaban.nro_cuenta,
+         ctaban.fecha_alta,
+         ctaban.id_institucion,
+         inst.nombre AS nombre_institucion,
+         ctaban.fecha_reg,
+         ctaban.id_usuario_reg,
+         ctaban.fecha_mod,
+         ctaban.id_usuario_mod,
+         mon.id_moneda,
+         mon.codigo AS codigo_moneda
+  FROM tes.tcuenta_bancaria ctaban
+       JOIN param.tinstitucion inst ON inst.id_institucion =
+        ctaban.id_institucion
+       JOIN param.tmoneda mon ON mon.id_moneda = ctaban.id_moneda;
+/***********************************F-DEP-RAC-TES-19-24/06/2013****************************************/

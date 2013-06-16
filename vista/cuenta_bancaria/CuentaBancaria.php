@@ -36,10 +36,10 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 			config: {
 				name: 'id_institucion',
 				fieldLabel: 'Institucion',
-				anchor: '80%',
 				tinit: true,
 				allowBlank: false,
 				origen: 'INSTITUCION',
+				baseParams:{es_banco:'si'},
 				gdisplayField: 'nombre_institucion',
 				gwidth: 200,
 				renderer:function (value, p, record){return String.format('{0}', record.data['nombre_institucion']);}
@@ -50,102 +50,7 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 			grid: true,
 			form: true
 		},
-		{
-			config:{
-				name:'id_cuenta',
-				fieldLabel:'Cuenta',
-				anchor: '80%',
-				allowBlank:false,
-				emptyText:'Cuenta...',
-				store: new Ext.data.JsonStore({
-
-				url: '../../sis_contabilidad/control/Cuenta/listarCuenta',
-				id: 'id_cuenta',
-				root: 'datos',
-				sortInfo:{
-				field: 'nombre_cuenta',
-				direction: 'ASC'
-				},
-				totalProperty: 'total',
-				fields: ['id_cuenta','nro_cuenta','nombre_cuenta','desc_cuenta'],
-				// turn on remote sorting
-				remoteSort: true,
-				baseParams:{par_filtro:'nro_cuenta#nombre_cuenta'}
-				}),
-				valueField: 'id_cuenta',
-				displayField: 'nombre_cuenta',
-				tpl:'<tpl for="."><div class="x-combo-list-item"><p>{nombre_cuenta}</p><p>NumeroCta:{nro_cuenta}</p> </div></tpl>',
-				gdisplayField: 'nombre_cuenta',
-				hiddenName: 'id_cuenta',
-				forceSelection:true,
-				typeAhead: true,
-    triggerAction: 'all',
-    lazyRender:true,
-				mode:'remote',
-				pageSize:10,
-				queryDelay:1000,
-				width:250,
-				minChars:2,
-			
-				renderer:function(value, p, record){return String.format('{0}', record.data['nombre_cuenta']);}
-
-			},
-			type:'ComboBox',
-			id_grupo:0,
-			filters:{   pfiltro:'cta.nombre_cuenta',
-						type:'string'
-					},
-			grid:true,
-			form:true
-		},		
-		{
-			config:{
-				name:'id_auxiliar',
-				fieldLabel:'Auxiliar',
-				allowBlank:true,
-				emptyText:'Auxiliar...',
-				anchor: '80%',
-				store: new Ext.data.JsonStore({
-
-				url: '../../sis_contabilidad/control/Auxiliar/listarAuxiliar',
-				id: 'id_auxiliar',
-				root: 'datos',
-				sortInfo:{
-				field: 'nombre',
-				direction: 'ASC'
-				},
-				totalProperty: 'total',
-				fields: ['id_auxiliar','nombre','codigo_auxiliar','nombre_auxiliar'],
-				// turn on remote sorting
-				remoteSort: true,
-				baseParams:{par_filtro:'codigo_auxiliar#nombre_auxiliar'}
-				}),
-				valueField: 'id_auxiliar',
-				displayField: 'nombre_auxiliar',
-				tpl:'<tpl for="."><div class="x-combo-list-item"><p>Codigo:{codigo_auxiliar}</p><p>{nombre_auxiliar}</p> </div></tpl>',
-				gdisplayField: 'nombre_auxiliar',
-				hiddenName: 'id_auxiliar',
-				forceSelection:true,
-				typeAhead: true,
-    triggerAction: 'all',
-    lazyRender:true,
-				mode:'remote',
-				pageSize:10,
-				queryDelay:1000,
-				width:250,
-				minChars:2,
-			
-				renderer:function(value, p, record){return String.format('{0}', record.data['nombre_auxiliar']);}
-
-			},
-			type:'ComboBox',
-			id_grupo:0,
-			filters:{   pfiltro:'aux.nombre_auxiliar',
-						type:'string'
-					},
-			grid:true,
-			form:true
-		},
+		
 		{
 			config:{
 				name: 'nro_cuenta',
@@ -165,7 +70,7 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 			config:{
 				name: 'fecha_alta',
 				fieldLabel: 'Fecha Alta',
-				allowBlank: true,
+				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
 						format: 'd/m/Y', 
@@ -177,6 +82,25 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 			grid:true,
 			form:true
 		},
+		{
+            config:{
+                name:'id_moneda',
+                origen:'MONEDA',
+                 allowBlank:false,
+                fieldLabel:'Moneda',
+                gdisplayField:'codigo_moneda',//mapea al store del grid
+                gwidth:50,
+              //   renderer:function (value, p, record){return String.format('{0}', record.data['codigo_moenda']);}
+             },
+            type:'ComboRec',
+            id_grupo:1,
+            filters:{   
+                pfiltro:'mon.codigo',
+                type:'string'
+            },
+            grid:true,
+            form:true
+          },
 		{
 			config:{
 				name: 'fecha_baja',
@@ -280,13 +204,9 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 	fields: [
 		{name:'id_cuenta_bancaria', type: 'numeric'},
 		{name:'estado_reg', type: 'string'},
-		{name:'id_cuenta', type: 'numeric'},
-		{name:'nombre_cuenta', type: 'string'},
 		{name:'fecha_baja', type: 'date',dateFormat:'Y-m-d'},
 		{name:'nro_cuenta', type: 'string'},
 		{name:'fecha_alta', type: 'date',dateFormat:'Y-m-d'},
-		{name:'id_auxiliar', type: 'numeric'},
-		{name:'nombre_auxiliar', type: 'string'},
 		{name:'id_institucion', type: 'numeric'},
 		{name:'nombre_institucion', type: 'string'},
 		{name:'fecha_reg', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
@@ -294,7 +214,7 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'usr_reg', type: 'string'},
-		{name:'usr_mod', type: 'string'},
+		{name:'usr_mod', type: 'string'},'id_moneda','codigo_moneda'
 		
 	],
 	sortInfo:{

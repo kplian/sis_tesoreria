@@ -22,13 +22,9 @@ class MODCuentaBancaria extends MODbase{
 		//Definicion de la lista del resultado del query
 		$this->captura('id_cuenta_bancaria','int4');
 		$this->captura('estado_reg','varchar');
-		$this->captura('id_cuenta','int4');
-		$this->captura('nombre_cuenta','varchar');
 		$this->captura('fecha_baja','date');
 		$this->captura('nro_cuenta','varchar');
 		$this->captura('fecha_alta','date');
-		$this->captura('id_auxiliar','int4');
-		$this->captura('nombre_auxiliar','varchar');
 		$this->captura('id_institucion','int4');
 		$this->captura('nombre_institucion','varchar');
 		$this->captura('fecha_reg','timestamp');
@@ -37,6 +33,10 @@ class MODCuentaBancaria extends MODbase{
 		$this->captura('id_usuario_mod','int4');
 		$this->captura('usr_reg','varchar');
 		$this->captura('usr_mod','varchar');
+		$this->captura('id_moneda','integer');
+		$this->captura('codigo_moneda','varchar');
+		
+	
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -54,12 +54,11 @@ class MODCuentaBancaria extends MODbase{
 				
 		//Define los parametros para la funcion
 		$this->setParametro('estado_reg','estado_reg','varchar');
-		$this->setParametro('id_cuenta','id_cuenta','int4');
 		$this->setParametro('fecha_baja','fecha_baja','date');
 		$this->setParametro('nro_cuenta','nro_cuenta','varchar');
 		$this->setParametro('fecha_alta','fecha_alta','date');
-		$this->setParametro('id_auxiliar','id_auxiliar','int4');
 		$this->setParametro('id_institucion','id_institucion','int4');
+		$this->setParametro('id_moneda','id_moneda','int4');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -78,12 +77,11 @@ class MODCuentaBancaria extends MODbase{
 		//Define los parametros para la funcion
 		$this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
 		$this->setParametro('estado_reg','estado_reg','varchar');
-		$this->setParametro('id_cuenta','id_cuenta','int4');
 		$this->setParametro('fecha_baja','fecha_baja','date');
 		$this->setParametro('nro_cuenta','nro_cuenta','varchar');
 		$this->setParametro('fecha_alta','fecha_alta','date');
-		$this->setParametro('id_auxiliar','id_auxiliar','int4');
 		$this->setParametro('id_institucion','id_institucion','int4');
+		$this->setParametro('id_moneda','id_moneda','int4');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();

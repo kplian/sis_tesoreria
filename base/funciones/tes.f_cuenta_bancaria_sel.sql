@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_cuenta_bancaria_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -47,13 +49,9 @@ BEGIN
 			v_consulta:='select
 						ctaban.id_cuenta_bancaria,
 						ctaban.estado_reg,
-						ctaban.id_cuenta,                        
-                        cta.nombre_cuenta,
 						ctaban.fecha_baja,
 						ctaban.nro_cuenta,
 						ctaban.fecha_alta,
-						ctaban.id_auxiliar,
-                        aux.nombre_auxiliar,
 						ctaban.id_institucion,
                         inst.nombre as nombre_institucion,
 						ctaban.fecha_reg,
@@ -61,11 +59,12 @@ BEGIN
 						ctaban.fecha_mod,
 						ctaban.id_usuario_mod,
 						usu1.cuenta as usr_reg,
-						usu2.cuenta as usr_mod	
+						usu2.cuenta as usr_mod,
+                        mon.id_moneda,	
+                        mon.codigo as codigo_moneda
 						from tes.tcuenta_bancaria ctaban
                         inner join param.tinstitucion inst on inst.id_institucion = ctaban.id_institucion
-                        inner join conta.tcuenta cta on cta.id_cuenta = ctaban.id_cuenta
-                        left join conta.tauxiliar aux on aux.id_auxiliar = ctaban.id_auxiliar
+                        inner join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda
 						inner join segu.tusuario usu1 on usu1.id_usuario = ctaban.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = ctaban.id_usuario_mod
 				        where  ';
@@ -93,9 +92,8 @@ BEGIN
 			v_consulta:='select count(id_cuenta_bancaria)
 					    from tes.tcuenta_bancaria ctaban
                         inner join param.tinstitucion inst on inst.id_institucion = ctaban.id_institucion
-                        inner join conta.tcuenta cta on cta.id_cuenta = ctaban.id_cuenta
-                        inner join conta.tauxiliar aux on aux.id_auxiliar = ctaban.id_auxiliar
-					    inner join segu.tusuario usu1 on usu1.id_usuario = ctaban.id_usuario_reg
+                        inner join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda
+                        inner join segu.tusuario usu1 on usu1.id_usuario = ctaban.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = ctaban.id_usuario_mod
 					    where ';
 			

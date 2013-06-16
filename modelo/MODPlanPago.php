@@ -63,6 +63,7 @@ class MODPlanPago extends MODbase{
 		$this->captura('liquido_pagable','numeric');
 		$this->captura('total_prorrateado','numeric');
 		$this->captura('total_pagado','numeric');
+        $this->captura('desc_cuenta_bancaria','text');
         
 		
 		//Ejecuta la instruccion

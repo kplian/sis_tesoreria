@@ -1,8 +1,13 @@
-CREATE OR REPLACE FUNCTION "tes"."f_cuenta_bancaria_ime" (	
-				p_administrador integer, p_id_usuario integer, p_tabla character varying, p_transaccion character varying)
-RETURNS character varying AS
-$BODY$
+--------------- SQL ---------------
 
+CREATE OR REPLACE FUNCTION tes.f_cuenta_bancaria_ime (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Sistema de Tesoreria
  FUNCION: 		tes.f_cuenta_bancaria_ime
@@ -43,31 +48,59 @@ BEGIN
 	if(p_transaccion='TES_CTABAN_INS')then
 					
         begin
+        
+            -- validar que el numero de cuenta sea unico para registros activos
+            
+            IF   exists (select 1 FROM tes.tcuenta_bancaria cb 
+                                   WHERE cb.nro_cuenta ilike v_parametros.nro_cuenta
+                                      and  cb.id_institucion = v_parametros.id_institucion ) THEN
+                  
+               raise exception 'La nro de cuenta ya existe para este banco';                    
+                                      
+            END IF;
+            
+            --valida fechas
+            
+            IF v_parametros.fecha_alta is  null then
+                
+                raise exception 'La fecha de alta no puede quedar en blanco';
+               
+            END IF;
+            
+            IF v_parametros.fecha_baja is not null then
+                 IF  v_parametros.fecha_baja <  v_parametros.fecha_alta  THEN
+                  
+                  raise exception 'La fecha de baja no puede ser anterior a la fecha de alta';
+                
+                END IF;
+            END IF;
+            
+          
+            
+        
         	--Sentencia de la insercion
         	insert into tes.tcuenta_bancaria(
 			estado_reg,
-			id_cuenta,
-			fecha_baja,
+		    fecha_baja,
 			nro_cuenta,
 			fecha_alta,
-			id_auxiliar,
-			id_institucion,
+		    id_institucion,
 			fecha_reg,
 			id_usuario_reg,
 			fecha_mod,
-			id_usuario_mod
+			id_usuario_mod,
+            id_moneda
           	) values(
 			'activo',
-			v_parametros.id_cuenta,
-			v_parametros.fecha_baja,
+		    v_parametros.fecha_baja,
 			v_parametros.nro_cuenta,
 			v_parametros.fecha_alta,
-			v_parametros.id_auxiliar,
 			v_parametros.id_institucion,
 			now(),
 			p_id_usuario,
 			null,
-			null
+			null,
+            v_parametros.id_moneda
 							
 			)RETURNING id_cuenta_bancaria into v_id_cuenta_bancaria;
 			
@@ -90,16 +123,43 @@ BEGIN
 	elsif(p_transaccion='TES_CTABAN_MOD')then
 
 		begin
+        
+             -- validar que el numero de cuenta sea unico para registros activos
+            
+            IF   exists (select 1 FROM tes.tcuenta_bancaria cb 
+                                   WHERE cb.nro_cuenta ilike v_parametros.nro_cuenta
+                                      and  cb.id_institucion = v_parametros.id_institucion
+                                      and  cb.id_cuenta_bancaria!= v_parametros.id_cuenta_bancaria) THEN
+                  
+               raise exception 'La nro de cuenta ya existe para este banco';                    
+                                      
+            END IF;
+            
+            --valida fechas
+            
+            IF v_parametros.fecha_alta is  null then
+                
+                raise exception 'La fecha de alta no puede quedar en blanco';
+               
+            END IF;
+            
+            IF v_parametros.fecha_baja is not null then
+                 IF  v_parametros.fecha_baja <  v_parametros.fecha_alta  THEN
+                  
+                  raise exception 'La fecha de baja no puede ser anterior a la fecha de alta';
+                
+                END IF;
+            END IF;
+        
 			--Sentencia de la modificacion
 			update tes.tcuenta_bancaria set
-			id_cuenta = v_parametros.id_cuenta,
 			fecha_baja = v_parametros.fecha_baja,
 			nro_cuenta = v_parametros.nro_cuenta,
 			fecha_alta = v_parametros.fecha_alta,
-			id_auxiliar = v_parametros.id_auxiliar,
 			id_institucion = v_parametros.id_institucion,
 			fecha_mod = now(),
-			id_usuario_mod = p_id_usuario
+			id_usuario_mod = p_id_usuario,
+            id_moneda = v_parametros.id_moneda
 			where id_cuenta_bancaria=v_parametros.id_cuenta_bancaria;
                
 			--Definicion de la respuesta
@@ -150,7 +210,9 @@ EXCEPTION
 		raise exception '%',v_resp;
 				        
 END;
-$BODY$
-LANGUAGE 'plpgsql' VOLATILE
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
 COST 100;
-ALTER FUNCTION "tes"."f_cuenta_bancaria_ime"(integer, integer, character varying, character varying) OWNER TO postgres;

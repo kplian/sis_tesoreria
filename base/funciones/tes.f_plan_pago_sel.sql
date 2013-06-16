@@ -93,16 +93,20 @@ BEGIN
                         pla.desc_plantilla,
                         plapa.liquido_pagable,
                         plapa.total_prorrateado,
-                        plapa.total_pagado                        
+                        plapa.total_pagado ,                       
+						cb.nombre_institucion ||'' (''||cb.nro_cuenta||'')'' as desc_cuenta_bancaria                        
 						from tes.tplan_pago plapa
                         left join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
 						inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
-						left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
-				        where  plapa.estado_reg=''activo''  and ';
+                        left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = plapa.id_cuenta_bancaria
+                        left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
+                       where  plapa.estado_reg=''activo''  and ';
 			
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+
+             raise notice '%',v_consulta;
 
 			--Devuelve la respuesta
 			return v_consulta;
@@ -126,9 +130,10 @@ BEGIN
 			v_consulta:='select count(id_plan_pago)
 						from tes.tplan_pago plapa
                         left join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
-					    inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
-						left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
-					       where  plapa.estado_reg=''activo''   and ';
+						inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
+                        left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = plapa.id_cuenta_bancaria
+                        left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
+                        where  plapa.estado_reg=''activo''   and ';
 			
 			--Definicion de la respuesta		    
 			v_consulta:=v_consulta||v_parametros.filtro;
