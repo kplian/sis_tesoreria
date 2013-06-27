@@ -94,19 +94,19 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 				renderer:function (value, p, record){
                         var dato='';
                         dato = (dato==''&&value=='pago_directo')?'Pago Directo':dato;
-                        dato = (dato==''&&value=='caja_chica')?'Caja Chica':dato;
-                        dato = (dato==''&&value=='viaticos')?'Viáticos':dato;
-                        dato = (dato==''&&value=='fondo_en_avance')?'Fondo en Avance':dato;
+                        //dato = (dato==''&&value=='caja_chica')?'Caja Chica':dato;
+                        //dato = (dato==''&&value=='viaticos')?'Viáticos':dato;
+                        //dato = (dato==''&&value=='fondo_en_avance')?'Fondo en Avance':dato;
                         dato = (dato==''&&value=='aduisiciones')?'Adquisiciones':dato;
                         return String.format('{0}', dato);
                     },
             
                     store:new Ext.data.ArrayStore({
                             fields: ['variable', 'valor'],
-                            data : [ ['pago_directo','Pago Directo'],
-                                     ['caja_chica','Caja Chica'],
-                                     ['viaticos','Viáticos'],
-                                     ['fondo_en_avance','Fondo en Avance']
+                            data : [ ['pago_directo','Pago Directo']
+                                     //,['caja_chica','Caja Chica'],
+                                     //['viaticos','Viáticos'],
+                                    // ['fondo_en_avance','Fondo en Avance']
                                     ]
                                     }),
 			    valueField: 'variable',

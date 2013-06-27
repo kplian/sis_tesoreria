@@ -32,7 +32,7 @@ class MODObligacionPago extends MODbase{
 		$this->captura('id_subsistema','int4');
 		$this->captura('nombre_subsistema','varchar');
 		$this->captura('id_funcionario','int4');
-		$this->captura('desc_funcionario1','text');
+		//$this->captura('desc_funcionario1','text');
 		$this->captura('estado_reg','varchar');
 		$this->captura('porc_anticipo','numeric');
 		$this->captura('id_estado_wf','int4');

@@ -6,7 +6,6 @@
 *@date 02-04-2013 20:27:35
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
 */
-
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
@@ -42,6 +41,24 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                 inputType:'hidden'
             },
             type:'Field',
+            form:true
+        },
+         {
+            config:{
+                    name:'id_centro_costo',
+                    origen:'CENTROCOSTO',
+                   // baseParams:{filtrar:'grupo_ep'},
+                    fieldLabel: 'Centro de Costos',
+                    url: '../../sis_parametros/control/CentroCosto/listarCentroCostoFiltradoXDepto',
+                    emptyText : 'Centro Costo...',
+                    allowBlank:false,
+                    gdisplayField:'codigo_cc',//mapea al store del grid
+                    gwidth:200,
+                },
+            type:'ComboRec',
+            id_grupo:0,
+            filters:{pfiltro:'cc.codigo_cc',type:'string'},
+            grid:true,
             form:true
         },                    
         {
@@ -101,24 +118,6 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
             type:'TextArea',
             filters:{pfiltro:'obdet.descripcion',type:'numeric'},
             id_grupo:1,
-            grid:true,
-            form:true
-        },
-         {
-            config:{
-                    name:'id_centro_costo',
-                    origen:'CENTROCOSTO',
-                   // baseParams:{filtrar:'grupo_ep'},
-                    fieldLabel: 'Centro de Costos',
-                    url: '../../sis_parametros/control/CentroCosto/listarCentroCostoFiltradoXDepto',
-                    emptyText : 'Centro Costo...',
-                    allowBlank:false,
-                    gdisplayField:'codigo_cc',//mapea al store del grid
-                    gwidth:200,
-                },
-            type:'ComboRec',
-            id_grupo:0,
-            filters:{pfiltro:'cc.codigo_cc',type:'string'},
             grid:true,
             form:true
         }
@@ -206,7 +205,7 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
  						type:'string'
  					},
  			grid:true,
- 			form:true
+ 			form:false
  	    },			
 		{
  			config:{
@@ -453,15 +452,13 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
 	    this.cmpMontoPagoMo=this.getComponente('monto_pago_mo');
 	    this.cmpConceptoIngas=this.getComponente('id_concepto_ingas');
 	    this.cmpCentroCostos=this.getComponente('id_centro_costo');
-        this.cmpPartida=this.getComponente('id_partida');
-        this.cmpCuenta=this.getComponente('id_cuenta');
-        this.cmpAuxiliar=this.getComponente('id_auxiliar');
+        //this.cmpPartida=this.getComponente('id_partida');
+        //this.cmpCuenta=this.getComponente('id_cuenta');
+        //this.cmpAuxiliar=this.getComponente('id_auxiliar');
         this.cmpObligacionPago=this.getComponente('id_obligacion_pago');
 	    
 	},
-	
-	
-	 onReloadPage:function(m){
+	onReloadPage:function(m){
        
         this.maestro=m;
         
@@ -471,8 +468,8 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
         this.Cmp.id_centro_costo.store.baseParams.id_depto =this.maestro.id_depto;
         this.Cmp.id_centro_costo.modificado=true;
         
-        this.cmpPartida.store.baseParams.id_gestion=this.maestro.id_gestion
-        this.cmpPartida.modificado=true;
+        /*this.cmpPartida.store.baseParams.id_gestion=this.maestro.id_gestion
+        this.cmpPartida.modificado=true;*/
         
        /* this.cmpCuenta.store.baseParams.id_gestion=this.maestro.id_gestion
         this.cmpCuenta.modificado=true;*/
@@ -526,9 +523,7 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
          }
          
     },
-    
- 
-	sortInfo:{
+    sortInfo:{
 		field: 'id_obligacion_det',
 		direction: 'ASC'
 	},
@@ -536,6 +531,4 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
 	bsave:false
 	}
 )
-</script>
-		
-		
+</script>	

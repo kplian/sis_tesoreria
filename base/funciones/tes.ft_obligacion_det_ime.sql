@@ -36,6 +36,8 @@ DECLARE
     v_monto_mb numeric;
     v_tipo_obligacion varchar;
     v_id_moneda integer;
+    v_id_partida integer;
+    v_id_gestion integer;
       
     
 BEGIN
@@ -58,10 +60,12 @@ BEGIN
            
            select
            op.tipo_cambio_conv,
-           op.tipo_obligacion
+           op.tipo_obligacion,
+           op.id_gestion
            into
            v_tipo_cambio_conv,
-           v_tipo_obligacion
+           v_tipo_obligacion,
+           v_id_gestion
            from tes.tobligacion_pago op 
            where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
            
@@ -79,6 +83,24 @@ BEGIN
            v_monto_mb = v_parametros.monto_pago_mo * v_tipo_cambio_conv;
         
         
+          --recueprar la partida de la parametrizacion
+          v_id_partida = NULL;
+          
+          SELECT 
+              ps_id_partida 
+            into 
+              v_id_partida 
+          FROM conta.f_get_config_relacion_contable('CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo);
+          
+        
+           
+        
+           IF v_id_partida is NULL THEN
+          
+            raise exception 'no se tiene una parametrizacionde partida  para este concepto de gasto en la relacion contable de código CUECOMP  (%,%,%,%)','CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo;
+            
+           END IF;
+         
         
         	--Sentencia de la insercion
         	insert into tes.tobligacion_det(
@@ -100,7 +122,7 @@ BEGIN
           	) values(
 			'activo',
 			--v_parametros.id_cuenta,
-			v_parametros.id_partida,
+			v_id_partida,
 			--v_parametros.id_auxiliar,
 			v_parametros.id_concepto_ingas,
 			v_parametros.monto_pago_mo,
@@ -139,24 +161,41 @@ BEGIN
            
            select
            op.tipo_cambio_conv,
-           op.id_moneda
+           op.id_moneda,
+           op.id_gestion
            into
            v_tipo_cambio_conv,
-           v_id_moneda
+           v_id_moneda,
+           v_id_gestion
            from tes.tobligacion_pago op 
            where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
            
-         
-        
-        
            v_monto_mb = v_parametros.monto_pago_mo * v_tipo_cambio_conv;
+           
+           --recueprar la partida de la parametrizacion
+          v_id_partida = NULL;
+          
+          SELECT 
+              ps_id_partida 
+            into 
+              v_id_partida 
+          FROM conta.f_get_config_relacion_contable('CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo);
+          
+        
+           
+        
+           IF v_id_partida is NULL THEN
+          
+            raise exception 'no se tiene una parametrizacionde partida  para este concepto de gasto en la relacion contable de código CUECOMP  (%,%,%,%)','CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo;
+            
+           END IF;
         
         
 			--Sentencia de la modificacion
 			update tes.tobligacion_det set
-			id_cuenta = v_parametros.id_cuenta,
-			id_partida = v_parametros.id_partida,
-			id_auxiliar = v_parametros.id_auxiliar,
+			--id_cuenta = v_parametros.id_cuenta,
+			id_partida = v_id_partida,
+			--id_auxiliar = v_parametros.id_auxiliar,
 			id_concepto_ingas = v_parametros.id_concepto_ingas,
 			monto_pago_mo = v_parametros.monto_pago_mo,
 			id_obligacion_pago = v_parametros.id_obligacion_pago,

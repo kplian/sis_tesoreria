@@ -608,7 +608,7 @@ BEGIN
             
           
             
-            -- hay que recuperar el supervidor que seria el estado inmediato,...
+            -- hay que recuperar  el estado inmediato,...
              v_id_estado_actual =  wf.f_registra_estado_wf(va_id_tipo_estado[1], 
                                                            NULL, 
                                                            v_id_estado_wf, 
@@ -620,11 +620,14 @@ BEGIN
            
             IF  va_codigo_estado[1] = 'registrado'  and v_tipo_obligacion != 'adquisiciones' THEN
             
-             -- TO DO , verficar presupuesto y comprometer
-            
-            
-            
-            END IF;
+               -- verficar presupuesto y comprometer
+               IF not tes.f_gestionar_presupuesto_tesoreria(v_parametros.id_obligacion_pago, p_id_usuario, 'comprometer')  THEN
+                   
+                     raise exception 'Error al comprometer el presupeusto';
+                   
+               END IF;
+           
+           END IF;
             
             
             
@@ -756,7 +759,12 @@ BEGIN
                         -- cuando el estado al que regresa es  y no viene de adquisiciones se revierte el repsupuesto
                          IF v_codigo_estado = 'borrador'  and v_tipo_obligacion !='adquisiciones' THEN
                          
-                          --TO DO , se revierte el presupeusto
+                           --se revierte el presupeusto
+                           IF not tes.f_gestionar_presupuesto_tesoreria(v_parametros.id_obligacion_pago, p_id_usuario, 'revertir')  THEN
+                               
+                                 raise exception 'Error al revertir el presupeusto';
+                               
+                           END IF;
                           
                           
                           

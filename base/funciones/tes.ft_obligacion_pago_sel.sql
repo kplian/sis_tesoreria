@@ -79,7 +79,7 @@ BEGIN
 						obpg.id_subsistema,
                         ss.nombre as nombre_subsistema,
 						obpg.id_funcionario,
-                        fun.desc_funcionario1,
+                      --  fun.desc_funcionario1,
 						obpg.estado_reg,
 						obpg.porc_anticipo,
 						obpg.id_estado_wf,
@@ -105,11 +105,11 @@ BEGIN
 						from tes.tobligacion_pago obpg
 						inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
-                        left join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
+                        inner join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
                         inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
                         inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
 						inner join param.tdepto dep on dep.id_depto=obpg.id_depto
-                        left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
+                       -- left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
                         where  '||v_filadd;
 			
 			--Definicion de la respuesta
@@ -208,11 +208,11 @@ BEGIN
 					    from tes.tobligacion_pago obpg
 						inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
-                        left join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
+                        inner join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
                         inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
                         inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
 						inner join param.tdepto dep on dep.id_depto=obpg.id_depto
-                        left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
+                       -- left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
                         where  '||v_filadd;
 			
 			--Definicion de la respuesta		    
