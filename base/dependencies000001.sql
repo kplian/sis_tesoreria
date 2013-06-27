@@ -45,30 +45,16 @@ ALTER TABLE tes.tplan_pago
 
 /***********************************I-DEP-GSS-TES-121-24/04/2013****************************************/
 --tabla tes.tcuenta_bancaria
-
-ALTER TABLE tes.tcuenta_bancaria
-  ADD CONSTRAINT fk_tcuenta_bancaria_id_auxiliar FOREIGN KEY (id_auxiliar)
-    REFERENCES conta.tauxiliar(id_auxiliar)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE; 
-
-ALTER TABLE tes.tcuenta_bancaria
-  ADD CONSTRAINT fk_tcuenta_bancaria_id_cuenta FOREIGN KEY (id_cuenta)
-    REFERENCES conta.tcuenta(id_cuenta)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
     
 ALTER TABLE tes.tcuenta_bancaria
-  ADD CONSTRAINT fk_tcuenta_bancaria_id_institucion FOREIGN KEY (id_institucion)
+  ADD CONSTRAINT fk_tcuenta_bancaria__id_institucion FOREIGN KEY (id_institucion)
     REFERENCES param.tinstitucion(id_institucion)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     NOT DEFERRABLE;
   
 ALTER TABLE tes.tchequera
-  ADD CONSTRAINT fk_tchequera_id_cuenta_bancaria FOREIGN KEY (id_cuenta_bancaria)
+  ADD CONSTRAINT fk_tchequera__id_cuenta_bancaria FOREIGN KEY (id_cuenta_bancaria)
     REFERENCES tes.tcuenta_bancaria(id_cuenta_bancaria)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
