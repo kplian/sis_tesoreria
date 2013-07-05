@@ -82,7 +82,7 @@ DECLARE
     v_count integer;
     v_registros_pp record;
     
-    v_verficacion boolean;
+    v_verficacion varchar[];
   
     
     
@@ -1040,18 +1040,32 @@ BEGIN
            v_verficacion = tes.f_generar_comprobante(p_id_usuario, v_parametros.id_plan_pago);
            
             
-            IF not v_verficacion THEN
+            IF  v_verficacion[1]= 'TRUE'   THEN
             
-               raise exception 'Ocurrio un error al generar el comprobante';
+                  --Definicion de la respuesta
+                v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Solitud de generacion de comprobante desde interface de plan de pagos'); 
+                v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_parametros.id_plan_pago::varchar);
+                  
+                --Devuelve la respuesta
+                return v_resp;
+            
+            ELSE
+            
+                --Definicion de la respuesta
+              
+              
+                v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_parametros.id_plan_pago::varchar);
+                v_resp = pxp.f_agrega_clave(v_resp,'resultado','falla'); 
+                v_resp = pxp.f_agrega_clave(v_resp,'qwe','123');
+                v_resp = pxp.f_agrega_clave(v_resp,'mensaje',v_verficacion[2]);
+                  
+                --Devuelve la respuesta
+                return v_resp;
+            
             
             END IF;
           
-           --Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Solitud de generacion de comprobante desde interface de plan de pagos'); 
-            v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_parametros.id_plan_pago::varchar);
-              
-            --Devuelve la respuesta
-            return v_resp;
+           
             
             
             

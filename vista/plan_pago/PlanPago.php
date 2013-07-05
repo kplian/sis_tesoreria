@@ -1103,12 +1103,12 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
       }, 
      successSinc:function(resp){
             Phx.CP.loadingHide();
-             var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
-            if(!reg.ROOT.error){
+            var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+            if(reg.ROOT.datos.resultado!='falla'){
                 
                 this.reload();
              }else{
-                alert('ocurrio un error durante el proceso')
+                alert(reg.ROOT.datos.mensaje)
             }
      },
 	

@@ -64,7 +64,8 @@ BEGIN
 						usu1.cuenta as usr_reg,
 						usu2.cuenta as usr_mod,
                         cc.codigo_cc,
-                        cig.desc_ingas	
+                        cig.desc_ingas,
+                        od.descripcion	
 						from tes.tprorrateo pro
 						inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det
                         inner join param.tconcepto_ingas cig on cig.id_concepto_ingas = od.id_concepto_ingas

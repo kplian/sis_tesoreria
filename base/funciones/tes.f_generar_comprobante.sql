@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION tes.f_generar_comprobante (
   p_id_usuario integer,
   p_id_plan_pago integer
 )
-RETURNS boolean AS
+RETURNS varchar [] AS
 $body$
 /*
 *
@@ -20,6 +20,9 @@ DECLARE
 	v_nombre_funcion   	text;
     v_resp    			varchar;
     v_registros   		record;
+    v_registros_pro   	record;
+    v_ejecutado 		numeric;
+    v_comprometido		numeric;
     v_tipo_sol			varchar;
     v_monto_ejecutar_mo	numeric;
     
@@ -30,12 +33,19 @@ DECLARE
     va_prioridad        integer[];
     
     v_id_estado_actual	integer;
+    v_id_moneda_base   integer;
+    
+    v_sw_verificacion  boolean;
+    v_mensaje_verificacion varchar;
+    v_desc_ingas varchar;
+    v_cont integer;
+    v_respuesta varchar[];
 	
     
 BEGIN
 
 	v_nombre_funcion = 'tes.f_generar_comprobante';
-
+    v_id_moneda_base =  param.f_get_moneda_base();
     --  obtinen datos del plan de pagos
            
            SELECT
@@ -61,7 +71,7 @@ BEGIN
           IF  v_registros.estado != 'borrador' THEN
           
           
-             raise exception 'Solo puede solicitarce el devengado o pago de registros en borrador';
+             raise exception 'Solo puede solicitarce el devengado o pago de registros en borrador, actualice  su interfaz';
           
           
           END IF;
@@ -90,32 +100,80 @@ BEGIN
           
                
           
-          
+          v_sw_verificacion = true;
+          v_mensaje_verificacion ='';
+          v_cont =1;
           
           
           IF v_registros.id_plan_pago_fk is NULL THEN
            
            		v_tipo_sol = 'devengado';
                 
-                --verifica si el presupuesto comprometido sobrante alcanza para pagar el monto de la cuota prorrateada corepondiente al pago
+                --verifica si el presupuesto comprometido sobrante alcanza para pagar el monto de la cuota prorrateada correspondiente al pago
                 
-               /*   --for  v_registro_pro in ( 
-                                 select  * 
-                                 from  tes.tprorrateo 
-                                 where 
+                  FOR  v_registros_pro in ( 
+                                 select  
+                                   pro.id_prorrateo,
+                                   pro.monto_ejecutar_mb,
+                                   pro.monto_ejecutar_mo,
+                                   od.id_partida_ejecucion_com,
+                                   od.descripcion,
+                                   od.id_concepto_ingas
+                                 from  tes.tprorrateo pro
+                                 inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det   
+                                 where  pro.id_plan_pago = p_id_plan_pago
+                                   and pro.estado_reg = 'activo') LOOP
                 
                 
                 
-				SELECT * FROM pre.f_verificar_com_eje_pag(145088, 1);*/
+				        SELECT 
+                               ps_comprometido, 
+                               COALESCE(ps_ejecutado,0)  
+                           into 
+                               v_comprometido,
+                               v_ejecutado
+                        FROM pre.f_verificar_com_eje_pag(v_registros_pro.id_partida_ejecucion_com, v_id_moneda_base);
                 
+                   
+                      --verifica si el presupuesto comprometido sobrante alcanza para devengar
+                      IF  ( v_comprometido - v_ejecutado)  <  v_registros_pro.monto_ejecutar_mb   THEN
+                         
+                         -- raise EXCEPTION  '% - % = % < %',v_comprometido,v_ejecutado,v_comprometido - v_ejecutado, v_registros_pro.monto_ejecutar_mb;
+                    
+                         select 
+                          cig.desc_ingas
+                         into
+                          v_desc_ingas
+                         from  param.tconcepto_ingas cig 
+                         where cig.id_concepto_ingas  = v_registros_pro.id_concepto_ingas;
+                         
+                          --sinc_presupuesto
+                          v_mensaje_verificacion =v_mensaje_verificacion ||v_cont::varchar||') '||v_desc_ingas||'('||  substr(v_registros_pro.descripcion, 0, 15)   ||'...)'||' monto faltante ' || (v_registros_pro.monto_ejecutar_mb - (v_comprometido - v_ejecutado))::varchar||' \n';
+                          v_sw_verificacion=false;
+                          v_cont = v_cont +1;
+                     
+                      END IF;
+                      
+                     
                 
-                
-                
-                --TO DO, generar numero de devengado
-                
-                
-           
-           
+                   END LOOP;
+                  
+                  IF not v_sw_verificacion THEN
+                  
+                     
+                      UPDATE  tes.tplan_pago pp set
+                       sinc_presupuesto = 'si'
+                      where  pp.id_plan_pago=p_id_plan_pago;  
+                      
+                      
+                     v_respuesta[1]='FALSE'; 
+                     v_respuesta[2]='Falta Presupuesto según el siguiente detalle (los montos estan en moneda base) :\n '||v_mensaje_verificacion;
+                     RETURN v_respuesta;
+                  ELSE
+                  
+                  
+                  
+                  END IF;
            
            
            
@@ -126,7 +184,7 @@ BEGIN
            
            		v_tipo_sol = 'pago';
                 
-                --TO DO,  generar numero de pago
+              
            
            END IF;
           
@@ -233,8 +291,9 @@ BEGIN
              where id_plan_pago  = p_id_plan_pago;
   
 
+ v_respuesta[1]= 'TRUE';
 
-RETURN  TRUE;
+RETURN   v_respuesta;
 
 
 

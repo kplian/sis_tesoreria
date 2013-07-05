@@ -38,6 +38,7 @@ class MODProrrateo extends MODbase{
 		$this->captura('usr_mod','varchar');
 		$this->captura('codigo_cc','text');
 		$this->captura('desc_ingas','varchar');
+		$this->captura('descripcion','text');
 		
 		
 		

@@ -103,18 +103,23 @@ BEGIN
            
            
             -- controlar que el monto asignado + el total ya prorrateao no supere el total de la obigacion para este concepto
-          
+            --    RAC, comentamos esta validacion por solo los pagos variables admiten edicion
+            --  y los pagos variables pueden ser menor o mayor el monto estimado inicialmente  
+        
+           /*
              v_monto_registrado=COALESCE(tes.f_determinar_total_prorrateo_faltante( v_parametros.id_obligacion_det, 'registrado'),0);
             
             IF  (v_monto_registrado + COALESCE(v_registros.monto_ejecutar_mo,0))  <  COALESCE(v_parametros.monto_ejecutar_mo,0) THEN
             
-              raise exception 'El monto no puede ser mayor que % para   de este item', v_monto_registrado + v_registros.monto_ejecutar_mo;
-              
+             -- raise exception 'El monto no puede ser mayor que % para   de este item', v_monto_registrado + v_registros.monto_ejecutar_mo;
+            
+            
+            
             ELSE
             
              -- raise exception '   % ,% , %',v_monto_registrado,v_registros.monto_ejecutar_mo,v_parametros.monto_ejecutar_mo;
            
-            END IF;
+            END IF;*/
             
             
             --la suma del prorrateo no puede sobrepasar el monto a ejcutar en la cuota

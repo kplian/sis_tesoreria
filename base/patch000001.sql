@@ -197,6 +197,14 @@ ALTER TABLE tes.tobligacion_det
   
 ALTER TABLE tes.tplan_pago
   ALTER COLUMN tipo_cambio SET DEFAULT 1;  
+  
+--------------- SQL ---------------
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN sinc_presupuesto VARCHAR(2) DEFAULT 'no' NOT NULL;
+
+COMMENT ON COLUMN tes.tplan_pago.sinc_presupuesto
+IS 'este campo indica que falta presupuesto comprometido para realizar el pago, y es necesario incremetar con una sincronizacion';  
 
 /***********************************F-SCP-RAC-TES-0-04/07/2013***************************************/
 

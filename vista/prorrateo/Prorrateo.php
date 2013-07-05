@@ -60,11 +60,26 @@ Phx.vista.Prorrateo=Ext.extend(Phx.gridInterfaz,{
 				maxLength:4
 			},
 			type:'Field',
-			filters:{pfiltro:'desc_ingas',type:'numeric'},
+			filters:{pfiltro:'cig.desc_ingas',type:'numeric'},
 			id_grupo:1,
 			grid:true,
 			form:false
 		},
+        {
+            config:{
+                name: 'descripcion',
+                fieldLabel: 'descripción',
+                allowBlank: false,
+                anchor: '80%',
+                gwidth: 200,
+                maxLength:4
+            },
+            type:'Field',
+            filters:{pfiltro:'od.descripcion',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
 		
         {
             config:{
@@ -210,7 +225,7 @@ Phx.vista.Prorrateo=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_usuario_reg', type: 'numeric'},
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'id_usuario_mod', type: 'numeric'},
-		{name:'usr_reg', type: 'string'},
+		{name:'usr_reg', type: 'string'},'descripcion',
 		{name:'usr_mod', type: 'string'},'codigo_cc','desc_ingas','total_prorrateado'
 		
 	],
