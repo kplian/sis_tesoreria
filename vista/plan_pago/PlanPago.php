@@ -211,6 +211,21 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             id_grupo:1,
             grid:true,
             form:true
+        },
+         {
+            config:{
+                name: 'tipo_cambio',
+                fieldLabel: 'Tipo Cambio',
+                allowBlank: false,
+                anchor: '80%',
+                gwidth: 100,
+                maxLength:131074
+            },
+            type:'NumberField',
+            filters:{pfiltro:'tipo_cambio',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:true
         },{
             config:{
                 name: 'id_plantilla',
@@ -286,20 +301,6 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             id_grupo:1,
             grid:true,
             form:true
-        },
-        {
-            config:{
-                name: 'tipo_cambio',
-                fieldLabel: 'Tip Cambio',
-                allowBlank: false,
-                gwidth: 100,
-                maxLength:1245186
-            },
-            type:'NumberField',
-            filters:{pfiltro:'plapa.tipo_cambio',type:'numeric'},
-            id_grupo:1,
-            grid:true,
-            form:false
         },
         {
             config:{
@@ -850,6 +851,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 this.ocultarComponente(this.cmpObsMontoNoPagado);
                 
                 this.obtenerFaltante('registrado_pagado',data.id_plan_pago);
+                this.Cmp.tipo_cambio.setValue(0);
+                this.Cmp.tipo_cambio.disable();
+                this.ocultarComponente(this.Cmp.tipo_cambio);
+                
             }
             else{
                 if(data.estado!=devengado){
@@ -881,22 +886,24 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                
                 this.cmpTipo.enable();
                 this.mostrarComponente(this.cmpTipo);
-            
-                
-                
-                 
                 this.cmpPlantilla.enable();
                 this.mostrarComponente(this.cmpPlantilla);
-                
                 this.cmpMontoNoPagado.enable();
                 this.mostrarComponente(this.cmpMontoNoPagado);
-                 
                 this.cmpObsMontoNoPagado.enable();
                 this.mostrarComponente(this.cmpObsMontoNoPagado);
-                
-              
-              
                 this.obtenerFaltante('registrado');
+                if(this.maestro.tipo_moneda=='base'){
+                   this.Cmp.tipo_cambio.setValue(1);  
+                   this.Cmp.tipo_cambio.disable();
+                   this.ocultarComponente(this.Cmp.tipo_cambio);
+                }
+                else{
+                    this.Cmp.tipo_cambio.enable();
+                    this.mostrarComponente(this.Cmp.tipo_cambio);
+                    this.Cmp.tipo_cambio.setValue(this.maestro.tipo_cambio_conv);  
+                }
+       
               
                 
            }
@@ -943,6 +950,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 this.ocultarComponente(this.cmpMontoNoPagado);
                 this.cmpObsMontoNoPagado.disable();
                 this.ocultarComponente(this.cmpObsMontoNoPagado);
+                this.Cmp.tipo_cambio.disable();
+                this.ocultarComponente(this.Cmp.tipo_cambio);
          
          
          }
@@ -960,11 +969,23 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                  
                 this.cmpObsMontoNoPagado.enable();
                 this.mostrarComponente(this.cmpObsMontoNoPagado);
+                if(this.maestro.tipo_moneda=='base'){
+                 
+                   this.Cmp.tipo_cambio.disable();
+                   this.ocultarComponente(this.Cmp.tipo_cambio);
+                }
+                else{
+                    this.Cmp.tipo_cambio.enable();
+                    this.mostrarComponente(this.Cmp.tipo_cambio);
+                  
+                }
+                
          }
        
            this.cmpFechaTentativa.disable();
            this.cmpTipo.disable();
            this.cmpTipoPago.disable(); 
+           
        },
     
     obtenerFaltante:function(_filtro,_id_plan_pago){
@@ -1000,36 +1021,14 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             } 
     },
     
-     obtenerTipoCambio:function(){
-         var fecha = this.cmpFechaDev.getValue().dateFormat(this.cmpFechaDev.format);
-         var id_moneda = this.maestro.id_moneda;
-            Phx.CP.loadingShow();
-            Ext.Ajax.request({
-                    // form:this.form.getForm().getEl(),
-                    url:'../../sis_parametros/control/TipoCambio/obtenerTipoCambio',
-                    params:{fecha:fecha,id_moneda:id_moneda},
-                    success:this.successTC,
-                    failure: this.conexionFailure,
-                    timeout:this.timeout,
-                    scope:this
-             });
-        }, 
-    successTC:function(resp){
-       Phx.CP.loadingHide();
-            var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
-            if(!reg.ROOT.error){
-                
-                this.cmpTipoCambio.setValue(reg.ROOT.datos.tipo_cambio);
-            }else{
-                
-                alert('ocurrio al obtener el tipo de Cambio')
-            } 
-    },
-	onReloadPage:function(m){
+    onReloadPage:function(m){
         this.maestro=m;
         this.store.baseParams={id_obligacion_pago:this.maestro.id_obligacion_pago};
+      
+        
+        
         this.load({params:{start:0, limit:this.tam_pag}})
-       
+        this.Cmp.tipo_cambio.setValue(1);  
     },
     
     successSave: function(resp) {

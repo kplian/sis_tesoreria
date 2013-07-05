@@ -38,6 +38,7 @@ DECLARE
     v_monto_ejecutar_total_mo numeric;
     v_tipo varchar;
     v_estado varchar;
+    v_tipo_cambio numeric;
 			    
 BEGIN
 
@@ -136,14 +137,23 @@ BEGIN
           
             END IF;
             
-            
-            
+            --asumimos que el tipo de cambio del pagado es igual al tipo de cambio del devengado
+            --recupera el tipo de cambio del devengado
+              select
+                ppd.tipo_cambio
+              into
+                v_tipo_cambio
+              from tes.tplan_pago ppd
+              inner join tes.tprorrateo pro on pro.id_plan_pago = ppd.id_plan_pago 
+              where pro.id_prorrateo=v_parametros.id_prorrateo;
+                    
             
             
         
 			--Sentencia de la modificacion
 			update tes.tprorrateo set
 			monto_ejecutar_mo = COALESCE(v_parametros.monto_ejecutar_mo,0),
+            monto_ejecutar_mb = round(COALESCE(v_parametros.monto_ejecutar_mo*v_tipo_cambio,0),2),
 			fecha_mod = now(),
 			id_usuario_mod = p_id_usuario
 			where id_prorrateo=v_parametros.id_prorrateo;

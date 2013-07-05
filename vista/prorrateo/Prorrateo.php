@@ -96,6 +96,21 @@ Phx.vista.Prorrateo=Ext.extend(Phx.gridInterfaz,{
 			grid:true,
 			form:true
 		},
+        {
+            config:{
+                name: 'monto_ejecutar_mb',
+                fieldLabel: 'Monto a Ejecutar MB',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 100,
+                maxLength:1245186
+            },
+            type:'NumberField',
+            filters:{pfiltro:'pro.monto_ejecutar_mb',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
 		{
 			config:{
 				name: 'estado_reg',

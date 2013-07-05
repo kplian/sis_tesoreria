@@ -97,9 +97,30 @@ BEGIN
            
            		v_tipo_sol = 'devengado';
                 
+                --verifica si el presupuesto comprometido sobrante alcanza para pagar el monto de la cuota prorrateada corepondiente al pago
+                
+               /*   --for  v_registro_pro in ( 
+                                 select  * 
+                                 from  tes.tprorrateo 
+                                 where 
+                
+                
+                
+				SELECT * FROM pre.f_verificar_com_eje_pag(145088, 1);*/
+                
+                
+                
+                
                 --TO DO, generar numero de devengado
                 
                 
+           
+           
+           
+           
+           
+           
+           
            ELSE
                --VALIDAR QUE nose se salte el orden de los pagos
            

@@ -347,7 +347,8 @@ BEGIN
 			fecha_mod,
 			id_usuario_mod,
             liquido_pagable,
-            fecha_tentativa
+            fecha_tentativa,
+            tipo_cambio
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -376,7 +377,8 @@ BEGIN
 			null,
 			null,
             v_liquido_pagable,
-            v_parametros.fecha_tentativa
+            v_parametros.fecha_tentativa,
+            v_parametros.tipo_cambio
 							
 			)RETURNING id_plan_pago into v_id_plan_pago;
             
@@ -565,7 +567,8 @@ BEGIN
 			fecha_mod,
 			id_usuario_mod,
             liquido_pagable,
-            fecha_tentativa
+            fecha_tentativa,
+            tipo_cambio
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -594,7 +597,8 @@ BEGIN
 			null,
 			null,
             v_liquido_pagable,
-            v_parametros.fecha_tentativa
+            v_parametros.fecha_tentativa,
+            v_parametros.tipo_cambio
 							
 			)RETURNING id_plan_pago into v_id_plan_pago;
             
@@ -669,19 +673,23 @@ BEGIN
            where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
            
            
+           
+           
+           
            select   
             pp.monto,
             pp.estado,
             pp.tipo,
-            pp.id_plan_pago_fk,
-            ppfk.monto_ejecutar_total_mo 
-           
+            pp.id_plan_pago_fk
            into
              v_registros_pp
            from tes.tplan_pago pp 
-           inner join tes.tplan_pago ppfk  on ppfk.id_plan_pago = pp.id_plan_pago_fk
            where pp.estado_reg='activo'
            and  pp.id_plan_pago= v_parametros.id_plan_pago ;
+           
+           
+           
+           
            
            
            IF v_codigo_estado != 'borrador' THEN
@@ -702,7 +710,7 @@ BEGIN
            
            IF v_registros_pp.tipo != 'pagado' THEN
             
-                    --si es un proceso variable, verifica que el registro no sobrepase el total a pagar
+                    --si no es un proceso variable, verifica que el registro no sobrepase el total a pagar
                    
                    IF v_registros.pago_variable='no' THEN
                       v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado');
@@ -720,7 +728,7 @@ BEGIN
                      -- calcula el liquido pagable y el monto a ejecutar presupeustaria mente
                    v_liquido_pagable = COALESCE(v_parametros.monto,0) - COALESCE(v_parametros.monto_no_pagado,0) - COALESCE(v_parametros.otros_descuentos,0);-- - COALESCE(v_parametros.descuento_anticipo,0);
                    v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0) -  COALESCE(v_parametros.monto_no_pagado,0);
-                   
+              
                    IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
                         raise exception ' Ni el  monto a ejecutar   ni el liquido pagable  puede ser menor a cero';
                    END IF;
@@ -729,7 +737,7 @@ BEGIN
            --si es una cuota de pago
            
                     --verifica el el registro que falta por pagar
-                    
+                    raise exception 'es pagado';
                     
                     v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado_pagado', v_registros_pp.id_plan_pago_fk);
                    
@@ -776,7 +784,8 @@ BEGIN
 			monto_no_pagado = v_parametros.monto_no_pagado,
             liquido_pagable=v_liquido_pagable,
 			fecha_mod = now(),
-			id_usuario_mod = p_id_usuario
+			id_usuario_mod = p_id_usuario,
+            tipo_cambio= v_parametros.tipo_cambio
 			where id_plan_pago=v_parametros.id_plan_pago;
             
             --elimina el prorrateo si es automatico

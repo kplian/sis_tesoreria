@@ -113,6 +113,7 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('forma_pago','forma_pago','varchar');
 		$this->setParametro('monto_no_pagado','monto_no_pagado','numeric');
 		$this->setParametro('fecha_tentativa','fecha_tentativa','date');
+		$this->setParametro('tipo_cambio','tipo_cambio','numeric');
 		
 
 		//Ejecuta la instruccion
@@ -152,6 +153,7 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('forma_pago','forma_pago','varchar');
 		$this->setParametro('monto_no_pagado','monto_no_pagado','numeric');
         $this->setParametro('fecha_tentativa','fecha_tentativa','date');
+        $this->setParametro('tipo_cambio','tipo_cambio','numeric');
         
 		//Ejecuta la instruccion
 		$this->armarConsulta();

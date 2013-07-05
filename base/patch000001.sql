@@ -194,6 +194,9 @@ ALTER TABLE tes.tcuenta_bancaria
 
 ALTER TABLE tes.tobligacion_det
   ADD COLUMN revertido_mb NUMERIC(19,2) DEFAULT 0 NOT NULL;
+  
+ALTER TABLE tes.tplan_pago
+  ALTER COLUMN tipo_cambio SET DEFAULT 1;  
 
 /***********************************F-SCP-RAC-TES-0-04/07/2013***************************************/
 
