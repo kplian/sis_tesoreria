@@ -19,6 +19,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		this.init();
 		this.iniciarEventos();
 		this.addButton('SolDevPag',{text:'Solicitar Devengado/Pago',iconCls: 'bpagar',disabled:true,handler:this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente, devengado o pago  '});
+        this.addButton('SincPresu',{text:'Inc. Pres.',iconCls: 'bpagar',disabled:true,handler:this.onBtnSincPresu,tooltip: '<b>Incrementar Presupuesto</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
         
 		
 		 //si la interface es pestanha este código es para iniciar 
@@ -644,7 +645,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		{name:'usr_mod', type: 'string'},
 		'liquido_pagable',
 		{name:'total_pagado', type: 'numeric'},
-		'desc_plantilla','desc_cuenta_bancaria'
+		'desc_plantilla','desc_cuenta_bancaria','sinc_presupuesto'
 		
 	],
 	iniciarEventos:function(){
@@ -1065,12 +1066,20 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
              this.getBoton('del').disable();
              this.getBoton('SolDevPag').disable(); 
           }
+          
+          if(data['sinc_presupuesto']=='si'){
+               this.getBoton('SincPresu').enable();
+          }
+          else{
+               this.getBoton('SincPresu').disable();
+          }
      },
      
       liberaMenu:function(){
         var tb = Phx.vista.PlanPago.superclass.liberaMenu.call(this);
         if(tb){
            this.getBoton('SolDevPag').disable();
+           this.getBoton('SincPresu').disable();
           }
        return tb
     }, 
@@ -1085,6 +1094,21 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		field: 'nro_cuota',
 		direction: 'ASC'
 	},
+	onBtnSincPresu:function()
+        {                   
+            var d= this.sm.getSelected().data;
+            Phx.CP.loadingShow();
+            Ext.Ajax.request({
+                // form:this.form.getForm().getEl(),
+                url:'../../sis_tesoreria/control/PlanPago/sincronizarPresupuesto',
+                params:{id_plan_pago:d.id_plan_pago},
+                success:this.successSinc,
+                failure: this.conexionFailure,
+                timeout:this.timeout,
+                scope:this
+            });     
+      },
+	
     onBtnDevPag:function()
         {                   
             var d= this.sm.getSelected().data;

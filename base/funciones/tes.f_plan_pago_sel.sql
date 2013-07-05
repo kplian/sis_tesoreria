@@ -94,7 +94,8 @@ BEGIN
                         plapa.liquido_pagable,
                         plapa.total_prorrateado,
                         plapa.total_pagado ,                       
-						cb.nombre_institucion ||'' (''||cb.nro_cuenta||'')'' as desc_cuenta_bancaria                        
+						cb.nombre_institucion ||'' (''||cb.nro_cuenta||'')'' as desc_cuenta_bancaria ,
+                        plapa.sinc_presupuesto                      
 						from tes.tplan_pago plapa
                         left join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
 						inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg

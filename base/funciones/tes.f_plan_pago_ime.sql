@@ -1027,7 +1027,7 @@ BEGIN
 	/*********************************    
  	#TRANSACCION:  'TES_SOLDEVPAG_IME'
  	#DESCRIPCION:	Solicitud de devengado o pago
- 	#AUTOR:		admin	
+ 	#AUTOR:		RAC	
  	#FECHA:		10-04-2013 15:43:23
 	***********************************/
 
@@ -1064,12 +1064,31 @@ BEGIN
             
             
             END IF;
-          
-           
-            
-            
-            
+        end;
     
+    /*********************************    
+ 	#TRANSACCION:  'TES_SINPRE_IME'
+ 	#DESCRIPCION:	Incremeta el  presupuesto faltante para la cuota indicada del plan de pagos
+ 	#AUTOR:		rac
+ 	#FECHA:		08-07-2013 15:43:23
+	***********************************/
+
+	elsif(p_transaccion='TES_SINPRE_IME')then
+
+		begin
+         
+           -- verficar presupuesto y comprometer
+           IF not tes.f_gestionar_presupuesto_tesoreria(NULL, p_id_usuario, 'sincronizar_presupuesto',v_parametros.id_plan_pago)  THEN
+                   
+                 raise exception 'Error al comprometer el presupeusto';
+                   
+           END IF;
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','El presupuesto de la cuota del plan de pago fue incrementado exitosamente'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_parametros.id_plan_pago::varchar);
+            
+            --Devuelve la respuesta
+            return v_resp;        
         end;
     
     else

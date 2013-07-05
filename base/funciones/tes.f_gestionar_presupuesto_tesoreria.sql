@@ -3,7 +3,8 @@
 CREATE OR REPLACE FUNCTION tes.f_gestionar_presupuesto_tesoreria (
   p_id_obligacion_pago integer,
   p_id_usuario integer,
-  p_operacion varchar
+  p_operacion varchar,
+  p_id_plan_pago integer = NULL::integer
 )
 RETURNS boolean AS
 $body$
@@ -49,6 +50,8 @@ DECLARE
   
   v_comprometido numeric;
   v_ejecutado    numeric;
+  v_registros_pro record;
+
   
 
   
@@ -177,16 +180,14 @@ BEGIN
                      END IF;
                      
                      
-                       SELECT 
-                               COALESCE(ps_comprometido,0), 
-                               COALESCE(ps_ejecutado,0)  
-                           into 
-                               v_comprometido,
-                               v_ejecutado
-                        FROM pre.f_verificar_com_eje_pag(v_registros.id_partida_ejecucion_com, v_id_moneda_base);
+                     SELECT 
+                             COALESCE(ps_comprometido,0), 
+                             COALESCE(ps_ejecutado,0)  
+                         into 
+                             v_comprometido,
+                             v_ejecutado
+                     FROM pre.f_verificar_com_eje_pag(v_registros.id_partida_ejecucion_com, v_id_moneda_base);
                 
-                     
-                     
                      
                       --armamos los array para enviar a presupuestos          
                     IF v_comprometido != 0 THEN
@@ -230,15 +231,93 @@ BEGIN
       
        ELSEIF p_operacion = 'sincronizar_presupuesto' THEN
        
+          v_i =0;
+           --1) determinar cuanto es el faltante para la cuota ee moneda base, si sobra no hacer nada
+           FOR  v_registros_pro in ( 
+                                 select  
+                                   pro.id_prorrateo,
+                                   pro.monto_ejecutar_mb,
+                                   pro.monto_ejecutar_mo,
+                                   od.id_partida_ejecucion_com,
+                                   od.descripcion,
+                                   od.id_concepto_ingas,
+                                   od.id_partida,
+                                   p.id_presupuesto,
+                                   od.id_obligacion_pago,
+                                   od.id_obligacion_det
+                                 from  tes.tprorrateo pro
+                                 inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det  
+                                 INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = od.id_centro_costo  
+                                 where  pro.id_plan_pago = p_id_plan_pago
+                                   and pro.estado_reg = 'activo') LOOP
+                         v_comprometido=0;
+                         v_ejecutado=0;
+				        
+                         SELECT 
+                               ps_comprometido, 
+                               COALESCE(ps_ejecutado,0)  
+                           into 
+                               v_comprometido,
+                               v_ejecutado
+                        FROM pre.f_verificar_com_eje_pag(v_registros_pro.id_partida_ejecucion_com, v_id_moneda_base);
+                
+                   
+                      --verifica si el presupuesto comprometido sobrante alcanza para devengar
+                      IF  ( v_comprometido - v_ejecutado)  <  v_registros_pro.monto_ejecutar_mb   THEN
+                         
+                         v_aux =  v_registros_pro.monto_ejecutar_mb -  (v_comprometido-v_ejecutado);
+                     
+                         --armamos los array para enviar a presupuestos          
+                            IF v_aux > 0 THEN
+                             
+                                v_i = v_i +1;                
+                                --1.1) armar el array de llamada para comprometer
+                                va_id_presupuesto[v_i] = v_registros_pro.id_presupuesto;
+                                va_id_partida[v_i]= v_registros_pro.id_partida;
+                                va_momento[v_i]	= 2; --el momento 2 con signo positivo es revertir
+                                va_monto[v_i]  = v_aux;  --  con signo positivo significa incremento presupuestario 
+                                va_id_moneda[v_i]  = v_id_moneda_base;
+                                va_id_partida_ejecucion[v_i]= v_registros_pro.id_partida_ejecucion_com;
+                                va_columna_relacion[v_i]= 'id_obligacion_pago';
+                                va_fk_llave[v_i] = v_registros_pro.id_obligacion_pago;
+                                va_id_obligacion_det[v_i]= v_registros_pro.id_obligacion_det;
+                                va_fecha[v_i]=now()::date;
+                           
+                               --1.2) actualizar el incremento en obligacion det 
+                            
+                              update tes.tobligacion_det od set
+                              incrementado_mb = COALESCE(incrementado_mb,0) + v_aux
+                              where  od.id_obligacion_det= v_registros_pro.id_obligacion_det;
+                            
+                            END IF;
+                      
+                      END IF;
+                   END LOOP;
+           
+           --2)  llamar a la funcion de incremeto presupuestario
+           
+               IF v_i > 0 THEN 
+                  
+                  va_resp_ges =  pre.f_gestionar_presupuesto(va_id_presupuesto, 
+                                                             va_id_partida, 
+                                                             va_id_moneda, 
+                                                             va_monto, 
+                                                             va_fecha, --p_fecha
+                                                             va_momento, 
+                                                             va_id_partida_ejecucion,--  p_id_partida_ejecucion 
+                                                             va_columna_relacion, 
+                                                             va_fk_llave);
+              
+                       --quitamos la bandera de sincronizacion del plan de pago
+                       update tes.tplan_pago pp set
+                        sinc_presupuesto = 'no'
+                       where  pp.id_plan_pago =  p_id_plan_pago;
+               
+               END IF;
       
-          -- TO DO revertir presupuesto sobrante
-          raise exception 'revertir presupuesto sobrante que no se ha de pagar, no implementado';  
-       
-       
-       
        ELSE
        
-          raise exception 'Oepracion no implementada';
+          raise exception 'Operación no implementada';
        
        END IF;
    

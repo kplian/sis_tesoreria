@@ -206,6 +206,12 @@ ALTER TABLE tes.tplan_pago
 COMMENT ON COLUMN tes.tplan_pago.sinc_presupuesto
 IS 'este campo indica que falta presupuesto comprometido para realizar el pago, y es necesario incremetar con una sincronizacion';  
 
+ALTER TABLE tes.tobligacion_det
+  ADD COLUMN incrementado_mb NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tobligacion_det.incrementado_mb
+IS 'En este campo se almacenan los incrementos acumulados en el presupeussto comprometido';
+
 /***********************************F-SCP-RAC-TES-0-04/07/2013***************************************/
 
 

@@ -64,6 +64,7 @@ class MODPlanPago extends MODbase{
 		$this->captura('total_prorrateado','numeric');
 		$this->captura('total_pagado','numeric');
         $this->captura('desc_cuenta_bancaria','text');
+        $this->captura('sinc_presupuesto','varchar');    
         
 		
 		//Ejecuta la instruccion
@@ -184,6 +185,23 @@ class MODPlanPago extends MODbase{
         //Definicion de variables para ejecucion del procedimiento
         $this->procedimiento='tes.f_plan_pago_ime';
         $this->transaccion='TES_SOLDEVPAG_IME';
+        $this->tipo_procedimiento='IME';
+                
+        //Define los parametros para la funcion
+        $this->setParametro('id_plan_pago','id_plan_pago','int4');
+
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+    
+    function sincronizarPresupuesto(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.f_plan_pago_ime';
+        $this->transaccion='TES_SINPRE_IME';
         $this->tipo_procedimiento='IME';
                 
         //Define los parametros para la funcion
