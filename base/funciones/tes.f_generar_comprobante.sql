@@ -125,7 +125,8 @@ BEGIN
                                    and pro.estado_reg = 'activo') LOOP
                 
                 
-                
+                        v_comprometido=0;
+                        v_ejecutado=0;
 				        SELECT 
                                ps_comprometido, 
                                COALESCE(ps_ejecutado,0)  
