@@ -80,7 +80,7 @@ BEGIN
                               op.comprometido
                               
                               FROM  tes.tobligacion_pago  op
-                              INNER JOIN tes.tobligacion_det opd  on  opd.id_obligacion_pago = op.id_obligacion_pago
+                              INNER JOIN tes.tobligacion_det opd  on  opd.id_obligacion_pago = op.id_obligacion_pago and opd.estado_reg = 'activo'
                               INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = opd.id_centro_costo 
                               WHERE  
                                      op.id_obligacion_pago = p_id_obligacion_pago
@@ -148,7 +148,8 @@ BEGIN
       
         ELSEIF p_operacion = 'revertir' THEN
        
-       --revierte al revveertir la probacion de la solicitud
+       -- revierte el presupuesto total que se encuentre comprometido
+        
        
            v_i = 0;
           
@@ -166,7 +167,7 @@ BEGIN
                               opd.id_partida_ejecucion_com
                               
                               FROM  tes.tobligacion_pago  op
-                              INNER JOIN tes.tobligacion_det opd  on  opd.id_obligacion_pago = op.id_obligacion_pago
+                              INNER JOIN tes.tobligacion_det opd  on  opd.id_obligacion_pago = op.id_obligacion_pago and opd.estado_reg = 'activo'
                               INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = opd.id_centro_costo 
                               WHERE  
                                      op.id_obligacion_pago = p_id_obligacion_pago
@@ -220,14 +221,7 @@ BEGIN
                                                              va_columna_relacion, 
                                                              va_fk_llave);
                END IF;
-             
-       ELSEIF p_operacion = 'revertir_sobrante' THEN
-       
-      
-          -- TO DO revertir presupuesto sobrante
-          raise exception 'revertir presupuesto sobrante que no se ha de pagar, no implementado';  
-       
-      
+                     
       
        ELSEIF p_operacion = 'sincronizar_presupuesto' THEN
        
@@ -246,7 +240,7 @@ BEGIN
                                    od.id_obligacion_pago,
                                    od.id_obligacion_det
                                  from  tes.tprorrateo pro
-                                 inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det  
+                                 inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det   and od.estado_reg = 'activo'
                                  INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = od.id_centro_costo  
                                  where  pro.id_plan_pago = p_id_plan_pago
                                    and pro.estado_reg = 'activo') LOOP

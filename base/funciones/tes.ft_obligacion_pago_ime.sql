@@ -552,27 +552,7 @@ BEGIN
                   where estado_reg = 'activo'
                   and id_obligacion_det= v_id_obligacion_det;
                   
-                
             
-            
-            
-            
-            
-            
-             ELSEIF  v_codigo_estado = 'en_pago' THEN
-              
-             
-                --  validar que el total del detalle de obligacion
-                --  este pagado y no se tengan pendientes
-               
-               
-                --  si tiene relacionado una cotizacion llama a la funcion de finalizar cotizacion              
-                
-               
-             raise exception 'Falta las valiaciones';
-             
-             
-             
              END IF;
              
              
@@ -629,8 +609,6 @@ BEGIN
            
            END IF;
             
-            
-            
              -- actualiza estado en la solicitud
             
              update tes.tobligacion_pago  set 
@@ -642,10 +620,30 @@ BEGIN
                fecha_mod=now()
              where id_obligacion_pago  = v_parametros.id_obligacion_pago;
         
-        
-            --Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligacion de pago fin de registro'); 
-            v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_parametros.id_obligacion_pago::varchar);
+            -- este verificacion se hace al final por que es necesario
+            -- que la llamada de integracion con endesis quede por ulitmo en caso de acontecer algun error
+            -- el rooback sea efectivo y no afecte la integridad de endesis
+            
+            IF  v_codigo_estado = 'en_pago' THEN
+              
+               --llamar a la funcion de finalizacion de obligacion
+             
+            
+                 IF not tes.f_finalizar_obligacion(v_parametros.id_obligacion_pago, p_id_usuario)  THEN
+                                     
+                    raise exception 'Error al finalizar la obligaón';
+                 else
+                 
+                   --Definicion de la respuesta
+                    v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligacion fue finzalida, y el presupuesto sobrante revertido'); 
+                  END IF;
+             ELSE
+                --Definicion de la respuesta
+              v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligacion de pago fin de registro'); 
+              END IF;
+            
+             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_parametros.id_obligacion_pago::varchar);
+            
               
             --Devuelve la respuesta
             return v_resp;
@@ -683,7 +681,7 @@ BEGIN
         
         
         --------------------------------------------------
-        --REtrocede al estado inmediatamente anterior
+        --Retrocede al estado inmediatamente anterior
         -------------------------------------------------
          IF  v_parametros.operacion = 'cambiar' THEN
                      
