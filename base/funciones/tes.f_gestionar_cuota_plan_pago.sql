@@ -46,6 +46,7 @@ DECLARE
      v_codigo_estado varchar;
      v_id_plan_pago integer;
      v_verficacion  boolean;
+     v_verficacion2  varchar[];
     
 BEGIN
 
@@ -90,7 +91,7 @@ BEGIN
     
      IF  v_registros.id_plan_pago is NULL  THEN
      
-        raise exception 'El comproante no esta relacionado con nigun plan de pagos';
+        raise exception 'El comprobante no esta relacionado con nigun plan de pagos';
      
      END IF;
     
@@ -276,18 +277,16 @@ BEGIN
             --------------------------------------------------
             -- Inserta prorrateo automatico del pago
             ------------------------------------------------
-           IF not ( SELECT * FROM tes.f_prorrateo_plan_pago( v_id_plan_pago,
+            
+           
+             v_verficacion =  tes.f_prorrateo_plan_pago( v_id_plan_pago,
                										 v_registros.id_obligacion_pago, 
                                                      v_registros.pago_variable, 
                                                      v_registros.monto_ejecutar_total_mo,
                                                      p_id_usuario,
-                                                     v_registros.id_plan_pago)) THEN
+                                                     v_registros.id_plan_pago); 
                                                      
-                  
-              raise exception 'Error al prorratear';
-                     
-			END IF;  
-            
+        
             
             --actualiza el total de pagos registrados en el plan de pago padre
              update tes.tplan_pago  pp set 
@@ -298,9 +297,9 @@ BEGIN
               
               -- solicitar negeracion de comprobantes de pago
               
-              v_verficacion = tes.f_generar_comprobante(p_id_usuario, v_id_plan_pago);
+              v_verficacion2 = tes.f_generar_comprobante(p_id_usuario, v_id_plan_pago);
              
-              IF not v_verficacion  THEN
+              IF v_verficacion2[1]='FALSE'  THEN
               
                 raise exception 'Error al generar el comprobante de pago';
               

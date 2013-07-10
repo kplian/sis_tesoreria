@@ -617,17 +617,36 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
         {                   
             var d= this.sm.getSelected().data;
            
+            if(d.estado !='en_pago'){
+            //if(confirm('¿Está seguro de eliminar el registro?')){
             Phx.CP.loadingShow();
             
-            Ext.Ajax.request({
-                // form:this.form.getForm().getEl(),
-                url:'../../sis_tesoreria/control/ObligacionPago/finalizarRegistro',
-                params:{id_obligacion_pago:d.id_obligacion_pago,operacion:'fin_registro'},
-                success:this.successSinc,
-                failure: this.conexionFailure,
-                timeout:this.timeout,
-                scope:this
-            });     
+                Ext.Ajax.request({
+                    // form:this.form.getForm().getEl(),
+                    url:'../../sis_tesoreria/control/ObligacionPago/finalizarRegistro',
+                    params:{id_obligacion_pago:d.id_obligacion_pago,operacion:'fin_registro'},
+                    success:this.successSinc,
+                    failure: this.conexionFailure,
+                    timeout:this.timeout,
+                    scope:this
+                }); 
+            
+            }
+            else{
+                if(d.estado =='en_pago'){
+                    if(confirm('¿Está seguro finalizar la obligacion?. \n Esta acción no  puede revertirse')){
+                            Ext.Ajax.request({
+                            // form:this.form.getForm().getEl(),
+                            url:'../../sis_tesoreria/control/ObligacionPago/finalizarRegistro',
+                            params:{id_obligacion_pago:d.id_obligacion_pago,operacion:'fin_registro'},
+                            success:this.successSinc,
+                            failure: this.conexionFailure,
+                            timeout:this.timeout,
+                            scope:this
+                        }); 
+                     }
+                } 
+           }  
       }, 
      successSinc:function(resp){
             Phx.CP.loadingHide();

@@ -102,34 +102,42 @@ BEGIN
           --  si tiene relacionado una cotizacion, se llama a la funcion de finalizar cotizacion              
           IF v_registros_obli.tipo_obligacion ='adquisiciones' THEN      
            
-             select 
-            	 co.id_cotizacion
-             into
-               	 v_id_cotizacion
-             from adq.tcotizacion co
-             where co.id_obligacion_pago = p_id_obligacion_pago;
+                 select 
+                     co.id_cotizacion
+                 into
+                     v_id_cotizacion
+                 from adq.tcotizacion co
+                 where co.id_obligacion_pago = p_id_obligacion_pago;
+                 
+                 IF v_id_cotizacion is NULL THEN
+                 
+                    raise exception  'No existe relacion con ninguna cotizacion en adquisiciones.';
+                 
+                 END IF;
+                 
+                 
+                 IF not adq.f_finalizar_cotizacion(v_id_cotizacion, p_id_usuario)  THEN
+                                     
+                    raise exception 'Error al finalizar la cotización';
+                                     
+                 END IF;
+                 
+                 /*
+                 Si es un pago de adquisiciciones el presupuesto se revierte al finalizar el proceso
+                 esto debido a que un mismo id_partida ejecucion puede pertenecer a diferentes cotizaciones
+                 al revertir el presupuesto de una desde tesoreria,  afectaria al presupuesto del otro
+                 */
              
-             IF v_id_cotizacion is NULL THEN
-             
-                raise exception  'No existe relacion con ninguna cotizacion en adquisiciones.';
-             
-             END IF;
-             
-             
-             IF not adq.f_finalizar_cotizacion(v_id_cotizacion, p_id_usuario)  THEN
-                                 
-                raise exception 'Error al finalizar la cotización';
-                                 
-             END IF;
       
-          END IF;
-         --se revierte el presupeusto  sobrante si existe
-         IF not tes.f_gestionar_presupuesto_tesoreria(p_id_obligacion_pago, p_id_usuario, 'revertir')  THEN
-                                 
-             raise exception 'Error al revertir el presupuesto';
-                                 
-         END IF;
-      
+         ELSE
+               --si no es de adquisiciones
+               --se revierte el presupeusto  sobrante si existe
+               IF not tes.f_gestionar_presupuesto_tesoreria(p_id_obligacion_pago, p_id_usuario, 'revertir')  THEN
+                                       
+                   raise exception 'Error al revertir el presupuesto';
+                                       
+               END IF;
+       END IF;
       
 
 RETURN   v_respuesta;
