@@ -164,7 +164,7 @@ BEGIN
            
           -- calcula el liquido pagable y el monsto a ejecutar presupeustaria mente
            
-           v_liquido_pagable = COALESCE(v_parametros.monto,0) - COALESCE(v_parametros.monto_no_pagado,0) - COALESCE(v_parametros.otros_descuentos,0); -- - COALESCE(v_parametros.descuento_anticipo,0);
+           v_liquido_pagable = COALESCE(v_parametros.monto,0) - COALESCE(v_parametros.monto_no_pagado,0) - COALESCE(v_parametros.otros_descuentos,0) - COALESCE(v_parametros.monto_retgar_mo,0);
            v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0) -  COALESCE(v_parametros.monto_no_pagado,0);
           
           
@@ -348,7 +348,8 @@ BEGIN
 			id_usuario_mod,
             liquido_pagable,
             fecha_tentativa,
-            tipo_cambio
+            tipo_cambio,
+            monto_retgar_mo
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -378,7 +379,8 @@ BEGIN
 			null,
             v_liquido_pagable,
             v_parametros.fecha_tentativa,
-            v_parametros.tipo_cambio
+            v_parametros.tipo_cambio,
+            v_parametros.monto_retgar_mo
 							
 			)RETURNING id_plan_pago into v_id_plan_pago;
             
@@ -505,7 +507,7 @@ BEGIN
           
           --TO DO, agregar monto por retencion de garantia, agregar el monto por retencion de anticipo
            
-           v_liquido_pagable = COALESCE(v_parametros.monto,0)  - COALESCE(v_parametros.otros_descuentos,0)   ; -- - COALESCE(v_parametros.descuento_anticipo,0);
+           v_liquido_pagable = COALESCE(v_parametros.monto,0)  - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0);
            v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0);
           
           
@@ -568,7 +570,8 @@ BEGIN
 			id_usuario_mod,
             liquido_pagable,
             fecha_tentativa,
-            tipo_cambio
+            tipo_cambio,
+            monto_retgar_mo
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -598,7 +601,8 @@ BEGIN
 			null,
             v_liquido_pagable,
             v_parametros.fecha_tentativa,
-            v_parametros.tipo_cambio
+            v_parametros.tipo_cambio,
+             v_parametros.monto_retgar_mo
 							
 			)RETURNING id_plan_pago into v_id_plan_pago;
             
@@ -726,7 +730,7 @@ BEGIN
                 
                    
                      -- calcula el liquido pagable y el monto a ejecutar presupeustaria mente
-                   v_liquido_pagable = COALESCE(v_parametros.monto,0) - COALESCE(v_parametros.monto_no_pagado,0) - COALESCE(v_parametros.otros_descuentos,0);-- - COALESCE(v_parametros.descuento_anticipo,0);
+                   v_liquido_pagable = COALESCE(v_parametros.monto,0) - COALESCE(v_parametros.monto_no_pagado,0) - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0);
                    v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0) -  COALESCE(v_parametros.monto_no_pagado,0);
               
                    IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
@@ -751,7 +755,7 @@ BEGIN
                     --  en cuota de pago el monoto no pagado no se considera
                     --TO DO,  mas delante es necesario considerar la retencon por garantia y por anticipos 
                    
-                   v_liquido_pagable = COALESCE(v_parametros.monto,0)  - COALESCE(v_parametros.otros_descuentos,0);-- - COALESCE(v_parametros.descuento_anticipo,0);
+                   v_liquido_pagable = COALESCE(v_parametros.monto,0)  - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0);
                    v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0);
                    
                    IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
@@ -785,7 +789,8 @@ BEGIN
             liquido_pagable=v_liquido_pagable,
 			fecha_mod = now(),
 			id_usuario_mod = p_id_usuario,
-            tipo_cambio= v_parametros.tipo_cambio
+            tipo_cambio= v_parametros.tipo_cambio,
+            monto_retgar_mo= v_parametros.monto_retgar_mo
 			where id_plan_pago=v_parametros.id_plan_pago;
             
             --elimina el prorrateo si es automatico

@@ -78,7 +78,8 @@ BEGIN
       pp.tipo_cambio,
       pp.tipo_pago,
       pp.fecha_tentativa,
-      pp.otros_descuentos
+      pp.otros_descuentos,
+      pp.monto_retgar_mo
       into
       v_registros
       from  tes.tplan_pago pp
@@ -244,7 +245,8 @@ BEGIN
                         monto,
                         otros_descuentos,
                         monto_ejecutar_total_mo,
-                        liquido_pagable
+                        liquido_pagable,
+                        monto_retgar_mo
                        
                       ) 
                       VALUES (
@@ -269,7 +271,8 @@ BEGIN
                         v_registros.monto_ejecutar_total_mo,  --monto
                         v_registros.otros_descuentos,
                         v_registros.monto_ejecutar_total_mo,
-                        v_registros.liquido_pagable
+                        v_registros.liquido_pagable,
+                        v_registros.monto_retgar_mo
                        
                       )RETURNING id_plan_pago into v_id_plan_pago;
                     
