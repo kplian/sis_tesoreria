@@ -64,7 +64,9 @@ class MODPlanPago extends MODbase{
 		$this->captura('total_prorrateado','numeric');
 		$this->captura('total_pagado','numeric');
         $this->captura('desc_cuenta_bancaria','text');
-        $this->captura('sinc_presupuesto','varchar');    
+        $this->captura('sinc_presupuesto','varchar'); 
+        $this->captura('monto_retgar_mb','numeric');
+        $this->captura('monto_retgar_mo','numeric');   
         
 		
 		//Ejecuta la instruccion
@@ -115,6 +117,7 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('monto_no_pagado','monto_no_pagado','numeric');
 		$this->setParametro('fecha_tentativa','fecha_tentativa','date');
 		$this->setParametro('tipo_cambio','tipo_cambio','numeric');
+		$this->setParametro('monto_retgar_mo','monto_retgar_mo','numeric');
 		
 
 		//Ejecuta la instruccion
@@ -155,6 +158,7 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('monto_no_pagado','monto_no_pagado','numeric');
         $this->setParametro('fecha_tentativa','fecha_tentativa','date');
         $this->setParametro('tipo_cambio','tipo_cambio','numeric');
+        $this->setParametro('monto_retgar_mo','monto_retgar_mo','numeric');
         
 		//Ejecuta la instruccion
 		$this->armarConsulta();

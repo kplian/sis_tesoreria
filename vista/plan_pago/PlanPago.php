@@ -335,6 +335,23 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:true
         },*/
+       
+       {
+            config:{
+                name: 'monto_retgar_mo',
+                currencyChar:' ',
+                fieldLabel: 'Ret. Garantia',
+                allowBlank: true,
+                allowNegative:false,
+                gwidth: 100,
+                maxLength:1245186
+            },
+            type:'MoneyField',
+            filters:{pfiltro:'plapa.monto_retgar_mo',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
         {
             config:{
                 name: 'monto_no_pagado',
@@ -645,6 +662,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		{name:'usr_mod', type: 'string'},
 		'liquido_pagable',
 		{name:'total_pagado', type: 'numeric'},
+		{name:'monto_retgar_mo', type: 'numeric'},
 		'desc_plantilla','desc_cuenta_bancaria','sinc_presupuesto'
 		
 	],
@@ -679,6 +697,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         //this.cmpDescuentoAnticipo.on('change',this.calculaMontoPago,this);
         this.cmpMontoNoPagado.on('change',this.calculaMontoPago,this);
         this.cmpOtrosDescuentos.on('change',this.calculaMontoPago,this);
+        this.Cmp.monto_retgar_mo.on('change',this.calculaMontoPago,this);
+        
         
         this.cmpTipo.on('change',function(groupRadio,radio){
                                 this.enableDisable(radio.inputValue);
@@ -748,8 +768,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
      
     
     calculaMontoPago:function(){
-        this.cmpLiquidoPagable.setValue(this.cmpMonto.getValue()  -  this.cmpMontoNoPagado.getValue() -  this.cmpOtrosDescuentos.getValue());
-        this.cmpMontoEjecutarTotalMo.setValue(this.cmpMonto.getValue()  -  this.cmpMontoNoPagado.getValue());
+        var liquido = this.cmpMonto.getValue()  -  this.cmpMontoNoPagado.getValue() -  this.cmpOtrosDescuentos.getValue() - this.Cmp.monto_retgar_mo.getValue()
+        this.cmpLiquidoPagable.setValue(liquido>0?liquido:0);
+        var eje = this.cmpMonto.getValue()  -  this.cmpMontoNoPagado.getValue()
+        this.cmpMontoEjecutarTotalMo.setValue(eje>0?eje:0);
      },
      
      enableDisable:function(val){
@@ -784,6 +806,12 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             this.habilitarDescuentos();
             
          }
+          this.cmpMontoNoPagado.setValue(0);
+          this.cmpOtrosDescuentos.setValue(0);
+          this.cmpLiquidoPagable.setValue(0);
+          this.cmpMontoEjecutarTotalMo.setValue(0);
+          this.Cmp.monto_retgar_mo.setValue(0);
+          this.calculaMontoPago()
          
      },
      
@@ -792,6 +820,11 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         //this.mostrarComponente(this.cmpDescuentoAnticipo);
         this.cmpOtrosDescuentos.enable();
         this.mostrarComponente(this.cmpOtrosDescuentos);
+        
+        this.Cmp.monto_retgar_mo.enable();
+        this.mostrarComponente(this.Cmp.monto_retgar_mo);
+        
+        
         
         //this.cmpObsDescuentoAnticipo.enable();
         //this.mostrarComponente(this.cmpObsDescuentoAnticipo);
@@ -804,6 +837,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
        // this.ocultarComponente(this.cmpDescuentoAnticipo);
         this.cmpOtrosDescuentos.disable();
         this.ocultarComponente(this.cmpOtrosDescuentos);
+        
+        this.Cmp.monto_retgar_mo.disable();
+        this.ocultarComponente(this.Cmp.monto_retgar_mo);
+        
         
          
         //this.cmpObsDescuentoAnticipo.disable();
@@ -918,6 +955,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             this.cmpOtrosDescuentos.setValue(0);
             this.cmpLiquidoPagable.setValue(0);
             this.cmpMontoEjecutarTotalMo.setValue(0);
+            this.Cmp.monto_retgar_mo.setValue(0);
             this.cmpLiquidoPagable.disable();
             this.cmpMontoEjecutarTotalMo.disable();
       },

@@ -212,6 +212,21 @@ ALTER TABLE tes.tobligacion_det
 COMMENT ON COLUMN tes.tobligacion_det.incrementado_mb
 IS 'En este campo se almacenan los incrementos acumulados en el presupeussto comprometido';
 
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN monto_retgar_mo NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tplan_pago.monto_retgar_mo
+IS 'Aqui se almacenea el monto qeu se retrendra por concepto de garantia';
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN monto_retgar_mb NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tplan_pago.monto_retgar_mb
+IS 'conto de retencion de garantia en moneda base';
+
+
 /***********************************F-SCP-RAC-TES-0-04/07/2013***************************************/
 
 

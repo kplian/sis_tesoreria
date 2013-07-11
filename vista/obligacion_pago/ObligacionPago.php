@@ -314,8 +314,8 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 			type:'NumberField',
 			filters:{pfiltro:'obpg.porc_retgar',type:'numeric'},
 			id_grupo:1,
-			grid:true,
-			form:true
+			grid:false,
+			form:false
 		},
         {
             config:{
@@ -463,7 +463,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 	    this.cmpTipoCambioConv=this.getComponente('tipo_cambio_conv');
 	    
 	   // this.cmpPorcAnticipo=this.getComponente('porc_anticipo');
-	    this.cmpPorcRetgar=this.getComponente('porc_retgar');
+	   // this.cmpPorcRetgar=this.getComponente('porc_retgar');
 		
 		this.ocultarComponente(this.cmpProveedor);
 		this.ocultarComponente(this.cmpFuncionario);
@@ -550,7 +550,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
     onButtonNew:function(){
         Phx.vista.ObligacionPago.superclass.onButtonNew.call(this);
         //this.cmpPorcAnticipo.setValue(0);
-        this.cmpPorcRetgar.setValue(0);
+        //this.cmpPorcRetgar.setValue(0);
        
         this.ocultarComponente(this.cmpProveedor);
         this.ocultarComponente(this.cmpFuncionario);
