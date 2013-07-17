@@ -30,6 +30,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
           });
           
         this.addButton('fin_registro',{text:'Fin Reg.',iconCls: 'badelante',disabled:true,handler:this.fin_registro,tooltip: '<b>Finalizar</b><p>Finalizar registro de cotización</p>'});
+        this.addButton('reporte_com_ejec_pag',{text:'Rep.',iconCls: 'bpdf32',disabled:true,handler:this.repComEjePag,tooltip: '<b>Reporte</b><p>Reporte Obligacion de Pago</p>'});
           this.TabPanelSouth.get(1).disable()
 	
 	
@@ -449,6 +450,20 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		direction: 'ASC'
 	},
 	
+	repComEjePag: function(){
+            var rec = this.sm.getSelected();        
+            if(rec){
+                Phx.CP.loadWindows('../../../sis_tesoreria/vista/obligacion_pago/ReporteComEjePag.php',
+                        'Reporte de Obligacion',
+                        {
+                            width:400,
+                            height:200
+                        },
+                        rec.data,this.idContenedor,'ReporteComEjePag')
+           }
+        },
+
+	
 	iniciarEventos:function()
 	{
 		
@@ -705,6 +720,11 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                     this.TabPanelSouth.get(1).enable()
                     this.getBoton('ant_estado').enable();
                     this.getBoton('fin_registro').enable();
+                    this.getBoton('reporte_com_ejec_pag').enable();
+                }
+                
+                if (data['estado']=='finalizado'){
+              						this.getBoton('reporte_com_ejec_pag').enable();
                 }
                 
                 if (data['estado']== 'anulado'){
@@ -724,7 +744,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
         if(tb){
             this.getBoton('fin_registro').disable();
              this.getBoton('ant_estado').disable();
-           
+             this.getBoton('reporte_com_ejec_pag').disable();
 
         }
        this.TabPanelSouth.get(1).disable();

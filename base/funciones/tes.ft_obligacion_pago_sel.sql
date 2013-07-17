@@ -32,7 +32,8 @@ DECLARE
     v_filadd 			varchar;
     va_id_depto 		integer[];
     v_obligaciones      record;
-			    
+    v_obligaciones_partida	record;
+    v_respuesta_verificar	record;
 BEGIN
 
 	v_nombre_funcion = 'tes.ft_obligacion_pago_sel';
@@ -224,7 +225,122 @@ BEGIN
 			return v_consulta;
 
 		end;
-					
+    
+     /*********************************    
+ 	#TRANSACCION:  'TES_OBPGSEL_SEL'
+ 	#DESCRIPCION:	Reporte de Obligacion Seleccionado
+ 	#AUTOR:		Gonzalo Sarmiento Sejas	
+ 	#FECHA:		17-07-2013 16:01:32
+	***********************************/
+
+	elsif(p_transaccion='TES_OBPGSEL_SEL')then
+      begin
+      	v_consulta:='select
+						obpg.id_obligacion_pago,
+						obpg.id_proveedor,
+                        pv.desc_proveedor,
+						obpg.estado,
+						obpg.tipo_obligacion,
+						obpg.id_moneda,
+                        mn.moneda,
+						obpg.obs,
+						obpg.porc_retgar,
+						obpg.id_subsistema,
+                        ss.nombre as nombre_subsistema,
+						obpg.porc_anticipo,
+						obpg.id_depto,
+                        dep.nombre as nombre_depto,
+						obpg.num_tramite,
+                        obpg.fecha,
+                        obpg.numero,
+                        obpg.tipo_cambio_conv,
+                        obpg.comprometido,
+                        obpg.nro_cuota_vigente,
+                        mn.tipo_moneda,
+                        obpg.pago_variable
+						from tes.tobligacion_pago obpg
+                        inner join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
+                        inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
+                        inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
+						inner join param.tdepto dep on dep.id_depto=obpg.id_depto
+                        where obpg.id_obligacion_pago='||v_parametros.id_obligacion_pago||'';
+  
+            --Definicion de la respuesta
+			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+
+			--Devuelve la respuesta
+			return v_consulta;
+      end;    
+    
+     /*********************************    
+ 	#TRANSACCION:  'TES_COMEJEPAG_SEL'
+ 	#DESCRIPCION:	Reporte de Comprometido Ejecutado Pagado
+ 	#AUTOR:		Gonzalo Sarmiento Sejas	
+ 	#FECHA:		17-07-2013 16:01:32
+	***********************************/
+
+	elsif(p_transaccion='TES_COMEJEPAG_SEL')then
+        begin
+    		--Sentencia de la consulta
+            create temp table obligaciones(
+        	id_obligacion_det 	integer,
+                id_partida			integer,
+                nombre_partida		text,
+                id_concepto_ingas	integer,
+                nombre_ingas			text,
+                id_obligacion_pago	integer,
+                id_centro_costo		integer,
+                codigo_cc			text,
+                id_partida_ejecucion_com	integer,
+                descripcion			text,
+                comprometido		numeric DEFAULT 0.00,
+                ejecutado			numeric DEFAULT 0.00,
+                pagado				numeric DEFAULT 0.00
+        ) on commit drop;
+            
+            insert into obligaciones (id_obligacion_det,id_partida,nombre_partida,
+            						id_concepto_ingas,nombre_ingas,id_obligacion_pago,
+                                    id_centro_costo, codigo_cc, id_partida_ejecucion_com,
+                                    descripcion)
+            select
+                obdet.id_obligacion_det,
+                obdet.id_partida,
+                par.nombre_partida||'-('||par.codigo||')' as nombre_partida,
+                obdet.id_concepto_ingas,
+                cig.desc_ingas||'-('||cig.movimiento||')' as nombre_ingas,
+                obdet.id_obligacion_pago,
+                obdet.id_centro_costo,
+                cc.codigo_cc,
+                obdet.id_partida_ejecucion_com,
+                obdet.descripcion
+                from tes.tobligacion_det obdet
+                inner join segu.tusuario usu1 on usu1.id_usuario = obdet.id_usuario_reg
+                left join segu.tusuario usu2 on usu2.id_usuario = obdet.id_usuario_mod
+                left join conta.tcuenta cta on cta.id_cuenta=obdet.id_cuenta
+                left join pre.tpartida par on par.id_partida=obdet.id_partida
+                left join conta.tauxiliar aux on aux.id_auxiliar=obdet.id_auxiliar
+                left join param.tconcepto_ingas cig on cig.id_concepto_ingas=obdet.id_concepto_ingas
+                left join param.vcentro_costo cc on cc.id_centro_costo=obdet.id_centro_costo
+                where obdet.id_obligacion_pago=v_parametros.id_obligacion_pago;
+
+			FOR v_obligaciones_partida in (select * from obligaciones)
+       	    LOOP
+            	v_respuesta_verificar = pre.f_verificar_com_eje_pag(v_obligaciones_partida.id_partida_ejecucion_com,v_parametros.id_moneda);
+
+            	update obligaciones set
+                comprometido = COALESCE(v_respuesta_verificar.ps_comprometido,0.00::numeric),
+                ejecutado = COALESCE(v_respuesta_verificar.ps_ejecutado,0.00::numeric),
+                pagado = COALESCE(v_respuesta_verificar.ps_pagado,0.00::numeric) 
+                where obligaciones.id_obligacion_det=v_obligaciones_partida.id_obligacion_det;
+                        
+        	END LOOP;
+            
+            v_consulta:='select * from obligaciones';
+            
+			--Devuelve la respuesta
+			return v_consulta;
+						
+		end;		
 	else
 					     
 		raise exception 'Transaccion inexistente';
@@ -242,7 +358,7 @@ EXCEPTION
 END;
 $body$
 LANGUAGE 'plpgsql'
-STABLE
+VOLATILE
 CALLED ON NULL INPUT
 SECURITY INVOKER
 COST 100;

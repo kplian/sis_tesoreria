@@ -216,5 +216,76 @@ class MODObligacionPago extends MODbase{
 					return $this->respuesta;
 				}
 				
+				function obligacionPagoSeleccionado(){
+					$this->procedimiento='tes.ft_obligacion_pago_sel';
+					$this->transaccion = 'TES_OBPGSEL_SEL';
+					$this->tipo_procedimiento = 'SEL';
+					$this->setCount(false);
+					
+					$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
+					
+					//Definicion de la lista del resultado del query
+					$this->captura('id_obligacion_pago','int4');
+					$this->captura('id_proveedor','int4');
+					$this->captura('desc_proveedor','varchar');
+					$this->captura('estado','varchar');
+					$this->captura('tipo_obligacion','varchar');
+					$this->captura('id_moneda','int4');
+					$this->captura('moneda','varchar');
+					$this->captura('obs','varchar');
+					$this->captura('porc_retgar','numeric');
+					$this->captura('id_subsistema','int4');
+					$this->captura('nombre_subsistema','varchar');
+					$this->captura('porc_anticipo','numeric');
+					$this->captura('id_depto','int4');
+					$this->captura('nombre_depto','varchar');
+					$this->captura('num_tramite','varchar');
+					$this->captura('fecha','date');
+					$this->captura('numero','varchar');
+					$this->captura('tipo_cambio_conv','numeric');
+					$this->captura('comprometido','varchar');
+					$this->captura('nro_cuota_vigente','numeric');
+					$this->captura('tipo_moneda','varchar');
+					$this->captura('pago_variable','varchar');
+					
+					//Ejecuta la instruccion
+					$this->armarConsulta();
+					$this->ejecutarConsulta();
+					
+					//Devuelve la respuesta
+					return $this->respuesta;
+					
+				}
+				
+				function listarObligacion(){
+					//Definicion de variables para ejecucion del procedimientp
+					$this->procedimiento='tes.ft_obligacion_pago_sel';
+					$this->transaccion='TES_COMEJEPAG_SEL';
+					$this->tipo_procedimiento='SEL';//tipo de transaccion
+					$this->setCount(false);
+					
+					$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
+					$this->setParametro('id_moneda','id_moneda','int4');
+					//Definicion de la lista del resultado del query
+					$this->captura('id_obligacion_det','int4');
+					$this->captura('id_partida','int4');
+					$this->captura('nombre_partida','text');
+					$this->captura('id_concepto_ingas','int4');
+					$this->captura('nombre_ingas','text');
+					$this->captura('id_obligacion_pago','int4');
+					$this->captura('id_centro_costo','int4');
+					$this->captura('codigo_cc','text');
+					$this->captura('id_partida_ejecucion_com','int4');
+					$this->captura('descripcion','text');
+					$this->captura('comprometido','numeric');
+					$this->captura('ejecutado','numeric');
+					$this->captura('pagado','numeric');
+					
+					//Ejecuta la instruccion
+					$this->armarConsulta();
+					$this->ejecutarConsulta();
+					//Devuelve la respuesta
+					return $this->respuesta;
+				}
 }
 ?>
