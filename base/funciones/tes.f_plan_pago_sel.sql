@@ -46,9 +46,6 @@ BEGIN
      				
     	begin
         
-          
-        
-        
     		--Sentencia de la consulta
 			v_consulta:='select
 						plapa.id_plan_pago,
@@ -116,6 +113,133 @@ BEGIN
 						
 		end;
 
+	/*********************************    
+ 	#TRANSACCION:  'TES_PLAPAOB_SEL'
+ 	#DESCRIPCION:	Consulta de datos
+ 	#AUTOR:		Gonzalo Sarmiento Sejas	
+ 	#FECHA:		18-07-2013 15:43:23
+	***********************************/
+
+	elsif(p_transaccion='TES_PLAPAOB_SEL')then
+     				
+    	begin
+        
+    		--Sentencia de la consulta
+			v_consulta:='select
+						plapa.id_plan_pago,
+						plapa.nro_cuota,
+						plapa.monto_ejecutar_total_mb,
+						plapa.nro_sol_pago,
+						plapa.tipo_cambio,
+						plapa.fecha_pag,
+						plapa.fecha_dev,
+						plapa.estado,
+						plapa.tipo_pago,
+						plapa.monto_ejecutar_total_mo,
+						plapa.descuento_anticipo_mb,
+						plapa.obs_descuentos_anticipo,
+						plapa.id_plan_pago_fk,
+						plapa.descuento_anticipo,
+						plapa.otros_descuentos,
+						plapa.tipo,
+						plapa.obs_monto_no_pagado,
+						plapa.obs_otros_descuentos,
+						plapa.monto,
+						plapa.nombre_pago,
+						plapa.monto_no_pagado_mb,
+						plapa.monto_mb,
+						plapa.otros_descuentos_mb,
+						plapa.forma_pago,
+						plapa.monto_no_pagado,
+                        plapa.fecha_tentativa,
+                        pla.desc_plantilla,
+                        plapa.liquido_pagable,
+                        plapa.total_prorrateado,
+                        plapa.total_pagado ,                       
+						cb.nombre_institucion ||'' (''||cb.nro_cuenta||'')'' as desc_cuenta_bancaria ,
+                        plapa.sinc_presupuesto ,
+                        plapa.monto_retgar_mb,
+                        plapa.monto_retgar_mo                                             
+						from tes.tplan_pago plapa
+                        left join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
+						inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
+                        left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = plapa.id_cuenta_bancaria
+                        left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
+                       where  plapa.estado_reg=''activo''  and plapa.id_obligacion_pago='||v_parametros.id_obligacion_pago||' and ';
+			
+			--Definicion de la respuesta
+			v_consulta:=v_consulta||v_parametros.filtro;
+			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+
+             raise notice '%',v_consulta;
+
+			--Devuelve la respuesta
+			return v_consulta;
+						
+		end;
+        
+   	/*********************************    
+ 	#TRANSACCION:  'TES_PLAPAREP_SEL'
+ 	#DESCRIPCION:	Consulta para reporte plan de pagos
+ 	#AUTOR:		Gonzalo Sarmiento Sejas	
+ 	#FECHA:		19-07-2013 15:43:23
+	***********************************/
+
+	elsif(p_transaccion='TES_PLAPAREP_SEL')then
+     				
+    	begin
+        
+    		--Sentencia de la consulta
+              v_consulta:='select 
+              		  pg.estado,
+              		  op.numero as numero_oc,
+                      pv.desc_proveedor as proveedor,
+                      pg.nro_cuota as nro_cuota,
+                      pg.fecha_dev as fecha_devengado	,
+                      pg.fecha_pag as fecha_pago,
+                      pg.forma_pago as forma_pago,
+                      pg.tipo_pago as tipo_pago,
+                      pm.nombre as modalidad,
+                      mon.moneda as moneda,
+                      op.tipo_cambio_conv as tipo_cambio,
+                      pg.monto as importe,
+                      pg.monto_no_pagado as monto_no_pagado,
+                      pg.otros_descuentos as otros_descuentos,
+                      pg.monto_ejecutar_total_mo as monto_ejecutado_total,
+                      pg.liquido_pagable as liquido_pagable,
+                      pg.total_pagado as total_pagado,
+                      pg.fecha_reg,
+                      vcc.nombre_uo,
+                      vcc.nombre_programa,
+                      vcc.nombre_regional,
+                      vcc.nombre_proyecto,
+                      vcc.nombre_financiador,        
+                      vcc.nombre_actividad,
+                      par.nombre_partida,
+                      op.total_pago    
+              from tes.tplan_pago pg
+              inner join tes.tobligacion_pago op on op.id_obligacion_pago=pg.id_obligacion_pago
+              left join adq.tcotizacion cot on cot.numero_oc=op.numero
+              left join wf.tproceso_wf pw on pw.id_proceso_wf=cot.id_proceso_wf
+              left join wf.ttipo_proceso tp on tp.id_tipo_proceso=pw.id_tipo_proceso
+              left join wf.tproceso_macro pm on pm.id_proceso_macro=tp.id_proceso_macro
+              inner join param.vproveedor pv on pv.id_proveedor=op.id_proveedor
+              left join tes.tcuenta_bancaria cta on cta.id_cuenta_bancaria=pg.id_cuenta_bancaria
+              inner join param.tmoneda mon on mon.id_moneda=op.id_moneda              
+              inner join tes.tobligacion_det obd on obd.id_obligacion_det=op.id_obligacion_pago
+              inner join param.vcentro_costo vcc on vcc.id_centro_costo=obd.id_centro_costo
+              inner join pre.tpartida par on par.id_partida = obd.id_partida
+              where pg.id_plan_pago='||v_parametros.id_plan_pago||' and ';
+			
+			--Definicion de la respuesta
+			v_consulta:=v_consulta||v_parametros.filtro;
+			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+
+			--Devuelve la respuesta
+			return v_consulta;
+						
+		end;
+    
 	/*********************************    
  	#TRANSACCION:  'TES_PLAPA_CONT'
  	#DESCRIPCION:	Conteo de registros

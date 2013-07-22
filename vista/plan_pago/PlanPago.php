@@ -19,8 +19,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		this.init();
 		this.iniciarEventos();
 		this.addButton('SolDevPag',{text:'Solicitar Devengado/Pago',iconCls: 'bpagar',disabled:true,handler:this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente, devengado o pago  '});
-        this.addButton('SincPresu',{text:'Inc. Pres.',iconCls: 'balert',disabled:true,handler:this.onBtnSincPresu,tooltip: '<b>Incrementar Presupuesto</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
-        
+  this.addButton('SincPresu',{text:'Inc. Pres.',iconCls: 'balert',disabled:true,handler:this.onBtnSincPresu,tooltip: '<b>Incrementar Presupuesto</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
+  this.addButton('SolPlanPago',{text:'Sol. Plan Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnSolPlanPago,tooltip: '<b>Solicitud Plan Pago</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});      
 		
 		 //si la interface es pestanha este código es para iniciar 
           var dataPadre = Phx.CP.getPagina(this.idContenedorPadre).getSelectedData()
@@ -754,8 +754,22 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
            
        },this);   
     
+    },
     
-    
+    onBtnSolPlanPago:function(){    	
+        var rec=this.sm.getSelected();
+        Ext.Ajax.request({
+            url:'../../sis_tesoreria/control/PlanPago/solicitudPlanPago',
+            params:{'id_plan_pago':rec.data.id_plan_pago,id_obligacion_pago:this.maestro.id_obligacion_pago},
+            success: this.successExport,
+            failure: function() {
+                console.log("fail");
+            },
+            timeout: function() {
+                console.log("timeout");
+            },
+            scope:this
+        });  
     },
     
     setTipoPagoNormal:function(){
@@ -1090,7 +1104,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
               this.getBoton('del').enable(); 
               this.getBoton('SolDevPag').enable(); 
               this.getBoton('new').disable(); 
-                 
+              this.getBoton('SolPlanPago').enable();    
           }
           else{
               
@@ -1102,7 +1116,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             }
              this.getBoton('edit').disable();
              this.getBoton('del').disable();
-             this.getBoton('SolDevPag').disable(); 
+             this.getBoton('SolDevPag').disable();
+             
+                this.getBoton('SolPlanPago').enable(); 
           }
           
           if(data['sinc_presupuesto']=='si'){
@@ -1118,6 +1134,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         if(tb){
            this.getBoton('SolDevPag').disable();
            this.getBoton('SincPresu').disable();
+           this.getBoton('SolPlanPago').disable();  
           }
        return tb
     }, 

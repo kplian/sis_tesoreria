@@ -218,6 +218,100 @@ class MODPlanPago extends MODbase{
         //Devuelve la respuesta
         return $this->respuesta;
     }
-			
+				
+				function listarPlanPagoPorObligacion(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.f_plan_pago_sel';
+		$this->transaccion='TES_PLAPAOB_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+				
+		$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
+		//Definicion de la lista del resultado del query
+		$this->captura('id_plan_pago','int4');
+		$this->captura('nro_cuota','numeric');
+		$this->captura('monto_ejecutar_total_mb','numeric');
+		$this->captura('nro_sol_pago','varchar');
+		$this->captura('tipo_cambio','numeric');
+		$this->captura('fecha_pag','date');
+		$this->captura('fecha_dev','date');
+		$this->captura('estado','varchar');
+		$this->captura('tipo_pago','varchar');
+		$this->captura('monto_ejecutar_total_mo','numeric');
+		$this->captura('descuento_anticipo_mb','numeric');
+		$this->captura('obs_descuentos_anticipo','text');
+		$this->captura('id_plan_pago_fk','int4');
+		$this->captura('descuento_anticipo','numeric');
+		$this->captura('otros_descuentos','numeric');
+		$this->captura('tipo','varchar');
+		$this->captura('obs_monto_no_pagado','text');
+		$this->captura('obs_otros_descuentos','text');
+		$this->captura('monto','numeric');
+		$this->captura('nombre_pago','varchar');
+		$this->captura('monto_no_pagado_mb','numeric');
+		$this->captura('monto_mb','numeric');
+		$this->captura('otros_descuentos_mb','numeric');
+		$this->captura('forma_pago','varchar');
+		$this->captura('monto_no_pagado','numeric');
+		$this->captura('fecha_tentativa','date');
+		$this->captura('desc_plantilla','varchar');
+		$this->captura('liquido_pagable','numeric');
+		$this->captura('total_prorrateado','numeric');
+		$this->captura('total_pagado','numeric');
+  $this->captura('desc_cuenta_bancaria','text');
+  $this->captura('sinc_presupuesto','varchar'); 
+  $this->captura('monto_retgar_mb','numeric');
+  $this->captura('monto_retgar_mo','numeric');
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
+	function reportePlanPago(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.f_plan_pago_sel';
+		$this->transaccion='TES_PLAPAREP_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this->setCount(false);
+		
+		$this->setParametro('id_plan_pago','id_plan_pago','int4');
+		
+		$this->captura('estado','varchar');
+		$this->captura('numero_oc','varchar');
+		$this->captura('proveedor','varchar');
+		$this->captura('nro_cuota','numeric');
+		$this->captura('fecha_devengado','date');
+		$this->captura('fecha_pag','date');
+		$this->captura('forma_pago','varchar');
+		$this->captura('tipo_pago','varchar');
+		$this->captura('modalidad','varchar');
+		$this->captura('moneda','varchar');
+		$this->captura('tipo_cambio','numeric');
+		$this->captura('importe','numeric');
+		$this->captura('monto_no_pagado','numeric');
+		$this->captura('otros_descuentos','numeric');
+		$this->captura('monto_ejecutado_total','numeric');
+		$this->captura('liquido_pagable','numeric');
+		$this->captura('total_pagado','numeric');
+		$this->captura('fecha_reg','timestamp');
+		
+		$this->captura('nombre_uo','varchar');
+		$this->captura('nombre_programa','varchar');
+		$this->captura('nombre_regional','varchar');
+		$this->captura('nombre_proyecto','varchar');
+		$this->captura('nombre_financiador','varchar');
+		$this->captura('nombre_actividad','varchar');
+		$this->captura('nombre_partida','varchar');
+		$this->captura('total_pago','numeric');
+		//Ejecuta la respuesta
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;		
+		
+	}
 }
 ?>
