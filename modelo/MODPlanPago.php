@@ -219,7 +219,7 @@ class MODPlanPago extends MODbase{
         return $this->respuesta;
     }
 				
-				function listarPlanPagoPorObligacion(){
+				function listarPlanesPagoPorObligacion(){
 		//Definicion de variables para ejecucion del procedimientp
 		$this->procedimiento='tes.f_plan_pago_sel';
 		$this->transaccion='TES_PLAPAOB_SEL';

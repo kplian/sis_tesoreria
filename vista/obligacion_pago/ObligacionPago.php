@@ -31,6 +31,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
           
         this.addButton('fin_registro',{text:'Fin Reg.',iconCls: 'badelante',disabled:true,handler:this.fin_registro,tooltip: '<b>Finalizar</b><p>Finalizar registro de cotización</p>'});
         this.addButton('reporte_com_ejec_pag',{text:'Rep.',iconCls: 'bpdf32',disabled:true,handler:this.repComEjePag,tooltip: '<b>Reporte</b><p>Reporte Obligacion de Pago</p>'});
+        this.addButton('reporte_plan_pago',{text:'Planes de Pago',iconCls: 'bpdf32',disabled:true,handler:this.repPlanPago,tooltip: '<b>Reporte Plan Pago</b><p>Reporte Planes de Pago</p>'});
           this.TabPanelSouth.get(1).disable()
 	
 	
@@ -462,6 +463,22 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                         rec.data,this.idContenedor,'ReporteComEjePag')
            }
         },
+	
+		repPlanPago:function(){
+        var rec=this.sm.getSelected();
+                Ext.Ajax.request({
+                    url:'../../sis_tesoreria/control/ObligacionPago/reportePlanesPago',
+                    params:{'id_obligacion_pago':rec.data.id_obligacion_pago},
+                    success: this.successExport,
+                    failure: function() {
+                        console.log("fail");
+                    },
+                    timeout: function() {
+                        console.log("timeout");
+                    },
+                    scope:this
+                });  
+    },
 
 	
 	iniciarEventos:function()
@@ -721,10 +738,12 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                     this.getBoton('ant_estado').enable();
                     this.getBoton('fin_registro').enable();
                     this.getBoton('reporte_com_ejec_pag').enable();
+                    this.getBoton('reporte_plan_pago').enable();
                 }
                 
                 if (data['estado']=='finalizado'){
               						this.getBoton('reporte_com_ejec_pag').enable();
+              						this.getBoton('reporte_plan_pago').enable();
                 }
                 
                 if (data['estado']== 'anulado'){
@@ -745,7 +764,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             this.getBoton('fin_registro').disable();
              this.getBoton('ant_estado').disable();
              this.getBoton('reporte_com_ejec_pag').disable();
-
+													this.getBoton('reporte_plan_pago').disable();
         }
        this.TabPanelSouth.get(1).disable();
         

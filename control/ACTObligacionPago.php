@@ -8,6 +8,7 @@
 */
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
 require_once(dirname(__FILE__).'/../reportes/RComEjePag.php');
+require_once(dirname(__FILE__).'/../reportes/RPlanesPago.php');
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
 
 
@@ -115,6 +116,57 @@ class ACTObligacionPago extends ACTbase{
        $this->res = $mensajeExito;
        $this->res->imprimirRespuesta($this->res->generarJson());
     }
+
+				function reportePlanesPago(){
+							$dataSource = new DataSource();
+							
+							$this->objParam->addParametroConsulta('ordenacion','id_obligacion_pago');
+       $this->objParam->addParametroConsulta('dir_ordenacion','ASC');
+       $this->objParam->addParametroConsulta('cantidad',1000);
+       $this->objParam->addParametroConsulta('puntero',0);
+							
+							$this->objFunc=$this->create('MODObligacionPago');
+							$resultObligacionPago = $this->objFunc->obligacionPagoSeleccionado($this->objParam);
+							$datosObligacionPago = $resultObligacionPago->getDatos();
+													
+							$dataSource->putParameter('desc_proveedor',$datosObligacionPago[0]['desc_proveedor']);
+							$dataSource->putParameter('estado',$datosObligacionPago[0]['estado']);
+							$dataSource->putParameter('tipo_obligacion',$datosObligacionPago[0]['tipo_obligacion']);
+							$dataSource->putParameter('obs',$datosObligacionPago[0]['obs']);
+							$dataSource->putParameter('nombre_subsistema',$datosObligacionPago[0]['nombre_subsistema']);
+							$dataSource->putParameter('porc_retgar',$datosObligacionPago[0]['porc_retgar']);
+							$dataSource->putParameter('porc_anticipo',$datosObligacionPago[0]['porc_anticipo']);
+							$dataSource->putParameter('nombre_depto',$datosObligacionPago[0]['nombre_depto']);
+							$dataSource->putParameter('num_tramite',$datosObligacionPago[0]['num_tramite']);
+							$dataSource->putParameter('fecha',$datosObligacionPago[0]['fecha']);
+							$dataSource->putParameter('numero',$datosObligacionPago[0]['numero']);
+							$dataSource->putParameter('tipo_cambio_conv',$datosObligacionPago[0]['tipo_cambio_conv']);
+							$dataSource->putParameter('comprometido',$datosObligacionPago[0]['comprometido']);
+							$dataSource->putParameter('nro_cuota_vigente',$datosObligacionPago[0]['nro_cuota_vigente']);
+							$dataSource->putParameter('pago_variable',$datosObligacionPago[0]['pago_variable']);
+							
+							$this->objParam->addParametroConsulta('ordenacion','nro_cuota');
+       $this->objParam->addParametroConsulta('dir_ordenacion','asc');
+							$this->objFunc=$this->create('MODPlanPago');
+							$resultPlanesPago = $this->objFunc->listarPlanesPagoPorObligacion($this->objParam);
+							$datosPlanesPago = $resultPlanesPago->getDatos();
+							$dataSource->setDataSet($datosPlanesPago);
+							
+							$nombreArchivo = 'Reporte.pdf';
+						 
+						 $reporte = new RPlanesPago();
+       $reporte->setDataSource($dataSource);	
+							$reportWriter = new ReportWriter($reporte, dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo);
+       $reportWriter->writeReport(ReportWriter::PDF);
+
+       $mensajeExito = new Mensaje();
+       $mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
+       'Se generó con éxito el reporte: '.$nombreArchivo,'control');
+       $mensajeExito->setArchivoGenerado($nombreArchivo);
+       $this->res = $mensajeExito;
+       $this->res->imprimirRespuesta($this->res->generarJson());
+																	
+				}
 }
 
 ?>
