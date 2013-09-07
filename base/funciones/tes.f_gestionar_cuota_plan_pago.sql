@@ -2,7 +2,7 @@
 
 CREATE OR REPLACE FUNCTION tes.f_gestionar_cuota_plan_pago (
   p_id_usuario integer,
-  p_id_comprobante integer
+  p_id_int_comprobante integer
 )
 RETURNS boolean AS
 $body$
@@ -84,7 +84,7 @@ BEGIN
       v_registros
       from  tes.tplan_pago pp
       inner join tes.tobligacion_pago  op on op.id_obligacion_pago = pp.id_obligacion_pago 
-      where  pp.id_comprobante = p_id_comprobante; 
+      where  pp.id_int_comprobante = p_id_int_comprobante; 
     
     
     --2) Validar que tenga un plan de pago

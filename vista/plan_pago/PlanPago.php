@@ -19,8 +19,85 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		this.init();
 		this.iniciarEventos();
 		this.addButton('SolDevPag',{text:'Solicitar Devengado/Pago',iconCls: 'bpagar',disabled:true,handler:this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente, devengado o pago  '});
-  this.addButton('SincPresu',{text:'Inc. Pres.',iconCls: 'balert',disabled:true,handler:this.onBtnSincPresu,tooltip: '<b>Incrementar Presupuesto</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
-  this.addButton('SolPlanPago',{text:'Sol. Plan Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnSolPlanPago,tooltip: '<b>Solicitud Plan Pago</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});      
+        this.addButton('SincPresu',{text:'Inc. Pres.',iconCls: 'balert',disabled:true,handler:this.onBtnSincPresu,tooltip: '<b>Incrementar Presupuesto</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
+        this.addButton('SolPlanPago',{text:'Sol. Plan Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnSolPlanPago,tooltip: '<b>Solicitud Plan Pago</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});      
+		////formulario de departamentos
+        
+        this.cmpDeptoConta = new Ext.form.ComboBox({
+                    xtype: 'combo',
+                    name: 'id_depto_conta',
+                    hiddenName: 'id_depto_conta',
+                    fieldLabel: 'Depto. Conta.',
+                    allowBlank: false,
+                    emptyText:'Elija un Depto',
+                    store:new Ext.data.JsonStore(
+                    {
+                        url: '../../sis_tesoreria/control/ObligacionPago/listarDeptoFiltradoObligacionPago',
+                        id: 'id_depto',
+                        root: 'datos',
+                        sortInfo:{
+                            field: 'deppto.nombre',
+                            direction: 'ASC'
+                        },
+                        totalProperty: 'total',
+                        fields: ['id_depto','nombre'],
+                        // turn on remote sorting
+                        remoteSort: true,
+                        baseParams:{par_filtro:'deppto.nombre#deppto.codigo',estado:'activo',codigo_subsistema:'CONTA',tipo_filtro:'DEP_EP-DEP_EP'}
+                    }),
+                    valueField: 'id_depto',
+                    displayField: 'nombre',
+                    tpl:'<tpl for="."><div class="x-combo-list-item"><p>{nombre}</p></div></tpl>',
+                    hiddenName: 'id_depto_tes',
+                    forceSelection:true,
+                    typeAhead: true,
+                    triggerAction: 'all',
+                    lazyRender:true,
+                    mode:'remote',
+                    pageSize:10,
+                    queryDelay:1000,
+                    width:250,
+                    listWidth:'280',
+                    minChars:2
+                });
+        
+        this.formDEPTO = new Ext.form.FormPanel({
+            baseCls: 'x-plain',
+            autoDestroy: true,
+            layout: 'form',
+            items: [this.cmpDeptoConta]
+        });
+        
+       
+        
+        this.wDEPTO= new Ext.Window({
+            title: 'Depto Tesoreria',
+            collapsible: true,
+            maximizable: true,
+             autoDestroy: true,
+            width: 400,
+            height: 200,
+            layout: 'fit',
+            plain: true,
+            bodyStyle: 'padding:5px;',
+            buttonAlign: 'center',
+            items: this.formDEPTO,
+            modal:true,
+             closeAction: 'hide',
+            buttons: [{
+                text: 'Guardar',
+                 handler:this.onSubmitDepto,
+                scope:this
+                
+            },{
+                text: 'Cancelar',
+                handler:function(){this.wDEPTO.hide()},
+                scope:this
+            }]
+        }); 
+		
+		
+		
 		
 		 //si la interface es pestanha este código es para iniciar 
           var dataPadre = Phx.CP.getPagina(this.idContenedorPadre).getSelectedData()
@@ -33,6 +110,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
           }
 	},
 	tam_pag:50,
+
 
 	Atributos:[
 		{
@@ -1163,25 +1241,44 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 scope:this
             });     
       },
-	
-    onBtnDevPag:function()
-        {                   
-            var d= this.sm.getSelected().data;
-           
-            Phx.CP.loadingShow();
-            
-            Ext.Ajax.request({
+      
+    onSubmitDepto:function(x,y,id_depto_conta){
+           var data = this.getSelectedData();
+           Phx.CP.loadingShow();
+           Ext.Ajax.request({
                 // form:this.form.getForm().getEl(),
                 url:'../../sis_tesoreria/control/PlanPago/solicitarDevPag',
-                params:{id_plan_pago:d.id_plan_pago},
+                params:{id_plan_pago:data.id_plan_pago, id_depto_conta:id_depto_conta?id_depto_conta:this.cmpDeptoConta.getValue()},
                 success:this.successSinc,
                 failure: this.conexionFailure,
                 timeout:this.timeout,
                 scope:this
-            });     
+            })
+        
+    },
+	
+    onBtnDevPag:function()
+        {                   
+            var data = this.getSelectedData();
+            
+            console.log('depto_conta',this.maestro.id_depto_conta)
+            if(this.maestro.id_depto_conta > 0){
+           
+                this.onSubmitDepto(undefined,undefined,this.maestro.id_depto_conta);  
+            }
+            else{
+              
+                this.wDEPTO.show();
+                this.cmpDeptoConta.reset();
+                this.cmpDeptoConta.store.baseParams.id_plan_pago = data.id_plan_pago;
+                this.cmpDeptoConta.store.baseParams.id_obligacion_pago = this.maestro.id_obligacion_pago;
+                this.cmpDeptoConta.modificado = true;
+              
+            }  
       }, 
      successSinc:function(resp){
             Phx.CP.loadingHide();
+            this.wDEPTO.hide();
             var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
             if(reg.ROOT.datos.resultado!='falla'){
                 

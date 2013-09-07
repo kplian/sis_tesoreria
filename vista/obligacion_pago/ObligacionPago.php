@@ -441,6 +441,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
 		{name:'tipo_cambio_conv', type: 'numeric'},
+		{name:'id_depto_conta', type: 'numeric'},
 		'numero','pago_variable','total_pago',
 		'id_gestion','comprometido','nro_cuota_vigente','tipo_moneda'
 		

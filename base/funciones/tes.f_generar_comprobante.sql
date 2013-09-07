@@ -2,7 +2,8 @@
 
 CREATE OR REPLACE FUNCTION tes.f_generar_comprobante (
   p_id_usuario integer,
-  p_id_plan_pago integer
+  p_id_plan_pago integer,
+  p_id_depto_conta integer
 )
 RETURNS varchar [] AS
 $body$
@@ -40,13 +41,22 @@ DECLARE
     v_desc_ingas varchar;
     v_cont integer;
     v_respuesta varchar[];
+    v_id_int_comprobante integer;
 	
     
 BEGIN
 
 	v_nombre_funcion = 'tes.f_generar_comprobante';
     v_id_moneda_base =  param.f_get_moneda_base();
+    
+  
+    
+    
+    
     --  obtinen datos del plan de pagos
+    
+    
+  
            
            SELECT
            pp.id_plan_pago,
@@ -60,7 +70,9 @@ BEGIN
            pp.monto_ejecutar_total_mo,
            pp.total_prorrateado,
            pp.nro_cuota,
-           pp.id_obligacion_pago
+           pp.id_obligacion_pago,
+           op.id_depto_conta,
+           op.id_obligacion_pago
            into
            v_registros
            FROM tes.tplan_pago pp
@@ -76,6 +88,26 @@ BEGIN
           
           END IF;
           
+          -- verifica el depto de conta, si no tiene lo modifica
+          
+          IF v_registros.id_depto_conta is NULL THEN
+             --registra el depto de conta
+             
+             update tes.tobligacion_pago set
+               id_depto_conta =  p_id_depto_conta
+             where id_obligacion_pago = v_registros.id_obligacion_pago;
+          
+          ELSE
+          
+              IF v_registros.id_depto_conta != p_id_depto_conta THEN
+              
+                 raise exception 'El departamento de contabilidad no coincide con el registrado para  las anteriores cuotas del plan de pago';
+                        
+              END IF;
+          
+          
+          
+          END IF;
           
           
           
@@ -90,7 +122,7 @@ BEGIN
                       and  pp.nro_cuota < v_registros.nro_cuota ) THEN
                       
                       
-                    raise exception 'Antes de Finalizar la cuotas anteriores tienes que estar finalizadas';
+                    raise exception 'Antes de Continuar,  la cuotas anteriores tienes que estar finalizadas';
                  
                  
                  END IF;
@@ -219,12 +251,18 @@ BEGIN
         
             IF v_tipo_sol ='devengado' THEN
             
-                -- TO DO llamda a la generaciond e comprobante de devengado 
-                  
+                -- TODO llamda a la generaciond e comprobante de devengado 
+                
+                 v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,'DEVTESPROV',p_id_usuario);
                  
            
             ELSIF v_tipo_sol ='pago' THEN
-                 --TO DO,  llamada a la generacion de comprobante de pago
+                
+            
+                --TODO,  llamada a la generacion de comprobante de pago
+                
+            
+                --- select conta.f_gen_comprobante (120  ,'DEVTESPROV',1) 
             
             
             
@@ -235,7 +273,9 @@ BEGIN
             --  TO DO, actualiza el id_comprobante en el registro del plan de pago
             
             
-            
+            update tes.tplan_pago set
+              id_int_comprobante = v_id_int_comprobante
+            where id_plan_pago = v_registros.id_plan_pago;
             
                   
             --------------------------------------------------------
@@ -293,6 +333,8 @@ BEGIN
   
 
  v_respuesta[1]= 'TRUE';
+ 
+  
 
 RETURN   v_respuesta;
 

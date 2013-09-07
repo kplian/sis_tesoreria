@@ -63,6 +63,47 @@ class ACTObligacionPago extends ACTbase{
         $this->res->imprimirRespuesta($this->res->generarJson());
     }
     
+    
+    function listarDeptoFiltradoObligacionPago(){
+            
+        $this->objFunc=$this->create('MODObligacionPago'); 
+        $this->res=$this->objFunc->obtnerUosEpsDetalleObligacion($this->objParam);
+        
+        //si sucede un error
+        if($this->res->getTipo()=='ERROR'){
+            
+            $this->res->imprimirRespuesta($this->res->generarJson());
+            exit;
+        }
+        
+        //var_dump($this->res->datos);
+
+        $this->datos=array();
+        $this->datos=$this->res->getDatos();
+        $uos=$this->res->datos['uos'];
+        $eps=$this->res->datos['eps'];
+   
+        
+        $this->objParam->addParametro('eps',$eps);
+        $this->objParam->addParametro('uos',$uos); 
+        
+        //////////////////////////
+        
+       
+        
+        // parametros de ordenacion por defecto
+        $this->objParam->defecto('ordenacion','depto');
+        $this->objParam->defecto('dir_ordenacion','asc');
+        
+       
+        $this->objFunc=$this->create('sis_parametros/MODDepto'); 
+        //ejecuta el metodo de lista personas a travez de la intefaz objetoFunSeguridad 
+        $this->res=$this->objFunc->listarDeptoFiltradoXUOsEPs($this->objParam);
+        $this->res->imprimirRespuesta($this->res->generarJson());
+        
+        
+    }
+    
     function reporteComEjePag(){
     			$dataSource = new DataSource();							
 														

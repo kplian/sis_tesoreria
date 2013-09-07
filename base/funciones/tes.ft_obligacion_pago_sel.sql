@@ -102,7 +102,8 @@ BEGIN
                         obpg.nro_cuota_vigente,
                         mn.tipo_moneda,
                         obpg.total_pago,
-                        obpg.pago_variable
+                        obpg.pago_variable,
+                        obpg.id_depto_conta
 						from tes.tobligacion_pago obpg
 						inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod

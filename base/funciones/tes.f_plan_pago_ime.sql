@@ -1042,7 +1042,7 @@ BEGIN
         
            
         
-           v_verficacion = tes.f_generar_comprobante(p_id_usuario, v_parametros.id_plan_pago);
+           v_verficacion = tes.f_generar_comprobante(p_id_usuario, v_parametros.id_plan_pago, v_parametros.id_depto_conta);
            
             
             IF  v_verficacion[1]= 'TRUE'   THEN

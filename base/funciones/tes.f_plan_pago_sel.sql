@@ -71,7 +71,7 @@ BEGIN
 						plapa.obs_monto_no_pagado,
 						plapa.obs_otros_descuentos,
 						plapa.monto,
-						plapa.id_comprobante,
+						plapa.id_int_comprobante,
 						plapa.nombre_pago,
 						plapa.monto_no_pagado_mb,
 						plapa.monto_mb,

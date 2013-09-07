@@ -69,6 +69,8 @@ DECLARE
     v_factor numeric;
     
     v_registros    record;
+    v_cad_ep varchar;
+    v_cad_uo varchar;
 			    
 BEGIN
 
@@ -837,7 +839,44 @@ BEGIN
             return v_resp;
 
 		end;   
-	
+	 /*********************************    
+ 	#TRANSACCION:  'TES_OBEPUO_IME'
+ 	#DESCRIPCION:	Obtener listado de up y ep correspondientes a los centros de costo
+                    del detalle de la obligacion de pago 
+                    
+ 	#AUTOR:	        Rensi Arteaga Copari
+ 	#FECHA:		    1-4-2013 14:48:35
+	***********************************/
+
+	elsif(p_transaccion='TES_OBEPUO_IME')then
+
+		begin
+			
+         
+        
+            select 
+              pxp.list(cc.id_uo::text),
+              pxp.list(cc.id_ep::text)
+            into
+              v_cad_uo,
+              v_cad_ep
+            from tes.tobligacion_det  od
+            inner join param.tcentro_costo cc on od.id_centro_costo = cc.id_centro_costo
+            where od.id_obligacion_pago = v_parametros.id_obligacion_pago 
+            and od.estado_reg = 'activo';
+        
+           
+             --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','UOs, EPs retornados'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'eps',v_cad_ep::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'uos',v_cad_uo::varchar);
+              
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;
+        
+   
     
     else
      

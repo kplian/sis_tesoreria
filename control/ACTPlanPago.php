@@ -61,8 +61,10 @@ class ACTPlanPago extends ACTbase{
         $this->res=$this->objFunc->sincronizarPresupuesto($this->objParam);
         $this->res->imprimirRespuesta($this->res->generarJson());
     }
+    
+    
 				
-				function solicitudPlanPago(){
+	function solicitudPlanPago(){
 					  $dataSource = new DataSource();
 							
 							$this->objParam->addParametroConsulta('ordenacion','id_plan_pago');

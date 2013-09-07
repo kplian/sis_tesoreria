@@ -43,7 +43,7 @@ class MODPlanPago extends MODbase{
 		$this->captura('obs_monto_no_pagado','text');
 		$this->captura('obs_otros_descuentos','text');
 		$this->captura('monto','numeric');
-		$this->captura('id_comprobante','int4');
+		$this->captura('id_int_comprobante','int4');
 		$this->captura('nombre_pago','varchar');
 		$this->captura('monto_no_pagado_mb','numeric');
 		$this->captura('monto_mb','numeric');
@@ -150,7 +150,7 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('obs_monto_no_pagado','obs_monto_no_pagado','text');
 		$this->setParametro('obs_otros_descuentos','obs_otros_descuentos','text');
 		$this->setParametro('monto','monto','numeric');
-		$this->setParametro('id_comprobante','id_comprobante','int4');
+		
 		$this->setParametro('nombre_pago','nombre_pago','varchar');
 		$this->setParametro('monto_no_pagado_mb','monto_no_pagado_mb','numeric');
 		$this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
@@ -193,6 +193,7 @@ class MODPlanPago extends MODbase{
                 
         //Define los parametros para la funcion
         $this->setParametro('id_plan_pago','id_plan_pago','int4');
+        $this->setParametro('id_depto_conta','id_depto_conta','int4');
 
         //Ejecuta la instruccion
         $this->armarConsulta();
