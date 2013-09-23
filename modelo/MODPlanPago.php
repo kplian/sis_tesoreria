@@ -66,7 +66,14 @@ class MODPlanPago extends MODbase{
         $this->captura('desc_cuenta_bancaria','text');
         $this->captura('sinc_presupuesto','varchar'); 
         $this->captura('monto_retgar_mb','numeric');
-        $this->captura('monto_retgar_mo','numeric');   
+        $this->captura('monto_retgar_mo','numeric'); 
+        
+        $this->captura('descuento_ley','numeric'); 
+        $this->captura('obs_descuentos_ley','text'); 
+        $this->captura('descuento_ley_mb','numeric'); 
+        $this->captura('porc_descuento_ley','numeric');   
+        
+        
         
 		
 		//Ejecuta la instruccion
@@ -119,6 +126,13 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('tipo_cambio','tipo_cambio','numeric');
 		$this->setParametro('monto_retgar_mo','monto_retgar_mo','numeric');
 		
+		$this->setParametro('descuento_ley','descuento_ley','numeric');
+		$this->setParametro('obs_descuentos_ley','obs_descuentos_ley','text');
+		$this->setParametro('porc_descuento_ley','porc_descuento_ley','numeric');
+		
+		 
+        
+		
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -159,6 +173,9 @@ class MODPlanPago extends MODbase{
         $this->setParametro('fecha_tentativa','fecha_tentativa','date');
         $this->setParametro('tipo_cambio','tipo_cambio','numeric');
         $this->setParametro('monto_retgar_mo','monto_retgar_mo','numeric');
+        $this->setParametro('descuento_ley','descuento_ley','numeric');
+        $this->setParametro('obs_descuentos_ley','obs_descuentos_ley','text');
+        $this->setParametro('porc_descuento_ley','porc_descuento_ley','numeric');
         
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -220,7 +237,7 @@ class MODPlanPago extends MODbase{
         return $this->respuesta;
     }
 				
-				function listarPlanesPagoPorObligacion(){
+	function listarPlanesPagoPorObligacion(){
 		//Definicion de variables para ejecucion del procedimientp
 		$this->procedimiento='tes.f_plan_pago_sel';
 		$this->transaccion='TES_PLAPAOB_SEL';
@@ -258,11 +275,11 @@ class MODPlanPago extends MODbase{
 		$this->captura('liquido_pagable','numeric');
 		$this->captura('total_prorrateado','numeric');
 		$this->captura('total_pagado','numeric');
-  $this->captura('desc_cuenta_bancaria','text');
-  $this->captura('sinc_presupuesto','varchar'); 
-  $this->captura('monto_retgar_mb','numeric');
-  $this->captura('monto_retgar_mo','numeric');
-		
+          $this->captura('desc_cuenta_bancaria','text');
+          $this->captura('sinc_presupuesto','varchar'); 
+          $this->captura('monto_retgar_mb','numeric');
+          $this->captura('monto_retgar_mo','numeric');
+        		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();

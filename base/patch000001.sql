@@ -245,4 +245,48 @@ ALTER TABLE tes.tplan_pago
 
 /***********************************F-SCP-RAC-TES-0-09/09/2013***************************************/
  
+/***********************************I-SCP-RAC-TES-0-18/09/2013***************************************/
+
+ALTER TABLE tes.tprorrateo
+  ADD COLUMN id_int_transaccion INTEGER;
+
+COMMENT ON COLUMN tes.tprorrateo.id_int_transaccion
+IS 'relaciona el prorrateo del devengado con la transaccion don de se ejecuta el presupuesto'; 
+
+ALTER TABLE tes.tprorrateo
+  ADD COLUMN id_prorrateo_fk INTEGER;
+
+COMMENT ON COLUMN tes.tprorrateo.id_prorrateo_fk
+IS 'solo sirve para prorrateos de pago, referencia el prorrateo del devengado';
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN descuento_ley NUMERIC(18,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tplan_pago.descuento_ley
+IS 'en este campo se registran los decuento asociados al tipo de documentos, por ejemplo si es recibo con retencion de bienes, se retiene 3% del IT y 5%del IUE';
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN obs_descuentos_ley TEXT;
+
+COMMENT ON COLUMN tes.tplan_pago.obs_descuentos_ley
+IS 'este campo espeficia los porcentajes aplicado a los decuentos, es solo descriptivo';
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN descuento_ley_mb NUMERIC(18,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tplan_pago.descuento_ley_mb
+IS 'descuentos de ley en moneda base';
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN porc_descuento_ley NUMERIC(4,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tplan_pago.porc_descuento_ley
+IS 'cste campo almacena el porcentaje de descuentos de ley, se utiliza para las cuotas de tipo pago';
+
+/***********************************F-SCP-RAC-TES-0-18/09/2013***************************************/
+ 
+ 
  

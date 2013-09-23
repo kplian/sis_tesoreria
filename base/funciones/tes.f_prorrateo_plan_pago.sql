@@ -10,6 +10,13 @@ CREATE OR REPLACE FUNCTION tes.f_prorrateo_plan_pago (
 )
 RETURNS boolean AS
 $body$
+/*
+
+
+
+
+*/
+
 DECLARE
 v_registros record;
 v_monto_total numeric;
@@ -157,9 +164,9 @@ BEGIN
                      END LOOP;
               END IF;
       ELSE
-      
+      -------------------------------------------------------------------------------
       -- Si p_id_plan_pago_fk no es nulo se trata de un prorrateo de una cuota de pago
-      
+      ---------------------------------------------------------------------------------
       
       
       select
@@ -186,7 +193,9 @@ BEGIN
                      select 
                           pr.monto_ejecutar_mo,
                           pr.monto_ejecutar_mb,
-                          pr.id_obligacion_det                         
+                          pr.id_obligacion_det,
+                          pr.id_prorrateo,
+                          pr.id_trasaccion                         
                          from  tes.tprorrateo pr
                          inner join tes.tobligacion_det od on od.id_obligacion_det = pr.id_obligacion_det
                          where pr.id_plan_pago = p_id_plan_pago_fk 
@@ -217,7 +226,9 @@ BEGIN
                                 id_plan_pago,
                                 id_obligacion_det,
                                 monto_ejecutar_mo,
-                                monto_ejecutar_mb
+                                monto_ejecutar_mb,
+                                id_prorrateo_fk,
+                                id_trasaccion
                                 
                               ) 
                               VALUES (
@@ -227,7 +238,10 @@ BEGIN
                                 p_id_plan_pago,
                                 v_registros.id_obligacion_det,
                                 v_monto,
-                                v_monto_mb
+                                v_monto_mb,
+                                v_registros.id_prorrateo,
+                                id_trasaccion
+                                
                               
                               )RETURNING id_prorrateo into v_id_prorrateo;
                          END IF;

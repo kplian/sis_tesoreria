@@ -94,7 +94,13 @@ BEGIN
 						cb.nombre_institucion ||'' (''||cb.nro_cuenta||'')'' as desc_cuenta_bancaria ,
                         plapa.sinc_presupuesto ,
                         plapa.monto_retgar_mb,
-                        plapa.monto_retgar_mo                                             
+                        plapa.monto_retgar_mo,
+                        descuento_ley, 
+                        obs_descuentos_ley , 
+                        descuento_ley_mb, 
+                        porc_descuento_ley 
+                        
+                                                                     
 						from tes.tplan_pago plapa
                         left join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
 						inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg

@@ -86,6 +86,11 @@ BEGIN
           --recueprar la partida de la parametrizacion
           v_id_partida = NULL;
           
+          
+          raise notice '(''CUECOMP'', %, %, %)',  v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo;
+         
+        
+          
           SELECT 
               ps_id_partida 
             into 
@@ -97,7 +102,7 @@ BEGIN
         
            IF v_id_partida is NULL THEN
           
-            raise exception 'no se tiene una parametrizacionde partida  para este concepto de gasto en la relacion contable de código CUECOMP  (%,%,%,%)','CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo;
+            raise exception 'no se tiene una parametrizacion de partida  para este concepto de gasto en la relacion contable de código CUECOMP  (%,%,%,%)','CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo;
             
            END IF;
          
