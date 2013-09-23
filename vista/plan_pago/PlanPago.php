@@ -825,7 +825,12 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         this.Cmp.monto_retgar_mo.on('change',this.calculaMontoPago,this);
         this.Cmp.descuento_ley.on('change',this.calculaMontoPago,this);
         
-        
+        this.Cmp.id_plantilla.on('select',function(cmb,rec,i){
+            
+            console.log(rec.data)
+            this.getDecuentosPorAplicar(rec.data.id_plantilla);
+            
+        },this);
         
         this.cmpTipo.on('change',function(groupRadio,radio){
                                 this.enableDisable(radio.inputValue);

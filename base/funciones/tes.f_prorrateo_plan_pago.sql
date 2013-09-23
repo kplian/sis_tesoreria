@@ -195,7 +195,7 @@ BEGIN
                           pr.monto_ejecutar_mb,
                           pr.id_obligacion_det,
                           pr.id_prorrateo,
-                          pr.id_trasaccion                         
+                          pr.id_int_transaccion                         
                          from  tes.tprorrateo pr
                          inner join tes.tobligacion_det od on od.id_obligacion_det = pr.id_obligacion_det
                          where pr.id_plan_pago = p_id_plan_pago_fk 
@@ -228,7 +228,7 @@ BEGIN
                                 monto_ejecutar_mo,
                                 monto_ejecutar_mb,
                                 id_prorrateo_fk,
-                                id_trasaccion
+                                id_int_transaccion
                                 
                               ) 
                               VALUES (
@@ -240,7 +240,7 @@ BEGIN
                                 v_monto,
                                 v_monto_mb,
                                 v_registros.id_prorrateo,
-                                id_trasaccion
+                                v_registros.id_int_transaccion
                                 
                               
                               )RETURNING id_prorrateo into v_id_prorrateo;

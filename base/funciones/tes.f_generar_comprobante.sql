@@ -263,7 +263,7 @@ BEGIN
                 
             
                 --- select conta.f_gen_comprobante (120  ,'DEVTESPROV',1) 
-            
+                v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,'PAGTESPROV',p_id_usuario);
             
             
                       

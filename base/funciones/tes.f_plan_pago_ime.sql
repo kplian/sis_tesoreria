@@ -164,7 +164,7 @@ BEGIN
            
           -- calcula el liquido pagable y el monsto a ejecutar presupeustaria mente
            
-           v_liquido_pagable = COALESCE(v_parametros.monto,0) - COALESCE(v_parametros.monto_no_pagado,0) - COALESCE(v_parametros.otros_descuentos,0) - COALESCE(v_parametros.monto_retgar_mo,0);
+           v_liquido_pagable = COALESCE(v_parametros.monto,0) - COALESCE(v_parametros.monto_no_pagado,0) - COALESCE(v_parametros.otros_descuentos,0) - COALESCE(v_parametros.monto_retgar_mo,0) - COALESCE(v_parametros.descuento_ley,0);
            v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0) -  COALESCE(v_parametros.monto_no_pagado,0);
           
           
@@ -349,7 +349,10 @@ BEGIN
             liquido_pagable,
             fecha_tentativa,
             tipo_cambio,
-            monto_retgar_mo
+            monto_retgar_mo,
+            descuento_ley,
+            obs_descuentos_ley,
+            porc_descuento_ley
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -380,9 +383,14 @@ BEGIN
             v_liquido_pagable,
             v_parametros.fecha_tentativa,
             v_parametros.tipo_cambio,
-            v_parametros.monto_retgar_mo
+            v_parametros.monto_retgar_mo,
+            v_parametros.descuento_ley,
+            v_parametros.obs_descuentos_ley,
+            v_parametros.porc_descuento_ley
 							
 			)RETURNING id_plan_pago into v_id_plan_pago;
+            
+            
             
             
             --------------------------------------------------
@@ -739,7 +747,7 @@ BEGIN
                 
                    
                      -- calcula el liquido pagable y el monto a ejecutar presupeustaria mente
-                   v_liquido_pagable = COALESCE(v_parametros.monto,0) - COALESCE(v_parametros.monto_no_pagado,0) - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0);
+                   v_liquido_pagable = COALESCE(v_parametros.monto,0) - COALESCE(v_parametros.monto_no_pagado,0) - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0) - COALESCE(v_parametros.descuento_ley,0);
                    v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0) -  COALESCE(v_parametros.monto_no_pagado,0);
               
                    IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
@@ -798,8 +806,12 @@ BEGIN
 			fecha_mod = now(),
 			id_usuario_mod = p_id_usuario,
             tipo_cambio= v_parametros.tipo_cambio,
-            monto_retgar_mo= v_parametros.monto_retgar_mo
+            monto_retgar_mo= v_parametros.monto_retgar_mo,
+            descuento_ley=v_parametros.descuento_ley,
+            obs_descuentos_ley=v_parametros.obs_descuentos_ley,
+            porc_descuento_ley=v_parametros.porc_descuento_ley
 			where id_plan_pago=v_parametros.id_plan_pago;
+           
             
             --elimina el prorrateo si es automatico
             
