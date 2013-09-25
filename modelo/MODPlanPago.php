@@ -300,30 +300,35 @@ class MODPlanPago extends MODbase{
 		$this->captura('estado','varchar');
 		$this->captura('numero_oc','varchar');
 		$this->captura('proveedor','varchar');
+		
 		$this->captura('nro_cuota','numeric');
 		$this->captura('fecha_devengado','date');
 		$this->captura('fecha_pag','date');
+		
 		$this->captura('forma_pago','varchar');
 		$this->captura('tipo_pago','varchar');
-		$this->captura('modalidad','varchar');
 		$this->captura('moneda','varchar');
+		$this->captura('codigo_moneda','varchar');
+		
+		
 		$this->captura('tipo_cambio','numeric');
+		
 		$this->captura('importe','numeric');
 		$this->captura('monto_no_pagado','numeric');
 		$this->captura('otros_descuentos','numeric');
+		
+		$this->captura('obs_otros_descuentos','text');
+		$this->captura('descuento_ley','numeric');
+		$this->captura('obs_descuento_ley','text');
+		
 		$this->captura('monto_ejecutado_total','numeric');
 		$this->captura('liquido_pagable','numeric');
 		$this->captura('total_pagado','numeric');
 		$this->captura('fecha_reg','timestamp');
-		
-		$this->captura('nombre_uo','varchar');
-		$this->captura('nombre_programa','varchar');
-		$this->captura('nombre_regional','varchar');
-		$this->captura('nombre_proyecto','varchar');
-		$this->captura('nombre_financiador','varchar');
-		$this->captura('nombre_actividad','varchar');
-		$this->captura('nombre_partida','varchar');
 		$this->captura('total_pago','numeric');
+		$this->captura('tipo','varchar');
+		
+		  
 		//Ejecuta la respuesta
 		$this->armarConsulta();
 		$this->ejecutarConsulta();

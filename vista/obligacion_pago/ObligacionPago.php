@@ -738,24 +738,21 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                     this.TabPanelSouth.get(1).enable()
                     this.getBoton('ant_estado').enable();
                     this.getBoton('fin_registro').enable();
-                    this.getBoton('reporte_com_ejec_pag').enable();
-                    this.getBoton('reporte_plan_pago').enable();
+                    
                 }
                 
-                if (data['estado']=='finalizado'){
-              						this.getBoton('reporte_com_ejec_pag').enable();
-              						this.getBoton('reporte_plan_pago').enable();
-                }
+               
                 
                 if (data['estado']== 'anulado'){
                     this.getBoton('fin_registro').disable();
                     this.TabPanelSouth.get(1).disable();
                 }
               
-             
               this.getBoton('edit').disable();
               this.getBoton('del').disable();
           }
+          this.getBoton('reporte_com_ejec_pag').enable();
+          this.getBoton('reporte_plan_pago').enable();
      },
      
      

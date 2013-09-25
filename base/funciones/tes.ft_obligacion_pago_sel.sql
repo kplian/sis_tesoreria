@@ -284,25 +284,31 @@ BEGIN
         begin
     		--Sentencia de la consulta
             create temp table obligaciones(
-        	id_obligacion_det 	integer,
-                id_partida			integer,
-                nombre_partida		text,
-                id_concepto_ingas	integer,
-                nombre_ingas			text,
-                id_obligacion_pago	integer,
-                id_centro_costo		integer,
-                codigo_cc			text,
-                id_partida_ejecucion_com	integer,
-                descripcion			text,
-                comprometido		numeric DEFAULT 0.00,
-                ejecutado			numeric DEFAULT 0.00,
-                pagado				numeric DEFAULT 0.00
-        ) on commit drop;
+                    id_obligacion_det 	integer,
+                    id_partida			integer,
+                    nombre_partida		text,
+                    id_concepto_ingas	integer,
+                    nombre_ingas			text,
+                    id_obligacion_pago	integer,
+                    id_centro_costo		integer,
+                    codigo_cc			text,
+                    id_partida_ejecucion_com	integer,
+                    descripcion			text,
+                    comprometido		numeric DEFAULT 0.00,
+                    ejecutado			numeric DEFAULT 0.00,
+                    pagado				numeric DEFAULT 0.00
+            ) on commit drop;
             
-            insert into obligaciones (id_obligacion_det,id_partida,nombre_partida,
-            						id_concepto_ingas,nombre_ingas,id_obligacion_pago,
-                                    id_centro_costo, codigo_cc, id_partida_ejecucion_com,
-                                    descripcion)
+            insert into obligaciones (id_obligacion_det,
+                                      id_partida,
+                                      nombre_partida,
+            						  id_concepto_ingas,
+                                      nombre_ingas,
+                                      id_obligacion_pago,
+                                      id_centro_costo, 
+                                      codigo_cc, 
+                                      id_partida_ejecucion_com,
+                                      descripcion)
             select
                 obdet.id_obligacion_det,
                 obdet.id_partida,
@@ -314,20 +320,26 @@ BEGIN
                 cc.codigo_cc,
                 obdet.id_partida_ejecucion_com,
                 obdet.descripcion
-                from tes.tobligacion_det obdet
+           from tes.tobligacion_det obdet
+                inner join param.vcentro_costo cc on cc.id_centro_costo=obdet.id_centro_costo
                 inner join segu.tusuario usu1 on usu1.id_usuario = obdet.id_usuario_reg
-                left join segu.tusuario usu2 on usu2.id_usuario = obdet.id_usuario_mod
-                left join conta.tcuenta cta on cta.id_cuenta=obdet.id_cuenta
-                left join pre.tpartida par on par.id_partida=obdet.id_partida
-                left join conta.tauxiliar aux on aux.id_auxiliar=obdet.id_auxiliar
-                left join param.tconcepto_ingas cig on cig.id_concepto_ingas=obdet.id_concepto_ingas
-                left join param.vcentro_costo cc on cc.id_centro_costo=obdet.id_centro_costo
-                where obdet.id_obligacion_pago=v_parametros.id_obligacion_pago;
+                inner join pre.tpartida par on par.id_partida=obdet.id_partida
+                inner join param.tconcepto_ingas cig on cig.id_concepto_ingas=obdet.id_concepto_ingas
+              
+               
+              
+                
+               
+            where obdet.id_obligacion_pago=v_parametros.id_obligacion_pago;
+            
+            --raise exception 'Moneda %', v_parametros.id_moneda ;
 
 			FOR v_obligaciones_partida in (select * from obligaciones)
        	    LOOP
             	v_respuesta_verificar = pre.f_verificar_com_eje_pag(v_obligaciones_partida.id_partida_ejecucion_com,v_parametros.id_moneda);
 
+                  
+                    
             	update obligaciones set
                 comprometido = COALESCE(v_respuesta_verificar.ps_comprometido,0.00::numeric),
                 ejecutado = COALESCE(v_respuesta_verificar.ps_ejecutado,0.00::numeric),
@@ -335,6 +347,8 @@ BEGIN
                 where obligaciones.id_obligacion_det=v_obligaciones_partida.id_obligacion_det;
                         
         	END LOOP;
+            
+            --raise exception 'Moneda %', v_parametros.id_moneda ;
             
             v_consulta:='select * from obligaciones';
             

@@ -65,9 +65,18 @@ BEGIN
 						usu2.cuenta as usr_mod,
                         cc.codigo_cc,
                         cig.desc_ingas,
-                        od.descripcion	
+                        od.descripcion,	
+						cc.nombre_programa,
+                        cc.nombre_proyecto,
+                        cc.nombre_actividad,
+                        cc.nombre_financiador,
+                        cc.nombre_regional,
+                        cc.nombre_uo,
+                        par.nombre_partida,
+                        par.codigo as codigo_partida
 						from tes.tprorrateo pro
 						inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det
+                        inner join pre.tpartida par on par.id_partida = od.id_partida
                         inner join param.tconcepto_ingas cig on cig.id_concepto_ingas = od.id_concepto_ingas
                         inner join segu.tusuario usu1 on usu1.id_usuario = pro.id_usuario_reg
                         inner join param.vcentro_costo cc on cc.id_centro_costo=od.id_centro_costo
@@ -97,11 +106,11 @@ BEGIN
 			v_consulta:='select count(id_prorrateo)
 					    from tes.tprorrateo pro
 						inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det
+                        inner join pre.tpartida par on par.id_partida = od.id_partida
                         inner join param.tconcepto_ingas cig on cig.id_concepto_ingas = od.id_concepto_ingas
                         inner join segu.tusuario usu1 on usu1.id_usuario = pro.id_usuario_reg
                         inner join param.vcentro_costo cc on cc.id_centro_costo=od.id_centro_costo
-                        
-						left join segu.tusuario usu2 on usu2.id_usuario = pro.id_usuario_mod
+                        left join segu.tusuario usu2 on usu2.id_usuario = pro.id_usuario_mod
                         where ';
 			
 			--Definicion de la respuesta		    
@@ -111,6 +120,7 @@ BEGIN
 			return v_consulta;
 
 		end;
+        
 					
 	else
 					     

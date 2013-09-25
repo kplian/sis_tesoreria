@@ -197,45 +197,35 @@ BEGIN
         
     		--Sentencia de la consulta
               v_consulta:='select 
-              		  pg.estado,
-              		  op.numero as numero_oc,
-                      pv.desc_proveedor as proveedor,
-                      pg.nro_cuota as nro_cuota,
-                      pg.fecha_dev as fecha_devengado	,
-                      pg.fecha_pag as fecha_pago,
-                      pg.forma_pago as forma_pago,
-                      pg.tipo_pago as tipo_pago,
-                      pm.nombre as modalidad,
-                      mon.moneda as moneda,
-                      op.tipo_cambio_conv as tipo_cambio,
-                      pg.monto as importe,
-                      pg.monto_no_pagado as monto_no_pagado,
-                      pg.otros_descuentos as otros_descuentos,
-                      pg.monto_ejecutar_total_mo as monto_ejecutado_total,
-                      pg.liquido_pagable as liquido_pagable,
-                      pg.total_pagado as total_pagado,
-                      pg.fecha_reg,
-                      vcc.nombre_uo,
-                      vcc.nombre_programa,
-                      vcc.nombre_regional,
-                      vcc.nombre_proyecto,
-                      vcc.nombre_financiador,        
-                      vcc.nombre_actividad,
-                      par.nombre_partida,
-                      op.total_pago    
-              from tes.tplan_pago pg
-              inner join tes.tobligacion_pago op on op.id_obligacion_pago=pg.id_obligacion_pago
-              left join adq.tcotizacion cot on cot.numero_oc=op.numero
-              left join wf.tproceso_wf pw on pw.id_proceso_wf=cot.id_proceso_wf
-              left join wf.ttipo_proceso tp on tp.id_tipo_proceso=pw.id_tipo_proceso
-              left join wf.tproceso_macro pm on pm.id_proceso_macro=tp.id_proceso_macro
-              inner join param.vproveedor pv on pv.id_proveedor=op.id_proveedor
-              left join tes.tcuenta_bancaria cta on cta.id_cuenta_bancaria=pg.id_cuenta_bancaria
-              inner join param.tmoneda mon on mon.id_moneda=op.id_moneda              
-              inner join tes.tobligacion_det obd on obd.id_obligacion_det=op.id_obligacion_pago
-              inner join param.vcentro_costo vcc on vcc.id_centro_costo=obd.id_centro_costo
-              inner join pre.tpartida par on par.id_partida = obd.id_partida
-              where pg.id_plan_pago='||v_parametros.id_plan_pago||' and ';
+                               	  pg.estado,
+                                  op.numero as numero_oc,
+                                  pv.desc_proveedor as proveedor,
+                                  pg.nro_cuota as nro_cuota,
+                                  pg.fecha_dev as fecha_devengado	,
+                                  pg.fecha_pag as fecha_pago,
+                                  pg.forma_pago as forma_pago,
+                                  pg.tipo_pago as tipo_pago,
+                                  mon.moneda as moneda,
+                                  mon.codigo as codigo_moneda,
+                                  op.tipo_cambio_conv as tipo_cambio,
+                                  pg.monto as importe,
+                                  pg.monto_no_pagado as monto_no_pagado,
+                                  pg.otros_descuentos as otros_descuentos,
+                                  pg.obs_otros_descuentos,
+                                  pg.descuento_ley,
+                                  pg.obs_descuentos_ley,
+                                  pg.monto_ejecutar_total_mo as monto_ejecutado_total,
+                                  pg.liquido_pagable as liquido_pagable,
+                                  pg.total_pagado as total_pagado,
+                                  pg.fecha_reg,
+                                  op.total_pago,
+                                  pg.tipo     
+                        from tes.tplan_pago pg
+                        inner join tes.tobligacion_pago op on op.id_obligacion_pago=pg.id_obligacion_pago
+                        inner join param.vproveedor pv on pv.id_proveedor=op.id_proveedor
+                        left join tes.tcuenta_bancaria cta on cta.id_cuenta_bancaria=pg.id_cuenta_bancaria
+                        inner join param.tmoneda mon on mon.id_moneda=op.id_moneda  
+                        where pg.id_plan_pago='||v_parametros.id_plan_pago||' and ';
 			
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
