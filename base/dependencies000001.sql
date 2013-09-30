@@ -229,7 +229,7 @@ CREATE VIEW tes.vcomp_devtesprov_plan_pago(
     otros_descuentos_mb,
     id_plantilla,
     id_cuenta_bancaria,
-    id_comprobante,
+    
     tipo,
     id_gestion_cuentas)
 AS
@@ -253,7 +253,7 @@ AS
          pp.otros_descuentos_mb,
          pp.id_plantilla,
          pp.id_cuenta_bancaria,
-         pp.id_comprobante,
+        
          pp.tipo,
          op.id_gestion AS id_gestion_cuentas
   FROM tes.tplan_pago pp
@@ -293,18 +293,10 @@ AS
 
  /***********************************I-DEP-RAC-TES-0-18/09/2013***************************************/
 
-
 --------------- SQL ---------------
 
  -- object recreation
-DROP VIEW tes.vcomp_devtesprov_plan_pago;
-
---------------- SQL ---------------
-
- -- object recreation
-DROP VIEW tes.vcomp_devtesprov_plan_pago;
-
-CREATE VIEW tes.vcomp_devtesprov_plan_pago(
+CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
     id_plan_pago,
     id_proveedor,
     desc_proveedor,
@@ -325,7 +317,7 @@ CREATE VIEW tes.vcomp_devtesprov_plan_pago(
     otros_descuentos_mb,
     id_plantilla,
     id_cuenta_bancaria,
-    id_comprobante,
+   
     tipo,
     id_gestion_cuentas,
     id_int_comprobante,
@@ -352,7 +344,7 @@ AS
          pp.otros_descuentos_mb,
          pp.id_plantilla,
          pp.id_cuenta_bancaria,
-         pp.id_int_comprobante AS id_comprobante,
+      
          pp.tipo,
          op.id_gestion AS id_gestion_cuentas,
          pp.id_int_comprobante,
@@ -368,10 +360,9 @@ AS
 
 --------------- SQL ---------------
 
- -- object recreation
-DROP VIEW tes.vcomp_devtesprov_det_plan_pago;
 
-CREATE VIEW tes.vcomp_devtesprov_det_plan_pago(
+
+CREATE OR REPLACE VIEW tes.vcomp_devtesprov_det_plan_pago(
     id_concepto_ingas,
     id_partida,
     id_partida_ejecucion_com,
