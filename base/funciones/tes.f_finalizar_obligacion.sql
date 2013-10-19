@@ -9,8 +9,7 @@ $body$
 /*
 *
 *  Autor:   RAC
-*  DESC:     Generar comprobantes de devengado o pago segun correponda al tipo de plan de pago
-*            y pasa al siguiente estado
+*  DESC:     Finaliza la obligacion de pago
 *  Fecha:   10/06/2013
 *
 */

@@ -190,8 +190,9 @@ BEGIN
                      FROM pre.f_verificar_com_eje_pag(v_registros.id_partida_ejecucion_com, v_id_moneda_base);
                 
                      
+                     
                       --armamos los array para enviar a presupuestos          
-                    IF v_comprometido != 0 THEN
+                    IF v_comprometido - v_ejecutado > 0 THEN
                      
                        	v_i = v_i +1;                
                        
@@ -208,6 +209,8 @@ BEGIN
                     END IF;
              
              END LOOP;
+             
+           
              
              --llamada a la funcion de  reversion
                IF v_i > 0 THEN 

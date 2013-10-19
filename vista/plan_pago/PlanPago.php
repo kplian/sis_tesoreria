@@ -167,7 +167,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                                  else{
                                          if(record.data.total_pagado!=record.data.monto_ejecutar_total_mo 
                                              && (record.data.tipo=='devengado'  || record.data.tipo=='devengado_pagado')){
-                                             return String.format('<b><font color="yellow">{0}</font></b>', value);
+                                             return String.format('<b><font color="orange">{0}</font></b>', value);
                                          }
                                          else{
                                              if(record.data.tipo=='pagado'){
@@ -1036,7 +1036,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
          var data = this.getSelectedData();
          if(data){
          // para habilitar registros de cuotas de pago    
-            if(data.monto_ejecutar_total_mo  > data.total_pagado  && data.estado =='devengado'){
+            if(data.monto_ejecutar_total_mo*1  > data.total_pagado*1  && data.estado =='devengado'){
                 Phx.vista.PlanPago.superclass.onButtonNew.call(this); 
                 this.cmpObligacionPago.setValue(this.maestro.id_obligacion_pago);
                 this.Cmp.id_plan_pago_fk.setValue(data.id_plan_pago);
@@ -1075,7 +1075,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 
             }
             else{
-                if(data.estado!=devengado){
+                if(data.estado!='devengado'){
                     
                     alert('El devengado no fue completado');
                 }
@@ -1278,11 +1278,13 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
           }
           else{
               
-            if (data['estado']== 'devengado'  && data.monto_ejecutar_total_mo  > data.total_pagado ){ 
+            if (data['estado']== 'devengado'  && (data.monto_ejecutar_total_mo*1)  > (data.total_pagado*1) ){ 
                 this.getBoton('new').enable();
+                console.log('habilita new')
             }
             else{
                 this.getBoton('new').disable(); 
+                 console.log('deshabilita new')
             }
              this.getBoton('edit').disable();
              this.getBoton('del').disable();
