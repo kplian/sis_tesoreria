@@ -600,6 +600,8 @@ BEGIN
             
             
            
+       
+        
             IF  va_codigo_estado[1] = 'registrado'  and v_tipo_obligacion != 'adquisiciones' THEN
             
                -- verficar presupuesto y comprometer
@@ -610,6 +612,8 @@ BEGIN
                END IF;
            
            END IF;
+           
+           
             
              -- actualiza estado en la solicitud
             
@@ -639,6 +643,8 @@ BEGIN
                    --Definicion de la respuesta
                     v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligacion fue finzalida, y el presupuesto sobrante revertido'); 
                   END IF;
+                  
+                
              ELSE
                 --Definicion de la respuesta
               v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligacion de pago fin de registro'); 
