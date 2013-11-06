@@ -1338,16 +1338,19 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
       
     onSubmitDepto:function(x,y,id_depto_conta){
            var data = this.getSelectedData();
-           Phx.CP.loadingShow();
-           Ext.Ajax.request({
-                // form:this.form.getForm().getEl(),
-                url:'../../sis_tesoreria/control/PlanPago/solicitarDevPag',
-                params:{id_plan_pago:data.id_plan_pago, id_depto_conta:id_depto_conta?id_depto_conta:this.cmpDeptoConta.getValue()},
-                success:this.successSinc,
-                failure: this.conexionFailure,
-                timeout:this.timeout,
-                scope:this
-            })
+          
+           if(this.formDEPTO.getForm().isValid() || id_depto_conta){
+                Phx.CP.loadingShow();
+               Ext.Ajax.request({
+                    // form:this.form.getForm().getEl(),
+                    url:'../../sis_tesoreria/control/PlanPago/solicitarDevPag',
+                    params:{id_plan_pago:data.id_plan_pago, id_depto_conta:id_depto_conta?id_depto_conta:this.cmpDeptoConta.getValue()},
+                    success:this.successSinc,
+                    failure: this.conexionFailure,
+                    timeout:this.timeout,
+                    scope:this
+                })
+            }
         
     },
 	
