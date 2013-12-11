@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -98,14 +96,17 @@ BEGIN
                         descuento_ley, 
                         obs_descuentos_ley , 
                         descuento_ley_mb, 
-                        porc_descuento_ley 
-                        
-                                                                     
+                        porc_descuento_ley, 
+                        plapa.nro_cheque,
+                        plapa.nro_cuenta_bancaria,
+                        plapa.id_libro_bancos,
+                        lban.detalle as desc_deposito                                             
 						from tes.tplan_pago plapa
                         left join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
 						inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
                         left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = plapa.id_cuenta_bancaria
                         left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
+                        left join migra.tts_libro_bancos lban on lban.id_libro_bancos = plapa.id_libro_bancos
                        where  plapa.estado_reg=''activo''  and ';
 			
 			--Definicion de la respuesta
@@ -256,6 +257,7 @@ BEGIN
 						inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
                         left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = plapa.id_cuenta_bancaria
                         left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
+                        left join migra.tts_libro_bancos lban on lban.id_libro_bancos = plapa.id_libro_bancos
                         where  plapa.estado_reg=''activo''   and ';
 			
 			--Definicion de la respuesta		    

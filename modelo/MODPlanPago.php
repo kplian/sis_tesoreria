@@ -72,7 +72,10 @@ class MODPlanPago extends MODbase{
         $this->captura('obs_descuentos_ley','text'); 
         $this->captura('descuento_ley_mb','numeric'); 
         $this->captura('porc_descuento_ley','numeric');   
-        
+        $this->captura('nro_cheque','integer');
+		$this->captura('nro_cuenta_bancaria','varchar');
+		$this->captura('id_libro_bancos','integer');
+		$this->captura('desc_deposito','text');
         
         
 		
@@ -130,6 +133,10 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('obs_descuentos_ley','obs_descuentos_ley','text');
 		$this->setParametro('porc_descuento_ley','porc_descuento_ley','numeric');
 		
+		$this->setParametro('nro_cheque','nro_cheque','integer');
+		$this->setParametro('nro_cuenta_bancaria','nro_cuenta_bancaria','varchar');
+		$this->setParametro('id_libro_bancos','id_libro_bancos','integer');
+		
 		 
         
 		
@@ -176,6 +183,10 @@ class MODPlanPago extends MODbase{
         $this->setParametro('descuento_ley','descuento_ley','numeric');
         $this->setParametro('obs_descuentos_ley','obs_descuentos_ley','text');
         $this->setParametro('porc_descuento_ley','porc_descuento_ley','numeric');
+		
+		$this->setParametro('nro_cheque','nro_cheque','integer');
+		$this->setParametro('nro_cuenta_bancaria','nro_cuenta_bancaria','varchar');
+		$this->setParametro('id_libro_bancos','id_libro_bancos','integer');
         
 		//Ejecuta la instruccion
 		$this->armarConsulta();

@@ -287,6 +287,26 @@ COMMENT ON COLUMN tes.tplan_pago.porc_descuento_ley
 IS 'cste campo almacena el porcentaje de descuentos de ley, se utiliza para las cuotas de tipo pago';
 
 /***********************************F-SCP-RAC-TES-0-18/09/2013***************************************/
+
+/***********************************I-SCP-RCM-TES-0-05/12/2013***************************************/ 
  
- 
- 
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN nro_cheque INTEGER;
+
+COMMENT ON COLUMN tes.tplan_pago.nro_cheque
+IS 'Número de cheque que se utilizará para realizar el pago';
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN nro_cuenta_bancaria VARCHAR(50);
+
+COMMENT ON COLUMN tes.tplan_pago.nro_cuenta_bancaria
+IS 'Número de cuenta bancaria para realizar el pago cuando es Transferencia';
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN id_libro_bancos integer;
+
+COMMENT ON COLUMN tes.tplan_pago.id_libro_bancos
+IS 'referencia al deposito para integración con endesis';
+
+/***********************************F-SCP-RCM-TES-0-05/12/2013***************************************/
+

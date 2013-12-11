@@ -393,6 +393,36 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         },
         {
             config:{
+                name: 'nro_cheque',
+                fieldLabel: 'Número Cheque',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 100,
+                maxLength:255
+            },
+            type:'NumberField',
+            filters:{pfiltro:'plapa.nro_cheque',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
+        {
+            config:{
+                name: 'nro_cuenta_bancaria',
+                fieldLabel: 'Banco y Cuenta Bancaria Dest.',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 100,
+                maxLength:50
+            },
+            type:'TextField',
+            filters:{pfiltro:'plapa.nro_cuenta_bancaria',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
+        {
+            config:{
                 name: 'monto',
                 currencyChar:' ',
                 allowNegative:false,
@@ -524,7 +554,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         {
             config:{
                 name: 'id_cuenta_bancaria',
-                fieldLabel: 'Cuenta Bancaria',
+                fieldLabel: 'Cuenta Bancaria Pago',
                 allowBlank: false,
                 emptyText:'Elija una Cuenta...',
                 store:new Ext.data.JsonStore(
@@ -538,7 +568,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                     },
                     totalProperty:'total',
                     fields: ['id_cuenta_bancaria','nro_cuenta','nombre_institucion','codigo_moneda'],
-                    remoteSort: true
+                    remoteSort: true,
+                    baseParams : {
+						par_filtro : 'ctaban.nro_cuenta#inst.nombre'
+					}
                 }),
                 tpl:'<tpl for="."><div class="x-combo-list-item"><p>{nombre_institucion}</p>{nro_cuenta} - {codigo_moneda}</div></tpl>',
                 valueField: 'id_cuenta_bancaria',
@@ -553,13 +586,56 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 mode:'remote',
                 pageSize:20,
                 queryDelay:500,
-               
                 gwidth: 250,
-                minChars:2
+                minChars:2,
+                renderer:function(value, p, record){return String.format('{0}', record.data['desc_cuenta_bancaria']);}
              },
             type:'ComboBox',
             filters:{pfiltro:'cb.nro_cuenta',type:'string'},
             id_grupo:0,
+            grid:true,
+            form:true
+        },
+        {
+            config:{
+                name: 'id_libro_bancos',
+                fieldLabel: 'Depósitos',
+                allowBlank: true,
+                emptyText : 'Depósito...',
+                store: new Ext.data.JsonStore({
+                            url:'../../sis_migracion/control/TsLibroBancos/listarTsLibroBancos',
+                            id : 'id_libro_bancos',
+                            root: 'datos',
+                            sortInfo:{
+                                    field: 'nro_cheque',
+                                    direction: 'ASC'
+                            },
+                            totalProperty: 'total',
+                            fields: ['id_libro_bancos','id_cuenta_bancaria','fecha','a_favor','detalle','observaciones','nro_liquidacion','nro_comprobante','nro_cheque','tipo','importe_deposito','importe_cheque','origen','estado','indice'],
+                            remoteSort: true,
+                            baseParams:{par_filtro:'detalle',tipo:'deposito'}
+                }),
+                valueField: 'id_libro_bancos',
+               displayField: 'detalle',
+               gdisplayField: 'desc_deposito',
+               hiddenName: 'id_libro_bancos',
+               forceSelection:true,
+               typeAhead: false,
+               triggerAction: 'all',
+               listWidth:350,
+               lazyRender:true,
+               mode:'remote',
+               pageSize:10,
+               queryDelay:1000,
+               anchor: '100%',
+               gwidth:200,
+               minChars:2,
+               tpl: '<tpl for="."><div class="x-combo-list-item"><p>{detalle}</p><strong>{nro_comprobante}</strong></div></tpl>',
+               renderer:function(value, p, record){return String.format('{0}', record.data['desc_deposito']);}
+            },
+            type:'ComboBox',
+            filters:{pfiltro:'detalle',type:'string'},
+            id_grupo:1,
             grid:true,
             form:true
         },
@@ -788,7 +864,11 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		{name:'monto_retgar_mo', type: 'numeric'},
 		{name:'descuento_ley', type: 'numeric'},
 		{name:'porc_descuento_ley', type: 'numeric'},
-		'desc_plantilla','desc_cuenta_bancaria','sinc_presupuesto','obs_descuentos_ley'
+		'desc_plantilla','desc_cuenta_bancaria','sinc_presupuesto','obs_descuentos_ley',
+		{name:'nro_cheque', type: 'numeric'},
+		{name:'nro_cuenta_bancaria', type: 'string'},
+		{name:'id_libro_bancos', type: 'numeric'},
+		{name:'desc_deposito', type: 'string'}
 		
 	],
 	iniciarEventos:function(){
@@ -884,7 +964,36 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
            }
            
            
-       },this);   
+       },this);
+       
+       //Evento para filtrar los depósitos a partir de la cuenta bancaria
+		this.Cmp.id_cuenta_bancaria.on('select',function(data,rec,ind){
+			this.Cmp.id_libro_bancos.setValue('');
+			this.Cmp.id_libro_bancos.modificado=true;
+			Ext.apply(this.Cmp.id_libro_bancos.store.baseParams,{id_cuenta_bancaria: rec.id});
+		},this);
+		
+		//Evento para ocultar/motrar componentes por cheque o transferencia
+		this.Cmp.forma_pago.on('change',function(groupRadio,radio){
+			if(radio.inputValue=='transferencia'){
+				//Deshabilita campo cheque
+				this.Cmp.nro_cheque.allowBlank=true;
+				this.Cmp.nro_cheque.setValue('');
+				this.Cmp.nro_cheque.disable();
+				//Habilita nrocuenta bancaria destino
+				this.Cmp.nro_cuenta_bancaria.allowBlank=false;
+				this.Cmp.nro_cuenta_bancaria.enable();
+			} else{
+				//cheque
+				//Habilita campo cheque
+				this.Cmp.nro_cheque.allowBlank=false;
+				this.Cmp.nro_cheque.enable();
+				//Habilita nrocuenta bancaria destino
+				this.Cmp.nro_cuenta_bancaria.allowBlank=true;
+				this.Cmp.nro_cuenta_bancaria.setValue('');
+				this.Cmp.nro_cuenta_bancaria.disable();
+			}
+		},this);		   
     
     },
     

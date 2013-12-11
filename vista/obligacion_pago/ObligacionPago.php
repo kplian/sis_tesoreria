@@ -482,10 +482,8 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
     },
 
 	
-	iniciarEventos:function()
-	{
-		
-		
+	iniciarEventos:function(){
+			
 		this.cmpProveedor = this.getComponente('id_proveedor');
 		this.cmpFuncionario = this.getComponente('id_funcionario');
 		this.cmpFuncionarioProveedor = this.getComponente('funcionario_proveedor');
@@ -546,7 +544,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                             },this);
 						}
 				}				
-		},this);		
+		},this);
 		
 	},
 	

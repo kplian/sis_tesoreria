@@ -352,7 +352,10 @@ BEGIN
             monto_retgar_mo,
             descuento_ley,
             obs_descuentos_ley,
-            porc_descuento_ley
+            porc_descuento_ley,
+            nro_cheque,
+            nro_cuenta_bancaria,
+            id_libro_bancos
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -386,8 +389,10 @@ BEGIN
             v_parametros.monto_retgar_mo,
             v_parametros.descuento_ley,
             v_parametros.obs_descuentos_ley,
-            v_parametros.porc_descuento_ley
-							
+            v_parametros.porc_descuento_ley,
+			v_parametros.nro_cheque,
+			v_parametros.nro_cuenta_bancaria,
+            v_parametros.id_libro_bancos				
 			)RETURNING id_plan_pago into v_id_plan_pago;
             
             
@@ -585,7 +590,10 @@ BEGIN
             monto_retgar_mo,
             descuento_ley,
             obs_descuentos_ley,
-            porc_descuento_ley
+            porc_descuento_ley,
+            nro_cheque,
+            nro_cuenta_bancaria,
+            id_libro_bancos
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -619,8 +627,10 @@ BEGIN
             v_parametros.monto_retgar_mo,
             v_parametros.descuento_ley,
             v_parametros.obs_descuentos_ley,
-            v_parametros.porc_descuento_ley
-							
+            v_parametros.porc_descuento_ley,
+            v_parametros.nro_cheque,
+            v_parametros.nro_cuenta_bancaria,
+			v_parametros.id_libgro_bancos				
 			)RETURNING id_plan_pago into v_id_plan_pago;
             
             -- actualiza el monto pagado en el plan_pago padre
@@ -809,7 +819,10 @@ BEGIN
             monto_retgar_mo= v_parametros.monto_retgar_mo,
             descuento_ley=v_parametros.descuento_ley,
             obs_descuentos_ley=v_parametros.obs_descuentos_ley,
-            porc_descuento_ley=v_parametros.porc_descuento_ley
+            porc_descuento_ley=v_parametros.porc_descuento_ley,
+            nro_cheque = v_parametros.nro_cheque,
+            nro_cuenta_bancaria = v_parametros.cuenta_bancaria,
+            id_libro_bancos = v_parametros.id_libro_bancos
 			where id_plan_pago=v_parametros.id_plan_pago;
            
             
