@@ -303,10 +303,36 @@ COMMENT ON COLUMN tes.tplan_pago.nro_cuenta_bancaria
 IS 'Número de cuenta bancaria para realizar el pago cuando es Transferencia';
 
 ALTER TABLE tes.tplan_pago
-  ADD COLUMN id_libro_bancos integer;
-
-COMMENT ON COLUMN tes.tplan_pago.id_libro_bancos
-IS 'referencia al deposito para integración con endesis';
+  ADD COLUMN id_cuenta_bancaria_mov integer;
 
 /***********************************F-SCP-RCM-TES-0-05/12/2013***************************************/
 
+
+/***********************************I-SCP-RCM-TES-0-12/12/2013***************************************/
+CREATE TABLE tes.tcuenta_bancaria_mov (
+  id_cuenta_bancaria_mov SERIAL, 
+  id_cuenta_bancaria INTEGER NOT NULL, 
+  id_int_comprobante INTEGER, 
+  id_cuenta_bancaria_mov_fk INTEGER, 
+  tipo_mov VARCHAR(15) NOT NULL, 
+  tipo varchar(15) NOT NULL, 
+  descripcion VARCHAR(2000) NOT NULL, 
+  nro_doc_tipo VARCHAR(50), 
+  importe NUMERIC(18,2) NOT NULL,
+  fecha date not null, 
+  estado VARCHAR(20) NOT NULL, 
+  observaciones VARCHAR(2000), 
+  CONSTRAINT pk_tcuenta_bancaria_mov__id_cuenta_bancaria_mov PRIMARY KEY(id_cuenta_bancaria_mov)
+) INHERITS (pxp.tbase)
+WITHOUT OIDS;
+
+COMMENT ON COLUMN tes.tcuenta_bancaria_mov.id_cuenta_bancaria_mov_fk
+IS 'Relacion para determinar en un Egreso a que ingreso corresponde';
+
+COMMENT ON COLUMN tes.tcuenta_bancaria_mov.tipo_mov
+IS 'tipo_mov in (''ingreso'',''egreso'')';
+
+COMMENT ON COLUMN tes.tcuenta_bancaria_mov.tipo
+IS 'tipo in (''cheque'',''transferencia'')';
+
+/***********************************F-SCP-RCM-TES-0-12/12/2013***************************************/

@@ -355,7 +355,7 @@ BEGIN
             porc_descuento_ley,
             nro_cheque,
             nro_cuenta_bancaria,
-            id_libro_bancos
+            id_cuenta_bancaria_mov
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -392,7 +392,7 @@ BEGIN
             v_parametros.porc_descuento_ley,
 			v_parametros.nro_cheque,
 			v_parametros.nro_cuenta_bancaria,
-            v_parametros.id_libro_bancos				
+            v_parametros.id_cuenta_bancaria_mov				
 			)RETURNING id_plan_pago into v_id_plan_pago;
             
             
@@ -593,7 +593,7 @@ BEGIN
             porc_descuento_ley,
             nro_cheque,
             nro_cuenta_bancaria,
-            id_libro_bancos
+            id_cuenta_bancaria_mov
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -630,7 +630,7 @@ BEGIN
             v_parametros.porc_descuento_ley,
             v_parametros.nro_cheque,
             v_parametros.nro_cuenta_bancaria,
-			v_parametros.id_libgro_bancos				
+			v_parametros.id_cuenta_bancaria_mov				
 			)RETURNING id_plan_pago into v_id_plan_pago;
             
             -- actualiza el monto pagado en el plan_pago padre
@@ -822,7 +822,7 @@ BEGIN
             porc_descuento_ley=v_parametros.porc_descuento_ley,
             nro_cheque = v_parametros.nro_cheque,
             nro_cuenta_bancaria = v_parametros.cuenta_bancaria,
-            id_libro_bancos = v_parametros.id_libro_bancos
+            id_cuenta_bancaria_mov = v_parametros.id_cuenta_bancaria_mov
 			where id_plan_pago=v_parametros.id_plan_pago;
            
             
