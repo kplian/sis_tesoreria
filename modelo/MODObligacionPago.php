@@ -18,6 +18,11 @@ class MODObligacionPago extends MODbase{
 		$this->procedimiento='tes.ft_obligacion_pago_sel';
 		$this->transaccion='TES_OBPG_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		
+		
+		$this->setParametro('id_funcionario_usu','id_funcionario_usu','int4');
+        $this->setParametro('tipo_interfaz','tipo_interfaz','varchar');
 				
 		//Definicion de la lista del resultado del query
 		$this->captura('id_obligacion_pago','int4');
