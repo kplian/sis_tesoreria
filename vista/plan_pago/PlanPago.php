@@ -147,7 +147,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
          {
             config:{
                 name: 'tipo_pago',
-                fieldLabel: 'Tipo de Cuoata',
+                fieldLabel: 'Tipo de Cuota',
                 allowBlank: false,
                  emptyText:'Tipo de Cuoata',
                 renderer:function (value, p, record){
@@ -306,7 +306,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
            filters:{pfiltro:'plapa.forma_pago',type:'string'},
            id_grupo:1,
            grid:false,
-           form:true
+           form:false
           },
 		 {
             config:{
@@ -336,7 +336,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             filters:{pfiltro:'plapa.nro_cheque',type:'numeric'},
             id_grupo:1,
             grid:true,
-            form:true
+            form:false
         },
         {
             config:{
@@ -352,7 +352,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             filters:{pfiltro:'plapa.nro_cuenta_bancaria',type:'string'},
             id_grupo:1,
             grid:true,
-            form:true
+            form:false
         },
         {
             config:{
@@ -527,7 +527,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             filters:{pfiltro:'cb.nro_cuenta',type:'string'},
             id_grupo:0,
             grid:true,
-            form:true
+            form:false
         },
         {
             config:{
@@ -570,7 +570,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             filters:{pfiltro:'cbanmo.detalle#cbanmo.nro_doc_tipo',type:'string'},
             id_grupo:1,
             grid:true,
-            form:true
+            form:false
         },
         {
             config:{
@@ -801,7 +801,11 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		{name:'nro_cheque', type: 'numeric'},
 		{name:'nro_cuenta_bancaria', type: 'string'},
 		{name:'id_cuenta_bancaria_mov', type: 'numeric'},
-		{name:'desc_deposito', type: 'string'},'numero_op','id_estado_wf','id_depto_conta'
+		{name:'desc_deposito', type: 'string'},
+		'numero_op',
+		'id_estado_wf',
+		'id_depto_conta',
+		'id_moneda','tipo_moneda','desc_moneda'
 		
 	],
 	
@@ -1162,6 +1166,146 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 alert(reg.ROOT.datos.mensaje)
             }
      },
+     
+     enableDisable:function(val){
+      
+      
+      if(val=='devengado'){
+            
+            //this.Cmp.id_plantilla.enable();
+            //this.ocultarComponente(this.Cmp.id_plantilla);
+            
+            this.Cmp.nombre_pago.disable();
+            this.ocultarComponente(this.Cmp.nombre_pago);
+            
+            this.Cmp.forma_pago.disable();
+            this.ocultarComponente(this.Cmp.forma_pago);
+            
+                      
+            this.Cmp.id_cuenta_bancaria.disable()
+            this.ocultarComponente(this.Cmp.id_cuenta_bancaria);
+            
+            this.Cmp.nro_cheque.disable()
+            this.ocultarComponente(this.Cmp.nro_cheque);
+            
+            this.Cmp.nro_cuenta_bancaria.disable()
+            this.ocultarComponente(this.Cmp.nro_cuenta_bancaria);
+            
+                       
+            this.Cmp.id_cuenta_bancaria_mov.disable()
+            this.ocultarComponente(this.Cmp.id_cuenta_bancaria_mov);
+            
+            this.deshabilitarDescuentos()
+            
+        }
+        else{
+            
+            //this.Cmp.id_plantilla.enable();
+            //this.mostrarComponente(this.Cmp.id_plantilla);
+            
+            this.Cmp.nombre_pago.enable();
+            this.mostrarComponente(this.Cmp.nombre_pago);
+            
+            this.Cmp.forma_pago.enable();
+            this.mostrarComponente(this.Cmp.forma_pago);
+            
+            this.Cmp.id_cuenta_bancaria.enable()
+            this.mostrarComponente(this.Cmp.id_cuenta_bancaria);
+            
+            this.Cmp.nro_cheque.enable()
+            this.mostrarComponente(this.Cmp.nro_cheque);
+            
+            this.Cmp.nro_cuenta_bancaria.enable()
+            this.mostrarComponente(this.Cmp.nro_cuenta_bancaria);
+            
+            this.Cmp.id_cuenta_bancaria_mov.enable()
+            this.mostrarComponente(this.Cmp.id_cuenta_bancaria_mov);
+            
+            this.habilitarDescuentos();
+            
+         }
+          
+          this.Cmp.monto_no_pagado.setValue(0);
+          this.Cmp.otros_descuentos.setValue(0);
+          this.Cmp.liquido_pagable.setValue(0);
+          this.Cmp.monto_ejecutar_total_mo.setValue(0);
+          this.Cmp.monto_retgar_mo.setValue(0);
+          this.Cmp.descuento_ley.setValue(0)
+          this.calculaMontoPago()
+         
+     },
+     
+    habilitarDescuentos:function(){
+        //this.cmpDescuentoAnticipo.enable();
+        //this.mostrarComponente(this.cmpDescuentoAnticipo);
+        
+        this.Cmp.otros_descuentos.enable();
+        this.mostrarComponente(this.Cmp.otros_descuentos);
+        
+        //calcular retenciones segun documento
+        
+        this.mostrarComponente(this.Cmp.descuento_ley);
+        
+        this.Cmp.monto_retgar_mo.enable();
+        this.mostrarComponente(this.Cmp.monto_retgar_mo);
+        
+        
+        
+        //this.cmpObsDescuentoAnticipo.enable();
+        //this.mostrarComponente(this.cmpObsDescuentoAnticipo);
+        this.Cmp.obs_otros_descuentos.enable();
+        this.mostrarComponente(this.Cmp.obs_otros_descuentos);
+        
+        this.mostrarComponente(this.Cmp.obs_descuentos_ley);
+        
+    } ,
+     deshabilitarDescuentos:function(){
+       // this.cmpDescuentoAnticipo.disable();
+       // this.ocultarComponente(this.cmpDescuentoAnticipo);
+        this.Cmp.otros_descuentos.disable();
+        this.ocultarComponente(this.Cmp.otros_descuentos);
+        
+        this.Cmp.monto_retgar_mo.disable();
+        this.ocultarComponente(this.Cmp.monto_retgar_mo);
+        
+        this.ocultarComponente(this.Cmp.descuento_ley);
+        
+        
+         
+        //this.cmpObsDescuentoAnticipo.disable();
+        //this.ocultarComponente(this.cmpObsDescuentoAnticipo);
+        this.Cmp.obs_otros_descuentos.disable();
+        this.ocultarComponente(this.Cmp.obs_otros_descuentos);
+        
+         this.ocultarComponente(this.Cmp.obs_descuentos_ley);
+            
+        
+    } ,
+     
+    onBtnSolPlanPago:function(){        
+        var rec=this.sm.getSelected();
+        Ext.Ajax.request({
+            url:'../../sis_tesoreria/control/PlanPago/solicitudPlanPago',
+            params:{'id_plan_pago':rec.data.id_plan_pago,id_obligacion_pago:rec.data.id_obligacion_pago},
+            success: this.successExport,
+            failure: function() {
+                console.log("fail");
+            },
+            timeout: function() {
+                console.log("timeout");
+            },
+            scope:this
+        });  
+    },
+    
+    calculaMontoPago:function(){
+        var descuento_ley = this.Cmp.monto.getValue()*this.Cmp.porc_descuento_ley.getValue();
+         this.Cmp.descuento_ley.setValue(descuento_ley);
+         var liquido = this.Cmp.monto.getValue()  -  this.Cmp.monto_no_pagado.getValue() -  this.Cmp.otros_descuentos.getValue() - this.Cmp.monto_retgar_mo.getValue() -  this.Cmp.descuento_ley.getValue();
+        this.Cmp.liquido_pagable.setValue(liquido>0?liquido:0);
+        var eje = this.Cmp.monto.getValue()  -  this.Cmp.monto_no_pagado.getValue()
+        this.Cmp.monto_ejecutar_total_mo.setValue(eje>0?eje:0);
+     }, 
     
     sortInfo:{
 		field: 'nro_cuota',

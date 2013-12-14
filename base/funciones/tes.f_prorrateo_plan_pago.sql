@@ -10,12 +10,12 @@ CREATE OR REPLACE FUNCTION tes.f_prorrateo_plan_pago (
 )
 RETURNS boolean AS
 $body$
-/*
-
-
-
-
-*/
+	/*********************************    
+ 	#TRANSACCION:  'TES_PLAPAPA_INS'
+ 	#DESCRIPCION:	insercion del prorrateo del plan de pagos
+ 	#AUTOR:		RAC KPLIAN	
+ 	#FECHA:  23/12/2013
+	***********************************/
 
 DECLARE
 v_registros record;
@@ -42,8 +42,11 @@ BEGIN
       
         
             --------------------------------------------------
+            --  SI ES UNA CUOTA DE DEVENGADO
             -- Inserta prorrateo automatico para cuota de devengado
             ------------------------------------------------
+             
+             --acumulador del monto a pagar inciado en cero
              v_monto_total=0; 
              --obtengo tipo de cambio del plan de pago
              select 
@@ -64,6 +67,8 @@ BEGIN
                       
                       v_monto_ejecutar_total_mb = round(p_monto_ejecutar_total_mo*v_tipo_cambio,2);
                      
+                      
+                      --se lista los cenotr de costo que se prorratean
                       FOR  v_registros in (
                                            select
                                             od.id_obligacion_det,
@@ -75,6 +80,7 @@ BEGIN
                         
                         --calcula el importe prorrateado segun factor
                         v_monto= round(p_monto_ejecutar_total_mo * v_registros.factor_porcentual,2);
+                        --incrementa el acumlador del total a pagar
                         v_monto_total=v_monto_total+v_monto;
                         
                         v_monto_mb= round(v_monto_ejecutar_total_mb * v_registros.factor_porcentual,2);
@@ -106,15 +112,15 @@ BEGIN
                         
                        
                       END LOOP;
-                      
+                     
                      IF (v_monto_total_mb!=v_monto_ejecutar_total_mb) or (v_monto_total!=p_monto_ejecutar_total_mo)  THEN
                         
                        --OJO, si existe alguna diferencia por tipo de cambio podria ser aca
                        --a casusa de la condicion del IF que fuerza la igualdad
                        
                          update tes.tprorrateo p set
-                         monto_ejecutar_mo =   p_monto_ejecutar_total_mo-(v_monto-monto_ejecutar_mo),
-                         monto_ejecutar_mb =   v_monto_ejecutar_total_mb-(v_monto_mb-monto_ejecutar_mb)
+                         monto_ejecutar_mo =   p_monto_ejecutar_total_mo-(v_monto_total-monto_ejecutar_mo),
+                         monto_ejecutar_mb =   v_monto_ejecutar_total_mb-(v_monto_total_mb-monto_ejecutar_mb)
                          where p.id_prorrateo = v_id_prorrateo;
                       
                       END IF;
@@ -165,6 +171,7 @@ BEGIN
               END IF;
       ELSE
       -------------------------------------------------------------------------------
+      -- SI ES UNA CUOTA DE PAGO
       -- Si p_id_plan_pago_fk no es nulo se trata de un prorrateo de una cuota de pago
       ---------------------------------------------------------------------------------
       
@@ -181,7 +188,7 @@ BEGIN
       
      -- raise exception 'tipo de cambio %', v_tipo_cambio ;
       
-      --calculo del factor eligual al monto a pagar entre el monto devengado
+      --calculo del factor el igual al monto a pagar entre el monto devengado
       v_factor =    p_monto_ejecutar_total_mo / v_monto_ejecutar_total_mo_devengado;
         
         v_cont = 0;
@@ -252,8 +259,8 @@ BEGIN
                       --ajusta diferencia por redondeo
                       IF v_monto_total!=p_monto_ejecutar_total_mo  THEN
                         
-                         update tes.tprorrateo p set
-                         monto_ejecutar_mo =   p_monto_ejecutar_total_mo-(v_monto-monto_ejecutar_mo)
+                          update tes.tprorrateo p set
+                         monto_ejecutar_mo =   p_monto_ejecutar_total_mo-(v_monto_total-monto_ejecutar_mo)
                            where p.id_prorrateo = v_id_prorrateo;
                       
                       END IF;

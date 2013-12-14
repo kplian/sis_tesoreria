@@ -84,6 +84,12 @@ class MODPlanPago extends MODbase{
 		
 		$this->captura('id_depto_conta','integer');
 		
+		$this->captura('id_moneda','integer');
+		$this->captura('tipo_moneda','varchar');
+		$this->captura('desc_moneda','varchar');
+		
+		
+		
 		
 		
 		//Ejecuta la instruccion
@@ -193,6 +199,7 @@ class MODPlanPago extends MODbase{
 		
 		$this->setParametro('nro_cheque','nro_cheque','integer');
 		$this->setParametro('nro_cuenta_bancaria','nro_cuenta_bancaria','varchar');
+		
 		$this->setParametro('id_cuenta_bancaria_mov','id_cuenta_bancaria_mov','integer');
         
 		//Ejecuta la instruccion

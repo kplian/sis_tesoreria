@@ -12,7 +12,7 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 Phx.vista.PlanPagoVb = {
-    bedit:false,
+    bedit:true,
     bnew:false,
     bsave:false,
     bdel:false,
@@ -24,9 +24,23 @@ Phx.vista.PlanPagoVb = {
 	constructor: function(config) {
 	    
 	   this.Atributos[this.getIndAtributo('numero_op')].grid=true; 
+	   
+	    this.Atributos[this.getIndAtributo('nro_cuota')].form=false; 
+	    
+	    this.Atributos[this.getIndAtributo('forma_pago')].form=true; 
+	    this.Atributos[this.getIndAtributo('nro_cheque')].form=true; 
+	    this.Atributos[this.getIndAtributo('nro_cuenta_bancaria')].form=true; 
+	    this.Atributos[this.getIndAtributo('id_cuenta_bancaria')].form=true; 
+	    
+	    this.Atributos[this.getIndAtributo('id_cuenta_bancaria_mov')].form=true; 
+	    
+	    
+	    
+	    
+	    
 	    
        Phx.vista.PlanPagoVb.superclass.constructor.call(this,config);
-       
+        this.iniciarEventos();
        
        this.addButton('SolDevPag',{text:'Solicitar Devengado/Pago',iconCls: 'bpagar',disabled:true,handler:this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente, devengado o pago  '});
         
@@ -119,6 +133,94 @@ Phx.vista.PlanPagoVb = {
         
     },
     
+   
+   onButtonEdit:function(){
+       
+         var data = this.getSelectedData();
+        
+         
+         if(data.tipo=='pagado'){
+             
+                this.Cmp.tipo_pago.disable();
+                this.ocultarComponente(this.Cmp.tipo_pago);
+                
+                this.Cmp.tipo.disable();
+                this.ocultarComponente(this.Cmp.tipo);
+                
+                this.Cmp.id_plantilla.disable();
+                this.ocultarComponente(this.Cmp.id_plantilla);
+                
+                this.Cmp.nombre_pago.enable();
+                this.mostrarComponente(this.Cmp.nombre_pago);
+                
+                /*this.Cmp.forma_pago.enable();
+                this.mostrarComponente(this.Cmp.forma_pago);*/
+                
+                this.Cmp.id_cuenta_bancaria.enable()
+                this.mostrarComponente(this.Cmp.id_cuenta_bancaria);
+                this.habilitarDescuentos();
+                
+                this.Cmp.monto_no_pagado.disable();
+                this.ocultarComponente(this.Cmp.monto_no_pagado);
+                
+                this.Cmp.obs_monto_no_pagado.disable();
+                this.ocultarComponente(this.Cmp.obs_monto_no_pagado);
+                
+                this.Cmp.tipo_cambio.disable();
+                this.ocultarComponente(this.Cmp.tipo_cambio);
+                
+                
+         
+         
+         }
+         else{
+                this.mostrarComponente(this.Cmp.tipo_pago);
+                this.Cmp.tipo.enable();
+                
+                this.mostrarComponente(this.Cmp.tipo);
+               
+                
+                this.Cmp.id_plantilla.enable();
+                this.mostrarComponente(this.Cmp.id_plantilla);
+                
+                this.Cmp.monto_no_pagado.enable();
+                this.mostrarComponente(this.Cmp.monto_no_pagado);
+                 
+                this.Cmp.obs_monto_no_pagado.enable();
+                this.mostrarComponente(this.Cmp.obs_monto_no_pagado);
+                
+                if(data.tipo_moneda=='base'){
+                 
+                   this.Cmp.tipo_cambio.disable();
+                   this.ocultarComponente(this.Cmp.tipo_cambio);
+                }
+                else{
+                    this.Cmp.tipo_cambio.enable();
+                    this.mostrarComponente(this.Cmp.tipo_cambio);
+                  
+                }
+                
+         }
+         
+         if(data.tipo=='devengado'){
+             this.enableDisable('devengado')
+             
+         }
+         else{
+            this.enableDisable('devengado_pagado') 
+            //Verifica si habilita o no el cheque y la cuenta bancaria destino
+            this.ocultarCheCue(data.forma_pago);
+         }
+         
+       
+           this.Cmp.fecha_tentativa.disable();
+           this.Cmp.tipo.disable();
+           this.Cmp.tipo_pago.disable(); 
+           
+            Phx.vista.PlanPagoVb.superclass.onButtonEdit.call(this);
+           
+       },
+    
     
     
     onBtnDevPag:function()
@@ -160,40 +262,122 @@ Phx.vista.PlanPagoVb = {
                 })
             }
         
-    },  
+    }, 
+    
+    iniciarEventos:function(){
+        
+        this.Cmp.monto.on('change',this.calculaMontoPago,this); 
+        //this.cmpDescuentoAnticipo.on('change',this.calculaMontoPago,this);
+        this.Cmp.monto_no_pagado.on('change',this.calculaMontoPago,this);
+        this.Cmp.otros_descuentos.on('change',this.calculaMontoPago,this);
+        this.Cmp.monto_retgar_mo.on('change',this.calculaMontoPago,this);
+        this.Cmp.descuento_ley.on('change',this.calculaMontoPago,this);
+        
+        this.Cmp.id_plantilla.on('select',function(cmb,rec,i){
+            
+            console.log(rec.data)
+            this.getDecuentosPorAplicar(rec.data.id_plantilla);
+            
+        },this);
+        
+        this.Cmp.tipo.on('change',function(groupRadio,radio){
+                                this.enableDisable(radio.inputValue);
+                            },this); 
+          
+        
+      /* this.cmpFechaDev.on('change',function(com,dat){
+              
+              if(this.maestro.tipo_moneda=='base'){
+                 this.cmpTipoCambio.disable();
+                 this.cmpTipoCambio.setValue(1); 
+                  
+              }
+              else{
+                   this.cmpTipoCambio.enable()
+                 this.obtenerTipoCambio();  
+              }
+             
+              
+          },this);*/
+         
+       
+       
+       this.Cmp.tipo_pago.on('select',function(cmb,rec,i){
+           if(rec.data.variable=='anticipo' || rec.data.variable=='adelanto'){
+               this.Cmp.tipo.disable();
+               this.ocultarComponente(this.Cmp.tipo);
+               
+               this.deshabilitarDescuentos();
+               
+               if(rec.data.variable=='anticipo'){
+                   this.ocultarComponente(this.Cmp.monto_ejecutar_total_mo);
+                   this.Cmp.id_plantilla.disable();
+                   this.ocultarComponente(this.Cmp.id_plantilla);
+               }
+               else{
+                   this.mostrarComponente(this.Cmp.monto_ejecutar_total_mo);
+                   this.Cmp.id_plantilla.enable();
+                   this.mostrarComponente(this.Cmp.id_plantilla);
+                   
+               }
+               
+           
+           
+           }
+           else{
+               this.Cmp.tipo.enable();
+               this.mostrarComponente(this.Cmp.tipo);
+               this.mostrarComponente(this.Cmp.monto_ejecutar_total_mo)
+               this.habilitarDescuentos();
+           }
+           
+           
+       },this);
+       
+       //Evento para filtrar los depósitos a partir de la cuenta bancaria
+        this.Cmp.id_cuenta_bancaria.on('select',function(data,rec,ind){
+            this.Cmp.id_cuenta_bancaria_mov.setValue('');
+            this.Cmp.id_cuenta_bancaria_mov.modificado=true;
+            Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: rec.id});
+        },this);
+        
+        //Evento para ocultar/motrar componentes por cheque o transferencia
+        this.Cmp.forma_pago.on('change',function(groupRadio,radio){
+            this.ocultarCheCue(radio.inputValue);
+        },this);           
+    
+    }, 
     
     
     preparaMenu:function(n){
           var data = this.getSelectedData();
           var tb =this.tbar;
           Phx.vista.PlanPagoVb.superclass.preparaMenu.call(this,n); 
-         
-         
           if (data['estado']== 'borrador' || data['estado']== 'pendiente' || data['estado']== 'devengado' || data['estado']== 'pagado' ){
                   this.getBoton('ant_estado').disable();
                   this.getBoton('sig_estado').disable();
-                  this.getBoton('SolDevPag').disable();    
+                  this.getBoton('SolDevPag').disable(); 
+                  this.getBoton('edit').disable();   
           }
-           else{
+          else{
                    if (data['estado']== 'vbconta'){
                        this.getBoton('ant_estado').enable();
                        this.getBoton('sig_estado').disable();
-                        this.getBoton('SolDevPag').enable();
-                       
+                       this.getBoton('SolDevPag').enable();
+                        this.getBoton('edit').enable(); 
                    }
                    else{
                        this.getBoton('ant_estado').enable();
                        this.getBoton('sig_estado').enable();
                        this.getBoton('SolDevPag').disable();
-                       
+                       this.getBoton('edit').disable(); 
+                     
                    }
-                  
-                  
-                  
-          }
-              
-          
-          
+                   
+                   
+           }
+           this.getBoton('SolPlanPago').enable(); 
+           
      },
     
     liberaMenu:function(){
@@ -203,10 +387,39 @@ Phx.vista.PlanPagoVb = {
            this.getBoton('ant_estado').disable();
            this.getBoton('sig_estado').disable();
            this.getBoton('SolDevPag').disable();
+           this.getBoton('SolPlanPago').disable();
+           
+           
+           
            
         }
        return tb
     }, 
+    
+    ocultarCheCue: function(pFormaPago){
+        console.log('pFormaPago',pFormaPago)
+        if(pFormaPago=='transferencia'){
+            //Deshabilita campo cheque
+            this.Cmp.nro_cheque.allowBlank=true;
+            this.Cmp.nro_cheque.setValue('');
+            this.Cmp.nro_cheque.disable();
+           
+            //Habilita nrocuenta bancaria destino
+            this.Cmp.nro_cuenta_bancaria.allowBlank=false;
+            this.Cmp.nro_cuenta_bancaria.enable();
+        } else{
+            
+            //cheque
+            //Habilita campo cheque
+            this.Cmp.nro_cheque.allowBlank=false;
+            this.Cmp.nro_cheque.enable();
+            //Habilita nrocuenta bancaria destino
+            this.Cmp.nro_cuenta_bancaria.allowBlank=true;
+            this.Cmp.nro_cuenta_bancaria.setValue('');
+            this.Cmp.nro_cuenta_bancaria.disable();
+        }
+        
+    },
     
     south:{
           url:'../../../sis_tesoreria/vista/prorrateo/Prorrateo.php',
@@ -214,7 +427,7 @@ Phx.vista.PlanPagoVb = {
           height:'40%',
           cls:'Prorrateo'
      },
-   sortInfo:{
+    sortInfo:{
         field: 'numero_op',
         direction: 'ASC'
     }

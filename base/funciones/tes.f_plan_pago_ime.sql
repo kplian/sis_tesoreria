@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -75,12 +77,39 @@ DECLARE
     va_regla         varchar[]; 
     va_prioridad     integer[];
     
-    v_monto_ejecutar_mo numeric;
+    v_monto_ejecutar_mo 	numeric;
     
-    v_count integer;
-    v_registros_pp record;
+    v_count 				integer;
+    v_registros_pp 			record;
     
-    v_verficacion varchar[];
+    v_verficacion 			varchar[];
+    
+    v_perdir_obs 			varchar;
+    v_num_estados 			integer;
+    v_num_funcionarios  	integer;
+    v_num_deptos  			integer;
+    
+    v_id_funcionario_estado integer;
+    v_id_depto_estado 		integer;
+    
+    v_num_obliacion_pago 	varchar;
+    v_codigo_estado_siguiente  varchar;
+    v_id_depto  			INTEGER;
+    v_obs 					varchar;
+    
+    v_id_funcionario     	integer;
+    v_id_usuario_reg        integer;
+    v_id_estado_wf_ant 		integer;
+    
+    v_id_cuenta_bancaria integer;
+    v_id_cuenta_bancaria_mov integer;
+    
+    
+    v_forma_pago varchar;
+    
+    v_nro_cheque integer;
+    
+    v_nro_cuenta_bancaria  varchar;
   
     
     
@@ -101,6 +130,47 @@ BEGIN
 					
         begin
         
+           
+           --determinar exixtencia de parametros dinamicos para registro  
+           -- (Interface de obligacions de adquisocines o interface de obligaciones tesoeria)
+           -- la adquisiciones tiene menos parametros presentes
+           
+           
+             IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria') THEN
+             
+             v_id_cuenta_bancaria =  v_parametros.id_cuenta_bancaria;
+             
+             END IF;
+             
+             IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria_mov') THEN
+             
+             v_id_cuenta_bancaria_mov =  v_parametros.id_cuenta_bancaria_mov;
+             
+             END IF;
+             
+            IF  pxp.f_existe_parametro(p_tabla,'forma_pago') THEN
+             
+                 v_forma_pago =  v_parametros.forma_pago;
+             
+             END IF;
+             
+             
+             IF  pxp.f_existe_parametro(p_tabla,'nro_cheque') THEN
+             
+                 v_nro_cheque =  v_parametros.nro_cheque;
+             
+             END IF;
+             
+             
+             IF  pxp.f_existe_parametro(p_tabla,'nro_cuenta_bancaria') THEN
+             
+                 v_nro_cuenta_bancaria =  v_parametros.nro_cuenta_bancaria;
+             
+             END IF;
+             
+             
+             
+           
            --validamos que el monto a pagar sea mayor que cero
            
            IF  v_parametros.monto = 0 THEN
@@ -374,8 +444,8 @@ BEGIN
 			v_parametros.monto,
 			v_parametros.nombre_pago,
 		    v_id_estado_wf,
-			v_parametros.id_cuenta_bancaria,
-			v_parametros.forma_pago,
+			v_id_cuenta_bancaria,
+			v_forma_pago,
 			v_parametros.monto_no_pagado,
 			now(),
 			p_id_usuario,
@@ -388,9 +458,9 @@ BEGIN
             v_parametros.descuento_ley,
             v_parametros.obs_descuentos_ley,
             v_parametros.porc_descuento_ley,
-			v_parametros.nro_cheque,
-			v_parametros.nro_cuenta_bancaria,
-            v_parametros.id_cuenta_bancaria_mov				
+			v_nro_cheque,
+			v_nro_cuenta_bancaria,
+            v_id_cuenta_bancaria_mov			
 			)RETURNING id_plan_pago into v_id_plan_pago;
             
             
@@ -428,6 +498,39 @@ BEGIN
 	elsif(p_transaccion='TES_PLAPAPA_INS')then
 					
         begin
+        
+        
+              IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria') THEN
+             
+             v_id_cuenta_bancaria =  v_parametros.id_cuenta_bancaria;
+             
+             END IF;
+             
+             IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria_mov') THEN
+             
+             v_id_cuenta_bancaria_mov =  v_parametros.id_cuenta_bancaria_mov;
+             
+             END IF;
+             
+            IF  pxp.f_existe_parametro(p_tabla,'forma_pago') THEN
+             
+                 v_forma_pago =  v_parametros.forma_pago;
+             
+             END IF;
+             
+             
+             IF  pxp.f_existe_parametro(p_tabla,'nro_cheque') THEN
+             
+                 v_nro_cheque =  v_parametros.nro_cheque;
+             
+             END IF;
+             
+             
+             IF  pxp.f_existe_parametro(p_tabla,'nro_cuenta_bancaria') THEN
+             
+                 v_nro_cuenta_bancaria =  v_parametros.nro_cuenta_bancaria;
+             
+             END IF;
         
         
         
@@ -612,8 +715,8 @@ BEGIN
 			v_parametros.monto,
 			v_parametros.nombre_pago,
 		    v_id_estado_wf,
-			v_parametros.id_cuenta_bancaria,
-			v_parametros.forma_pago,
+			v_id_cuenta_bancaria,
+			v_forma_pago,
 			v_parametros.monto_no_pagado,
 			now(),
 			p_id_usuario,
@@ -626,9 +729,9 @@ BEGIN
             v_parametros.descuento_ley,
             v_parametros.obs_descuentos_ley,
             v_parametros.porc_descuento_ley,
-            v_parametros.nro_cheque,
-            v_parametros.nro_cuenta_bancaria,
-			v_parametros.id_cuenta_bancaria_mov				
+            v_nro_cheque,
+            v_nro_cuenta_bancaria,
+			v_id_cuenta_bancaria_mov				
 			)RETURNING id_plan_pago into v_id_plan_pago;
             
             -- actualiza el monto pagado en el plan_pago padre
@@ -675,6 +778,47 @@ BEGIN
 
 		begin
         
+           --determinar exixtencia de parametros dinamicos para registro  
+           -- (Interface de obligacions de adquisocines o interface de obligaciones tesoeria)
+           -- la adquisiciones tiene menos parametros presentes
+           
+           -- raise exception '%, %, %,%,%', COALESCE(v_parametros.id_cuenta_bancaria,0), COALESCE(v_parametros.id_cuenta_bancaria_mov,0),  COALESCE(v_parametros.forma_pago,''),  COALESCE(v_parametros.nro_cheque,0),  COALESCE(v_parametros.nro_cuenta_bancaria,'');
+        
+           
+             IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria') THEN
+             
+             v_id_cuenta_bancaria =  v_parametros.id_cuenta_bancaria;
+             
+             END IF;
+             
+             IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria_mov') THEN
+             
+             v_id_cuenta_bancaria_mov =  v_parametros.id_cuenta_bancaria_mov;
+             
+             END IF;
+             
+             IF  pxp.f_existe_parametro(p_tabla,'forma_pago') THEN
+             
+                 v_forma_pago =  v_parametros.forma_pago;
+             
+             END IF;
+             
+             
+             IF  pxp.f_existe_parametro(p_tabla,'nro_cheque') THEN
+             
+                 v_nro_cheque =  v_parametros.nro_cheque;
+             
+             END IF;
+             
+             
+             IF  pxp.f_existe_parametro(p_tabla,'nro_cuenta_bancaria') THEN
+             
+                 v_nro_cuenta_bancaria =  v_parametros.nro_cuenta_bancaria;
+             
+             END IF;
+        
+        
+        
         
             --validamos que el monto a pagar sea mayor que cero
            
@@ -717,11 +861,7 @@ BEGIN
            and  pp.id_plan_pago= v_parametros.id_plan_pago ;
            
            
-           
-           
-           
-           
-           IF v_codigo_estado != 'borrador' THEN
+           IF v_codigo_estado = 'borrador' or v_codigo_estado = 'pagado'  or v_codigo_estado = 'pendiente' or v_codigo_estado = 'devengado' or v_codigo_estado = 'anulado' THEN
            
              raise exception 'Solo puede modificar pagos en estado borrador';  
            
@@ -794,7 +934,8 @@ BEGIN
             
             
             END IF;
-        
+            
+           
         
 			--Sentencia de la modificacion
 			update tes.tplan_pago set
@@ -807,8 +948,8 @@ BEGIN
 			obs_otros_descuentos = v_parametros.obs_otros_descuentos,
 			monto = v_parametros.monto,
 			nombre_pago = v_parametros.nombre_pago,
-			id_cuenta_bancaria = v_parametros.id_cuenta_bancaria,
-			forma_pago = v_parametros.forma_pago,
+			id_cuenta_bancaria = v_id_cuenta_bancaria,
+			forma_pago = v_forma_pago,
 			monto_no_pagado = v_parametros.monto_no_pagado,
             liquido_pagable=v_liquido_pagable,
 			fecha_mod = now(),
@@ -818,9 +959,10 @@ BEGIN
             descuento_ley=v_parametros.descuento_ley,
             obs_descuentos_ley=v_parametros.obs_descuentos_ley,
             porc_descuento_ley=v_parametros.porc_descuento_ley,
-            nro_cheque = v_parametros.nro_cheque,
-            nro_cuenta_bancaria = v_parametros.nro_cuenta_bancaria,
-            id_cuenta_bancaria_mov = v_parametros.id_cuenta_bancaria_mov
+            nro_cheque = v_nro_cheque,
+            fecha_tentativa = v_parametros.fecha_tentativa,
+            nro_cuenta_bancaria = v_nro_cuenta_bancaria,
+            id_cuenta_bancaria_mov = v_id_cuenta_bancaria_mov
 			where id_plan_pago=v_parametros.id_plan_pago;
            
             
@@ -1071,6 +1213,59 @@ BEGIN
 
 		begin
         
+           --validacion de la cuota
+           
+           select  
+             * 
+           into
+             v_registros
+           from tes.tplan_pago pp 
+           where pp.id_plan_pago = v_parametros.id_plan_pago;
+           
+           
+            
+            IF  v_registros.tipo = 'pagado'  or  v_registros.tipo = 'devengado_pagado' THEN
+                
+                  IF v_registros.forma_pago = 'cheque' THEN
+                
+                      IF  v_registros.nro_cheque is NULL THEN
+                      
+                         raise exception  'Tiene que especificar el  nro de cheque';
+                      
+                      END IF;
+                  ELSE 
+                
+                 		IF  v_registros.nro_cuenta_bancaria  = '' or  v_registros.nro_cuenta_bancaria is NULL THEN
+                      
+                         raise exception  'Tiene que especificar el nro de cuenta destino, para la transferencia bancaria';
+                      
+                      END IF;  
+                  
+               
+               END IF; 
+               
+               
+               IF v_registros.id_cuenta_bancaria is NULL THEN
+                  raise exception  'Tiene que especificar la cuenta bancaria origen de los fondos';
+               END IF ;    
+                  
+                
+               
+               --validacion de deposito, (solo BOA, puede retirarse)
+               IF v_registros.id_cuenta_bancaria_mov is NULL THEN
+               
+                    IF  v_registros.nro_cuenta_bancaria  = '' or  v_registros.nro_cuenta_bancaria is NULL THEN
+                      
+                         raise exception  'Tiene que especificar el deposito  origen de los fondos';
+                      
+                    END IF;
+               
+               END IF ;
+            
+           END IF;
+           
+         
+           
            v_verficacion = tes.f_generar_comprobante(p_id_usuario, v_parametros.id_plan_pago, v_parametros.id_depto_conta);
            
           IF  v_verficacion[1]= 'TRUE'   THEN
@@ -1098,7 +1293,320 @@ BEGIN
             
             END IF;
         end;
-    
+        
+     /*********************************    
+ 	#TRANSACCION:  'TES_SIGEPP_IME'
+ 	#DESCRIPCION:	funcion que controla el cambio al Siguiente esado de los planes de pago, integrado  con el EF
+ 	#AUTOR:		RAC	
+ 	#FECHA:		17-12-2013 12:12:51
+	***********************************/
+
+	elseif(p_transaccion='TES_SIGEPP_IME')then   
+        begin
+        
+        --obtenermos datos basicos
+         select
+            pp.id_proceso_wf,
+            pp.id_estado_wf,
+            pp.estado,
+            pp.fecha_tentativa,
+            op.numero 
+          into 
+          
+            v_id_proceso_wf,
+            v_id_estado_wf,
+            v_codigo_estado,
+            v_fecha_tentativa
+            v_num_obliacion_pago
+            
+          from tes.tplan_pago  pp
+          inner  join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
+          where pp.id_plan_pago = v_parametros.id_plan_pago;
+          
+          
+          select 
+            ew.id_tipo_estado ,
+            te.pedir_obs
+           into 
+            v_id_tipo_estado,
+            v_perdir_obs
+          from wf.testado_wf ew
+          inner join wf.ttipo_estado te on te.id_tipo_estado = ew.id_tipo_estado
+          where ew.id_estado_wf = v_id_estado_wf;
+          
+          
+        
+         --------------------------------------------- 
+         -- Verifica  los posibles estados sigueintes para que desde la interfza se tome la decision si es necesario
+         --------------------------------------------------
+          IF  v_parametros.operacion = 'verificar' THEN
+          
+              --buscamos siguiente estado correpondiente al proceso del WF
+             
+              ----- variables de retorno------
+              
+              v_num_estados=0;
+              v_num_funcionarios=0;
+              v_num_deptos=0;
+              
+              --------------------------------- 
+            
+              
+              SELECT 
+                 *
+              into
+                va_id_tipo_estado,
+                va_codigo_estado,
+                va_disparador,
+                va_regla,
+                va_prioridad
+            
+              FROM wf.f_obtener_estado_wf(v_id_proceso_wf, NULL,v_id_tipo_estado,'siguiente');
+          
+             
+          
+            
+              v_num_estados= array_length(va_id_tipo_estado, 1);
+            
+             IF v_perdir_obs = 'no' THEN
+            
+                     IF v_num_estados = 1 then
+                     
+                           -- si solo hay un estado,  verificamos si tiene mas de un funcionario por este estado
+                           SELECT 
+                           *
+                            into
+                           v_num_funcionarios 
+                           FROM wf.f_funcionario_wf_sel(
+                               p_id_usuario, 
+                               va_id_tipo_estado[1], 
+                               v_fecha_tentativa,
+                               v_id_estado_wf,
+                               TRUE) AS (total bigint);
+                         
+                          IF v_num_funcionarios = 1 THEN
+                          -- si solo es un funcionario, recuperamos el funcionario correspondiente
+                               SELECT 
+                                   id_funcionario
+                                     into
+                                   v_id_funcionario_estado
+                               FROM wf.f_funcionario_wf_sel(
+                                   p_id_usuario, 
+                                   va_id_tipo_estado[1], 
+                                   v_fecha_tentativa,
+                                   v_id_estado_wf,
+                                   FALSE) 
+                                   AS (id_funcionario integer,
+                                     desc_funcionario text,
+                                     desc_funcionario_cargo text,
+                                     prioridad integer);
+                          END IF;    
+                         
+                  
+                          --verificamos el numero de deptos
+                          
+                            SELECT 
+                            *
+                            into
+                              v_num_deptos 
+                           FROM wf.f_depto_wf_sel(
+                               p_id_usuario, 
+                               va_id_tipo_estado[1], 
+                               v_fecha_tentativa,
+                               v_id_estado_wf,
+                               TRUE) AS (total bigint);
+                       
+                          IF v_num_deptos = 1 THEN
+                              -- si solo es un funcionario, recuperamos el funcionario correspondiente
+                                   SELECT 
+                                       id_depto
+                                         into
+                                       v_id_depto_estado
+                                  FROM wf.f_depto_wf_sel(
+                                       p_id_usuario, 
+                                       va_id_tipo_estado[1], 
+                                       v_fecha_tentativa,
+                                       v_id_estado_wf,
+                                       FALSE) 
+                                       AS (id_depto integer,
+                                         codigo_depto varchar,
+                                         nombre_corto_depto varchar,
+                                         nombre_depto varchar,
+                                         prioridad integer);
+                            END IF;
+                  
+                  END IF;
+           
+           END IF;
+            
+            -- si hay mas de un estado disponible  preguntamos al usuario
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Verificacion para el siguiente estado)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'estados', array_to_string(va_id_tipo_estado, ','));
+            v_resp = pxp.f_agrega_clave(v_resp,'operacion','preguntar_todo');
+            v_resp = pxp.f_agrega_clave(v_resp,'num_estados',v_num_estados::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'num_funcionarios',v_num_funcionarios::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'num_deptos',v_num_deptos::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'id_funcionario_estado',v_id_funcionario_estado::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'id_depto_estado',v_id_depto_estado::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'id_tipo_estado', va_id_tipo_estado[1]::varchar);
+            
+            
+           ----------------------------------------
+           --Se se solicita cambiar de estado a la solicitud
+           ------------------------------------------
+           ELSEIF  v_parametros.operacion = 'cambiar' THEN
+          
+              -- obtener datos tipo estado
+                
+                select
+                 te.codigo
+                into
+                 v_codigo_estado_siguiente
+                from wf.ttipo_estado te
+                where te.id_tipo_estado = v_parametros.id_tipo_estado;
+                
+                IF  pxp.f_existe_parametro(p_tabla,'id_depto') THEN
+                 
+                 v_id_depto = v_parametros.id_depto;
+                
+                END IF;
+                
+                
+                IF  pxp.f_existe_parametro(p_tabla,'obs') THEN
+                  v_obs=v_parametros.obs;
+                ELSE
+                   v_obs='---';
+                
+                END IF;
+                
+                IF v_codigo_estado_siguiente =  'pendiente' THEN
+                --si el siguient estado es aprobado obtenemos el depto que le correponde de la solictud de compra
+                
+                   raise exception 'Error el estado pendientes debe generar comprobantes';
+                
+                END IF;
+                
+               
+                
+                -- hay que recuperar el supervidor que seria el estado inmediato,...
+                v_id_estado_actual =  wf.f_registra_estado_wf(v_parametros.id_tipo_estado, 
+                                                               v_parametros.id_funcionario, 
+                                                               v_id_estado_wf, 
+                                                               v_id_proceso_wf,
+                                                               p_id_usuario,
+                                                               v_id_depto,
+                                                               COALESCE(v_num_obliacion_pago,'--')||' Obs:'||v_obs);
+                
+                 -- actualiza estado en la solicitud
+                
+                 update tes.tplan_pago  t set 
+                   id_estado_wf =  v_id_estado_actual,
+                   estado = v_codigo_estado_siguiente,
+                   id_usuario_mod=p_id_usuario,
+                   fecha_mod=now()
+                   
+                 where id_plan_pago = v_parametros.id_plan_pago;
+                 
+            
+          
+           -- si hay mas de un estado disponible  preguntamos al usuario
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado del plan de pagos)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
+          
+          
+          END IF;
+
+        
+          --Devuelve la respuesta
+            return v_resp;
+        
+        end;    
+        
+     /*********************************    
+ 	#TRANSACCION:  'TES_ANTEPP_IME'
+ 	#DESCRIPCION:	Trasaacion utilizada  pasar a  estados anterior en el plan de pagos
+                    segun la operacion definida
+ 	#AUTOR:		RAC	
+ 	#FECHA:		19-02-2013 12:12:51
+	***********************************/
+
+	elseif(p_transaccion='TES_ANTEPP_IME')then   
+        begin
+        
+        --------------------------------------------------
+        --Retrocede al estado inmediatamente anterior
+        -------------------------------------------------
+         IF  v_parametros.operacion = 'cambiar' THEN
+               
+               raise notice 'es_estaado_wf %',v_parametros.id_estado_wf;
+              
+                      --recuperaq estado anterior segun Log del WF
+                        SELECT  
+                           ps_id_tipo_estado,
+                           ps_id_funcionario,
+                           ps_id_usuario_reg,
+                           ps_id_depto,
+                           ps_codigo_estado,
+                           ps_id_estado_wf_ant
+                        into
+                           v_id_tipo_estado,
+                           v_id_funcionario,
+                           v_id_usuario_reg,
+                           v_id_depto,
+                           v_codigo_estado,
+                           v_id_estado_wf_ant 
+                        FROM wf.f_obtener_estado_ant_log_wf(v_parametros.id_estado_wf);
+                        
+                        
+                        --
+                      select 
+                           ew.id_proceso_wf 
+                        into 
+                           v_id_proceso_wf
+                      from wf.testado_wf ew
+                      where ew.id_estado_wf= v_id_estado_wf_ant;
+                      
+                      -- registra nuevo estado
+                      
+                      v_id_estado_actual = wf.f_registra_estado_wf(
+                          v_id_tipo_estado, 
+                          v_id_funcionario, 
+                          v_parametros.id_estado_wf, 
+                          v_id_proceso_wf, 
+                          p_id_usuario,
+                          v_id_depto,
+                          v_parametros.obs);
+                      
+                    
+                      
+                      -- actualiza estado en la solicitud
+                        update tes.tplan_pago  pp set 
+                           id_estado_wf =  v_id_estado_actual,
+                           estado = v_codigo_estado,
+                           id_usuario_mod=p_id_usuario,
+                           fecha_mod=now()
+                         where id_plan_pago = v_parametros.id_plan_pago;
+                         
+                         
+                         
+                         
+                        -- si hay mas de un estado disponible  preguntamos al usuario
+                        v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado)'); 
+                        v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
+                        
+                              
+                      --Devuelve la respuesta
+                        return v_resp;
+                        
+            ELSE
+           
+           		raise exception 'Operacion no reconocida %',v_parametros.operacion;
+           
+           END IF;
+        
+        
+        
+        end;
     /*********************************    
  	#TRANSACCION:  'TES_SINPRE_IME'
  	#DESCRIPCION:	Incremeta el  presupuesto faltante para la cuota indicada del plan de pagos
