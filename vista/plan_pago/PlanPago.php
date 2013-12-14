@@ -22,7 +22,14 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         
 		this.addButton('sig_estado',{text:'Siguiente',iconCls: 'badelante',disabled:true,handler:this.sigEstado,tooltip: '<b>Pasar al Siguiente Estado</b>'});
         
-		this.addButton('SolPlanPago',{text:'Sol. Plan Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnSolPlanPago,tooltip: '<b>Solicitud Plan Pago</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});      
+		this.addButton('SolPlanPago',{text:'Sol. Plan Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnSolPlanPago,tooltip: '<b>Solicitud Plan Pago</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
+		
+		//Eventos
+		this.Cmp.id_cuenta_bancaria.on('select',function(a,b,c){
+			this.Cmp.id_cuenta_bancaria_mov.setValue('');
+			this.Cmp.id_cuenta_bancaria_mov.store.baseParams.id_cuenta_bancaria = this.Cmp.id_cuenta_bancaria.getValue();
+			this.Cmp.id_cuenta_bancaria_mov.modificado=true;
+		},this);      
        
 		
 	},

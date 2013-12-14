@@ -319,7 +319,7 @@ CREATE TABLE tes.tcuenta_bancaria_mov (
   descripcion VARCHAR(2000) NOT NULL, 
   nro_doc_tipo VARCHAR(50), 
   importe NUMERIC(18,2) NOT NULL,
-  fecha date not null, 
+  fecha date, 
   estado VARCHAR(20) NOT NULL, 
   observaciones VARCHAR(2000), 
   CONSTRAINT pk_tcuenta_bancaria_mov__id_cuenta_bancaria_mov PRIMARY KEY(id_cuenta_bancaria_mov)
@@ -336,3 +336,38 @@ COMMENT ON COLUMN tes.tcuenta_bancaria_mov.tipo
 IS 'tipo in (''cheque'',''transferencia'')';
 
 /***********************************F-SCP-RCM-TES-0-12/12/2013***************************************/
+
+/***********************************I-SCP-RCM-TES-0-23/12/2013***************************************/
+CREATE TRIGGER tr_tcuenta_bancaria__endesis
+AFTER INSERT OR UPDATE OR DELETE 
+ON tes.tcuenta_bancaria FOR EACH ROW 
+EXECUTE PROCEDURE tes.f_tri_tcuenta_bancaria();
+
+/***********************************F-SCP-RCM-TES-0-23/12/2013***************************************/
+
+/***********************************I-SCP-ECR-TES-0-20/12/2013***************************************/
+CREATE TABLE tes.tcaja (
+  id_caja SERIAL, 
+  id_depto INTEGER NOT NULL, 
+  id_moneda INTEGER NOT NULL, 
+  codigo VARCHAR(20) NOT NULL, 
+  tipo VARCHAR(20) NOT NULL, 
+  estado VARCHAR(20) NOT NULL, 
+  importe_maximo NUMERIC(18,2) NOT NULL, 
+  porcentaje_compra NUMERIC(6,2) NOT NULL, 
+  CONSTRAINT pk_tcaja__id_caja PRIMARY KEY(id_caja)
+) INHERITS (pxp.tbase)
+WITHOUT OIDS;
+/***********************************F-SCP-ECR-TES-0-20/12/2013***************************************/
+
+/***********************************I-SCP-ECR-TES-0-20/12/2013***************************************/
+CREATE TABLE tes.tcajero (
+  id_cajero SERIAL, 
+  id_funcionario INTEGER NOT NULL, 
+  tipo VARCHAR(20) NOT NULL, 
+  estado VARCHAR(20) NOT NULL, 
+  id_caja INTEGER, 
+  CONSTRAINT pk_tcajero__id_cajero PRIMARY KEY(id_cajero)
+) INHERITS (pxp.tbase)
+WITHOUT OIDS;
+/***********************************F-SCP-ECR-TES-0-20/12/2013***************************************/
