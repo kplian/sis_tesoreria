@@ -29,7 +29,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 			this.Cmp.id_cuenta_bancaria_mov.setValue('');
 			Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: this.Cmp.id_cuenta_bancaria.getValue()})
 			this.Cmp.id_cuenta_bancaria_mov.modificado=true;
-		},this);      
+		},this);   
+		   
 		this.Cmp.fecha_tentativa.on('blur',function(a){
 			this.Cmp.id_cuenta_bancaria_mov.setValue('');
 			Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{fecha: this.Cmp.fecha_tentativa.getValue()})
