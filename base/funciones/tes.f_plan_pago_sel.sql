@@ -30,6 +30,11 @@ DECLARE
 	v_nombre_funcion   	text;
 	v_resp				varchar;
     v_filtro			varchar;
+    
+    v_historico        varchar;
+    v_inner            varchar;
+    v_strg_pp         varchar;
+    v_strg_obs         varchar;
   
 BEGIN
 
@@ -58,27 +63,54 @@ BEGIN
             END IF;
             
             
-            IF  lower(v_parametros.tipo_interfaz) = 'planpagoVb' THEN
             
-                 IF p_administrador !=1 THEN
+            IF  lower(v_parametros.tipo_interfaz) = 'planpagovb' THEN
+                
+                IF p_administrador !=1 THEN
                 
                               
-                      v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (lower(plapa.estado)!=''borrador'') and ';
+                      v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (lower(plapa.estado)!=''borrador'') and and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'') and  ';
                   
                  ELSE
+                      
                       v_filtro = ' (lower(plapa.estado)!=''borrador''  and lower(plapa.estado)!=''pendiente''  and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'') and ';
                   
                 END IF;
                 
                 
             END IF;
+            
+            
+            IF  pxp.f_existe_parametro(p_tabla,'historico') THEN
+             
+             v_historico =  v_parametros.historico;
+            
+            ELSE
+            
+            v_historico = 'no';
+            
+            END IF;
+            
+            IF v_historico =  'si' THEN
+            
+               v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = plapa.id_proceso_wf';
+               v_strg_pp = 'DISTINCT(plapa.id_plan_pago)'; 
+               v_filtro = ' (lower(plapa.estado)!=''borrador'' ) and ';
+            
+            ELSE
+            
+               v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = plapa.id_estado_wf';
+               v_strg_pp = 'plapa.id_plan_pago';
+               
+               
+             END IF;
         
         
         
         
     		--Sentencia de la consulta
 			v_consulta:='select
-						plapa.id_plan_pago,
+						'||v_strg_pp||', 
 						plapa.estado_reg,
 						plapa.nro_cuota,
 						plapa.monto_ejecutar_total_mb,
@@ -141,7 +173,7 @@ BEGIN
 						from tes.tplan_pago plapa
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
                         inner join param.tmoneda mon on mon.id_moneda = op.id_moneda
-                        inner join wf.testado_wf ew on ew.id_estado_wf = plapa.id_estado_wf
+                        '||v_inner||'  
                         left join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
                         inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
                         left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = plapa.id_cuenta_bancaria
@@ -159,6 +191,92 @@ BEGIN
 			return v_consulta;
 						
 		end;
+        
+   /*********************************    
+ 	#TRANSACCION:  'TES_PLAPA_CONT'
+ 	#DESCRIPCION:	Conteo de registros
+ 	#AUTOR:		admin	
+ 	#FECHA:		10-04-2013 15:43:23
+	***********************************/
+
+	elsif(p_transaccion='TES_PLAPA_CONT')then
+
+		begin
+        
+        
+        v_filtro='';
+            
+            IF (v_parametros.id_funcionario_usu is null) then
+              	
+                v_parametros.id_funcionario_usu = -1;
+            
+            END IF;
+            
+            
+            IF  lower(v_parametros.tipo_interfaz) = 'planpagovb' THEN
+            
+                 IF p_administrador !=1 THEN
+                
+                              
+                      v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (lower(plapa.estado)!=''borrador'') and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'') and ';
+                  
+                 ELSE
+                      v_filtro = ' (lower(plapa.estado)!=''borrador''  and lower(plapa.estado)!=''pendiente''  and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'') and ';
+                  
+                END IF;
+                
+                
+            END IF;
+            
+            
+            IF  pxp.f_existe_parametro(p_tabla,'historico') THEN
+             
+             v_historico =  v_parametros.historico;
+            
+            ELSE
+            
+            v_historico = 'no';
+            
+            END IF;
+            
+            IF v_historico =  'si' THEN
+            
+               v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = plapa.id_proceso_wf';
+               v_strg_pp = 'DISTINCT(plapa.id_plan_pago)'; 
+               v_filtro = ' (lower(plapa.estado)!=''borrador'' ) and ';
+            
+            ELSE
+            
+               v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = plapa.id_estado_wf';
+               v_strg_pp = 'plapa.id_plan_pago';
+               
+               
+             END IF;
+        
+         
+        
+			--Sentencia de la consulta de conteo de registros
+			v_consulta:='select count('||v_strg_pp||')
+						from tes.tplan_pago plapa
+                        inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
+                        inner join param.tmoneda mon on mon.id_moneda = op.id_moneda
+                        '||v_inner||'  
+                        left join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
+                        inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
+                        left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = plapa.id_cuenta_bancaria
+                        left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
+                        left join tes.tcuenta_bancaria_mov cbanmo on cbanmo.id_cuenta_bancaria_mov = plapa.id_cuenta_bancaria_mov
+                      where  plapa.estado_reg=''activo''   and '||v_filtro;
+			
+			--Definicion de la respuesta		    
+			v_consulta:=v_consulta||v_parametros.filtro;
+
+			--Devuelve la respuesta
+			return v_consulta;
+
+		end;
+		     
+        
 
 	/*********************************    
  	#TRANSACCION:  'TES_PLAPAOB_SEL'
@@ -277,41 +395,7 @@ BEGIN
 						
 		end;
     
-	/*********************************    
- 	#TRANSACCION:  'TES_PLAPA_CONT'
- 	#DESCRIPCION:	Conteo de registros
- 	#AUTOR:		admin	
- 	#FECHA:		10-04-2013 15:43:23
-	***********************************/
-
-	elsif(p_transaccion='TES_PLAPA_CONT')then
-
-		begin
-        
-         
-        
-			--Sentencia de la consulta de conteo de registros
-			v_consulta:='select count(id_plan_pago)
-						from tes.tplan_pago plapa
-                        inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
-                        inner join param.tmoneda mon on mon.id_moneda = op.id_moneda
-                        
-                        left join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
-						inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
-                        inner join wf.testado_wf ew on ew.id_estado_wf = plapa.id_estado_wf
-                        left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = plapa.id_cuenta_bancaria
-                        left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
-                        left join tes.tcuenta_bancaria_mov cbanmo on cbanmo.id_cuenta_bancaria_mov = plapa.id_cuenta_bancaria_mov
-                        where  plapa.estado_reg=''activo''   and ';
-			
-			--Definicion de la respuesta		    
-			v_consulta:=v_consulta||v_parametros.filtro;
-
-			--Devuelve la respuesta
-			return v_consulta;
-
-		end;
-		
+	
 		
 	/*********************************    
  	#TRANSACCION:  'TES_VERDIS_SEL'
