@@ -23,10 +23,18 @@ Phx.vista.PlanPagoRegIni = {
 	nombreVista: 'PlanPagoRegIni',
 	
 	constructor: function(config) {
+	    
+	     alert(0)
 	    this.maestro=config.maestro;
+	    
+	    this.Atributos[this.getIndAtributo('id_cuenta_bancaria')].form=true;
 	    Phx.vista.PlanPagoRegIni.superclass.constructor.call(this,config);
+	    
+	    
         this.addButton('SincPresu',{text:'Inc. Pres.',iconCls: 'balert',disabled:true,handler:this.onBtnSincPresu,tooltip: '<b>Incrementar Presupuesto</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
         ////formulario de departamentos
+        
+         alert(1)
         this.crearFormularioEstados();
         //si la interface es pestanha este código es para iniciar 
           var dataPadre = Phx.CP.getPagina(this.idContenedorPadre).getSelectedData()

@@ -53,6 +53,9 @@ BEGIN
         
           v_filadd='';
           v_inner='';
+          
+          
+        --  raise exception 'cc  %',v_parametros.tipo_interfaz  ;
         
            
          IF   v_parametros.tipo_interfaz ='obligacionPago' THEN

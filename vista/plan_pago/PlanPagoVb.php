@@ -35,7 +35,27 @@ Phx.vista.PlanPagoVb = {
 	    this.Atributos[this.getIndAtributo('id_cuenta_bancaria_mov')].form=true; 
 	    
 	    
-	    
+	    //funcionalidad para listado de historicos
+        this.historico = 'no';
+        this.tbarItems = [{
+            text: 'Histórico',
+            enableToggle: true,
+            pressed: false,
+            toggleHandler: function(btn, pressed) {
+               
+                if(pressed){
+                    this.historico = 'si';
+                     this.desBotoneshistorico();
+                }
+                else{
+                   this.historico = 'no' 
+                }
+                
+                this.store.baseParams.historico = this.historico;
+                this.reload();
+             },
+            scope: this
+           }];
 	    
 	    
 	    
@@ -346,37 +366,53 @@ Phx.vista.PlanPagoVb = {
             this.ocultarCheCue(radio.inputValue);
         },this);           
     
-    }, 
+    },
+    
+     //deshabilitas botones para informacion historica
+      desBotoneshistorico:function(){
+          
+          this.getBoton('ant_estado').disable();
+          this.getBoton('sig_estado').disable();
+          this.getBoton('SolDevPag').disable(); 
+          this.getBoton('edit').disable();   
+          
+      }, 
     
     
     preparaMenu:function(n){
           var data = this.getSelectedData();
           var tb =this.tbar;
           Phx.vista.PlanPagoVb.superclass.preparaMenu.call(this,n); 
-          if (data['estado']== 'borrador' || data['estado']== 'pendiente' || data['estado']== 'devengado' || data['estado']== 'pagado' ){
-                  this.getBoton('ant_estado').disable();
-                  this.getBoton('sig_estado').disable();
-                  this.getBoton('SolDevPag').disable(); 
-                  this.getBoton('edit').disable();   
-          }
-          else{
-                   if (data['estado']== 'vbconta'){
-                       this.getBoton('ant_estado').enable();
-                       this.getBoton('sig_estado').disable();
-                       this.getBoton('SolDevPag').enable();
-                        this.getBoton('edit').enable(); 
+          if(this.historico == 'no'){    
+              
+                  if (data['estado']== 'borrador' || data['estado']== 'pendiente' || data['estado']== 'devengado' || data['estado']== 'pagado' ){
+                          this.getBoton('ant_estado').disable();
+                          this.getBoton('sig_estado').disable();
+                          this.getBoton('SolDevPag').disable(); 
+                          this.getBoton('edit').disable();   
+                  }
+                  else{
+                           if (data['estado']== 'vbconta'){
+                               this.getBoton('ant_estado').enable();
+                               this.getBoton('sig_estado').disable();
+                               this.getBoton('SolDevPag').enable();
+                                this.getBoton('edit').enable(); 
+                           }
+                           else{
+                               this.getBoton('ant_estado').enable();
+                               this.getBoton('sig_estado').enable();
+                               this.getBoton('SolDevPag').disable();
+                               this.getBoton('edit').disable(); 
+                             
+                           }
+                           
+                           
                    }
-                   else{
-                       this.getBoton('ant_estado').enable();
-                       this.getBoton('sig_estado').enable();
-                       this.getBoton('SolDevPag').disable();
-                       this.getBoton('edit').disable(); 
-                     
-                   }
-                   
-                   
-           }
-           this.getBoton('SolPlanPago').enable(); 
+                   this.getBoton('SolPlanPago').enable(); 
+           } 
+         else{
+            this.desBotoneshistorico();
+         } 
            
      },
     
