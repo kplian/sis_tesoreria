@@ -395,7 +395,7 @@ AS
 
 --------------- SQL ---------------
 
- -- object recreation
+  -- object recreation
 DROP VIEW tes.vcomp_devtesprov_plan_pago;
 
 CREATE VIEW tes.vcomp_devtesprov_plan_pago(
@@ -424,7 +424,9 @@ CREATE VIEW tes.vcomp_devtesprov_plan_pago(
     id_int_comprobante,
     liquido_pagable,
     liquido_pagable_mb,
-    nombre_pago)
+    nombre_pago,
+    id_cuenta_bancaria_mov,
+    nro_cheque)
 AS
   SELECT pp.id_plan_pago,
          op.id_proveedor,
@@ -451,12 +453,12 @@ AS
          pp.id_int_comprobante,
          pp.liquido_pagable,
          pp.liquido_pagable_mb,
-         pp.nombre_pago
+         pp.nombre_pago,
+         pp.id_cuenta_bancaria_mov,
+         pp.nro_cheque
   FROM tes.tplan_pago pp
        JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
         op.id_obligacion_pago
        JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor;
-
-
-
- /***********************************F-DEP-RAC-TES-0-18/11/2013***************************************/
+       
+/***********************************F-DEP-RAC-TES-0-16/12/2013***************************************/

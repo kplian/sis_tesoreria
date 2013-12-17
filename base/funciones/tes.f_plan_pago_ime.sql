@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -821,7 +819,7 @@ BEGIN
             obs_descuentos_ley=v_parametros.obs_descuentos_ley,
             porc_descuento_ley=v_parametros.porc_descuento_ley,
             nro_cheque = v_parametros.nro_cheque,
-            nro_cuenta_bancaria = v_parametros.cuenta_bancaria,
+            nro_cuenta_bancaria = v_parametros.nro_cuenta_bancaria,
             id_cuenta_bancaria_mov = v_parametros.id_cuenta_bancaria_mov
 			where id_plan_pago=v_parametros.id_plan_pago;
            

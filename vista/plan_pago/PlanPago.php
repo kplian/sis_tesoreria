@@ -108,6 +108,14 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
           {
              this.bloquearMenus();
           }
+          
+          this.addButton('btnVerifPresup', {
+				text : 'Disponibilidad',
+				iconCls : 'bassign',
+				disabled : true,
+				handler : this.onBtnVerifPresup,
+				tooltip : '<b>Verificación de la disponibilidad presupuestaria</b>'
+			});
 	},
 	tam_pag:50,
 
@@ -1398,6 +1406,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
           else{
                this.getBoton('SincPresu').disable();
           }
+          this.getBoton('btnVerifPresup').enable();
      },
      
       liberaMenu:function(){
@@ -1405,7 +1414,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         if(tb){
            this.getBoton('SolDevPag').disable();
            this.getBoton('SincPresu').disable();
-           this.getBoton('SolPlanPago').disable();  
+           this.getBoton('SolPlanPago').disable();
+           this.getBoton('btnVerifPresup').disable();  
           }
        return tb
     }, 
@@ -1525,6 +1535,14 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 			this.Cmp.nro_cuenta_bancaria.disable();
 		}
 		
+	},
+	onBtnVerifPresup : function() {
+		var rec = this.sm.getSelected();
+		Phx.CP.loadWindows('../../../sis_tesoreria/vista/plan_pago/PlanPagoVerifPresup.php', 'Disponibilidad Presupuestaria', {
+			modal : true,
+			width : '80%',
+			height : '50%',
+		}, rec.data, this.idContenedor, 'PlanPagoVerifPresup');
 	}
 	
 })

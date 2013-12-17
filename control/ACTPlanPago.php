@@ -149,6 +149,20 @@ class ACTPlanPago extends ACTbase{
              $resultPlanPago->imprimirRespuesta($resultPlanPago->generarJson());
         }     																	
 	}
+
+	function verificarDisponibilidad(){
+		$this->objParam->defecto('ordenacion','desc_partida');
+		$this->objParam->defecto('dir_ordenacion','asc');
+		
+		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+			$this->objReporte = new Reporte($this->objParam,$this);
+			$this->res = $this->objReporte->generarReporteListado('MODPlanPago','verificarDisponibilidad');
+		} else{
+			$this->objFunc=$this->create('MODPlanPago');
+			$this->res=$this->objFunc->verificarDisponibilidad($this->objParam);
+		}
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
 			
 }
 

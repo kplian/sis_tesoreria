@@ -347,5 +347,31 @@ class MODPlanPago extends MODbase{
 		return $this->respuesta;		
 		
 	}
+
+	function verificarDisponibilidad(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.f_plan_pago_sel';
+		$this->transaccion='TES_VERDIS_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		$this->setParametro('id_plan_pago','id_plan_pago','int4');
+				
+		//Definicion de la lista del resultado del query
+		$this->captura('id_partida','int4');
+		$this->captura('id_centro_costo','int4');
+		$this->captura('id_moneda','int4');
+		$this->captura('importe','numeric');
+		$this->captura('disponibilidad','varchar');
+		$this->captura('desc_partida','text');
+		$this->captura('desc_cc','text');
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
 }
 ?>

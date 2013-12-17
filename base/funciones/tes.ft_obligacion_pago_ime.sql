@@ -881,6 +881,69 @@ BEGIN
             return v_resp;
 
 		end;
+		
+	/*********************************    
+ 	#TRANSACCION:  'TES_IDSEXT_GET'
+ 	#DESCRIPCION:	Devuelve los IDS de otros sistemas (adquisiciones, etc.) a partir de la obligacion de pago
+ 	#AUTOR:			RCM	
+ 	#FECHA:			02-04-2013 16:01:32
+	***********************************/
+
+	elsif(p_transaccion='TES_IDSEXT_GET')then
+
+		begin
+		
+			--1.Verificar existencia de la obligación de pago
+			if not exists(select 1 from tes.tobligacion_pago
+						where id_obligacion_pago = v_parametros.id_obligacion_pago) then
+				raise exception 'Obligación de pago inexistente';
+			end if;
+			
+			--2.Condicional por sistema
+			if v_parametros.sistema = 'ADQ' then
+			
+				--2.1 Obtiene los IDS: id_cotizacion, id_proceso_compra, id_solicitud
+				select
+				cot.id_cotizacion, cot.id_proceso_compra, pro.id_solicitud
+				into v_registros
+				from adq.tcotizacion cot
+				inner join adq.tproceso_compra pro on pro.id_proceso_compra = cot.id_proceso_compra
+				where cot.id_obligacion_pago = v_parametros.id_obligacion_pago;
+				
+				
+				--2.2 Respuesta por sistema
+				v_resp = pxp.f_agrega_clave(v_resp,'mensaje','IDs obtenidos');
+				v_resp = pxp.f_agrega_clave(v_resp,'id_cotizacion',v_registros.id_cotizacion::varchar);
+				v_resp = pxp.f_agrega_clave(v_resp,'id_proceso_compra',v_registros.id_proceso_compra::varchar);
+				v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud',v_registros.id_solicitud::varchar);
+			
+			
+			elsif v_parametros.sistema = 'TES' then
+				--(17/12/2013)TODO implementar cuando corresponda
+				raise exception 'Funcionalidad no implementada para el sistema %',v_parametros.sistema;
+				
+				--2.1 Obtiene los IDS
+				--2.2 Respuesta por sistema
+				v_resp = pxp.f_agrega_clave(v_resp,'mensaje','IDs obtenidos');
+			
+			
+			elsif v_parametros.sistema = 'CONTA' then
+				--(17/12/2013)TODO implementar si corresponde
+				raise exception 'Funcionalidad no implementada para el sistema %',v_parametros.sistema;
+				
+				--2.1 Obtiene los IDS
+				--2.2 Respuesta por sistema
+				v_resp = pxp.f_agrega_clave(v_resp,'mensaje','IDs obtenidos');
+			
+			
+			else
+				raise exception 'Sistema no reconocido';
+			end if;
+
+			--3.Respuesta
+			return v_resp;
+
+		end;
         
    
     

@@ -267,6 +267,68 @@ BEGIN
 			return v_consulta;
 
 		end;
+		
+		
+	/*********************************    
+ 	#TRANSACCION:  'TES_VERDIS_SEL'
+ 	#DESCRIPCION:	Consulta para verificar la disponibilidad presupuestaria de toda la cuota
+ 	#AUTOR:			RCM
+ 	#FECHA:			15/12/2013
+	***********************************/
+
+	elsif(p_transaccion='TES_VERDIS_SEL')then
+     				
+    	begin
+        
+    		--Sentencia de la consulta
+              v_consulta:='select
+              				id_partida,  id_presupuesto, id_moneda, importe,
+							presupuesto, desc_partida , desc_presupuesto
+              				from
+							tes.f_verificar_disponibilidad_presup_oblig_pago('||v_parametros.id_plan_pago ||')
+							as (id_partida integer, id_presupuesto integer, id_moneda INTEGER, importe numeric,
+							presupuesto varchar,
+							desc_partida text, desc_presupuesto text)
+							where ';
+			
+			--Definicion de la respuesta
+			v_consulta:=v_consulta||v_parametros.filtro;
+			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+			
+			--Devuelve la respuesta
+			return v_consulta;
+						
+		end;
+    
+	/*********************************    
+ 	#TRANSACCION:  'TES_VERDIS_CONT'
+ 	#DESCRIPCION:	Conteo de registros
+ 	#AUTOR:			RCM	
+ 	#FECHA:			15/12/2013
+	***********************************/
+
+	elsif(p_transaccion='TES_VERDIS_CONT')then
+
+		begin
+        
+			--Sentencia de la consulta de conteo de registros
+			v_consulta:='select count(id_partida)
+						from
+						tes.f_verificar_disponibilidad_presup_oblig_pago('||v_parametros.id_plan_pago ||')
+						as (id_partida integer, id_presupuesto integer, id_moneda INTEGER, importe numeric,
+						presupuesto varchar,
+						desc_partida text, desc_presupuesto text)
+                        where ';
+			
+			--Definicion de la respuesta
+			v_consulta:=v_consulta||v_parametros.filtro;
+            
+            raise notice '%',v_consulta;
+			
+			--Devuelve la respuesta
+			return v_consulta;
+
+		end;
 					
 	else
 					     
