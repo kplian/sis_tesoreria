@@ -2,7 +2,7 @@
 
 CREATE OR REPLACE FUNCTION tes.f_gestionar_cuota_plan_pago (
   p_id_usuario integer,
-  p_id_comprobante integer
+  p_id_int_comprobante integer
 )
 RETURNS boolean AS
 $body$
@@ -79,12 +79,17 @@ BEGIN
       pp.tipo_pago,
       pp.fecha_tentativa,
       pp.otros_descuentos,
-      pp.monto_retgar_mo
+      pp.monto_retgar_mo,
+      
+      pp.descuento_ley,
+      pp.obs_descuentos_ley,
+      pp.porc_descuento_ley,
+      op.id_depto_conta
       into
       v_registros
       from  tes.tplan_pago pp
       inner join tes.tobligacion_pago  op on op.id_obligacion_pago = pp.id_obligacion_pago 
-      where  pp.id_comprobante = p_id_comprobante; 
+      where  pp.id_int_comprobante = p_id_int_comprobante; 
     
     
     --2) Validar que tenga un plan de pago
@@ -246,7 +251,11 @@ BEGIN
                         otros_descuentos,
                         monto_ejecutar_total_mo,
                         liquido_pagable,
-                        monto_retgar_mo
+                        monto_retgar_mo,
+                        
+                        descuento_ley,
+                        obs_descuentos_ley,
+                        porc_descuento_ley
                        
                       ) 
                       VALUES (
@@ -272,7 +281,10 @@ BEGIN
                         v_registros.otros_descuentos,
                         v_registros.monto_ejecutar_total_mo,
                         v_registros.liquido_pagable,
-                        v_registros.monto_retgar_mo
+                        v_registros.monto_retgar_mo,
+                        v_registros.descuento_ley,
+                        v_registros.obs_descuentos_ley,
+                        v_registros.porc_descuento_ley
                        
                       )RETURNING id_plan_pago into v_id_plan_pago;
                     
@@ -300,7 +312,7 @@ BEGIN
               
               -- solicitar negeracion de comprobantes de pago
               
-              v_verficacion2 = tes.f_generar_comprobante(p_id_usuario, v_id_plan_pago);
+              v_verficacion2 = tes.f_generar_comprobante(p_id_usuario, v_id_plan_pago,v_registros.id_depto_conta);
              
               IF v_verficacion2[1]='FALSE'  THEN
               

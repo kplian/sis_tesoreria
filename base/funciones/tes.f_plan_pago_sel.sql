@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -71,7 +69,7 @@ BEGIN
 						plapa.obs_monto_no_pagado,
 						plapa.obs_otros_descuentos,
 						plapa.monto,
-						plapa.id_comprobante,
+						plapa.id_int_comprobante,
 						plapa.nombre_pago,
 						plapa.monto_no_pagado_mb,
 						plapa.monto_mb,
@@ -91,15 +89,24 @@ BEGIN
                         plapa.liquido_pagable,
                         plapa.total_prorrateado,
                         plapa.total_pagado ,                       
-						cb.nombre_institucion ||'' (''||cb.nro_cuenta||'')'' as desc_cuenta_bancaria ,
+						coalesce(cb.nombre_institucion,''S/N'') ||'' (''||coalesce(cb.nro_cuenta,''S/C'')||'')'' as desc_cuenta_bancaria ,
                         plapa.sinc_presupuesto ,
                         plapa.monto_retgar_mb,
-                        plapa.monto_retgar_mo                                             
+                        plapa.monto_retgar_mo,
+                        descuento_ley, 
+                        obs_descuentos_ley , 
+                        descuento_ley_mb, 
+                        porc_descuento_ley, 
+                        plapa.nro_cheque,
+                        plapa.nro_cuenta_bancaria,
+                        plapa.id_cuenta_bancaria_mov,
+                        cbanmo.descripcion as desc_deposito                                             
 						from tes.tplan_pago plapa
                         left join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
 						inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
                         left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = plapa.id_cuenta_bancaria
                         left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
+                        left join tes.tcuenta_bancaria_mov cbanmo on cbanmo.id_cuenta_bancaria_mov = plapa.id_cuenta_bancaria_mov
                        where  plapa.estado_reg=''activo''  and ';
 			
 			--Definicion de la respuesta
@@ -191,45 +198,35 @@ BEGIN
         
     		--Sentencia de la consulta
               v_consulta:='select 
-              		  pg.estado,
-              		  op.numero as numero_oc,
-                      pv.desc_proveedor as proveedor,
-                      pg.nro_cuota as nro_cuota,
-                      pg.fecha_dev as fecha_devengado	,
-                      pg.fecha_pag as fecha_pago,
-                      pg.forma_pago as forma_pago,
-                      pg.tipo_pago as tipo_pago,
-                      pm.nombre as modalidad,
-                      mon.moneda as moneda,
-                      op.tipo_cambio_conv as tipo_cambio,
-                      pg.monto as importe,
-                      pg.monto_no_pagado as monto_no_pagado,
-                      pg.otros_descuentos as otros_descuentos,
-                      pg.monto_ejecutar_total_mo as monto_ejecutado_total,
-                      pg.liquido_pagable as liquido_pagable,
-                      pg.total_pagado as total_pagado,
-                      pg.fecha_reg,
-                      vcc.nombre_uo,
-                      vcc.nombre_programa,
-                      vcc.nombre_regional,
-                      vcc.nombre_proyecto,
-                      vcc.nombre_financiador,        
-                      vcc.nombre_actividad,
-                      par.nombre_partida,
-                      op.total_pago    
-              from tes.tplan_pago pg
-              inner join tes.tobligacion_pago op on op.id_obligacion_pago=pg.id_obligacion_pago
-              left join adq.tcotizacion cot on cot.numero_oc=op.numero
-              left join wf.tproceso_wf pw on pw.id_proceso_wf=cot.id_proceso_wf
-              left join wf.ttipo_proceso tp on tp.id_tipo_proceso=pw.id_tipo_proceso
-              left join wf.tproceso_macro pm on pm.id_proceso_macro=tp.id_proceso_macro
-              inner join param.vproveedor pv on pv.id_proveedor=op.id_proveedor
-              left join tes.tcuenta_bancaria cta on cta.id_cuenta_bancaria=pg.id_cuenta_bancaria
-              inner join param.tmoneda mon on mon.id_moneda=op.id_moneda              
-              inner join tes.tobligacion_det obd on obd.id_obligacion_det=op.id_obligacion_pago
-              inner join param.vcentro_costo vcc on vcc.id_centro_costo=obd.id_centro_costo
-              inner join pre.tpartida par on par.id_partida = obd.id_partida
-              where pg.id_plan_pago='||v_parametros.id_plan_pago||' and ';
+                               	  pg.estado,
+                                  op.numero as numero_oc,
+                                  pv.desc_proveedor as proveedor,
+                                  pg.nro_cuota as nro_cuota,
+                                  pg.fecha_dev as fecha_devengado	,
+                                  pg.fecha_pag as fecha_pago,
+                                  pg.forma_pago as forma_pago,
+                                  pg.tipo_pago as tipo_pago,
+                                  mon.moneda as moneda,
+                                  mon.codigo as codigo_moneda,
+                                  op.tipo_cambio_conv as tipo_cambio,
+                                  pg.monto as importe,
+                                  pg.monto_no_pagado as monto_no_pagado,
+                                  pg.otros_descuentos as otros_descuentos,
+                                  pg.obs_otros_descuentos,
+                                  pg.descuento_ley,
+                                  pg.obs_descuentos_ley,
+                                  pg.monto_ejecutar_total_mo as monto_ejecutado_total,
+                                  pg.liquido_pagable as liquido_pagable,
+                                  pg.total_pagado as total_pagado,
+                                  pg.fecha_reg,
+                                  op.total_pago,
+                                  pg.tipo     
+                        from tes.tplan_pago pg
+                        inner join tes.tobligacion_pago op on op.id_obligacion_pago=pg.id_obligacion_pago
+                        inner join param.vproveedor pv on pv.id_proveedor=op.id_proveedor
+                        left join tes.tcuenta_bancaria cta on cta.id_cuenta_bancaria=pg.id_cuenta_bancaria
+                        inner join param.tmoneda mon on mon.id_moneda=op.id_moneda  
+                        where pg.id_plan_pago='||v_parametros.id_plan_pago||' and ';
 			
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
@@ -260,11 +257,74 @@ BEGIN
 						inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
                         left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = plapa.id_cuenta_bancaria
                         left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
+                        left join tes.tcuenta_bancaria_mov cbanmo on cbanmo.id_cuenta_bancaria_mov = plapa.id_cuenta_bancaria_mov
                         where  plapa.estado_reg=''activo''   and ';
 			
 			--Definicion de la respuesta		    
 			v_consulta:=v_consulta||v_parametros.filtro;
 
+			--Devuelve la respuesta
+			return v_consulta;
+
+		end;
+		
+		
+	/*********************************    
+ 	#TRANSACCION:  'TES_VERDIS_SEL'
+ 	#DESCRIPCION:	Consulta para verificar la disponibilidad presupuestaria de toda la cuota
+ 	#AUTOR:			RCM
+ 	#FECHA:			15/12/2013
+	***********************************/
+
+	elsif(p_transaccion='TES_VERDIS_SEL')then
+     				
+    	begin
+        
+    		--Sentencia de la consulta
+              v_consulta:='select
+              				id_partida,  id_presupuesto, id_moneda, importe,
+							presupuesto, desc_partida , desc_presupuesto
+              				from
+							tes.f_verificar_disponibilidad_presup_oblig_pago('||v_parametros.id_plan_pago ||')
+							as (id_partida integer, id_presupuesto integer, id_moneda INTEGER, importe numeric,
+							presupuesto varchar,
+							desc_partida text, desc_presupuesto text)
+							where ';
+			
+			--Definicion de la respuesta
+			v_consulta:=v_consulta||v_parametros.filtro;
+			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+			
+			--Devuelve la respuesta
+			return v_consulta;
+						
+		end;
+    
+	/*********************************    
+ 	#TRANSACCION:  'TES_VERDIS_CONT'
+ 	#DESCRIPCION:	Conteo de registros
+ 	#AUTOR:			RCM	
+ 	#FECHA:			15/12/2013
+	***********************************/
+
+	elsif(p_transaccion='TES_VERDIS_CONT')then
+
+		begin
+        
+			--Sentencia de la consulta de conteo de registros
+			v_consulta:='select count(id_partida)
+						from
+						tes.f_verificar_disponibilidad_presup_oblig_pago('||v_parametros.id_plan_pago ||')
+						as (id_partida integer, id_presupuesto integer, id_moneda INTEGER, importe numeric,
+						presupuesto varchar,
+						desc_partida text, desc_presupuesto text)
+                        where ';
+			
+			--Definicion de la respuesta
+			v_consulta:=v_consulta||v_parametros.filtro;
+            
+            raise notice '%',v_consulta;
+			
 			--Devuelve la respuesta
 			return v_consulta;
 

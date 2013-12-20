@@ -18,6 +18,10 @@ class MODPlanPago extends MODbase{
 		$this->procedimiento='tes.f_plan_pago_sel';
 		$this->transaccion='TES_PLAPA_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		
+		$this->setParametro('id_funcionario_usu','id_funcionario_usu','int4');
+        $this->setParametro('tipo_interfaz','tipo_interfaz','varchar');
 				
 		//Definicion de la lista del resultado del query
 		$this->captura('id_plan_pago','int4');
@@ -43,7 +47,7 @@ class MODPlanPago extends MODbase{
 		$this->captura('obs_monto_no_pagado','text');
 		$this->captura('obs_otros_descuentos','text');
 		$this->captura('monto','numeric');
-		$this->captura('id_comprobante','int4');
+		$this->captura('id_int_comprobante','int4');
 		$this->captura('nombre_pago','varchar');
 		$this->captura('monto_no_pagado_mb','numeric');
 		$this->captura('monto_mb','numeric');
@@ -66,8 +70,21 @@ class MODPlanPago extends MODbase{
         $this->captura('desc_cuenta_bancaria','text');
         $this->captura('sinc_presupuesto','varchar'); 
         $this->captura('monto_retgar_mb','numeric');
-        $this->captura('monto_retgar_mo','numeric');   
+        $this->captura('monto_retgar_mo','numeric'); 
         
+        $this->captura('descuento_ley','numeric'); 
+        $this->captura('obs_descuentos_ley','text'); 
+        $this->captura('descuento_ley_mb','numeric'); 
+        $this->captura('porc_descuento_ley','numeric');   
+        $this->captura('nro_cheque','integer');
+		$this->captura('nro_cuenta_bancaria','varchar');
+		$this->captura('id_cuenta_bancaria_mov','integer');
+		$this->captura('desc_deposito','varchar');
+		$this->captura('numero_op','varchar');
+		
+		$this->captura('id_depto_conta','integer');
+		
+		
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -119,6 +136,17 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('tipo_cambio','tipo_cambio','numeric');
 		$this->setParametro('monto_retgar_mo','monto_retgar_mo','numeric');
 		
+		$this->setParametro('descuento_ley','descuento_ley','numeric');
+		$this->setParametro('obs_descuentos_ley','obs_descuentos_ley','text');
+		$this->setParametro('porc_descuento_ley','porc_descuento_ley','numeric');
+		
+		$this->setParametro('nro_cheque','nro_cheque','integer');
+		$this->setParametro('nro_cuenta_bancaria','nro_cuenta_bancaria','varchar');
+		$this->setParametro('id_cuenta_bancaria_mov','id_cuenta_bancaria_mov','integer');
+		
+		 
+        
+		
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -150,7 +178,7 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('obs_monto_no_pagado','obs_monto_no_pagado','text');
 		$this->setParametro('obs_otros_descuentos','obs_otros_descuentos','text');
 		$this->setParametro('monto','monto','numeric');
-		$this->setParametro('id_comprobante','id_comprobante','int4');
+		
 		$this->setParametro('nombre_pago','nombre_pago','varchar');
 		$this->setParametro('monto_no_pagado_mb','monto_no_pagado_mb','numeric');
 		$this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
@@ -159,6 +187,13 @@ class MODPlanPago extends MODbase{
         $this->setParametro('fecha_tentativa','fecha_tentativa','date');
         $this->setParametro('tipo_cambio','tipo_cambio','numeric');
         $this->setParametro('monto_retgar_mo','monto_retgar_mo','numeric');
+        $this->setParametro('descuento_ley','descuento_ley','numeric');
+        $this->setParametro('obs_descuentos_ley','obs_descuentos_ley','text');
+        $this->setParametro('porc_descuento_ley','porc_descuento_ley','numeric');
+		
+		$this->setParametro('nro_cheque','nro_cheque','integer');
+		$this->setParametro('nro_cuenta_bancaria','nro_cuenta_bancaria','varchar');
+		$this->setParametro('id_cuenta_bancaria_mov','id_cuenta_bancaria_mov','integer');
         
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -167,6 +202,53 @@ class MODPlanPago extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+	
+	function siguienteEstadoPlanPago(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.f_plan_pago_ime';
+        $this->transaccion='TES_SIGEPP_IME';
+        $this->tipo_procedimiento='IME';
+                
+        //Define los parametros para la funcion
+        $this->setParametro('id_plan_pago','id_plan_pago','int4');
+        $this->setParametro('id_funcionario_usu','id_funcionario_usu','int4');
+        $this->setParametro('operacion','operacion','varchar');
+        $this->setParametro('id_funcionario','id_funcionario','int4');
+        $this->setParametro('id_tipo_estado','id_tipo_estado','int4');
+        $this->setParametro('obs','obs','text');
+
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+    
+    function anteriorEstadoPlanPago(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.f_plan_pago_ime';
+        $this->transaccion='TES_ANTEPP_IME';
+        $this->tipo_procedimiento='IME';
+                
+        //Define los parametros para la funcion
+        $this->setParametro('id_plan_pago','id_plan_pago','int4');
+        $this->setParametro('id_funcionario_usu','id_funcionario_usu','int4');
+        $this->setParametro('operacion','operacion','varchar');
+        
+        $this->setParametro('id_funcionario','id_funcionario','int4');
+        $this->setParametro('id_tipo_estado','id_tipo_estado','int4');
+        $this->setParametro('id_estado_wf','id_estado_wf','int4');
+        $this->setParametro('obs','obs','text');
+
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+    
 			
 	function eliminarPlanPago(){
 		//Definicion de variables para ejecucion del procedimiento
@@ -193,6 +275,7 @@ class MODPlanPago extends MODbase{
                 
         //Define los parametros para la funcion
         $this->setParametro('id_plan_pago','id_plan_pago','int4');
+        $this->setParametro('id_depto_conta','id_depto_conta','int4');
 
         //Ejecuta la instruccion
         $this->armarConsulta();
@@ -219,7 +302,7 @@ class MODPlanPago extends MODbase{
         return $this->respuesta;
     }
 				
-				function listarPlanesPagoPorObligacion(){
+	function listarPlanesPagoPorObligacion(){
 		//Definicion de variables para ejecucion del procedimientp
 		$this->procedimiento='tes.f_plan_pago_sel';
 		$this->transaccion='TES_PLAPAOB_SEL';
@@ -257,11 +340,11 @@ class MODPlanPago extends MODbase{
 		$this->captura('liquido_pagable','numeric');
 		$this->captura('total_prorrateado','numeric');
 		$this->captura('total_pagado','numeric');
-  $this->captura('desc_cuenta_bancaria','text');
-  $this->captura('sinc_presupuesto','varchar'); 
-  $this->captura('monto_retgar_mb','numeric');
-  $this->captura('monto_retgar_mo','numeric');
-		
+          $this->captura('desc_cuenta_bancaria','text');
+          $this->captura('sinc_presupuesto','varchar'); 
+          $this->captura('monto_retgar_mb','numeric');
+          $this->captura('monto_retgar_mo','numeric');
+        		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
@@ -282,30 +365,35 @@ class MODPlanPago extends MODbase{
 		$this->captura('estado','varchar');
 		$this->captura('numero_oc','varchar');
 		$this->captura('proveedor','varchar');
+		
 		$this->captura('nro_cuota','numeric');
 		$this->captura('fecha_devengado','date');
 		$this->captura('fecha_pag','date');
+		
 		$this->captura('forma_pago','varchar');
 		$this->captura('tipo_pago','varchar');
-		$this->captura('modalidad','varchar');
 		$this->captura('moneda','varchar');
+		$this->captura('codigo_moneda','varchar');
+		
+		
 		$this->captura('tipo_cambio','numeric');
+		
 		$this->captura('importe','numeric');
 		$this->captura('monto_no_pagado','numeric');
 		$this->captura('otros_descuentos','numeric');
+		
+		$this->captura('obs_otros_descuentos','text');
+		$this->captura('descuento_ley','numeric');
+		$this->captura('obs_descuento_ley','text');
+		
 		$this->captura('monto_ejecutado_total','numeric');
 		$this->captura('liquido_pagable','numeric');
 		$this->captura('total_pagado','numeric');
 		$this->captura('fecha_reg','timestamp');
-		
-		$this->captura('nombre_uo','varchar');
-		$this->captura('nombre_programa','varchar');
-		$this->captura('nombre_regional','varchar');
-		$this->captura('nombre_proyecto','varchar');
-		$this->captura('nombre_financiador','varchar');
-		$this->captura('nombre_actividad','varchar');
-		$this->captura('nombre_partida','varchar');
 		$this->captura('total_pago','numeric');
+		$this->captura('tipo','varchar');
+		
+		  
 		//Ejecuta la respuesta
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
@@ -313,5 +401,31 @@ class MODPlanPago extends MODbase{
 		return $this->respuesta;		
 		
 	}
+
+	function verificarDisponibilidad(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.f_plan_pago_sel';
+		$this->transaccion='TES_VERDIS_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		$this->setParametro('id_plan_pago','id_plan_pago','int4');
+				
+		//Definicion de la lista del resultado del query
+		$this->captura('id_partida','int4');
+		$this->captura('id_centro_costo','int4');
+		$this->captura('id_moneda','int4');
+		$this->captura('importe','numeric');
+		$this->captura('disponibilidad','varchar');
+		$this->captura('desc_partida','text');
+		$this->captura('desc_cc','text');
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
 }
 ?>

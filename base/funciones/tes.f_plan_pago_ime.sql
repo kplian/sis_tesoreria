@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -164,7 +162,7 @@ BEGIN
            
           -- calcula el liquido pagable y el monsto a ejecutar presupeustaria mente
            
-           v_liquido_pagable = COALESCE(v_parametros.monto,0) - COALESCE(v_parametros.monto_no_pagado,0) - COALESCE(v_parametros.otros_descuentos,0) - COALESCE(v_parametros.monto_retgar_mo,0);
+           v_liquido_pagable = COALESCE(v_parametros.monto,0) - COALESCE(v_parametros.monto_no_pagado,0) - COALESCE(v_parametros.otros_descuentos,0) - COALESCE(v_parametros.monto_retgar_mo,0) - COALESCE(v_parametros.descuento_ley,0);
            v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0) -  COALESCE(v_parametros.monto_no_pagado,0);
           
           
@@ -349,7 +347,13 @@ BEGIN
             liquido_pagable,
             fecha_tentativa,
             tipo_cambio,
-            monto_retgar_mo
+            monto_retgar_mo,
+            descuento_ley,
+            obs_descuentos_ley,
+            porc_descuento_ley,
+            nro_cheque,
+            nro_cuenta_bancaria,
+            id_cuenta_bancaria_mov
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -380,9 +384,16 @@ BEGIN
             v_liquido_pagable,
             v_parametros.fecha_tentativa,
             v_parametros.tipo_cambio,
-            v_parametros.monto_retgar_mo
-							
+            v_parametros.monto_retgar_mo,
+            v_parametros.descuento_ley,
+            v_parametros.obs_descuentos_ley,
+            v_parametros.porc_descuento_ley,
+			v_parametros.nro_cheque,
+			v_parametros.nro_cuenta_bancaria,
+            v_parametros.id_cuenta_bancaria_mov				
 			)RETURNING id_plan_pago into v_id_plan_pago;
+            
+            
             
             
             --------------------------------------------------
@@ -418,6 +429,8 @@ BEGIN
 					
         begin
         
+        
+        
            --validamos que el monto a pagar sea mayor que cero
            
            IF  v_parametros.monto = 0 THEN
@@ -444,7 +457,8 @@ BEGIN
             pp.nro_cuota,
             pp.fecha_tentativa,
             op.id_depto,
-            op.pago_variable
+            op.pago_variable,
+            pp.id_plantilla
             
           into v_registros  
            from tes.tplan_pago pp
@@ -456,7 +470,7 @@ BEGIN
            --CAlcular el nro de cuota
            --------------------------
            
-           
+        
            
           select 
             count(id_plan_pago)
@@ -490,7 +504,7 @@ BEGIN
           
            
          
-          IF  v_parametros.monto < 0 or v_parametros.monto_no_pagado < 0 or v_parametros.otros_descuentos  < 0 THEN
+          IF  v_parametros.monto < 0 or v_parametros.monto_no_pagado < 0 or v_parametros.otros_descuentos  < 0 or v_parametros.descuento_ley < 0 THEN
           
              raise exception 'No se admiten cifras negativas'; 
           END IF;
@@ -498,16 +512,16 @@ BEGIN
         
           IF v_parametros.monto_no_pagado !=0  THEN
           
-               raise exception 'El mmonto no pagado solo puede definirce en cuotas de devengado';
+               raise exception 'El monto no pagado solo puede definirce en cuotas de devengado';
           
           END IF;
         
            
           -- calcula el liquido pagable y el monto  a ejecutar presupeustaria mente
           
-          --TO DO, agregar monto por retencion de garantia, agregar el monto por retencion de anticipo
+          --TO DO,  agregar el monto por retencion de anticipo
            
-           v_liquido_pagable = COALESCE(v_parametros.monto,0)  - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0);
+           v_liquido_pagable = COALESCE(v_parametros.monto,0)  - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0)  - COALESCE(v_parametros.descuento_ley,0);
            v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0);
           
           
@@ -571,7 +585,13 @@ BEGIN
             liquido_pagable,
             fecha_tentativa,
             tipo_cambio,
-            monto_retgar_mo
+            monto_retgar_mo,
+            descuento_ley,
+            obs_descuentos_ley,
+            porc_descuento_ley,
+            nro_cheque,
+            nro_cuenta_bancaria,
+            id_cuenta_bancaria_mov
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -602,8 +622,13 @@ BEGIN
             v_liquido_pagable,
             v_parametros.fecha_tentativa,
             v_parametros.tipo_cambio,
-             v_parametros.monto_retgar_mo
-							
+            v_parametros.monto_retgar_mo,
+            v_parametros.descuento_ley,
+            v_parametros.obs_descuentos_ley,
+            v_parametros.porc_descuento_ley,
+            v_parametros.nro_cheque,
+            v_parametros.nro_cuenta_bancaria,
+			v_parametros.id_cuenta_bancaria_mov				
 			)RETURNING id_plan_pago into v_id_plan_pago;
             
             -- actualiza el monto pagado en el plan_pago padre
@@ -730,7 +755,7 @@ BEGIN
                 
                    
                      -- calcula el liquido pagable y el monto a ejecutar presupeustaria mente
-                   v_liquido_pagable = COALESCE(v_parametros.monto,0) - COALESCE(v_parametros.monto_no_pagado,0) - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0);
+                   v_liquido_pagable = COALESCE(v_parametros.monto,0) - COALESCE(v_parametros.monto_no_pagado,0) - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0) - COALESCE(v_parametros.descuento_ley,0);
                    v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0) -  COALESCE(v_parametros.monto_no_pagado,0);
               
                    IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
@@ -741,8 +766,7 @@ BEGIN
            --si es una cuota de pago
            
                     --verifica el el registro que falta por pagar
-                    raise exception 'es pagado';
-                    
+                     
                     v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado_pagado', v_registros_pp.id_plan_pago_fk);
                    
                     IF (v_monto_total + v_registros_pp.monto)  <  v_parametros.monto  THEN
@@ -755,7 +779,7 @@ BEGIN
                     --  en cuota de pago el monoto no pagado no se considera
                     --TO DO,  mas delante es necesario considerar la retencon por garantia y por anticipos 
                    
-                   v_liquido_pagable = COALESCE(v_parametros.monto,0)  - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0);
+                   v_liquido_pagable = COALESCE(v_parametros.monto,0)  - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0)  - COALESCE(v_parametros.descuento_ley,0);
                    v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0);
                    
                    IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
@@ -790,8 +814,15 @@ BEGIN
 			fecha_mod = now(),
 			id_usuario_mod = p_id_usuario,
             tipo_cambio= v_parametros.tipo_cambio,
-            monto_retgar_mo= v_parametros.monto_retgar_mo
+            monto_retgar_mo= v_parametros.monto_retgar_mo,
+            descuento_ley=v_parametros.descuento_ley,
+            obs_descuentos_ley=v_parametros.obs_descuentos_ley,
+            porc_descuento_ley=v_parametros.porc_descuento_ley,
+            nro_cheque = v_parametros.nro_cheque,
+            nro_cuenta_bancaria = v_parametros.nro_cuenta_bancaria,
+            id_cuenta_bancaria_mov = v_parametros.id_cuenta_bancaria_mov
 			where id_plan_pago=v_parametros.id_plan_pago;
+           
             
             --elimina el prorrateo si es automatico
             
@@ -1040,12 +1071,9 @@ BEGIN
 
 		begin
         
+           v_verficacion = tes.f_generar_comprobante(p_id_usuario, v_parametros.id_plan_pago, v_parametros.id_depto_conta);
            
-        
-           v_verficacion = tes.f_generar_comprobante(p_id_usuario, v_parametros.id_plan_pago);
-           
-            
-            IF  v_verficacion[1]= 'TRUE'   THEN
+          IF  v_verficacion[1]= 'TRUE'   THEN
             
                   --Definicion de la respuesta
                 v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Solitud de generacion de comprobante desde interface de plan de pagos'); 

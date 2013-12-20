@@ -18,6 +18,11 @@ class MODObligacionPago extends MODbase{
 		$this->procedimiento='tes.ft_obligacion_pago_sel';
 		$this->transaccion='TES_OBPG_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		
+		
+		$this->setParametro('id_funcionario_usu','id_funcionario_usu','int4');
+        $this->setParametro('tipo_interfaz','tipo_interfaz','varchar');
 				
 		//Definicion de la lista del resultado del query
 		$this->captura('id_obligacion_pago','int4');
@@ -55,6 +60,7 @@ class MODObligacionPago extends MODbase{
 		$this->captura('tipo_moneda','varchar');
 		$this->captura('total_pago','numeric');
 		$this->captura('pago_variable','varchar');
+		$this->captura('id_depto_conta','integer');
 		
 		
 		
@@ -65,6 +71,24 @@ class MODObligacionPago extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+	
+	function obtnerUosEpsDetalleObligacion(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.ft_obligacion_pago_ime';
+        $this->transaccion='TES_OBEPUO_IME';
+        $this->tipo_procedimiento='IME';
+                
+        //Define los parametros para la funcion
+        $this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
+
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+    
 			
 	function insertarObligacionPago(){
 		//Definicion de variables para ejecucion del procedimiento
@@ -257,35 +281,54 @@ class MODObligacionPago extends MODbase{
 					
 				}
 				
-				function listarObligacion(){
-					//Definicion de variables para ejecucion del procedimientp
-					$this->procedimiento='tes.ft_obligacion_pago_sel';
-					$this->transaccion='TES_COMEJEPAG_SEL';
-					$this->tipo_procedimiento='SEL';//tipo de transaccion
-					$this->setCount(false);
-					
-					$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
-					$this->setParametro('id_moneda','id_moneda','int4');
-					//Definicion de la lista del resultado del query
-					$this->captura('id_obligacion_det','int4');
-					$this->captura('id_partida','int4');
-					$this->captura('nombre_partida','text');
-					$this->captura('id_concepto_ingas','int4');
-					$this->captura('nombre_ingas','text');
-					$this->captura('id_obligacion_pago','int4');
-					$this->captura('id_centro_costo','int4');
-					$this->captura('codigo_cc','text');
-					$this->captura('id_partida_ejecucion_com','int4');
-					$this->captura('descripcion','text');
-					$this->captura('comprometido','numeric');
-					$this->captura('ejecutado','numeric');
-					$this->captura('pagado','numeric');
-					
-					//Ejecuta la instruccion
-					$this->armarConsulta();
-					$this->ejecutarConsulta();
-					//Devuelve la respuesta
-					return $this->respuesta;
-				}
+		function listarObligacion(){
+			//Definicion de variables para ejecucion del procedimientp
+			$this->procedimiento='tes.ft_obligacion_pago_sel';
+			$this->transaccion='TES_COMEJEPAG_SEL';
+			$this->tipo_procedimiento='SEL';//tipo de transaccion
+			$this->setCount(false);
+			
+			$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
+			$this->setParametro('id_moneda','id_moneda','int4');
+			//Definicion de la lista del resultado del query
+			$this->captura('id_obligacion_det','int4');
+			$this->captura('id_partida','int4');
+			$this->captura('nombre_partida','text');
+			$this->captura('id_concepto_ingas','int4');
+			$this->captura('nombre_ingas','text');
+			$this->captura('id_obligacion_pago','int4');
+			$this->captura('id_centro_costo','int4');
+			$this->captura('codigo_cc','text');
+			$this->captura('id_partida_ejecucion_com','int4');
+			$this->captura('descripcion','text');
+			$this->captura('comprometido','numeric');
+			$this->captura('ejecutado','numeric');
+			$this->captura('pagado','numeric');
+			
+			//Ejecuta la instruccion
+			$this->armarConsulta();
+			$this->ejecutarConsulta();
+			//Devuelve la respuesta
+			return $this->respuesta;
+		}
+	
+	function obtenerIdsExternos(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.ft_obligacion_pago_ime';
+        $this->transaccion='TES_IDSEXT_GET';
+        $this->tipo_procedimiento='IME';
+                
+        //Define los parametros para la funcion
+        $this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
+		$this->setParametro('sistema','sistema','varchar');
+
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+
 }
 ?>

@@ -69,6 +69,8 @@ DECLARE
     v_factor numeric;
     
     v_registros    record;
+    v_cad_ep varchar;
+    v_cad_uo varchar;
 			    
 BEGIN
 
@@ -598,6 +600,8 @@ BEGIN
             
             
            
+       
+        
             IF  va_codigo_estado[1] = 'registrado'  and v_tipo_obligacion != 'adquisiciones' THEN
             
                -- verficar presupuesto y comprometer
@@ -608,6 +612,8 @@ BEGIN
                END IF;
            
            END IF;
+           
+           
             
              -- actualiza estado en la solicitud
             
@@ -637,6 +643,8 @@ BEGIN
                    --Definicion de la respuesta
                     v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligacion fue finzalida, y el presupuesto sobrante revertido'); 
                   END IF;
+                  
+                
              ELSE
                 --Definicion de la respuesta
               v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligacion de pago fin de registro'); 
@@ -837,7 +845,107 @@ BEGIN
             return v_resp;
 
 		end;   
-	
+	 /*********************************    
+ 	#TRANSACCION:  'TES_OBEPUO_IME'
+ 	#DESCRIPCION:	Obtener listado de up y ep correspondientes a los centros de costo
+                    del detalle de la obligacion de pago 
+                    
+ 	#AUTOR:	        Rensi Arteaga Copari
+ 	#FECHA:		    1-4-2013 14:48:35
+	***********************************/
+
+	elsif(p_transaccion='TES_OBEPUO_IME')then
+
+		begin
+			
+         
+        
+            select 
+              pxp.list(cc.id_uo::text),
+              pxp.list(cc.id_ep::text)
+            into
+              v_cad_uo,
+              v_cad_ep
+            from tes.tobligacion_det  od
+            inner join param.tcentro_costo cc on od.id_centro_costo = cc.id_centro_costo
+            where od.id_obligacion_pago = v_parametros.id_obligacion_pago 
+            and od.estado_reg = 'activo';
+        
+           
+             --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','UOs, EPs retornados'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'eps',v_cad_ep::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'uos',v_cad_uo::varchar);
+              
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;
+		
+	/*********************************    
+ 	#TRANSACCION:  'TES_IDSEXT_GET'
+ 	#DESCRIPCION:	Devuelve los IDS de otros sistemas (adquisiciones, etc.) a partir de la obligacion de pago
+ 	#AUTOR:			RCM	
+ 	#FECHA:			02-04-2013 16:01:32
+	***********************************/
+
+	elsif(p_transaccion='TES_IDSEXT_GET')then
+
+		begin
+		
+			--1.Verificar existencia de la obligación de pago
+			if not exists(select 1 from tes.tobligacion_pago
+						where id_obligacion_pago = v_parametros.id_obligacion_pago) then
+				raise exception 'Obligación de pago inexistente';
+			end if;
+			
+			--2.Condicional por sistema
+			if v_parametros.sistema = 'ADQ' then
+			
+				--2.1 Obtiene los IDS: id_cotizacion, id_proceso_compra, id_solicitud
+				select
+				cot.id_cotizacion, cot.id_proceso_compra, pro.id_solicitud
+				into v_registros
+				from adq.tcotizacion cot
+				inner join adq.tproceso_compra pro on pro.id_proceso_compra = cot.id_proceso_compra
+				where cot.id_obligacion_pago = v_parametros.id_obligacion_pago;
+				
+				
+				--2.2 Respuesta por sistema
+				v_resp = pxp.f_agrega_clave(v_resp,'mensaje','IDs obtenidos');
+				v_resp = pxp.f_agrega_clave(v_resp,'id_cotizacion',v_registros.id_cotizacion::varchar);
+				v_resp = pxp.f_agrega_clave(v_resp,'id_proceso_compra',v_registros.id_proceso_compra::varchar);
+				v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud',v_registros.id_solicitud::varchar);
+			
+			
+			elsif v_parametros.sistema = 'TES' then
+				--(17/12/2013)TODO implementar cuando corresponda
+				raise exception 'Funcionalidad no implementada para el sistema %',v_parametros.sistema;
+				
+				--2.1 Obtiene los IDS
+				--2.2 Respuesta por sistema
+				v_resp = pxp.f_agrega_clave(v_resp,'mensaje','IDs obtenidos');
+			
+			
+			elsif v_parametros.sistema = 'CONTA' then
+				--(17/12/2013)TODO implementar si corresponde
+				raise exception 'Funcionalidad no implementada para el sistema %',v_parametros.sistema;
+				
+				--2.1 Obtiene los IDS
+				--2.2 Respuesta por sistema
+				v_resp = pxp.f_agrega_clave(v_resp,'mensaje','IDs obtenidos');
+			
+			
+			else
+				raise exception 'Sistema no reconocido';
+			end if;
+
+			--3.Respuesta
+			return v_resp;
+
+		end;
+        
+   
     
     else
      

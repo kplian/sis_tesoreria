@@ -41,6 +41,19 @@ class MODProrrateo extends MODbase{
 		$this->captura('descripcion','text');
 		
 		
+		$this->captura('nombre_programa','varchar');
+		$this->captura('nombre_proyecto','varchar');
+		$this->captura('nombre_actividad','varchar');
+		$this->captura('nombre_financiador','varchar');
+		$this->captura('nombre_regional','varchar');
+		$this->captura('nombre_uo','varchar');
+		$this->captura('nombre_partida','varchar');
+		$this->captura('codigo_partida','varchar');
+		
+		
+		
+		
+		
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();

@@ -230,3 +230,109 @@ IS 'conto de retencion de garantia en moneda base';
 /***********************************F-SCP-RAC-TES-0-04/07/2013***************************************/
 
 
+/***********************************I-SCP-RAC-TES-0-20/08/2013***************************************/
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN id_depto_conta INTEGER;
+  
+/***********************************F-SCP-RAC-TES-0-20/08/2013***************************************/
+  
+  
+/***********************************I-SCP-RAC-TES-0-09/09/2013***************************************/
+  
+ALTER TABLE tes.tplan_pago
+  RENAME COLUMN id_comprobante TO id_int_comprobante;  
+
+/***********************************F-SCP-RAC-TES-0-09/09/2013***************************************/
+ 
+/***********************************I-SCP-RAC-TES-0-18/09/2013***************************************/
+
+ALTER TABLE tes.tprorrateo
+  ADD COLUMN id_int_transaccion INTEGER;
+
+COMMENT ON COLUMN tes.tprorrateo.id_int_transaccion
+IS 'relaciona el prorrateo del devengado con la transaccion don de se ejecuta el presupuesto'; 
+
+ALTER TABLE tes.tprorrateo
+  ADD COLUMN id_prorrateo_fk INTEGER;
+
+COMMENT ON COLUMN tes.tprorrateo.id_prorrateo_fk
+IS 'solo sirve para prorrateos de pago, referencia el prorrateo del devengado';
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN descuento_ley NUMERIC(18,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tplan_pago.descuento_ley
+IS 'en este campo se registran los decuento asociados al tipo de documentos, por ejemplo si es recibo con retencion de bienes, se retiene 3% del IT y 5%del IUE';
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN obs_descuentos_ley TEXT;
+
+COMMENT ON COLUMN tes.tplan_pago.obs_descuentos_ley
+IS 'este campo espeficia los porcentajes aplicado a los decuentos, es solo descriptivo';
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN descuento_ley_mb NUMERIC(18,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tplan_pago.descuento_ley_mb
+IS 'descuentos de ley en moneda base';
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN porc_descuento_ley NUMERIC(4,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tplan_pago.porc_descuento_ley
+IS 'cste campo almacena el porcentaje de descuentos de ley, se utiliza para las cuotas de tipo pago';
+
+/***********************************F-SCP-RAC-TES-0-18/09/2013***************************************/
+
+/***********************************I-SCP-RCM-TES-0-05/12/2013***************************************/ 
+ 
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN nro_cheque INTEGER;
+
+COMMENT ON COLUMN tes.tplan_pago.nro_cheque
+IS 'Número de cheque que se utilizará para realizar el pago';
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN nro_cuenta_bancaria VARCHAR(50);
+
+COMMENT ON COLUMN tes.tplan_pago.nro_cuenta_bancaria
+IS 'Número de cuenta bancaria para realizar el pago cuando es Transferencia';
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN id_cuenta_bancaria_mov integer;
+
+/***********************************F-SCP-RCM-TES-0-05/12/2013***************************************/
+
+
+/***********************************I-SCP-RCM-TES-0-12/12/2013***************************************/
+CREATE TABLE tes.tcuenta_bancaria_mov (
+  id_cuenta_bancaria_mov SERIAL, 
+  id_cuenta_bancaria INTEGER NOT NULL, 
+  id_int_comprobante INTEGER, 
+  id_cuenta_bancaria_mov_fk INTEGER, 
+  tipo_mov VARCHAR(15) NOT NULL, 
+  tipo varchar(15) NOT NULL, 
+  descripcion VARCHAR(2000) NOT NULL, 
+  nro_doc_tipo VARCHAR(50), 
+  importe NUMERIC(18,2) NOT NULL,
+  fecha date not null, 
+  estado VARCHAR(20) NOT NULL, 
+  observaciones VARCHAR(2000), 
+  CONSTRAINT pk_tcuenta_bancaria_mov__id_cuenta_bancaria_mov PRIMARY KEY(id_cuenta_bancaria_mov)
+) INHERITS (pxp.tbase)
+WITHOUT OIDS;
+
+COMMENT ON COLUMN tes.tcuenta_bancaria_mov.id_cuenta_bancaria_mov_fk
+IS 'Relacion para determinar en un Egreso a que ingreso corresponde';
+
+COMMENT ON COLUMN tes.tcuenta_bancaria_mov.tipo_mov
+IS 'tipo_mov in (''ingreso'',''egreso'')';
+
+COMMENT ON COLUMN tes.tcuenta_bancaria_mov.tipo
+IS 'tipo in (''cheque'',''transferencia'')';
+
+/***********************************F-SCP-RCM-TES-0-12/12/2013***************************************/

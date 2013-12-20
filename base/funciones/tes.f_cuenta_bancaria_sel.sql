@@ -64,7 +64,7 @@ BEGIN
                         mon.codigo as codigo_moneda
 						from tes.tcuenta_bancaria ctaban
                         inner join param.tinstitucion inst on inst.id_institucion = ctaban.id_institucion
-                        inner join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda
+                        left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda
 						inner join segu.tusuario usu1 on usu1.id_usuario = ctaban.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = ctaban.id_usuario_mod
 				        where  ';
@@ -92,7 +92,7 @@ BEGIN
 			v_consulta:='select count(id_cuenta_bancaria)
 					    from tes.tcuenta_bancaria ctaban
                         inner join param.tinstitucion inst on inst.id_institucion = ctaban.id_institucion
-                        inner join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda
+                        left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda
                         inner join segu.tusuario usu1 on usu1.id_usuario = ctaban.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = ctaban.id_usuario_mod
 					    where ';
