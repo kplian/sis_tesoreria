@@ -355,3 +355,16 @@ CREATE TABLE tes.tcaja (
 WITHOUT OIDS;
 /***********************************F-SCP-ECR-TES-0-20/12/2013***************************************/
 
+
+
+/***********************************I-SCP-ECR-TES-0-20/12/2013***************************************/
+CREATE TABLE tes.tcajero (
+  id_cajero SERIAL, 
+  id_funcionario INTEGER NOT NULL, 
+  tipo VARCHAR(20) NOT NULL, 
+  estado VARCHAR(20) NOT NULL, 
+  id_caja INTEGER, 
+  CONSTRAINT pk_tcajero__id_cajero PRIMARY KEY(id_cajero)
+) INHERITS (pxp.tbase)
+WITHOUT OIDS;
+/***********************************F-SCP-ECR-TES-0-20/12/2013***************************************/
