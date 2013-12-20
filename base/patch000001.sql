@@ -336,3 +336,22 @@ COMMENT ON COLUMN tes.tcuenta_bancaria_mov.tipo
 IS 'tipo in (''cheque'',''transferencia'')';
 
 /***********************************F-SCP-RCM-TES-0-12/12/2013***************************************/
+
+
+
+
+/***********************************I-SCP-ECR-TES-0-20/12/2013***************************************/
+CREATE TABLE tes.tcaja (
+  id_caja SERIAL, 
+  id_depto INTEGER NOT NULL, 
+  id_moneda INTEGER NOT NULL, 
+  codigo VARCHAR(20) NOT NULL, 
+  tipo VARCHAR(20) NOT NULL, 
+  estado VARCHAR(20) NOT NULL, 
+  importe_maximo NUMERIC(18,2) NOT NULL, 
+  porcentaje_compra NUMERIC(6,2) NOT NULL, 
+  CONSTRAINT pk_tcaja__id_caja PRIMARY KEY(id_caja)
+) INHERITS (pxp.tbase)
+WITHOUT OIDS;
+/***********************************F-SCP-ECR-TES-0-20/12/2013***************************************/
+

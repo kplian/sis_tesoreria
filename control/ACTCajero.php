@@ -33,7 +33,7 @@ class ACTCajero extends ACTbase{
 		$this->objFunc=$this->create('MODCajero');	
 		if($this->objParam->insertar('id_cajero')){
 			$this->res=$this->objFunc->insertarCajero($this->objParam);			
-		} else{			
+		} else{
 			$this->res=$this->objFunc->modificarCajero($this->objParam);
 		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
