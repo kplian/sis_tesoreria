@@ -127,3 +127,9 @@ select pxp.f_insert_testructura_gui ('CTABAN', 'TES');
 
 /***********************************F-DAT-GSS-TES-121-24/04/2013*****************************************/
 
+
+
+/***********************************I-DAT-ECR-TES-0-16/12/2013*****************************************/
+select pxp.f_insert_tgui ('Caja', 'Caja', 'CAJA', 'si', 1, 'sis_tesoreria/vista/caja/Caja.php', 2, '', 'Caja', 'TES');
+select pxp.f_insert_testructura_gui ('CAJA', 'TES');
+/***********************************F-DAT-ECR-TES-0-16/12/2013*****************************************/
