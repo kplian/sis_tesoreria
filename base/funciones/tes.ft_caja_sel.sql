@@ -56,7 +56,7 @@ BEGIN
 						caja.fecha_mod,
 						usu1.cuenta as usr_reg,
 						usu2.cuenta as usr_mod,
-						mon.moneda as desc_moneda	
+						mon.moneda as desc_moneda,	
 						depto.nombre as desc_depto
 						from tes.tcaja caja
 						inner join segu.tusuario usu1 on usu1.id_usuario = caja.id_usuario_reg
