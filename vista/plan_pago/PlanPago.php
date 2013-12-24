@@ -13,109 +13,18 @@ header("content-type: text/javascript; charset=UTF-8");
 Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 
 	constructor:function(config){
-		this.maestro=config.maestro;
+		
     	//llama al constructor de la clase padre
 		Phx.vista.PlanPago.superclass.constructor.call(this,config);
 		this.init();
-		this.iniciarEventos();
-		this.addButton('SolDevPag',{text:'Solicitar Devengado/Pago',iconCls: 'bpagar',disabled:true,handler:this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente, devengado o pago  '});
-        this.addButton('SincPresu',{text:'Inc. Pres.',iconCls: 'balert',disabled:true,handler:this.onBtnSincPresu,tooltip: '<b>Incrementar Presupuesto</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
-        this.addButton('SolPlanPago',{text:'Sol. Plan Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnSolPlanPago,tooltip: '<b>Solicitud Plan Pago</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});      
-		////formulario de departamentos
+		
+		this.addButton('ant_estado',{argument: {estado: 'anterior'},text:'Anterior',iconCls: 'batras',disabled:true,handler:this.antEstado,tooltip: '<b>Pasar al Anterior Estado</b>'});
         
-        this.cmpDeptoConta = new Ext.form.ComboBox({
-                    xtype: 'combo',
-                    name: 'id_depto_conta',
-                    hiddenName: 'id_depto_conta',
-                    fieldLabel: 'Depto. Conta.',
-                    allowBlank: false,
-                    emptyText:'Elija un Depto',
-                    store:new Ext.data.JsonStore(
-                    {
-                        url: '../../sis_tesoreria/control/ObligacionPago/listarDeptoFiltradoObligacionPago',
-                        id: 'id_depto',
-                        root: 'datos',
-                        sortInfo:{
-                            field: 'deppto.nombre',
-                            direction: 'ASC'
-                        },
-                        totalProperty: 'total',
-                        fields: ['id_depto','nombre'],
-                        // turn on remote sorting
-                        remoteSort: true,
-                        baseParams:{par_filtro:'deppto.nombre#deppto.codigo',estado:'activo',codigo_subsistema:'CONTA',tipo_filtro:'DEP_EP-DEP_EP'}
-                    }),
-                    valueField: 'id_depto',
-                    displayField: 'nombre',
-                    tpl:'<tpl for="."><div class="x-combo-list-item"><p>{nombre}</p></div></tpl>',
-                    hiddenName: 'id_depto_tes',
-                    forceSelection:true,
-                    typeAhead: true,
-                    triggerAction: 'all',
-                    lazyRender:true,
-                    mode:'remote',
-                    pageSize:10,
-                    queryDelay:1000,
-                    width:250,
-                    listWidth:'280',
-                    minChars:2
-                });
+		this.addButton('sig_estado',{text:'Siguiente',iconCls: 'badelante',disabled:true,handler:this.sigEstado,tooltip: '<b>Pasar al Siguiente Estado</b>'});
         
-        this.formDEPTO = new Ext.form.FormPanel({
-            baseCls: 'x-plain',
-            autoDestroy: true,
-            layout: 'form',
-            items: [this.cmpDeptoConta]
-        });
-        
+		this.addButton('SolPlanPago',{text:'Sol. Plan Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnSolPlanPago,tooltip: '<b>Solicitud Plan Pago</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});      
        
-        
-        this.wDEPTO= new Ext.Window({
-            title: 'Depto Tesoreria',
-            collapsible: true,
-            maximizable: true,
-             autoDestroy: true,
-            width: 400,
-            height: 200,
-            layout: 'fit',
-            plain: true,
-            bodyStyle: 'padding:5px;',
-            buttonAlign: 'center',
-            items: this.formDEPTO,
-            modal:true,
-             closeAction: 'hide',
-            buttons: [{
-                text: 'Guardar',
-                 handler:this.onSubmitDepto,
-                scope:this
-                
-            },{
-                text: 'Cancelar',
-                handler:function(){this.wDEPTO.hide()},
-                scope:this
-            }]
-        }); 
 		
-		
-		
-		
-		 //si la interface es pestanha este código es para iniciar 
-          var dataPadre = Phx.CP.getPagina(this.idContenedorPadre).getSelectedData()
-          if(dataPadre){
-             this.onEnablePanel(this, dataPadre);
-          }
-          else
-          {
-             this.bloquearMenus();
-          }
-          
-          this.addButton('btnVerifPresup', {
-				text : 'Disponibilidad',
-				iconCls : 'bassign',
-				disabled : true,
-				handler : this.onBtnVerifPresup,
-				tooltip : '<b>Verificación de la disponibilidad presupuestaria</b>'
-			});
 	},
 	tam_pag:50,
 
@@ -156,6 +65,21 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             },
             type:'Field',
             form:true
+        },
+        {
+            config:{
+                name: 'numero_op',
+                fieldLabel: 'Obl. Pago',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 130,
+                maxLength:4
+            },
+            type:'NumberField',
+            filters:{pfiltro:'op.numero',type:'string'},
+            id_grupo:1,
+            grid:false,
+            form:false
         } ,
         {
             config:{
@@ -877,560 +801,179 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		{name:'nro_cheque', type: 'numeric'},
 		{name:'nro_cuenta_bancaria', type: 'string'},
 		{name:'id_cuenta_bancaria_mov', type: 'numeric'},
-		{name:'desc_deposito', type: 'string'}
+		{name:'desc_deposito', type: 'string'},'numero_op','id_estado_wf','id_depto_conta'
 		
 	],
-	iniciarEventos:function(){
+	
+   crearFormularioEstados:function(){
         
-        this.cmpObligacionPago=this.getComponente('id_obligacion_pago');
-        this.cmpFechaTentativa=this.getComponente('fecha_tentativa');
-      
-        this.cmpTipoPago=this.getComponente('tipo_pago');
-       
-        this.cmpPlantilla=this.getComponente('id_plantilla');
-        this.cmpNombrePago=this.getComponente('nombre_pago');
-        this.cmpFormaPago=this.getComponente('forma_pago');
-        this.cmpTipo=this.getComponente('tipo');
-        this.cmpCuentaBancaria=this.getComponente('id_cuenta_bancaria');
-        
-        
-        this.cmpMonto=this.getComponente('monto');
-        //this.cmpDescuentoAnticipo=this.getComponente('descuento_anticipo');
-        this.cmpMontoNoPagado=this.getComponente('monto_no_pagado');
-        this.cmpOtrosDescuentos=this.getComponente('otros_descuentos');
-        this.cmpLiquidoPagable=this.getComponente('liquido_pagable');
-        this.cmpMontoEjecutarTotalMo=this.getComponente('monto_ejecutar_total_mo');
-        
-       // this.cmpObsDescuentoAnticipo=this.getComponente('obs_descuentos_anticipo');
-        this.cmpObsMontoNoPagado=this.getComponente('obs_monto_no_pagado');
-        this.cmpObsOtrosDescuentos=this.getComponente('obs_otros_descuentos');
-       
-       
-        
-        this.cmpMonto.on('change',this.calculaMontoPago,this); 
-        //this.cmpDescuentoAnticipo.on('change',this.calculaMontoPago,this);
-        this.cmpMontoNoPagado.on('change',this.calculaMontoPago,this);
-        this.cmpOtrosDescuentos.on('change',this.calculaMontoPago,this);
-        this.Cmp.monto_retgar_mo.on('change',this.calculaMontoPago,this);
-        this.Cmp.descuento_ley.on('change',this.calculaMontoPago,this);
-        
-        this.Cmp.id_plantilla.on('select',function(cmb,rec,i){
-            
-            console.log(rec.data)
-            this.getDecuentosPorAplicar(rec.data.id_plantilla);
-            
-        },this);
-        
-        this.cmpTipo.on('change',function(groupRadio,radio){
-                                this.enableDisable(radio.inputValue);
-                            },this); 
-          
-        
-      /* this.cmpFechaDev.on('change',function(com,dat){
-              
-              if(this.maestro.tipo_moneda=='base'){
-                 this.cmpTipoCambio.disable();
-                 this.cmpTipoCambio.setValue(1); 
-                  
-              }
-              else{
-                   this.cmpTipoCambio.enable()
-                 this.obtenerTipoCambio();  
-              }
-             
-              
-          },this);*/
-         
-       
-       
-       this.cmpTipoPago.on('select',function(cmb,rec,i){
-           if(rec.data.variable=='anticipo' || rec.data.variable=='adelanto'){
-               this.cmpTipo.disable();
-               this.ocultarComponente(this.cmpTipo);
+          this.formEstado = new Ext.form.FormPanel({
+                baseCls: 'x-plain',
+                autoDestroy: true,
                
-               this.deshabilitarDescuentos();
+                border: false,
+                layout: 'form',
+                 autoHeight: true,
                
-               if(rec.data.variable=='anticipo'){
-                   this.ocultarComponente(this.cmpMontoEjecutarTotalMo);
-                   this.cmpPlantilla.disable();
-                   this.ocultarComponente(this.cmpPlantilla);
-               }
-               else{
-                   this.mostrarComponente(this.cmpMontoEjecutarTotalMo);
-                   this.cmpPlantilla.enable();
-                   this.mostrarComponente(this.cmpPlantilla);
-                   
-               }
-               
-           
-           
-           }
-           else{
-               this.cmpTipo.enable();
-               this.mostrarComponente(this.cmpTipo);
-               this.mostrarComponente(this.cmpMontoEjecutarTotalMo)
-               this.habilitarDescuentos();
-           }
-           
-           
-       },this);
-       
-       //Evento para filtrar los depósitos a partir de la cuenta bancaria
-		this.Cmp.id_cuenta_bancaria.on('select',function(data,rec,ind){
-			this.Cmp.id_cuenta_bancaria_mov.setValue('');
-			this.Cmp.id_cuenta_bancaria_mov.modificado=true;
-			Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: rec.id});
-		},this);
-		
-		//Evento para ocultar/motrar componentes por cheque o transferencia
-		this.Cmp.forma_pago.on('change',function(groupRadio,radio){
-			this.ocultarCheCue(radio.inputValue);
-		},this);		   
-    
-    },
-    
-    onBtnSolPlanPago:function(){    	
-        var rec=this.sm.getSelected();
-        Ext.Ajax.request({
-            url:'../../sis_tesoreria/control/PlanPago/solicitudPlanPago',
-            params:{'id_plan_pago':rec.data.id_plan_pago,id_obligacion_pago:this.maestro.id_obligacion_pago},
-            success: this.successExport,
-            failure: function() {
-                console.log("fail");
-            },
-            timeout: function() {
-                console.log("timeout");
-            },
-            scope:this
-        });  
-    },
-    
-    setTipoPagoNormal:function(){
-        this.cmpTipo.enable();
-       this.mostrarComponente(this.cmpTipo);
-       this.mostrarComponente(this.cmpMontoEjecutarTotalMo)
-       this.habilitarDescuentos();
         
-    },
-    
-     successAplicarDesc:function(resp){
-            Phx.CP.loadingHide();
-           var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
-            if(!reg.ROOT.error){
-                
-               this.Cmp.porc_descuento_ley.setValue(reg.ROOT.datos.descuento_porc*1);
-               this.Cmp.obs_descuentos_ley.setValue(reg.ROOT.datos.observaciones);
-               
-               this.calculaMontoPago();
-               
-              
-             
-             }else{
-                alert(reg.ROOT.mensaje)
-            }
-     },
-     
-   
-    calculaMontoPago:function(){
-        
-         var descuento_ley = this.cmpMonto.getValue()*this.Cmp.porc_descuento_ley.getValue();
-         this.Cmp.descuento_ley.setValue(descuento_ley);
-         var liquido = this.cmpMonto.getValue()  -  this.cmpMontoNoPagado.getValue() -  this.cmpOtrosDescuentos.getValue() - this.Cmp.monto_retgar_mo.getValue() -  this.Cmp.descuento_ley.getValue();
-        
-        
-        this.cmpLiquidoPagable.setValue(liquido>0?liquido:0);
-        var eje = this.cmpMonto.getValue()  -  this.cmpMontoNoPagado.getValue()
-        this.cmpMontoEjecutarTotalMo.setValue(eje>0?eje:0);
-     },
-     
-     enableDisable:function(val){
-      if(val =='devengado'){
-            
-            //this.cmpPlantilla.enable();
-            //this.ocultarComponente(this.cmpPlantilla);
-            this.cmpNombrePago.disable();
-            this.ocultarComponente(this.cmpNombrePago);
-            this.cmpFormaPago.disable();
-            this.ocultarComponente(this.cmpFormaPago);
-            this.cmpFormaPago.disable();
-            this.ocultarComponente(this.cmpFormaPago);
-            this.cmpCuentaBancaria.disable()
-            this.ocultarComponente(this.cmpCuentaBancaria);
-            
-           this.deshabilitarDescuentos()
-            
-        }
-        else{
-            //this.cmpPlantilla.enable();
-            //this.mostrarComponente(this.cmpPlantilla);
-            this.cmpNombrePago.enable();
-            this.mostrarComponente(this.cmpNombrePago);
-            this.cmpFormaPago.enable();
-            this.mostrarComponente(this.cmpFormaPago);
-            this.cmpFormaPago.enable();
-            this.mostrarComponente(this.cmpFormaPago);
-            this.cmpCuentaBancaria.enable()
-            this.mostrarComponente(this.cmpCuentaBancaria);
-            
-            this.habilitarDescuentos();
-            
-         }
-          this.cmpMontoNoPagado.setValue(0);
-          this.cmpOtrosDescuentos.setValue(0);
-          this.cmpLiquidoPagable.setValue(0);
-          this.cmpMontoEjecutarTotalMo.setValue(0);
-          this.Cmp.monto_retgar_mo.setValue(0);
-          this.Cmp.descuento_ley.setValue(0)
-          this.calculaMontoPago()
-         
-     },
-     
-    habilitarDescuentos:function(){
-        //this.cmpDescuentoAnticipo.enable();
-        //this.mostrarComponente(this.cmpDescuentoAnticipo);
-        this.cmpOtrosDescuentos.enable();
-        this.mostrarComponente(this.cmpOtrosDescuentos);
-        
-        //calcular retenciones segun documento
-        
-        this.mostrarComponente(this.Cmp.descuento_ley);
-        
-        this.Cmp.monto_retgar_mo.enable();
-        this.mostrarComponente(this.Cmp.monto_retgar_mo);
-        
-        
-        
-        //this.cmpObsDescuentoAnticipo.enable();
-        //this.mostrarComponente(this.cmpObsDescuentoAnticipo);
-        this.cmpObsOtrosDescuentos.enable();
-        this.mostrarComponente(this.cmpObsOtrosDescuentos);
-        
-        this.mostrarComponente(this.Cmp.obs_descuentos_ley);
-        
-    } ,
-     deshabilitarDescuentos:function(){
-       // this.cmpDescuentoAnticipo.disable();
-       // this.ocultarComponente(this.cmpDescuentoAnticipo);
-        this.cmpOtrosDescuentos.disable();
-        this.ocultarComponente(this.cmpOtrosDescuentos);
-        
-        this.Cmp.monto_retgar_mo.disable();
-        this.ocultarComponente(this.Cmp.monto_retgar_mo);
-        
-        this.ocultarComponente(this.Cmp.descuento_ley);
-        
-        
-         
-        //this.cmpObsDescuentoAnticipo.disable();
-        //this.ocultarComponente(this.cmpObsDescuentoAnticipo);
-        this.cmpObsOtrosDescuentos.disable();
-        this.ocultarComponente(this.cmpObsOtrosDescuentos);
-        
-         this.ocultarComponente(this.Cmp.obs_descuentos_ley);
-            
-        
-    } ,
-    
-    
-    onButtonNew:function(){
-        
-         var data = this.getSelectedData();
-         if(data){
-         // para habilitar registros de cuotas de pago    
-            if(data.monto_ejecutar_total_mo*1  > data.total_pagado*1  && data.estado =='devengado'){
-                Phx.vista.PlanPago.superclass.onButtonNew.call(this); 
-                this.cmpObligacionPago.setValue(this.maestro.id_obligacion_pago);
-                this.Cmp.id_plan_pago_fk.setValue(data.id_plan_pago);
-                
-              
-                this.cmpTipoPago.disable();
-                this.ocultarComponente(this.cmpTipoPago);
-                
-                this.cmpTipo.disable();
-                this.ocultarComponente(this.cmpTipo);
-                
-                this.cmpPlantilla.disable();
-                this.ocultarComponente(this.cmpPlantilla);
-                
-                this.cmpNombrePago.enable();
-                this.mostrarComponente(this.cmpNombrePago);
-                this.cmpFormaPago.enable();
-                this.mostrarComponente(this.cmpFormaPago);
-                this.cmpFormaPago.enable();
-                this.mostrarComponente(this.cmpFormaPago);
-                this.cmpCuentaBancaria.enable()
-                this.mostrarComponente(this.cmpCuentaBancaria);
-                this.habilitarDescuentos();
-                
-                this.cmpMontoNoPagado.disable();
-                this.ocultarComponente(this.cmpMontoNoPagado);
-                this.cmpObsMontoNoPagado.disable();
-                this.ocultarComponente(this.cmpObsMontoNoPagado);
-                
-                this.obtenerFaltante('registrado_pagado',data.id_plan_pago);
-                this.Cmp.tipo_cambio.setValue(0);
-                this.Cmp.tipo_cambio.disable();
-                this.ocultarComponente(this.Cmp.tipo_cambio);
-                //calculo de descuentos por documento
-                this.getDecuentosPorAplicar(data.id_plantilla);
-
-            }
-            else{
-                if(data.estado!='devengado'){
+                items: [
+                    {
+                        xtype: 'combo',
+                        name: 'id_tipo_estado',
+                          hiddenName: 'id_tipo_estado',
+                        fieldLabel: 'Siguiente Estado',
+                        listWidth:280,
+                        allowBlank: false,
+                        emptyText:'Elija el estado siguiente',
+                        store:new Ext.data.JsonStore(
+                        {
+                            url: '../../sis_workflow/control/TipoEstado/listarTipoEstado',
+                            id: 'id_tipo_estado',
+                            root:'datos',
+                            sortInfo:{
+                                field:'tipes.codigo',
+                                direction:'ASC'
+                            },
+                            totalProperty:'total',
+                            fields: ['id_tipo_estado','codigo_estado','nombre_estado'],
+                            // turn on remote sorting
+                            remoteSort: true,
+                            baseParams:{par_filtro:'tipes.nombre_estado#tipes.codigo'}
+                        }),
+                        valueField: 'id_tipo_estado',
+                        displayField: 'codigo_estado',
+                        forceSelection:true,
+                        typeAhead: false,
+                        triggerAction: 'all',
+                        lazyRender:true,
+                        mode:'remote',
+                        pageSize:50,
+                        queryDelay:500,
+                        width:210,
+                        gwidth:220,
+                        minChars:2,
+                        tpl: '<tpl for="."><div class="x-combo-list-item"><p>{codigo_estado}</p>Prioridad: <strong>{nombre_estado}</strong> </div></tpl>'
                     
-                    alert('El devengado no fue completado');
-                }
-                else{
-                    alert('No queda nada por pagar');
-                }
+                    },
+                    {
+                        xtype: 'combo',
+                        name: 'id_funcionario_wf',
+                        hiddenName: 'id_funcionario_wf',
+                        fieldLabel: 'Funcionario Resp.',
+                        allowBlank: false,
+                        emptyText:'Elija un funcionario',
+                        listWidth:280,
+                        store:new Ext.data.JsonStore(
+                        {
+                            url: '../../sis_workflow/control/TipoEstado/listarFuncionarioWf',
+                            id: 'id_funcionario',
+                            root:'datos',
+                            sortInfo:{
+                                field:'prioridad',
+                                direction:'ASC'
+                            },
+                            totalProperty:'total',
+                            fields: ['id_funcionario','desc_funcionario','prioridad'],
+                            // turn on remote sorting
+                            remoteSort: true,
+                            baseParams:{par_filtro:'fun.desc_funcionario1'}
+                        }),
+                        valueField: 'id_funcionario',
+                        displayField: 'desc_funcionario',
+                        forceSelection:true,
+                        typeAhead: false,
+                        triggerAction: 'all',
+                        lazyRender:true,
+                        mode:'remote',
+                        pageSize:50,
+                        queryDelay:500,
+                        width:210,
+                        gwidth:220,
+                        minChars:2,
+                        tpl: '<tpl for="."><div class="x-combo-list-item"><p>{desc_funcionario}</p>Prioridad: <strong>{prioridad}</strong> </div></tpl>'
+                    
+                    },
+                        {
+                            name: 'obs',
+                            xtype: 'textarea',
+                            fieldLabel: 'Obs',
+                            allowBlank: false,
+                            anchor: '80%',
+                            maxLength:500
+                        }
+                   ]
+            });
             
-            }
             
-             
-         }
-         else{
-           //para habilitar registros de cuota de devengado  
-                Phx.vista.PlanPago.superclass.onButtonNew.call(this); 
-                this.cmpObligacionPago.setValue(this.maestro.id_obligacion_pago);
-                 this.mostrarComponente(this.cmpTipoPago);
-               if(this.maestro.nro_cuota_vigente ==0){
-                    this.cmpTipoPago.setValue('normal');
-                    this.cmpTipoPago.enable();
-                }
-                else{
-                     this.cmpTipoPago.setValue('normal');
-                      this.cmpTipoPago.disable();
-                }
-                this.setTipoPagoNormal();
-               
-                this.cmpTipo.enable();
-                this.mostrarComponente(this.cmpTipo);
-                this.cmpPlantilla.enable();
-                this.mostrarComponente(this.cmpPlantilla);
-                this.cmpMontoNoPagado.enable();
-                this.mostrarComponente(this.cmpMontoNoPagado);
-                this.cmpObsMontoNoPagado.enable();
-                this.mostrarComponente(this.cmpObsMontoNoPagado);
-                this.obtenerFaltante('registrado');
-                if(this.maestro.tipo_moneda=='base'){
-                   this.Cmp.tipo_cambio.setValue(1);  
-                   this.Cmp.tipo_cambio.disable();
-                   this.ocultarComponente(this.Cmp.tipo_cambio);
-                }
-                else{
-                    this.Cmp.tipo_cambio.enable();
-                    this.mostrarComponente(this.Cmp.tipo_cambio);
-                    this.Cmp.tipo_cambio.setValue(this.maestro.tipo_cambio_conv);  
-                }
-       
-              
-                
-           }
-          
-            this.cmpFechaTentativa.minValue=new Date();
-            this.cmpFechaTentativa.setValue(new Date());
-            this.cmpNombrePago.setValue(this.maestro.desc_proveedor);
-            this.cmpMonto.setValue(0);
-           // this.cmpDescuentoAnticipo.setValue(0);
-            this.cmpMontoNoPagado.setValue(0);
-            this.cmpOtrosDescuentos.setValue(0);
-            this.cmpLiquidoPagable.setValue(0);
-            this.cmpMontoEjecutarTotalMo.setValue(0);
-            this.Cmp.monto_retgar_mo.setValue(0);
-            this.cmpLiquidoPagable.disable();
-            this.cmpMontoEjecutarTotalMo.disable();
-            
-            //calcular el descuento segun el documento
-            this.Cmp.descuento_ley.setValue(0);
-            
-            //Verifica si habilita o no el cheque y la cuenta bancaria destino
-			this.ocultarCheCue(data.forma_pago);
-      },
-     
-      onButtonEdit:function(){
-       
-         var data = this.getSelectedData();
-        
-         Phx.vista.PlanPago.superclass.onButtonEdit.call(this); 
-         if(data.tipo=='pagado'){
-             
-                this.cmpTipoPago.disable();
-                this.ocultarComponente(this.cmpTipoPago);
-                
-                this.cmpTipo.disable();
-                this.ocultarComponente(this.cmpTipo);
-                
-                this.cmpPlantilla.disable();
-                this.ocultarComponente(this.cmpPlantilla);
-                
-                this.cmpNombrePago.enable();
-                this.mostrarComponente(this.cmpNombrePago);
-                this.cmpFormaPago.enable();
-                this.mostrarComponente(this.cmpFormaPago);
-                this.cmpFormaPago.enable();
-                this.mostrarComponente(this.cmpFormaPago);
-                this.cmpCuentaBancaria.enable()
-                this.mostrarComponente(this.cmpCuentaBancaria);
-                this.habilitarDescuentos();
-                
-                this.cmpMontoNoPagado.disable();
-                this.ocultarComponente(this.cmpMontoNoPagado);
-                this.cmpObsMontoNoPagado.disable();
-                this.ocultarComponente(this.cmpObsMontoNoPagado);
-                this.Cmp.tipo_cambio.disable();
-                this.ocultarComponente(this.Cmp.tipo_cambio);
-         
-         
-         }
-         else{
-                this.mostrarComponente(this.cmpTipoPago);
-                this.cmpTipo.enable();
-                this.mostrarComponente(this.cmpTipo);
-               
-                
-                this.cmpPlantilla.enable();
-                this.mostrarComponente(this.cmpPlantilla);
-                
-                this.cmpMontoNoPagado.enable();
-                this.mostrarComponente(this.cmpMontoNoPagado);
-                 
-                this.cmpObsMontoNoPagado.enable();
-                this.mostrarComponente(this.cmpObsMontoNoPagado);
-                if(this.maestro.tipo_moneda=='base'){
-                 
-                   this.Cmp.tipo_cambio.disable();
-                   this.ocultarComponente(this.Cmp.tipo_cambio);
-                }
-                else{
-                    this.Cmp.tipo_cambio.enable();
-                    this.mostrarComponente(this.Cmp.tipo_cambio);
-                  
-                }
-                
-         }
-       
-           this.cmpFechaTentativa.disable();
-           this.cmpTipo.disable();
-           this.cmpTipoPago.disable(); 
-           
-			//Verifica si habilita o no el cheque y la cuenta bancaria destino
-			this.ocultarCheCue(data.forma_pago);
-           
-       },
-    
-    obtenerFaltante:function(_filtro,_id_plan_pago){
-        
-       Phx.CP.loadingShow();
-          Ext.Ajax.request({
-                    // form:this.form.getForm().getEl(),
-                    url:'../../sis_tesoreria/control/ObligacionPago/obtenerFaltante',
-                    params:{ope_filtro:_filtro, 
-                            id_obligacion_pago: this.maestro.id_obligacion_pago,
-                            id_plan_pago:_id_plan_pago},
-                    success:this.successOF,
-                    failure: this.conexionFailure,
-                    timeout:this.timeout,
+             this.wEstado = new Ext.Window({
+                title: 'Estados',
+                collapsible: true,
+                maximizable: true,
+                 autoDestroy: true,
+                width: 380,
+                height: 290,
+                layout: 'fit',
+                plain: true,
+                bodyStyle: 'padding:5px;',
+                buttonAlign: 'center',
+                items: this.formEstado,
+                modal:true,
+                 closeAction: 'hide',
+                buttons: [{
+                    text: 'Guardar',
+                    handler:this.confSigEstado,
+                     scope:this
+                    
+                 },
+                 {
+                    text: 'Guardar',
+                    handler:this.antEstadoSubmmit,
                     scope:this
-             });
-    },
-    
-     successOF:function(resp){
-       Phx.CP.loadingHide();
-        var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
-            if(!reg.ROOT.error){
-                if(reg.ROOT.datos.monto_total_faltante > 0){
-                    this.cmpMonto.setValue(reg.ROOT.datos.monto_total_faltante);
-                }
-                else{
-                    this.cmpMonto.setValue(0);
-                }
-               this.calculaMontoPago();
-            }else{
-                
-                alert('error al obtener saldo por registrar')
-            } 
-    },
-    
-    onReloadPage:function(m){
-        this.maestro=m;
-        this.store.baseParams={id_obligacion_pago:this.maestro.id_obligacion_pago};
-      
-        
-        
-        this.load({params:{start:0, limit:this.tam_pag}})
-        this.Cmp.tipo_cambio.setValue(1);  
-    },
-    
-    successSave: function(resp) {
-       Phx.CP.getPagina(this.idContenedorPadre).reload();  
-       Phx.vista.PlanPago.superclass.successSave.call(this,resp);
-        
-        
-    },
-    successDel:function(resp){
-       Phx.CP.getPagina(this.idContenedorPadre).reload(); 
-       Phx.vista.PlanPago.superclass.successDel.call(this,resp);
-     },
-     
-      preparaMenu:function(n){
-          var data = this.getSelectedData();
-          var tb =this.tbar;
-          Phx.vista.PlanPago.superclass.preparaMenu.call(this,n); 
-          if (data['estado']== 'borrador'){
-              this.getBoton('edit').enable();
-              this.getBoton('del').enable(); 
-              this.getBoton('SolDevPag').enable(); 
-              this.getBoton('new').disable(); 
-              this.getBoton('SolPlanPago').enable();    
-          }
-          else{
-              
-            if (data['estado']== 'devengado'  && (data.monto_ejecutar_total_mo*1)  > (data.total_pagado*1) ){ 
-                this.getBoton('new').enable();
-                console.log('habilita new')
-            }
-            else{
-                this.getBoton('new').disable(); 
-                 console.log('deshabilita new')
-            }
-             this.getBoton('edit').disable();
-             this.getBoton('del').disable();
-             this.getBoton('SolDevPag').disable();
-             
-                this.getBoton('SolPlanPago').enable(); 
-          }
+                        
+                 },
+                 {
+                    text: 'Cancelar',
+                    handler:function(){this.wEstado.hide()},
+                    scope:this
+                }]
+            });
+            
+            
+           
+            
+            this.cmbTipoEstado =this.formEstado.getForm().findField('id_tipo_estado');
+            this.cmbTipoEstado.store.on('loadexception', this.conexionFailure,this);
+         
+            this.cmbFuncionarioWf = this.formEstado.getForm().findField('id_funcionario_wf');
+            
+            this.cmbFuncionarioWf.store.on('loadexception', this.conexionFailure,this);
           
-          if(data['sinc_presupuesto']=='si'){
-               this.getBoton('SincPresu').enable();
-          }
-          else{
-               this.getBoton('SincPresu').disable();
-          }
-          this.getBoton('btnVerifPresup').enable();
-     },
-     
-      liberaMenu:function(){
-        var tb = Phx.vista.PlanPago.superclass.liberaMenu.call(this);
-        if(tb){
-           this.getBoton('SolDevPag').disable();
-           this.getBoton('SincPresu').disable();
-           this.getBoton('SolPlanPago').disable();
-           this.getBoton('btnVerifPresup').disable();  
-          }
-       return tb
-    }, 
-    east:{
-          url:'../../../sis_tesoreria/vista/prorrateo/Prorrateo.php',
-          title:'Prorrateo', 
-          width:400,
-          cls:'Prorrateo'
-     },
+            this.cmpObs=this.formEstado.getForm().findField('obs');
+            
+            //this.cmbIntrucRPC =this.formEstado.getForm().findField('instruc_rpc');
+           
+            
+            this.cmbTipoEstado.on('select',function(){
+                
+                this.cmbFuncionarioWf.enable();
+                this.cmbFuncionarioWf.store.baseParams.id_tipo_estado = this.cmbTipoEstado.getValue();
+                this.cmbFuncionarioWf.modificado=true;
+                
+                this.cmbFuncionarioWf.store.load({params:{start:0,limit:this.tam_pag}, 
+                           callback : function (r) {
+                               if (r.length >= 1 ) {                       
+                                    this.cmbFuncionarioWf.setValue(r[0].data.id_funcionario);
+                                    this.cmbFuncionarioWf.fireEvent('select', r[0]);
+                                }    
+                                                
+                            }, scope : this
+                        });
+                
+            },this);  
+    },
     
-    sortInfo:{
-		field: 'nro_cuota',
-		direction: 'ASC'
-	},
-	onBtnSincPresu:function()
+   
+   onBtnSincPresu:function()
         {                   
             var d= this.sm.getSelected().data;
             Phx.CP.loadingShow();
@@ -1444,45 +987,171 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 scope:this
             });     
       },
-      
-    onSubmitDepto:function(x,y,id_depto_conta){
-           var data = this.getSelectedData();
-          
-           if(this.formDEPTO.getForm().isValid() || id_depto_conta){
+   
+    
+   sigEstado:function(){                   
+            var d= this.sm.getSelected().data;
+            if(d){
+                
                 Phx.CP.loadingShow();
-               Ext.Ajax.request({
+                this.cmbTipoEstado.reset();
+                this.cmbFuncionarioWf.reset();
+                this.cmbFuncionarioWf.store.baseParams.id_estado_wf=d.id_estado_wf;
+                this.cmbFuncionarioWf.store.baseParams.fecha= d.fecha_tentativa;
+                
+                this.cmbTipoEstado.show();
+                this.cmbFuncionarioWf.show();
+                this.cmbTipoEstado.enable();
+             
+                Ext.Ajax.request({
                     // form:this.form.getForm().getEl(),
-                    url:'../../sis_tesoreria/control/PlanPago/solicitarDevPag',
-                    params:{id_plan_pago:data.id_plan_pago, id_depto_conta:id_depto_conta?id_depto_conta:this.cmpDeptoConta.getValue()},
-                    success:this.successSinc,
+                    url:'../../sis_tesoreria/control/PlanPago/siguienteEstadoPlanPago',
+                    params:{id_plan_pago:d.id_plan_pago,
+                            operacion:'verificar'},
+                    success:this.successEstadoSinc,
+                    argument:{data:d},
                     failure: this.conexionFailure,
                     timeout:this.timeout,
                     scope:this
-                })
+                }); 
+                
+                
             }
-        
-    },
-	
-    onBtnDevPag:function()
-        {                   
-            var data = this.getSelectedData();
+               
+     },
+     
+     
+     successEstadoSinc:function(resp){
             
-            console.log('depto_conta',this.maestro.id_depto_conta)
-            if(this.maestro.id_depto_conta > 0){
-           
-                this.onSubmitDepto(undefined,undefined,this.maestro.id_depto_conta);  
+            Phx.CP.loadingHide();
+            var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+            if(!reg.ROOT.error){
+                
+                if (reg.ROOT.datos.operacion=='preguntar_todo'){
+                  
+                      if(reg.ROOT.datos.num_estados==1 && reg.ROOT.datos.num_funcionarios==1){
+                               //directamente mandamos los datos
+                               Phx.CP.loadingShow();
+                               var d= this.sm.getSelected().data;
+                               Ext.Ajax.request({
+                                // form:this.form.getForm().getEl(),
+                                url:'../../sis_tesoreria/control/PlanPago/siguienteEstadoPlanPago',
+                                params:{id_plan_pago:d.id_plan_pago,
+                                    operacion:'cambiar',
+                                    id_tipo_estado:reg.ROOT.datos.id_tipo_estado,
+                                    id_funcionario:reg.ROOT.datos.id_funcionario_estado,
+                                    id_depto:reg.ROOT.datos.id_depto_estado,
+                                    id_plan_pago:d.id_plan_pago
+                                    },
+                                success:this.successEstadoSinc,
+                                failure: this.conexionFailure,
+                                timeout:this.timeout,
+                                scope:this
+                            }); 
+                    }
+                    else{
+                       
+                         this.cmbTipoEstado.store.baseParams.estados= reg.ROOT.datos.estados;
+                         this.cmbTipoEstado.modificado=true;
+                         this.cmbFuncionarioWf.disable();
+                         this.wEstado.buttons[1].hide();
+                         this.wEstado.buttons[0].show();
+                         this.wEstado.show();  
+                     
+                     
+                         //precarga combo de estado
+                         this.cmbTipoEstado.store.load({params:{start:0,limit:this.tam_pag}, 
+                           callback : function (r) {
+                                if (r.length == 1 ) {                       
+                                    this.cmbTipoEstado.setValue(r[0].data.id_tipo_estado);
+                                    this.cmbTipoEstado.fireEvent('select', r[0]);
+                                }    
+                                                
+                            }, scope : this
+                        });
+                     
+                    }
+                   
+               }
+               
+               if (reg.ROOT.datos.operacion=='cambio_exitoso'){
+                  this.reload();
+                  this.wEstado.hide();
+                }
             }
             else{
-              
-                this.wDEPTO.show();
-                this.cmpDeptoConta.reset();
-                this.cmpDeptoConta.store.baseParams.id_plan_pago = data.id_plan_pago;
-                this.cmpDeptoConta.store.baseParams.id_obligacion_pago = this.maestro.id_obligacion_pago;
-                this.cmpDeptoConta.modificado = true;
-              
-            }  
-      }, 
-     successSinc:function(resp){
+                
+                alert('ocurrio un error durante el proceso')
+            
+            }
+           
+            
+        },
+    
+      confSigEstado :function() {                   
+            var d= this.sm.getSelected().data;
+           
+            if ( this.formEstado .getForm().isValid()){
+                 Phx.CP.loadingShow();
+                    Ext.Ajax.request({
+                        // form:this.form.getForm().getEl(),
+                        url:'../../sis_tesoreria/control/PlanPago/siguienteEstadoPlanPago',
+                        params:{
+                            id_plan_pago:d.id_plan_pago,
+                            operacion:'cambiar',
+                            id_tipo_estado:this.cmbTipoEstado.getValue(),
+                            id_funcionario:this.cmbFuncionarioWf.getValue(),
+                            obs:this.cmpObs.getValue()
+                            },
+                        success:this.successEstadoSinc,
+                        failure: this.conexionFailure,
+                        timeout:this.timeout,
+                        scope:this
+                    }); 
+              }    
+     },
+     
+      antEstado:function(res,eve) {                   
+            this.wEstado.buttons[0].hide();
+            this.wEstado.buttons[1].show();
+            this.wEstado.show();
+            this.cmbTipoEstado.hide();
+            this.cmbFuncionarioWf.hide();
+            this.cmbTipoEstado.disable();
+            this.cmbFuncionarioWf.disable();
+            this.cmpObs.setValue('');
+            
+            this.sw_estado =res.argument.estado;
+           
+               
+        },
+        
+        antEstadoSubmmit:function(res){
+            var d= this.sm.getSelected().data;
+           
+            Phx.CP.loadingShow();
+            var operacion = 'cambiar';
+            operacion=  this.sw_estado == 'inicio'?'inicio':operacion; 
+            
+            Ext.Ajax.request({
+                // form:this.form.getForm().getEl(),
+                url:'../../sis_tesoreria/control/PlanPago/anteriorEstadoPlanPago',
+                params:{
+                        id_plan_pago:d.id_plan_pago, 
+                        id_estado_wf:d.id_estado_wf, 
+                        operacion: operacion,
+                        obs:this.cmpObs.getValue()
+                 },
+                success:this.successEstadoSinc,
+                failure: this.conexionFailure,
+                timeout:this.timeout,
+                scope:this
+            });  
+            
+            
+        },
+        
+    successSinc:function(resp){
             Phx.CP.loadingHide();
             this.wDEPTO.hide();
             var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
@@ -1493,56 +1162,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 alert(reg.ROOT.datos.mensaje)
             }
      },
-     
-     getDecuentosPorAplicar:function(id_plantilla){
-         
-         var data = this.getSelectedData();
-           Phx.CP.loadingShow();
-           
-           Ext.Ajax.request({
-                // form:this.form.getForm().getEl(),
-                url:'../../sis_contabilidad/control/PlantillaCalculo/recuperarDescuentosPlantillaCalculo',
-                params:{id_plantilla:id_plantilla},
-                success:this.successAplicarDesc,
-                failure: this.conexionFailure,
-                timeout:this.timeout,
-                scope:this
-            })
-         
-         
-     },
-
-	bdel:true,
-	bedit:true,
-	bsave:false,
-	ocultarCheCue: function(pFormaPago){
-		if(pFormaPago=='transferencia'){
-			//Deshabilita campo cheque
-			this.Cmp.nro_cheque.allowBlank=true;
-			this.Cmp.nro_cheque.setValue('');
-			this.Cmp.nro_cheque.disable();
-			//Habilita nrocuenta bancaria destino
-			this.Cmp.nro_cuenta_bancaria.allowBlank=false;
-			this.Cmp.nro_cuenta_bancaria.enable();
-		} else{
-			//cheque
-			//Habilita campo cheque
-			this.Cmp.nro_cheque.allowBlank=false;
-			this.Cmp.nro_cheque.enable();
-			//Habilita nrocuenta bancaria destino
-			this.Cmp.nro_cuenta_bancaria.allowBlank=true;
-			this.Cmp.nro_cuenta_bancaria.setValue('');
-			this.Cmp.nro_cuenta_bancaria.disable();
-		}
-		
-	},
-	onBtnVerifPresup : function() {
-		var rec = this.sm.getSelected();
-		Phx.CP.loadWindows('../../../sis_tesoreria/vista/plan_pago/PlanPagoVerifPresup.php', 'Disponibilidad Presupuestaria', {
-			modal : true,
-			width : '80%',
-			height : '50%',
-		}, rec.data, this.idContenedor, 'PlanPagoVerifPresup');
+    
+    sortInfo:{
+		field: 'nro_cuota',
+		direction: 'ASC'
 	}
 	
 })

@@ -22,6 +22,8 @@ class ACTPlanPago extends ACTbase{
             $this->objParam->addFiltro("plapa.id_obligacion_pago = ".$this->objParam->getParametro('id_obligacion_pago'));  
         }
         
+		$this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]); 
+        
 		
 		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
 			$this->objReporte = new Reporte($this->objParam,$this);
@@ -150,6 +152,23 @@ class ACTPlanPago extends ACTbase{
         }     																	
 	}
 
+     function siguienteEstadoPlanPago(){
+        $this->objFunc=$this->create('MODPlanPago');  
+        
+        $this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]); 
+        
+        $this->res=$this->objFunc->siguienteEstadoPlanPago($this->objParam);
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
+    
+     function anteriorEstadoPlanPago(){
+        $this->objFunc=$this->create('MODPlanPago');  
+        $this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]); 
+        $this->res=$this->objFunc->anteriorEstadoPlanPago($this->objParam);
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
+    
+	
 	function verificarDisponibilidad(){
 		$this->objParam->defecto('ordenacion','desc_partida');
 		$this->objParam->defecto('dir_ordenacion','asc');

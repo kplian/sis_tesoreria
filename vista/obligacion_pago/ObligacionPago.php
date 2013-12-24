@@ -12,13 +12,18 @@ header("content-type: text/javascript; charset=UTF-8");
 <script>
 Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 
+    nombreVista: 'obligacionPago',
 	constructor: function(config){
 		this.maestro=config;
     	//llama al constructor de la clase padre
 		Phx.vista.ObligacionPago.superclass.constructor.call(this,config);
 		this.init();
 		
-		this.load({params:{start:0, limit:this.tam_pag, id_obligacion_pago: this.maestro.id_obligacion_pago}})
+		this.load({params:{start:0, 
+		           limit:this.tam_pag, 
+		           tipo_interfaz: this.nombreVista,
+		           id_obligacion_pago: this.maestro.id_obligacion_pago}});
+		           
 		this.iniciarEventos();
 	    
          this.addButton('ant_estado',{
@@ -719,7 +724,9 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
           Phx.vista.ObligacionPago.superclass.preparaMenu.call(this,n); 
           if (data['estado']== 'borrador'){
               this.getBoton('edit').enable();
-              this.getBoton('new').enable();
+              if(this.getBoton('new'))
+                this.getBoton('new').enable();
+              
               this.getBoton('del').enable();    
               this.getBoton('fin_registro').enable();
                this.getBoton('ant_estado').disable();
@@ -785,10 +792,10 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
              cls:'ObligacionDet'
             },
             {
-              url:'../../../sis_tesoreria/vista/plan_pago/PlanPago.php',
+              url:'../../../sis_tesoreria/vista/plan_pago/PlanPagoReq.php',
               title:'Plan de Pagos', 
               height:'50%',
-              cls:'PlanPago'
+              cls:'PlanPagoReq'
             }
     
        ], 
