@@ -319,7 +319,7 @@ CREATE TABLE tes.tcuenta_bancaria_mov (
   descripcion VARCHAR(2000) NOT NULL, 
   nro_doc_tipo VARCHAR(50), 
   importe NUMERIC(18,2) NOT NULL,
-  fecha date not null, 
+  fecha date, 
   estado VARCHAR(20) NOT NULL, 
   observaciones VARCHAR(2000), 
   CONSTRAINT pk_tcuenta_bancaria_mov__id_cuenta_bancaria_mov PRIMARY KEY(id_cuenta_bancaria_mov)
@@ -336,3 +336,10 @@ COMMENT ON COLUMN tes.tcuenta_bancaria_mov.tipo
 IS 'tipo in (''cheque'',''transferencia'')';
 
 /***********************************F-SCP-RCM-TES-0-12/12/2013***************************************/
+
+/***********************************I-SCP-RCM-TES-0-23/12/2013***************************************/
+CREATE TRIGGER tr_tcuenta_bancaria__endesis
+AFTER INSERT OR UPDATE OR DELETE 
+ON tes.tcuenta_bancaria FOR EACH ROW 
+EXECUTE PROCEDURE tes.f_tri_tcuenta_bancaria();
+/***********************************F-SCP-RCM-TES-0-23/12/2013***************************************/
