@@ -136,3 +136,9 @@ select pxp.f_insert_testructura_gui ('CTABAN', 'TES');
 
 /***********************************F-DAT-GSS-TES-121-24/04/2013*****************************************/
 
+/***********************************I-DAT-RCM-TES-0-24/12/2013*****************************************/
+
+select pxp.f_insert_tgui ('Cuenta Bancaria ENDESIS', 'cuentas bancarias de la empresa', 'CTABANE', 'si', 2, 'sis_tesoreria/vista/cuenta_bancaria/CuentaBancariaESIS.php', 2, '', 'CuentaBancariaESIS', 'TES');
+select pxp.f_insert_testructura_gui ('CTABANE', 'TES');
+
+/***********************************F-DAT-RCM-TES-0-24/12/2013*****************************************/

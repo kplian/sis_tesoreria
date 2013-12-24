@@ -58,7 +58,7 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-				maxLength:5
+				maxLength:50
 			},
 			type:'TextField',
 			filters:{pfiltro:'ctaban.nro_cuenta',type:'string'},

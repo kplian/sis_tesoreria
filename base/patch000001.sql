@@ -336,3 +336,10 @@ COMMENT ON COLUMN tes.tcuenta_bancaria_mov.tipo
 IS 'tipo in (''cheque'',''transferencia'')';
 
 /***********************************F-SCP-RCM-TES-0-12/12/2013***************************************/
+
+/***********************************I-SCP-RCM-TES-0-23/12/2013***************************************/
+CREATE TRIGGER tr_tcuenta_bancaria__endesis
+AFTER INSERT OR UPDATE OR DELETE 
+ON tes.tcuenta_bancaria FOR EACH ROW 
+EXECUTE PROCEDURE tes.f_tri_tcuenta_bancaria();
+/***********************************F-SCP-RCM-TES-0-23/12/2013***************************************/
