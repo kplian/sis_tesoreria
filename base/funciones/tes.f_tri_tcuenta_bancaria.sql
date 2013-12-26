@@ -16,6 +16,8 @@ DECLARE
 	v_nro_cheque integer;
 	v_estado_cuenta numeric;
 	v_id_cuenta integer;
+    v_id_gestion integer;
+    v_id_auxiliar integer;
 		
 BEGIN
 
@@ -32,7 +34,7 @@ BEGIN
 	v_nro_cheque = 0;
 	v_estado_cuenta = 1;
 	v_id_cuenta = NULL;
-	
+	v_id_auxiliar = NULL;
 	
 	if TG_OP IN ('INSERT','UPDATE') then
 			
@@ -41,7 +43,7 @@ BEGIN
                         COALESCE(NEW.id_cuenta_bancaria::varchar,'NULL')||','||
                         COALESCE(NEW.id_institucion::varchar,'NULL')||','||
                         COALESCE(v_id_cuenta::varchar,'NULL')||','||
-                        COALESCE(''''||NEW.nro_cuenta_banco::varchar||'''','NULL')||','||
+                        COALESCE(''''||NEW.nro_cuenta::varchar||'''','NULL')||','||
                         COALESCE(v_nro_cheque::varchar,'NULL')||','||
                         COALESCE(v_estado_cuenta::varchar,'NULL')||','||
                         COALESCE(v_id_auxiliar::varchar,'NULL')||','||
