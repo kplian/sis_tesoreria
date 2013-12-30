@@ -108,7 +108,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                         //dato = (dato==''&&value=='caja_chica')?'Caja Chica':dato;
                         //dato = (dato==''&&value=='viaticos')?'Viáticos':dato;
                         //dato = (dato==''&&value=='fondo_en_avance')?'Fondo en Avance':dato;
-                        dato = (dato==''&&value=='aduisiciones')?'Adquisiciones':dato;
+                        dato = (dato==''&&value=='adquisiciones')?'Adquisiciones':dato;
                         return String.format('{0}', dato);
                     },
             
@@ -763,8 +763,17 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
           this.getBoton('reporte_com_ejec_pag').enable();
           this.getBoton('reporte_plan_pago').enable();
           
-          //RCM: menú de reportes de adquisiciones
-          this.menuAdq.enable();
+          if(data.tipo_obligacion=='adquisiciones'){
+              //RCM: menú de reportes de adquisiciones
+              this.menuAdq.enable();
+              
+          }
+          else{
+              //RCM: menú de reportes de adquisiciones
+              this.menuAdq.disable();
+          }
+          
+          
      },
      
      
@@ -831,7 +840,13 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Reporte de la Solicitud de Compra</b>',
 				handler:this.onBtnSol,
 				scope: this
-			}
+			}, {
+                id:'btn-docsol-' + this.idContenedor,
+                text: 'Documentos',
+                tooltip: '<b>Documentos anexos a la solicitud de compra</b>',
+                handler:this.onBtnDocSol,
+                scope: this
+            }
 		]}
 		});
 		
@@ -954,6 +969,18 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		             failure: this.conexionFailure,
 		             scope:this
 		         });
+		         
+		     } else if(this.auxFuncion=='onBtnDocSol'){   
+                
+                Phx.CP.loadWindows('../../../sis_adquisiciones/vista/documento_sol/ChequeoDocumentoSol.php',
+                            'Chequeo de documentos de la solicitud',
+                            {
+                                width:700,
+                                height:450
+                            },
+                            {'id_solicitud':this.id_solicitud},  
+                            this.idContenedor,
+                            'ChequeoDocumentoSol')      
 				
 			} else{
 				alert('Reporte no reconocido');

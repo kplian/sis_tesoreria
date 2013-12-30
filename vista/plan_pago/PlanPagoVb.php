@@ -35,7 +35,27 @@ Phx.vista.PlanPagoVb = {
 	    this.Atributos[this.getIndAtributo('id_cuenta_bancaria_mov')].form=true; 
 	    
 	    
-	    
+	    //funcionalidad para listado de historicos
+        this.historico = 'no';
+        this.tbarItems = [{
+            text: 'Histórico',
+            enableToggle: true,
+            pressed: false,
+            toggleHandler: function(btn, pressed) {
+               
+                if(pressed){
+                    this.historico = 'si';
+                     this.desBotoneshistorico();
+                }
+                else{
+                   this.historico = 'no' 
+                }
+                
+                this.store.baseParams.historico = this.historico;
+                this.reload();
+             },
+            scope: this
+           }];
 	    
 	    
 	    
@@ -47,6 +67,9 @@ Phx.vista.PlanPagoVb = {
        
        this.crearFormularioEstados();
        this.crearFomularioDepto()
+       
+       //RAC: Se agrega menú de reportes de adquisiciones
+       this.addBotones();
        
        
        this.store.baseParams={tipo_interfaz:this.nombreVista};
@@ -346,37 +369,64 @@ Phx.vista.PlanPagoVb = {
             this.ocultarCheCue(radio.inputValue);
         },this);           
     
-    }, 
+    },
+    
+     //deshabilitas botones para informacion historica
+      desBotoneshistorico:function(){
+          
+          this.getBoton('ant_estado').disable();
+          this.getBoton('sig_estado').disable();
+          this.getBoton('SolDevPag').disable(); 
+          this.getBoton('edit').disable();   
+          
+      }, 
     
     
     preparaMenu:function(n){
           var data = this.getSelectedData();
           var tb =this.tbar;
           Phx.vista.PlanPagoVb.superclass.preparaMenu.call(this,n); 
-          if (data['estado']== 'borrador' || data['estado']== 'pendiente' || data['estado']== 'devengado' || data['estado']== 'pagado' ){
-                  this.getBoton('ant_estado').disable();
-                  this.getBoton('sig_estado').disable();
-                  this.getBoton('SolDevPag').disable(); 
-                  this.getBoton('edit').disable();   
-          }
+          if(this.historico == 'no'){    
+              
+                  if (data['estado']== 'borrador' || data['estado']== 'pendiente' || data['estado']== 'devengado' || data['estado']== 'pagado' ){
+                          this.getBoton('ant_estado').disable();
+                          this.getBoton('sig_estado').disable();
+                          this.getBoton('SolDevPag').disable(); 
+                          this.getBoton('edit').disable();   
+                  }
+                  else{
+                           if (data['estado']== 'vbconta'){
+                               this.getBoton('ant_estado').enable();
+                               this.getBoton('sig_estado').disable();
+                               this.getBoton('SolDevPag').enable();
+                                this.getBoton('edit').enable(); 
+                           }
+                           else{
+                               this.getBoton('ant_estado').enable();
+                               this.getBoton('sig_estado').enable();
+                               this.getBoton('SolDevPag').disable();
+                               this.getBoton('edit').disable(); 
+                             
+                           }
+                           
+                           
+                   }
+                   this.getBoton('SolPlanPago').enable(); 
+           } 
+         else{
+            this.desBotoneshistorico();
+         } 
+         
+        // if(data.tipo_obligacion=='adquisiciones'){
+              //RCM: menú de reportes de adquisiciones
+              this.menuAdq.enable();
+              
+         /* }
           else{
-                   if (data['estado']== 'vbconta'){
-                       this.getBoton('ant_estado').enable();
-                       this.getBoton('sig_estado').disable();
-                       this.getBoton('SolDevPag').enable();
-                        this.getBoton('edit').enable(); 
-                   }
-                   else{
-                       this.getBoton('ant_estado').enable();
-                       this.getBoton('sig_estado').enable();
-                       this.getBoton('SolDevPag').disable();
-                       this.getBoton('edit').disable(); 
-                     
-                   }
-                   
-                   
-           }
-           this.getBoton('SolPlanPago').enable(); 
+              //RCM: menú de reportes de adquisiciones
+              this.menuAdq.disable();
+         }*/
+         
            
      },
     
@@ -430,7 +480,215 @@ Phx.vista.PlanPagoVb = {
     sortInfo:{
         field: 'numero_op',
         direction: 'ASC'
-    }
+    },
+    //funciones adiconales para boton de reportes
+    
+    addBotones: function() {
+        this.menuAdq = new Ext.Toolbar.SplitButton({
+          
+            id:'btn-docsol-' + this.idContenedor,
+            text: 'Documentos',
+            tooltip: '<b>Documentos anexos a la solicitud de compra</b>',
+            handler:this.onBtnDocSol,
+            scope: this,
+            disabled: true,
+            menu:{
+            items: [{
+                id:'btn-cot-' + this.idContenedor,
+                text: 'Cotización',
+                tooltip: '<b>Reporte de la Cotización</b>',
+                handler:this.onBtnCot,
+                scope: this
+            }, {
+                id:'btn-proc-' + this.idContenedor,
+                text: 'Cuadro Comparativo',
+                tooltip: '<b>Reporte de Cuadro Comparativo</b>',
+                handler:this.onBtnProc,
+                scope: this
+            }, {
+                id:'btn-sol-' + this.idContenedor,
+                text: 'Solicitud de Compra',
+                tooltip: '<b>Reporte de la Solicitud de Compra</b>',
+                handler:this.onBtnSol,
+                scope: this
+            },
+             {
+                id: 'btn-adq-' + this.idContenedor,
+                text: 'Orden de Compra',
+                tooltip: '<b>Orden de Compra</b>',
+                handler:this.onBtnAdq,
+                scope: this
+            }
+        ]}
+        });
+        
+        //Adiciona el menú a la barra de herramientas
+        this.tbar.add(this.menuAdq);
+    },
+    
+    onBtnAdq: function(){
+        Phx.CP.loadingShow();
+        var rec = this.sm.getSelected();
+        var data = rec.data;
+        if(data){
+            //Obtiene los IDS
+            this.auxFuncion='onBtnAdq';
+            this.obtenerIDS(data);
+        } else {
+            alert('Seleccione un registro y vuelta a intentarlo');
+        }
+    },
+    
+    onBtnCot: function(){
+        Phx.CP.loadingShow();
+        var rec = this.sm.getSelected();
+        var data = rec.data;
+        if(data){
+            //Obtiene los IDS
+            this.auxFuncion='onBtnCot';
+            this.obtenerIDS(data);
+        } else {
+            alert('Seleccione un registro y vuelta a intentarlo');
+        }
+    },
+    
+    onBtnSol: function(){
+        Phx.CP.loadingShow();
+        var rec = this.sm.getSelected();
+        var data = rec.data;
+        if(data){
+            //Obtiene los IDS
+            this.auxFuncion='onBtnSol';
+            this.obtenerIDS(data);
+        } else {
+            alert('Seleccione un registro y vuelta a intentarlo');
+        }
+    },
+    
+    onBtnDocSol: function(){
+        Phx.CP.loadingShow();
+        var rec = this.sm.getSelected();
+        var data = rec.data;
+        if(data){
+            //Obtiene los IDS
+            this.auxFuncion='onBtnDocSol';
+            this.obtenerIDS(data);
+        } else {
+            alert('Seleccione un registro y vuelta a intentarlo');
+        }
+    },
+    
+    
+    onBtnProc: function(){
+        Phx.CP.loadingShow();
+        var rec = this.sm.getSelected();
+        var data = rec.data;
+        if(data){
+            //Obtiene los IDS
+            this.auxFuncion='onBtnProc';
+            this.obtenerIDS(data);
+        } else {
+            alert('Seleccione un registro y vuelta a intentarlo');
+        }
+    },
+    
+    obtenerIDS: function(data){
+        Ext.Ajax.request({
+            url: '../../sis_tesoreria/control/ObligacionPago/obtenerIdsExternos',
+            params: {
+                id_obligacion_pago: data.id_obligacion_pago,
+                sistema: this.sistema
+            },
+            success: this.successobtenerIDS,
+            failure: this.conexionFailure,
+            timeout: this.timeout,
+            scope: this
+        });
+    },
+    successobtenerIDS: function(resp) {
+        Phx.CP.loadingHide();
+        var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+        if (!reg.ROOT.error) {
+            //Setea los valores a variables locales
+            var ids=reg.ROOT.datos;
+            this.id_cotizacion = ids.id_cotizacion,
+            this.id_proceso_compra = ids.id_proceso_compra,
+            this.id_solicitud = ids.id_solicitud
+            
+            //Genera el reporte en función del botón presionado
+            if(this.auxFuncion=='onBtnAdq'){
+                Ext.Ajax.request({
+                    url:'../../sis_adquisiciones/control/Cotizacion/reporteOC',
+                    params:{'id_cotizacion':this.id_cotizacion},
+                    success: this.successExport,
+                    failure: this.conexionFailure,
+                    timeout:this.timeout,
+                    scope:this
+                });
+                
+            } else if(this.auxFuncion=='onBtnCot'){
+                Ext.Ajax.request({
+                    url:'../../sis_adquisiciones/control/Cotizacion/reporteCotizacion',
+                    params:{'id_cotizacion':this.id_cotizacion,tipo:'cotizado'},
+                    success: this.successExport,
+                    failure: this.conexionFailure,
+                    timeout:this.timeout,
+                    scope:this
+                });  
+                
+            } else if(this.auxFuncion=='onBtnSol'){
+                Ext.Ajax.request({
+                    url:'../../sis_adquisiciones/control/Solicitud/reporteSolicitud',
+                    params:{'id_solicitud':this.id_solicitud},
+                    success: this.successExport,
+                    failure: this.conexionFailure,
+                    timeout:this.timeout,
+                    scope:this
+                });  
+                
+            } else if(this.auxFuncion=='onBtnProc'){
+                Ext.Ajax.request({
+                     url:'../../sis_adquisiciones/control/ProcesoCompra/cuadroComparativo',
+                     params:{id_proceso_compra:this.id_proceso_compra},
+                     success: this.successExport,
+                     failure: this.conexionFailure,
+                     scope:this
+                 });
+                 
+                 
+            } else if(this.auxFuncion=='onBtnDocSol'){   
+                
+                Phx.CP.loadWindows('../../../sis_adquisiciones/vista/documento_sol/ChequeoDocumentoSol.php',
+                            'Chequeo de documentos de la solicitud',
+                            {
+                                width:700,
+                                height:450
+                            },
+                            {'id_solicitud':this.id_solicitud},  
+                            this.idContenedor,
+                            'ChequeoDocumentoSol')  
+                 
+            } else{
+                alert('Reporte no reconocido');
+            }
+
+        } else {
+
+            alert('ocurrio un error durante el proceso')
+        }
+
+    },
+    
+    sistema: 'ADQ',
+    id_cotizacion: 0,
+    id_proceso_compra: 0,
+    id_solicitud: 0,
+    auxFuncion:'onBtnAdq'
+            
+    
+    
+    
+    
     
     
 };

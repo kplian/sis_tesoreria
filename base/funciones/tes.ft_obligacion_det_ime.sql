@@ -118,6 +118,7 @@ BEGIN
 			id_obligacion_pago,
 			id_centro_costo,
 			monto_pago_mb,
+            descripcion,
 			
 			
 			fecha_reg,
@@ -134,6 +135,7 @@ BEGIN
 			v_parametros.id_obligacion_pago,
 			v_parametros.id_centro_costo,
 			v_monto_mb,
+            v_parametros.descripcion,
 		
 			now(),
 			p_id_usuario,
@@ -207,6 +209,7 @@ BEGIN
 			id_centro_costo = v_parametros.id_centro_costo,
 			monto_pago_mb = v_monto_mb,
 		    fecha_mod = now(),
+            descripcion=v_parametros.descripcion,
 			id_usuario_mod = p_id_usuario
 			where id_obligacion_det=v_parametros.id_obligacion_det;
                
