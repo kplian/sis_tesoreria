@@ -582,7 +582,7 @@ Phx.vista.PlanPagoReq = {
           width:400,
           cls:'Prorrateo'
     },
-    
+
 	tabla_id: 'id_plan_pago',
 	tabla:'tes.tplan_pago'    
 
