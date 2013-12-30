@@ -110,40 +110,40 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 			form:true
 		},
 		{
-            config:{
-                    name:'id_moneda',
-                    origen:'MONEDA',
-                    fieldLabel: 'Moneda',
-                    url: '../../sis_parametros/control/Moneda/listarMoneda',
-                    emptyText : 'Moneda...',
-                    allowBlank:false,
-                    gdisplayField:'desc_moneda',//mapea al store del grid
-                    gwidth:200,
-                    renderer:function (value, p, record){return String.format('{0}', record.data['desc_moneda']);}
-                },
-            type:'ComboRec',
-            id_grupo:0,
-            filters:{pfiltro:'cc.codigo_cc',type:'string'},
-            grid:true,
-            form:true
-        },
-		{
+     config:{
+        name:'id_moneda',
+        origen:'MONEDA',
+        fieldLabel: 'Moneda',
+        url: '../../sis_parametros/control/Moneda/listarMoneda',
+        emptyText : 'Moneda...',
+        allowBlank:false,
+        gdisplayField:'desc_moneda',//mapea al store del grid
+        gwidth:200,
+        renderer:function (value, p, record){return String.format('{0}', record.data['desc_moneda']);}
+     },
+        type:'ComboRec',
+        id_grupo:0,
+        filters:{pfiltro:'cc.codigo_cc',type:'string'},
+        grid:true,
+        form:true
+  },    
+		{     
 			config:{
-				   name:'id_depto',
-                    origen:'DEPTO',
-                    fieldLabel: 'Departamento',
-                    url: '../../sis_parametros/control/Depto/listarDepto',
-                    emptyText : 'Departamento...',
-                    allowBlank:false,
-                    gdisplayField:'desc_depto',//mapea al store del grid
-                    gwidth:200,
-                    renderer:function (value, p, record){return String.format('{0}', record.data['desc_depto']);}
-                },
-            type:'ComboRec',
-            id_grupo:0,
-            filters:{pfiltro:'cc.codigo_cc',type:'string'},
-            grid:true,
-            form:true
+				    name:'id_depto',
+        origen:'DEPTO',
+        fieldLabel: 'Departamento',
+        url: '../../sis_parametros/control/Depto/listarDepto',
+        emptyText : 'Departamento...',
+        allowBlank:false,
+        gdisplayField:'desc_depto',//mapea al store del grid
+        gwidth:200,
+        renderer:function (value, p, record){return String.format('{0}', record.data['desc_depto']);}
+   },   
+        type:'ComboRec',
+        id_grupo:0,
+        filters:{pfiltro:'cc.codigo_cc',type:'string'},
+        grid:true,
+        form:true
 			},
 
 		{
