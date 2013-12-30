@@ -34,6 +34,7 @@ DECLARE
     v_obligaciones      record;
     v_obligaciones_partida	record;
     v_respuesta_verificar	record;
+    v_inner 			varchar;
 BEGIN
 
 	v_nombre_funcion = 'tes.ft_obligacion_pago_sel';
@@ -51,72 +52,108 @@ BEGIN
     	begin
         
           v_filadd='';
-        
-           IF   p_administrador != 1 THEN
-           
-             select  
-                 pxp.aggarray(depu.id_depto)
-              into 
-                 va_id_depto
-             from param.tdepto_usuario depu 
-             where depu.id_usuario =  p_id_usuario; 
-        
-           v_filadd='(obpg.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||')) and';
+          v_inner='';
           
-          END IF;
+          
+        --  raise exception 'cc  %',v_parametros.tipo_interfaz  ;
         
-        
-    		--Sentencia de la consulta
-			v_consulta:='select
-						obpg.id_obligacion_pago,
-						obpg.id_proveedor,
-                        pv.desc_proveedor,
-						obpg.estado,
-						obpg.tipo_obligacion,
-						obpg.id_moneda,
-                        mn.moneda,
-						obpg.obs,
-						obpg.porc_retgar,
-						obpg.id_subsistema,
-                        ss.nombre as nombre_subsistema,
-						obpg.id_funcionario,
-                      --  fun.desc_funcionario1,
-						obpg.estado_reg,
-						obpg.porc_anticipo,
-						obpg.id_estado_wf,
-						obpg.id_depto,
-                        dep.nombre as nombre_depto,
-						obpg.num_tramite,
-						obpg.id_proceso_wf,
-						obpg.fecha_reg,
-						obpg.id_usuario_reg,
-						obpg.fecha_mod,
-						obpg.id_usuario_mod,
-						usu1.cuenta as usr_reg,
-						usu2.cuenta as usr_mod,
-                        obpg.fecha,
-                        obpg.numero,
-                        obpg.tipo_cambio_conv,
-                        obpg.id_gestion,
-                        obpg.comprometido,
-                        obpg.nro_cuota_vigente,
-                        mn.tipo_moneda,
-                        obpg.total_pago,
-                        obpg.pago_variable,
-                        obpg.id_depto_conta
-						from tes.tobligacion_pago obpg
-						inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
-						left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
-                        inner join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
-                        inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
-                        inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
-						inner join param.tdepto dep on dep.id_depto=obpg.id_depto
-                       -- left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
-                        where  '||v_filadd;
-			
-			--Definicion de la respuesta
-			v_consulta:=v_consulta||v_parametros.filtro;
-			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+           
+         IF   v_parametros.tipo_interfaz ='obligacionPago' THEN
+           
+            IF   p_administrador != 1 THEN
+                 
+                   select  
+                       pxp.aggarray(depu.id_depto)
+                    into 
+                       va_id_depto
+                   from param.tdepto_usuario depu 
+                   where depu.id_usuario =  p_id_usuario; 
+              
+                 v_filadd='(obpg.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||')) and';
+                
+                END IF;
+                
+         ELSE
+
+                --SI LA NTERFACE VIENE DE ADQUISIONES   
+          
+                IF   p_administrador != 1 THEN
+                     select  
+                           pxp.aggarray(depu.id_depto)
+                        into 
+                           va_id_depto
+                       from param.tdepto_usuario depu 
+                       where depu.id_usuario =  p_id_usuario and depu.cargo = 'responsable'; 
+                  
+                       
+                       v_filadd='( (pc.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))   or   pc.id_usuario_auxiliar = '||p_id_usuario::varchar ||' ) and ';
+                END IF; 
+                
+                
+                v_inner = '
+                              inner join adq.tcotizacion cot on cot.id_obligacion_pago = obpg.id_obligacion_pago
+                              inner join adq.tproceso_compra pc on pc.id_proceso_compra = cot.id_proceso_compra  ';      
+        END IF;         
+                
+              
+              
+                  --Sentencia de la consulta
+                  v_consulta:='select
+                              obpg.id_obligacion_pago,
+                              obpg.id_proveedor,
+                              pv.desc_proveedor,
+                              obpg.estado,
+                              obpg.tipo_obligacion,
+                              obpg.id_moneda,
+                              mn.moneda,
+                              obpg.obs,
+                              obpg.porc_retgar,
+                              obpg.id_subsistema,
+                              ss.nombre as nombre_subsistema,
+                              obpg.id_funcionario,
+                            --  fun.desc_funcionario1,
+                              obpg.estado_reg,
+                              obpg.porc_anticipo,
+                              obpg.id_estado_wf,
+                              obpg.id_depto,
+                              dep.nombre as nombre_depto,
+                              obpg.num_tramite,
+                              obpg.id_proceso_wf,
+                              obpg.fecha_reg,
+                              obpg.id_usuario_reg,
+                              obpg.fecha_mod,
+                              obpg.id_usuario_mod,
+                              usu1.cuenta as usr_reg,
+                              usu2.cuenta as usr_mod,
+                              obpg.fecha,
+                              obpg.numero,
+                              obpg.tipo_cambio_conv,
+                              obpg.id_gestion,
+                              obpg.comprometido,
+                              obpg.nro_cuota_vigente,
+                              mn.tipo_moneda,
+                              obpg.total_pago,
+                              obpg.pago_variable,
+                              obpg.id_depto_conta
+                              from tes.tobligacion_pago obpg
+                              inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
+                              left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
+                              inner join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
+                              inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
+                              inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
+                              inner join param.tdepto dep on dep.id_depto=obpg.id_depto
+                              '||v_inner ||'
+                             -- left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
+                              where  '||v_filadd;
+      			
+                  --Definicion de la respuesta
+                  v_consulta:=v_consulta||v_parametros.filtro;
+                  v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+
+
+
+
+
 
 
   -- raise notice '%',v_consulta;
@@ -191,22 +228,47 @@ BEGIN
 		begin
         
            v_filadd='';
+           v_inner='';
           
-             IF   p_administrador != 1 THEN
-             
-               select  
-                   pxp.aggarray(depu.id_depto)
-                into 
-                   va_id_depto
-               from param.tdepto_usuario depu 
-               where depu.id_usuario =  p_id_usuario; 
+          IF   v_parametros.tipo_interfaz ='obligacionPago' THEN
+           
+                  IF   p_administrador != 1 THEN
+                 
+                   select  
+                       pxp.aggarray(depu.id_depto)
+                    into 
+                       va_id_depto
+                   from param.tdepto_usuario depu 
+                   where depu.id_usuario =  p_id_usuario; 
+              
+                 v_filadd='(obpg.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||')) and';
+                
+                END IF;
+                
+         ELSE
+
+                --SI LA NTERFACE VIENE DE ADQUISIONES   
           
-             v_filadd='(obpg.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||')) and';
-            
-            END IF;
+                IF   p_administrador != 1 THEN
+                     select  
+                           pxp.aggarray(depu.id_depto)
+                        into 
+                           va_id_depto
+                       from param.tdepto_usuario depu 
+                       where depu.id_usuario =  p_id_usuario and depu.cargo = 'responsable'; 
+                  
+                       
+                       v_filadd='( (pc.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))   or   pc.id_usuario_auxiliar = '||p_id_usuario::varchar ||' ) and ';
+                END IF; 
+                
+                
+                v_inner = '
+                              inner join adq.tcotizacion cot on cot.id_obligacion_pago = obpg.id_obligacion_pago
+                              inner join adq.tproceso_compra pc on pc.id_proceso_compra = cot.id_proceso_compra';      
+        END IF;    
         
 			--Sentencia de la consulta de conteo de registros
-			v_consulta:='select count(id_obligacion_pago)
+			v_consulta:='select count(obpg.id_obligacion_pago)
 					    from tes.tobligacion_pago obpg
 						inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
@@ -214,6 +276,7 @@ BEGIN
                         inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
                         inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
 						inner join param.tdepto dep on dep.id_depto=obpg.id_depto
+                        '|| v_inner ||'  
                        -- left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
                         where  '||v_filadd;
 			

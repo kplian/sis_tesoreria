@@ -42,6 +42,8 @@ DECLARE
     v_cont integer;
     v_respuesta varchar[];
     v_id_int_comprobante integer;
+    
+    v_id_tipo_estado integer;
 	
     
 BEGIN
@@ -80,22 +82,25 @@ BEGIN
            where pp.id_plan_pago = p_id_plan_pago;
         
         
-          IF  v_registros.estado != 'borrador' THEN
-          
-          
-             raise exception 'Solo puede solicitarce el devengado o pago de registros en borrador, actualice  su interfaz';
-          
-          
-          END IF;
-          
+                    
           -- verifica el depto de conta, si no tiene lo modifica
+          
+         
+          
           
           IF v_registros.id_depto_conta is NULL THEN
              --registra el depto de conta
              
-             update tes.tobligacion_pago set
-               id_depto_conta =  p_id_depto_conta
-             where id_obligacion_pago = v_registros.id_obligacion_pago;
+             IF p_id_depto_conta is not null THEN
+          
+                 update tes.tobligacion_pago set
+                   id_depto_conta =  p_id_depto_conta
+                 where id_obligacion_pago = v_registros.id_obligacion_pago;
+             ELSE 
+             
+             raise exception 'no eligio un depto de contabilidad';
+             
+             END IF;
           
           ELSE
           
@@ -283,36 +288,35 @@ BEGIN
             ---------------------------------------------------------
             
              
-             -- obtiene el siguiente estado del flujo 
-             SELECT 
-                 *
-              into
-                va_id_tipo_estado,
-                va_codigo_estado,
-                va_disparador,
-                va_regla,
-                va_prioridad
+             -- obtiene el siguiente estado del flujo
+              
+            -- pasar la solicitud a estado pendiente, que quiere decir que el comprobante esta generado a espera de validacion
+           
+             
             
-            FROM wf.f_obtener_estado_wf(v_registros.id_proceso_wf, v_registros.id_estado_wf,NULL,'siguiente');
+            select   
+              te.id_tipo_estado
+            into
+              v_id_tipo_estado
+            from wf.ttipo_estado te 
+            inner join wf.tproceso_wf  pw on pw.id_tipo_proceso = te.id_tipo_proceso 
+                  and pw.id_proceso_wf = v_registros.id_proceso_wf
+            where te.codigo = 'pendiente'; 
+              
             
             
-            IF va_codigo_estado[2] is not null THEN
             
-             raise exception 'El proceso de WF esta mal parametrizado, el estado borrador de la obligacion solo admite un estado ';
+            IF v_id_tipo_estado is  null THEN
             
-            END IF;
-            
-             IF va_codigo_estado[1] is  null THEN
-            
-             raise exception 'El proceso de WF esta mal parametrizado, no se encuentra el estado siguiente ';
+             raise exception 'El proceso de WF esta mal parametrizado, no tiene el estado pendiente';
             
             END IF;
             
             
           
             
-            -- hay que recuperar el supervidor que seria el estado inmediato,...
-             v_id_estado_actual =  wf.f_registra_estado_wf(va_id_tipo_estado[1], 
+            --registrar el siguiente estado detectado
+             v_id_estado_actual =  wf.f_registra_estado_wf(v_id_tipo_estado, 
                                                            NULL, 
                                                            v_registros.id_estado_wf, 
                                                            v_registros.id_proceso_wf,
@@ -326,7 +330,7 @@ BEGIN
             
              update tes.tplan_pago  set 
                id_estado_wf =  v_id_estado_actual,
-               estado = va_codigo_estado[1],
+               estado = 'pendiente',
                id_usuario_mod=p_id_usuario,
                fecha_mod=now()
              where id_plan_pago  = p_id_plan_pago;

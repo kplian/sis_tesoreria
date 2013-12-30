@@ -58,7 +58,7 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-				maxLength:5
+				maxLength:50
 			},
 			type:'TextField',
 			filters:{pfiltro:'ctaban.nro_cuenta',type:'string'},
@@ -70,7 +70,7 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 			config:{
 				name: 'fecha_alta',
 				fieldLabel: 'Fecha Alta',
-				allowBlank: false,
+				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
 						format: 'd/m/Y', 
@@ -86,7 +86,7 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
             config:{
                 name:'id_moneda',
                 origen:'MONEDA',
-                 allowBlank:false,
+                allowBlank:true,
                 fieldLabel:'Moneda',
                 gdisplayField:'codigo_moneda',//mapea al store del grid
                 gwidth:50,
@@ -227,9 +227,18 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
         url:'../../../sis_tesoreria/vista/chequera/Chequera.php',
         title:'Chequeras', 
         height : '50%',
-        cls:'Chequera'}
-	}	
-)
+        cls:'Chequera'
+   },
+
+	onButtonEdit: function(){
+		Phx.vista.CuentaBancaria.superclass.onButtonEdit.call(this);
+		this.Cmp.nro_cuenta.disable();
+	},
+	onButtonNew: function(){
+		Phx.vista.CuentaBancaria.superclass.onButtonNew.call(this);
+		this.Cmp.nro_cuenta.enable();
+	}
+})	
 </script>
 		
 		

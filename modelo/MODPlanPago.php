@@ -22,6 +22,7 @@ class MODPlanPago extends MODbase{
 		
 		$this->setParametro('id_funcionario_usu','id_funcionario_usu','int4');
         $this->setParametro('tipo_interfaz','tipo_interfaz','varchar');
+        $this->setParametro('historico','historico','varchar');
 				
 		//Definicion de la lista del resultado del query
 		$this->captura('id_plan_pago','int4');
@@ -83,6 +84,12 @@ class MODPlanPago extends MODbase{
 		$this->captura('numero_op','varchar');
 		
 		$this->captura('id_depto_conta','integer');
+		
+		$this->captura('id_moneda','integer');
+		$this->captura('tipo_moneda','varchar');
+		$this->captura('desc_moneda','varchar');
+		
+		
 		
 		
 		
@@ -193,6 +200,7 @@ class MODPlanPago extends MODbase{
 		
 		$this->setParametro('nro_cheque','nro_cheque','integer');
 		$this->setParametro('nro_cuenta_bancaria','nro_cuenta_bancaria','varchar');
+		
 		$this->setParametro('id_cuenta_bancaria_mov','id_cuenta_bancaria_mov','integer');
         
 		//Ejecuta la instruccion

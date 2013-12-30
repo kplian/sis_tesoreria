@@ -42,6 +42,15 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
         
         //RCM: Se agrega menú de reportes de adquisiciones
         this.addBotones();
+        
+        //RCM: reporte de verificacion presupeustaria
+        this.addButton('btnVerifPresup', {
+                text : 'Disponibilidad',
+                iconCls : 'bassign',
+                disabled : true,
+                handler : this.onBtnVerifPresup,
+                tooltip : '<b>Verificación de la disponibilidad presupuestaria</b>'
+            });
 	
 	
 	},
@@ -108,7 +117,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                         //dato = (dato==''&&value=='caja_chica')?'Caja Chica':dato;
                         //dato = (dato==''&&value=='viaticos')?'Viáticos':dato;
                         //dato = (dato==''&&value=='fondo_en_avance')?'Fondo en Avance':dato;
-                        dato = (dato==''&&value=='aduisiciones')?'Adquisiciones':dato;
+                        dato = (dato==''&&value=='adquisiciones')?'Adquisiciones':dato;
                         return String.format('{0}', dato);
                     },
             
@@ -763,8 +772,28 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
           this.getBoton('reporte_com_ejec_pag').enable();
           this.getBoton('reporte_plan_pago').enable();
           
-          //RCM: menú de reportes de adquisiciones
-          this.menuAdq.enable();
+          if(data.tipo_obligacion=='adquisiciones'){
+              //RCM: menú de reportes de adquisiciones
+              this.menuAdq.enable();
+              //Inhabilita el reporte de disponibilidad
+              this.getBoton('btnVerifPresup').disable();
+              
+          }
+          else{
+              //RCM: menú de reportes de adquisiciones
+              this.menuAdq.disable();
+              
+              //Habilita el reporte de disponibilidad si está en estado borrador
+              if (data['estado']== 'borrador'){
+              	this.getBoton('btnVerifPresup').enable();
+              } else{
+              	//Inhabilita el reporte de disponibilidad
+              	this.getBoton('btnVerifPresup').disable();
+              }
+              
+          }
+          
+          
      },
      
      
@@ -772,9 +801,11 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
         var tb = Phx.vista.ObligacionPago.superclass.liberaMenu.call(this);
         if(tb){
             this.getBoton('fin_registro').disable();
-             this.getBoton('ant_estado').disable();
-             this.getBoton('reporte_com_ejec_pag').disable();
-													this.getBoton('reporte_plan_pago').disable();
+            this.getBoton('ant_estado').disable();
+            this.getBoton('reporte_com_ejec_pag').disable();
+			this.getBoton('reporte_plan_pago').disable();
+			//Inhabilita el reporte de disponibilidad
+            this.getBoton('btnVerifPresup').disable();
         }
        this.TabPanelSouth.get(1).disable();
        
@@ -831,7 +862,13 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Reporte de la Solicitud de Compra</b>',
 				handler:this.onBtnSol,
 				scope: this
-			}
+			}, {
+                id:'btn-docsol-' + this.idContenedor,
+                text: 'Documentos',
+                tooltip: '<b>Documentos anexos a la solicitud de compra</b>',
+                handler:this.onBtnDocSol,
+                scope: this
+            }
 		]}
 		});
 		
@@ -954,6 +991,18 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		             failure: this.conexionFailure,
 		             scope:this
 		         });
+		         
+		     } else if(this.auxFuncion=='onBtnDocSol'){   
+                
+                Phx.CP.loadWindows('../../../sis_adquisiciones/vista/documento_sol/ChequeoDocumentoSol.php',
+                            'Chequeo de documentos de la solicitud',
+                            {
+                                width:700,
+                                height:450
+                            },
+                            {'id_solicitud':this.id_solicitud},  
+                            this.idContenedor,
+                            'ChequeoDocumentoSol')      
 				
 			} else{
 				alert('Reporte no reconocido');
@@ -966,15 +1015,26 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 
 	},
 	
+	onBtnVerifPresup : function() {
+        var rec = this.sm.getSelected();
+        //Se define el nombre de la columna de la llave primaria
+        rec.data.tabla_id = this.tabla_id;
+        rec.data.tabla = this.tabla;
+        
+        Phx.CP.loadWindows('../../../sis_presupuestos/vista/verificacion_presup/VerificacionPresup.php', 'Disponibilidad Presupuestaria', {
+            modal : true,
+            width : '80%',
+            height : '50%',
+        }, rec.data, this.idContenedor, 'VerificacionPresup');
+    },
+	
 	sistema: 'ADQ',
 	id_cotizacion: 0,
 	id_proceso_compra: 0,
 	id_solicitud: 0,
-	auxFuncion:'onBtnAdq'
-			
-	
-	
-	
+	auxFuncion:'onBtnAdq',
+	tabla_id: 'id_obligacion_pago',
+	tabla:'tes.tobligacion_pago'
 	
 })
 </script>

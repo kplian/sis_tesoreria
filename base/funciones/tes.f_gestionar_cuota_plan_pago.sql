@@ -84,7 +84,10 @@ BEGIN
       pp.descuento_ley,
       pp.obs_descuentos_ley,
       pp.porc_descuento_ley,
-      op.id_depto_conta
+      op.id_depto_conta,
+      pp.id_cuenta_bancaria_mov,
+      pp.nro_cheque,
+      pp.nro_cuenta_bancaria
       into
       v_registros
       from  tes.tplan_pago pp
@@ -106,7 +109,7 @@ BEGIN
      -- 3)  Si es devengado_pagado o   devengado, se identifica  con id_plan_pago_fk = null
     
     
-    IF  v_registros.id_plan_pago_fk is NULL  THEN
+     IF  v_registros.id_plan_pago_fk is NULL  THEN
     
            
          
@@ -255,7 +258,11 @@ BEGIN
                         
                         descuento_ley,
                         obs_descuentos_ley,
-                        porc_descuento_ley
+                        porc_descuento_ley,
+                        
+                        id_cuenta_bancaria_mov,
+                        nro_cheque,
+                        nro_cuenta_bancaria
                        
                       ) 
                       VALUES (
@@ -263,7 +270,7 @@ BEGIN
                         now(),
                         'activo',
                         v_registros.id_obligacion_pago,
-                        v_registros.id_plan_pago, --id_plan_pago_fk
+                        v_registros.id_plan_pago, --id_plan_pago_fk  hace referencia al plan de pago del devengado
                         v_registros.id_cuenta_bancaria,
                      
                         v_id_estado_wf,
@@ -284,7 +291,11 @@ BEGIN
                         v_registros.monto_retgar_mo,
                         v_registros.descuento_ley,
                         v_registros.obs_descuentos_ley,
-                        v_registros.porc_descuento_ley
+                        v_registros.porc_descuento_ley,
+                        
+                        v_registros.id_cuenta_bancaria_mov,
+                        v_registros.nro_cheque,
+                        v_registros.nro_cuenta_bancaria
                        
                       )RETURNING id_plan_pago into v_id_plan_pago;
                     
