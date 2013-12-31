@@ -22,7 +22,20 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         
 		this.addButton('sig_estado',{text:'Siguiente',iconCls: 'badelante',disabled:true,handler:this.sigEstado,tooltip: '<b>Pasar al Siguiente Estado</b>'});
         
-		this.addButton('SolPlanPago',{text:'Sol. Plan Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnSolPlanPago,tooltip: '<b>Solicitud Plan Pago</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});      
+		this.addButton('SolPlanPago',{text:'Sol. Plan Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnSolPlanPago,tooltip: '<b>Solicitud Plan Pago</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
+		
+		//Eventos
+		this.Cmp.id_cuenta_bancaria.on('select',function(a,b,c){
+			this.Cmp.id_cuenta_bancaria_mov.setValue('');
+			Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: this.Cmp.id_cuenta_bancaria.getValue()})
+			this.Cmp.id_cuenta_bancaria_mov.modificado=true;
+		},this);   
+		   
+		this.Cmp.fecha_tentativa.on('blur',function(a){
+			this.Cmp.id_cuenta_bancaria_mov.setValue('');
+			Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{fecha: this.Cmp.fecha_tentativa.getValue()})
+			this.Cmp.id_cuenta_bancaria_mov.modificado=true;
+		},this);
        
 		
 	},
@@ -536,35 +549,36 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 allowBlank: true,
                 emptyText : 'Depósito...',
                 store: new Ext.data.JsonStore({
-                            url:'../../sis_tesoreria/control/CuentaBancariaMov/listarCuentaBancariaMov',
-                            id : 'id_cuenta_bancaria_mov',
-                            root: 'datos',
-                            sortInfo:{
-                                    field: 'nro_doc_tipo',
-                                    direction: 'ASC'
-                            },
-                            totalProperty: 'total',
-                            fields: ['id_cuenta_bancaria_mov','id_cuenta_bancaria','descripcion','observaciones','nro_doc_tipo','importe','estado'],
-                            remoteSort: true,
-                            baseParams:{par_filtro:'cbanmo.detalle#cbanmo.nro_doc_tipo#cbanmo.observaciones',tipo_mov:'ingreso'}
+                    //url:'../../sis_tesoreria/control/CuentaBancariaMov/listarCuentaBancariaMov',
+                    url:'../../sis_migracion/control/TsLibroBancos/listarDepositosENDESIS',
+                    id : 'id_cuenta_bancaria_mov',
+                    root: 'datos',
+                    sortInfo:{
+                            field: 'nro_doc_tipo',
+                            direction: 'ASC'
+                    },
+                    totalProperty: 'total',
+                    fields: ['id_cuenta_bancaria_mov','id_cuenta_bancaria','fecha','detalle','observaciones','importe_deposito','saldo'],
+                    remoteSort: true,
+                    baseParams:{par_filtro:'detalle#observaciones#fecha'}
                 }),
                 valueField: 'id_cuenta_bancaria_mov',
-               displayField: 'nro_doc_tipo',
-               gdisplayField: 'desc_deposito',
-               hiddenName: 'id_cuenta_bancaria_mov',
-               forceSelection:true,
-               typeAhead: false,
-               triggerAction: 'all',
-               listWidth:350,
-               lazyRender:true,
-               mode:'remote',
-               pageSize:10,
-               queryDelay:1000,
-               anchor: '100%',
-               gwidth:200,
-               minChars:2,
-               tpl: '<tpl for="."><div class="x-combo-list-item"><p>Nro:{nro_doc_tipo}</p><p>Detalle:<strong>{descripcion}</strong></p><p>Observaciones:<strong>{observaciones}</strong></p></div></tpl>',
-               renderer:function(value, p, record){return String.format('{0}', record.data['desc_deposito']);}
+                displayField: 'detalle',
+                gdisplayField: 'desc_deposito',
+                hiddenName: 'id_cuenta_bancaria_mov',
+                forceSelection:true,
+                typeAhead: false,
+                triggerAction: 'all',
+                listWidth:350,
+                lazyRender:true,
+                mode:'remote',
+                pageSize:200,
+                queryDelay:1000,
+                anchor: '100%',
+                gwidth:200,
+                minChars:2,
+                tpl: '<tpl for="."><div class="x-combo-list-item"><p>{detalle}</p><p>Fecha:<strong>{fecha}</strong></p><p>Importe:<strong>{importe_deposito}</strong></p><p>Saldo:<strong>{saldo}</strong></p></div></tpl>',
+                renderer:function(value, p, record){return String.format('{0}', record.data['desc_deposito']);}
             },
             type:'ComboBox',
             filters:{pfiltro:'cbanmo.detalle#cbanmo.nro_doc_tipo',type:'string'},
@@ -1310,6 +1324,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
     sortInfo:{
 		field: 'nro_cuota',
 		direction: 'ASC'
+	},
+	onButtonNew: function(){
+		Phx.vista.PlanPago.superclass.onButtonNew.call(this);
+		this.Cmp.id_cuenta_bancaria_mov.store.baseParams={id_cuenta_bancaria:-1,fecha:new Date()}
 	}
 	
 })

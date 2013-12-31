@@ -41,8 +41,10 @@ Phx.vista.PlanPagoReq = {
         Phx.vista.PlanPagoReq.superclass.constructor.call(this,config);
        
        
-       
+        
         this.addButton('SincPresu',{text:'Inc. Pres.',iconCls: 'balert',disabled:true,handler:this.onBtnSincPresu,tooltip: '<b>Incrementar Presupuesto</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
+        
+        
         
         ////formulario de departamentos
         
@@ -78,7 +80,7 @@ Phx.vista.PlanPagoReq = {
          //this.load({params:{start:0, limit:this.tam_pag}}); 
        
          //this.store.baseParams={tipo_interfaz:this.nombreVista,tipo_interfaz:'vistobueno'};
-        
+      
         
     }, 
     
@@ -230,7 +232,7 @@ Phx.vista.PlanPagoReq = {
                     this.Cmp.forma_pago.enable();
                     this.mostrarComponente(this.Cmp.forma_pago);
                  
-                    this.Cmp.id_cuenta_bancaria.enable();
+                    this.Cmp.id_cuenta_bancaria.enable()
                     this.mostrarComponente(this.Cmp.id_cuenta_bancaria);
                     this.habilitarDescuentos();
                     

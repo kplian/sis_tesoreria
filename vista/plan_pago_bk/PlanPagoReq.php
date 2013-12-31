@@ -11,7 +11,7 @@
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
-Phx.vista.PlanPagoRegIni = {
+Phx.vista.PlanPagoReq = {
     
     bdel:true,
     bedit:true,
@@ -20,14 +20,38 @@ Phx.vista.PlanPagoRegIni = {
 	require:'../../../sis_tesoreria/vista/plan_pago/PlanPago.php',
 	requireclase:'Phx.vista.PlanPago',
 	title:'Registro de Planes de Pago',
-	nombreVista: 'PlanPagoRegIni',
+	nombreVista: 'planpagoReq',
 	
 	constructor: function(config) {
+	    
+	    this.Atributos[this.getIndAtributo('numero_op')].grid=true; 
+       
+        this.Atributos[this.getIndAtributo('nro_cuota')].form=false; 
+        
+        this.Atributos[this.getIndAtributo('forma_pago')].form=true; 
+        this.Atributos[this.getIndAtributo('nro_cheque')].form=true; 
+        this.Atributos[this.getIndAtributo('nro_cuenta_bancaria')].form=true; 
+        this.Atributos[this.getIndAtributo('id_cuenta_bancaria')].form=true; 
+        
+        this.Atributos[this.getIndAtributo('id_cuenta_bancaria_mov')].form=true; 
+        
+	    
 	    this.maestro=config.maestro;
-	    Phx.vista.PlanPagoRegIni.superclass.constructor.call(this,config);
+	    
+        Phx.vista.PlanPagoReq.superclass.constructor.call(this,config);
+       
+       
+       
         this.addButton('SincPresu',{text:'Inc. Pres.',iconCls: 'balert',disabled:true,handler:this.onBtnSincPresu,tooltip: '<b>Incrementar Presupuesto</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
+        
         ////formulario de departamentos
+        
+        
         this.crearFormularioEstados();
+        
+       
+        
+        
         //si la interface es pestanha este código es para iniciar 
           var dataPadre = Phx.CP.getPagina(this.idContenedorPadre).getSelectedData()
           if(dataPadre){
@@ -48,6 +72,13 @@ Phx.vista.PlanPagoRegIni = {
        
          
          this.iniciarEventos();
+         
+        // this.store.baseParams={tipo_interfaz:this.nombreVista};
+         //this.store.baseParams={tipo_interfaz:this.nombreVista};
+         //this.load({params:{start:0, limit:this.tam_pag}}); 
+       
+         //this.store.baseParams={tipo_interfaz:this.nombreVista,tipo_interfaz:'vistobueno'};
+        
         
     }, 
     
@@ -58,7 +89,7 @@ Phx.vista.PlanPagoRegIni = {
     
     iniciarEventos:function(){
         
-         this.Cmp.monto.on('change',this.calculaMontoPago,this); 
+        this.Cmp.monto.on('change',this.calculaMontoPago,this); 
         //this.cmpDescuentoAnticipo.on('change',this.calculaMontoPago,this);
         this.Cmp.monto_no_pagado.on('change',this.calculaMontoPago,this);
         this.Cmp.otros_descuentos.on('change',this.calculaMontoPago,this);
@@ -126,27 +157,21 @@ Phx.vista.PlanPagoRegIni = {
            
        },this);
        
-       
+       //Evento para filtrar los depósitos a partir de la cuenta bancaria
+        this.Cmp.id_cuenta_bancaria.on('select',function(data,rec,ind){
+            this.Cmp.id_cuenta_bancaria_mov.setValue('');
+            this.Cmp.id_cuenta_bancaria_mov.modificado=true;
+            Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: rec.id});
+        },this);
         
-       
+        //Evento para ocultar/motrar componentes por cheque o transferencia
+        this.Cmp.forma_pago.on('change',function(groupRadio,radio){
+            this.ocultarCheCue(radio.inputValue);
+        },this);           
     
     },
     
-    onBtnSolPlanPago:function(){        
-        var rec=this.sm.getSelected();
-        Ext.Ajax.request({
-            url:'../../sis_tesoreria/control/PlanPago/solicitudPlanPago',
-            params:{'id_plan_pago':rec.data.id_plan_pago,id_obligacion_pago:this.maestro.id_obligacion_pago},
-            success: this.successExport,
-            failure: function() {
-                console.log("fail");
-            },
-            timeout: function() {
-                console.log("timeout");
-            },
-            scope:this
-        });  
-    },
+   
     
     setTipoPagoNormal:function(){
         this.Cmp.tipo.enable();
@@ -174,128 +199,46 @@ Phx.vista.PlanPagoRegIni = {
      },
      
    
-    calculaMontoPago:function(){
-        
-         var descuento_ley = this.Cmp.monto.getValue()*this.Cmp.porc_descuento_ley.getValue();
-         this.Cmp.descuento_ley.setValue(descuento_ley);
-         var liquido = this.Cmp.monto.getValue()  -  this.Cmp.monto_no_pagado.getValue() -  this.Cmp.otros_descuentos.getValue() - this.Cmp.monto_retgar_mo.getValue() -  this.Cmp.descuento_ley.getValue();
-        
-        
-        this.Cmp.liquido_pagable.setValue(liquido>0?liquido:0);
-        var eje = this.Cmp.monto.getValue()  -  this.Cmp.monto_no_pagado.getValue()
-        this.Cmp.monto_ejecutar_total_mo.setValue(eje>0?eje:0);
-     },
+    
      
-     enableDisable:function(val){
-      if(val =='devengado'){
-            
-            //this.Cmp.id_plantilla.enable();
-            //this.ocultarComponente(this.Cmp.id_plantilla);
-            this.Cmp.nombre_pago.disable();
-            this.ocultarComponente(this.Cmp.nombre_pago);
-            
-            
-            
-           
-            
-           this.deshabilitarDescuentos()
-            
-        }
-        else{
-            //this.Cmp.id_plantilla.enable();
-            //this.mostrarComponente(this.Cmp.id_plantilla);
-            this.Cmp.nombre_pago.enable();
-            this.mostrarComponente(this.Cmp.nombre_pago);
-            
-           
-            
-            this.habilitarDescuentos();
-            
-         }
-          this.Cmp.monto_no_pagado.setValue(0);
-          this.Cmp.otros_descuentos.setValue(0);
-          this.Cmp.liquido_pagable.setValue(0);
-          this.Cmp.monto_ejecutar_total_mo.setValue(0);
-          this.Cmp.monto_retgar_mo.setValue(0);
-          this.Cmp.descuento_ley.setValue(0)
-          this.calculaMontoPago()
-         
-     },
      
-    habilitarDescuentos:function(){
-        //this.cmpDescuentoAnticipo.enable();
-        //this.mostrarComponente(this.cmpDescuentoAnticipo);
-        this.Cmp.otros_descuentos.enable();
-        this.mostrarComponente(this.Cmp.otros_descuentos);
-        
-        //calcular retenciones segun documento
-        
-        this.mostrarComponente(this.Cmp.descuento_ley);
-        
-        this.Cmp.monto_retgar_mo.enable();
-        this.mostrarComponente(this.Cmp.monto_retgar_mo);
-        
-        
-        
-        //this.cmpObsDescuentoAnticipo.enable();
-        //this.mostrarComponente(this.cmpObsDescuentoAnticipo);
-        this.Cmp.obs_otros_descuentos.enable();
-        this.mostrarComponente(this.Cmp.obs_otros_descuentos);
-        
-        this.mostrarComponente(this.Cmp.obs_descuentos_ley);
-        
-    } ,
-     deshabilitarDescuentos:function(){
-       // this.cmpDescuentoAnticipo.disable();
-       // this.ocultarComponente(this.cmpDescuentoAnticipo);
-        this.Cmp.otros_descuentos.disable();
-        this.ocultarComponente(this.Cmp.otros_descuentos);
-        
-        this.Cmp.monto_retgar_mo.disable();
-        this.ocultarComponente(this.Cmp.monto_retgar_mo);
-        
-        this.ocultarComponente(this.Cmp.descuento_ley);
-        
-        
-         
-        //this.cmpObsDescuentoAnticipo.disable();
-        //this.ocultarComponente(this.cmpObsDescuentoAnticipo);
-        this.Cmp.obs_otros_descuentos.disable();
-        this.ocultarComponente(this.Cmp.obs_otros_descuentos);
-        this.ocultarComponente(this.Cmp.obs_descuentos_ley);
-            
-        
-    } ,
     
     
     onButtonNew:function(){
         
          var data = this.getSelectedData();
          if(data){
-                
-                // para habilitar registros de cuotas de pago    
+                console.log('data..',data)
+             // para habilitar registros de cuotas de pago    
                 if(data.monto_ejecutar_total_mo*1  > data.total_pagado*1  && data.estado =='devengado'){
-                    Phx.vista.PlanPagoRegIni.superclass.onButtonNew.call(this); 
+                    Phx.vista.PlanPagoReq.superclass.onButtonNew.call(this); 
                     this.Cmp.id_obligacion_pago.setValue(this.maestro.id_obligacion_pago);
                     this.Cmp.id_plan_pago_fk.setValue(data.id_plan_pago);
+                    
+                  
                     this.Cmp.tipo_pago.disable();
                     this.ocultarComponente(this.Cmp.tipo_pago);
+                    
                     this.Cmp.tipo.disable();
                     this.ocultarComponente(this.Cmp.tipo);
+                    
                     this.Cmp.id_plantilla.disable();
                     this.ocultarComponente(this.Cmp.id_plantilla);
+                    
                     this.Cmp.nombre_pago.enable();
                     this.mostrarComponente(this.Cmp.nombre_pago);
-                    
-                   
-                    
-                    
-                   
+                    this.Cmp.forma_pago.enable();
+                    this.mostrarComponente(this.Cmp.forma_pago);
+                 
+                    this.Cmp.id_cuenta_bancaria.enable();
+                    this.mostrarComponente(this.Cmp.id_cuenta_bancaria);
                     this.habilitarDescuentos();
+                    
                     this.Cmp.monto_no_pagado.disable();
                     this.ocultarComponente(this.Cmp.monto_no_pagado);
                     this.Cmp.obs_monto_no_pagado.disable();
                     this.ocultarComponente(this.Cmp.obs_monto_no_pagado);
+                    
                     this.obtenerFaltante('registrado_pagado',data.id_plan_pago);
                     this.Cmp.tipo_cambio.setValue(0);
                     this.Cmp.tipo_cambio.disable();
@@ -303,7 +246,9 @@ Phx.vista.PlanPagoRegIni = {
                     //calculo de descuentos por documento
                     this.getDecuentosPorAplicar(data.id_plantilla);
                     
-                    
+                    //TODO ....
+                    //Verifica si habilita o no el cheque y la cuenta bancaria destino
+                    this.ocultarCheCue(data.forma_pago);
                     
     
                 }
@@ -325,12 +270,10 @@ Phx.vista.PlanPagoRegIni = {
               console.log('data..',data)
               
               
-                //para habilitar registros de cuota de devengado  
-                Phx.vista.PlanPagoRegIni.superclass.onButtonNew.call(this); 
-                
+           //para habilitar registros de cuota de devengado  
+                Phx.vista.PlanPagoReq.superclass.onButtonNew.call(this); 
                 this.Cmp.id_obligacion_pago.setValue(this.maestro.id_obligacion_pago);
-                
-               //tipo pago (OPERACION)
+                 this.mostrarComponente(this.Cmp.tipo_pago);
                
                if(this.maestro.nro_cuota_vigente ==0){
                     this.Cmp.tipo_pago.setValue('normal');
@@ -338,25 +281,22 @@ Phx.vista.PlanPagoRegIni = {
                 }
                 else{
                      this.Cmp.tipo_pago.setValue('normal');
-                     this.Cmp.tipo_pago.disable();
+                      this.Cmp.tipo_pago.disable();
                 }
-                
                 this.setTipoPagoNormal();
+               
                 
                 this.Cmp.tipo.enable();
                 this.mostrarComponente(this.Cmp.tipo);
-                //plantilla (TIPO DOCUMENTO)
+                
+                
                 this.Cmp.id_plantilla.enable();
                 this.mostrarComponente(this.Cmp.id_plantilla);
-                
-                
-                
                 this.Cmp.monto_no_pagado.enable();
                 this.mostrarComponente(this.Cmp.monto_no_pagado);
                 this.Cmp.obs_monto_no_pagado.enable();
                 this.mostrarComponente(this.Cmp.obs_monto_no_pagado);
                 this.obtenerFaltante('registrado');
-                
                 if(this.maestro.tipo_moneda=='base'){
                    this.Cmp.tipo_cambio.setValue(1);  
                    this.Cmp.tipo_cambio.disable();
@@ -395,7 +335,7 @@ Phx.vista.PlanPagoRegIni = {
        
          var data = this.getSelectedData();
         
-         Phx.vista.PlanPagoRegIni.superclass.onButtonEdit.call(this); 
+        
          if(data.tipo=='pagado'){
              
                 this.Cmp.tipo_pago.disable();
@@ -409,14 +349,18 @@ Phx.vista.PlanPagoRegIni = {
                 
                 this.Cmp.nombre_pago.enable();
                 this.mostrarComponente(this.Cmp.nombre_pago);
-                
                
-                this.habilitarDescuentos();     
+                
+                this.Cmp.id_cuenta_bancaria.enable()
+                this.mostrarComponente(this.Cmp.id_cuenta_bancaria);
+                this.habilitarDescuentos();
                 
                 this.Cmp.monto_no_pagado.disable();
                 this.ocultarComponente(this.Cmp.monto_no_pagado);
+                
                 this.Cmp.obs_monto_no_pagado.disable();
                 this.ocultarComponente(this.Cmp.obs_monto_no_pagado);
+                
                 this.Cmp.tipo_cambio.disable();
                 this.ocultarComponente(this.Cmp.tipo_cambio);
          
@@ -449,11 +393,29 @@ Phx.vista.PlanPagoRegIni = {
                 
          }
        
-           this.Cmp.fecha_tentativa.enable();
+           this.Cmp.fecha_tentativa.disable();
            this.Cmp.tipo.disable();
            this.Cmp.tipo_pago.disable(); 
            
            
+            
+            if(data.tipo=='devengado'){
+                this.enableDisable('devengado')
+             
+            }
+            else{
+                this.enableDisable('devengado_pagado') 
+                //Verifica si habilita o no el cheque y la cuenta bancaria destino
+                this.ocultarCheCue(data.forma_pago);  
+                
+            }
+            
+            
+                
+            Phx.vista.PlanPagoReq.superclass.onButtonEdit.call(this);
+            
+           
+            
            
        },
     
@@ -493,19 +455,22 @@ Phx.vista.PlanPagoRegIni = {
     onReloadPage:function(m){
         this.maestro=m;
         this.store.baseParams={id_obligacion_pago:this.maestro.id_obligacion_pago,tipo_interfaz:this.nombreVista};
+      
+        
+        
         this.load({params:{start:0, limit:this.tam_pag}})
         this.Cmp.tipo_cambio.setValue(1);  
     },
     
     successSave: function(resp) {
        Phx.CP.getPagina(this.idContenedorPadre).reload();  
-       Phx.vista.PlanPagoRegIni.superclass.successSave.call(this,resp);
+       Phx.vista.PlanPagoReq.superclass.successSave.call(this,resp);
         
         
     },
     successDel:function(resp){
        Phx.CP.getPagina(this.idContenedorPadre).reload(); 
-       Phx.vista.PlanPagoRegIni.superclass.successDel.call(this,resp);
+       Phx.vista.PlanPagoReq.superclass.successDel.call(this,resp);
      },
      
       preparaMenu:function(n){
@@ -513,7 +478,7 @@ Phx.vista.PlanPagoRegIni = {
           var tb =this.tbar;
           this.getBoton('ant_estado').disable();
           this.getBoton('sig_estado').disable();
-          Phx.vista.PlanPagoRegIni.superclass.preparaMenu.call(this,n); 
+          Phx.vista.PlanPagoReq.superclass.preparaMenu.call(this,n); 
           if (data['estado']== 'borrador'){
               this.getBoton('edit').enable();
               this.getBoton('del').enable(); 
@@ -533,7 +498,9 @@ Phx.vista.PlanPagoRegIni = {
             }
              this.getBoton('edit').disable();
              this.getBoton('del').disable();
-             this.getBoton('SolPlanPago').enable(); 
+            
+             
+                this.getBoton('SolPlanPago').enable(); 
           }
           
           if(data['sinc_presupuesto']=='si'){
@@ -546,7 +513,7 @@ Phx.vista.PlanPagoRegIni = {
      },
      
       liberaMenu:function(){
-        var tb = Phx.vista.PlanPagoRegIni.superclass.liberaMenu.call(this);
+        var tb = Phx.vista.PlanPagoReq.superclass.liberaMenu.call(this);
         if(tb){
           
            this.getBoton('SincPresu').disable();
@@ -575,6 +542,27 @@ Phx.vista.PlanPagoRegIni = {
      },
 
   
+    ocultarCheCue: function(pFormaPago){
+        if(pFormaPago=='transferencia'){
+            //Deshabilita campo cheque
+            this.Cmp.nro_cheque.allowBlank=true;
+            this.Cmp.nro_cheque.setValue('');
+            this.Cmp.nro_cheque.disable();
+            //Habilita nrocuenta bancaria destino
+            this.Cmp.nro_cuenta_bancaria.allowBlank=false;
+            this.Cmp.nro_cuenta_bancaria.enable();
+        } else{
+            //cheque
+            //Habilita campo cheque
+            this.Cmp.nro_cheque.allowBlank=false;
+            this.Cmp.nro_cheque.enable();
+            //Habilita nrocuenta bancaria destino
+            this.Cmp.nro_cuenta_bancaria.allowBlank=true;
+            this.Cmp.nro_cuenta_bancaria.setValue('');
+            this.Cmp.nro_cuenta_bancaria.disable();
+        }
+        
+    },
     onBtnVerifPresup : function() {
         var rec = this.sm.getSelected();
         Phx.CP.loadWindows('../../../sis_tesoreria/vista/plan_pago/PlanPagoVerifPresup.php', 'Disponibilidad Presupuestaria', {

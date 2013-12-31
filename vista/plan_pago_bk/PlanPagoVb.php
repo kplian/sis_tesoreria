@@ -25,18 +25,19 @@ Phx.vista.PlanPagoVb = {
 	    
 	   this.Atributos[this.getIndAtributo('numero_op')].grid=true; 
 	   
-	   this.Atributos[this.getIndAtributo('nro_cuota')].form=false; 
+	    this.Atributos[this.getIndAtributo('nro_cuota')].form=false; 
 	    
-	   this.Atributos[this.getIndAtributo('forma_pago')].form=true; 
-	   this.Atributos[this.getIndAtributo('nro_cheque')].form=true; 
-	   this.Atributos[this.getIndAtributo('nro_cuenta_bancaria')].form=true; 
-	   this.Atributos[this.getIndAtributo('id_cuenta_bancaria')].form=true; 
+	    this.Atributos[this.getIndAtributo('forma_pago')].form=true; 
+	    this.Atributos[this.getIndAtributo('nro_cheque')].form=true; 
+	    this.Atributos[this.getIndAtributo('nro_cuenta_bancaria')].form=true; 
+	    this.Atributos[this.getIndAtributo('id_cuenta_bancaria')].form=true; 
 	    
-	   this.Atributos[this.getIndAtributo('id_cuenta_bancaria_mov')].form=true; 
+	    this.Atributos[this.getIndAtributo('id_cuenta_bancaria_mov')].form=true; 
 	    
-	   //funcionalidad para listado de historicos
-       this.historico = 'no';
-       this.tbarItems = [{
+	    
+	    //funcionalidad para listado de historicos
+        this.historico = 'no';
+        this.tbarItems = [{
             text: 'Histórico',
             enableToggle: true,
             pressed: false,
@@ -54,17 +55,13 @@ Phx.vista.PlanPagoVb = {
                 this.reload();
              },
             scope: this
-        }];
-	    
+           }];
 	    
 	    
 	    
        Phx.vista.PlanPagoVb.superclass.constructor.call(this,config);
        this.iniciarEventos();
-       
        this.addButton('SolDevPag',{text:'Solicitar Devengado/Pago',iconCls: 'bpagar',disabled:true,handler:this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente, devengado o pago  '});
-        
-       
        this.crearFormularioEstados();
        this.crearFomularioDepto()
        
@@ -78,16 +75,6 @@ Phx.vista.PlanPagoVb = {
        
         
     },
-    //deshabilitas botones para informacion historica
-    desBotoneshistorico:function(){
-          
-          this.getBoton('ant_estado').disable();
-          this.getBoton('sig_estado').disable();
-          this.getBoton('SolDevPag').disable(); 
-          this.getBoton('edit').disable();   
-          
-      }, 
-    
     
     crearFomularioDepto:function(){
       
@@ -379,45 +366,58 @@ Phx.vista.PlanPagoVb = {
             this.ocultarCheCue(radio.inputValue);
         },this);           
     
-    }, 
+    },
+    
+     //deshabilitas botones para informacion historica
+      desBotoneshistorico:function(){
+          
+          this.getBoton('ant_estado').disable();
+          this.getBoton('sig_estado').disable();
+          this.getBoton('SolDevPag').disable(); 
+          this.getBoton('edit').disable();   
+          
+      }, 
     
     
     preparaMenu:function(n){
-         var data = this.getSelectedData();
-         var tb =this.tbar;
-         Phx.vista.PlanPagoVb.superclass.preparaMenu.call(this,n); 
-         if(this.historico == 'no'){    
-          
-              if (data['estado']== 'borrador' || data['estado']== 'pendiente' || data['estado']== 'devengado' || data['estado']== 'pagado' ){
-                      this.getBoton('ant_estado').disable();
-                      this.getBoton('sig_estado').disable();
-                      this.getBoton('SolDevPag').disable(); 
-                      this.getBoton('edit').disable();   
-              }
-              else{
-                       if (data['estado']== 'vbconta'){
-                           this.getBoton('ant_estado').enable();
-                           this.getBoton('sig_estado').disable();
-                           this.getBoton('SolDevPag').enable();
-                            this.getBoton('edit').enable(); 
-                       }
-                       else{
-                           this.getBoton('ant_estado').enable();
-                           this.getBoton('sig_estado').enable();
-                           this.getBoton('SolDevPag').disable();
-                           this.getBoton('edit').disable(); 
-                         
-                       }
-                       
-                       
-               }
-               this.getBoton('SolPlanPago').enable(); 
-         } 
+          var data = this.getSelectedData();
+          var tb =this.tbar;
+          Phx.vista.PlanPagoVb.superclass.preparaMenu.call(this,n); 
+          if(this.historico == 'no'){    
+              
+                  if (data['estado']== 'borrador' || data['estado']== 'pendiente' || data['estado']== 'devengado' || data['estado']== 'pagado' ){
+                          this.getBoton('ant_estado').disable();
+                          this.getBoton('sig_estado').disable();
+                          this.getBoton('SolDevPag').disable(); 
+                          this.getBoton('edit').disable();   
+                  }
+                  else{
+                           if (data['estado']== 'vbconta'){
+                               this.getBoton('ant_estado').enable();
+                               this.getBoton('sig_estado').disable();
+                               this.getBoton('SolDevPag').enable();
+                                this.getBoton('edit').enable(); 
+                           }
+                           else{
+                               this.getBoton('ant_estado').enable();
+                               this.getBoton('sig_estado').enable();
+                               this.getBoton('SolDevPag').disable();
+                               this.getBoton('edit').disable(); 
+                             
+                           }
+                           
+                           
+                   }
+                   this.getBoton('SolPlanPago').enable(); 
+           } 
          else{
             this.desBotoneshistorico();
          } 
          
-         this.menuAdq.enable();
+        this.menuAdq.enable();
+              
+         
+         
            
      },
     
@@ -473,7 +473,6 @@ Phx.vista.PlanPagoVb = {
         field: 'numero_op',
         direction: 'ASC'
     },
-    
     //funciones adiconales para boton de reportes
     
     addBotones: function() {
@@ -677,6 +676,11 @@ Phx.vista.PlanPagoVb = {
     id_proceso_compra: 0,
     id_solicitud: 0,
     auxFuncion:'onBtnAdq'
+            
+    
+    
+    
+    
     
     
 };

@@ -108,7 +108,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                         //dato = (dato==''&&value=='caja_chica')?'Caja Chica':dato;
                         //dato = (dato==''&&value=='viaticos')?'Viáticos':dato;
                         //dato = (dato==''&&value=='fondo_en_avance')?'Fondo en Avance':dato;
-                        dato = (dato==''&&value=='aduisiciones')?'Adquisiciones':dato;
+                        dato = (dato==''&&value=='adquisiciones')?'Adquisiciones':dato;
                         return String.format('{0}', dato);
                     },
             
@@ -772,6 +772,8 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
               //RCM: menú de reportes de adquisiciones
               this.menuAdq.disable();
           }
+          
+          
      },
      
      
@@ -813,162 +815,162 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
     bedit:true,
 	bsave:false,
 	addBotones: function() {
-        this.menuAdq = new Ext.Toolbar.SplitButton({
-            id: 'btn-adq-' + this.idContenedor,
-            text: 'Orden de Compra',
-            handler: this.onBtnAdq,
-            disabled: true,
-            scope: this,
-            menu:{
-            items: [{
-                id:'btn-cot-' + this.idContenedor,
-                text: 'Cotización',
-                tooltip: '<b>Reporte de la Cotización</b>',
-                handler:this.onBtnCot,
-                scope: this
-            }, {
-                id:'btn-proc-' + this.idContenedor,
-                text: 'Cuadro Comparativo',
-                tooltip: '<b>Reporte de Cuadro Comparativo</b>',
-                handler:this.onBtnProc,
-                scope: this
-            }, {
-                id:'btn-sol-' + this.idContenedor,
-                text: 'Solicitud de Compra',
-                tooltip: '<b>Reporte de la Solicitud de Compra</b>',
-                handler:this.onBtnSol,
-                scope: this
-            }, {
+		this.menuAdq = new Ext.Toolbar.SplitButton({
+			id: 'btn-adq-' + this.idContenedor,
+			text: 'Orden de Compra',
+			handler: this.onBtnAdq,
+			disabled: true,
+			scope: this,
+			menu:{
+			items: [{
+				id:'btn-cot-' + this.idContenedor,
+				text: 'Cotización',
+				tooltip: '<b>Reporte de la Cotización</b>',
+				handler:this.onBtnCot,
+				scope: this
+			}, {
+				id:'btn-proc-' + this.idContenedor,
+				text: 'Cuadro Comparativo',
+				tooltip: '<b>Reporte de Cuadro Comparativo</b>',
+				handler:this.onBtnProc,
+				scope: this
+			}, {
+				id:'btn-sol-' + this.idContenedor,
+				text: 'Solicitud de Compra',
+				tooltip: '<b>Reporte de la Solicitud de Compra</b>',
+				handler:this.onBtnSol,
+				scope: this
+			}, {
                 id:'btn-docsol-' + this.idContenedor,
                 text: 'Documentos',
                 tooltip: '<b>Documentos anexos a la solicitud de compra</b>',
                 handler:this.onBtnDocSol,
                 scope: this
             }
-        ]}
-        });
-        
-        //Adiciona el menú a la barra de herramientas
-        this.tbar.add(this.menuAdq);
-    },
-    
-    onBtnAdq: function(){
-        Phx.CP.loadingShow();
-        var rec = this.sm.getSelected();
-        var data = rec.data;
-        if(data){
-            //Obtiene los IDS
-            this.auxFuncion='onBtnAdq';
-            this.obtenerIDS(data);
-        } else {
-            alert('Seleccione un registro y vuelta a intentarlo');
-        }
-    },
-    
-    onBtnCot: function(){
-        Phx.CP.loadingShow();
-        var rec = this.sm.getSelected();
-        var data = rec.data;
-        if(data){
-            //Obtiene los IDS
-            this.auxFuncion='onBtnCot';
-            this.obtenerIDS(data);
-        } else {
-            alert('Seleccione un registro y vuelta a intentarlo');
-        }
-    },
-    
-    onBtnSol: function(){
-        Phx.CP.loadingShow();
-        var rec = this.sm.getSelected();
-        var data = rec.data;
-        if(data){
-            //Obtiene los IDS
-            this.auxFuncion='onBtnSol';
-            this.obtenerIDS(data);
-        } else {
-            alert('Seleccione un registro y vuelta a intentarlo');
-        }
-    },
-    
-    onBtnProc: function(){
-        Phx.CP.loadingShow();
-        var rec = this.sm.getSelected();
-        var data = rec.data;
-        if(data){
-            //Obtiene los IDS
-            this.auxFuncion='onBtnProc';
-            this.obtenerIDS(data);
-        } else {
-            alert('Seleccione un registro y vuelta a intentarlo');
-        }
-    },
-    
-    obtenerIDS: function(data){
-        Ext.Ajax.request({
-            url: '../../sis_tesoreria/control/ObligacionPago/obtenerIdsExternos',
-            params: {
-                id_obligacion_pago: data.id_obligacion_pago,
-                sistema: this.sistema
-            },
-            success: this.successobtenerIDS,
-            failure: this.conexionFailure,
-            timeout: this.timeout,
-            scope: this
-        });
-    },
-    successobtenerIDS: function(resp) {
-        Phx.CP.loadingHide();
-        var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
-        if (!reg.ROOT.error) {
-            //Setea los valores a variables locales
-            var ids=reg.ROOT.datos;
-            this.id_cotizacion = ids.id_cotizacion,
-            this.id_proceso_compra = ids.id_proceso_compra,
-            this.id_solicitud = ids.id_solicitud
-            
-            //Genera el reporte en función del botón presionado
-            if(this.auxFuncion=='onBtnAdq'){
-                Ext.Ajax.request({
+		]}
+		});
+		
+		//Adiciona el menú a la barra de herramientas
+		this.tbar.add(this.menuAdq);
+	},
+	
+	onBtnAdq: function(){
+		Phx.CP.loadingShow();
+		var rec = this.sm.getSelected();
+		var data = rec.data;
+		if(data){
+			//Obtiene los IDS
+			this.auxFuncion='onBtnAdq';
+			this.obtenerIDS(data);
+		} else {
+			alert('Seleccione un registro y vuelta a intentarlo');
+		}
+	},
+	
+	onBtnCot: function(){
+		Phx.CP.loadingShow();
+		var rec = this.sm.getSelected();
+		var data = rec.data;
+		if(data){
+			//Obtiene los IDS
+			this.auxFuncion='onBtnCot';
+			this.obtenerIDS(data);
+		} else {
+			alert('Seleccione un registro y vuelta a intentarlo');
+		}
+	},
+	
+	onBtnSol: function(){
+		Phx.CP.loadingShow();
+		var rec = this.sm.getSelected();
+		var data = rec.data;
+		if(data){
+			//Obtiene los IDS
+			this.auxFuncion='onBtnSol';
+			this.obtenerIDS(data);
+		} else {
+			alert('Seleccione un registro y vuelta a intentarlo');
+		}
+	},
+	
+	onBtnProc: function(){
+		Phx.CP.loadingShow();
+		var rec = this.sm.getSelected();
+		var data = rec.data;
+		if(data){
+			//Obtiene los IDS
+			this.auxFuncion='onBtnProc';
+			this.obtenerIDS(data);
+		} else {
+			alert('Seleccione un registro y vuelta a intentarlo');
+		}
+	},
+	
+	obtenerIDS: function(data){
+		Ext.Ajax.request({
+			url: '../../sis_tesoreria/control/ObligacionPago/obtenerIdsExternos',
+			params: {
+				id_obligacion_pago: data.id_obligacion_pago,
+				sistema: this.sistema
+			},
+			success: this.successobtenerIDS,
+			failure: this.conexionFailure,
+			timeout: this.timeout,
+			scope: this
+		});
+	},
+	successobtenerIDS: function(resp) {
+		Phx.CP.loadingHide();
+		var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+		if (!reg.ROOT.error) {
+			//Setea los valores a variables locales
+			var ids=reg.ROOT.datos;
+			this.id_cotizacion = ids.id_cotizacion,
+			this.id_proceso_compra = ids.id_proceso_compra,
+			this.id_solicitud = ids.id_solicitud
+			
+			//Genera el reporte en función del botón presionado
+			if(this.auxFuncion=='onBtnAdq'){
+				Ext.Ajax.request({
                     url:'../../sis_adquisiciones/control/Cotizacion/reporteOC',
                     params:{'id_cotizacion':this.id_cotizacion},
                     success: this.successExport,
                     failure: this.conexionFailure,
-                    timeout:this.timeout,
+		            timeout:this.timeout,
                     scope:this
                 });
-                
-            } else if(this.auxFuncion=='onBtnCot'){
-                Ext.Ajax.request({
+				
+			} else if(this.auxFuncion=='onBtnCot'){
+				Ext.Ajax.request({
                     url:'../../sis_adquisiciones/control/Cotizacion/reporteCotizacion',
                     params:{'id_cotizacion':this.id_cotizacion,tipo:'cotizado'},
                     success: this.successExport,
                     failure: this.conexionFailure,
-                    timeout:this.timeout,
+		            timeout:this.timeout,
                     scope:this
                 });  
-                
-            } else if(this.auxFuncion=='onBtnSol'){
-                Ext.Ajax.request({
-                    url:'../../sis_adquisiciones/control/Solicitud/reporteSolicitud',
-                    params:{'id_solicitud':this.id_solicitud},
-                    success: this.successExport,
-                    failure: this.conexionFailure,
-                    timeout:this.timeout,
-                    scope:this
-                });  
-                
-            } else if(this.auxFuncion=='onBtnProc'){
-                Ext.Ajax.request({
-                     url:'../../sis_adquisiciones/control/ProcesoCompra/cuadroComparativo',
-                     params:{id_proceso_compra:this.id_proceso_compra},
-                     success: this.successExport,
-                     success: this.successExport,
-                     failure: this.conexionFailure,
-                     scope:this
-                 });
-                 
-             } else if(this.auxFuncion=='onBtnDocSol'){   
+				
+			} else if(this.auxFuncion=='onBtnSol'){
+				Ext.Ajax.request({
+		            url:'../../sis_adquisiciones/control/Solicitud/reporteSolicitud',
+		            params:{'id_solicitud':this.id_solicitud},
+		            success: this.successExport,
+		            failure: this.conexionFailure,
+		            timeout:this.timeout,
+		            scope:this
+		        });  
+				
+			} else if(this.auxFuncion=='onBtnProc'){
+				Ext.Ajax.request({
+		             url:'../../sis_adquisiciones/control/ProcesoCompra/cuadroComparativo',
+		             params:{id_proceso_compra:this.id_proceso_compra},
+		             success: this.successExport,
+		             success: this.successExport,
+		             failure: this.conexionFailure,
+		             scope:this
+		         });
+		         
+		     } else if(this.auxFuncion=='onBtnDocSol'){   
                 
                 Phx.CP.loadWindows('../../../sis_adquisiciones/vista/documento_sol/ChequeoDocumentoSol.php',
                             'Chequeo de documentos de la solicitud',
@@ -979,23 +981,23 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                             {'id_solicitud':this.id_solicitud},  
                             this.idContenedor,
                             'ChequeoDocumentoSol')      
-                
-            } else{
-                alert('Reporte no reconocido');
-            }
+				
+			} else{
+				alert('Reporte no reconocido');
+			}
 
-        } else {
+		} else {
 
-            alert('ocurrio un error durante el proceso')
-        }
+			alert('ocurrio un error durante el proceso')
+		}
 
-    },
-    
-    sistema: 'ADQ',
-    id_cotizacion: 0,
-    id_proceso_compra: 0,
-    id_solicitud: 0,
-    auxFuncion:'onBtnAdq'
+	},
+	
+	sistema: 'ADQ',
+	id_cotizacion: 0,
+	id_proceso_compra: 0,
+	id_solicitud: 0,
+	auxFuncion:'onBtnAdq'
 			
 	
 	
