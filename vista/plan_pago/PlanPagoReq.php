@@ -567,21 +567,26 @@ Phx.vista.PlanPagoReq = {
     },
     onBtnVerifPresup : function() {
         var rec = this.sm.getSelected();
-        Phx.CP.loadWindows('../../../sis_tesoreria/vista/plan_pago/PlanPagoVerifPresup.php', 'Disponibilidad Presupuestaria', {
+        //Se define el nombre de la columna de la llave primaria
+        rec.data.tabla_id = this.tabla_id;
+        rec.data.tabla = this.tabla;
+        
+        Phx.CP.loadWindows('../../../sis_presupuestos/vista/verificacion_presup/VerificacionPresup.php', 'Disponibilidad Presupuestaria', {
             modal : true,
             width : '80%',
             height : '50%',
-        }, rec.data, this.idContenedor, 'PlanPagoVerifPresup');
-    } ,
+        }, rec.data, this.idContenedor, 'VerificacionPresup');
+    },
     
     east:{
           url:'../../../sis_tesoreria/vista/prorrateo/Prorrateo.php',
           title:'Prorrateo', 
           width:400,
           cls:'Prorrateo'
-     },
-    
-    
-    
+    },
+
+	tabla_id: 'id_plan_pago',
+	tabla:'tes.tplan_pago'    
+
 };
 </script>
