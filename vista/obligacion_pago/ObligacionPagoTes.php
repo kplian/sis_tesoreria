@@ -15,7 +15,7 @@ Phx.vista.ObligacionPagoTes = {
     require:'../../../sis_tesoreria/vista/obligacion_pago/ObligacionPago.php',
 	requireclase:'Phx.vista.ObligacionPago',
 	title:'Obligacion de Pago(Adquisiciones)',
-	nombreVista: 'obligacionPagoAdq',
+	nombreVista: 'obligacionPagoTes',
 	
 	/*
 	 *  Interface heredada para el sistema de adquisiciones para que el reposnable 

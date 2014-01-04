@@ -925,6 +925,18 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             alert('Seleccione un registro y vuelta a intentarlo');
         }
     },
+     onBtnDocSol: function(){
+        Phx.CP.loadingShow();
+        var rec = this.sm.getSelected();
+        var data = rec.data;
+        if(data){
+            //Obtiene los IDS
+            this.auxFuncion='onBtnDocSol';
+            this.obtenerIDS(data);
+        } else {
+            alert('Seleccione un registro y vuelta a intentarlo');
+        }
+    },
     
     obtenerIDS: function(data){
         Ext.Ajax.request({
@@ -991,7 +1003,6 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                  });
                  
              } else if(this.auxFuncion=='onBtnDocSol'){   
-                
                 Phx.CP.loadWindows('../../../sis_adquisiciones/vista/documento_sol/ChequeoDocumentoSol.php',
                             'Chequeo de documentos de la solicitud',
                             {

@@ -69,7 +69,7 @@ BEGIN
                 IF p_administrador !=1 THEN
                 
                               
-                      v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (lower(plapa.estado)!=''borrador'') and and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'') and  ';
+                      v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (lower(plapa.estado)!=''borrador'') and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'' and  ';
                   
                  ELSE
                       
@@ -95,7 +95,18 @@ BEGIN
             
                v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = plapa.id_proceso_wf';
                v_strg_pp = 'DISTINCT(plapa.id_plan_pago)'; 
-               v_filtro = ' (lower(plapa.estado)!=''borrador'' ) and ';
+              
+               
+                 IF p_administrador !=1 THEN
+                
+                        v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  ';
+                 ELSE 
+                 
+                      v_filtro = '';
+              
+                
+                 END IF;
+               
             
             ELSE
             
@@ -218,7 +229,7 @@ BEGIN
                  IF p_administrador !=1 THEN
                 
                               
-                      v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (lower(plapa.estado)!=''borrador'') and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'') and ';
+                      v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (lower(plapa.estado)!=''borrador'') and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado''  and ';
                   
                  ELSE
                       v_filtro = ' (lower(plapa.estado)!=''borrador''  and lower(plapa.estado)!=''pendiente''  and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'') and ';
@@ -243,7 +254,12 @@ BEGIN
             
                v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = plapa.id_proceso_wf';
                v_strg_pp = 'DISTINCT(plapa.id_plan_pago)'; 
-               v_filtro = ' (lower(plapa.estado)!=''borrador'' ) and ';
+              
+                IF p_administrador =1 THEN
+                
+                       --v_filtro = ' (lower(plapa.estado)!=''borrador'' ) and ';
+                
+               END IF;
             
             ELSE
             
@@ -270,7 +286,8 @@ BEGIN
 			
 			--Definicion de la respuesta		    
 			v_consulta:=v_consulta||v_parametros.filtro;
-
+         
+            raise notice '% .',v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 

@@ -95,7 +95,7 @@ BEGIN
            
            END IF;
            
-            IF v_estado != 'borrador' THEN
+            IF v_estado = 'devengado'  or v_estado = 'pagado' or v_estado = 'pendiente' THEN
            
              raise exception 'Solo puede editarce cuotas en estado  borrador';
            
