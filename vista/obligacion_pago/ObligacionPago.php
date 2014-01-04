@@ -51,6 +51,21 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                 handler : this.onBtnVerifPresup,
                 tooltip : '<b>Verificación de la disponibilidad presupuestaria</b>'
             });
+        
+        this.addButton('diagrama_gantt',{text:'Gant',iconCls: 'bgantt',disabled:true,handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
+  
+        function diagramGantt(){            
+            var data=this.sm.getSelected().data.id_proceso_wf;
+            Phx.CP.loadingShow();
+            Ext.Ajax.request({
+                url:'../../sis_workflow/control/ProcesoWf/diagramaGanttTramite',
+                params:{'id_proceso_wf':data},
+                success:this.successExport,
+                failure: this.conexionFailure,
+                timeout:this.timeout,
+                scope:this
+            });         
+        }
 	
 	
 	},
@@ -792,6 +807,8 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
               }
               
           }
+          this.getBoton('diagrama_gantt').enable();
+          
      },
      
      
@@ -802,6 +819,8 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             this.getBoton('ant_estado').disable();
             this.getBoton('reporte_com_ejec_pag').disable();
 			this.getBoton('reporte_plan_pago').disable();
+			this.getBoton('diagrama_gantt').disable();
+			
 			//Inhabilita el reporte de disponibilidad
             this.getBoton('btnVerifPresup').disable();
         }

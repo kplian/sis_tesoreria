@@ -63,6 +63,22 @@ Phx.vista.PlanPagoVb = {
        this.iniciarEventos();
        
        this.addButton('SolDevPag',{text:'Solicitar Devengado/Pago',iconCls: 'bpagar',disabled:true,handler:this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente, devengado o pago  '});
+       
+       
+       this.addButton('diagrama_gantt',{text:'Gant',iconCls: 'bgantt',disabled:true,handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
+  
+       function diagramGantt(){            
+            var data=this.sm.getSelected().data.id_proceso_wf;
+            Phx.CP.loadingShow();
+            Ext.Ajax.request({
+                url:'../../sis_workflow/control/ProcesoWf/diagramaGanttTramite',
+                params:{'id_proceso_wf':data},
+                success:this.successExport,
+                failure: this.conexionFailure,
+                timeout:this.timeout,
+                scope:this
+            });         
+        } 
         
        
        this.crearFormularioEstados();
@@ -412,12 +428,14 @@ Phx.vista.PlanPagoVb = {
                        
                }
                this.getBoton('SolPlanPago').enable(); 
+               
          } 
          else{
             this.desBotoneshistorico();
          } 
          
          this.menuAdq.enable();
+         this.getBoton('diagrama_gantt').enable();
            
      },
     
@@ -429,6 +447,8 @@ Phx.vista.PlanPagoVb = {
            this.getBoton('sig_estado').disable();
            this.getBoton('SolDevPag').disable();
            this.getBoton('SolPlanPago').disable();
+           this.getBoton('diagrama_gantt').disable();
+           
            this.menuAdq.disable();
            
            
