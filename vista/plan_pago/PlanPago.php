@@ -24,19 +24,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         
 		this.addButton('SolPlanPago',{text:'Sol. Plan Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnSolPlanPago,tooltip: '<b>Solicitud Plan Pago</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
 		
-		//Eventos
-      	this.Cmp.id_cuenta_bancaria.on('select',function(a,b,c){
-	      	this.Cmp.id_cuenta_bancaria_mov.setValue('');
-	      	this.Cmp.id_cuenta_bancaria_mov.store.baseParams.id_cuenta_bancaria = this.Cmp.id_cuenta_bancaria.getValue();
-	      	Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: this.Cmp.id_cuenta_bancaria.getValue()})
-	        this.Cmp.id_cuenta_bancaria_mov.modificado=true;
-		},this);
-            
-		this.Cmp.fecha_tentativa.on('blur',function(a){
-	    	this.Cmp.id_cuenta_bancaria_mov.setValue('');
-	      	Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{fecha: this.Cmp.fecha_tentativa.getValue()})
-	      	this.Cmp.id_cuenta_bancaria_mov.modificado=true;
-	    },this);      
+		    
        
 		
 	},
@@ -1196,8 +1184,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             this.ocultarComponente(this.Cmp.forma_pago);
             
                       
-            this.Cmp.id_cuenta_bancaria.disable()
-            this.ocultarComponente(this.Cmp.id_cuenta_bancaria);
+            
             
             this.Cmp.nro_cheque.disable()
             this.ocultarComponente(this.Cmp.nro_cheque);
@@ -1205,9 +1192,16 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             this.Cmp.nro_cuenta_bancaria.disable()
             this.ocultarComponente(this.Cmp.nro_cuenta_bancaria);
             
+            //RCM, deshabilita deposito
+            if(this.Cmp.id_cuenta_bancaria_mov){
+               this.Cmp.id_cuenta_bancaria_mov.disable()
+               this.ocultarComponente(this.Cmp.id_cuenta_bancaria_mov);
+               this.Cmp.id_cuenta_bancaria.disable()
+               this.ocultarComponente(this.Cmp.id_cuenta_bancaria);
+                
+            }
                        
-            this.Cmp.id_cuenta_bancaria_mov.disable()
-            this.ocultarComponente(this.Cmp.id_cuenta_bancaria_mov);
+            
             
             this.deshabilitarDescuentos()
             
@@ -1223,8 +1217,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             this.Cmp.forma_pago.enable();
             this.mostrarComponente(this.Cmp.forma_pago);
             
-            this.Cmp.id_cuenta_bancaria.enable()
-            this.mostrarComponente(this.Cmp.id_cuenta_bancaria);
+            
             
             this.Cmp.nro_cheque.enable()
             this.mostrarComponente(this.Cmp.nro_cheque);
@@ -1232,8 +1225,13 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             this.Cmp.nro_cuenta_bancaria.enable()
             this.mostrarComponente(this.Cmp.nro_cuenta_bancaria);
             
-            this.Cmp.id_cuenta_bancaria_mov.enable()
-            this.mostrarComponente(this.Cmp.id_cuenta_bancaria_mov);
+            //RCM, habilita deposito
+            if(this.Cmp.id_cuenta_bancaria_mov){
+               this.Cmp.id_cuenta_bancaria_mov.enable()
+               this.mostrarComponente(this.Cmp.id_cuenta_bancaria_mov);
+               this.Cmp.id_cuenta_bancaria.enable()
+               this.mostrarComponente(this.Cmp.id_cuenta_bancaria);
+            }
             
             this.habilitarDescuentos();
             
@@ -1327,7 +1325,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 	},
 	onButtonNew: function(){
 		Phx.vista.PlanPago.superclass.onButtonNew.call(this);
-		this.Cmp.id_cuenta_bancaria_mov.store.baseParams={id_cuenta_bancaria:-1,fecha:new Date()}
+		//this.Cmp.f.store.baseParams={id_cuenta_bancaria:-1,fecha:new Date()}
 	}
 	
 })

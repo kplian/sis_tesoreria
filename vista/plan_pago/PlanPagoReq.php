@@ -110,6 +110,21 @@ Phx.vista.PlanPagoReq = {
                             },this); 
           
         
+        //Eventos
+        this.Cmp.id_cuenta_bancaria.on('select',function(a,b,c){
+            this.Cmp.id_cuenta_bancaria_mov.setValue('');
+            this.Cmp.id_cuenta_bancaria_mov.store.baseParams.id_cuenta_bancaria = this.Cmp.id_cuenta_bancaria.getValue();
+            Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: this.Cmp.id_cuenta_bancaria.getValue()})
+            this.Cmp.id_cuenta_bancaria_mov.modificado=true;
+        },this);
+            
+        this.Cmp.fecha_tentativa.on('blur',function(a){
+            this.Cmp.id_cuenta_bancaria_mov.setValue('');
+            Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{fecha: this.Cmp.fecha_tentativa.getValue()})
+            this.Cmp.id_cuenta_bancaria_mov.modificado=true;
+        },this);
+        
+        
       /* this.cmpFechaDev.on('change',function(com,dat){
               
               if(this.maestro.tipo_moneda=='base'){
@@ -210,7 +225,7 @@ Phx.vista.PlanPagoReq = {
         
          var data = this.getSelectedData();
          if(data){
-                console.log('data..',data)
+              
              // para habilitar registros de cuotas de pago    
                 if(data.monto_ejecutar_total_mo*1  > data.total_pagado*1  && data.estado =='devengado'){
                     Phx.vista.PlanPagoReq.superclass.onButtonNew.call(this); 
@@ -330,6 +345,9 @@ Phx.vista.PlanPagoReq = {
             //calcular el descuento segun el documento
             this.Cmp.descuento_ley.setValue(0);
             
+            //RCM, resetea store del deposito para no mostrar datos al hacer nuevo
+            this.Cmp.id_cuenta_bancaria_mov.store.baseParams={id_cuenta_bancaria:-1,fecha:new Date()}
+            
             
       },
      
@@ -395,7 +413,20 @@ Phx.vista.PlanPagoReq = {
                 
          }
        
-           this.Cmp.fecha_tentativa.disable();
+           this.Cmp.fecha_tentativa.enable();
+           
+            //RCM, resetea store del deposito para no mostrar datos al hacer nuevo
+            if(this.Cmp.id_cuenta_bancaria.getValue() > 0){
+                this.Cmp.id_cuenta_bancaria_mov.store.baseParams={ id_cuenta_bancaria:-1,
+                                                                   fecha:this.Cmp.fecha_tentativa.getValue()}
+            }
+            else{
+               //RCM, resetea store del deposito para no mostrar datos al hacer nuevo
+               this.Cmp.id_cuenta_bancaria_mov.store.baseParams={id_cuenta_bancaria:-1,fecha:this.Cmp.fecha_tentativa.getValue()}
+            }
+            
+            
+           
            this.Cmp.tipo.disable();
            this.Cmp.tipo_pago.disable(); 
            

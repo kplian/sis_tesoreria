@@ -33,6 +33,8 @@ Phx.vista.PlanPagoVb = {
 	   this.Atributos[this.getIndAtributo('id_cuenta_bancaria')].form=true; 
 	    
 	   this.Atributos[this.getIndAtributo('id_cuenta_bancaria_mov')].form=true; 
+	   
+	   
 	    
 	   //funcionalidad para listado de historicos
        this.historico = 'no';
@@ -60,6 +62,7 @@ Phx.vista.PlanPagoVb = {
 	    
 	    
        Phx.vista.PlanPagoVb.superclass.constructor.call(this,config);
+       
        this.iniciarEventos();
        
        this.addButton('SolDevPag',{text:'Solicitar Devengado/Pago',iconCls: 'bpagar',disabled:true,handler:this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente, devengado o pago  '});
@@ -262,11 +265,23 @@ Phx.vista.PlanPagoVb = {
          }
          
        
-           this.Cmp.fecha_tentativa.disable();
+           this.Cmp.fecha_tentativa.enable();
            this.Cmp.tipo.disable();
            this.Cmp.tipo_pago.disable(); 
            
-            Phx.vista.PlanPagoVb.superclass.onButtonEdit.call(this);
+           Phx.vista.PlanPagoVb.superclass.onButtonEdit.call(this);
+           
+           //RCM, resetea store del deposito para no mostrar datos al hacer nuevo
+           if(this.Cmp.id_cuenta_bancaria.getValue() > 0){
+                this.Cmp.id_cuenta_bancaria_mov.store.baseParams={ id_cuenta_bancaria:-1,
+                                                                   fecha:this.Cmp.fecha_tentativa.getValue()}
+           }
+           else{
+               //RCM, resetea store del deposito para no mostrar datos al hacer nuevo
+               this.Cmp.id_cuenta_bancaria_mov.store.baseParams={id_cuenta_bancaria:-1,fecha:this.Cmp.fecha_tentativa.getValue()}
+            }
+           
+           
            
        },
     
@@ -332,7 +347,22 @@ Phx.vista.PlanPagoVb = {
         this.Cmp.tipo.on('change',function(groupRadio,radio){
                                 this.enableDisable(radio.inputValue);
                             },this); 
-          
+                            
+                            
+        //Eventos
+        this.Cmp.id_cuenta_bancaria.on('select',function(a,b,c){
+            this.Cmp.id_cuenta_bancaria_mov.setValue('');
+            this.Cmp.id_cuenta_bancaria_mov.store.baseParams.id_cuenta_bancaria = this.Cmp.id_cuenta_bancaria.getValue();
+            Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: this.Cmp.id_cuenta_bancaria.getValue()})
+            this.Cmp.id_cuenta_bancaria_mov.modificado=true;
+        },this);
+            
+        this.Cmp.fecha_tentativa.on('blur',function(a){
+            this.Cmp.id_cuenta_bancaria_mov.setValue('');
+            Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{fecha: this.Cmp.fecha_tentativa.getValue()})
+            this.Cmp.id_cuenta_bancaria_mov.modificado=true;
+        },this); 
+         
         
       /* this.cmpFechaDev.on('change',function(com,dat){
               
