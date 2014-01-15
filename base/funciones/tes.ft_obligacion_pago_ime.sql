@@ -203,7 +203,9 @@ BEGIN
                v_id_gestion, 
                v_codigo_tipo_proceso, 
                NULL,
-               v_parametros.id_depto);
+               v_parametros.id_depto,
+               'Obligacion de pago ('||v_num||') '||v_parametros.obs,
+               v_num );
             
            
             -- raise exception 'estado %',v_codigo_estado;

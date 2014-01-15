@@ -87,7 +87,8 @@ BEGIN
       op.id_depto_conta,
       pp.id_cuenta_bancaria_mov,
       pp.nro_cheque,
-      pp.nro_cuenta_bancaria
+      pp.nro_cuenta_bancaria,
+      op.numero
       into
       v_registros
       from  tes.tplan_pago pp
@@ -224,7 +225,11 @@ BEGIN
                      p_id_usuario,
                      v_id_estado_actual, 
                      NULL, 
-                     v_registros.id_depto);
+                     v_registros.id_depto,
+                     ('Solicutd de pago,  OP:'|| v_registros.numero||' cuota nro'||v_nro_cuota),
+                     '',
+                     v_registros.numero||'-'||v_nro_cuota
+                    );
            
            
          	-- 3.1.1) genera la cuota de pago.

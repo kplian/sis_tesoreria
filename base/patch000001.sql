@@ -289,7 +289,7 @@ IS 'cste campo almacena el porcentaje de descuentos de ley, se utiliza para las 
 /***********************************F-SCP-RAC-TES-0-18/09/2013***************************************/
 
 /***********************************I-SCP-RCM-TES-0-05/12/2013***************************************/ 
- 
+ /*
 ALTER TABLE tes.tplan_pago
   ADD COLUMN nro_cheque INTEGER;
 
@@ -303,12 +303,13 @@ COMMENT ON COLUMN tes.tplan_pago.nro_cuenta_bancaria
 IS 'Número de cuenta bancaria para realizar el pago cuando es Transferencia';
 
 ALTER TABLE tes.tplan_pago
-  ADD COLUMN id_cuenta_bancaria_mov integer;
+  ADD COLUMN id_cuenta_bancaria_mov integer;*/
 
 /***********************************F-SCP-RCM-TES-0-05/12/2013***************************************/
 
 
 /***********************************I-SCP-RCM-TES-0-12/12/2013***************************************/
+
 CREATE TABLE tes.tcuenta_bancaria_mov (
   id_cuenta_bancaria_mov SERIAL, 
   id_cuenta_bancaria INTEGER NOT NULL, 

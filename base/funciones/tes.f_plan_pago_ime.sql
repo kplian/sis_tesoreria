@@ -190,7 +190,8 @@ BEGIN
             op.id_estado_wf,
             op.estado,
             op.id_depto,
-            op.pago_variable
+            op.pago_variable,
+            op.numero
             
           into v_registros  
            from tes.tobligacion_pago op
@@ -312,7 +313,11 @@ BEGIN
                                p_id_usuario,
                                v_id_estado_actual, 
                                NULL, 
-                               v_registros.id_depto);
+                               v_registros.id_depto,
+                              ('Solicutd de devengado para la OP:'|| v_registros.numero||' cuota nro'||v_nro_cuota),
+                               '',
+                                v_registros.numero||'-'||v_nro_cuota
+                           );
                   
       
                     
@@ -333,7 +338,11 @@ BEGIN
                            p_id_usuario,
                            v_registros.id_estado_wf, 
                            NULL, 
-                           v_registros.id_depto);
+                           v_registros.id_depto,
+                           ('Solicutd de devengado para la OP:'|| v_registros.numero||' cuota nro'||v_nro_cuota),
+                           '',
+                           v_registros.numero||'-'||v_nro_cuota
+                         );
           
           
           ELSE
@@ -561,7 +570,8 @@ BEGIN
             pp.fecha_tentativa,
             op.id_depto,
             op.pago_variable,
-            pp.id_plantilla
+            pp.id_plantilla,
+            op.numero
             
           into v_registros  
            from tes.tplan_pago pp
@@ -650,7 +660,11 @@ BEGIN
                      p_id_usuario,
                      v_registros.id_estado_wf, 
                      NULL, 
-                     v_registros.id_depto);
+                     v_registros.id_depto,
+                     ('Solicutd de Pago, OP:'|| v_registros.numero||' cuota nro'||v_nro_cuota),
+                      '',
+                     v_registros.numero||'-'||v_nro_cuota
+                     );
           
         
             
