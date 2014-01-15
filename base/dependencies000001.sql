@@ -462,3 +462,15 @@ AS
        JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor;
        
 /***********************************F-DEP-RAC-TES-0-16/12/2013***************************************/
+
+/***********************************I-DEP-RCM-TES-0-16/01/2014***************************************/
+ALTER TABLE tes.tcuenta_bancaria
+  ADD CONSTRAINT fk_tcuenta_bancaria__id_moneda FOREIGN KEY (id_moneda)
+    REFERENCES param.tmoneda(id_moneda)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+    
+DROP TRIGGER tr_tcuenta_bancaria__endesis ON tes.tcuenta_bancaria;
+    
+/***********************************F-DEP-RCM-TES-0-16/01/2014***************************************/
