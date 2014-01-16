@@ -39,6 +39,16 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
         this.addButton('reporte_com_ejec_pag',{text:'Rep.',iconCls: 'bpdf32',disabled:true,handler:this.repComEjePag,tooltip: '<b>Reporte</b><p>Reporte Obligacion de Pago</p>'});
         this.addButton('reporte_plan_pago',{text:'Planes de Pago',iconCls: 'bpdf32',disabled:true,handler:this.repPlanPago,tooltip: '<b>Reporte Plan Pago</b><p>Reporte Planes de Pago</p>'});
         this.TabPanelSouth.get(1).disable()
+        this.addButton('btnChequeoDocumentosWf',
+            {
+                text: 'Chequear Documentos',
+                iconCls: 'bchecklist',
+                disabled: true,
+                handler: this.loadCheckDocumentosSolWf,
+                tooltip: '<b>Documentos de la Solicitud</b><br/>Subir los documetos requeridos en la solicitud seleccionada.'
+            }
+        );
+        
         
         //RCM: Se agrega menú de reportes de adquisiciones
         this.addBotones();
@@ -82,6 +92,21 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 			type:'Field',
 			form:true 
 		},
+        {
+            config:{
+                name: 'num_tramite',
+                fieldLabel: 'Num. Tramite',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 150,
+                maxLength:200
+            },
+            type:'TextField',
+            filters:{pfiltro:'obpg.num_tramite',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
 		{
 		config:{
 				name: 'estado',
@@ -351,22 +376,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 			id_grupo:1,
 			grid:false,
 			form:false
-		},
-        {
-            config:{
-                name: 'num_tramite',
-                fieldLabel: 'Num. Tramite',
-                allowBlank: true,
-                anchor: '80%',
-                gwidth: 100,
-                maxLength:200
-            },
-            type:'TextField',
-            filters:{pfiltro:'obpg.num_tramite',type:'string'},
-            id_grupo:1,
-            grid:true,
-            form:false
-        },		
+		},		
 		{
 			config:{
 				labelSeparator:'Estado Reg.',
@@ -808,6 +818,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
               
           }
           this.getBoton('diagrama_gantt').enable();
+          this.getBoton('btnChequeoDocumentosWf').enable();
           
      },
      
@@ -820,6 +831,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             this.getBoton('reporte_com_ejec_pag').disable();
 			this.getBoton('reporte_plan_pago').disable();
 			this.getBoton('diagrama_gantt').disable();
+			this.getBoton('btnChequeoDocumentosWf').disable();
 			
 			//Inhabilita el reporte de disponibilidad
             this.getBoton('btnVerifPresup').disable();
@@ -853,6 +865,22 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
     bdel:true,
     bedit:true,
 	bsave:false,
+	
+	loadCheckDocumentosSolWf:function() {
+            var rec=this.sm.getSelected();
+            rec.data.nombreVista = this.nombreVista;
+            Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
+                    'Chequear documento del WF',
+                    {
+                        width:700,
+                        height:450
+                    },
+                    rec.data,
+                    this.idContenedor,
+                    'DocumentoWf'
+        )
+    },
+	
 	addBotones: function() {
         this.menuAdq = new Ext.Toolbar.SplitButton({
             id: 'btn-adq-' + this.idContenedor,
@@ -879,12 +907,6 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                 tooltip: '<b>Reporte de la Solicitud de Compra</b>',
                 handler:this.onBtnSol,
                 scope: this
-            }, {
-                id:'btn-docsol-' + this.idContenedor,
-                text: 'Documentos',
-                tooltip: '<b>Documentos anexos a la solicitud de compra</b>',
-                handler:this.onBtnDocSol,
-                scope: this
             }
         ]}
         });
@@ -902,7 +924,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             this.auxFuncion='onBtnAdq';
             this.obtenerIDS(data);
         } else {
-            alert('Seleccione un registro y vuelta a intentarlo');
+            alert('Seleccione un registro y vuelva a intentarlo');
         }
     },
     
@@ -915,7 +937,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             this.auxFuncion='onBtnCot';
             this.obtenerIDS(data);
         } else {
-            alert('Seleccione un registro y vuelta a intentarlo');
+            alert('Seleccione un registro y vuelva a intentarlo');
         }
     },
     
@@ -928,7 +950,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             this.auxFuncion='onBtnSol';
             this.obtenerIDS(data);
         } else {
-            alert('Seleccione un registro y vuelta a intentarlo');
+            alert('Seleccione un registro y vuelva a intentarlo');
         }
     },
     
@@ -941,21 +963,10 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             this.auxFuncion='onBtnProc';
             this.obtenerIDS(data);
         } else {
-            alert('Seleccione un registro y vuelta a intentarlo');
+            alert('Seleccione un registro y vuelva a intentarlo');
         }
     },
-     onBtnDocSol: function(){
-        Phx.CP.loadingShow();
-        var rec = this.sm.getSelected();
-        var data = rec.data;
-        if(data){
-            //Obtiene los IDS
-            this.auxFuncion='onBtnDocSol';
-            this.obtenerIDS(data);
-        } else {
-            alert('Seleccione un registro y vuelta a intentarlo');
-        }
-    },
+    
     
     obtenerIDS: function(data){
         Ext.Ajax.request({
@@ -1021,18 +1032,9 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                      scope:this
                  });
                  
-             } else if(this.auxFuncion=='onBtnDocSol'){   
-                Phx.CP.loadWindows('../../../sis_adquisiciones/vista/documento_sol/ChequeoDocumentoSol.php',
-                            'Chequeo de documentos de la solicitud',
-                            {
-                                width:700,
-                                height:450
-                            },
-                            {'id_solicitud':this.id_solicitud},  
-                            this.idContenedor,
-                            'ChequeoDocumentoSol')      
-                
-            } else{
+             } 
+            
+            else{
                 alert('Reporte no reconocido');
             }
 
