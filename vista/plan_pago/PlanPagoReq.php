@@ -543,6 +543,7 @@ Phx.vista.PlanPagoReq = {
                this.getBoton('SincPresu').disable();
           }
           this.getBoton('btnVerifPresup').enable();
+          this.getBoton('btnChequeoDocumentosWf').enable();
      },
      
       liberaMenu:function(){
@@ -553,7 +554,8 @@ Phx.vista.PlanPagoReq = {
            this.getBoton('SolPlanPago').disable();
            this.getBoton('btnVerifPresup').disable();
            this.getBoton('ant_estado').disable();
-           this.getBoton('sig_estado').disable();  
+           this.getBoton('sig_estado').disable(); 
+           this.getBoton('btnChequeoDocumentosWf').disable(); 
           }
        return tb
     }, 

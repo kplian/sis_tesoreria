@@ -372,3 +372,21 @@ CREATE TABLE tes.tcajero (
 ) INHERITS (pxp.tbase)
 WITHOUT OIDS;
 /***********************************F-SCP-ECR-TES-0-20/12/2013***************************************/
+
+
+
+/***********************************I-SCP-RAC-TES-0-17/12/2014***************************************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tcuenta_bancaria
+  ADD COLUMN centro VARCHAR(4) DEFAULT 'si' NOT NULL;
+
+COMMENT ON COLUMN tes.tcuenta_bancaria.centro
+IS 'Identifica si es de la regional central o no. Viene por la integracionde cuenta bancaria endesis';
+
+
+/***********************************F-SCP-RAC-TES-0-17/12/2014***************************************/
+
+
+

@@ -275,7 +275,7 @@ BEGIN
             END IF;
             
             
-            --  TO DO, actualiza el id_comprobante en el registro del plan de pago
+            --  actualiza el id_comprobante en el registro del plan de pago
             
             
             update tes.tplan_pago set

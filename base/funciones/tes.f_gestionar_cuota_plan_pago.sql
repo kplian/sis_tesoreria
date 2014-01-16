@@ -226,9 +226,9 @@ BEGIN
                      v_id_estado_actual, 
                      NULL, 
                      v_registros.id_depto,
-                     ('Solicutd de pago,  OP:'|| v_registros.numero||' cuota nro'||v_nro_cuota),
+                     ('Solicutd de pago,  OP:'|| v_registros.numero||' cuota nro'||v_nro_cuota::varchar),
                      '',
-                     v_registros.numero||'-'||v_nro_cuota
+                     v_registros.numero||'-'||v_nro_cuota::varchar
                     );
            
            

@@ -24,6 +24,15 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         
 		this.addButton('SolPlanPago',{text:'Sol. Plan Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnSolPlanPago,tooltip: '<b>Solicitud Plan Pago</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
 		
+		this.addButton('btnChequeoDocumentosWf',
+            {
+                text: 'Chequear Documentos',
+                iconCls: 'bchecklist',
+                disabled: true,
+                handler: this.loadCheckDocumentosSolWf,
+                tooltip: '<b>Documentos de la Solicitud</b><br/>Subir los documetos requeridos en la solicitud seleccionada.'
+            }
+        );
 		    
        
 		
@@ -1319,6 +1328,20 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         this.Cmp.monto_ejecutar_total_mo.setValue(eje>0?eje:0);
      }, 
     
+     loadCheckDocumentosSolWf:function() {
+            var rec=this.sm.getSelected();
+            rec.data.nombreVista = this.nombreVista;
+            Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
+                    'Chequear documento del WF',
+                    {
+                        width:700,
+                        height:450
+                    },
+                    rec.data,
+                    this.idContenedor,
+                    'DocumentoWf'
+        )
+    },
     sortInfo:{
 		field: 'nro_cuota',
 		direction: 'ASC'

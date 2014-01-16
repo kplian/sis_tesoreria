@@ -110,6 +110,8 @@ DECLARE
     v_nro_cheque integer;
     
     v_nro_cuenta_bancaria  varchar;
+    
+    v_centro varchar;
   
     
     
@@ -242,6 +244,10 @@ BEGIN
               raise exception ' Ni  el monto a ejecutar   ni el liquido pagable  puede ser menor a cero';
           END IF;  
            
+          
+         -- define numero de cuota
+          
+         v_nro_cuota = floor(COALESCE(v_nro_cuota,0))+1; 
             
          -- raise exception 'xxx %',v_registros;
            
@@ -301,6 +307,8 @@ BEGIN
                       -- raise exception 'xxxxxxxxxxxxx  %', v_id_estado_actual ;
                      --dispara estado para plan de pagos 
                     
+                   
+                    
                      SELECT
                                ps_id_proceso_wf,
                                ps_id_estado_wf,
@@ -314,9 +322,9 @@ BEGIN
                                v_id_estado_actual, 
                                NULL, 
                                v_registros.id_depto,
-                              ('Solicutd de devengado para la OP:'|| v_registros.numero||' cuota nro'||v_nro_cuota),
+                              ('Solicutd de devengado para la OP:'|| COALESCE(v_registros.numero,'s/n')||' cuota nro'||v_nro_cuota::varchar),
                                '',
-                                v_registros.numero||'-'||v_nro_cuota
+                               COALESCE(v_registros.numero,'s/n')||'-N# '||v_nro_cuota::varchar
                            );
                   
       
@@ -325,6 +333,8 @@ BEGIN
           ELSEIF   v_registros.estado = 'en_pago' THEN
           
                  --registra estado de cotizacion
+                 
+                 
           
                  SELECT
                            ps_id_proceso_wf,
@@ -339,9 +349,9 @@ BEGIN
                            v_registros.id_estado_wf, 
                            NULL, 
                            v_registros.id_depto,
-                           ('Solicutd de devengado para la OP:'|| v_registros.numero||' cuota nro'||v_nro_cuota),
+                           ('Solicutd de devengado para la OP:'|| v_registros.numero||' cuota nro'||v_nro_cuota::varchar),
                            '',
-                           v_registros.numero||'-'||v_nro_cuota
+                           v_registros.numero||'-N# '||v_nro_cuota::varchar
                          );
           
           
@@ -353,12 +363,10 @@ BEGIN
           END IF;
         
         
-        
+      
          
            
-           -- define numero de cuota
           
-           v_nro_cuota = floor(COALESCE(v_nro_cuota,0))+1;
            
            --actualiza la cuota vigente en la obligacion
            update tes.tobligacion_pago  p set 
@@ -661,9 +669,9 @@ BEGIN
                      v_registros.id_estado_wf, 
                      NULL, 
                      v_registros.id_depto,
-                     ('Solicutd de Pago, OP:'|| v_registros.numero||' cuota nro'||v_nro_cuota),
+                     ('Solicutd de Pago, OP:'|| v_registros.numero||' cuota nro'||v_nro_cuota::varchar),
                       '',
-                     v_registros.numero||'-'||v_nro_cuota
+                     v_registros.numero||'-N# '||v_nro_cuota
                      );
           
         
@@ -1268,9 +1276,25 @@ BEGIN
                --validacion de deposito, (solo BOA, puede retirarse)
                IF v_registros.id_cuenta_bancaria_mov is NULL THEN
                
+                    --TODO verificar si la cuenta es de centro
+                    
+                   select 
+                       cb.centro
+                   into 
+                       v_centro 
+                   from tes.tcuenta_bancaria cb
+                   where cb.id_cuenta_bancaria = v_registros.id_cuenta_bancaria;
+                    
+                    
+                    
                     IF  v_registros.nro_cuenta_bancaria  = '' or  v_registros.nro_cuenta_bancaria is NULL THEN
                       
-                         raise exception  'Tiene que especificar el deposito  origen de los fondos';
+                         IF  v_centro = 'no' THEN
+                          
+                          raise exception  'Tiene que especificar el deposito  origen de los fondos';
+                         
+                         END IF;
+                         
                       
                     END IF;
                

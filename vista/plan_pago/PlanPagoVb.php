@@ -466,6 +466,7 @@ Phx.vista.PlanPagoVb = {
          
          this.menuAdq.enable();
          this.getBoton('diagrama_gantt').enable();
+         this.getBoton('btnChequeoDocumentosWf').enable();
            
      },
     
@@ -478,6 +479,7 @@ Phx.vista.PlanPagoVb = {
            this.getBoton('SolDevPag').disable();
            this.getBoton('SolPlanPago').disable();
            this.getBoton('diagrama_gantt').disable();
+           this.getBoton('btnChequeoDocumentosWf').disable();
            
            this.menuAdq.disable();
            
