@@ -390,3 +390,16 @@ IS 'Identifica si es de la regional central o no. Viene por la integracionde cue
 
 
 
+/***********************************I-SCP-RAC-TES-0-29/01/2014***************************************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_det
+  ADD COLUMN revertido_mo NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_det
+  ADD COLUMN incrementado_mo NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+/***********************************F-SCP-RAC-TES-0-29/01/2014***************************************/

@@ -51,7 +51,6 @@ DECLARE
   v_comprometido numeric;
   v_ejecutado    numeric;
   v_registros_pro record;
-  v_aux_mb numeric;
 
   
 
@@ -77,10 +76,8 @@ BEGIN
                               op.id_obligacion_pago,
                               opd.id_partida,
                               opd.monto_pago_mb,
-                              opd.monto_pago_mo,
                               p.id_presupuesto,
-                              op.comprometido,
-                              op.id_moneda
+                              op.comprometido
                               
                               FROM  tes.tobligacion_pago  op
                               INNER JOIN tes.tobligacion_det opd  on  opd.id_obligacion_pago = op.id_obligacion_pago and opd.estado_reg = 'activo'
@@ -104,8 +101,8 @@ BEGIN
                     va_id_presupuesto[v_i] = v_registros.id_presupuesto;
                     va_id_partida[v_i]= v_registros.id_partida;
                     va_momento[v_i]	= 1; --el momento 1 es el comprometido
-                    va_monto[v_i]  = v_registros.monto_pago_mo; --v_registros.monto_pago_mb;
-                    va_id_moneda[v_i]  = v_registros.id_moneda; --v_id_moneda_base;
+                    va_monto[v_i]  = v_registros.monto_pago_mb;
+                    va_id_moneda[v_i]  = v_id_moneda_base;
                   
                     va_columna_relacion[v_i]= 'id_obligacion_pago';
                     va_fk_llave[v_i] = v_registros.id_obligacion_pago;
@@ -140,8 +137,7 @@ BEGIN
                          id_partida_ejecucion_com = va_resp_ges[v_cont],
                          fecha_mod = now(),
                          id_usuario_mod = p_id_usuario,
-                         revertido_mb = 0,     -- inicializa el monto de reversion 
-                         revertido_mo = 0     -- inicializa el monto de reversion 
+                         revertido_mb = 0     -- inicializa el monto de reversion 
                       where opd.id_obligacion_det  =  va_id_obligacion_det[v_cont];
                    
                      
@@ -165,13 +161,10 @@ BEGIN
                               op.id_obligacion_pago,
                               opd.id_partida,
                               opd.monto_pago_mb,
-                              opd.monto_pago_mo,
                               p.id_presupuesto,
                               op.comprometido,
                               opd.revertido_mb,
-                              opd.revertido_mo,
-                              opd.id_partida_ejecucion_com,
-                              op.id_moneda
+                              opd.id_partida_ejecucion_com
                               
                               FROM  tes.tobligacion_pago  op
                               INNER JOIN tes.tobligacion_det opd  on  opd.id_obligacion_pago = op.id_obligacion_pago and opd.estado_reg = 'activo'
@@ -194,7 +187,7 @@ BEGIN
                          into 
                              v_comprometido,
                              v_ejecutado
-                     FROM pre.f_verificar_com_eje_pag(v_registros.id_partida_ejecucion_com,v_registros.id_moneda);
+                     FROM pre.f_verificar_com_eje_pag(v_registros.id_partida_ejecucion_com, v_id_moneda_base);
                 
                      
                      
@@ -207,7 +200,7 @@ BEGIN
                         va_id_partida[v_i]= v_registros.id_partida;
                         va_momento[v_i]	= 2; --el momento 2 con signo positivo es revertir
                         va_monto[v_i]  = v_comprometido*-1;  -- considera la posibilidad de que a este item se le aya revertido algun monto
-                        va_id_moneda[v_i]  = v_registros.id_moneda;
+                        va_id_moneda[v_i]  = v_id_moneda_base;
                         va_id_partida_ejecucion[v_i]= v_registros.id_partida_ejecucion_com;
                         va_columna_relacion[v_i]= 'id_obligacion_pago';
                         va_fk_llave[v_i] = v_registros.id_obligacion_pago;
@@ -248,11 +241,9 @@ BEGIN
                                    od.id_partida,
                                    p.id_presupuesto,
                                    od.id_obligacion_pago,
-                                   od.id_obligacion_det,
-                                   op.id_moneda
+                                   od.id_obligacion_det
                                  from  tes.tprorrateo pro
                                  inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det   and od.estado_reg = 'activo'
-                                 inner join tes.tobligacion_pago op on op.id_obligacion_pago = od.id_obligacion_pago
                                  INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = od.id_centro_costo  
                                  where  pro.id_plan_pago = p_id_plan_pago
                                    and pro.estado_reg = 'activo') LOOP
@@ -265,13 +256,13 @@ BEGIN
                            into 
                                v_comprometido,
                                v_ejecutado
-                        FROM pre.f_verificar_com_eje_pag(v_registros_pro.id_partida_ejecucion_com, v_registros_pro.id_moneda);
+                        FROM pre.f_verificar_com_eje_pag(v_registros_pro.id_partida_ejecucion_com, v_id_moneda_base);
                 
                    
                       --verifica si el presupuesto comprometido sobrante alcanza para devengar
-                      IF  ( v_comprometido - v_ejecutado)  <  v_registros_pro.monto_ejecutar_mo   THEN
+                      IF  ( v_comprometido - v_ejecutado)  <  v_registros_pro.monto_ejecutar_mb   THEN
                          
-                         v_aux =  v_registros_pro.monto_ejecutar_mo -  (v_comprometido-v_ejecutado);
+                         v_aux =  v_registros_pro.monto_ejecutar_mb -  (v_comprometido-v_ejecutado);
                      
                          --armamos los array para enviar a presupuestos          
                             IF v_aux > 0 THEN
@@ -282,27 +273,17 @@ BEGIN
                                 va_id_partida[v_i]= v_registros_pro.id_partida;
                                 va_momento[v_i]	= 2; --el momento 2 con signo positivo es revertir
                                 va_monto[v_i]  = v_aux;  --  con signo positivo significa incremento presupuestario 
-                                va_id_moneda[v_i]  = v_registros_pro.id_moneda;
+                                va_id_moneda[v_i]  = v_id_moneda_base;
                                 va_id_partida_ejecucion[v_i]= v_registros_pro.id_partida_ejecucion_com;
                                 va_columna_relacion[v_i]= 'id_obligacion_pago';
                                 va_fk_llave[v_i] = v_registros_pro.id_obligacion_pago;
                                 va_id_obligacion_det[v_i]= v_registros_pro.id_obligacion_det;
                                 va_fecha[v_i]=now()::date;
                            
-                                v_aux_mb = param.f_convertir_moneda(
-                                          v_registros.id_moneda, 
-                                          NULL,   --por defecto moenda base
-                                          v_aux, 
-                                          va_fecha[v_i], 
-                                          'O',-- tipo oficial, venta, compra 
-                                          NULL);
-                         
-                         
-                              --1.2) actualizar el incremento en obligacion det 
+                               --1.2) actualizar el incremento en obligacion det 
                             
                               update tes.tobligacion_det od set
-                              incrementado_mb = COALESCE(incrementado_mb,0) + v_aux_mb,
-                              incrementado_mo = COALESCE(incrementado_mb,0) + v_aux
+                              incrementado_mb = COALESCE(incrementado_mb,0) + v_aux
                               where  od.id_obligacion_det= v_registros_pro.id_obligacion_det;
                             
                             END IF;

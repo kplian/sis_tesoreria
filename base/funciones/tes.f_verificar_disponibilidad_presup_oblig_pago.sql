@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_verificar_disponibilidad_presup_oblig_pago (
   p_id_plan_pago integer
 )
@@ -42,13 +44,15 @@ BEGIN
     
     	--Obtiene los datos de la transacción
         v_cont = 1;
-        for v_dat in (select
-                      obl.id_partida,
-                      obl.id_centro_costo,
-                      param.f_get_moneda_base() as id_moneda,
-                      sum(pro.monto_ejecutar_mb) as importe
+        for v_dat in (
+                      select
+                        obl.id_partida,
+                        obl.id_centro_costo,
+                        op.id_moneda,
+                        sum(pro.monto_ejecutar_mo) as importe
                       from tes.tplan_pago pla
                       inner join tes.tprorrateo pro on pro.id_plan_pago = pla.id_plan_pago
+                      inner join tes.tobligacion_pago op on op.id_obligacion_pago = pla.id_obligacion_pago
                       inner join tes.tobligacion_det obl on obl.id_obligacion_det = pro.id_obligacion_det
                       where pla.id_plan_pago = p_id_plan_pago
                       group by obl.id_partida,obl.id_centro_costo) loop

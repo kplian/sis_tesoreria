@@ -480,7 +480,9 @@ DROP TRIGGER tr_tcuenta_bancaria__endesis ON tes.tcuenta_bancaria;
 
 /***********************************I-DEP-RAC-TES-0-28/01/2014****************************************/
 
+--------------- SQL ---------------
 
+DROP VIEW tes.vcomp_devtesprov_det_plan_pago;
 
 CREATE OR REPLACE VIEW tes.vcomp_devtesprov_det_plan_pago(
     id_concepto_ingas,
