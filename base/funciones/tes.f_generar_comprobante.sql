@@ -74,7 +74,8 @@ BEGIN
            pp.nro_cuota,
            pp.id_obligacion_pago,
            op.id_depto_conta,
-           op.id_obligacion_pago
+           op.id_obligacion_pago,
+           op.id_moneda
            into
            v_registros
            FROM tes.tplan_pago pp
@@ -170,11 +171,11 @@ BEGIN
                            into 
                                v_comprometido,
                                v_ejecutado
-                        FROM pre.f_verificar_com_eje_pag(v_registros_pro.id_partida_ejecucion_com, v_id_moneda_base);
+                        FROM pre.f_verificar_com_eje_pag(v_registros_pro.id_partida_ejecucion_com, v_registros.id_moneda);
                 
                    
                       --verifica si el presupuesto comprometido sobrante alcanza para devengar
-                      IF  ( v_comprometido - v_ejecutado)  <  v_registros_pro.monto_ejecutar_mb   THEN
+                      IF  ( v_comprometido - v_ejecutado)  <  v_registros_pro.monto_ejecutar_mo   THEN
                          
                          -- raise EXCEPTION  '% - % = % < %',v_comprometido,v_ejecutado,v_comprometido - v_ejecutado, v_registros_pro.monto_ejecutar_mb;
                     
@@ -186,7 +187,7 @@ BEGIN
                          where cig.id_concepto_ingas  = v_registros_pro.id_concepto_ingas;
                          
                           --sinc_presupuesto
-                          v_mensaje_verificacion =v_mensaje_verificacion ||v_cont::varchar||') '||v_desc_ingas||'('||  substr(v_registros_pro.descripcion, 0, 15)   ||'...)'||' monto faltante ' || (v_registros_pro.monto_ejecutar_mb - (v_comprometido - v_ejecutado))::varchar||' \n';
+                          v_mensaje_verificacion =v_mensaje_verificacion ||v_cont::varchar||') '||v_desc_ingas||'('||  substr(v_registros_pro.descripcion, 0, 15)   ||'...)'||' monto faltante ' || (v_registros_pro.monto_ejecutar_mo - (v_comprometido - v_ejecutado))::varchar||' \n';
                           v_sw_verificacion=false;
                           v_cont = v_cont +1;
                      
@@ -205,7 +206,7 @@ BEGIN
                       
                       
                      v_respuesta[1]='FALSE'; 
-                     v_respuesta[2]='Falta Presupuesto según el siguiente detalle (los montos estan en moneda base) :\n '||v_mensaje_verificacion;
+                     v_respuesta[2]='Falta Presupuesto según el siguiente detalle :\n '||v_mensaje_verificacion;
                      RETURN v_respuesta;
                   ELSE
                   
