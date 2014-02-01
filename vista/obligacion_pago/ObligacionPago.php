@@ -491,8 +491,8 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 	],
 	
 	sortInfo:{
-		field: 'id_obligacion_pago',
-		direction: 'ASC'
+		field: 'obpg.fecha_reg',
+		direction: 'DESC'
 	},
 	
 	repComEjePag: function(){
