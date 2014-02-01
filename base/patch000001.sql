@@ -289,7 +289,7 @@ IS 'cste campo almacena el porcentaje de descuentos de ley, se utiliza para las 
 /***********************************F-SCP-RAC-TES-0-18/09/2013***************************************/
 
 /***********************************I-SCP-RCM-TES-0-05/12/2013***************************************/ 
- /*
+ 
 ALTER TABLE tes.tplan_pago
   ADD COLUMN nro_cheque INTEGER;
 
@@ -303,7 +303,7 @@ COMMENT ON COLUMN tes.tplan_pago.nro_cuenta_bancaria
 IS 'Número de cuenta bancaria para realizar el pago cuando es Transferencia';
 
 ALTER TABLE tes.tplan_pago
-  ADD COLUMN id_cuenta_bancaria_mov integer;*/
+  ADD COLUMN id_cuenta_bancaria_mov integer;
 
 /***********************************F-SCP-RCM-TES-0-05/12/2013***************************************/
 
@@ -337,14 +337,6 @@ COMMENT ON COLUMN tes.tcuenta_bancaria_mov.tipo
 IS 'tipo in (''cheque'',''transferencia'')';
 
 /***********************************F-SCP-RCM-TES-0-12/12/2013***************************************/
-
-/***********************************I-SCP-RCM-TES-0-23/12/2013***************************************/
-CREATE TRIGGER tr_tcuenta_bancaria__endesis
-AFTER INSERT OR UPDATE OR DELETE 
-ON tes.tcuenta_bancaria FOR EACH ROW 
-EXECUTE PROCEDURE tes.f_tri_tcuenta_bancaria();
-
-/***********************************F-SCP-RCM-TES-0-23/12/2013***************************************/
 
 /***********************************I-SCP-ECR-TES-0-20/12/2013***************************************/
 CREATE TABLE tes.tcaja (

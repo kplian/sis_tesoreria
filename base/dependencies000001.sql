@@ -470,9 +470,7 @@ ALTER TABLE tes.tcuenta_bancaria
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     NOT DEFERRABLE;
-    
-DROP TRIGGER tr_tcuenta_bancaria__endesis ON tes.tcuenta_bancaria;
-    
+
 /***********************************F-DEP-RCM-TES-0-16/01/2014***************************************/
 
 
