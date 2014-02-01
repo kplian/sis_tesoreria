@@ -79,6 +79,21 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         },
         {
             config:{
+                name: 'num_tramite',
+                fieldLabel: 'Num. Tramite',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 150,
+                maxLength:200
+            },
+            type:'TextField',
+            filters:{pfiltro:'op.num_tramite',type:'string'},
+            id_grupo:1,
+            grid:false,
+            form:false
+        },
+        {
+            config:{
                 name: 'numero_op',
                 fieldLabel: 'Obl. Pago',
                 allowBlank: true,
@@ -365,6 +380,24 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:false
         },
+        
+        {
+            config:{
+                name:'desc_moneda',
+                fieldLabel:'Mon.',
+                gwidth: 30,
+            },
+            type:'Field',
+            id_grupo:1,
+            filters:{   
+                pfiltro:'mon.codigo',
+                type:'string'
+            },
+            grid:false,
+            form:false
+        },
+        
+        
         {
             config:{
                 name: 'monto',
@@ -816,7 +849,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'numero_op',
 		'id_estado_wf',
 		'id_depto_conta',
-		'id_moneda','tipo_moneda','desc_moneda'
+		'id_moneda','tipo_moneda','desc_moneda','num_tramite'
 		
 	],
 	

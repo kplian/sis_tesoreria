@@ -88,6 +88,12 @@ class MODPlanPago extends MODbase{
 		$this->captura('id_moneda','integer');
 		$this->captura('tipo_moneda','varchar');
 		$this->captura('desc_moneda','varchar');
+		$this->captura('num_tramite','varchar');
+		
+		
+		
+		
+		
 		
 		
 		

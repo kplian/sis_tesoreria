@@ -180,7 +180,8 @@ BEGIN
                         op.id_depto_conta,
                         op.id_moneda ,
                         mon.tipo_moneda ,
-                        mon.codigo as desc_moneda                      
+                        mon.codigo as desc_moneda,
+                        op.num_tramite                    
 						from tes.tplan_pago plapa
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
                         inner join param.tmoneda mon on mon.id_moneda = op.id_moneda

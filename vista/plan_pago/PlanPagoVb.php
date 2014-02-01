@@ -23,15 +23,15 @@ Phx.vista.PlanPagoVb = {
 	
 	constructor: function(config) {
 	    
-	   this.Atributos[this.getIndAtributo('numero_op')].grid=true; 
+	   this.Atributos[this.getIndAtributo('num_tramite')].grid=true;
+	   this.Atributos[this.getIndAtributo('desc_moneda')].grid=true;
 	   
+	   this.Atributos[this.getIndAtributo('numero_op')].grid=true; 
 	   this.Atributos[this.getIndAtributo('nro_cuota')].form=false; 
-	    
 	   this.Atributos[this.getIndAtributo('forma_pago')].form=true; 
 	   this.Atributos[this.getIndAtributo('nro_cheque')].form=true; 
 	   this.Atributos[this.getIndAtributo('nro_cuenta_bancaria')].form=true; 
 	   this.Atributos[this.getIndAtributo('id_cuenta_bancaria')].form=true; 
-	    
 	   this.Atributos[this.getIndAtributo('id_cuenta_bancaria_mov')].form=true; 
 	   
 	   
