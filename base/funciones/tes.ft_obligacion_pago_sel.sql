@@ -58,7 +58,7 @@ BEGIN
         --  raise exception 'cc  %',v_parametros.tipo_interfaz  ;
         
            
-         IF   v_parametros.tipo_interfaz ='obligacionPago' THEN
+         IF   v_parametros.tipo_interfaz ='obligacionPagoTes' THEN
            
             IF   p_administrador != 1 THEN
                  
