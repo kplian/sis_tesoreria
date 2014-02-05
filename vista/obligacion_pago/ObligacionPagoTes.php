@@ -23,10 +23,7 @@ Phx.vista.ObligacionPagoTes = {
 	 * */
 	
 	constructor: function(config) {
-	    
 	   Phx.vista.ObligacionPagoTes.superclass.constructor.call(this,config);
-       
-        
     },
     
     preparaMenu:function(n){
@@ -34,14 +31,13 @@ Phx.vista.ObligacionPagoTes = {
           var tb =this.tbar;
           
           
-          Phx.vista.ObligacionPago.superclass.preparaMenu.call(this,n); 
+          Phx.vista.ObligacionPagoTes.superclass.preparaMenu.call(this,n); 
           if (data['estado']== 'borrador'){
               this.getBoton('edit').enable();
               this.getBoton('new').enable();
               this.getBoton('del').enable();    
               this.getBoton('fin_registro').enable();
-               this.getBoton('ant_estado').disable();
-          
+              this.getBoton('ant_estado').disable();
               this.TabPanelSouth.get(1).disable();
           
           }
@@ -63,10 +59,10 @@ Phx.vista.ObligacionPagoTes = {
                 
                
                 
-                if (data['estado']== 'anulado'){
+               if (data['estado']== 'anulado'){
                     this.getBoton('fin_registro').disable();
                     this.TabPanelSouth.get(1).disable();
-                }
+               }
               
               this.getBoton('edit').disable();
               this.getBoton('del').disable();
@@ -80,17 +76,17 @@ Phx.vista.ObligacionPagoTes = {
     
      tabsouth:[
             { 
-             url:'../../../sis_tesoreria/vista/obligacion_det/ObligacionDet.php',
-             title:'Detalle', 
-             height:'50%',
-             cls:'ObligacionDet'
+                 url:'../../../sis_tesoreria/vista/obligacion_det/ObligacionDet.php',
+                 title:'Detalle', 
+                 height:'50%',
+                 cls:'ObligacionDet'
             },
             {
-              //carga la interface de registro inicial  
-              url:'../../../sis_tesoreria/vista/plan_pago/PlanPagoRegIni.php',
-              title:'Plan de Pagos (Reg. Adq.)', 
-              height:'50%',
-              cls:'PlanPagoRegIni'
+                  //carga la interface de registro inicial  
+                  url:'../../../sis_tesoreria/vista/plan_pago/PlanPagoRegIni.php',
+                  title:'Plan de Pagos (Reg. Adq.)', 
+                  height:'50%',
+                  cls:'PlanPagoRegIni'
             }
     
        ], 

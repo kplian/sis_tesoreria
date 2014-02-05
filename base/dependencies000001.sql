@@ -751,3 +751,14 @@ ALTER TABLE tes.tobligacion_det
     ON UPDATE NO ACTION
     NOT DEFERRABLE;  
 /***********************************F-DEP-RAC-TES-0-04/02/2014****************************************/
+
+
+
+/***********************************I-DEP-RAC-TES-0-05/02/2014****************************************/
+ALTER TABLE tes.tobligacion_pago
+  ADD CONSTRAINT tobligacion_pago__id_palntilla FOREIGN KEY (id_plantilla)
+    REFERENCES param.tplantilla(id_plantilla)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+/***********************************F-DEP-RAC-TES-0-05/02/2014****************************************/

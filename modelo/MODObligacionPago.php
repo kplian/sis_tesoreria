@@ -61,6 +61,15 @@ class MODObligacionPago extends MODbase{
 		$this->captura('total_pago','numeric');
 		$this->captura('pago_variable','varchar');
 		$this->captura('id_depto_conta','integer');
+		$this->captura('total_nro_cuota','integer');
+		
+		$this->captura('fecha_pp_ini','date');
+		$this->captura('rotacion','integer');
+		$this->captura('id_plantilla','integer');
+		$this->captura('desc_plantilla','varchar');
+		
+		
+		
 		
 		
 		
@@ -108,6 +117,15 @@ class MODObligacionPago extends MODbase{
 		$this->setParametro('fecha','fecha','date');
 		$this->setParametro('tipo_cambio_conv','tipo_cambio_conv','numeric');
         $this->setParametro('pago_variable','pago_variable','varchar');
+		
+
+		$this->setParametro('total_nro_cuota','total_nro_cuota','int4');
+		$this->setParametro('fecha_pp_ini','fecha_pp_ini','date');
+		$this->setParametro('rotacion','rotacion','int4');
+		$this->setParametro('id_plantilla','id_plantilla','int4');
+		
+		
+		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
@@ -136,7 +154,16 @@ class MODObligacionPago extends MODbase{
 		$this->setParametro('id_depto','id_depto','int4');
 		$this->setParametro('tipo_cambio_conv','tipo_cambio_conv','numeric');
 		$this->setParametro('pago_variable','pago_variable','varchar');
-
+        
+        $this->setParametro('total_nro_cuota','total_nro_cuota','int4');
+        $this->setParametro('fecha_pp_ini','fecha_pp_ini','date');
+        $this->setParametro('rotacion','rotacion','int4');
+        $this->setParametro('id_plantilla','id_plantilla','int4');
+        
+        
+        
+        
+       
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();

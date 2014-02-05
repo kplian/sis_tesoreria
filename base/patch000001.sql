@@ -395,3 +395,47 @@ ALTER TABLE tes.tobligacion_det
   ADD COLUMN incrementado_mo NUMERIC(19,2) DEFAULT 0 NOT NULL;
 
 /***********************************F-SCP-RAC-TES-0-29/01/2014***************************************/
+
+
+
+
+/***********************************I-SCP-RAC-TES-0-05/02/2014***************************************/
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN total_nro_cuota INTEGER DEFAULT 0 NOT NULL;
+
+
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN id_plantilla INTEGER;
+
+COMMENT ON COLUMN tes.tobligacion_pago.id_plantilla
+IS 'rAra registra el documento por defecto para los planes de pago';
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN fecha_pp_ini DATE;
+
+COMMENT ON COLUMN tes.tobligacion_pago.fecha_pp_ini
+IS 'Fecha tentativa inicial para los planes de pago';
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN rotacion INTEGER;
+
+ALTER TABLE tes.tobligacion_pago
+  ALTER COLUMN rotacion SET DEFAULT 1;
+
+COMMENT ON COLUMN tes.tobligacion_pago.rotacion
+IS 'Cada cuantos meses se registrar las fechas tentaivas a partir de la inicial';
+
+
+
+/***********************************F-SCP-RAC-TES-0-05/02/2014***************************************/
+
+
+
