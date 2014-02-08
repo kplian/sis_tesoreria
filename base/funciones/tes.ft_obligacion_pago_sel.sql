@@ -134,7 +134,13 @@ BEGIN
                               mn.tipo_moneda,
                               obpg.total_pago,
                               obpg.pago_variable,
-                              obpg.id_depto_conta
+                              obpg.id_depto_conta,
+                              obpg.total_nro_cuota,
+                              obpg.fecha_pp_ini,
+                              obpg.rotacion,
+                              obpg.id_plantilla,
+                              pla.desc_plantilla
+                              
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
                               left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
@@ -142,6 +148,7 @@ BEGIN
                               inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
                               inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
                               inner join param.tdepto dep on dep.id_depto=obpg.id_depto
+                              left join param.tplantilla pla on pla.id_plantilla = obpg.id_plantilla
                               '||v_inner ||'
                              -- left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
                               where  '||v_filadd;

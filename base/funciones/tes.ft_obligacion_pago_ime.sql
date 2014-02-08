@@ -235,7 +235,12 @@ BEGIN
             fecha,
             id_gestion,
             tipo_cambio_conv,
-            pago_variable
+            pago_variable,
+            total_nro_cuota,
+            fecha_pp_ini,
+            rotacion,
+            id_plantilla
+            
           	) values(
 			v_parametros.id_proveedor,
 			v_codigo_estado,
@@ -259,7 +264,11 @@ BEGIN
             v_parametros.fecha,
             v_id_gestion,
             v_parametros.tipo_cambio_conv,
-            v_parametros.pago_variable
+            v_parametros.pago_variable,
+            v_parametros.total_nro_cuota,
+            v_parametros.fecha_pp_ini,
+            v_parametros.rotacion,
+            v_parametros.id_plantilla
 							
 			)RETURNING id_obligacion_pago into v_id_obligacion_pago;
 			
@@ -294,7 +303,13 @@ BEGIN
 		    id_depto = v_parametros.id_depto,
 			fecha_mod = now(),
 			id_usuario_mod = p_id_usuario,
-            pago_variable=v_parametros.pago_variable
+            pago_variable = v_parametros.pago_variable,
+            total_nro_cuota = v_parametros.total_nro_cuota,
+            fecha_pp_ini = v_parametros.fecha_pp_ini,
+            rotacion = v_parametros.rotacion,
+            id_plantilla = v_parametros.id_plantilla
+            
+            
 			where id_obligacion_pago=v_parametros.id_obligacion_pago;
                
 			--Definicion de la respuesta
@@ -556,6 +571,11 @@ BEGIN
                   where estado_reg = 'activo'
                   and id_obligacion_det= v_id_obligacion_det;
                   
+                  
+                  -- si esta saliendo de borrador,  verifica el total de cuotas y las inserta
+                  --  con la plantilla por defecto 
+                  --TODO llamada a la funcion 
+                  
             
              END IF;
              
@@ -603,7 +623,7 @@ BEGIN
             
            
        
-        
+          --TEMP, SE COMENTA EL COMPROMISO TEMORALMENTE, PARA PRUEBAS
             IF  va_codigo_estado[1] = 'registrado'  and v_tipo_obligacion != 'adquisiciones' THEN
             
                -- verficar presupuesto y comprometer

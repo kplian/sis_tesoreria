@@ -346,6 +346,102 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 			form:true
 		},
 		{
+            config:{
+                name: 'total_nro_cuota',
+                fieldLabel: 'Nro Cuotas',
+                allowBlank: false,
+                anchor: '80%',
+                gwidth: 50,
+                value:0,
+                mimValue:0,
+                maxLength:131074,
+                maxValue:24
+            },
+            type:'NumberField',
+            valorInicial:0,
+            filters:{pfiltro:'obpg.total_nro_cuota',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },{
+            config:{
+                name: 'id_plantilla',
+                fieldLabel: 'Tipo Documento',
+                allowBlank: false,
+                emptyText:'Elija una plantilla...',
+                store:new Ext.data.JsonStore(
+                {
+                    url: '../../sis_parametros/control/Plantilla/listarPlantilla',
+                    id: 'id_plantilla',
+                    root:'datos',
+                    sortInfo:{
+                        field:'desc_plantilla',
+                        direction:'ASC'
+                    },
+                    totalProperty:'total',
+                    fields: ['id_plantilla','nro_linea','desc_plantilla','tipo','sw_tesoro', 'sw_compro'],
+                    remoteSort: true,
+                    baseParams:{par_filtro:'plt.desc_plantilla',sw_compro:'si',sw_tesoro:'si'}
+                }),
+                tpl:'<tpl for="."><div class="x-combo-list-item"><p>{desc_plantilla}</p></div></tpl>',
+                valueField: 'id_plantilla',
+                hiddenValue: 'id_plantilla',
+                displayField: 'desc_plantilla',
+                gdisplayField:'desc_plantilla',
+                listWidth:'280',
+                forceSelection:true,
+                typeAhead: false,
+                triggerAction: 'all',
+                lazyRender:true,
+                mode:'remote',
+                pageSize:20,
+                queryDelay:500,
+               
+                gwidth: 250,
+                minChars:2,
+                renderer:function (value, p, record){return String.format('{0}', record.data['desc_plantilla']);}
+            },
+            type:'ComboBox',
+            filters:{pfiltro:'pla.desc_plantilla',type:'string'},
+            id_grupo:0,
+            grid:true,
+            form:true
+        },
+        {
+            config:{
+                name: 'fecha_pp_ini',
+                fieldLabel: 'Fecha Ini.',
+                allowBlank: false,
+                gwidth: 100,
+                        format: 'd/m/Y', 
+                        renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+            },
+            type:'DateField',
+            filters:{pfiltro:'obpg.fecha_pp_ini',type:'date'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
+        {
+            config:{
+                name: 'rotacion',
+                fieldLabel: 'Rotación (Meses)',
+                allowBlank: false,
+                anchor: '80%',
+                gwidth: 50,
+                value:0,
+                maxLength:131074,
+                mimValue:1,
+                maxValue:100
+            },
+            type:'NumberField',
+            filters:{pfiltro:'obpg.rotacion',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
+		
+		{
 			config:{
 				name: 'porc_anticipo',
 				fieldLabel: 'Porc. Anticipo',
@@ -486,7 +582,10 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		{name:'tipo_cambio_conv', type: 'numeric'},
 		{name:'id_depto_conta', type: 'numeric'},
 		'numero','pago_variable','total_pago',
-		'id_gestion','comprometido','nro_cuota_vigente','tipo_moneda'
+		'id_gestion','comprometido','nro_cuota_vigente','tipo_moneda',
+		'total_nro_cuota','id_plantilla','desc_plantilla',
+		{name:'fecha_pp_ini', type: 'date',dateFormat:'Y-m-d'},
+		'rotacion'
 		
 	],
 	
@@ -588,6 +687,32 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 						}
 				}				
 		},this);
+		
+		
+		//validaciones para registro de plan de pagos por defecto
+		//this.Cmp.total_nro_cuota.setValue(0);
+		
+		this.ocultarComponente(this.Cmp.id_plantilla);
+		this.ocultarComponente(this.Cmp.fecha_pp_ini);
+		this.ocultarComponente(this.Cmp.rotacion);
+		
+		this.Cmp.total_nro_cuota.on('change',function(cmp,newValue, oldValue ){
+		    
+		    if(newValue > 0){
+		        this.mostrarComponente(this.Cmp.id_plantilla);
+                this.mostrarComponente(this.Cmp.fecha_pp_ini);
+                this.mostrarComponente(this.Cmp.rotacion);
+		    }
+		    else{
+		        this.ocultarComponente(this.Cmp.id_plantilla);
+                this.ocultarComponente(this.Cmp.fecha_pp_ini);
+                this.ocultarComponente(this.Cmp.rotacion);
+		        
+		    }
+		    
+		},this);
+		
+		
 		
 	},
 	

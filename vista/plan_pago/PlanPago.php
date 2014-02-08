@@ -593,7 +593,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                     baseParams:{par_filtro:'detalle#observaciones#fecha'}
                }),
                valueField: 'id_cuenta_bancaria_mov',
-               displayField: 'nro_doc_tipo',
+               displayField: 'detalle',
                gdisplayField: 'desc_deposito',
                hiddenName: 'id_cuenta_bancaria_mov',
                forceSelection:true,
