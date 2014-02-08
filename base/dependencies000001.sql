@@ -585,14 +585,6 @@ ALTER TABLE tes.tplan_pago
     NOT DEFERRABLE;
 
 
----------- ERROR MESSAGE ----------
-ALTER TABLE tes.tplan_pago
-  ADD CONSTRAINT tplan_pago__id_int_comprobante FOREIGN KEY (id_int_comprobante)
-    REFERENCES conta.tint_comprobante(id_int_comprobante)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
 --------------- SQL ---------------
 
 ALTER TABLE tes.tplan_pago
@@ -641,14 +633,7 @@ ALTER TABLE tes.tobligacion_pago
     ON UPDATE NO ACTION
     NOT DEFERRABLE;
 
---------------- SQL ---------------
 
-ALTER TABLE tes.tobligacion_pago
-  ADD CONSTRAINT tobligacion_pago__id_depto_conta FOREIGN KEY (id_depto_conta)
-    REFERENCES param.tdepto(id_depto)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
 
 --------------- SQL ---------------
 
