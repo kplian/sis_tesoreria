@@ -53,9 +53,6 @@ Phx.vista.PlanPagoRegIni = {
     
      
        
-    
-    
-    
     iniciarEventos:function(){
         
          this.Cmp.monto.on('change',this.calculaMontoPago,this); 
@@ -65,10 +62,16 @@ Phx.vista.PlanPagoRegIni = {
         this.Cmp.monto_retgar_mo.on('change',this.calculaMontoPago,this);
         this.Cmp.descuento_ley.on('change',this.calculaMontoPago,this);
         
-        this.Cmp.id_plantilla.on('select',function(cmb,rec,i){
-            
-            console.log(rec.data)
+        this.Cmp.id_plantilla.on('select',function(cmb,rec,i){  
             this.getDecuentosPorAplicar(rec.data.id_plantilla);
+            this.Cmp.monto_excento.reset();
+            if(rec.data.sw_monto_excento=='si'){
+               this.Cmp.monto_excento.enable();
+            }
+            else{
+               this.Cmp.monto_excento.disable();
+            }
+            
             
         },this);
         
@@ -105,11 +108,17 @@ Phx.vista.PlanPagoRegIni = {
                    this.ocultarComponente(this.Cmp.monto_ejecutar_total_mo);
                    this.Cmp.id_plantilla.disable();
                    this.ocultarComponente(this.Cmp.id_plantilla);
+                   //RAC  11/02/2014 agrega monto ecento
+                   this.Cmp.monto_excento.disable();
+                   this.ocultarComponente(this.Cmp.monto_excento);
                }
                else{
                    this.mostrarComponente(this.Cmp.monto_ejecutar_total_mo);
                    this.Cmp.id_plantilla.enable();
                    this.mostrarComponente(this.Cmp.id_plantilla);
+                   //RAC  11/02/2014 agrega monto ecento
+                   //this.Cmp.monto_excento.enable();
+                   this.mostrarComponente(this.Cmp.monto_excento);
                    
                }
                
@@ -139,10 +148,10 @@ Phx.vista.PlanPagoRegIni = {
             params:{'id_plan_pago':rec.data.id_plan_pago,id_obligacion_pago:this.maestro.id_obligacion_pago},
             success: this.successExport,
             failure: function() {
-                console.log("fail");
+                //console.log("fail");
             },
             timeout: function() {
-                console.log("timeout");
+                //console.log("timeout");
             },
             scope:this
         });  
@@ -188,9 +197,6 @@ Phx.vista.PlanPagoRegIni = {
      
      enableDisable:function(val){
       if(val =='devengado'){
-            
-            //this.Cmp.id_plantilla.enable();
-            //this.ocultarComponente(this.Cmp.id_plantilla);
             this.Cmp.nombre_pago.disable();
             this.ocultarComponente(this.Cmp.nombre_pago);
             
@@ -202,12 +208,8 @@ Phx.vista.PlanPagoRegIni = {
             
         }
         else{
-            //this.Cmp.id_plantilla.enable();
-            //this.mostrarComponente(this.Cmp.id_plantilla);
             this.Cmp.nombre_pago.enable();
             this.mostrarComponente(this.Cmp.nombre_pago);
-            
-           
             
             this.habilitarDescuentos();
             
@@ -284,6 +286,12 @@ Phx.vista.PlanPagoRegIni = {
                     this.ocultarComponente(this.Cmp.tipo);
                     this.Cmp.id_plantilla.disable();
                     this.ocultarComponente(this.Cmp.id_plantilla);
+                    //RAC  11/02/2014 agrega monto ecento
+                    this.Cmp.monto_excento.disable();
+                    this.ocultarComponente(this.Cmp.monto_excento);
+                    
+                    
+                    
                     this.Cmp.nombre_pago.enable();
                     this.mostrarComponente(this.Cmp.nombre_pago);
                     
@@ -322,9 +330,6 @@ Phx.vista.PlanPagoRegIni = {
          }
          else{
              
-              console.log('data..',data)
-              
-              
                 //para habilitar registros de cuota de devengado  
                 Phx.vista.PlanPagoRegIni.superclass.onButtonNew.call(this); 
                 
@@ -348,6 +353,9 @@ Phx.vista.PlanPagoRegIni = {
                 //plantilla (TIPO DOCUMENTO)
                 this.Cmp.id_plantilla.enable();
                 this.mostrarComponente(this.Cmp.id_plantilla);
+                //RAC  11/02/2014 agrega monto ecento
+                //this.Cmp.monto_excento.enable();
+                this.mostrarComponente(this.Cmp.monto_excento);
                 
                 
                 
@@ -407,6 +415,10 @@ Phx.vista.PlanPagoRegIni = {
                 this.Cmp.id_plantilla.disable();
                 this.ocultarComponente(this.Cmp.id_plantilla);
                 
+                //RAC  11/02/2014 agrega monto ecento
+                this.Cmp.monto_excento.disable();
+                this.ocultarComponente(this.Cmp.monto_excento);
+                
                 this.Cmp.nombre_pago.enable();
                 this.mostrarComponente(this.Cmp.nombre_pago);
                 
@@ -430,6 +442,10 @@ Phx.vista.PlanPagoRegIni = {
                 
                 this.Cmp.id_plantilla.enable();
                 this.mostrarComponente(this.Cmp.id_plantilla);
+                
+                //RAC  11/02/2014 agrega monto ecento
+                //this.Cmp.monto_excento.enable();
+                this.mostrarComponente(this.Cmp.monto_excento);
                 
                 this.Cmp.monto_no_pagado.enable();
                 this.mostrarComponente(this.Cmp.monto_no_pagado);
@@ -508,7 +524,7 @@ Phx.vista.PlanPagoRegIni = {
        Phx.vista.PlanPagoRegIni.superclass.successDel.call(this,resp);
      },
      
-      preparaMenu:function(n){
+    preparaMenu:function(n){
           var data = this.getSelectedData();
           var tb =this.tbar;
           this.getBoton('ant_estado').disable();
@@ -525,11 +541,9 @@ Phx.vista.PlanPagoRegIni = {
           else{
             if (data['estado']== 'devengado'  && (data.monto_ejecutar_total_mo*1)  > (data.total_pagado*1) ){ 
                 this.getBoton('new').enable();
-                console.log('habilita new')
             }
             else{
-                this.getBoton('new').disable(); 
-                 console.log('deshabilita new')
+                this.getBoton('new').disable();
             }
              this.getBoton('edit').disable();
              this.getBoton('del').disable();
@@ -546,7 +560,7 @@ Phx.vista.PlanPagoRegIni = {
           this.getBoton('btnChequeoDocumentosWf').enable();  
      },
      
-      liberaMenu:function(){
+    liberaMenu:function(){
         var tb = Phx.vista.PlanPagoRegIni.superclass.liberaMenu.call(this);
         if(tb){
           

@@ -289,7 +289,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                         direction:'ASC'
                     },
                     totalProperty:'total',
-                    fields: ['id_plantilla','nro_linea','desc_plantilla','tipo','sw_tesoro', 'sw_compro'],
+                    fields: ['id_plantilla','nro_linea','desc_plantilla','tipo','sw_tesoro', 'sw_compro','sw_monto_excento'],
                     remoteSort: true,
                     baseParams:{par_filtro:'plt.desc_plantilla',sw_compro:'si',sw_tesoro:'si'}
                 }),
@@ -314,6 +314,24 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             type:'ComboBox',
             filters:{pfiltro:'pla.desc_plantilla',type:'string'},
             id_grupo:0,
+            grid:true,
+            form:true
+        },
+        {
+            config:{
+                name: 'monto_excento',
+                currencyChar:' ',
+                allowNegative:false,
+                fieldLabel: 'Monto excento',
+                allowBlank: false,
+                disabled:true,
+                gwidth: 100,
+                maxLength:1245186
+            },
+            type:'MoneyField',
+            valorInicial:0,
+            filters:{pfiltro:'plapa.monto_excento',type:'numeric'},
+            id_grupo:1,
             grid:true,
             form:true
         },{
@@ -358,8 +376,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 gwidth: 100,
                 maxLength:255
             },
-            type:'NumberField',
-            filters:{pfiltro:'plapa.nro_cheque',type:'numeric'},
+            type: 'NumberField',
+            filters: {pfiltro:'plapa.nro_cheque',type:'numeric'},
             id_grupo:1,
             grid:true,
             form:false

@@ -30,6 +30,7 @@ Phx.vista.PlanPagoVb = {
 	   this.Atributos[this.getIndAtributo('nro_cuota')].form=false; 
 	   this.Atributos[this.getIndAtributo('forma_pago')].form=true; 
 	   this.Atributos[this.getIndAtributo('nro_cheque')].form=true; 
+	   this.Atributos[this.getIndAtributo('nro_cheque')].valorInicial=0;
 	   this.Atributos[this.getIndAtributo('nro_cuenta_bancaria')].form=true; 
 	   this.Atributos[this.getIndAtributo('id_cuenta_bancaria')].form=true; 
 	   this.Atributos[this.getIndAtributo('id_cuenta_bancaria_mov')].form=true; 
@@ -202,6 +203,10 @@ Phx.vista.PlanPagoVb = {
                 this.Cmp.id_plantilla.disable();
                 this.ocultarComponente(this.Cmp.id_plantilla);
                 
+                //RAC  11/02/2014 agrega monto ecento
+                this.Cmp.monto_excento.disable();
+                this.ocultarComponente(this.Cmp.monto_excento);
+                
                 this.Cmp.nombre_pago.enable();
                 this.mostrarComponente(this.Cmp.nombre_pago);
                 
@@ -234,6 +239,10 @@ Phx.vista.PlanPagoVb = {
                 
                 this.Cmp.id_plantilla.enable();
                 this.mostrarComponente(this.Cmp.id_plantilla);
+                
+                //RAC  11/02/2014 agrega monto ecento
+                //this.Cmp.monto_excento.enable();
+                this.mostrarComponente(this.Cmp.monto_excento);
                 
                 this.Cmp.monto_no_pagado.enable();
                 this.mostrarComponente(this.Cmp.monto_no_pagado);
@@ -290,8 +299,6 @@ Phx.vista.PlanPagoVb = {
     onBtnDevPag:function()
         {                   
             var data = this.getSelectedData();
-            
-            console.log('depto_conta',data.id_depto_conta)
             if(data.id_depto_conta > 0){
            
                 this.onSubmitDepto(undefined,undefined,data.id_depto_conta);  
@@ -338,9 +345,14 @@ Phx.vista.PlanPagoVb = {
         this.Cmp.descuento_ley.on('change',this.calculaMontoPago,this);
         
         this.Cmp.id_plantilla.on('select',function(cmb,rec,i){
-            
-            console.log(rec.data)
             this.getDecuentosPorAplicar(rec.data.id_plantilla);
+            this.Cmp.monto_excento.reset();
+            if(rec.data.sw_monto_excento=='si'){
+               this.Cmp.monto_excento.enable();
+            }
+            else{
+               this.Cmp.monto_excento.disable();
+            }
             
         },this);
         
@@ -392,11 +404,17 @@ Phx.vista.PlanPagoVb = {
                    this.ocultarComponente(this.Cmp.monto_ejecutar_total_mo);
                    this.Cmp.id_plantilla.disable();
                    this.ocultarComponente(this.Cmp.id_plantilla);
+                   //RAC  11/02/2014 agrega monto ecento
+                   this.Cmp.monto_excento.disable();
+                   this.ocultarComponente(this.Cmp.monto_excento);
                }
                else{
                    this.mostrarComponente(this.Cmp.monto_ejecutar_total_mo);
                    this.Cmp.id_plantilla.enable();
                    this.mostrarComponente(this.Cmp.id_plantilla);
+                   //RAC  11/02/2014 agrega monto ecento
+                   //this.Cmp.monto_excento.enable();
+                   this.mostrarComponente(this.Cmp.monto_excento);
                    
                }
                
@@ -491,7 +509,6 @@ Phx.vista.PlanPagoVb = {
     }, 
     
     ocultarCheCue: function(pFormaPago){
-        console.log('pFormaPago',pFormaPago)
         if(pFormaPago=='transferencia'){
             //Deshabilita campo cheque
             this.Cmp.nro_cheque.allowBlank=true;

@@ -99,9 +99,14 @@ Phx.vista.PlanPagoReq = {
         this.Cmp.descuento_ley.on('change',this.calculaMontoPago,this);
         
         this.Cmp.id_plantilla.on('select',function(cmb,rec,i){
-            
-            console.log(rec.data)
             this.getDecuentosPorAplicar(rec.data.id_plantilla);
+            this.Cmp.monto_excento.reset();
+            if(rec.data.sw_monto_excento=='si'){
+               this.Cmp.monto_excento.enable();
+            }
+            else{
+               this.Cmp.monto_excento.disable();
+            }
             
         },this);
         
@@ -153,11 +158,17 @@ Phx.vista.PlanPagoReq = {
                    this.ocultarComponente(this.Cmp.monto_ejecutar_total_mo);
                    this.Cmp.id_plantilla.disable();
                    this.ocultarComponente(this.Cmp.id_plantilla);
+                   //RAC  11/02/2014 agrega monto ecento
+                   this.Cmp.monto_excento.disable();
+                   this.ocultarComponente(this.Cmp.monto_excento);
                }
                else{
                    this.mostrarComponente(this.Cmp.monto_ejecutar_total_mo);
                    this.Cmp.id_plantilla.enable();
                    this.mostrarComponente(this.Cmp.id_plantilla);
+                   //RAC  11/02/2014 agrega monto ecento
+                   this.Cmp.monto_excento.enable();
+                   this.mostrarComponente(this.Cmp.monto_excento);
                    
                }
                
@@ -242,6 +253,10 @@ Phx.vista.PlanPagoReq = {
                     this.Cmp.id_plantilla.disable();
                     this.ocultarComponente(this.Cmp.id_plantilla);
                     
+                    //RAC  11/02/2014 agrega monto ecento
+                    this.Cmp.monto_excento.disable();
+                    this.ocultarComponente(this.Cmp.monto_excento);
+                    
                     this.Cmp.nombre_pago.enable();
                     this.mostrarComponente(this.Cmp.nombre_pago);
                     this.Cmp.forma_pago.enable();
@@ -283,11 +298,7 @@ Phx.vista.PlanPagoReq = {
              
          }
          else{
-             
-              console.log('data..',data)
-              
-              
-           //para habilitar registros de cuota de devengado  
+              //para habilitar registros de cuota de devengado  
                 Phx.vista.PlanPagoReq.superclass.onButtonNew.call(this); 
                 this.Cmp.id_obligacion_pago.setValue(this.maestro.id_obligacion_pago);
                  this.mostrarComponente(this.Cmp.tipo_pago);
@@ -309,6 +320,11 @@ Phx.vista.PlanPagoReq = {
                 
                 this.Cmp.id_plantilla.enable();
                 this.mostrarComponente(this.Cmp.id_plantilla);
+                
+                //RAC  11/02/2014 agrega monto ecento
+                this.Cmp.monto_excento.enable();
+                this.mostrarComponente(this.Cmp.monto_excento);
+                   
                 this.Cmp.monto_no_pagado.enable();
                 this.mostrarComponente(this.Cmp.monto_no_pagado);
                 this.Cmp.obs_monto_no_pagado.enable();
@@ -367,6 +383,10 @@ Phx.vista.PlanPagoReq = {
                 this.Cmp.id_plantilla.disable();
                 this.ocultarComponente(this.Cmp.id_plantilla);
                 
+                //RAC  11/02/2014 agrega monto ecento
+                this.Cmp.monto_excento.disable();
+                this.ocultarComponente(this.Cmp.monto_excento);
+                
                 this.Cmp.nombre_pago.enable();
                 this.mostrarComponente(this.Cmp.nombre_pago);
                
@@ -394,6 +414,10 @@ Phx.vista.PlanPagoReq = {
                 
                 this.Cmp.id_plantilla.enable();
                 this.mostrarComponente(this.Cmp.id_plantilla);
+                
+                //RAC  11/02/2014 agrega monto ecento
+                this.Cmp.monto_excento.enable();
+                this.mostrarComponente(this.Cmp.monto_excento);
                 
                 this.Cmp.monto_no_pagado.enable();
                 this.mostrarComponente(this.Cmp.monto_no_pagado);
@@ -523,12 +547,10 @@ Phx.vista.PlanPagoReq = {
           else{
             if (data['estado']== 'devengado'  && (data.monto_ejecutar_total_mo*1)  > (data.total_pagado*1) ){ 
                 this.getBoton('new').enable();
-                console.log('habilita new')
             }
             else{
                 this.getBoton('new').disable(); 
-                 console.log('deshabilita new')
-            }
+             }
              this.getBoton('edit').disable();
              this.getBoton('del').disable();
             
