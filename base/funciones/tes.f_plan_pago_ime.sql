@@ -112,6 +112,11 @@ DECLARE
     v_nro_cuenta_bancaria  varchar;
     
     v_centro varchar;
+    
+    v_sw_me_plantilla   varchar;
+    
+    v_porc_monto_excento_var numeric;
+    v_monto_excento  numeric;
   
     
     
@@ -152,7 +157,7 @@ BEGIN
         begin
         
         
-              IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria') THEN
+             IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria') THEN
              
              v_id_cuenta_bancaria =  v_parametros.id_cuenta_bancaria;
              
@@ -473,6 +478,19 @@ BEGIN
                  v_nro_cuenta_bancaria =  v_parametros.nro_cuenta_bancaria;
              
              END IF;
+             
+             
+             IF  pxp.f_existe_parametro(p_tabla,'porc_monto_excento_var') THEN
+             
+                 v_porc_monto_excento_var =  v_parametros.porc_monto_excento_var;
+             
+             END IF;
+             
+             IF  pxp.f_existe_parametro(p_tabla,'monto_excento') THEN
+             
+                 v_monto_excento =  v_parametros.monto_excento;
+             
+             END IF;
         
         
         
@@ -540,7 +558,6 @@ BEGIN
                    
                    IF v_registros.pago_variable='no' THEN
                       v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado');
-                   
                       IF (v_monto_total + v_registros_pp.monto)  <  v_parametros.monto  THEN
                       
                           raise exception 'No puede exceder el total a pagar en obligaciones no variables';
@@ -592,6 +609,34 @@ BEGIN
             
             END IF;
             
+            
+           --RAC 11/02/2014 
+           --calculo porcentaje monto excento
+           
+           Select  
+           p.sw_monto_excento
+           into
+           v_sw_me_plantilla
+           from param.tplantilla p 
+           where p.id_plantilla =  v_parametros.id_plantilla;    
+           
+           IF v_sw_me_plantilla = 'si' and  v_monto_excento <= 0 THEN
+           
+              raise exception  'Este documento necesita especificar un monto excento mayor a cero';
+           
+           END IF;
+           
+           
+           IF v_monto_excento >=  v_monto_ejecutar_total_mo THEN
+             raise exception 'El monto excento (%) debe ser menr que el total a ejecutar(%)',v_monto_excento, v_monto_ejecutar_total_mo  ;
+           END IF;
+           
+           IF v_monto_excento > 0 THEN
+              v_porc_monto_excento_var  = v_monto_excento / v_monto_ejecutar_total_mo;
+           ELSE
+              v_porc_monto_excento_var = 0;
+           END IF;
+            
            
         
 			--Sentencia de la modificacion
@@ -619,7 +664,13 @@ BEGIN
             nro_cheque = v_nro_cheque,
             fecha_tentativa = v_parametros.fecha_tentativa,
             nro_cuenta_bancaria = v_nro_cuenta_bancaria,
-            id_cuenta_bancaria_mov = v_id_cuenta_bancaria_mov
+            id_cuenta_bancaria_mov = v_id_cuenta_bancaria_mov,
+            porc_monto_excento_var = v_porc_monto_excento_var,
+            monto_excento = v_monto_excento
+            
+            
+            
+            
 			where id_plan_pago=v_parametros.id_plan_pago;
            
             

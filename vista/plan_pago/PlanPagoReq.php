@@ -167,7 +167,7 @@ Phx.vista.PlanPagoReq = {
                    this.Cmp.id_plantilla.enable();
                    this.mostrarComponente(this.Cmp.id_plantilla);
                    //RAC  11/02/2014 agrega monto ecento
-                   this.Cmp.monto_excento.enable();
+                   //this.Cmp.monto_excento.enable();
                    this.mostrarComponente(this.Cmp.monto_excento);
                    
                }
@@ -322,7 +322,7 @@ Phx.vista.PlanPagoReq = {
                 this.mostrarComponente(this.Cmp.id_plantilla);
                 
                 //RAC  11/02/2014 agrega monto ecento
-                this.Cmp.monto_excento.enable();
+                //this.Cmp.monto_excento.enable();
                 this.mostrarComponente(this.Cmp.monto_excento);
                    
                 this.Cmp.monto_no_pagado.enable();
@@ -416,7 +416,7 @@ Phx.vista.PlanPagoReq = {
                 this.mostrarComponente(this.Cmp.id_plantilla);
                 
                 //RAC  11/02/2014 agrega monto ecento
-                this.Cmp.monto_excento.enable();
+                //this.Cmp.monto_excento.enable();
                 this.mostrarComponente(this.Cmp.monto_excento);
                 
                 this.Cmp.monto_no_pagado.enable();

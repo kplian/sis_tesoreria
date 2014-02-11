@@ -82,13 +82,17 @@ class MODPlanPago extends MODbase{
 		$this->captura('id_cuenta_bancaria_mov','integer');
 		$this->captura('desc_deposito','varchar');
 		$this->captura('numero_op','varchar');
-		
 		$this->captura('id_depto_conta','integer');
-		
 		$this->captura('id_moneda','integer');
 		$this->captura('tipo_moneda','varchar');
 		$this->captura('desc_moneda','varchar');
 		$this->captura('num_tramite','varchar');
+		
+		
+		$this->captura('porc_monto_excento_var','numeric');
+		$this->captura('monto_excento','numeric');
+		
+		
 		
 		
 		
@@ -157,6 +161,9 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('nro_cuenta_bancaria','nro_cuenta_bancaria','varchar');
 		$this->setParametro('id_cuenta_bancaria_mov','id_cuenta_bancaria_mov','integer');
 		
+		$this->setParametro('porc_monto_excento_var','porc_monto_excento_var','integer');
+		$this->setParametro('monto_excento','monto_excento','integer');
+		
 		 
         
 		
@@ -208,6 +215,10 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('nro_cuenta_bancaria','nro_cuenta_bancaria','varchar');
 		
 		$this->setParametro('id_cuenta_bancaria_mov','id_cuenta_bancaria_mov','integer');
+		
+		
+		$this->setParametro('porc_monto_excento_var','porc_monto_excento_var','integer');
+        $this->setParametro('monto_excento','monto_excento','integer');
         
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -354,10 +365,10 @@ class MODPlanPago extends MODbase{
 		$this->captura('liquido_pagable','numeric');
 		$this->captura('total_prorrateado','numeric');
 		$this->captura('total_pagado','numeric');
-          $this->captura('desc_cuenta_bancaria','text');
-          $this->captura('sinc_presupuesto','varchar'); 
-          $this->captura('monto_retgar_mb','numeric');
-          $this->captura('monto_retgar_mo','numeric');
+        $this->captura('desc_cuenta_bancaria','text');
+        $this->captura('sinc_presupuesto','varchar'); 
+        $this->captura('monto_retgar_mb','numeric');
+        $this->captura('monto_retgar_mo','numeric');
         		
 		//Ejecuta la instruccion
 		$this->armarConsulta();

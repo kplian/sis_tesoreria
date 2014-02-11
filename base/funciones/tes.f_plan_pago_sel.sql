@@ -52,7 +52,7 @@ BEGIN
      				
     	begin
         
-        
+       
         
             v_filtro='';
             
@@ -181,7 +181,9 @@ BEGIN
                         op.id_moneda ,
                         mon.tipo_moneda ,
                         mon.codigo as desc_moneda,
-                        op.num_tramite                    
+                        op.num_tramite,
+                        plapa.porc_monto_excento_var,
+                        plapa.monto_excento               
 						from tes.tplan_pago plapa
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
                         inner join param.tmoneda mon on mon.id_moneda = op.id_moneda
@@ -306,6 +308,7 @@ BEGIN
 	elsif(p_transaccion='TES_PLAPAOB_SEL')then
      				
     	begin
+        
         
     		--Sentencia de la consulta
 			v_consulta:='select

@@ -867,7 +867,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'numero_op',
 		'id_estado_wf',
 		'id_depto_conta',
-		'id_moneda','tipo_moneda','desc_moneda','num_tramite'
+		'id_moneda','tipo_moneda','desc_moneda',
+		'num_tramite','monto_excento',
+		'proc_monto_excento_var'
 		
 	],
 	

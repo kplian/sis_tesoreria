@@ -52,7 +52,12 @@ DECLARE
     v_id_proceso_wf 				integer;
     v_id_estado_wf 					integer;
     v_codigo_estado					varchar;
-    v_id_plan_pago					integer;			
+    v_id_plan_pago					integer;
+    
+    v_monto_excento					numeric;
+    v_porc_monto_excento_var		numeric;
+    v_sw_me_plantilla               varchar;
+    			
     
     
                
@@ -82,6 +87,9 @@ BEGIN
     (p_hstore->'id_plantilla')::integer
     (p_hstore->'tipo')::varchar
     
+    (p_hstore->'porc_monto_excento_var')::numeric
+    (p_hstore->'monto_excento')::numeric
+    
     
     
     
@@ -102,10 +110,13 @@ BEGIN
              v_nro_cheque =  (p_hstore->'nro_cheque')::integer;
              v_nro_cuenta_bancaria =  (p_hstore->'nro_cuenta_bancaria')::varchar;
              
+             v_porc_monto_excento_var = (p_hstore->'porc_monto_excento_var')::numeric;
+             v_monto_excento = (p_hstore->'monto_excento')::numeric;
              
              
              
              
+            
            
            --validamos que el monto a pagar sea mayor que cero
            
@@ -180,6 +191,34 @@ BEGIN
           END IF;  
            
           
+         --RAC 11/02/2014 
+         --calculo porcentaje monto excento
+         
+         Select  
+         p.sw_monto_excento
+         into
+         v_sw_me_plantilla
+         from param.tplantilla p 
+         where p.id_plantilla =  (p_hstore->'id_plantilla')::integer;    
+         
+         IF v_sw_me_plantilla = 'si' and  v_monto_excento <= 0 THEN
+         
+            raise exception  'Este documento necesita especificar un monto excento mayor a cero';
+         
+         END IF;
+         
+         
+         IF v_monto_excento >=  v_monto_ejecutar_total_mo THEN
+           raise exception 'El monto excento (%) debe ser menr que el total a ejecutar(%)',v_monto_excento, v_monto_ejecutar_total_mo  ;
+         END IF;
+         
+         IF v_monto_excento > 0 THEN
+            v_porc_monto_excento_var  = v_monto_excento / v_monto_ejecutar_total_mo;
+         ELSE
+            v_porc_monto_excento_var = 0;
+         END IF;
+         
+         
          -- define numero de cuota
           
          v_nro_cuota = floor(COALESCE(v_nro_cuota,0))+1; 
@@ -375,7 +414,9 @@ BEGIN
             porc_descuento_ley,
             nro_cheque,
             nro_cuenta_bancaria,
-            id_cuenta_bancaria_mov
+            id_cuenta_bancaria_mov,
+            porc_monto_excento_var,
+            monto_excento
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -412,7 +453,9 @@ BEGIN
             (p_hstore->'porc_descuento_ley')::numeric,
 			v_nro_cheque,
 			v_nro_cuenta_bancaria,
-            v_id_cuenta_bancaria_mov			
+            v_id_cuenta_bancaria_mov,
+            v_porc_monto_excento_var,
+            v_monto_excento		
 			)RETURNING id_plan_pago into v_id_plan_pago;
             
              --------------------------------------------------

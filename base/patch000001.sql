@@ -453,7 +453,8 @@ IS 'Cada cuantos meses se registrar las fechas tentaivas a partir de la inicial'
 ALTER TABLE tes.tplan_pago
   ADD COLUMN monto_excento NUMERIC(12,2) DEFAULT 0 NOT NULL;
   
+  
 ALTER TABLE tes.tplan_pago
-  ADD COLUMN porc_monto_excento_var NUMERIC(5,2) DEFAULT 0 NOT NULL;
+  ADD COLUMN porc_monto_excento_var NUMERIC DEFAULT 0 NOT NULL;
 /***********************************F-SCP-RAC-TES-0-08/02/2014***************************************/
 
