@@ -394,6 +394,13 @@ ALTER TABLE tes.tobligacion_det
 ALTER TABLE tes.tobligacion_det
   ADD COLUMN incrementado_mo NUMERIC(19,2) DEFAULT 0 NOT NULL;
 
+ALTER TABLE tes.tplan_pago
+  ALTER COLUMN nro_cheque SET DEFAULT 0;
+
+ALTER TABLE tes.tplan_pago
+  ALTER COLUMN nro_cheque SET NOT NULL;
+
+
 /***********************************F-SCP-RAC-TES-0-29/01/2014***************************************/
 
 
@@ -448,6 +455,5 @@ ALTER TABLE tes.tplan_pago
   
 ALTER TABLE tes.tplan_pago
   ADD COLUMN porc_monto_excento_var NUMERIC(5,2) DEFAULT 0 NOT NULL;
- 
 /***********************************F-SCP-RAC-TES-0-08/02/2014***************************************/
 
