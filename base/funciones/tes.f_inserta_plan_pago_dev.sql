@@ -458,11 +458,11 @@ BEGIN
             (p_hstore->'descuento_ley')::numeric,
             (p_hstore->'obs_descuentos_ley'),
             (p_hstore->'porc_descuento_ley')::numeric,
-			v_nro_cheque,
+			COALESCE(v_nro_cheque,0),
 			v_nro_cuenta_bancaria,
             v_id_cuenta_bancaria_mov,
             v_porc_monto_excento_var,
-            v_monto_excento		
+            COALESCE(v_monto_excento,0)		
 			)RETURNING id_plan_pago into v_id_plan_pago;
             
              --------------------------------------------------

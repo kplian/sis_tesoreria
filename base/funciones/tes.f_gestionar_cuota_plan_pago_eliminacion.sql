@@ -84,7 +84,8 @@ BEGIN
       pp.tipo_pago,
       pp.fecha_tentativa,
       pp.otros_descuentos,
-      pp.monto_retgar_mo
+      pp.monto_retgar_mo,
+      op.numero
       into
       v_registros
       from  tes.tplan_pago pp
@@ -141,7 +142,7 @@ BEGIN
               v_id_proceso_wf, 
               p_id_usuario,
               v_id_depto,
-              'Eliminación de comprobante');
+              'Eliminación de comprobante de la OP:'|| COALESCE(v_registros.numero,'NaN')||', cuota nro: '|| COALESCE(v_registros.nro_cuota,'NAN'));
                       
                     
                       

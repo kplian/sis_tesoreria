@@ -101,22 +101,24 @@ DECLARE
     v_id_usuario_reg        integer;
     v_id_estado_wf_ant 		integer;
     
-    v_id_cuenta_bancaria integer;
+    v_id_cuenta_bancaria 		integer;
     v_id_cuenta_bancaria_mov integer;
     
     
-    v_forma_pago varchar;
+    v_forma_pago 			varchar;
     
-    v_nro_cheque integer;
+    v_nro_cheque 			integer;
     
-    v_nro_cuenta_bancaria  varchar;
+    v_nro_cuenta_bancaria  	varchar;
     
-    v_centro varchar;
+    v_centro 				varchar;
     
-    v_sw_me_plantilla   varchar;
+    v_sw_me_plantilla   	varchar;
     
     v_porc_monto_excento_var numeric;
-    v_monto_excento  numeric;
+    v_monto_excento 		 numeric;
+    
+    v_total_prorrateo        numeric;
   
     
     
@@ -391,7 +393,7 @@ BEGIN
             v_parametros.descuento_ley,
             v_parametros.obs_descuentos_ley,
             v_parametros.porc_descuento_ley,
-            v_nro_cheque,
+            COALESCE(v_nro_cheque,0),
             v_nro_cuenta_bancaria,
 			v_id_cuenta_bancaria_mov				
 			)RETURNING id_plan_pago into v_id_plan_pago;
@@ -661,12 +663,12 @@ BEGIN
             descuento_ley=v_parametros.descuento_ley,
             obs_descuentos_ley=v_parametros.obs_descuentos_ley,
             porc_descuento_ley=v_parametros.porc_descuento_ley,
-            nro_cheque = v_nro_cheque,
+            nro_cheque =  COALESCE(v_nro_cheque,0),
             fecha_tentativa = v_parametros.fecha_tentativa,
             nro_cuenta_bancaria = v_nro_cuenta_bancaria,
             id_cuenta_bancaria_mov = v_id_cuenta_bancaria_mov,
             porc_monto_excento_var = v_porc_monto_excento_var,
-            monto_excento = v_monto_excento
+            monto_excento = COALESCE(v_monto_excento,0)
             
             
             
@@ -674,28 +676,44 @@ BEGIN
 			where id_plan_pago=v_parametros.id_plan_pago;
            
             
-            --elimina el prorrateo si es automatico
-            
-            delete from tes.tprorrateo pro where pro.id_plan_pago = v_parametros.id_plan_pago;
             
             
-             --------------------------------------------------
-            -- Inserta prorrateo automatico
-            ------------------------------------------------
-           IF not ( SELECT * FROM tes.f_prorrateo_plan_pago( v_parametros.id_plan_pago,
-               										 v_parametros.id_obligacion_pago, 
-                                                     v_registros.pago_variable, 
-                                                     v_monto_ejecutar_total_mo,
-                                                     p_id_usuario,
-                                                     v_registros_pp.id_plan_pago_fk
-                                                     
-                                                     )) THEN
-                                                     
-                  
-              raise exception 'Error al prorratear';
-                                              
-           END IF;
             
+           --------------------------------------------------
+           -- Inserta prorrateo automatico
+           ------------------------------------------------
+           
+           --si el monto del pago y el total de prorrateo no son iguales, reiniciamos el prorrateo
+           
+            select 
+              sum(pr.monto_ejecutar_mo)
+            into
+              v_total_prorrateo
+            from  tes.tprorrateo pr
+            inner join tes.tobligacion_det od on od.id_obligacion_det = pr.id_obligacion_det
+            where pr.id_plan_pago = v_parametros.id_plan_pago 
+            and pr.estado_reg = 'activo' and od.estado_reg = 'activo';
+           
+           
+           IF v_total_prorrateo != v_monto_ejecutar_total_mo THEN 
+           
+                --elimina el prorrateo si es automatico
+                 delete from tes.tprorrateo pro where pro.id_plan_pago = v_parametros.id_plan_pago;
+             
+                IF not ( SELECT * FROM tes.f_prorrateo_plan_pago( v_parametros.id_plan_pago,
+                                                           v_parametros.id_obligacion_pago, 
+                                                           v_registros.pago_variable, 
+                                                           v_monto_ejecutar_total_mo,
+                                                           p_id_usuario,
+                                                           v_registros_pp.id_plan_pago_fk
+                                                           
+                                                           )) THEN
+                                                           
+                        
+                    raise exception 'Error al prorratear';
+                                                    
+                 END IF;
+            END IF;
                
 			--Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Plan Pago modificado(a)'); 

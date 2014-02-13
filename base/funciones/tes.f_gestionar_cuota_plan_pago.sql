@@ -10,7 +10,7 @@ $body$
 
 Autor: RAC KPLIAN
 Fecha:   6 junio de 2013
-Descripcion  Esta funcion gestion los planes de pago de la siguiente manera
+Descripcion  Esta funcion gestiona los planes de pago de la siguiente manera
 
 
     Cuando un comprobante de devegado o pago es validado  ->   cambia el estado de la cuota.
@@ -47,6 +47,8 @@ DECLARE
      v_id_plan_pago integer;
      v_verficacion  boolean;
      v_verficacion2  varchar[];
+     
+     v_id_tipo_estado  integer;
     
 BEGIN
 
@@ -213,7 +215,7 @@ BEGIN
              -------------------------------------
             
          
-           SELECT
+            SELECT
                      ps_id_proceso_wf,
                      ps_id_estado_wf,
                      ps_codigo_estado
@@ -297,9 +299,8 @@ BEGIN
                         v_registros.descuento_ley,
                         v_registros.obs_descuentos_ley,
                         v_registros.porc_descuento_ley,
-                        
                         v_registros.id_cuenta_bancaria_mov,
-                        v_registros.nro_cheque,
+                        COALESCE(v_registros.nro_cheque,0),
                         v_registros.nro_cuenta_bancaria
                        
                       )RETURNING id_plan_pago into v_id_plan_pago;
@@ -325,9 +326,52 @@ BEGIN
                  fecha_mod=now()
                where pp.id_plan_pago  = v_registros.id_plan_pago;
             
+            
+          
+             
+             --RAC 13-02-2013
+             ----------------------------------------------------------
+             --antes de generar el comprobante pasa al estado vbconta 
+             ----------------------------------------------------------
+            
+             select   
+              te.id_tipo_estado
+             into
+              v_id_tipo_estado
+             from wf.ttipo_estado te 
+             inner join wf.tproceso_wf  pw on pw.id_tipo_proceso = te.id_tipo_proceso 
+                  and pw.id_proceso_wf = v_id_proceso_wf
+             where te.codigo = 'vbconta'; 
               
+            
+            
+            
+             IF v_id_tipo_estado is  null THEN
+            
+                raise exception 'El proceso de WF esta mal parametrizado, no tiene el estado Visto bueno contabilidad (vbconta) ';
+            
+             END IF;
+            
+            --registrar el siguiente estado detectado  (vbconta)
+             v_id_estado_actual =  wf.f_registra_estado_wf(v_id_tipo_estado, 
+                                                           NULL, 
+                                                          v_id_estado_wf, 
+                                                           v_id_proceso_wf,
+                                                           p_id_usuario,
+                                                           v_registros.id_depto,
+                                                           '(generacion de comprobante de pago directo para la OP:'|| COALESCE(v_registros.numero,'NAN')||',   cuota nro: '||COALESCE(v_registros.nro_cuota,'NAN')||' ) La solicitud de  Pago pasa a Contabilidad');
+             
+             
+             --actualiza el nuevo estado para el nuevo pago
+              update tes.tplan_pago pp  set 
+                     id_estado_wf =  v_id_estado_actual,
+                     estado = 'vbconta'
+              where id_plan_pago  = v_id_plan_pago;
+             
+             
+              --------------------------------------------------
               -- solicitar negeracion de comprobantes de pago
-              
+              ---------------------------------------------------
               v_verficacion2 = tes.f_generar_comprobante(p_id_usuario, v_id_plan_pago,v_registros.id_depto_conta);
              
               IF v_verficacion2[1]='FALSE'  THEN

@@ -469,11 +469,14 @@ Phx.vista.PlanPagoVb = {
                            this.getBoton('ant_estado').enable();
                            this.getBoton('sig_estado').enable();
                            this.getBoton('SolDevPag').disable();
-                           this.getBoton('edit').disable(); 
-                         
+                           
+                           if (data['estado']== 'vbsolicitante'){
+                            this.getBoton('edit').enable();
+                           }
+                           else{
+                              this.getBoton('edit').disable();  
+                           }
                        }
-                       
-                       
                }
                this.getBoton('SolPlanPago').enable(); 
                

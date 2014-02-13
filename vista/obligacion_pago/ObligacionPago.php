@@ -350,6 +350,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                 name: 'total_nro_cuota',
                 fieldLabel: 'Nro Cuotas',
                 allowBlank: false,
+                allowDecimals: false,
                 anchor: '80%',
                 gwidth: 50,
                 value:0,
@@ -381,7 +382,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                     totalProperty:'total',
                     fields: ['id_plantilla','nro_linea','desc_plantilla','tipo','sw_tesoro', 'sw_compro'],
                     remoteSort: true,
-                    baseParams:{par_filtro:'plt.desc_plantilla',sw_compro:'si',sw_tesoro:'si'}
+                    baseParams:{par_filtro:'plt.desc_plantilla',sw_compro:'si',sw_tesoro:'si',sw_monto_excento:'no' }
                 }),
                 tpl:'<tpl for="."><div class="x-combo-list-item"><p>{desc_plantilla}</p></div></tpl>',
                 valueField: 'id_plantilla',
@@ -427,6 +428,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                 name: 'rotacion',
                 fieldLabel: 'Rotación (Meses)',
                 allowBlank: false,
+                allowDecimals: false,
                 anchor: '80%',
                 gwidth: 50,
                 value:0,
@@ -724,7 +726,8 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
        this.cmpFecha.disable(); 
        this.cmpTipoCambioConv.disable();
        
-        
+       Phx.vista.ObligacionPago.superclass.onButtonEdit.call(this);
+       
        if(data.tipo_obligacion=='adquisiciones'){
             this.mostrarComponente(this.cmpProveedor);
             this.ocultarComponente(this.cmpFuncionario);
@@ -741,8 +744,17 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
            this.cmpMoneda.enable();
        }
        
-       
-       Phx.vista.ObligacionPago.superclass.onButtonEdit.call(this);
+       //segun el total nro cuota cero, ocultamos los componentes
+       if(data.total_nro_cuota=='0'){
+           this.ocultarComponente(this.Cmp.id_plantilla);
+           this.ocultarComponente(this.Cmp.fecha_pp_ini);
+           this.ocultarComponente(this.Cmp.rotacion);
+       }
+       else{
+           this.cmpProveedor.enable();
+           this.mostrarComponente(this.cmpProveedor);
+           this.cmpMoneda.enable();
+       }
            
     },
     
@@ -754,11 +766,8 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
         this.ocultarComponente(this.cmpProveedor);
         this.ocultarComponente(this.cmpFuncionario);
         this.ocultarComponente(this.cmpFuncionarioProveedor);
-        
         this.cmpTipoObligacion.enable();
         this.cmpDepto.enable(); 
-        
-        
         this.mostrarComponente(this.cmpProveedor);
         this.ocultarComponente(this.cmpFuncionario);
         this.ocultarComponente(this.cmpFuncionarioProveedor);
@@ -768,6 +777,10 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
         this.cmpProveedor.enable();
         this.cmpDepto.enable(); 
         this.cmpMoneda.enable();
+        //defecto total nro cuota cero, entoces ocultamos los componentes
+        this.ocultarComponente(this.Cmp.id_plantilla);
+        this.ocultarComponente(this.Cmp.fecha_pp_ini);
+        this.ocultarComponente(this.Cmp.rotacion);
         
     },
     obtenerTipoCambio:function(){

@@ -102,7 +102,7 @@ BEGIN
                                 p_id_usuario,
                                 now(),
                                 'activo',
-                                 p_id_plan_pago,
+                                p_id_plan_pago,
                                 v_registros.id_obligacion_det,
                                v_monto,
                                v_monto_mb

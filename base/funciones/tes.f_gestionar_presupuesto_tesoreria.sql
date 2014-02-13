@@ -290,7 +290,7 @@ BEGIN
                                 va_fecha[v_i]=now()::date;
                            
                                 v_aux_mb = param.f_convertir_moneda(
-                                          v_registros.id_moneda, 
+                                          v_registros_pro.id_moneda, 
                                           NULL,   --por defecto moenda base
                                           v_aux, 
                                           va_fecha[v_i], 
@@ -302,7 +302,7 @@ BEGIN
                             
                               update tes.tobligacion_det od set
                               incrementado_mb = COALESCE(incrementado_mb,0) + v_aux_mb,
-                              incrementado_mo = COALESCE(incrementado_mb,0) + v_aux
+                              incrementado_mo = COALESCE(incrementado_mo,0) + v_aux
                               where  od.id_obligacion_det= v_registros_pro.id_obligacion_det;
                             
                             END IF;

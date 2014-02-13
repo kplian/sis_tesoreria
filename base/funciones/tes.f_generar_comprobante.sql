@@ -314,7 +314,7 @@ BEGIN
             END IF;
             
             
-          
+        
             
             --registrar el siguiente estado detectado
              v_id_estado_actual =  wf.f_registra_estado_wf(v_id_tipo_estado, 
