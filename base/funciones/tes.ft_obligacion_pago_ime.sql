@@ -71,6 +71,20 @@ DECLARE
     v_registros    record;
     v_cad_ep varchar;
     v_cad_uo varchar;
+    
+    
+     v_total_nro_cuota  integer;
+     v_fecha_pp_ini		date;
+     v_rotacion			integer;
+     v_id_plantilla 	integer;
+     
+     v_hstore_pp		hstore;
+     v_tipo_cambio_conv numeric;
+     v_registros_plan   record;
+     v_desc_proveedor   text;
+     v_descuentos_ley   numeric;
+     v_i                integer;
+     v_monto_cuota 		numeric;
 			    
 BEGIN
 
@@ -505,16 +519,34 @@ BEGIN
               op.id_estado_wf,
               op.estado,
               op.id_depto,
-              op.tipo_obligacion
+              op.tipo_obligacion,
+              op.total_nro_cuota,
+              op.fecha_pp_ini,
+              op.rotacion,
+              op.id_plantilla,
+              op.tipo_cambio_conv,
+              pr.desc_proveedor
               
              into
               v_id_proceso_wf,
               v_id_estado_wf,
               v_codigo_estado,
               v_id_depto,
-              v_tipo_obligacion
+              v_tipo_obligacion,
+              v_total_nro_cuota,
+              v_fecha_pp_ini,
+              v_rotacion,
+              v_id_plantilla,
+              v_tipo_cambio_conv,
+              v_desc_proveedor
+              
+              
              from tes.tobligacion_pago op
+             inner join param.vproveedor pr  on pr.id_proveedor = op.id_proveedor
              where op.id_obligacion_pago = v_parametros.id_obligacion_pago; 
+             
+             
+           
              
              --VALIDACIONES
              
@@ -571,13 +603,7 @@ BEGIN
                   where estado_reg = 'activo'
                   and id_obligacion_det= v_id_obligacion_det;
                   
-                  
-                  -- si esta saliendo de borrador,  verifica el total de cuotas y las inserta
-                  --  con la plantilla por defecto 
-                  --TODO llamada a la funcion 
-                  
-            
-             END IF;
+              END IF;
              
              
               
@@ -648,6 +674,80 @@ BEGIN
                fecha_mod=now()
              where id_obligacion_pago  = v_parametros.id_obligacion_pago;
         
+           
+           
+            --  si esta saliendo de borrador,  verifica el total de cuotas y las inserta
+            --  con la plantilla por defecto 
+            IF  v_codigo_estado = 'borrador' THEN 
+            
+            
+              
+               
+                     select  
+                       ps_descuento_porc,
+                       ps_descuento,
+                       ps_observaciones
+                     into
+                      v_registros_plan
+                     FROM  conta.f_get_descuento_plantilla_calculo(v_id_plantilla);
+                      
+                      
+                     v_monto_cuota =  floor( v_total_detalle/v_total_nro_cuota);
+                     
+                      FOR v_i  IN 1..v_total_nro_cuota LOOP
+                          
+                         
+                         IF v_i = v_total_nro_cuota THEN
+                         
+                           v_monto_cuota = v_total_detalle - (v_monto_cuota*v_total_nro_cuota) + v_monto_cuota;
+                         
+                         END IF;
+                         
+                         v_descuentos_ley = v_monto_cuota * v_registros_plan.ps_descuento_porc;
+                         
+                         
+                         -- raise exception 'TC %',v_tipo_cambio_conv;
+                         
+                         --armar hstore 
+                          v_hstore_pp =   hstore(ARRAY[
+                                                        'tipo_pago', 'normal',
+                                                        'tipo',   'devengado_pagado',
+                                                        'tipo_cambio',v_tipo_cambio_conv::varchar,
+                                                        'id_plantilla',v_id_plantilla::varchar,
+                                                        'id_obligacion_pago',v_parametros.id_obligacion_pago::varchar,
+                                                        'monto_no_pagado','0',
+                                                        'monto_retgar_mo','0',
+                                                        'otros_descuentos','0',
+                                                        'monto_excento','0',
+                                                        'id_plan_pago_fk',NULL::varchar,
+                                                        'porc_descuento_ley',v_registros_plan.ps_descuento_porc::varchar,
+                                                        'obs_descuentos_ley',v_registros_plan.ps_observaciones::varchar,
+                                                        'obs_otros_descuentos','',
+                                                        'obs_monto_no_pagado','',
+                                                        'nombre_pago',v_desc_proveedor::varchar,
+                                                        'monto', v_monto_cuota::varchar,
+                                                        'descuento_ley',v_descuentos_ley::varchar,
+                                                        'fecha_tentativa',v_fecha_pp_ini::varchar
+                                                       ]);
+                          
+                          
+                            
+                          
+                            --TODO,  bloquear en formulario de OP  facturas con monto excento
+                           
+                            -- llamada para insertar plan de pagos
+                            v_resp = tes.f_inserta_plan_pago_dev(p_administrador, p_id_usuario,v_hstore_pp);
+                            
+                            -- calcula la fecha para la siguiente insercion
+                            v_fecha_pp_ini =  v_fecha_pp_ini + interval  '1 month'*v_rotacion;
+                      
+                      
+                      END LOOP;
+            END IF;
+            
+            
+            
+            
             -- este verificacion se hace al final por que es necesario
             -- que la llamada de integracion con endesis quede por ulitmo en caso de acontecer algun error
             -- el rooback sea efectivo y no afecte la integridad de endesis

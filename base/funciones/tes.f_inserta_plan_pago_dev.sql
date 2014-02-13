@@ -90,6 +90,13 @@ BEGIN
     (p_hstore->'porc_monto_excento_var')::numeric
     (p_hstore->'monto_excento')::numeric
     
+   
+   (p_hstore->'tipo_cambio')::numeric,
+   (p_hstore->'obs_descuentos_ley'),
+   (p_hstore->'obs_monto_no_pagado')::text,
+   (p_hstore->'obs_otros_descuentos')::text,
+   (p_hstore->'porc_descuento_ley')::numeric,  
+    
     
     
     
@@ -374,7 +381,7 @@ BEGIN
             
             END IF;
             
-            
+          
             
                       
             --Sentencia de la insercion
