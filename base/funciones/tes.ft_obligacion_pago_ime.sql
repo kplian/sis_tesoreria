@@ -678,7 +678,7 @@ BEGIN
            
             --  si esta saliendo de borrador,  verifica el total de cuotas y las inserta
             --  con la plantilla por defecto 
-            IF  v_codigo_estado = 'borrador' THEN 
+            IF  v_codigo_estado = 'borrador'  and v_total_nro_cuota > 0 THEN 
             
             
               
