@@ -194,6 +194,8 @@ Phx.vista.PlanPagoVb = {
          
          if(data.tipo=='pagado'){
              
+                
+                
                 this.Cmp.tipo_pago.disable();
                 this.ocultarComponente(this.Cmp.tipo_pago);
                 
@@ -231,27 +233,21 @@ Phx.vista.PlanPagoVb = {
          
          }
          else{
+           //si es edicion de un pal de devengado    
+               
                 this.mostrarComponente(this.Cmp.tipo_pago);
                 this.Cmp.tipo.enable();
-                
                 this.mostrarComponente(this.Cmp.tipo);
-               
-                
                 this.Cmp.id_plantilla.enable();
                 this.mostrarComponente(this.Cmp.id_plantilla);
-                
                 //RAC  11/02/2014 agrega monto ecento
                 //this.Cmp.monto_excento.enable();
                 this.mostrarComponente(this.Cmp.monto_excento);
-                
                 this.Cmp.monto_no_pagado.enable();
                 this.mostrarComponente(this.Cmp.monto_no_pagado);
-                 
                 this.Cmp.obs_monto_no_pagado.enable();
                 this.mostrarComponente(this.Cmp.obs_monto_no_pagado);
-                
                 if(data.tipo_moneda=='base'){
-                 
                    this.Cmp.tipo_cambio.disable();
                    this.ocultarComponente(this.Cmp.tipo_cambio);
                 }
@@ -260,6 +256,7 @@ Phx.vista.PlanPagoVb = {
                     this.mostrarComponente(this.Cmp.tipo_cambio);
                   
                 }
+                
                 
          }
          
@@ -290,6 +287,22 @@ Phx.vista.PlanPagoVb = {
                this.Cmp.id_cuenta_bancaria_mov.store.baseParams={id_cuenta_bancaria:-1,fecha:this.Cmp.fecha_tentativa.getValue()}
             }
            
+          if(data.estado == 'vbsolicitante'){
+               this.Cmp.fecha_tentativa.disable();
+               this.Cmp.tipo_cambio.disable();
+               this.Cmp.id_plantilla.disable();
+               this.Cmp.forma_pago.disable();
+               this.Cmp.nombre_pago.disable();
+               this.Cmp.nro_cheque.disable();
+               this.Cmp.nro_cuenta_bancaria.disable();
+               this.Cmp.monto_retgar_mo.disable();
+               this.Cmp.monto_no_pagado.disable();
+               this.Cmp.id_cuenta_bancaria.disable();
+               this.Cmp.id_cuenta_bancaria_mov.disable();
+               this.Cmp.obs_monto_no_pagado.disable();
+               this.Cmp.obs_descuentos_ley.disable();
+          }
+         
            
            
        },
