@@ -52,6 +52,7 @@ DECLARE
      v_id_depto integer;
      v_codigo_estado varchar;
      v_id_estado_wf_ant  integer;
+     v_rec_cbte_trans   record;
     
 BEGIN
 
@@ -151,10 +152,22 @@ BEGIN
                id_estado_wf =  v_id_estado_actual,
                estado = v_codigo_estado,
                id_usuario_mod=p_id_usuario,
-               fecha_mod=now()--,
-               --id_int_comprobante = NULL
+               fecha_mod=now(),
+               id_int_comprobante = NULL
              where pp.id_plan_pago = v_registros.id_plan_pago;
      
+     
+     
+             --cheque si tiene prorrateo en tesoria (modulo de obligacion de pagos)
+            for v_rec_cbte_trans in (select * 
+                                     from conta.tint_transaccion
+                                      where id_int_comprobante = p_id_int_comprobante) LOOP
+            
+                  update tes.tprorrateo p set
+                       id_int_transaccion = NULL
+                  where p.id_int_transaccion = v_rec_cbte_trans.id_int_transaccion;
+           
+            END LOOP;
      
      
     
