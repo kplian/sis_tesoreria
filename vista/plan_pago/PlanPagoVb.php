@@ -16,28 +16,28 @@ Phx.vista.PlanPagoVb = {
     bnew:false,
     bsave:false,
     bdel:false,
-	require:'../../../sis_tesoreria/vista/plan_pago/PlanPago.php',
-	requireclase:'Phx.vista.PlanPago',
-	title:'Plan de Pagos',
-	nombreVista: 'planpagoVb',
-	
-	constructor: function(config) {
-	    
-	   this.Atributos[this.getIndAtributo('num_tramite')].grid=true;
-	   this.Atributos[this.getIndAtributo('desc_moneda')].grid=true;
-	   
-	   this.Atributos[this.getIndAtributo('numero_op')].grid=true; 
-	   this.Atributos[this.getIndAtributo('nro_cuota')].form=false; 
-	   this.Atributos[this.getIndAtributo('forma_pago')].form=true; 
-	   this.Atributos[this.getIndAtributo('nro_cheque')].form=true; 
-	   this.Atributos[this.getIndAtributo('nro_cheque')].valorInicial=0;
-	   this.Atributos[this.getIndAtributo('nro_cuenta_bancaria')].form=true; 
-	   this.Atributos[this.getIndAtributo('id_cuenta_bancaria')].form=true; 
-	   this.Atributos[this.getIndAtributo('id_cuenta_bancaria_mov')].form=true; 
-	   
-	   
-	    
-	   //funcionalidad para listado de historicos
+    require:'../../../sis_tesoreria/vista/plan_pago/PlanPago.php',
+    requireclase:'Phx.vista.PlanPago',
+    title:'Plan de Pagos',
+    nombreVista: 'planpagoVb',
+    
+    constructor: function(config) {
+        
+       this.Atributos[this.getIndAtributo('num_tramite')].grid=true;
+       this.Atributos[this.getIndAtributo('desc_moneda')].grid=true;
+       
+       this.Atributos[this.getIndAtributo('numero_op')].grid=true; 
+       this.Atributos[this.getIndAtributo('nro_cuota')].form=false; 
+       this.Atributos[this.getIndAtributo('forma_pago')].form=true; 
+       this.Atributos[this.getIndAtributo('nro_cheque')].form=true; 
+       this.Atributos[this.getIndAtributo('nro_cheque')].valorInicial=0;
+       this.Atributos[this.getIndAtributo('nro_cuenta_bancaria')].form=true; 
+       this.Atributos[this.getIndAtributo('id_cuenta_bancaria')].form=true; 
+       this.Atributos[this.getIndAtributo('id_cuenta_bancaria_mov')].form=true; 
+       
+       
+        
+       //funcionalidad para listado de historicos
        this.historico = 'no';
        this.tbarItems = [{
             text: 'Histórico',
@@ -58,10 +58,10 @@ Phx.vista.PlanPagoVb = {
              },
             scope: this
         }];
-	    
-	    
-	    
-	    
+        
+        
+        
+        
        Phx.vista.PlanPagoVb.superclass.constructor.call(this,config);
        
        this.iniciarEventos();
@@ -347,6 +347,38 @@ Phx.vista.PlanPagoVb = {
             }
         
     }, 
+    
+    getDecuentosPorAplicar:function(id_plantilla){
+        var data = this.getSelectedData();
+           Phx.CP.loadingShow();
+           
+           Ext.Ajax.request({
+                // form:this.form.getForm().getEl(),
+                url:'../../sis_contabilidad/control/PlantillaCalculo/recuperarDescuentosPlantillaCalculo',
+                params:{id_plantilla:id_plantilla},
+                success:this.successAplicarDesc,
+                failure: this.conexionFailure,
+                timeout:this.timeout,
+                scope:this
+            });
+     },
+     
+     successAplicarDesc:function(resp){
+            Phx.CP.loadingHide();
+           var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+            if(!reg.ROOT.error){
+                
+               this.Cmp.porc_descuento_ley.setValue(reg.ROOT.datos.descuento_porc*1);
+               this.Cmp.obs_descuentos_ley.setValue(reg.ROOT.datos.observaciones);
+               
+               this.calculaMontoPago();
+               
+              
+             
+             }else{
+                alert(reg.ROOT.mensaje)
+            }
+     },
     
     iniciarEventos:function(){
         
