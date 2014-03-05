@@ -458,3 +458,14 @@ ALTER TABLE tes.tplan_pago
   ADD COLUMN porc_monto_excento_var NUMERIC DEFAULT 0 NOT NULL;
 /***********************************F-SCP-RAC-TES-0-08/02/2014***************************************/
 
+
+
+/***********************************I-SCP-RAC-TES-0-05/03/2014***************************************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ALTER COLUMN nro_cuota_vigente TYPE NUMERIC(20,0);
+  
+/***********************************F-SCP-RAC-TES-0-05/03/2014***************************************/
+  
