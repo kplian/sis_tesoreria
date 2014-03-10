@@ -901,7 +901,12 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
               
               this.getBoton('del').enable();    
               this.getBoton('fin_registro').enable();
-               this.getBoton('ant_estado').disable();
+              this.getBoton('ant_estado').disable();
+              
+              this.getBoton('reporte_com_ejec_pag').disable();
+              this.getBoton('reporte_plan_pago').disable();
+               
+               
           
               this.TabPanelSouth.get(1).disable();
           
@@ -912,28 +917,26 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                if (data['estado']== 'registrado'){   
                   this.getBoton('ant_estado').enable();
                   this.getBoton('fin_registro').disable();
-                  this.TabPanelSouth.get(1).enable()
+                  this.TabPanelSouth.get(1).enable();
                 }
                 
                 if (data['estado']== 'en_pago'){
                     this.TabPanelSouth.get(1).enable()
                     this.getBoton('ant_estado').enable();
                     this.getBoton('fin_registro').enable();
-                    
                 }
                 
-               
-                
-                if (data['estado']== 'anulado'){
+               if (data['estado']== 'anulado'){
                     this.getBoton('fin_registro').disable();
                     this.TabPanelSouth.get(1).disable();
-                }
+               }
               
               this.getBoton('edit').disable();
               this.getBoton('del').disable();
+              this.getBoton('reporte_com_ejec_pag').enable();
+              this.getBoton('reporte_plan_pago').enable();
           }
-          this.getBoton('reporte_com_ejec_pag').enable();
-          this.getBoton('reporte_plan_pago').enable();
+          
           
           if(data.tipo_obligacion=='adquisiciones'){
               //RCM: menú de reportes de adquisiciones

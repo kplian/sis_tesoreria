@@ -67,8 +67,7 @@ Phx.vista.ObligacionPagoTes = {
               this.getBoton('edit').disable();
               this.getBoton('del').disable();
           }
-          this.getBoton('reporte_com_ejec_pag').enable();
-          this.getBoton('reporte_plan_pago').enable();
+          
           
           //RCM: menú de reportes de adquisiciones
           this.menuAdq.enable();
