@@ -242,7 +242,7 @@ BEGIN
               pro.id_plan_pago  = p_id_plan_pago;
               
           
-            IF v_registros.monto_ejecutar_total_mo != v_registros.total_prorrateado THEN
+            IF v_registros.monto_ejecutar_total_mo != v_registros.total_prorrateado  or  v_monto_ejecutar_mo != v_registros.monto_ejecutar_total_mo THEN
                       
               raise exception 'El total prorrateado no iguala con el monto total a ejecutar';
             

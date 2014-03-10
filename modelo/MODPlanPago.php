@@ -92,17 +92,6 @@ class MODPlanPago extends MODbase{
 		$this->captura('porc_monto_excento_var','numeric');
 		$this->captura('monto_excento','numeric');
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
