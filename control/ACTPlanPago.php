@@ -105,6 +105,11 @@ class ACTPlanPago extends ACTbase{
         		$dataSource->putParameter('total_pagado',$datosPlanPago[0]['total_pagado']);
         		$dataSource->putParameter('fecha_reg',$datosPlanPago[0]['fecha_reg']);
         		
+        		$dataSource->putParameter('monto_excento',$datosPlanPago[0]['monto_excento']);
+        		
+        		
+        		
+        		
         		//preapra conslta del prorrateo
         		
         		$this->objParam->addFiltro("pro.id_plan_pago = ".$this->objParam->getParametro('id_plan_pago'));  

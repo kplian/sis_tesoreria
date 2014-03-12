@@ -399,7 +399,8 @@ BEGIN
                                   pg.total_pagado as total_pagado,
                                   pg.fecha_reg,
                                   op.total_pago,
-                                  pg.tipo     
+                                  pg.tipo,
+                                  pg.monto_excento     
                         from tes.tplan_pago pg
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago=pg.id_obligacion_pago
                         inner join param.vproveedor pv on pv.id_proveedor=op.id_proveedor

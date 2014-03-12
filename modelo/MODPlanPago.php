@@ -407,6 +407,10 @@ class MODPlanPago extends MODbase{
 		$this->captura('total_pago','numeric');
 		$this->captura('tipo','varchar');
 		
+		$this->captura('monto_excento','numeric');
+		
+		
+		
 		  
 		//Ejecuta la respuesta
 		$this->armarConsulta();

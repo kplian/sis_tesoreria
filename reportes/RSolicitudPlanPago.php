@@ -169,12 +169,24 @@ Class RSolicitudPlanPago extends Report {
         $pdf->SetFont('', '');
         $pdf->Cell($width3, $height, $this->getDataSource()->getParameter('monto_no_pagado'), 0, 0, 'R', false, '', 0, false, 'T', 'C');
         $pdf->Ln();
+		
 		$pdf->Cell($width2+$width3, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
 		$pdf->SetFont('', 'B');
         $pdf->Cell($width2*2, $height, 'Otros Descuentos ('.$this->getDataSource()->getParameter('codigo_moneda').'):', 0, 0, 'R', false, '', 0, false, 'T', 'C');
         $pdf->SetFont('', '');
         $pdf->Cell($width3, $height, $this->getDataSource()->getParameter('otros_descuentos'), 0, 0, 'R', false, '', 0, false, 'T', 'C');
         $pdf->Ln();
+        
+        //si tiene monto excento de impuestos
+        if ($this->getDataSource()->getParameter('monto_excento') > 0){
+             $pdf->Cell($width2+$width3, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+            $pdf->SetFont('', 'B');
+            $pdf->Cell($width2*2, $height, 'Monto Excento de Impustos ('.$this->getDataSource()->getParameter('codigo_moneda').'):', 0, 0, 'R', false, '', 0, false, 'T', 'C');
+            $pdf->SetFont('', '');
+            $pdf->Cell($width3, $height, $this->getDataSource()->getParameter('monto_excento'), 0, 0, 'R', false, '', 0, false, 'T', 'C');
+            $pdf->Ln();       
+        }
+        
         
         $pdf->Cell($width2+$width3, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
         $pdf->SetFont('', 'B');
