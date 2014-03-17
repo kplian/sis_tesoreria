@@ -2,7 +2,7 @@
 /**
 *@package pXP
 *@file gen-SistemaDist.php
-*@author  (fprudencio)
+*@author  (rarteaga)
 *@date 20-09-2011 10:22:05
 *@description Archivo con la interfaz de usuario que permite 
 *dar el visto a solicitudes de compra
@@ -67,8 +67,7 @@ Phx.vista.ObligacionPagoTes = {
               this.getBoton('edit').disable();
               this.getBoton('del').disable();
           }
-          this.getBoton('reporte_com_ejec_pag').enable();
-          this.getBoton('reporte_plan_pago').enable();
+          
           
           //RCM: menú de reportes de adquisiciones
           this.menuAdq.enable();

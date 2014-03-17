@@ -119,6 +119,10 @@ DECLARE
     v_monto_excento 		 numeric;
     
     v_total_prorrateo        numeric;
+    
+    
+   
+  
   
     
     
@@ -1052,14 +1056,18 @@ BEGIN
             pp.id_estado_wf,
             pp.estado,
             pp.fecha_tentativa,
-            op.numero 
+            op.numero,
+            pp.total_prorrateado ,
+            pp.monto_ejecutar_total_mo
           into 
           
             v_id_proceso_wf,
             v_id_estado_wf,
             v_codigo_estado,
-            v_fecha_tentativa
-            v_num_obliacion_pago
+            v_fecha_tentativa,
+            v_num_obliacion_pago,
+            v_total_prorrateo,
+            v_monto_ejecutar_total_mo
             
           from tes.tplan_pago  pp
           inner  join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
@@ -1075,6 +1083,34 @@ BEGIN
           from wf.testado_wf ew
           inner join wf.ttipo_estado te on te.id_tipo_estado = ew.id_tipo_estado
           where ew.id_estado_wf = v_id_estado_wf;
+          
+          -- SI ES EL ESTADO VISTO BUENO 
+          -- validamos el prorrateo cuadre con el monto a pagar
+          
+          
+          IF v_codigo_estado  in ('vbsolicitante')  THEN
+          
+             
+                ------------------------------------
+                -- validacion del prorrateo--    
+                ------------------------------------
+                  select
+                    sum(pro.monto_ejecutar_mo)
+                 into
+                    v_monto_ejecutar_mo
+                  from tes.tprorrateo pro
+                  where pro.estado_reg = 'activo' and  
+                    pro.id_plan_pago  = v_parametros.id_plan_pago;
+                    
+                
+                  IF v_total_prorrateo != v_monto_ejecutar_total_mo  or  v_monto_ejecutar_total_mo != v_monto_ejecutar_mo THEN
+                            
+                    raise exception 'El total prorrateado no iguala con el monto total a ejecutar';
+                  
+                  END IF;
+                  
+                 
+          END IF;
           
           
         
@@ -1239,6 +1275,12 @@ BEGIN
                                                                v_id_depto,
                                                                COALESCE(v_num_obliacion_pago,'--')||' Obs:'||v_obs);
                 
+                 
+                 
+                
+                
+                 
+                 
                  -- actualiza estado en la solicitud
                 
                  update tes.tplan_pago  t set 
