@@ -1,7 +1,8 @@
 <?php
+require_once dirname(__FILE__).'/../../pxp/lib/lib_reporte/mypdf.php';
 require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
 
- class CustomReport extends TCPDF {
+ class CustomReport extends MYPDF {
     
     private $dataSource;
     
@@ -183,8 +184,9 @@ Class RComEjePag extends Report {
     function writeDetalles (DataSource $dataSource, TCPDF $pdf,$tipo) {
     	$blackAll = array('LTRB' =>array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0, 0, 0)));
         $widthMarginLeft = 1;
+        
         $width1 = 15;
-								$width2 = 30;
+		$width2 = 30;
         $width3 = 80;
         $pdf->Ln();
         $pdf->SetFontSize(7.5);
@@ -193,28 +195,35 @@ Class RComEjePag extends Report {
         $pdf->SetFillColor(255,255,255, true);
         $pdf->setTextColor(0,0,0);
 								
-		$pdf->Cell($width2, $height, 'Centro de Costo', $blackAll, 0, 'l', true, '', 1, false, 'T', 'C');
-		$pdf->Cell($width2, $height, 'Partida', $blackAll, 0, 'L', true, '', 1, false, 'T', 'C');
+		$pdf->Cell($width2, $height, 'Centro de Costo',        $blackAll, 0, 'L', true, '', 1, false, 'T', 'C');
+		$pdf->Cell($width2, $height, 'Partida',                $blackAll, 0, 'L', true, '', 1, false, 'T', 'C');
         $pdf->Cell($width3, $height, 'Concepto Ingreso Gasto', $blackAll, 0, 'L', true, '', 1, false, 'T', 'C');
-        $pdf->Cell($width1, $height, 'Comprometido', $blackAll, 0, 'L', true, '', 1, false, 'T', 'C');
-        $pdf->Cell($width1, $height, 'Ejecutado', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-        $pdf->Cell($width1, $height, 'Pagado', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+        $pdf->Cell($width1, $height, 'Comprometido',           $blackAll, 0, 'L', true, '', 1, false, 'T', 'C');
+        $pdf->Cell($width1, $height, 'Ejecutado',              $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+        $pdf->Cell($width1, $height, 'Pagado',                 $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
         
         $pdf->Ln();
         $pdf->SetFontSize(7);
         foreach($dataSource->getDataset() as $row) {
+        	             
+        	         
+        	 var_dump($row);
+        	 exit;
+        	 
+        	 //MultiRow($row, $fill = false, $border = 1)    
+        	    
         	$pdf->SetFont('', '');												
 			$xAntesMultiCell = $pdf->getX();
 			$yAntesMultiCell = $pdf->getY();												
             //$totalItem
-            $pdf->setX($xAntesMultiCell+$width2*2);
+            //$pdf->setX($xAntesMultiCell+$width2*2);
             $pdf->MultiCell($width3, $height, $row['nombre_ingas']."\r\n".'  - '.$row['descripcion'], 1,'L', false ,1);
-			$yDespuesMultiCell= $pdf->getY();
-			$height = $yDespuesMultiCell-$yAntesMultiCell;
-			$pdf->setXY($xAntesMultiCell,$yAntesMultiCell);	
+			//$yDespuesMultiCell= $pdf->getY();
+			//$height = $yDespuesMultiCell-$yAntesMultiCell;
+			//$pdf->setXY($xAntesMultiCell,$yAntesMultiCell);	
             $pdf->MultiCell($width2, $height, $row['codigo_cc'], 1,'L', false ,0);
             $pdf->MultiCell($width2, $height, $row['nombre_partida'], 1,'L', false ,0);
-			$pdf->setX($xAntesMultiCell+$width2*2+$width3);
+			//$pdf->setX($xAntesMultiCell+$width2*2+$width3);
             $pdf->Cell($width1, $height, $row['comprometido'], $blackAll, 0, 'L', true, '', 1, false, 'T', 'C');
 			$pdf->Cell($width1, $height, $row['ejecutado'], $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$pdf->Cell($width1, $height, $row['pagado'], $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');

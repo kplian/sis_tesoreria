@@ -115,18 +115,17 @@ class ACTObligacionPago extends ACTbase{
        $this->objParam->addParametroConsulta('dir_ordenacion','ASC');
        $this->objParam->addParametroConsulta('cantidad',1000);
        $this->objParam->addParametroConsulta('puntero',0);
-							
+	
+	   	//consulta por los datos de la obligacion de pago					
        $this->objFunc=$this->create('MODObligacionPago');
        $resultObligacionPago = $this->objFunc->obligacionPagoSeleccionado($this->objParam);
     	
        if($resultObligacionPago->getTipo()=='EXITO'){
     	
         	    $datosObligacionPago = $resultObligacionPago->getDatos();
-        	
-            	$dataSource->putParameter('desc_proveedor',$datosObligacionPago[0]['desc_proveedor']);
+        	    $dataSource->putParameter('desc_proveedor',$datosObligacionPago[0]['desc_proveedor']);
             	$dataSource->putParameter('estado',$datosObligacionPago[0]['estado']);
             	$dataSource->putParameter('tipo_obligacion',$datosObligacionPago[0]['tipo_obligacion']);
-            	
             	$dataSource->putParameter('obs',$datosObligacionPago[0]['obs']);
             	$dataSource->putParameter('nombre_subsistema',$datosObligacionPago[0]['nombre_subsistema']);
             	$dataSource->putParameter('porc_retgar',$datosObligacionPago[0]['porc_retgar']);
@@ -139,19 +138,18 @@ class ACTObligacionPago extends ACTbase{
             	$dataSource->putParameter('comprometido',$datosObligacionPago[0]['comprometido']);
             	$dataSource->putParameter('nro_cuota_vigente',$datosObligacionPago[0]['nro_cuota_vigente']);
             	$dataSource->putParameter('pago_variable',$datosObligacionPago[0]['pago_variable']);
+                $dataSource->putParameter('moneda',$datosObligacionPago[0]['moneda']);
             	
-            	$dataSource->putParameter('moneda',$datosObligacionPago[0]['moneda']);
             	
-               $this->objParam->addParametroConsulta('ordenacion','id_obligacion_det');
-               $this->objParam->addParametroConsulta('dir_ordenacion','ASC');
-               $this->objParam->addParametroConsulta('cantidad',1000);
-               $this->objParam->addParametroConsulta('puntero',0);
+            	//consulta por el detalle de obligacion
+                $this->objParam->addParametroConsulta('ordenacion','id_obligacion_det');
+                $this->objParam->addParametroConsulta('dir_ordenacion','ASC');
+                $this->objParam->addParametroConsulta('cantidad',1000);
+                $this->objParam->addParametroConsulta('puntero',0);
         	   
-        	   //listado del detalle 						
-               $this->objFunc=$this->create('MODObligacionPago');
-               
-               			
-               $resultObligacion=$this->objFunc->listarObligacion($this->objParam);
+            	//listado del detalle 						
+                $this->objFunc=$this->create('MODObligacionPago');
+                $resultObligacion=$this->objFunc->listarObligacion($this->objParam);
                
                 if($resultObligacion->getTipo()=='EXITO'){
                     
