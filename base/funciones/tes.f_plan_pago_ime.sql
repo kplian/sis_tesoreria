@@ -1210,7 +1210,8 @@ BEGIN
                                          codigo_depto varchar,
                                          nombre_corto_depto varchar,
                                          nombre_depto varchar,
-                                         prioridad integer);
+                                         prioridad integer,
+                                         subsistema varchar);
                             END IF;
                   
                   END IF;

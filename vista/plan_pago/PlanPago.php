@@ -322,7 +322,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 name: 'monto_excento',
                 currencyChar:' ',
                 allowNegative:false,
-                fieldLabel: 'Monto excento',
+                fieldLabel: 'Monto exento',
                 allowBlank: false,
                 disabled:true,
                 gwidth: 100,
