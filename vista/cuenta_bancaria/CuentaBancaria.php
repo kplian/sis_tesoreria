@@ -87,7 +87,7 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 				name: 'centro',
 				fieldLabel: 'Centro',
 				allowBlank: false,
-				anchor: '45%',
+				anchor: '60%',
 				gwidth: 100,
 				maxLength:25,
 				typeAhead:true,
