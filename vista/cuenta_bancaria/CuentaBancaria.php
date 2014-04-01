@@ -66,6 +66,42 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 			grid:true,
 			form:true
 		},
+		
+		{
+			config:{
+				name: 'denominacion',
+				fieldLabel: 'Denominación',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 150,
+				maxLength:100
+			},
+			type:'TextField',
+			filters:{pfiltro:'ctaban.denominacion',type:'string'},
+			id_grupo:1,
+			grid:true,
+			form:true
+		},
+		{
+			config:{
+				name: 'centro',
+				fieldLabel: 'Centro',
+				allowBlank: false,
+				anchor: '45%',
+				gwidth: 100,
+				maxLength:25,
+				typeAhead:true,
+				triggerAction:'all',
+				mode:'local',
+				store:['si','no']
+			},
+			valorInicial:'no',
+			type:'ComboBox',
+			filters:{pfiltro:'ctaban.centro',type:'string'},
+			id_grupo:1,
+			grid:true,
+			form:true
+		},
 		{
 			config:{
 				name: 'fecha_alta',
@@ -206,6 +242,8 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 		{name:'estado_reg', type: 'string'},
 		{name:'fecha_baja', type: 'date',dateFormat:'Y-m-d'},
 		{name:'nro_cuenta', type: 'string'},
+		{name:'denominacion', type: 'string'},
+		{name:'centro', type: 'string'},
 		{name:'fecha_alta', type: 'date',dateFormat:'Y-m-d'},
 		{name:'id_institucion', type: 'numeric'},
 		{name:'nombre_institucion', type: 'string'},

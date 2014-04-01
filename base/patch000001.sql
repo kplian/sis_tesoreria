@@ -468,4 +468,9 @@ ALTER TABLE tes.tobligacion_pago
   ALTER COLUMN nro_cuota_vigente TYPE NUMERIC(20,0);
   
 /***********************************F-SCP-RAC-TES-0-05/03/2014***************************************/
-  
+
+/***********************************I-SCP-JRR-TES-0-01/04/2014***************************************/
+ALTER TABLE tes.tcuenta_bancaria
+  ADD COLUMN denominacion VARCHAR(100);
+
+/***********************************F-SCP-JRR-TES-0-01/04/2014***************************************/

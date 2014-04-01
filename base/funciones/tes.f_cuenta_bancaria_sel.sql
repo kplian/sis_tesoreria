@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_cuenta_bancaria_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -61,7 +59,9 @@ BEGIN
 						usu1.cuenta as usr_reg,
 						usu2.cuenta as usr_mod,
                         mon.id_moneda,	
-                        mon.codigo as codigo_moneda
+                        mon.codigo as codigo_moneda,
+                        ctaban.denominacion,
+                        ctaban.centro
 						from tes.tcuenta_bancaria ctaban
                         inner join param.tinstitucion inst on inst.id_institucion = ctaban.id_institucion
                         left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda

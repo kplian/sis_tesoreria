@@ -35,6 +35,8 @@ class MODCuentaBancaria extends MODbase{
 		$this->captura('usr_mod','varchar');
 		$this->captura('id_moneda','integer');
 		$this->captura('codigo_moneda','varchar');
+		$this->captura('denominacion','varchar');
+		$this->captura('centro','varchar');
 		
 	
 		
@@ -59,6 +61,8 @@ class MODCuentaBancaria extends MODbase{
 		$this->setParametro('fecha_alta','fecha_alta','date');
 		$this->setParametro('id_institucion','id_institucion','int4');
 		$this->setParametro('id_moneda','id_moneda','int4');
+		$this->setParametro('denominacion','denominacion','varchar');
+		$this->setParametro('centro','centro','varchar');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -82,6 +86,8 @@ class MODCuentaBancaria extends MODbase{
 		$this->setParametro('fecha_alta','fecha_alta','date');
 		$this->setParametro('id_institucion','id_institucion','int4');
 		$this->setParametro('id_moneda','id_moneda','int4');
+		$this->setParametro('denominacion','denominacion','varchar');
+		$this->setParametro('centro','centro','varchar');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
