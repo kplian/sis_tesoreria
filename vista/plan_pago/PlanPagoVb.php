@@ -23,6 +23,8 @@ Phx.vista.PlanPagoVb = {
     
     constructor: function(config) {
         
+       
+        
        this.Atributos[this.getIndAtributo('num_tramite')].grid=true;
        this.Atributos[this.getIndAtributo('desc_moneda')].grid=true;
        
@@ -85,15 +87,24 @@ Phx.vista.PlanPagoVb = {
         } 
         
        
-       this.crearFormularioEstados();
+       //this.crearFormularioEstados();
        this.crearFomularioDepto()
        
        //RAC: Se agrega menú de reportes de adquisiciones
        this.addBotones();
        
-       
        this.store.baseParams={tipo_interfaz:this.nombreVista};
-       this.load({params:{start:0, limit:this.tam_pag}});
+       
+        if(config.filtro_directo){
+           this.store.baseParams.filtro_valor = config.filtro_directo.valor;
+           this.store.baseParams.filtro_campo = config.filtro_directo.campo;
+       }
+       
+       this.load({params:{
+           start:0, 
+           limit:this.tam_pag
+           
+           }});
        
        
         

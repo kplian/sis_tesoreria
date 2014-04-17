@@ -35,6 +35,7 @@ DECLARE
     v_inner            varchar;
     v_strg_pp         varchar;
     v_strg_obs         varchar;
+    va_id_depto        integer[];
   
 BEGIN
 
@@ -51,6 +52,16 @@ BEGIN
 	if(p_transaccion='TES_PLAPA_SEL')then
      				
     	begin
+        
+            
+            --obtiene los departamentos del usuario
+            select  
+                pxp.aggarray(depu.id_depto)
+            into 
+                va_id_depto
+            from param.tdepto_usuario depu 
+            where depu.id_usuario =  p_id_usuario; 
+        
         
        
         
@@ -69,7 +80,7 @@ BEGIN
                 IF p_administrador !=1 THEN
                 
                               
-                      v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (lower(plapa.estado)!=''borrador'') and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'' and  ';
+                      v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))    ) and  (lower(plapa.estado)!=''borrador'') and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'' and  ';
                   
                  ELSE
                       

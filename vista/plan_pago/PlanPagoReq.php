@@ -49,7 +49,7 @@ Phx.vista.PlanPagoReq = {
         ////formulario de departamentos
         
         
-        this.crearFormularioEstados();
+        //this.crearFormularioEstados();
         
        
         

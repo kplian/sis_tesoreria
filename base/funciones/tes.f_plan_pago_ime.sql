@@ -119,6 +119,16 @@ DECLARE
     v_monto_excento 		 numeric;
     
     v_total_prorrateo        numeric;
+    v_registros_proc        record;
+    v_codigo_tipo_pro       varchar;
+    
+    
+    v_acceso_directo  	varchar;
+    v_clase   			varchar;
+    v_parametros_ad   		varchar;
+    v_tipo_noti  			varchar;
+    v_titulo   			varchar;
+    
     
     
    
@@ -772,80 +782,79 @@ BEGIN
            
           
            IF  v_registros.tipo in  ('devengado_pagado','devengado')   THEN
-               select 
-                max(pp.nro_cuota)
-               into
-                v_nro_cuota
-               from tes.tplan_pago pp 
-               where 
-                  pp.id_obligacion_pago = v_registros.id_obligacion_pago 
-                   and   pp.estado_reg = 'activo';
-               
-               v_nro_cuota = floor(COALESCE(v_nro_cuota,0));
-               
-               IF v_nro_cuota != v_registros.nro_cuota THEN
-               
-                 raise exception 'Elimine primero la ultima cuota';
-               
-               END IF;
+                     select 
+                      max(pp.nro_cuota)
+                     into
+                      v_nro_cuota
+                     from tes.tplan_pago pp 
+                     where 
+                        pp.id_obligacion_pago = v_registros.id_obligacion_pago 
+                         and   pp.estado_reg = 'activo';
+                     
+                     v_nro_cuota = floor(COALESCE(v_nro_cuota,0));
+                     
+                     IF v_nro_cuota != v_registros.nro_cuota THEN
+                     
+                       raise exception 'Elimine primero la ultima cuota';
+                     
+                     END IF;
+                      
+                   
+                 
+                  
+                     
+                     
+                     --recuperamos el id_tipo_proceso en el WF para el estado anulado
+                     --ya que este es un estado especial que no tiene padres definidos
+                     
+                     
+                     select 
+                      te.id_tipo_estado
+                     into
+                      v_id_tipo_estado
+                     from wf.tproceso_wf pw 
+                     inner join wf.ttipo_proceso tp on pw.id_tipo_proceso = tp.id_tipo_proceso
+                     inner join wf.ttipo_estado te on te.id_tipo_proceso = tp.id_tipo_proceso and te.codigo = 'anulado'               
+                     where pw.id_proceso_wf = v_registros.id_proceso_wf;
+                     
+                    
+                    
+                     -- pasamos la cotizacion al siguiente estado
+                 
+                     v_id_estado_actual =  wf.f_registra_estado_wf(v_id_tipo_estado, 
+                                                                 NULL, 
+                                                                 v_registros.id_estado_wf, 
+                                                                 v_registros.id_proceso_wf,
+                                                                 p_id_usuario,
+                                                                 v_registros.id_depto,
+                                                                 'Se elimina la cuota de devengado');
+                  
+                  
+                     -- actualiza estado en la cotizacion
+                    
+                     update tes.tplan_pago  pp set 
+                       id_estado_wf =  v_id_estado_actual,
+                       estado = 'anulado',
+                       id_usuario_mod=p_id_usuario,
+                       fecha_mod=now(),
+                       estado_reg='inactivo'
+                     where pp.id_plan_pago  = v_parametros.id_plan_pago;
                 
-             
-           
-            
-               
-               
-               --recuperamos el id_tipo_proceso en el WF para el estado anulado
-               --ya que este es un estado especial que no tiene padres definidos
-               
-               
-               select 
-               	te.id_tipo_estado
-               into
-               	v_id_tipo_estado
-               from wf.tproceso_wf pw 
-               inner join wf.ttipo_proceso tp on pw.id_tipo_proceso = tp.id_tipo_proceso
-               inner join wf.ttipo_estado te on te.id_tipo_proceso = tp.id_tipo_proceso and te.codigo = 'anulado'               
-               where pw.id_proceso_wf = v_registros.id_proceso_wf;
-               
-              
-              
-               -- pasamos la cotizacion al siguiente estado
-           
-               v_id_estado_actual =  wf.f_registra_estado_wf(v_id_tipo_estado, 
-                                                           NULL, 
-                                                           v_registros.id_estado_wf, 
-                                                           v_registros.id_proceso_wf,
-                                                           p_id_usuario,
-                                                           v_registros.id_depto,
-                                                           'Se elimina la cuota de devengado');
-            
-            
-               -- actualiza estado en la cotizacion
-              
-               update tes.tplan_pago  pp set 
-                 id_estado_wf =  v_id_estado_actual,
-                 estado = 'anulado',
-                 id_usuario_mod=p_id_usuario,
-                 fecha_mod=now(),
-                 estado_reg='inactivo'
-               where pp.id_plan_pago  = v_parametros.id_plan_pago;
-          
-              --actulizamos el nro_cuota actual actual en obligacion_pago
-          
-          
-              update tes.tobligacion_pago op set
-                 nro_cuota_vigente = v_nro_cuota - 1
-               where   op.id_obligacion_pago = v_registros.id_obligacion_pago;
-               
-               
-             --elimina los prorrateos
-              update  tes.tprorrateo pro  set 
-               estado_reg='inactivo'
-              where pro.id_plan_pago =  v_parametros.id_plan_pago; 
+                    --actulizamos el nro_cuota actual actual en obligacion_pago
+                
+                
+                    update tes.tobligacion_pago op set
+                       nro_cuota_vigente = v_nro_cuota - 1
+                     where   op.id_obligacion_pago = v_registros.id_obligacion_pago;
+                     
+                     
+                   --elimina los prorrateos
+                    update  tes.tprorrateo pro  set 
+                     estado_reg='inactivo'
+                    where pro.id_plan_pago =  v_parametros.id_plan_pago; 
                
           
-           
-            ELSIF  v_registros.tipo in ('pagado')   THEN
+      ELSIF  v_registros.tipo in ('pagado')   THEN
              -- eliminacion de cuotas de pago
              
                      
@@ -914,11 +923,11 @@ BEGIN
              
              
             
-            ELSE
+          ELSE
             
                 raise exception 'Tipo no reconocido';
             
-            END IF;
+          END IF;
            
             
             
@@ -1040,7 +1049,7 @@ BEGIN
             END IF;
         end;
         
-     /*********************************    
+    /*********************************    
  	#TRANSACCION:  'TES_SIGEPP_IME'
  	#DESCRIPCION:	funcion que controla el cambio al Siguiente esado de los planes de pago, integrado  con el EF
  	#AUTOR:		RAC	
@@ -1048,6 +1057,216 @@ BEGIN
 	***********************************/
 
 	elseif(p_transaccion='TES_SIGEPP_IME')then   
+        begin
+        
+         /*   PARAMETROS
+         
+        $this->setParametro('id_proceso_wf_act','id_proceso_wf_act','int4');
+        $this->setParametro('id_tipo_estado','id_tipo_estado','int4');
+        $this->setParametro('id_funcionario_wf','id_funcionario_wf','int4');
+        $this->setParametro('id_depto_wf','id_depto_wf','int4');
+        $this->setParametro('obs','obs','text');
+        $this->setParametro('json_procesos','json_procesos','text');
+        */
+        
+        --obtenermos datos basicos
+        select
+            pp.id_plan_pago,
+            pp.id_proceso_wf,
+            pp.id_estado_wf,
+            pp.estado,
+            pp.fecha_tentativa,
+            op.numero,
+            pp.total_prorrateado ,
+            pp.monto_ejecutar_total_mo
+        into 
+            v_id_plan_pago,
+            v_id_proceso_wf,
+            v_id_estado_wf,
+            v_codigo_estado,
+            v_fecha_tentativa,
+            v_num_obliacion_pago,
+            v_total_prorrateo,
+            v_monto_ejecutar_total_mo
+            
+        from tes.tplan_pago  pp
+        inner  join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
+        where pp.id_proceso_wf  = v_parametros.id_proceso_wf_act;
+          
+          
+          select 
+            ew.id_tipo_estado ,
+            te.pedir_obs
+           into 
+            v_id_tipo_estado,
+            v_perdir_obs
+          from wf.testado_wf ew
+          inner join wf.ttipo_estado te on te.id_tipo_estado = ew.id_tipo_estado
+          where ew.id_estado_wf = v_id_estado_wf;
+          
+          -- SI ES EL ESTADO VISTO BUENO 
+          -- validamos el prorrateo cuadre con el monto a pagar
+          
+          ------------------------------------
+          -- validacion del prorrateo--    
+          ------------------------------------
+          
+          
+         IF v_codigo_estado  in ('vbsolicitante')  THEN
+                
+                 select
+                    sum(pro.monto_ejecutar_mo)
+                 into
+                    v_monto_ejecutar_mo
+                 from tes.tprorrateo pro
+                 where pro.estado_reg = 'activo' and  
+                    pro.id_plan_pago  = v_id_plan_pago;
+                    
+                
+                IF v_total_prorrateo != v_monto_ejecutar_total_mo  or  v_monto_ejecutar_total_mo != v_monto_ejecutar_mo THEN
+                            
+                    raise exception 'El total prorrateado no iguala con el monto total a ejecutar';
+                  
+                END IF;
+          END IF;
+          
+          
+        -- obtener datos tipo estado
+                
+                select
+                 te.codigo
+                into
+                 v_codigo_estado_siguiente
+                from wf.ttipo_estado te
+                where te.id_tipo_estado = v_parametros.id_tipo_estado;
+                
+                IF  pxp.f_existe_parametro(p_tabla,'id_depto_wf') THEN
+                 
+                 v_id_depto = v_parametros.id_depto_wf;
+                
+                END IF;
+                
+                
+                
+                IF  pxp.f_existe_parametro(p_tabla,'obs') THEN
+                  v_obs=v_parametros.obs;
+                ELSE
+                   v_obs='---';
+                
+                END IF;
+                
+                
+                IF v_codigo_estado_siguiente = 'pendiente' THEN
+                --si el siguient estado es aprobado obtenemos el depto que le correponde de la solictud de compra
+                    raise exception 'Error el estado pendientes debe generar comprobantes';
+                
+                END IF;
+                
+               
+             --configurar acceso directo para la alarma   
+             v_acceso_directo = '';
+             v_clase = '';
+             v_parametros_ad = '';
+             v_tipo_noti = 'notificacion';
+             v_titulo  = 'Visto Bueno';
+             
+           
+             IF   v_codigo_estado_siguiente not in('borrador','pendiente','pagado','devengado','anulado')   THEN
+                  v_acceso_directo = '../../../sis_tesoreria/vista/plan_pago/PlanPagoVb.php';
+                 v_clase = 'PlanPagoVb';
+                 v_parametros_ad = '{filtro_directo:{campo:"plapa.id_proceso_wf",valor:"'||v_id_proceso_wf::varchar||'"}}';
+                 v_tipo_noti = 'notificacion';
+                 v_titulo  = 'Visto Bueno';
+             
+              END IF;
+             
+             
+             -- hay que recuperar el supervidor que seria el estado inmediato,...
+             v_id_estado_actual =  wf.f_registra_estado_wf(v_parametros.id_tipo_estado, 
+                                                             v_parametros.id_funcionario_wf, 
+                                                             v_id_estado_wf, 
+                                                             v_id_proceso_wf,
+                                                             p_id_usuario,
+                                                             v_id_depto,
+                                                             COALESCE(v_num_obliacion_pago,'--')||' Obs:'||v_obs,
+                                                             v_acceso_directo ,
+                                                             v_clase,
+                                                             v_parametros_ad,
+                                                             v_tipo_noti,
+                                                             v_titulo);
+                
+                 
+             -- actualiza estado en la solicitud
+                
+             update tes.tplan_pago  t set 
+               id_estado_wf =  v_id_estado_actual,
+               estado = v_codigo_estado_siguiente,
+               id_usuario_mod=p_id_usuario,
+               fecha_mod=now()
+                   
+             where id_plan_pago = v_id_plan_pago;
+             
+             
+          --------------------------------------
+          -- registra los procesos disparados
+          --------------------------------------
+         
+          FOR v_registros_proc in ( select * from json_populate_recordset(null::wf.proceso_disparado_wf, v_parametros.json_procesos::json)) LOOP
+    
+               --get cdigo tipo proceso
+               select   
+                  tp.codigo 
+               into 
+                  v_codigo_tipo_pro   
+               from wf.ttipo_proceso tp 
+                where  tp.id_tipo_proceso =  v_registros_proc.id_tipo_proceso_pro;
+          
+          
+               -- disparar creacion de procesos seleccionados
+              
+              SELECT
+                       ps_id_proceso_wf,
+                       ps_id_estado_wf,
+                       ps_codigo_estado
+                 into
+                       v_id_proceso_wf,
+                       v_id_estado_wf,
+                       v_codigo_estado
+              FROM wf.f_registra_proceso_disparado_wf(
+                       p_id_usuario,
+                       v_id_estado_actual, 
+                       v_registros_proc.id_funcionario_wf_pro, 
+                       v_registros_proc.id_depto_wf_pro,
+                       v_registros_proc.obs_pro,
+                       v_codigo_tipo_pro,    
+                       v_codigo_tipo_pro);
+                       
+                       
+           END LOOP;  
+             
+                 
+            
+          
+          -- si hay mas de un estado disponible  preguntamos al usuario
+          v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado del plan de pagos)'); 
+          v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
+          
+          
+
+        
+          --Devuelve la respuesta
+            return v_resp;
+        
+        end;    
+        
+    /*********************************    
+ 	#TRANSACCION:  'TES_SIGEPP_IME__bk'
+ 	#DESCRIPCION:	funcion que controla el cambio al Siguiente esado de los planes de pago, integrado  con el EF
+ 	#AUTOR:		RAC	
+ 	#FECHA:		17-12-2013 12:12:51
+	***********************************/
+
+	elseif(p_transaccion='TES_SIGEPP_IME__bk')then   
         begin
         
         --obtenermos datos basicos
@@ -1276,11 +1495,7 @@ BEGIN
                                                                v_id_depto,
                                                                COALESCE(v_num_obliacion_pago,'--')||' Obs:'||v_obs);
                 
-                 
-                 
                 
-                
-                 
                  
                  -- actualiza estado en la solicitud
                 
@@ -1305,9 +1520,11 @@ BEGIN
           --Devuelve la respuesta
             return v_resp;
         
-        end;    
+        end;     
         
-     /*********************************    
+        
+        
+    /*********************************    
  	#TRANSACCION:  'TES_ANTEPP_IME'
  	#DESCRIPCION:	Trasaacion utilizada  pasar a  estados anterior en el plan de pagos
                     segun la operacion definida
@@ -1321,73 +1538,89 @@ BEGIN
         --------------------------------------------------
         --Retrocede al estado inmediatamente anterior
         -------------------------------------------------
-         IF  v_parametros.operacion = 'cambiar' THEN
-               
-               raise notice 'es_estaado_wf %',v_parametros.id_estado_wf;
-              
-                      --recuperaq estado anterior segun Log del WF
-                        SELECT  
-                           ps_id_tipo_estado,
-                           ps_id_funcionario,
-                           ps_id_usuario_reg,
-                           ps_id_depto,
-                           ps_codigo_estado,
-                           ps_id_estado_wf_ant
-                        into
-                           v_id_tipo_estado,
-                           v_id_funcionario,
-                           v_id_usuario_reg,
-                           v_id_depto,
-                           v_codigo_estado,
-                           v_id_estado_wf_ant 
-                        FROM wf.f_obtener_estado_ant_log_wf(v_parametros.id_estado_wf);
+       --recuperaq estado anterior segun Log del WF
+          SELECT  
+         
+             ps_id_tipo_estado,
+             ps_id_funcionario,
+             ps_id_usuario_reg,
+             ps_id_depto,
+             ps_codigo_estado,
+             ps_id_estado_wf_ant
+          into
+             v_id_tipo_estado,
+             v_id_funcionario,
+             v_id_usuario_reg,
+             v_id_depto,
+             v_codigo_estado,
+             v_id_estado_wf_ant 
+          FROM wf.f_obtener_estado_ant_log_wf(v_parametros.id_estado_wf);
                         
                         
-                        --
-                      select 
-                           ew.id_proceso_wf 
-                        into 
-                           v_id_proceso_wf
-                      from wf.testado_wf ew
-                      where ew.id_estado_wf= v_id_estado_wf_ant;
+           --
+          select 
+               ew.id_proceso_wf 
+            into 
+               v_id_proceso_wf
+          from wf.testado_wf ew
+          where ew.id_estado_wf= v_id_estado_wf_ant;
+          
+          
+         --configurar acceso directo para la alarma   
+             v_acceso_directo = '';
+             v_clase = '';
+             v_parametros_ad = '';
+             v_tipo_noti = 'notificacion';
+             v_titulo  = 'Visto Bueno';
+             
+           
+           IF   v_codigo_estado_siguiente not in('borrador','pendiente','pagado','devengado','anulado')   THEN
+                  v_acceso_directo = '../../../sis_tesoreria/vista/plan_pago/PlanPagoVb.php';
+                 v_clase = 'PlanPagoVb';
+                 v_parametros_ad = '{filtro_directo:{campo:"plapa.id_proceso_wf",valor:"'||v_id_proceso_wf::varchar||'"}}';
+                 v_tipo_noti = 'notificacion';
+                 v_titulo  = 'Visto Bueno';
+             
+           END IF;
+             
+          
+          -- registra nuevo estado
                       
-                      -- registra nuevo estado
+          v_id_estado_actual = wf.f_registra_estado_wf(
+              v_id_tipo_estado, 
+              v_id_funcionario, 
+              v_parametros.id_estado_wf, 
+              v_id_proceso_wf, 
+              p_id_usuario,
+              v_id_depto,
+              '[RETROCESO] '|| v_parametros.obs,
+              v_acceso_directo,
+              v_clase,
+              v_parametros_ad,
+              v_tipo_noti,
+              v_titulo);
                       
-                      v_id_estado_actual = wf.f_registra_estado_wf(
-                          v_id_tipo_estado, 
-                          v_id_funcionario, 
-                          v_parametros.id_estado_wf, 
-                          v_id_proceso_wf, 
-                          p_id_usuario,
-                          v_id_depto,
-                          v_parametros.obs);
-                      
-                    
-                      
-                      -- actualiza estado en la solicitud
-                        update tes.tplan_pago  pp set 
-                           id_estado_wf =  v_id_estado_actual,
-                           estado = v_codigo_estado,
-                           id_usuario_mod=p_id_usuario,
-                           fecha_mod=now()
-                         where id_plan_pago = v_parametros.id_plan_pago;
+         
+          -- actualiza estado en la solicitud
+          update tes.tplan_pago  pp set 
+               id_estado_wf =  v_id_estado_actual,
+               estado = v_codigo_estado,
+               id_usuario_mod=p_id_usuario,
+               fecha_mod=now()
+          where id_proceso_wf = v_parametros.id_proceso_wf;
                          
                          
                          
                          
-                        -- si hay mas de un estado disponible  preguntamos al usuario
-                        v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado)'); 
-                        v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
+         -- si hay mas de un estado disponible  preguntamos al usuario
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
                         
                               
-                      --Devuelve la respuesta
-                        return v_resp;
+          --Devuelve la respuesta
+            return v_resp;
                         
-            ELSE
            
-           		raise exception 'Operacion no reconocida %',v_parametros.operacion;
-           
-           END IF;
         
         
         
