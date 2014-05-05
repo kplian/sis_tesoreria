@@ -141,11 +141,12 @@ class MODCuentaDocumentadaEndesis extends MODbase{
 			$transaccion = 'TS_RECHSOLPAGCD_UPD';
 		}
 		$id_cuenta_documentada = $this->aParam->getParametro('id_cuenta_documentada');
+		$observaciones = $this->aParam->getParametro('mensaje');
 		
 		$query = "SELECT tesoro.f_tts_cuenta_doc_iud ($id_usuario,'$ip',
-								'SELECT tesoro.f_tts_cuenta_doc_iud ($id_usuario,''$ip'',''00:19:d1:09:22:7e'',''$transaccion'',NULL,$id_cuenta_documentada,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)',
+								'SELECT tesoro.f_tts_cuenta_doc_iud ($id_usuario,''$ip'',''00:19:d1:09:22:7e'',''$transaccion'',NULL,$id_cuenta_documentada,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,''$observaciones'',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)',
 								'$transaccion',NULL,$id_cuenta_documentada,NULL,NULL,NULL,NULL,NULL,NULL,
-								NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
+								NULL,NULL,NULL,NULL,'$observaciones',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 								NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)";
 								
 		
