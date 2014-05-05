@@ -604,15 +604,6 @@ ALTER TABLE tes.tplan_pago
     NOT DEFERRABLE;
 
 
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ADD CONSTRAINT tplan_pago__id_libro_bancos FOREIGN KEY (id_libro_bancos)
-    REFERENCES migra.tts_libro_bancos(id_libro_bancos)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
 
 --------------- SQL ---------------
 
