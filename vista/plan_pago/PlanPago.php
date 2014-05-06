@@ -928,38 +928,38 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
      },  
     
    sigEstado:function(){                   
-            var rec=this.sm.getSelected();
-            Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
-            'Estado de Wf',
-            {
-                modal:true,
-                width:700,
-                height:450
-            }, {data:{
-                   id_estado_wf:rec.data.id_estado_wf,
-                   id_proceso_wf:rec.data.id_proceso_wf,
-                   fecha_ini:rec.data.fecha_tentativa,
-                   //url_verificacion:'../../sis_tesoreria/control/PlanPago/siguienteEstadoPlanPago'
-                   
-                   
-                
-                }}, this.idContenedor,'FormEstadoWf',
-            {
-                config:[{
-                          event:'beforesave',
-                          delegate: this.onSaveWizard,
-                          
-                        }],
-                
-                scope:this
-             })
+      var rec=this.sm.getSelected();
+      this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+                                'Estado de Wf',
+                                {
+                                    modal:true,
+                                    width:700,
+                                    height:450
+                                }, {data:{
+                                       id_estado_wf:rec.data.id_estado_wf,
+                                       id_proceso_wf:rec.data.id_proceso_wf,
+                                       fecha_ini:rec.data.fecha_tentativa,
+                                       //url_verificacion:'../../sis_tesoreria/control/PlanPago/siguienteEstadoPlanPago'
+                                       
+                                       
+                                    
+                                    }}, this.idContenedor,'FormEstadoWf',
+                                {
+                                    config:[{
+                                              event:'beforesave',
+                                              delegate: this.onSaveWizard,
+                                              
+                                            }],
+                                    
+                                    scope:this
+                                 });
                
      },
      
     
      onSaveWizard:function(wizard,resp){
         Phx.CP.loadingShow();
-         
+        
         Ext.Ajax.request({
             url:'../../sis_tesoreria/control/PlanPago/siguienteEstadoPlanPago',
             params:{
