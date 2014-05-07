@@ -83,14 +83,14 @@ class MODCuentaDocumentadaEndesis extends MODbase{
 		   cant_rend_registradas bigint,
 		   cant_rend_finalizadas bigint,
 		   cant_rend_contabilizadas bigint,		   
-		   codigo_caja varchar,   
+		   codigo_caja varchar,  
+		   respuesta_aprobador text, 
 		   saldo_solicitante numeric,		   
 		   importe_detalle numeric,
 		   id_presupuesto_detalle integer, 	   
 		   saldo_rendiciones numeric,
 		   saldo_retenciones numeric,
-		   saldo_depositar numeric,
-		   respuesta_aprobador text
+		   saldo_depositar numeric
 		 );";
 		 
 		 $query_count = "SELECT * FROM tesoro.f_tts_cuenta_doc_sel($id_usuario,'$ip','00:19:d1:09:22:7e','TS_SOLVIA2_COUNT',NULL,
