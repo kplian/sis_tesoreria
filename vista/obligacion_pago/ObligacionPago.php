@@ -216,6 +216,25 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:true
         },
+         {
+            config:{
+                name:'id_funcionario',
+                hiddenName: 'id_funcionario',
+                origen:'FUNCIONARIOCAR',
+                fieldLabel:'Funcionario',
+                allowBlank:false,
+                gwidth:200,
+                valueField: 'id_funcionario',
+                gdisplayField: 'desc_funcionario',
+                baseParams: { es_combo_solicitud : 'si' },
+                renderer:function(value, p, record){return String.format('{0}', record.data['desc_funcionario']);}
+             },
+            type:'ComboRec',//ComboRec
+            id_grupo:1,
+            filters:{pfiltro:'fun.desc_funcionario1',type:'string'},
+            grid:true,
+            form:true
+         },
         {
             config:{
                 name: 'total_pago',
@@ -313,23 +332,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 			grid: true,
 			form: true
 		},
-		{
-			config:{
-				name: 'id_funcionario',
-				fieldLabel: 'Funcionario',
-				tinit: false,
-				allowBlank: false,
-				anchor: '80%',
-				origen: 'FUNCIONARIO',				
-				gdisplayField: 'desc_funcionario1',
-				gwidth: 100
-			},
-			type:'ComboRec',
-			filters:{pfiltro:'fun.desc_funcionario1',type:'string'},
-			id_grupo:1,
-			grid:true,
-			form:true
-		},		
+				
 		{
 			config:{
 				name: 'obs',
@@ -566,7 +569,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_subsistema', type: 'numeric'},
 		{name:'nombre_subsistema', type: 'string'},
 		{name:'id_funcionario', type: 'numeric'},
-		{name:'desc_funcionario1', type: 'numeric'},
+		{name:'desc_funcionario'},
 		{name:'estado_reg', type: 'string'},
 		{name:'porc_anticipo', type: 'numeric'},
 		{name:'id_estado_wf', type: 'numeric'},
@@ -718,71 +721,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		
 	},
 	
-	onButtonEdit:function(){
-       
-       var data= this.sm.getSelected().data;
-       this.cmpTipoObligacion.disable();
-       this.cmpDepto.disable(); 
-       this.cmpFecha.disable(); 
-       this.cmpTipoCambioConv.disable();
-       
-       Phx.vista.ObligacionPago.superclass.onButtonEdit.call(this);
-       
-       if(data.tipo_obligacion=='adquisiciones'){
-            this.mostrarComponente(this.cmpProveedor);
-            this.ocultarComponente(this.cmpFuncionario);
-            this.ocultarComponente(this.cmpFuncionarioProveedor);
-            this.cmpFuncionario.reset();
-            this.cmpProveedor.disable();
-            this.cmpMoneda.disable();
-       }
-       
-       if(data.tipo_obligacion=='pago_directo'){
-           
-           this.cmpProveedor.enable();
-           this.mostrarComponente(this.cmpProveedor);
-           this.cmpMoneda.enable();
-       }
-       
-       //segun el total nro cuota cero, ocultamos los componentes
-       if(data.total_nro_cuota=='0'){
-           this.ocultarComponente(this.Cmp.id_plantilla);
-           this.ocultarComponente(this.Cmp.fecha_pp_ini);
-           this.ocultarComponente(this.Cmp.rotacion);
-       }
-       else{
-           this.cmpProveedor.enable();
-           this.mostrarComponente(this.cmpProveedor);
-           this.cmpMoneda.enable();
-       }
-           
-    },
-    
-    onButtonNew:function(){
-        Phx.vista.ObligacionPago.superclass.onButtonNew.call(this);
-        //this.cmpPorcAnticipo.setValue(0);
-        //this.cmpPorcRetgar.setValue(0);
-       
-        this.ocultarComponente(this.cmpProveedor);
-        this.ocultarComponente(this.cmpFuncionario);
-        this.ocultarComponente(this.cmpFuncionarioProveedor);
-        this.cmpTipoObligacion.enable();
-        this.cmpDepto.enable(); 
-        this.mostrarComponente(this.cmpProveedor);
-        this.ocultarComponente(this.cmpFuncionario);
-        this.ocultarComponente(this.cmpFuncionarioProveedor);
-        this.cmpFuncionario.reset();
-        this.cmpFecha.enable(); 
-        this.cmpTipoCambioConv.enable();
-        this.cmpProveedor.enable();
-        this.cmpDepto.enable(); 
-        this.cmpMoneda.enable();
-        //defecto total nro cuota cero, entoces ocultamos los componentes
-        this.ocultarComponente(this.Cmp.id_plantilla);
-        this.ocultarComponente(this.Cmp.fecha_pp_ini);
-        this.ocultarComponente(this.Cmp.rotacion);
-        
-    },
+	
     obtenerTipoCambio:function(){
          
          var fecha = this.cmpFecha.getValue().dateFormat(this.cmpFecha.format);

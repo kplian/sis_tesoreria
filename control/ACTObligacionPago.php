@@ -18,6 +18,8 @@ class ACTObligacionPago extends ACTbase{
 		$this->objParam->defecto('ordenacion','id_obligacion_pago');
 		$this->objParam->defecto('dir_ordenacion','asc');
 		
+		$this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]); 
+		
 		if($this->objParam->getParametro('id_obligacion_pago')!=''){
 			$this->objParam->addFiltro("obpg.id_obligacion_pago = ".$this->objParam->getParametro('id_obligacion_pago'));
 		}
@@ -32,7 +34,36 @@ class ACTObligacionPago extends ACTbase{
 		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	
+	/*
+	
+	  Listado de obligacion de pago directas, para solicitudes individuales o por asistentes
+	
+	*/
+	
+	function listarObligacionPagoSol(){
+        $this->objParam->defecto('ordenacion','id_obligacion_pago');
+        $this->objParam->defecto('dir_ordenacion','asc');
+        
+        $this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]); 
+        
+        if($this->objParam->getParametro('id_obligacion_pago')!=''){
+            $this->objParam->addFiltro("obpg.id_obligacion_pago = ".$this->objParam->getParametro('id_obligacion_pago'));
+        }
+        
+        if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+            $this->objReporte = new Reporte($this->objParam,$this);
+            $this->res = $this->objReporte->generarReporteListado('MODObligacionPago','listarObligacionPagoSol');
+        } else{
+            $this->objFunc=$this->create('MODObligacionPago');
+            
+            $this->res=$this->objFunc->listarObligacionPagoSol($this->objParam);
+        }
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
 				
+	
+	
 	function insertarObligacionPago(){
 		$this->objFunc=$this->create('MODObligacionPago');	
 		if($this->objParam->insertar('id_obligacion_pago')){

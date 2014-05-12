@@ -51,7 +51,69 @@ Phx.vista.ObligacionPagoAdq = {
             }
     
        ], 
+    onButtonEdit:function(){
+       
+       var data= this.sm.getSelected().data;
+       this.cmpTipoObligacion.disable();
+       this.cmpDepto.disable(); 
+       this.cmpFecha.disable(); 
+       this.cmpTipoCambioConv.disable();
+       
+       Phx.vista.ObligacionPagoAdq.superclass.onButtonEdit.call(this);
+       
+       if(data.tipo_obligacion=='adquisiciones'){
+            this.mostrarComponente(this.cmpProveedor);
+            this.ocultarComponente(this.cmpFuncionario);
+            this.ocultarComponente(this.cmpFuncionarioProveedor);
+            this.cmpFuncionario.reset();
+            this.cmpProveedor.disable();
+            this.cmpMoneda.disable();
+       }
+       
+       if(data.tipo_obligacion=='pago_directo'){
+           
+           this.cmpProveedor.enable();
+           this.mostrarComponente(this.cmpProveedor);
+           this.cmpMoneda.enable();
+       }
+       
+       //segun el total nro cuota cero, ocultamos los componentes
+       if(data.total_nro_cuota=='0'){
+           this.ocultarComponente(this.Cmp.id_plantilla);
+           this.ocultarComponente(this.Cmp.fecha_pp_ini);
+           this.ocultarComponente(this.Cmp.rotacion);
+       }
+       else{
+           this.cmpProveedor.enable();
+           this.mostrarComponente(this.cmpProveedor);
+           this.cmpMoneda.enable();
+       }
+           
+    },
     
+    onButtonNew:function(){
+        Phx.vista.ObligacionPagoAdq.superclass.onButtonNew.call(this);
+        //this.cmpPorcAnticipo.setValue(0);
+        //this.cmpPorcRetgar.setValue(0);
+       
+        
+        this.cmpTipoObligacion.enable();
+        this.cmpDepto.enable(); 
+        this.mostrarComponente(this.cmpProveedor);
+        this.ocultarComponente(this.cmpFuncionario);
+        this.ocultarComponente(this.cmpFuncionarioProveedor);
+        this.cmpFuncionario.reset();
+        this.cmpFecha.enable(); 
+        this.cmpTipoCambioConv.enable();
+        this.cmpProveedor.enable();
+        this.cmpDepto.enable(); 
+        this.cmpMoneda.enable();
+        //defecto total nro cuota cero, entoces ocultamos los componentes
+        this.ocultarComponente(this.Cmp.id_plantilla);
+        this.ocultarComponente(this.Cmp.fecha_pp_ini);
+        this.ocultarComponente(this.Cmp.rotacion);
+        
+    },
     
 };
 </script>

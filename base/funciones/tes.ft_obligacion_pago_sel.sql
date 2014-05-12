@@ -35,6 +35,7 @@ DECLARE
     v_obligaciones_partida	record;
     v_respuesta_verificar	record;
     v_inner 			varchar;
+    
 BEGIN
 
 	v_nombre_funcion = 'tes.ft_obligacion_pago_sel';
@@ -56,9 +57,7 @@ BEGIN
           
           
         --  raise exception 'cc  %',v_parametros.tipo_interfaz  ;
-        
-           
-         IF   v_parametros.tipo_interfaz ='obligacionPagoTes' THEN
+        IF   v_parametros.tipo_interfaz ='obligacionPagoTes' THEN
            
             IF   p_administrador != 1 THEN
                  
@@ -159,71 +158,14 @@ BEGIN
 
 
 
-
-
-
-
-  -- raise notice '%',v_consulta;
+            -- raise notice '%',v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 						
 		end;
      
-   /*********************************    
- 	#TRANSACCION:  'TES_ESTOBPG_SEL'
- 	#DESCRIPCION:	Consulta de registros para los reportes
- 	#AUTOR:		Gonzalo Sarmiento Sejas	
- 	#FECHA:		31-05-2013
-	***********************************/
-	elsif (p_transaccion='TES_ESTOBPG_SEL')then
-    	begin
-         create temporary table flujo_obligaciones(
-        	funcionario text,
-            nombre text,
-            nombre_estado varchar,
-            fecha_reg date,
-            id_tipo_estado int4,
-            id_estado_wf int4,
-            id_estado_anterior int4
-        ) on commit drop;   
-    
-    	--recupera el flujo de control de las obligaciones
-        
-    	FOR v_obligaciones IN( 
-            select op.id_estado_wf
-            from tes.tobligacion_pago op
-            where op.id_obligacion_pago=v_parametros.id_obligacion_pago
-        )LOOP
-        		raise  notice 'estasd %', v_obligaciones.id_estado_wf;
-        	   INSERT INTO flujo_obligaciones(
-               WITH RECURSIVE estados_obligaciones(id_depto, id_proceso_wf, id_tipo_estado,id_estado_wf, id_estado_anterior, fecha_reg)AS(
-                   SELECT et.id_depto, et.id_proceso_wf, et.id_tipo_estado, et.id_estado_wf, et.id_estado_anterior, et.fecha_reg
-                   FROM wf.testado_wf et
-                   WHERE et.id_estado_wf=v_obligaciones.id_estado_wf
-                UNION ALL        
-                   SELECT et.id_depto, et.id_proceso_wf, et.id_tipo_estado, et.id_estado_wf, et.id_estado_anterior, et.fecha_reg
-                   FROM wf.testado_wf et, estados_obligaciones
-                   WHERE et.id_estado_wf=estados_obligaciones.id_estado_anterior         
-                )SELECT dep.nombre::text, tp.nombre||'-'||prv.desc_proveedor, te.nombre_estado, eo.fecha_reg, eo.id_tipo_estado, eo.id_estado_wf, COALESCE(eo.id_estado_anterior,NULL) as id_estado_anterior
-                 FROM estados_obligaciones eo
-                 INNER JOIN wf.ttipo_estado te on te.id_tipo_estado= eo.id_tipo_estado
-                 INNER JOIN wf.tproceso_wf pwf on pwf.id_proceso_wf=eo.id_proceso_wf
-                 INNER JOIN wf.ttipo_proceso tp on tp.id_tipo_proceso=pwf.id_tipo_proceso         
-                 INNER JOIN tes.tobligacion_pago op on op.id_proceso_wf=pwf.id_proceso_wf
-                 INNER JOIN param.vproveedor prv on prv.id_proveedor=op.id_proveedor
-                 LEFT JOIN param.tdepto dep on dep.id_depto=eo.id_depto
-                 ORDER BY eo.id_estado_wf ASC
-                 );      
-        END LOOP;    
-        
-              v_consulta:='select * from flujo_obligaciones';
-              --Devuelve la respuesta
-              return v_consulta;
-       
-        
-        end;
-
-	/*********************************    
+  
+    /*********************************    
  	#TRANSACCION:  'TES_OBPG_CONT'
  	#DESCRIPCION:	Conteo de registros
  	#AUTOR:		Gonzalo Sarmiento Sejas	
@@ -237,7 +179,18 @@ BEGIN
            v_filadd='';
            v_inner='';
           
-          IF   v_parametros.tipo_interfaz ='obligacionPago' THEN
+          --  raise exception 'cc  %',v_parametros.tipo_interfaz  ;
+        IF   v_parametros.tipo_interfaz ='obligacionPagoSol' THEN
+        
+              IF   p_administrador != 1 THEN
+                 
+                    v_filadd = '(obpg.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or obpg.id_usuario_reg='||p_id_usuario||' ) and ';
+            
+              END IF;
+        
+        
+           
+         ELSIF   v_parametros.tipo_interfaz ='obligacionPagoTes' THEN
            
                   IF   p_administrador != 1 THEN
                  
@@ -296,6 +249,202 @@ BEGIN
 			return v_consulta;
 
 		end;
+  
+    /*********************************    
+ 	#TRANSACCION:  'TES_OBPGSOL_SEL'
+ 	#DESCRIPCION:	Consulta de obligaciones de pagos por solicitante
+ 	#AUTOR:	Rensi Arteaga Copari
+ 	#FECHA:		08-05-2014 16:01:32
+	***********************************/
+
+	elsif(p_transaccion='TES_OBPGSOL_SEL')then
+     				
+    	begin
+        
+          v_filadd='';
+          v_inner='';
+          
+          
+          IF   p_administrador != 1 THEN
+                 
+                    v_filadd = '(obpg.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or obpg.id_usuario_reg='||p_id_usuario||' ) and ';
+                    
+                    
+           END IF;
+                 
+                
+          
+              
+                  --Sentencia de la consulta
+                  v_consulta:='select
+                              obpg.id_obligacion_pago,
+                              obpg.id_proveedor,
+                              pv.desc_proveedor,
+                              obpg.estado,
+                              obpg.tipo_obligacion,
+                              obpg.id_moneda,
+                              mn.moneda,
+                              obpg.obs,
+                              obpg.porc_retgar,
+                              obpg.id_subsistema,
+                              ss.nombre as nombre_subsistema,
+                              obpg.id_funcionario,
+                            --  fun.desc_funcionario1,
+                              obpg.estado_reg,
+                              obpg.porc_anticipo,
+                              obpg.id_estado_wf,
+                              obpg.id_depto,
+                              dep.nombre as nombre_depto,
+                              obpg.num_tramite,
+                              obpg.id_proceso_wf,
+                              obpg.fecha_reg,
+                              obpg.id_usuario_reg,
+                              obpg.fecha_mod,
+                              obpg.id_usuario_mod,
+                              usu1.cuenta as usr_reg,
+                              usu2.cuenta as usr_mod,
+                              obpg.fecha,
+                              obpg.numero,
+                              obpg.tipo_cambio_conv,
+                              obpg.id_gestion,
+                              obpg.comprometido,
+                              obpg.nro_cuota_vigente,
+                              mn.tipo_moneda,
+                              obpg.total_pago,
+                              obpg.pago_variable,
+                              obpg.id_depto_conta,
+                              obpg.total_nro_cuota,
+                              obpg.fecha_pp_ini,
+                              obpg.rotacion,
+                              obpg.id_plantilla,
+                              pla.desc_plantilla,
+                              fun.desc_funcionario1 as desc_funcionario
+                              
+                              from tes.tobligacion_pago obpg
+                              inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
+                              left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
+                              inner join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
+                              inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
+                              inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
+                              inner join param.tdepto dep on dep.id_depto=obpg.id_depto
+                              left join param.tplantilla pla on pla.id_plantilla = obpg.id_plantilla
+                              inner join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
+                              where  '||v_filadd;
+      			
+                  --Definicion de la respuesta
+                  v_consulta:=v_consulta||v_parametros.filtro;
+                  v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+
+
+
+
+
+
+
+  -- raise notice '%',v_consulta;
+			--Devuelve la respuesta
+			return v_consulta;
+						
+		end;
+  
+     /*********************************    
+ 	#TRANSACCION:  'TES_OBPGSOL_CONT'
+ 	#DESCRIPCION:	Conteo de registros
+ 	#AUTOR:	 RAC (KPLIAN)
+ 	#FECHA:		04-05-2014 16:01:32
+	***********************************/
+
+	elsif(p_transaccion='TES_OBPGSOL_CONT')then
+
+		begin
+        
+           v_filadd='';
+           v_inner='';
+          
+          IF   p_administrador != 1 THEN
+                 
+                    v_filadd = '(obpg.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or obpg.id_usuario_reg='||p_id_usuario||' ) and ';
+                    
+                    
+           END IF;
+        
+			--Sentencia de la consulta de conteo de registros
+			v_consulta:='select count(obpg.id_obligacion_pago)
+					    from tes.tobligacion_pago obpg
+						inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
+						left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
+                        inner join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
+                        inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
+                        inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
+						inner join param.tdepto dep on dep.id_depto=obpg.id_depto
+                        inner join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario  
+                        where  '||v_filadd;
+			
+			--Definicion de la respuesta		    
+			v_consulta:=v_consulta||v_parametros.filtro;
+
+			--Devuelve la respuesta
+            
+            raise notice '%',v_consulta;
+			return v_consulta;
+
+		end;
+  
+   /*********************************    
+ 	#TRANSACCION:  'TES_ESTOBPG_SEL'
+ 	#DESCRIPCION:	Consulta de registros para los reportes
+ 	#AUTOR:		Gonzalo Sarmiento Sejas	
+ 	#FECHA:		31-05-2013
+	***********************************/
+	elsif (p_transaccion='TES_ESTOBPG_SEL')then
+    	begin
+         create temporary table flujo_obligaciones(
+        	funcionario text,
+            nombre text,
+            nombre_estado varchar,
+            fecha_reg date,
+            id_tipo_estado int4,
+            id_estado_wf int4,
+            id_estado_anterior int4
+        ) on commit drop;   
+    
+    	--recupera el flujo de control de las obligaciones
+        
+    	FOR v_obligaciones IN( 
+            select op.id_estado_wf
+            from tes.tobligacion_pago op
+            where op.id_obligacion_pago=v_parametros.id_obligacion_pago
+        )LOOP
+        		raise  notice 'estasd %', v_obligaciones.id_estado_wf;
+        	   INSERT INTO flujo_obligaciones(
+               WITH RECURSIVE estados_obligaciones(id_depto, id_proceso_wf, id_tipo_estado,id_estado_wf, id_estado_anterior, fecha_reg)AS(
+                   SELECT et.id_depto, et.id_proceso_wf, et.id_tipo_estado, et.id_estado_wf, et.id_estado_anterior, et.fecha_reg
+                   FROM wf.testado_wf et
+                   WHERE et.id_estado_wf=v_obligaciones.id_estado_wf
+                UNION ALL        
+                   SELECT et.id_depto, et.id_proceso_wf, et.id_tipo_estado, et.id_estado_wf, et.id_estado_anterior, et.fecha_reg
+                   FROM wf.testado_wf et, estados_obligaciones
+                   WHERE et.id_estado_wf=estados_obligaciones.id_estado_anterior         
+                )SELECT dep.nombre::text, tp.nombre||'-'||prv.desc_proveedor, te.nombre_estado, eo.fecha_reg, eo.id_tipo_estado, eo.id_estado_wf, COALESCE(eo.id_estado_anterior,NULL) as id_estado_anterior
+                 FROM estados_obligaciones eo
+                 INNER JOIN wf.ttipo_estado te on te.id_tipo_estado= eo.id_tipo_estado
+                 INNER JOIN wf.tproceso_wf pwf on pwf.id_proceso_wf=eo.id_proceso_wf
+                 INNER JOIN wf.ttipo_proceso tp on tp.id_tipo_proceso=pwf.id_tipo_proceso         
+                 INNER JOIN tes.tobligacion_pago op on op.id_proceso_wf=pwf.id_proceso_wf
+                 INNER JOIN param.vproveedor prv on prv.id_proveedor=op.id_proveedor
+                 LEFT JOIN param.tdepto dep on dep.id_depto=eo.id_depto
+                 ORDER BY eo.id_estado_wf ASC
+                 );      
+        END LOOP;    
+        
+              v_consulta:='select * from flujo_obligaciones';
+              --Devuelve la respuesta
+              return v_consulta;
+       
+        
+        end;
+
+	
     
      /*********************************    
  	#TRANSACCION:  'TES_OBPGSEL_SEL'

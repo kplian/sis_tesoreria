@@ -81,6 +81,79 @@ class MODObligacionPago extends MODbase{
 		return $this->respuesta;
 	}
 	
+	/*
+	  Listado de olbigaciones de pago individual por solicitante
+	
+	*/
+	function listarObligacionPagoSol(){
+        
+        //Definicion de variables para ejecucion del procedimientp
+        $this->procedimiento='tes.ft_obligacion_pago_sel';
+        $this->transaccion='TES_OBPGSOL_SEL';
+        $this->tipo_procedimiento='SEL';//tipo de transaccion
+        
+        $this->setParametro('id_funcionario_usu','id_funcionario_usu','int4');
+        $this->setParametro('tipo_interfaz','tipo_interfaz','varchar');
+                
+        //Definicion de la lista del resultado del query
+        $this->captura('id_obligacion_pago','int4');
+        $this->captura('id_proveedor','int4');
+        $this->captura('desc_proveedor','varchar');
+        $this->captura('estado','varchar');
+        $this->captura('tipo_obligacion','varchar');
+        $this->captura('id_moneda','int4');
+        $this->captura('moneda','varchar');
+        $this->captura('obs','varchar');
+        $this->captura('porc_retgar','numeric');
+        $this->captura('id_subsistema','int4');
+        $this->captura('nombre_subsistema','varchar');
+        $this->captura('id_funcionario','int4');
+        //$this->captura('desc_funcionario1','text');
+        $this->captura('estado_reg','varchar');
+        $this->captura('porc_anticipo','numeric');
+        $this->captura('id_estado_wf','int4');
+        $this->captura('id_depto','int4');
+        $this->captura('nombre_depto','varchar');
+        $this->captura('num_tramite','varchar');
+        $this->captura('id_proceso_wf','int4');
+        $this->captura('fecha_reg','timestamp');
+        $this->captura('id_usuario_reg','int4');
+        $this->captura('fecha_mod','timestamp');
+        $this->captura('id_usuario_mod','int4');
+        $this->captura('usr_reg','varchar');
+        $this->captura('usr_mod','varchar');
+        $this->captura('fecha','date');
+        $this->captura('numero','varchar');
+        $this->captura('tipo_cambio_conv','numeric');
+        $this->captura('id_gestion','integer');
+        $this->captura('comprometido','varchar');
+        $this->captura('nro_cuota_vigente','numeric');
+        $this->captura('tipo_moneda','varchar');
+        $this->captura('total_pago','numeric');
+        $this->captura('pago_variable','varchar');
+        $this->captura('id_depto_conta','integer');
+        $this->captura('total_nro_cuota','integer');
+        
+        $this->captura('fecha_pp_ini','date');
+        $this->captura('rotacion','integer');
+        $this->captura('id_plantilla','integer');
+        $this->captura('desc_plantilla','varchar');
+        
+        $this->captura('desc_funcionario','text');
+        
+        
+        
+        
+        
+        
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+        
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+	
 	function obtnerUosEpsDetalleObligacion(){
         //Definicion de variables para ejecucion del procedimiento
         $this->procedimiento='tes.ft_obligacion_pago_ime';
