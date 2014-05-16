@@ -216,7 +216,7 @@ BEGIN
                p_id_usuario, 
                v_id_gestion, 
                v_codigo_tipo_proceso, 
-               NULL,
+               v_parametros.id_funcionario,
                v_parametros.id_depto,
                'Obligacion de pago ('||v_num||') '||v_parametros.obs,
                v_num );

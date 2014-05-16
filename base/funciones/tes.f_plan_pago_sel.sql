@@ -36,6 +36,7 @@ DECLARE
     v_strg_pp         varchar;
     v_strg_obs         varchar;
     va_id_depto        integer[];
+    
   
 BEGIN
 
@@ -105,7 +106,8 @@ BEGIN
             IF v_historico =  'si' THEN
             
                v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = plapa.id_proceso_wf';
-               v_strg_pp = 'DISTINCT(plapa.id_plan_pago)'; 
+               v_strg_pp = 'DISTINCT(plapa.id_plan_pago)';
+               v_strg_obs = '''---''::text  as obs_wf'; 
               
                
                  IF p_administrador !=1 THEN
@@ -123,6 +125,7 @@ BEGIN
             
                v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = plapa.id_estado_wf';
                v_strg_pp = 'plapa.id_plan_pago';
+               v_strg_obs = 'ew.obs as obs_wf'; 
                
                
              END IF;
@@ -194,7 +197,8 @@ BEGIN
                         mon.codigo as desc_moneda,
                         op.num_tramite,
                         plapa.porc_monto_excento_var,
-                        plapa.monto_excento               
+                        plapa.monto_excento,
+                        '||v_strg_obs||'              
 						from tes.tplan_pago plapa
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
                         inner join param.tmoneda mon on mon.id_moneda = op.id_moneda

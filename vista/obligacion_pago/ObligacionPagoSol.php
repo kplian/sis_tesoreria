@@ -110,12 +110,30 @@ Phx.vista.ObligacionPagoSol = {
             
            
             this.cmpFecha.on('change',function(f){
-            
+                 Phx.CP.loadingShow();
                  this.cmpFuncionario.reset();
                  this.cmpFuncionario.enable();             
                  this.cmpFuncionario.store.baseParams.fecha = this.cmpFecha.getValue().dateFormat(this.cmpFecha.format);
                  
+                 this.cmpFuncionario.store.load({params:{start:0,limit:this.tam_pag}, 
+                       callback : function (r) {
+                            Phx.CP.loadingHide();                        
+                            if (r.length == 1 ) {                        
+                                this.cmpFuncionario.setValue(r[0].data.id_funcionario);
+                            }     
+                                            
+                        }, scope : this
+                    });
+                 
+                 
              },this);
+             
+            // this.cmpFecha.on('',function(f){
+                 
+                // this.cmpFecha.fireEvent('select')
+                 
+            // },this);
+             
            
            // this.cmpPorcAnticipo=this.getComponente('porc_anticipo');
            // this.cmpPorcRetgar=this.getComponente('porc_retgar');
@@ -192,6 +210,9 @@ Phx.vista.ObligacionPagoSol = {
                 }
                 
             },this);
+            
+            
+            
     
     },
     
@@ -258,6 +279,12 @@ Phx.vista.ObligacionPagoSol = {
         this.ocultarComponente(this.Cmp.id_plantilla);
         this.ocultarComponente(this.Cmp.fecha_pp_ini);
         this.ocultarComponente(this.Cmp.rotacion);
+        
+        this.cmpFecha.setValue(new Date());
+        this.cmpFecha.fireEvent('change')
+        this.cmpTipoObligacion.setValue('pago_directo');
+        
+        
         
     },
     

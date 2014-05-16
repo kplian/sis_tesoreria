@@ -84,6 +84,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             grid:false,
             form:false
         },
+        
         {
             config:{
                 name: 'numero_op',
@@ -628,6 +629,21 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         },
         {
             config:{
+                name: 'obs_wf',
+                fieldLabel: 'Obs',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 300,
+                maxLength:1000
+            },
+            type:'TextArea',
+            filters:{pfiltro:'ew.obs',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
+        {
+            config:{
                 name: 'fecha_dev',
                 fieldLabel: 'Fecha Dev.',
                 allowBlank: true,
@@ -861,7 +877,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'id_depto_conta',
 		'id_moneda','tipo_moneda','desc_moneda',
 		'num_tramite','monto_excento',
-		'proc_monto_excento_var'
+		'proc_monto_excento_var','obs_wf'
 		
 	],
 	
