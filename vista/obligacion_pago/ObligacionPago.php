@@ -18,10 +18,10 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		Phx.vista.ObligacionPago.superclass.constructor.call(this,config);
 		this.init();
 		
+		this.store.baseParams = {tipo_interfaz: this.nombreVista,
+                   id_obligacion_pago: this.maestro.id_obligacion_pago}
 		this.load({params:{start:0, 
-		           limit:this.tam_pag, 
-		           tipo_interfaz: this.nombreVista,
-		           id_obligacion_pago: this.maestro.id_obligacion_pago}});
+		           limit:this.tam_pag}});
 		           
 		this.iniciarEventos();
 	    
@@ -143,6 +143,37 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:false
         },
+        {
+        config:{
+                name: 'ultima_cuota_pp',
+                fieldLabel: 'Ult PP',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 100,
+                maxLength:50
+            },
+            type:'Field',
+            filters:{pfiltro:'obpg.ultima_cuota_pp',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
+        {
+        config:{
+                name: 'ultimo_estado_pp',
+                fieldLabel: 'Ult. Est. PP',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 100,
+                maxLength:50
+            },
+            type:'Field',
+            filters:{pfiltro:'obpg.ultimo_estado_pp',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
+        
 		{
 			config:{
 				name: 'tipo_obligacion',
@@ -589,7 +620,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		'id_gestion','comprometido','nro_cuota_vigente','tipo_moneda',
 		'total_nro_cuota','id_plantilla','desc_plantilla',
 		{name:'fecha_pp_ini', type: 'date',dateFormat:'Y-m-d'},
-		'rotacion'
+		'rotacion','ultima_cuota_pp','ultimo_estado_pp'
 		
 	],
 	

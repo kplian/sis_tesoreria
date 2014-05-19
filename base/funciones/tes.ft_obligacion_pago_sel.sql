@@ -138,7 +138,9 @@ BEGIN
                               obpg.fecha_pp_ini,
                               obpg.rotacion,
                               obpg.id_plantilla,
-                              pla.desc_plantilla
+                              pla.desc_plantilla,
+                              obpg.ultima_cuota_pp,
+                              obpg.ultimo_estado_pp
                               
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
@@ -318,7 +320,9 @@ BEGIN
                               obpg.rotacion,
                               obpg.id_plantilla,
                               pla.desc_plantilla,
-                              fun.desc_funcionario1 as desc_funcionario
+                              fun.desc_funcionario1 as desc_funcionario,
+                              obpg.ultima_cuota_pp,
+                              obpg.ultimo_estado_pp
                               
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg

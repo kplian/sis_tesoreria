@@ -67,6 +67,8 @@ class MODObligacionPago extends MODbase{
 		$this->captura('rotacion','integer');
 		$this->captura('id_plantilla','integer');
 		$this->captura('desc_plantilla','varchar');
+		$this->captura('ultima_cuota_pp','numeric');
+        $this->captura('ultimo_estado_pp','varchar');
 		
 		
 		
@@ -140,6 +142,8 @@ class MODObligacionPago extends MODbase{
         $this->captura('desc_plantilla','varchar');
         
         $this->captura('desc_funcionario','text');
+        $this->captura('ultima_cuota_pp','numeric');
+        $this->captura('ultimo_estado_pp','varchar');
         
         
         

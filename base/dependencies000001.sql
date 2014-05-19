@@ -1672,3 +1672,21 @@ select pxp.f_insert_trol_procedimiento_gui ('OP - Cuenta Bancaria', 'TES_CHQ_MOD
 select pxp.f_insert_trol_procedimiento_gui ('OP - Cuenta Bancaria', 'TES_CHQ_ELI', 'CTABAN.1');
 
 /***********************************F-DEP-JRR-TES-0-24/04/2014*****************************************/
+
+
+
+
+/***********************************I-DEP-RAC-TES-0-19/05/2014*****************************************/
+
+CREATE TRIGGER trig_actualiza_informacion_estado_pp
+  AFTER INSERT OR UPDATE OF estado, nro_cuota 
+  ON tes.tplan_pago FOR EACH ROW 
+  EXECUTE PROCEDURE tes.f_trig_actualiza_informacion_estado_pp();
+
+/***********************************F-DEP-RAC-TES-0-19/05/2014*****************************************/
+
+
+
+
+
+

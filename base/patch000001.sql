@@ -474,3 +474,27 @@ ALTER TABLE tes.tcuenta_bancaria
   ADD COLUMN denominacion VARCHAR(100);
 
 /***********************************F-SCP-JRR-TES-0-01/04/2014***************************************/
+
+
+/***********************************I-SCP-RAC-TES-0-19/05/2014***************************************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN ultima_cuota_pp NUMERIC(4,2);
+
+COMMENT ON COLUMN tes.tobligacion_pago.ultima_cuota_pp
+IS 'eace referencia al numero de la ultima uocta modificada';
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN ultimo_estado_pp VARCHAR(150);
+
+COMMENT ON COLUMN tes.tobligacion_pago.ultimo_estado_pp
+IS 'ultimo estado del plan de pago correpondiente a la cuota indicada en ultima_cuota_pp';
+
+/***********************************F-SCP-RAC-TES-0-19/05/2014***************************************/
+
+

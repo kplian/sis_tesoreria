@@ -93,6 +93,8 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                 mode:'remote',
                 pageSize:10,
                 queryDelay:1000,
+                 listWidth:350,
+                resizable:true,
                 anchor:'80%', 
                 gwidth: 200,      
                 renderer:function(value, p, record){return String.format('{0}', record.data['nombre_ingas']);}
@@ -151,6 +153,8 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                 lazyRender:true,
  				mode:'remote',
  				pageSize:10,
+ 				listWidth:350,
+                resizable:true,
  				queryDelay:1000,
  				anchor:'80%',		
  				renderer:function(value, p, record){return String.format('{0}', record.data['nombre_cuenta']);}
@@ -194,6 +198,8 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                 lazyRender:true,
  				mode:'remote',
  				pageSize:10,
+ 				listWidth:350,
+                resizable:true,
  				queryDelay:1000,
  				anchor:'80%',		
  				renderer:function(value, p, record){return String.format('{0}', record.data['nombre_partida']);}
@@ -237,6 +243,8 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                 lazyRender:true,
  				mode:'remote',
  				pageSize:10,
+ 				listWidth:350,
+                resizable:true,
  				queryDelay:1000,
  				anchor:'80%',		
  				renderer:function(value, p, record){return String.format('{0}', record.data['nombre_auxiliar']);}
