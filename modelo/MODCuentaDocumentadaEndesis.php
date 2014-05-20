@@ -154,7 +154,7 @@ class MODCuentaDocumentadaEndesis extends MODbase{
 		$query_correos = "	select
 				            aut.email2 as email_autorizacion,
 				            COALESCE(aut.nombre,'')||' '||COALESCE(aut.apellido_paterno,'')||' '||COALESCE(aut.apellido_materno,'') as nombre_autorizacion,
-				            coalesce (em.email2,'gvelasquez@boa.bo') as email_jefe, 
+				            coalesce (em.email2,'gvelasquez@boa.bo')::varchar as email_jefe, 
 				            COALESCE(em.nombre,'')||' '||COALESCE(em.apellido_paterno,'')||' '||COALESCE(em.apellido_materno,'') as nombre_jefe,
 				            sol.nombre_completo as nombre_solicitante,
 				            sol.email2 as email_solicitante,
