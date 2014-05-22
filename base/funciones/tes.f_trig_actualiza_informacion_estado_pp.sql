@@ -1,4 +1,4 @@
-CREATE FUNCTION tes.f_trig_actualiza_informacion_estado_pp (
+CREATE OR REPLACE FUNCTION tes.f_trig_actualiza_informacion_estado_pp (
 )
 RETURNS trigger AS
 $body$
