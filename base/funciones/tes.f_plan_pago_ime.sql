@@ -322,6 +322,8 @@ BEGIN
                      v_codigo_estado
             FROM wf.f_registra_proceso_disparado_wf(
                      p_id_usuario,
+                     v_parametros._id_usuario_ai,
+                     v_parametros._nombre_usuario_ai,
                      v_registros.id_estado_wf, 
                      NULL, 
                      v_registros.id_depto,
@@ -372,7 +374,9 @@ BEGIN
             porc_descuento_ley,
             nro_cheque,
             nro_cuenta_bancaria,
-            id_cuenta_bancaria_mov
+            id_cuenta_bancaria_mov,
+            id_usuario_ai,
+            usuario_ai
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -409,7 +413,9 @@ BEGIN
             v_parametros.porc_descuento_ley,
             COALESCE(v_nro_cheque,0),
             v_nro_cuenta_bancaria,
-			v_id_cuenta_bancaria_mov				
+			v_id_cuenta_bancaria_mov,
+            v_parametros._id_usuario_ai,
+             v_parametros._nombre_usuario_ai				
 			)RETURNING id_plan_pago into v_id_plan_pago;
             
             -- actualiza el monto pagado en el plan_pago padre
@@ -682,7 +688,9 @@ BEGIN
             nro_cuenta_bancaria = v_nro_cuenta_bancaria,
             id_cuenta_bancaria_mov = v_id_cuenta_bancaria_mov,
             porc_monto_excento_var = v_porc_monto_excento_var,
-            monto_excento = COALESCE(v_monto_excento,0)
+            monto_excento = COALESCE(v_monto_excento,0),
+            id_usuario_ai = v_parametros._id_usuario_ai,
+            usuario_ai = v_parametros._nombre_usuario_ai
             
             
             
@@ -826,6 +834,8 @@ BEGIN
                                                                  v_registros.id_estado_wf, 
                                                                  v_registros.id_proceso_wf,
                                                                  p_id_usuario,
+                                                                 v_parametros._id_usuario_ai,
+                                                                 v_parametros._nombre_usuario_ai,
                                                                  v_registros.id_depto,
                                                                  'Se elimina la cuota de devengado');
                   
@@ -837,7 +847,9 @@ BEGIN
                        estado = 'anulado',
                        id_usuario_mod=p_id_usuario,
                        fecha_mod=now(),
-                       estado_reg='inactivo'
+                       estado_reg='inactivo',
+                       id_usuario_ai = v_parametros._id_usuario_ai,
+                       usuario_ai = v_parametros._nombre_usuario_ai
                      where pp.id_plan_pago  = v_parametros.id_plan_pago;
                 
                     --actulizamos el nro_cuota actual actual en obligacion_pago
@@ -893,6 +905,8 @@ BEGIN
                                                            v_registros.id_estado_wf, 
                                                            v_registros.id_proceso_wf,
                                                            p_id_usuario,
+                                                           v_parametros._id_usuario_ai,
+                                                           v_parametros._nombre_usuario_ai,
                                                            v_registros.id_depto,
                                                            'Elimina la cuota de pago');
             
@@ -904,7 +918,9 @@ BEGIN
                    estado = 'anulado',
                    id_usuario_mod=p_id_usuario,
                    fecha_mod=now(),
-                   estado_reg='inactivo'
+                   estado_reg='inactivo',
+                   id_usuario_ai = v_parametros._id_usuario_ai,
+                   usuario_ai = v_parametros._nombre_usuario_ai
                  where pp.id_plan_pago  = v_parametros.id_plan_pago;
                      
                  
@@ -1021,7 +1037,12 @@ BEGIN
            
          
            
-           v_verficacion = tes.f_generar_comprobante(p_id_usuario, v_parametros.id_plan_pago, v_parametros.id_depto_conta);
+           v_verficacion = tes.f_generar_comprobante(
+                                                      p_id_usuario,
+                                                      v_parametros._id_usuario_ai,
+                                                      v_parametros._nombre_usuario_ai,
+                                                      v_parametros.id_plan_pago, 
+                                                      v_parametros.id_depto_conta);
            
           IF  v_verficacion[1]= 'TRUE'   THEN
             
@@ -1187,6 +1208,8 @@ BEGIN
                                                              v_id_estado_wf, 
                                                              v_id_proceso_wf,
                                                              p_id_usuario,
+                                                             v_parametros._id_usuario_ai,
+                                                             v_parametros._nombre_usuario_ai,
                                                              v_id_depto,
                                                              COALESCE(v_num_obliacion_pago,'--')||' Obs:'||v_obs,
                                                              v_acceso_directo ,
@@ -1234,6 +1257,8 @@ BEGIN
                        v_codigo_estado
               FROM wf.f_registra_proceso_disparado_wf(
                        p_id_usuario,
+                       v_parametros._id_usuario_ai,
+                       v_parametros._nombre_usuario_ai,
                        v_id_estado_actual, 
                        v_registros_proc.id_funcionario_wf_pro, 
                        v_registros_proc.id_depto_wf_pro,
@@ -1492,6 +1517,8 @@ BEGIN
                                                                v_id_estado_wf, 
                                                                v_id_proceso_wf,
                                                                p_id_usuario,
+                                                               v_parametros._id_usuario_ai,
+                                                               v_parametros._nombre_usuario_ai,
                                                                v_id_depto,
                                                                COALESCE(v_num_obliacion_pago,'--')||' Obs:'||v_obs);
                 
@@ -1592,6 +1619,8 @@ BEGIN
               v_parametros.id_estado_wf, 
               v_id_proceso_wf, 
               p_id_usuario,
+              v_parametros._id_usuario_ai,
+              v_parametros._nombre_usuario_ai,
               v_id_depto,
               '[RETROCESO] '|| v_parametros.obs,
               v_acceso_directo,
@@ -1606,7 +1635,9 @@ BEGIN
                id_estado_wf =  v_id_estado_actual,
                estado = v_codigo_estado,
                id_usuario_mod=p_id_usuario,
-               fecha_mod=now()
+               fecha_mod=now(),
+               id_usuario_ai = v_parametros._id_usuario_ai,
+               usuario_ai = v_parametros._nombre_usuario_ai
           where id_proceso_wf = v_parametros.id_proceso_wf;
                          
                          

@@ -2,6 +2,8 @@
 
 CREATE OR REPLACE FUNCTION tes.f_gestionar_cuota_plan_pago (
   p_id_usuario integer,
+  p_id_usuario_ai integer,
+  p_usuario_ai varchar,
   p_id_int_comprobante integer
 )
 RETURNS boolean AS
@@ -169,6 +171,8 @@ BEGIN
                                                              v_registros.id_estado_wf, 
                                                              v_registros.id_proceso_wf,
                                                              p_id_usuario,
+                                                             p_id_usuario_ai, -- id_usuario_ai
+                                                             p_usuario_ai, -- usuario_ai
                                                              v_registros.id_depto,
                                                              'Comprobante de '||v_tipo_sol||' fue validado');
               
@@ -186,7 +190,9 @@ BEGIN
                    estado = va_codigo_estado[1],
                    id_usuario_mod=p_id_usuario,
                    fecha_mod=now(),
-                   fecha_dev = now()
+                   fecha_dev = now(),
+                   id_usuario_ai = p_id_usuario_ai,
+                   usuario_ai = p_usuario_ai
                  where id_plan_pago  = v_registros.id_plan_pago;    
               
               ELSE
@@ -196,7 +202,9 @@ BEGIN
                      estado = va_codigo_estado[1],
                      id_usuario_mod=p_id_usuario,
                      fecha_mod=now(),
-                     fecha_pag = now()
+                     fecha_pag = now(),
+                     id_usuario_ai = p_id_usuario_ai,
+                     usuario_ai = p_usuario_ai
                    where id_plan_pago  = v_registros.id_plan_pago;    
              
               END IF;
@@ -225,6 +233,8 @@ BEGIN
                      v_codigo_estado
             FROM wf.f_registra_proceso_disparado_wf(
                      p_id_usuario,
+                     p_id_usuario_ai, --id_usuario_ai
+                     p_usuario_ai, --usuario_ai
                      v_id_estado_actual, 
                      NULL, 
                      v_registros.id_depto,
@@ -269,7 +279,9 @@ BEGIN
                         
                         id_cuenta_bancaria_mov,
                         nro_cheque,
-                        nro_cuenta_bancaria
+                        nro_cuenta_bancaria,
+                        id_usuario_ai,
+                        usuario_ai
                        
                       ) 
                       VALUES (
@@ -301,7 +313,9 @@ BEGIN
                         v_registros.porc_descuento_ley,
                         v_registros.id_cuenta_bancaria_mov,
                         COALESCE(v_registros.nro_cheque,0),
-                        v_registros.nro_cuenta_bancaria
+                        v_registros.nro_cuenta_bancaria,
+                        p_id_usuario_ai,
+                        p_usuario_ai
                        
                       )RETURNING id_plan_pago into v_id_plan_pago;
                     
@@ -358,6 +372,8 @@ BEGIN
                                                           v_id_estado_wf, 
                                                            v_id_proceso_wf,
                                                            p_id_usuario,
+                                                           p_id_usuario_ai,
+                                                           p_usuario_ai,
                                                            v_registros.id_depto,
                                                            '(generacion de comprobante de pago directo para la OP:'|| COALESCE(v_registros.numero,'NAN')||',   cuota nro: '||COALESCE(v_registros.nro_cuota,'NAN')||' ) La solicitud de  Pago pasa a Contabilidad');
              
@@ -372,7 +388,11 @@ BEGIN
               --------------------------------------------------
               -- solicitar negeracion de comprobantes de pago
               ---------------------------------------------------
-              v_verficacion2 = tes.f_generar_comprobante(p_id_usuario, v_id_plan_pago,v_registros.id_depto_conta);
+              v_verficacion2 = tes.f_generar_comprobante(
+                                           p_id_usuario, 
+                                           p_id_usuario_ai,
+                                           p_usuario_ai,
+                                           v_id_plan_pago,v_registros.id_depto_conta);
              
               IF v_verficacion2[1]='FALSE'  THEN
               

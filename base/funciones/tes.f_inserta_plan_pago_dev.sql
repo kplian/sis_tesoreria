@@ -95,7 +95,10 @@ BEGIN
    (p_hstore->'obs_descuentos_ley'),
    (p_hstore->'obs_monto_no_pagado')::text,
    (p_hstore->'obs_otros_descuentos')::text,
-   (p_hstore->'porc_descuento_ley')::numeric,  
+   (p_hstore->'porc_descuento_ley')::numeric,
+   
+   (p_hstore->'_id_usuario_ai')::integer, 
+   (p_hstore->'_nombre_usuario_ai')::varchar,   
     
     
     
@@ -273,6 +276,8 @@ BEGIN
                                                                     v_registros.id_estado_wf, 
                                                                     v_registros.id_proceso_wf,
                                                                     p_id_usuario,
+                                                                    (p_hstore->'_id_usuario_ai')::integer,
+                                                                    (p_hstore->'_nombre_usuario_ai')::varchar,
                                                                     v_registros.id_depto);
                     
                     --actualiza el proceso
@@ -282,7 +287,9 @@ BEGIN
                        id_estado_wf =  v_id_estado_actual,
                        estado = va_codigo_estado_pro[1],
                        id_usuario_mod=p_id_usuario,
-                       fecha_mod=now()
+                       fecha_mod=now(),
+                       id_usuario_ai = (p_hstore->'_id_usuario_ai')::integer,
+                       usuario_ai = (p_hstore->'_nombre_usuario_ai')::varchar
                      where id_obligacion_pago = (p_hstore->'id_obligacion_pago')::integer;
                      
                       -- raise exception 'xxxxxxxxxxxxx  %', v_id_estado_actual ;
@@ -300,6 +307,8 @@ BEGIN
                                v_codigo_estado
                       FROM wf.f_registra_proceso_disparado_wf(
                                p_id_usuario,
+                               (p_hstore->'_id_usuario_ai')::integer,
+                               (p_hstore->'_nombre_usuario_ai')::varchar,
                                v_id_estado_actual, 
                                NULL, 
                                v_registros.id_depto,
@@ -327,6 +336,8 @@ BEGIN
                            v_codigo_estado
                   FROM wf.f_registra_proceso_disparado_wf(
                            p_id_usuario,
+                           (p_hstore->'_id_usuario_ai')::integer,
+                           (p_hstore->'_nombre_usuario_ai')::varchar,
                            v_registros.id_estado_wf, 
                            NULL, 
                            v_registros.id_depto,
@@ -423,7 +434,9 @@ BEGIN
             nro_cuenta_bancaria,
             id_cuenta_bancaria_mov,
             porc_monto_excento_var,
-            monto_excento
+            monto_excento,
+            id_usuario_ai,
+            usuario_ai
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -462,7 +475,9 @@ BEGIN
 			v_nro_cuenta_bancaria,
             v_id_cuenta_bancaria_mov,
             v_porc_monto_excento_var,
-            COALESCE(v_monto_excento,0)		
+            COALESCE(v_monto_excento,0)	,
+            (p_hstore->'_id_usuario_ai')::integer,
+            (p_hstore->'_nombre_usuario_ai')::varchar	
 			)RETURNING id_plan_pago into v_id_plan_pago;
             
              --------------------------------------------------

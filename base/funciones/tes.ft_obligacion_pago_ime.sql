@@ -213,7 +213,9 @@ BEGIN
                v_codigo_estado   
                 
           FROM wf.f_inicia_tramite(
-               p_id_usuario, 
+               p_id_usuario,
+               v_parametros._id_usuario_ai,
+               v_parametros._nombre_usuario_ai ,
                v_id_gestion, 
                v_codigo_tipo_proceso, 
                v_parametros.id_funcionario,
@@ -253,7 +255,9 @@ BEGIN
             total_nro_cuota,
             fecha_pp_ini,
             rotacion,
-            id_plantilla
+            id_plantilla,
+            id_usuario_ai,
+            usuario_ai
             
           	) values(
 			v_parametros.id_proveedor,
@@ -282,7 +286,9 @@ BEGIN
             v_parametros.total_nro_cuota,
             v_parametros.fecha_pp_ini,
             v_parametros.rotacion,
-            v_parametros.id_plantilla
+            v_parametros.id_plantilla,
+            v_parametros._id_usuario_ai,
+            v_parametros._nombre_usuario_ai
 							
 			)RETURNING id_obligacion_pago into v_id_obligacion_pago;
 			
@@ -321,7 +327,9 @@ BEGIN
             total_nro_cuota = v_parametros.total_nro_cuota,
             fecha_pp_ini = v_parametros.fecha_pp_ini,
             rotacion = v_parametros.rotacion,
-            id_plantilla = v_parametros.id_plantilla
+            id_plantilla = v_parametros.id_plantilla,
+            id_usuario_ai = v_parametros._id_usuario_ai,
+            usuario_ai = v_parametros._nombre_usuario_ai
             
             
 			where id_obligacion_pago=v_parametros.id_obligacion_pago;
@@ -395,6 +403,8 @@ BEGIN
                                                            v_registros.id_estado_wf, 
                                                            v_registros.id_proceso_wf,
                                                            p_id_usuario,
+                                                           v_parametros._id_usuario_ai,
+            											   v_parametros._nombre_usuario_ai,
                                                            v_registros.id_depto,
                                                            'Obligacion de Pago Anulada');
             
@@ -406,13 +416,19 @@ BEGIN
                  estado = 'anulado',
                  id_usuario_mod=p_id_usuario,
                  fecha_mod=now(),
-                 estado_reg='inactivo'
+                 estado_reg='inactivo',
+                 id_usuario_ai = v_parametros._id_usuario_ai,
+                 usuario_ai = v_parametros._nombre_usuario_ai
                where op.id_obligacion_pago  = v_parametros.id_obligacion_pago;
                
                
                --inactiva el datalle de la solicitud
                update tes.tobligacion_det od set  
-                estado_reg= 'inactivo'
+                estado_reg= 'inactivo',
+                id_usuario_mod = p_id_usuario,
+                fecha_mod = now(),
+                id_usuario_ai = v_parametros._id_usuario_ai,
+                usuario_ai = v_parametros._nombre_usuario_ai
                where  od.id_obligacion_pago = v_parametros.id_obligacion_pago;
                
                
@@ -467,6 +483,8 @@ BEGIN
                               v_registros.id_estado_wf, 
                               v_registros.id_proceso_wf, 
                               p_id_usuario,
+                              v_parametros._id_usuario_ai,
+                              v_parametros._nombre_usuario_ai,
                               v_id_depto,
                               'El estado  retrocede por anulacion de la obligacion en tesoreria');
                           
@@ -644,6 +662,8 @@ BEGIN
                                                            v_id_estado_wf, 
                                                            v_id_proceso_wf,
                                                            p_id_usuario,
+                                                           v_parametros._id_usuario_ai,
+                                                           v_parametros._nombre_usuario_ai,
                                                            v_id_depto);
             
             
@@ -671,7 +691,9 @@ BEGIN
                id_usuario_mod=p_id_usuario,
                comprometido = 'si',
                total_pago=v_total_detalle,
-               fecha_mod=now()
+               fecha_mod=now(),
+               id_usuario_ai = v_parametros._id_usuario_ai,
+               usuario_ai = v_parametros._nombre_usuario_ai
              where id_obligacion_pago  = v_parametros.id_obligacion_pago;
         
            
@@ -727,7 +749,9 @@ BEGIN
                                                         'nombre_pago',v_desc_proveedor::varchar,
                                                         'monto', v_monto_cuota::varchar,
                                                         'descuento_ley',v_descuentos_ley::varchar,
-                                                        'fecha_tentativa',v_fecha_pp_ini::varchar
+                                                        'fecha_tentativa',v_fecha_pp_ini::varchar,
+                                                        '_id_usuario_ai',v_parametros._id_usuario_ai::varchar,
+                                                        '_nombre_usuario_ai', v_parametros._nombre_usuario_ai::varchar
                                                        ]);
                           
                           
@@ -757,7 +781,11 @@ BEGIN
                --llamar a la funcion de finalizacion de obligacion
              
             
-                 IF not tes.f_finalizar_obligacion(v_parametros.id_obligacion_pago, p_id_usuario)  THEN
+                 IF not tes.f_finalizar_obligacion(
+                   v_parametros.id_obligacion_pago, 
+                   p_id_usuario,
+                   v_parametros._id_usuario_ai,
+                   v_parametros._nombre_usuario_ai)  THEN
                                      
                     raise exception 'Error al finalizar la obligaón';
                  else
@@ -871,6 +899,8 @@ BEGIN
                           v_id_estado_wf, 
                           v_id_proceso_wf, 
                           p_id_usuario,
+                          v_parametros._id_usuario_ai,
+                          v_parametros._nombre_usuario_ai,
                           v_id_depto);
                       
                     

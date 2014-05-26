@@ -2,6 +2,8 @@
 
 CREATE OR REPLACE FUNCTION tes.f_gestionar_cuota_plan_pago_eliminacion (
   p_id_usuario integer,
+  p_id_usuario_ai integer,
+  p_usuario_ai varchar,
   p_id_int_comprobante integer
 )
 RETURNS boolean AS
@@ -142,6 +144,8 @@ BEGIN
               v_registros.id_estado_wf, 
               v_id_proceso_wf, 
               p_id_usuario,
+              p_id_usuario_ai,
+              p_usuario_ai,
               v_id_depto,
               'Eliminación de comprobante de la OP:'|| COALESCE(v_registros.numero,'NaN')||', cuota nro: '|| COALESCE(v_registros.nro_cuota,'NAN'));
                       
@@ -153,7 +157,9 @@ BEGIN
                estado = v_codigo_estado,
                id_usuario_mod=p_id_usuario,
                fecha_mod=now(),
-               id_int_comprobante = NULL
+               id_int_comprobante = NULL,
+               id_usuario_ai = p_id_usuario_ai,
+               usuario_ai = p_usuario_ai
              where pp.id_plan_pago = v_registros.id_plan_pago;
      
      

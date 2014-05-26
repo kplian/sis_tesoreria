@@ -2,7 +2,9 @@
 
 CREATE OR REPLACE FUNCTION tes.f_finalizar_obligacion (
   p_id_obligacion_pago integer,
-  p_id_usuario integer
+  p_id_usuario integer,
+  p_id_usuario_ai integer,
+  p_usuario_ai varchar
 )
 RETURNS boolean AS
 $body$
@@ -115,7 +117,10 @@ BEGIN
                  END IF;
                  
                  
-                 IF not adq.f_finalizar_cotizacion(v_id_cotizacion, p_id_usuario)  THEN
+                 IF not adq.f_finalizar_cotizacion(v_id_cotizacion, 
+                                                    p_id_usuario,
+                                                    p_id_usuario_ai,
+                                                    p_usuario_ai)  THEN
                                      
                     raise exception 'Error al finalizar la cotización';
                                      

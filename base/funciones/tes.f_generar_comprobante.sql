@@ -2,6 +2,8 @@
 
 CREATE OR REPLACE FUNCTION tes.f_generar_comprobante (
   p_id_usuario integer,
+  p_id_usuario_ai integer,
+  p_usuario_ai varchar,
   p_id_plan_pago integer,
   p_id_depto_conta integer
 )
@@ -259,7 +261,7 @@ BEGIN
             
                 -- TODO llamda a la generaciond e comprobante de devengado 
                 
-                 v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,'DEVTESPROV',p_id_usuario);
+                 v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,'DEVTESPROV',p_id_usuario,p_id_usuario_ai,p_usuario_ai);
                  
            
             ELSIF v_tipo_sol ='pago' THEN
@@ -269,7 +271,7 @@ BEGIN
                 
             
                 --- select conta.f_gen_comprobante (120  ,'DEVTESPROV',1) 
-                v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,'PAGTESPROV',p_id_usuario);
+                v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,'PAGTESPROV',p_id_usuario,p_id_usuario_ai,p_usuario_ai);
             
             
                       
@@ -322,6 +324,8 @@ BEGIN
                                                            v_registros.id_estado_wf, 
                                                            v_registros.id_proceso_wf,
                                                            p_id_usuario,
+                                                           p_id_usuario_ai,
+                                                           p_usuario_ai,
                                                            v_registros.id_depto,
                                                            'La solicitud de '||v_tipo_sol ||'pasa a Contabilidad');
             
@@ -333,7 +337,9 @@ BEGIN
                id_estado_wf =  v_id_estado_actual,
                estado = 'pendiente',
                id_usuario_mod=p_id_usuario,
-               fecha_mod=now()
+               fecha_mod=now(),
+               id_usuario_ai = p_id_usuario_ai,
+               usuario_ai = p_usuario_ai
              where id_plan_pago  = p_id_plan_pago;
   
 
