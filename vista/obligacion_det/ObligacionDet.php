@@ -68,7 +68,7 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                 allowBlank:true,
                 emptyText:'Concepto Ingreso Gasto...',
                 store: new Ext.data.JsonStore({
-                         url: '../../sis_parametros/control/ConceptoIngas/listarConceptoIngas',
+                         url: '../../sis_parametros/control/ConceptoIngas/listarConceptoIngasMasPartida',
                          id: 'id_concepto_ingas',
                          root: 'datos',
                          sortInfo:{
@@ -76,15 +76,15 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                             direction: 'ASC'
                     },
                     totalProperty: 'total',
-                    fields: ['id_concepto_ingas','tipo','desc_ingas','movimiento'],
+                    fields: ['id_concepto_ingas','tipo','desc_ingas','movimiento','desc_partida'],
                     // turn on remote sorting
                     remoteSort: true,
-                    baseParams:{par_filtro:'desc_ingas',movimiento:'gasto'}
+                    baseParams:{par_filtro:'desc_ingas#par.codigo#par.nombre_partida',movimiento:'gasto'}
                     }),
                 valueField: 'id_concepto_ingas',
                 displayField: 'desc_ingas',
                 gdisplayField:'nombre_ingas',
-                tpl:'<tpl for="."><div class="x-combo-list-item"><p>{desc_ingas}</p><p>TIPO:{tipo}</p><p>MOVIMIENTO:{movimiento}</p></div></tpl>',
+                tpl:'<tpl for="."><div class="x-combo-list-item"><p>{desc_ingas}</p><p>TIPO:{tipo}</p><p>MOVIMIENTO:{movimiento}</p> <p>PARTIDA:{desc_partida}</p></div></tpl>',
                 hiddenName: 'id_concepto_ingas',
                 forceSelection:true,
                 typeAhead: true,
@@ -475,6 +475,12 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
         this.Cmp.id_centro_costo.store.baseParams.id_gestion=this.maestro.id_gestion
         this.Cmp.id_centro_costo.store.baseParams.id_depto =this.maestro.id_depto;
         this.Cmp.id_centro_costo.modificado=true;
+        
+        this.Cmp.id_concepto_ingas.store.baseParams.id_gestion=this.maestro.id_gestion
+        this.Cmp.id_concepto_ingas.modificado=true;
+        
+        
+        
         
         /*this.cmpPartida.store.baseParams.id_gestion=this.maestro.id_gestion
         this.cmpPartida.modificado=true;*/

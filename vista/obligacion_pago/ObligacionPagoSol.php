@@ -24,8 +24,9 @@ Phx.vista.ObligacionPagoSol = {
 	 * */
 	
 	constructor: function(config) {
+	   
+	  
 	   this.Atributos[this.getIndAtributo('id_depto')].config.url= '../../sis_parametros/control/Depto/listarDeptoFiltradoXUsuario';
-       
        this.Atributos[this.getIndAtributo('id_depto')].config.baseParams={estado:'activo',codigo_subsistema:'TES'},
        this.Atributos[this.getIndAtributo('id_funcionario')].grid= true;
        this.Atributos[this.getIndAtributo('id_funcionario')].form= true;

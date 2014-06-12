@@ -692,7 +692,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         {
             config:{
                 name: 'obs_monto_no_pagado',
-                fieldLabel: 'Obs. Monto no Pagado',
+                fieldLabel: 'Obs. Pago',
+                qtip:'Estas observaciones van a la glosa del comprobante que se genere',
                 allowBlank: true,
                 anchor: '80%',
                 gwidth: 100,
@@ -722,7 +723,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         {
             config:{
                 name: 'obs_descuentos_ley',
-                fieldLabel: 'Obs. otros desc.',
+                fieldLabel: 'Obs. desc. ley',
                 allowBlank: true,
                 anchor: '80%',
                 disabled:true,

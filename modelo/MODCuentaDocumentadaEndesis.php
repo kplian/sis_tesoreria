@@ -151,9 +151,19 @@ class MODCuentaDocumentadaEndesis extends MODbase{
 								NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)";
 								
 		
-		$query_correos = "	select
-				            aut.email2 as email_autorizacion,
-				            COALESCE(aut.nombre,'')||' '||COALESCE(aut.apellido_paterno,'')||' '||COALESCE(aut.apellido_materno,'') as nombre_autorizacion,
+		$query_correos = "	select 
+							(case when int.id_item_suplente is not null THEN
+								aut_sup.email2
+							else
+                            	aut.email2
+							end)as email_autorizacion,
+                            (case when int.id_item_suplente is not null THEN
+								COALESCE(aut_sup.nombre,'')||' '||COALESCE(aut_sup.apellido_paterno,'')||' '||COALESCE(aut_sup.apellido_materno,'')
+							else
+                            	COALESCE(aut.nombre,'')||' '||COALESCE(aut.apellido_paterno,'')||' '||COALESCE(aut.apellido_materno,'')
+							end) as nombre_autorizacion,
+				             
+				            
 				            coalesce (em.email2,'gvelasquez@boa.bo')::varchar as email_jefe, 
 				            COALESCE(em.nombre,'')||' '||COALESCE(em.apellido_paterno,'')||' '||COALESCE(em.apellido_materno,'') as nombre_jefe,
 				            sol.nombre_completo as nombre_solicitante,
@@ -166,7 +176,15 @@ class MODCuentaDocumentadaEndesis extends MODbase{
 				            cd.importe         
 				            from tesoro.tts_cuenta_doc cd
 				            inner join kard.vkp_empleado sol on sol.id_empleado=cd.id_empleado
-				            inner join kard.vkp_empleado aut on aut.id_empleado=cd.id_autorizacion           
+				            inner join kard.vkp_empleado aut on aut.id_empleado=cd.id_autorizacion
+                            inner join kard.tkp_historico_asignacion ha_aut on ha_aut.id_empleado = aut.id_empleado 
+                            											and ha_aut.estado_reg != 'eliminado' and ha_aut.fecha_asignacion <= now() AND
+                                                                        (ha_aut.fecha_finalizacion >= now() or ha_aut.fecha_finalizacion is null)
+                            left join kard.tkp_interinato int on ha_aut.id_item = int.id_item_titular
+                            left join kard.tkp_historico_asignacion ha_sup on int.id_item_suplente = ha_sup.id_item
+                            				           					and ha_sup.estado_reg != 'eliminado' and ha_sup.fecha_asignacion <= now() AND
+                                                                        (ha_sup.fecha_finalizacion >= now() or ha_sup.fecha_finalizacion is null)
+                            left join kard.vkp_empleado aut_sup on aut_sup.id_empleado = ha_sup.id_empleado
 				            inner join presto.tpr_presupuesto pre on pre.id_presupuesto=cd.id_presupuesto
 				            inner join kard.tkp_unidad_organizacional un on un.id_unidad_organizacional=pre.id_unidad_organizacional
 				            left join kard.tkp_historico_asignacion ha on (ha.id_unidad_organizacional=un.id_unidad_organizacional and now() BETWEEN ha.fecha_asignacion and COALESCE(ha.fecha_finalizacion, now()))
