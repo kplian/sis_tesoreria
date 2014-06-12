@@ -1687,6 +1687,554 @@ CREATE TRIGGER trig_actualiza_informacion_estado_pp
 
 
 
+/***********************************I-DEP-RAC-TES-0-11/06/2014*****************************************/
+
+--------------- SQL ---------------
+--------------- SQL ---------------
+
+--------------- SQL ---------------
+
+CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
+    id_plan_pago,
+    id_proveedor,
+    desc_proveedor,
+    id_moneda,
+    id_depto_conta,
+    numero,
+    fecha_actual,
+    estado,
+    monto_ejecutar_total_mb,
+    monto_ejecutar_total_mo,
+    monto,
+    monto_mb,
+    monto_retgar_mb,
+    monto_retgar_mo,
+    monto_no_pagado,
+    monto_no_pagado_mb,
+    otros_descuentos,
+    otros_descuentos_mb,
+    id_plantilla,
+    id_cuenta_bancaria,
+    id_cuenta_bancaria_mov,
+    nro_cheque,
+    nro_cuenta_bancaria,
+    num_tramite,
+    tipo,
+    id_gestion_cuentas,
+    id_int_comprobante,
+    liquido_pagable,
+    liquido_pagable_mb,
+    nombre_pago,
+    porc_monto_excento_var,
+    obs_pp)
+AS
+  SELECT pp.id_plan_pago,
+         op.id_proveedor,
+         p.desc_proveedor,
+         op.id_moneda,
+         op.id_depto_conta,
+         op.numero,
+         now() AS fecha_actual,
+         pp.estado,
+         pp.monto_ejecutar_total_mb,
+         pp.monto_ejecutar_total_mo,
+         pp.monto,
+         pp.monto_mb,
+         pp.monto_retgar_mb,
+         pp.monto_retgar_mo,
+         pp.monto_no_pagado,
+         pp.monto_no_pagado_mb,
+         pp.otros_descuentos,
+         pp.otros_descuentos_mb,
+         pp.id_plantilla,
+         pp.id_cuenta_bancaria,
+         pp.id_cuenta_bancaria_mov,
+         pp.nro_cheque,
+         pp.nro_cuenta_bancaria,
+         op.num_tramite,
+         pp.tipo,
+         op.id_gestion AS id_gestion_cuentas,
+         pp.id_int_comprobante,
+         pp.liquido_pagable,
+         pp.liquido_pagable_mb,
+         pp.nombre_pago,
+         pp.porc_monto_excento_var,
+         ((COALESCE(op.numero, '' ::character varying) ::text || ' ' ::text) ||
+          COALESCE(pp.obs_monto_no_pagado, '' ::text)) ::character varying AS
+           obs_pp
+  FROM tes.tplan_pago pp
+       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
+        op.id_obligacion_pago
+       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor;
 
 
+select pxp.f_insert_testructura_gui ('SOLPD', 'TES');
+select pxp.f_insert_testructura_gui ('OBPG.8.4', 'OBPG.8');
+select pxp.f_insert_testructura_gui ('OBPG.8.5', 'OBPG.8');
+select pxp.f_insert_testructura_gui ('OBPG.3.4', 'OBPG.3');
+select pxp.f_insert_testructura_gui ('OBPG.3.5', 'OBPG.3');
+select pxp.f_insert_testructura_gui ('VBDP.4', 'VBDP');
+select pxp.f_insert_testructura_gui ('VBDP.5', 'VBDP');
+select pxp.f_insert_testructura_gui ('SOLPD.1', 'SOLPD');
+select pxp.f_insert_testructura_gui ('SOLPD.2', 'SOLPD');
+select pxp.f_insert_testructura_gui ('SOLPD.3', 'SOLPD');
+select pxp.f_insert_testructura_gui ('SOLPD.4', 'SOLPD');
+select pxp.f_insert_testructura_gui ('SOLPD.5', 'SOLPD');
+select pxp.f_insert_testructura_gui ('SOLPD.6', 'SOLPD');
+select pxp.f_insert_testructura_gui ('SOLPD.7', 'SOLPD');
+select pxp.f_insert_testructura_gui ('SOLPD.2.1', 'SOLPD.2');
+select pxp.f_insert_testructura_gui ('SOLPD.2.2', 'SOLPD.2');
+select pxp.f_insert_testructura_gui ('SOLPD.2.3', 'SOLPD.2');
+select pxp.f_insert_testructura_gui ('SOLPD.2.4', 'SOLPD.2');
+select pxp.f_insert_testructura_gui ('SOLPD.2.5', 'SOLPD.2');
+select pxp.f_insert_testructura_gui ('SOLPD.2.5.1', 'SOLPD.2.5');
+select pxp.f_insert_testructura_gui ('SOLPD.2.5.2', 'SOLPD.2.5');
+select pxp.f_insert_testructura_gui ('SOLPD.4.1', 'SOLPD.4');
+select pxp.f_insert_testructura_gui ('SOLPD.4.2', 'SOLPD.4');
+select pxp.f_insert_testructura_gui ('SOLPD.4.3', 'SOLPD.4');
+select pxp.f_insert_testructura_gui ('SOLPD.4.4', 'SOLPD.4');
+select pxp.f_insert_testructura_gui ('SOLPD.4.5', 'SOLPD.4');
+select pxp.f_insert_testructura_gui ('SOLPD.4.5.1', 'SOLPD.4.5');
+select pxp.f_insert_testructura_gui ('SOLPD.4.5.2', 'SOLPD.4.5');
+select pxp.f_insert_testructura_gui ('SOLPD.5.1', 'SOLPD.5');
+select pxp.f_insert_testructura_gui ('SOLPD.5.2', 'SOLPD.5');
+select pxp.f_insert_testructura_gui ('SOLPD.7.1', 'SOLPD.7');
+select pxp.f_insert_testructura_gui ('SOLPD.7.2', 'SOLPD.7');
+select pxp.f_insert_testructura_gui ('SOLPD.7.3', 'SOLPD.7');
+select pxp.f_insert_testructura_gui ('SOLPD.7.2.1', 'SOLPD.7.2');
+select pxp.f_insert_testructura_gui ('SOLPD.7.3.1', 'SOLPD.7.3');
+select pxp.f_insert_testructura_gui ('SOLPD.7.3.1.1', 'SOLPD.7.3.1');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPGSOL_SEL', 'OBPG', 'no');
+select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'OBPG.8', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'OBPG.8.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'OBPG.8.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_VERSIGPRO_IME', 'OBPG.8.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CHKSTA_IME', 'OBPG.8.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'OBPG.8.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_FUNTIPES_SEL', 'OBPG.8.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DEPTIPES_SEL', 'OBPG.8.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPGSOL_SEL', 'OBPG.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'OBPG.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'OBPG.3.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'OBPG.3.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_VERSIGPRO_IME', 'OBPG.3.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CHKSTA_IME', 'OBPG.3.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'OBPG.3.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_FUNTIPES_SEL', 'OBPG.3.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DEPTIPES_SEL', 'OBPG.3.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('MIG_LBAN_INS', 'CTABANE.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('MIG_LBAN_MOD', 'CTABANE.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('MIG_LBAN_ELI', 'CTABANE.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('MIG_LBAN_SEL', 'CTABANE.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'VBDP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'VBDP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'VBDP.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_VERSIGPRO_IME', 'VBDP.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CHKSTA_IME', 'VBDP.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'VBDP.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_FUNTIPES_SEL', 'VBDP.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DEPTIPES_SEL', 'VBDP.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_GATNREP_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PLT_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPG_INS', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPG_MOD', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPG_ELI', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPG_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPGSOL_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPGSEL_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAOB_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_OBTTCB_GET', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_FINREG_IME', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_ANTEOB_IME', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_IDSEXT_GET', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COTOC_REP', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_CTD_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COTREP_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_SOLREP_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_SOLD_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_SOLDETCOT_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_VERPRE_IME', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_PROCPED_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COT_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COTPROC_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COTRPC_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_DEPUSUCOMB_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('RH_FUNCIOCAR_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_MONEDA_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEEV_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CCFILDEP_SEL', 'SOLPD.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CONIG_SEL', 'SOLPD.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CONIGPP_SEL', 'SOLPD.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_CTA_SEL', 'SOLPD.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_CTA_ARB_SEL', 'SOLPD.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_PAR_SEL', 'SOLPD.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_PAR_ARB_SEL', 'SOLPD.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_AUXCTA_SEL', 'SOLPD.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBDET_INS', 'SOLPD.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBDET_MOD', 'SOLPD.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBDET_ELI', 'SOLPD.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBDET_SEL', 'SOLPD.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CEC_SEL', 'SOLPD.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CECCOM_SEL', 'SOLPD.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CECCOMFU_SEL', 'SOLPD.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAREP_SEL', 'SOLPD.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_SEL', 'SOLPD.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PAFPP_IME', 'SOLPD.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_GETDEC_IME', 'SOLPD.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PLT_SEL', 'SOLPD.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_CTABAN_SEL', 'SOLPD.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'SOLPD.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAPA_INS', 'SOLPD.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_INS', 'SOLPD.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_MOD', 'SOLPD.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_ELI', 'SOLPD.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_SEL', 'SOLPD.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_SINPRE_IME', 'SOLPD.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_ANTEPP_IME', 'SOLPD.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_SIGEPP_IME', 'SOLPD.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_VERPRE_SEL', 'SOLPD.2.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_MOD', 'SOLPD.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_SEL', 'SOLPD.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'SOLPD.2.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'SOLPD.2.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_VERSIGPRO_IME', 'SOLPD.2.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CHKSTA_IME', 'SOLPD.2.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'SOLPD.2.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_FUNTIPES_SEL', 'SOLPD.2.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DEPTIPES_SEL', 'SOLPD.2.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_MOD', 'SOLPD.2.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_ELI', 'SOLPD.2.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_SEL', 'SOLPD.2.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CABMOM_IME', 'SOLPD.2.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'SOLPD.2.5.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPPROC_SEL', 'SOLPD.2.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'SOLPD.2.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_INS', 'SOLPD.2.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_MOD', 'SOLPD.2.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_ELI', 'SOLPD.2.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_SEL', 'SOLPD.2.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPGSEL_SEL', 'SOLPD.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPG_SEL', 'SOLPD.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPGSOL_SEL', 'SOLPD.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_COMEJEPAG_SEL', 'SOLPD.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_MONEDA_SEL', 'SOLPD.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PAFPP_IME', 'SOLPD.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_GETDEC_IME', 'SOLPD.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PLT_SEL', 'SOLPD.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_CTABAN_SEL', 'SOLPD.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'SOLPD.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAPA_INS', 'SOLPD.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_INS', 'SOLPD.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_MOD', 'SOLPD.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_ELI', 'SOLPD.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_SEL', 'SOLPD.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_SINPRE_IME', 'SOLPD.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_ANTEPP_IME', 'SOLPD.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_SIGEPP_IME', 'SOLPD.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAREP_SEL', 'SOLPD.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_SEL', 'SOLPD.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_VERPRE_SEL', 'SOLPD.4.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_MOD', 'SOLPD.4.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_SEL', 'SOLPD.4.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'SOLPD.4.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'SOLPD.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_VERSIGPRO_IME', 'SOLPD.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CHKSTA_IME', 'SOLPD.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'SOLPD.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_FUNTIPES_SEL', 'SOLPD.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DEPTIPES_SEL', 'SOLPD.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_MOD', 'SOLPD.4.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_ELI', 'SOLPD.4.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_SEL', 'SOLPD.4.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CABMOM_IME', 'SOLPD.4.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'SOLPD.4.5.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPPROC_SEL', 'SOLPD.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'SOLPD.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_INS', 'SOLPD.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_MOD', 'SOLPD.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_ELI', 'SOLPD.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_SEL', 'SOLPD.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_MOD', 'SOLPD.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_ELI', 'SOLPD.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_SEL', 'SOLPD.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CABMOM_IME', 'SOLPD.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'SOLPD.5.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPPROC_SEL', 'SOLPD.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'SOLPD.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_INS', 'SOLPD.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_MOD', 'SOLPD.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_ELI', 'SOLPD.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_SEL', 'SOLPD.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_VERPRE_SEL', 'SOLPD.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_SERVIC_SEL', 'SOLPD.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SAL_ITEMNOTBASE_SEL', 'SOLPD.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_SEL', 'SOLPD.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_ARB_SEL', 'SOLPD.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEE_INS', 'SOLPD.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEE_MOD', 'SOLPD.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEE_ELI', 'SOLPD.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEE_SEL', 'SOLPD.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEEV_SEL', 'SOLPD.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_SEL', 'SOLPD.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSONMIN_SEL', 'SOLPD.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_SEL', 'SOLPD.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SAL_ITEM_SEL', 'SOLPD.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SAL_ITEMNOTBASE_SEL', 'SOLPD.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SAL_ITMALM_SEL', 'SOLPD.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_SERVIC_SEL', 'SOLPD.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PRITSE_INS', 'SOLPD.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PRITSE_MOD', 'SOLPD.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PRITSE_ELI', 'SOLPD.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PRITSE_SEL', 'SOLPD.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_INS', 'SOLPD.7.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_MOD', 'SOLPD.7.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_ELI', 'SOLPD.7.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSONMIN_SEL', 'SOLPD.7.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_UPFOTOPER_MOD', 'SOLPD.7.2.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_INS', 'SOLPD.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_MOD', 'SOLPD.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_ELI', 'SOLPD.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_SEL', 'SOLPD.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_SEL', 'SOLPD.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSONMIN_SEL', 'SOLPD.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_INS', 'SOLPD.7.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_MOD', 'SOLPD.7.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_ELI', 'SOLPD.7.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSONMIN_SEL', 'SOLPD.7.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_UPFOTOPER_MOD', 'SOLPD.7.3.1.1', 'no');
+select pxp.f_insert_tgui_rol ('SOLPD', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('TES', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SISTEMA', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.7', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.7.3', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.7.3.1', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.7.3.1.1', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.7.2', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.7.2.1', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.7.1', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.6', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.5', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.5.2', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.5.1', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.4', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.4.5', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.4.5.2', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.4.5.1', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.4.4', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.4.3', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.4.2', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.4.1', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.3', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.2', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.2.5', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.2.5.2', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.2.5.1', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.2.4', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.2.3', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.2.2', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.2.1', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('SOLPD.1', 'OP - Solicitudes de Pago Directas');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_DWF_MOD', 'VBDP.3');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_DWF_ELI', 'VBDP.3');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'PM_PLT_SEL', 'OBPG');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DWF_MOD', 'OBPG.3.3');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_CABMOM_IME', 'OBPG.3.3');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_TIPES_SEL', 'OBPG.3.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_TIPPROC_SEL', 'OBPG.3.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_INS', 'OBPG.3.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_MOD', 'OBPG.3.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_ELI', 'OBPG.3.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_SEL', 'OBPG.3.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DWF_MOD', 'OBPG.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_CABMOM_IME', 'OBPG.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_TIPES_SEL', 'OBPG.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_TIPPROC_SEL', 'OBPG.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_INS', 'OBPG.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_MOD', 'OBPG.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_ELI', 'OBPG.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_SEL', 'OBPG.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DOCWFAR_MOD', 'OBPG.4.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'SEG_UPFOTOPER_MOD', 'OBPG.6.3.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'SEG_UPFOTOPER_MOD', 'OBPG.7.2.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'SEG_PERSONMIN_SEL', 'OBPG.7.1.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'SEG_PERSON_ELI', 'OBPG.7.1.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'SEG_PERSON_MOD', 'OBPG.7.1.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'SEG_PERSON_INS', 'OBPG.7.1.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'SEG_UPFOTOPER_MOD', 'OBPG.7.1.1.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_SEL', 'OBPG.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_DES_INS', 'VBDP.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_DES_MOD', 'VBDP.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_DES_ELI', 'VBDP.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_SEL', 'OBPG.4.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_GATNREP_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_PLT_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_OBPG_INS', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_OBPG_MOD', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_OBPG_ELI', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_OBPG_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_OBPGSOL_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_OBPGSEL_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPAOB_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_OBTTCB_GET', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_FINREG_IME', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_ANTEOB_IME', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_IDSEXT_GET', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'ADQ_COTOC_REP', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'ADQ_CTD_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'ADQ_COTREP_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'ADQ_SOLREP_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'ADQ_SOLD_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'ADQ_SOLDETCOT_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PRE_VERPRE_IME', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'ADQ_PROCPED_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'ADQ_COT_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'ADQ_COTPROC_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'ADQ_COTRPC_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_DEPUSUCOMB_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'RH_FUNCIOCAR_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_MONEDA_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_PROVEEV_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_SERVIC_SEL', 'SOLPD.7');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SAL_ITEMNOTBASE_SEL', 'SOLPD.7');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_LUG_SEL', 'SOLPD.7');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_LUG_ARB_SEL', 'SOLPD.7');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_PROVEE_INS', 'SOLPD.7');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_PROVEE_MOD', 'SOLPD.7');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_PROVEE_ELI', 'SOLPD.7');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_PROVEE_SEL', 'SOLPD.7');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_PROVEEV_SEL', 'SOLPD.7');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SEG_PERSON_SEL', 'SOLPD.7');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SEG_PERSONMIN_SEL', 'SOLPD.7');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_INSTIT_SEL', 'SOLPD.7');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_INSTIT_INS', 'SOLPD.7.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_INSTIT_MOD', 'SOLPD.7.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_INSTIT_ELI', 'SOLPD.7.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_INSTIT_SEL', 'SOLPD.7.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SEG_PERSON_SEL', 'SOLPD.7.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SEG_PERSONMIN_SEL', 'SOLPD.7.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SEG_PERSON_INS', 'SOLPD.7.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SEG_PERSON_MOD', 'SOLPD.7.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SEG_PERSON_ELI', 'SOLPD.7.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SEG_PERSONMIN_SEL', 'SOLPD.7.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SEG_UPFOTOPER_MOD', 'SOLPD.7.3.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SEG_PERSON_INS', 'SOLPD.7.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SEG_PERSON_MOD', 'SOLPD.7.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SEG_PERSON_ELI', 'SOLPD.7.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SEG_PERSONMIN_SEL', 'SOLPD.7.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SEG_UPFOTOPER_MOD', 'SOLPD.7.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SAL_ITEM_SEL', 'SOLPD.7.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SAL_ITEMNOTBASE_SEL', 'SOLPD.7.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'SAL_ITMALM_SEL', 'SOLPD.7.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_SERVIC_SEL', 'SOLPD.7.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_PRITSE_INS', 'SOLPD.7.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_PRITSE_MOD', 'SOLPD.7.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_PRITSE_ELI', 'SOLPD.7.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_PRITSE_SEL', 'SOLPD.7.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PRE_VERPRE_SEL', 'SOLPD.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DWF_MOD', 'SOLPD.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DWF_ELI', 'SOLPD.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DWF_SEL', 'SOLPD.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_CABMOM_IME', 'SOLPD.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_TIPPROC_SEL', 'SOLPD.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_TIPES_SEL', 'SOLPD.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DES_INS', 'SOLPD.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DES_MOD', 'SOLPD.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DES_ELI', 'SOLPD.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DES_SEL', 'SOLPD.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DOCWFAR_MOD', 'SOLPD.5.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PAFPP_IME', 'SOLPD.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'CONTA_GETDEC_IME', 'SOLPD.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_PLT_SEL', 'SOLPD.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_CTABAN_SEL', 'SOLPD.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'MIG_CBANESIS_SEL', 'SOLPD.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPAPA_INS', 'SOLPD.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPA_INS', 'SOLPD.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPA_MOD', 'SOLPD.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPA_ELI', 'SOLPD.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPA_SEL', 'SOLPD.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_SINPRE_IME', 'SOLPD.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_ANTEPP_IME', 'SOLPD.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_SIGEPP_IME', 'SOLPD.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPAREP_SEL', 'SOLPD.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PRO_SEL', 'SOLPD.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DWF_MOD', 'SOLPD.4.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DWF_ELI', 'SOLPD.4.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DWF_SEL', 'SOLPD.4.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_CABMOM_IME', 'SOLPD.4.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_TIPPROC_SEL', 'SOLPD.4.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_TIPES_SEL', 'SOLPD.4.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DES_INS', 'SOLPD.4.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DES_MOD', 'SOLPD.4.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DES_ELI', 'SOLPD.4.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DES_SEL', 'SOLPD.4.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DOCWFAR_MOD', 'SOLPD.4.5.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DOCWFAR_MOD', 'SOLPD.4.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_VERSIGPRO_IME', 'SOLPD.4.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_CHKSTA_IME', 'SOLPD.4.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_TIPES_SEL', 'SOLPD.4.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_FUNTIPES_SEL', 'SOLPD.4.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DEPTIPES_SEL', 'SOLPD.4.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DOCWFAR_MOD', 'SOLPD.4.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PRO_MOD', 'SOLPD.4.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PRO_SEL', 'SOLPD.4.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PRE_VERPRE_SEL', 'SOLPD.4.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_OBPGSEL_SEL', 'SOLPD.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_OBPG_SEL', 'SOLPD.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_OBPGSOL_SEL', 'SOLPD.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_COMEJEPAG_SEL', 'SOLPD.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_MONEDA_SEL', 'SOLPD.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPAREP_SEL', 'SOLPD.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PRO_SEL', 'SOLPD.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PAFPP_IME', 'SOLPD.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'CONTA_GETDEC_IME', 'SOLPD.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_PLT_SEL', 'SOLPD.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_CTABAN_SEL', 'SOLPD.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'MIG_CBANESIS_SEL', 'SOLPD.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPAPA_INS', 'SOLPD.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPA_INS', 'SOLPD.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPA_MOD', 'SOLPD.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPA_ELI', 'SOLPD.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPA_SEL', 'SOLPD.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_SINPRE_IME', 'SOLPD.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_ANTEPP_IME', 'SOLPD.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_SIGEPP_IME', 'SOLPD.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DWF_MOD', 'SOLPD.2.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DWF_ELI', 'SOLPD.2.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DWF_SEL', 'SOLPD.2.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_CABMOM_IME', 'SOLPD.2.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_TIPPROC_SEL', 'SOLPD.2.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_TIPES_SEL', 'SOLPD.2.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DES_INS', 'SOLPD.2.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DES_MOD', 'SOLPD.2.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DES_ELI', 'SOLPD.2.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DES_SEL', 'SOLPD.2.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DOCWFAR_MOD', 'SOLPD.2.5.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DOCWFAR_MOD', 'SOLPD.2.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_VERSIGPRO_IME', 'SOLPD.2.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_CHKSTA_IME', 'SOLPD.2.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_TIPES_SEL', 'SOLPD.2.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_FUNTIPES_SEL', 'SOLPD.2.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DEPTIPES_SEL', 'SOLPD.2.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'WF_DOCWFAR_MOD', 'SOLPD.2.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PRO_MOD', 'SOLPD.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PRO_SEL', 'SOLPD.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PRE_VERPRE_SEL', 'SOLPD.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_CCFILDEP_SEL', 'SOLPD.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_CONIG_SEL', 'SOLPD.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_CONIGPP_SEL', 'SOLPD.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'CONTA_CTA_SEL', 'SOLPD.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'CONTA_CTA_ARB_SEL', 'SOLPD.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PRE_PAR_SEL', 'SOLPD.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PRE_PAR_ARB_SEL', 'SOLPD.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'CONTA_AUXCTA_SEL', 'SOLPD.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_OBDET_INS', 'SOLPD.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_OBDET_MOD', 'SOLPD.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_OBDET_ELI', 'SOLPD.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_OBDET_SEL', 'SOLPD.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_CEC_SEL', 'SOLPD.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_CECCOM_SEL', 'SOLPD.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_CECCOMFU_SEL', 'SOLPD.1');
+
+
+/***********************************F-DEP-RAC-TES-0-11/06/2014*****************************************/
 

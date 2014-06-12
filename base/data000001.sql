@@ -925,3 +925,60 @@ select pxp.f_insert_trol ('Cierre de proceso con finalizacion de documentos', 'O
 select pxp.f_insert_trol ('Registro de Cuenta Bancaria', 'OP - Cuenta Bancaria', 'TES');
 
 /***********************************F-DAT-JRR-TES-0-24/04/2014*****************************************/
+
+
+
+
+/***********************************I-DAT-JRR-TES-0-12/05/2014*****************************************/
+
+
+
+
+----------------------------------
+--COPY LINES TO data.sql FILE  
+---------------------------------
+
+select pxp.f_insert_tgui ('Solicitudes de Obligaciones de pago', 'Solicitud de Pago Directos', 'SOLPD', 'si', 5, 'sis_tesoreria/vista/obligacion_pago/ObligacionPagoSol.php', 2, '', 'ObligacionPagoSol', 'TES');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'OBPG.8.4', 'no', 0, 'sis_workflow/vista/estado_wf/AntFormEstadoWf.php', 4, '', 'AntFormEstadoWf', 'TES');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'OBPG.8.5', 'no', 0, 'sis_workflow/vista/estado_wf/FormEstadoWf.php', 4, '', '../../sis_tesoreria/control/PlanPago/siguienteEstadoPlanPago', 'TES');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'OBPG.3.4', 'no', 0, 'sis_workflow/vista/estado_wf/AntFormEstadoWf.php', 4, '', 'AntFormEstadoWf', 'TES');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'OBPG.3.5', 'no', 0, 'sis_workflow/vista/estado_wf/FormEstadoWf.php', 4, '', '../../sis_tesoreria/control/PlanPago/siguienteEstadoPlanPago', 'TES');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'VBDP.4', 'no', 0, 'sis_workflow/vista/estado_wf/AntFormEstadoWf.php', 3, '', 'AntFormEstadoWf', 'TES');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'VBDP.5', 'no', 0, 'sis_workflow/vista/estado_wf/FormEstadoWf.php', 3, '', '../../sis_tesoreria/control/PlanPago/siguienteEstadoPlanPago', 'TES');
+select pxp.f_insert_tgui ('Detalle', 'Detalle', 'SOLPD.1', 'no', 0, 'sis_tesoreria/vista/obligacion_det/ObligacionDet.php', 3, '', '50%', 'TES');
+select pxp.f_insert_tgui ('Plan de Pagos (Reg. Adq.)', 'Plan de Pagos (Reg. Adq.)', 'SOLPD.2', 'no', 0, 'sis_tesoreria/vista/plan_pago/PlanPagoRegIni.php', 3, '', '50%', 'TES');
+select pxp.f_insert_tgui ('Reporte de Obligacion', 'Reporte de Obligacion', 'SOLPD.3', 'no', 0, 'sis_tesoreria/vista/obligacion_pago/ReporteComEjePag.php', 3, '', 'ReporteComEjePag', 'TES');
+select pxp.f_insert_tgui ('Plan de Pagos', 'Plan de Pagos', 'SOLPD.4', 'no', 0, 'sis_tesoreria/vista/plan_pago/PlanPagoReq.php', 3, '', '50%', 'TES');
+select pxp.f_insert_tgui ('Chequear documento del WF', 'Chequear documento del WF', 'SOLPD.5', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 3, '', '90%', 'TES');
+select pxp.f_insert_tgui ('Disponibilidad Presupuestaria', 'Disponibilidad Presupuestaria', 'SOLPD.6', 'no', 0, 'sis_presupuestos/vista/verificacion_presup/VerificacionPresup.php', 3, '', '80%', 'TES');
+select pxp.f_insert_tgui ('Proveedor', 'Proveedor', 'SOLPD.7', 'no', 0, 'sis_parametros/vista/proveedor/Proveedor.php', 3, '', 'proveedor', 'TES');
+select pxp.f_insert_tgui ('Disponibilidad Presupuestaria', 'Disponibilidad Presupuestaria', 'SOLPD.2.1', 'no', 0, 'sis_presupuestos/vista/verificacion_presup/VerificacionPresup.php', 4, '', '80%', 'TES');
+select pxp.f_insert_tgui ('Prorrateo', 'Prorrateo', 'SOLPD.2.2', 'no', 0, 'sis_tesoreria/vista/prorrateo/Prorrateo.php', 4, '', 'Prorrateo', 'TES');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'SOLPD.2.3', 'no', 0, 'sis_workflow/vista/estado_wf/AntFormEstadoWf.php', 4, '', 'AntFormEstadoWf', 'TES');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'SOLPD.2.4', 'no', 0, 'sis_workflow/vista/estado_wf/FormEstadoWf.php', 4, '', '../../sis_tesoreria/control/PlanPago/siguienteEstadoPlanPago', 'TES');
+select pxp.f_insert_tgui ('Chequear documento del WF', 'Chequear documento del WF', 'SOLPD.2.5', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 4, '', '90%', 'TES');
+select pxp.f_insert_tgui ('Subir Archivo', 'Subir Archivo', 'SOLPD.2.5.1', 'no', 0, 'sis_workflow/vista/documento_wf/SubirArchivoWf.php', 5, '', 'SubirArchivoWf', 'TES');
+select pxp.f_insert_tgui ('Estados por momento', 'Estados por momento', 'SOLPD.2.5.2', 'no', 0, 'sis_workflow/vista/tipo_documento_estado/TipoDocumentoEstadoWF.php', 5, '', 'TipoDocumentoEstadoWF', 'TES');
+select pxp.f_insert_tgui ('Disponibilidad Presupuestaria', 'Disponibilidad Presupuestaria', 'SOLPD.4.1', 'no', 0, 'sis_presupuestos/vista/verificacion_presup/VerificacionPresup.php', 4, '', '80%', 'TES');
+select pxp.f_insert_tgui ('Prorrateo', 'Prorrateo', 'SOLPD.4.2', 'no', 0, 'sis_tesoreria/vista/prorrateo/Prorrateo.php', 4, '', 'Prorrateo', 'TES');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'SOLPD.4.3', 'no', 0, 'sis_workflow/vista/estado_wf/AntFormEstadoWf.php', 4, '', 'AntFormEstadoWf', 'TES');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'SOLPD.4.4', 'no', 0, 'sis_workflow/vista/estado_wf/FormEstadoWf.php', 4, '', '../../sis_tesoreria/control/PlanPago/siguienteEstadoPlanPago', 'TES');
+select pxp.f_insert_tgui ('Chequear documento del WF', 'Chequear documento del WF', 'SOLPD.4.5', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 4, '', '90%', 'TES');
+select pxp.f_insert_tgui ('Subir Archivo', 'Subir Archivo', 'SOLPD.4.5.1', 'no', 0, 'sis_workflow/vista/documento_wf/SubirArchivoWf.php', 5, '', 'SubirArchivoWf', 'TES');
+select pxp.f_insert_tgui ('Estados por momento', 'Estados por momento', 'SOLPD.4.5.2', 'no', 0, 'sis_workflow/vista/tipo_documento_estado/TipoDocumentoEstadoWF.php', 5, '', 'TipoDocumentoEstadoWF', 'TES');
+select pxp.f_insert_tgui ('Subir Archivo', 'Subir Archivo', 'SOLPD.5.1', 'no', 0, 'sis_workflow/vista/documento_wf/SubirArchivoWf.php', 4, '', 'SubirArchivoWf', 'TES');
+select pxp.f_insert_tgui ('Estados por momento', 'Estados por momento', 'SOLPD.5.2', 'no', 0, 'sis_workflow/vista/tipo_documento_estado/TipoDocumentoEstadoWF.php', 4, '', 'TipoDocumentoEstadoWF', 'TES');
+select pxp.f_insert_tgui ('Items/Servicios ofertados', 'Items/Servicios ofertados', 'SOLPD.7.1', 'no', 0, 'sis_parametros/vista/proveedor_item_servicio/ProveedorItemServicio.php', 4, '', '50%', 'TES');
+select pxp.f_insert_tgui ('Personas', 'Personas', 'SOLPD.7.2', 'no', 0, 'sis_seguridad/vista/persona/Persona.php', 4, '', 'persona', 'TES');
+select pxp.f_insert_tgui ('Instituciones', 'Instituciones', 'SOLPD.7.3', 'no', 0, 'sis_parametros/vista/institucion/Institucion.php', 4, '', 'Institucion', 'TES');
+select pxp.f_insert_tgui ('Subir foto', 'Subir foto', 'SOLPD.7.2.1', 'no', 0, 'sis_seguridad/vista/persona/subirFotoPersona.php', 5, '', 'subirFotoPersona', 'TES');
+select pxp.f_insert_tgui ('Personas', 'Personas', 'SOLPD.7.3.1', 'no', 0, 'sis_seguridad/vista/persona/Persona.php', 5, '', 'persona', 'TES');
+select pxp.f_insert_tgui ('Subir foto', 'Subir foto', 'SOLPD.7.3.1.1', 'no', 0, 'sis_seguridad/vista/persona/subirFotoPersona.php', 6, '', 'subirFotoPersona', 'TES');
+select pxp.f_insert_tfuncion ('tes.f_trig_actualiza_informacion_estado_pp', 'Funcion para tabla     ', 'TES');
+select pxp.f_insert_tprocedimiento ('TES_OBPGSOL_SEL', 'Consulta de obligaciones de pagos por solicitante', 'si', '', '', 'tes.ft_obligacion_pago_sel');
+select pxp.f_insert_tprocedimiento ('TES_OBPGSOL_CONT', 'Conteo de registros', 'si', '', '', 'tes.ft_obligacion_pago_sel');
+select pxp.f_insert_trol ('Solicitudes de Pago Directas', 'OP - Solicitudes de Pago Directas', 'TES');
+
+
+/***********************************F-DAT-JRR-TES-0-12/05/2014*****************************************/
+

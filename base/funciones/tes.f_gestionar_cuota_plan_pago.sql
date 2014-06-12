@@ -92,7 +92,11 @@ BEGIN
       pp.id_cuenta_bancaria_mov,
       pp.nro_cheque,
       pp.nro_cuenta_bancaria,
-      op.numero
+      op.numero,
+      pp.obs_descuentos_anticipo,
+      pp.obs_descuentos_ley,
+      pp.obs_monto_no_pagado,
+      pp.obs_otros_descuentos
       into
       v_registros
       from  tes.tplan_pago pp
@@ -281,7 +285,11 @@ BEGIN
                         nro_cheque,
                         nro_cuenta_bancaria,
                         id_usuario_ai,
-                        usuario_ai
+                        usuario_ai,
+                        obs_descuentos_anticipo,
+                       
+                        obs_monto_no_pagado,
+                        obs_otros_descuentos
                        
                       ) 
                       VALUES (
@@ -315,7 +323,11 @@ BEGIN
                         COALESCE(v_registros.nro_cheque,0),
                         v_registros.nro_cuenta_bancaria,
                         p_id_usuario_ai,
-                        p_usuario_ai
+                        p_usuario_ai,
+                        v_registros.obs_descuentos_anticipo,
+                       
+                        v_registros.obs_monto_no_pagado,
+                        v_registros.obs_otros_descuentos
                        
                       )RETURNING id_plan_pago into v_id_plan_pago;
                     
@@ -384,6 +396,8 @@ BEGIN
                      estado = 'vbconta'
               where id_plan_pago  = v_id_plan_pago;
              
+             
+            -- raise exception 'xxxxxx';
              
               --------------------------------------------------
               -- solicitar negeracion de comprobantes de pago
