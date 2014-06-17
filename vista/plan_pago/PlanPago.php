@@ -692,7 +692,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         {
             config:{
                 name: 'obs_monto_no_pagado',
-                fieldLabel: 'Obs. ',
+                fieldLabel: 'Obs. Pago',
                 qtip:'Estas observaciones van a la glosa del comprobante que se genere',
                 allowBlank: true,
                 anchor: '80%',

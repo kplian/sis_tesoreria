@@ -368,6 +368,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 				name: 'obs',
 				fieldLabel: 'Obs',
 				allowBlank: true,
+				qtip:'OBS, o Si el proveedor es PASAJEROS PERJUDICADOS aqui va el nombre del pasajero',
 				anchor: '80%',
 				gwidth: 100,
 				maxLength:1000
