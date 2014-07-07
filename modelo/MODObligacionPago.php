@@ -322,7 +322,7 @@ class MODObligacionPago extends MODbase{
         return $this->respuesta;
     }
 			
-				function estadosPago(){
+	function estadosPago(){
 					$this->procedimiento = 'tes.ft_obligacion_pago_sel';
 					$this->transaccion = 'TES_ESTOBPG_SEL';
 					$this->tipo_procedimiento = 'SEL';

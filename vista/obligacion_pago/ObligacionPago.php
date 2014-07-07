@@ -216,6 +216,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
         {
             config:{
                 name: 'fecha',
+                minValue:(Phx.CP.config_ini.sis_integracion=='ENDESIS')?new Date('1/1/2014'):undefined,
                 fieldLabel: 'Fecha',
                 allowBlank: false,
                 gwidth: 100,
