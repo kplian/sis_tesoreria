@@ -180,7 +180,8 @@ class MODCuentaDocumentadaEndesis extends MODbase{
                             inner join kard.tkp_historico_asignacion ha_aut on ha_aut.id_empleado = aut.id_empleado 
                             											and ha_aut.estado_reg != 'eliminado' and ha_aut.fecha_asignacion <= now() AND
                                                                         (ha_aut.fecha_finalizacion >= now() or ha_aut.fecha_finalizacion is null)
-                            left join kard.tkp_interinato int on ha_aut.id_item = int.id_item_titular
+                            left join kard.tkp_interinato int
+                            	on ha_aut.id_item = int.id_item_titular and int.fecha_ini<=now() and int.fecha_fin>=now()
                             left join kard.tkp_historico_asignacion ha_sup on int.id_item_suplente = ha_sup.id_item
                             				           					and ha_sup.estado_reg != 'eliminado' and ha_sup.fecha_asignacion <= now() AND
                                                                         (ha_sup.fecha_finalizacion >= now() or ha_sup.fecha_finalizacion is null)
