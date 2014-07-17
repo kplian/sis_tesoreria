@@ -153,8 +153,8 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('nro_cuenta_bancaria','nro_cuenta_bancaria','varchar');
 		$this->setParametro('id_cuenta_bancaria_mov','id_cuenta_bancaria_mov','integer');
 		
-		$this->setParametro('porc_monto_excento_var','porc_monto_excento_var','integer');
-		$this->setParametro('monto_excento','monto_excento','integer');
+		$this->setParametro('porc_monto_excento_var','porc_monto_excento_var','numeric');
+		$this->setParametro('monto_excento','monto_excento','numeric');
 		
 		 
         
@@ -209,8 +209,8 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('id_cuenta_bancaria_mov','id_cuenta_bancaria_mov','integer');
 		
 		
-		$this->setParametro('porc_monto_excento_var','porc_monto_excento_var','integer');
-        $this->setParametro('monto_excento','monto_excento','integer');
+		$this->setParametro('porc_monto_excento_var','porc_monto_excento_var','numeric');
+        $this->setParametro('monto_excento','monto_excento','numeric');
         
 		//Ejecuta la instruccion
 		$this->armarConsulta();
