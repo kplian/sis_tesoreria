@@ -226,18 +226,12 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('nro_cheque','nro_cheque','integer');
 		$this->setParametro('nro_cuenta_bancaria','nro_cuenta_bancaria','varchar');
 		$this->setParametro('id_cuenta_bancaria_mov','id_cuenta_bancaria_mov','integer');
-<<<<<<< HEAD
 		$this->setParametro('porc_monto_excento_var','porc_monto_excento_var','numeric');
         $this->setParametro('monto_excento','monto_excento','numeric');
         $this->setParametro('descuento_inter_serv','descuento_inter_serv','numeric');
         $this->setParametro('obs_descuento_inter_serv','obs_descuento_inter_serv','text');
         $this->setParametro('porc_monto_retgar','porc_monto_retgar','numeric');
-=======
-		
-		
-		$this->setParametro('porc_monto_excento_var','porc_monto_excento_var','numeric');
-        $this->setParametro('monto_excento','monto_excento','numeric');
->>>>>>> 608e8351e27fc04e32d7ccb60bc43d3f98d8cb72
+
         
 		//Ejecuta la instruccion
 		$this->armarConsulta();
