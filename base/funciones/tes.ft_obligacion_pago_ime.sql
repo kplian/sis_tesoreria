@@ -85,6 +85,9 @@ DECLARE
      v_descuentos_ley   numeric;
      v_i                integer;
      v_monto_cuota 		numeric;
+     v_ope_filtro       varchar[];
+     v_ind              varchar;
+     v_sw               boolean;
 			    
 BEGIN
 
@@ -257,7 +260,8 @@ BEGIN
             rotacion,
             id_plantilla,
             id_usuario_ai,
-            usuario_ai
+            usuario_ai,
+            tipo_anticipo
             
           	) values(
 			v_parametros.id_proveedor,
@@ -288,7 +292,8 @@ BEGIN
             v_parametros.rotacion,
             v_parametros.id_plantilla,
             v_parametros._id_usuario_ai,
-            v_parametros._nombre_usuario_ai
+            v_parametros._nombre_usuario_ai,
+            v_parametros.tipo_anticipo
 							
 			)RETURNING id_obligacion_pago into v_id_obligacion_pago;
 			
@@ -329,7 +334,8 @@ BEGIN
             rotacion = v_parametros.rotacion,
             id_plantilla = v_parametros.id_plantilla,
             id_usuario_ai = v_parametros._id_usuario_ai,
-            usuario_ai = v_parametros._nombre_usuario_ai
+            usuario_ai = v_parametros._nombre_usuario_ai,
+            tipo_anticipo = v_parametros.tipo_anticipo
             
             
 			where id_obligacion_pago=v_parametros.id_obligacion_pago;
@@ -985,13 +991,32 @@ BEGIN
 
 		begin
 			
-            v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, v_parametros.ope_filtro, v_parametros.id_plan_pago);
-            
+            v_ope_filtro = regexp_split_to_array(v_parametros.ope_filtro,',');
             
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','determina cuanto falta por pgar'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_parametros.id_obligacion_pago::varchar);
-            v_resp = pxp.f_agrega_clave(v_resp,'monto_total_faltante',v_monto_total::varchar);
+            
+            v_sw = TRUE;
+            
+            
+           
+            
+            
+            FOR v_ind IN array_lower(v_ope_filtro, 1) .. array_upper(v_ope_filtro, 1)
+            LOOP
+                v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, v_ope_filtro[v_ind], v_parametros.id_plan_pago);
+              
+              IF v_sw THEN
+                v_resp = pxp.f_agrega_clave(v_resp,'monto_total_faltante',v_monto_total::varchar);
+                v_sw = FALSE;
+              ELSE
+                v_resp = pxp.f_agrega_clave(v_resp,v_ope_filtro[v_ind],v_monto_total::varchar);
+              END IF;
+              
+            END LOOP;
+            
+          
               
             --Devuelve la respuesta
             return v_resp;

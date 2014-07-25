@@ -27,6 +27,7 @@ DECLARE
 
 	v_nro_requerimiento    	integer;
 	v_parametros           	record;
+    v_registros_tpp 	    record;
 	v_id_requerimiento     	integer;
 	v_resp		            varchar;
 	v_nombre_funcion        text;
@@ -125,15 +126,15 @@ DECLARE
     
     v_acceso_directo  	varchar;
     v_clase   			varchar;
-    v_parametros_ad   		varchar;
-    v_tipo_noti  			varchar;
+    v_parametros_ad   	varchar;
+    v_tipo_noti  		varchar;
     v_titulo   			varchar;
-    
-    
-    
-   
-  
-  
+    v_codigo_proceso_llave_wf  varchar;
+    v_porc_monto_retgar        numeric;
+    v_porc_ant   numeric;
+    v_monto_ant_parcial_descontado  numeric;
+    v_saldo_x_descontar numeric;
+    v_saldo_x_pagar numeric;
     
     
 			    
@@ -163,7 +164,7 @@ BEGIN
 
    	/*********************************    
  	#TRANSACCION:  'TES_PLAPAPA_INS'
- 	#DESCRIPCION:	Insercion de cuotas de pagos en el plan de pago
+ 	#DESCRIPCION:	Insercion de cuotas de CUOTAS DE SEGUNDO NIVEL,  PAGO o APLICAION DE ANTICIPO , en el plan de pago
  	#AUTOR:		RAC KPLIAN	
  	#FECHA:	7062013   15:43:23
 	***********************************/
@@ -235,7 +236,10 @@ BEGIN
             op.id_depto,
             op.pago_variable,
             pp.id_plantilla,
-            op.numero
+            pp.monto,
+            pp.descuento_ley,
+            pp.monto_retgar_mo,
+            op.numero 
             
           into v_registros  
            from tes.tplan_pago pp
@@ -267,45 +271,91 @@ BEGIN
             raise exception 'La fecha tentativa no puede ser inferior a la fecha tentativa de la ultima cuota registrada';
           
           END IF;
-           
-            -- verifica que el registro no sobrepase el total a devengado
-           
-        
-          v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado_pagado',v_parametros.id_plan_pago_fk );
-           
-          IF v_monto_total <  v_parametros.monto  THEN
-              
-              raise exception 'El Pago no puede exceder el total devengado, solo falta por devengar %',v_monto_total;
-              
-          END IF;
           
-           
+         -------------------------------------------------------------------
+         --  VALIDACION DE MONTO FALTANTE, SEGUN TIPO DE CUOTA
+         ------------------------------------------------------------
+          
+         IF v_parametros.tipo in('pagado') THEN 
+          
+                -- verifica que el registro no sobrepase el total a devengado
+                v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado_pagado',v_parametros.id_plan_pago_fk );
+                IF v_monto_total <  v_parametros.monto  THEN
+                    raise exception 'El Pago no puede exceder el total devengado, solo falta por devengar %',v_monto_total;
+                END IF;
+                
+                --valida que la retencion de anticipo no sobre pase el total anticipado
+                v_monto_ant_parcial_descontado = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'ant_parcial_descontado' );
+                IF v_monto_ant_parcial_descontado <  v_parametros.descuento_anticipo  THEN
+                    raise exception 'El decuento por anticipo no puede exceder el falta por descontar que es  %',v_monto_ant_parcial_descontado;
+                END IF;
+                
+                --  si es  un pago no variable  (si es una cuota de devengao_pagado, devegando_pagado_1c, pagado)
+                --  validar que no se haga el ultimo pago sin  terminar de descontar el anticipo,
+                
+                IF v_registros.pago_variable = 'no' THEN
+                
+                     -- saldo_x_pagar = determinar cuanto falta por pagar (sin considerar el devengado)
+                    v_saldo_x_pagar = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago,'total_registrado_pagado');
+                          
+                    -- saldo_x_descontar = determinar cuanto falta por descontar del anticipo
+                    v_saldo_x_descontar = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago,'ant_parcial_descontado');
+                           
+                    -- saldo_x_descontar - descuento_anticipo >  sando_x_pagar
+                    IF (v_saldo_x_descontar -  COALESCE(v_parametros.descuento_anticipo,0))  > (v_saldo_x_pagar  - COALESCE(v_parametros.monto,0)) THEN
+                        raise exception 'El saldo a pagar no es sufuciente para recuperar el anticipo (%)',v_saldo_x_descontar;
+                    END IF; 
+                
+                END IF;
+                
+               
+         ELSEIF v_parametros.tipo in ('ant_aplicado')  THEN
+                          
+                v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'ant_aplicado_descontado', v_parametros.id_plan_pago_fk);
+                IF (v_monto_total)  <  v_parametros.monto::numeric  THEN
+                   raise exception 'No puede exceder el total anticipado: %',v_monto_total;
+                END IF;
+                  
+         ELSE
+            
+            raise exception 'tipo no reconocido %',v_parametros.tipo;
+          
+         END IF;
          
-          IF  v_parametros.monto < 0 or v_parametros.monto_no_pagado < 0 or v_parametros.otros_descuentos  < 0 or v_parametros.descuento_ley < 0 THEN
-          
-             raise exception 'No se admiten cifras negativas'; 
-          END IF;
-        
-        
-          IF v_parametros.monto_no_pagado !=0  THEN
-          
-               raise exception 'El monto no pagado solo puede definirce en cuotas de devengado';
-          
-          END IF;
-        
+         --validaciond e cifras negativas
            
-          -- calcula el liquido pagable y el monto  a ejecutar presupeustaria mente
+         IF  v_parametros.monto < 0 or v_parametros.monto_no_pagado < 0 or v_parametros.otros_descuentos  < 0 or v_parametros.descuento_ley < 0  or v_parametros.descuento_anticipo < 0 THEN
+            raise exception 'No se admiten cifras negativas'; 
+         END IF;
+        
+        
+         IF v_parametros.monto_no_pagado !=0  THEN
+           raise exception 'El monto no pagado solo puede definirce en cuotas de devengado';
+         END IF;
+        
+         -- calcula el liquido pagable y el monto  a ejecutar presupeustaria mente
           
-          --TO DO,  agregar el monto por retencion de anticipo
-           
-           v_liquido_pagable = COALESCE(v_parametros.monto,0)  - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0)  - COALESCE(v_parametros.descuento_ley,0);
-           v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0);
-          
-          
-          
-          IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
+         v_liquido_pagable = COALESCE(v_parametros.monto,0)  - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0)  - COALESCE(v_parametros.descuento_ley,0)- COALESCE(v_parametros.descuento_anticipo,0)- COALESCE(v_parametros.descuento_inter_serv,0);
+         v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0);  -- TODO ver si es necesario el monto no pagado
+                  
+         IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
               raise exception ' Ni  el monto a ejecutar   ni el liquido pagable  puede ser menor a cero';
-          END IF;  
+         END IF;  
+          
+          
+          --obtiene el tipo de plan de pago para este registro
+          select
+           tpp.codigo_proceso_llave_wf
+          into
+           v_codigo_proceso_llave_wf
+          from tes.ttipo_plan_pago tpp
+          where tpp.codigo = v_parametros.tipo;
+          
+          IF v_codigo_proceso_llave_wf is NULL THEN
+          
+           raise exception 'No se encontro un tipo de plan de pago para este codigo %',COALESCE(v_codigo_proceso_llave_wf,'N/I');
+          
+          END IF;
            
           -------------------------------------
           --  Manejo de estados con el WF
@@ -328,15 +378,11 @@ BEGIN
                      NULL, 
                      v_registros.id_depto,
                      ('Solicutd de Pago, OP:'|| v_registros.numero||' cuota nro'||v_nro_cuota::varchar),
-                      '',
+                     v_codigo_proceso_llave_wf,
                      v_registros.numero||'-N# '||v_nro_cuota
-                     );
-          
+                     );     
         
-            
-            
-            
-                      
+                     
             --Sentencia de la insercion
         	insert into tes.tplan_pago(
 			estado_reg,
@@ -344,13 +390,13 @@ BEGIN
 		    nro_sol_pago,
             id_proceso_wf,
 		    estado,
-			tipo_pago,
+			--tipo_pago,
 			monto_ejecutar_total_mo,
-			--obs_descuentos_anticipo,
+			obs_descuentos_anticipo,
 			id_plan_pago_fk,
 			id_obligacion_pago,
 			id_plantilla,
-			--descuento_anticipo,
+			descuento_anticipo,
 			otros_descuentos,
 			tipo,
 			obs_monto_no_pagado,
@@ -367,7 +413,7 @@ BEGIN
 			id_usuario_mod,
             liquido_pagable,
             fecha_tentativa,
-            tipo_cambio,
+            --tipo_cambio,
             monto_retgar_mo,
             descuento_ley,
             obs_descuentos_ley,
@@ -376,22 +422,23 @@ BEGIN
             nro_cuenta_bancaria,
             id_cuenta_bancaria_mov,
             id_usuario_ai,
-            usuario_ai
+            usuario_ai,
+            porc_monto_retgar
           	) values(
 			'activo',
 			v_nro_cuota,
 			'---',--'v_parametros.nro_sol_pago',
 			v_id_proceso_wf,
 			v_codigo_estado,
-			v_parametros.tipo_pago,
+			--v_parametros.tipo_pago,
 			v_monto_ejecutar_total_mo,
-			--v_parametros.obs_descuentos_anticipo,
+			v_parametros.obs_descuentos_anticipo,
 			v_parametros.id_plan_pago_fk,
 			v_parametros.id_obligacion_pago,
 			v_parametros.id_plantilla,
-			--v_parametros.descuento_anticipo,
+			v_parametros.descuento_anticipo,
 			v_parametros.otros_descuentos,
-			'pagado',
+			v_parametros.tipo,
 			v_parametros.obs_monto_no_pagado,
 			v_parametros.obs_otros_descuentos,
 			v_parametros.monto,
@@ -406,7 +453,7 @@ BEGIN
 			null,
             v_liquido_pagable,
             v_parametros.fecha_tentativa,
-            v_parametros.tipo_cambio,
+            --v_parametros.tipo_cambio,
             v_parametros.monto_retgar_mo,
             v_parametros.descuento_ley,
             v_parametros.obs_descuentos_ley,
@@ -415,8 +462,9 @@ BEGIN
             v_nro_cuenta_bancaria,
 			v_id_cuenta_bancaria_mov,
             v_parametros._id_usuario_ai,
-             v_parametros._nombre_usuario_ai				
-			)RETURNING id_plan_pago into v_id_plan_pago;
+            v_parametros._nombre_usuario_ai,
+            v_parametros.porc_monto_retgar				
+		)RETURNING id_plan_pago into v_id_plan_pago;
             
             -- actualiza el monto pagado en el plan_pago padre
             
@@ -450,6 +498,392 @@ BEGIN
             return v_resp;
 
 		end;
+   
+   /*********************************    
+ 	#TRANSACCION:  'TES_PPANTPAR_INS'
+ 	#DESCRIPCION:	Inserta cuotas del tipo anticipo parcial , o
+                    anticipo total  o dev_garantia (todas no  tienen prorrateo por que no ejecutan presupuesto)
+ 	#AUTOR:		RAC KPLIAN	
+ 	#FECHA: 17/07/2014   15:43:23
+	***********************************/
+
+	elsif(p_transaccion='TES_PPANTPAR_INS')then
+					
+        begin
+        
+        
+             IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria') THEN
+                v_id_cuenta_bancaria =  v_parametros.id_cuenta_bancaria;
+             END IF;
+             
+             IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria_mov') THEN
+                v_id_cuenta_bancaria_mov =  v_parametros.id_cuenta_bancaria_mov;
+             END IF;
+             
+             IF  pxp.f_existe_parametro(p_tabla,'forma_pago') THEN
+                v_forma_pago =  v_parametros.forma_pago;
+             END IF;
+             
+             IF  pxp.f_existe_parametro(p_tabla,'nro_cheque') THEN
+               v_nro_cheque =  v_parametros.nro_cheque;
+             END IF;
+             
+             IF  pxp.f_existe_parametro(p_tabla,'nro_cuenta_bancaria') THEN
+                v_nro_cuenta_bancaria =  v_parametros.nro_cuenta_bancaria;
+             END IF;
+        
+        
+        
+            --validamos que el monto a pagar sea mayor que cero
+             IF  v_parametros.monto = 0 THEN
+               raise exception 'El monto a pagar no puede ser 0';
+             END IF;
+           
+           
+          --obtiene datos de la obligacion
+          
+          select
+            op.porc_anticipo,
+            op.porc_retgar,
+            op.num_tramite,
+            op.id_proceso_wf,
+            op.id_estado_wf,
+            op.estado,
+            op.id_depto,
+            op.pago_variable,
+            op.numero
+            
+          into v_registros  
+           from tes.tobligacion_pago op
+           where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
+           
+          
+          
+           --validaciones segun el tipo de anticipo
+           
+           IF v_parametros.tipo = 'anticipo' THEN
+                --si es un proceso variable, verifica que el registro no sobrepase el total a pagar
+                IF v_registros.pago_variable='no' THEN
+                      v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado');
+                   
+                      IF v_monto_total <  v_parametros.monto THEN
+                         raise exception 'No puede exceder el total a pagar en obligaciones no variables: %',v_monto_total;
+                      END IF;
+                     ---------------------------- 
+                     --  si es  un pago no variable  (si es una cuota de devengao_pagado, devegando_pagado_1c, pagado)
+                     --  validar que no se haga el ultimo pago sin  terminar de descontar el anticipo,
+                     
+                    IF v_registros.pago_variable = 'no' THEN
+                  
+                        -- saldo_x_pagar = determinar cuanto falta por pagar (sin considerar el devengado)
+                        v_saldo_x_pagar = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago,'total_registrado_pagado');
+                              
+                        -- saldo_x_descontar = determinar cuanto falta por descontar del anticipo parcial
+                        v_saldo_x_descontar = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago,'ant_parcial_descontado');
+                               
+                        --  SI saldo_x_descontar del anticipo paricla  >  saldo_x_pagar
+                        IF (v_saldo_x_descontar)  > (v_saldo_x_pagar  - COALESCE(v_parametros.monto,0)) THEN
+                                raise exception 'El saldo a pagar no es sufuciente para recuperar el anticipo (%)',v_saldo_x_descontar;
+                        END IF;
+                        
+                  
+                    END IF; 
+                    
+               END IF;
+           
+           ELSIF   v_parametros.tipo = 'ant_parcial'   THEN
+           
+               v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'ant_parcial');
+               v_porc_ant = pxp.f_get_variable_global('politica_porcentaje_anticipo')::numeric;
+               
+               IF v_monto_total <  v_parametros.monto  THEN
+                  raise exception 'No puede exceder el total a pagar segun politica de anticipos % porc', v_porc_ant*100;
+               END IF;
+           
+           ELSIF   v_parametros.tipo = 'dev_garantia'   THEN
+           
+               v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'dev_garantia');
+              
+               
+               IF v_monto_total <  v_parametros.monto  THEN
+                  raise exception 'No puede exceder el total de garantia por devolver que es de: %', v_monto_total;
+               END IF;
+           
+           
+           END IF;
+           
+           
+           -------------------------
+           --CAlcular el nro de cuota
+           --------------------------
+           
+           select   
+             max(pp.nro_cuota)
+           into
+             v_nro_cuota
+           from tes.tplan_pago pp 
+           where 
+               pp.id_obligacion_pago = v_parametros.id_obligacion_pago
+           and pp.estado_reg='activo';
+           
+           
+          -- define numero de cuota
+          v_nro_cuota = floor(COALESCE(v_nro_cuota,0))+1; 
+        
+          -- verifica que el registro no sobrepase el total a devengado
+           
+        
+          IF  v_parametros.monto < 0 or v_parametros.monto_no_pagado < 0 or v_parametros.otros_descuentos  < 0 or v_parametros.descuento_ley < 0 THEN
+          
+             raise exception 'No se admiten cifras negativas'; 
+          END IF;
+        
+        
+          IF v_parametros.monto_no_pagado !=0  THEN
+          
+               raise exception 'El monto no pagado solo puede definirce en cuotas de devengado';
+          
+          END IF;
+           
+          -- calcula el liquido pagable y el monto  a ejecutar presupeustaria mente
+          
+          v_liquido_pagable = COALESCE(v_parametros.monto,0) - v_parametros.descuento_ley; --en anticipo el monto es el liquido pagable
+          v_monto_ejecutar_total_mo  = 0;  -- el monto a ejecutar es cero los anticipo parciales no ejecutan presupeusto
+                  
+          IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
+              raise exception ' Ni  el monto a ejecutar   ni el liquido pagable  puede ser menor a cero';
+          END IF;  
+          
+          
+          --obtiene el tipo de plan de pago para este registro
+          select
+           tpp.codigo_proceso_llave_wf
+          into
+           v_codigo_proceso_llave_wf
+          from tes.ttipo_plan_pago tpp
+          where tpp.codigo = v_parametros.tipo;
+          
+          
+          IF v_codigo_proceso_llave_wf is NULL THEN
+          
+           raise exception 'No se encontro un tipo de plan de pago para este codigo %',COALESCE(v_codigo_proceso_llave_wf,'N/I');
+          
+          END IF;
+         
+          -------------------------------------
+          --  Manejo de estados con el WF
+          -------------------------------------
+            
+          --cambia de estado al obligacion
+          IF  v_registros.estado = 'registrado' THEN
+          
+                   SELECT 
+                     ps_id_tipo_estado,
+                     ps_codigo_estado,
+                     ps_disparador,
+                     ps_regla,
+                     ps_prioridad
+                  into
+                    va_id_tipo_estado_pro,
+                    va_codigo_estado_pro,
+                    va_disparador_pro,
+                    va_regla_pro,
+                    va_prioridad_pro
+                          
+                FROM wf.f_obtener_estado_wf( v_registros.id_proceso_wf,  v_registros.id_estado_wf,NULL,'siguiente');   
+          
+        
+                IF  va_id_tipo_estado_pro[2] is not null  THEN
+                           
+                     raise exception 'La obligacion se encuentra mal parametrizado dentro de Work Flow,  el estado registro  solo  admite un estado siguiente,  no admitido (%)',va_codigo_estado_pro[2];
+                           
+                END IF;
+                          
+                     
+                IF  va_codigo_estado_pro[1] != 'en_pago'  THEN
+                  raise exception 'La obligacion se encuentra mal parametrizado dentro de Work Flow, el siguiente estado para el proceso de compra deberia ser "en_pago" y no % ',va_codigo_estado_sol[1];
+                END IF; 
+                
+                 -- registra estado eactual en el WF para rl procesod e compra
+                     
+                     v_id_estado_actual =  wf.f_registra_estado_wf(va_id_tipo_estado_pro[1], 
+                                                                   NULL, --id_funcionario
+                                                                    v_registros.id_estado_wf, 
+                                                                    v_registros.id_proceso_wf,
+                                                                    p_id_usuario,
+                                                                    v_parametros._id_usuario_ai,
+                                                                    v_parametros._nombre_usuario_ai,
+                                                                    v_registros.id_depto);
+                    
+                    -- actuliaza el stado en la solictud
+                     update tes.tobligacion_pago  p set 
+                       id_estado_wf =  v_id_estado_actual,
+                       estado = va_codigo_estado_pro[1],
+                       id_usuario_mod=p_id_usuario,
+                       fecha_mod=now(),
+                       id_usuario_ai = v_parametros._id_usuario_ai,
+                       usuario_ai = v_parametros._nombre_usuario_ai
+                     where id_obligacion_pago = v_parametros.id_obligacion_pago;
+                     
+                     -------------------------------------
+                     --dispara estado para plan de pagos 
+                     --------------------------------------
+                   
+                    
+                     SELECT
+                               ps_id_proceso_wf,
+                               ps_id_estado_wf,
+                               ps_codigo_estado
+                         into
+                               v_id_proceso_wf,
+                               v_id_estado_wf,
+                               v_codigo_estado
+                      FROM wf.f_registra_proceso_disparado_wf(
+                               p_id_usuario,
+                               v_parametros._id_usuario_ai,
+                               v_parametros._nombre_usuario_ai,
+                               v_id_estado_actual, 
+                               NULL, 
+                               v_registros.id_depto,
+                              ('Solicutd de devengado para la OP:'|| COALESCE(v_registros.numero,'s/n')||' cuota nro'||v_nro_cuota::varchar),
+                               v_codigo_proceso_llave_wf,
+                               COALESCE(v_registros.numero,'s/n')||'-N# '||v_nro_cuota::varchar
+                           );
+                  
+      
+            ELSEIF   v_registros.estado = 'en_pago' THEN
+          
+                 --registra estado de cotizacion
+                 
+                  SELECT
+                           ps_id_proceso_wf,
+                           ps_id_estado_wf,
+                           ps_codigo_estado
+                     into
+                           v_id_proceso_wf,
+                           v_id_estado_wf,
+                           v_codigo_estado
+                  FROM wf.f_registra_proceso_disparado_wf(
+                           p_id_usuario,
+                           v_parametros._id_usuario_ai,
+                           v_parametros._nombre_usuario_ai,
+                           v_registros.id_estado_wf, 
+                           NULL, 
+                           v_registros.id_depto,
+                           ('Solicutd de Anticipo para la OP:'|| v_registros.numero||' cuota nro'||v_nro_cuota::varchar),
+                           v_codigo_proceso_llave_wf,
+                           v_registros.numero||'-N# '||v_nro_cuota::varchar
+                         );
+          ELSE
+        
+          
+           		 raise exception 'Estado no reconocido % ',  v_registros.estado;
+          
+          END IF;
+          
+          
+          
+       
+                      
+            --Sentencia de la insercion
+        	insert into tes.tplan_pago(
+			estado_reg,
+			nro_cuota,
+		    nro_sol_pago,
+            id_proceso_wf,
+		    estado,
+			--tipo_pago,
+			monto_ejecutar_total_mo,
+			obs_descuentos_anticipo,
+			id_plan_pago_fk,
+			id_obligacion_pago,
+			id_plantilla,
+			descuento_anticipo,
+			otros_descuentos,
+			tipo,
+			obs_monto_no_pagado,
+			obs_otros_descuentos,
+			monto,
+		    nombre_pago,
+            id_estado_wf,
+		    id_cuenta_bancaria,
+			forma_pago,
+			monto_no_pagado,
+			fecha_reg,
+			id_usuario_reg,
+			fecha_mod,
+			id_usuario_mod,
+            liquido_pagable,
+            fecha_tentativa,
+            --tipo_cambio,
+            monto_retgar_mo,
+            descuento_ley,
+            obs_descuentos_ley,
+            porc_descuento_ley,
+            nro_cheque,
+            nro_cuenta_bancaria,
+            id_cuenta_bancaria_mov,
+            id_usuario_ai,
+            usuario_ai,
+            porc_monto_retgar
+          	) values(
+			'activo',
+			v_nro_cuota,
+			'---',--'v_parametros.nro_sol_pago',
+			v_id_proceso_wf,
+			v_codigo_estado,
+			--v_parametros.tipo_pago,
+			v_monto_ejecutar_total_mo,
+			v_parametros.obs_descuentos_anticipo,
+			v_parametros.id_plan_pago_fk,
+			v_parametros.id_obligacion_pago,
+			v_parametros.id_plantilla,
+			v_parametros.descuento_anticipo,
+			v_parametros.otros_descuentos,
+			v_parametros.tipo,
+			v_parametros.obs_monto_no_pagado,
+			v_parametros.obs_otros_descuentos,
+			v_parametros.monto,
+			v_parametros.nombre_pago,
+		    v_id_estado_wf,
+			v_id_cuenta_bancaria,
+			v_forma_pago,
+			v_parametros.monto_no_pagado,
+			now(),
+			p_id_usuario,
+			null,
+			null,
+            v_liquido_pagable,
+            v_parametros.fecha_tentativa,
+            --v_parametros.tipo_cambio,
+            v_parametros.monto_retgar_mo,
+            v_parametros.descuento_ley,
+            v_parametros.obs_descuentos_ley,
+             COALESCE(v_parametros.porc_descuento_ley,0),
+            COALESCE(v_nro_cheque,0),
+            v_nro_cuenta_bancaria,
+			v_id_cuenta_bancaria_mov,
+            v_parametros._id_usuario_ai,
+            v_parametros._nombre_usuario_ai,
+            v_parametros.porc_monto_retgar				
+		  )RETURNING id_plan_pago into v_id_plan_pago;
+          
+          --actualiza la cuota vigente en la obligacion
+           update tes.tobligacion_pago  p set 
+                  nro_cuota_vigente =  v_nro_cuota
+           where id_obligacion_pago =  v_parametros.id_obligacion_pago::integer; 
+            
+            
+			--Definicion de la respuesta
+			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Plan Pago almacenado(a) con exito (id_plan_pago'||v_id_plan_pago||')'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_id_plan_pago::varchar);
+
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;
+         
+        
 
 	/*********************************    
  	#TRANSACCION:  'TES_PLAPA_MOD'
@@ -470,59 +904,36 @@ BEGIN
         
            
              IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria') THEN
-             
-             v_id_cuenta_bancaria =  v_parametros.id_cuenta_bancaria;
-             
+               v_id_cuenta_bancaria =  v_parametros.id_cuenta_bancaria;
              END IF;
              
              IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria_mov') THEN
-             
-             v_id_cuenta_bancaria_mov =  v_parametros.id_cuenta_bancaria_mov;
-             
+               v_id_cuenta_bancaria_mov =  v_parametros.id_cuenta_bancaria_mov;
              END IF;
              
              IF  pxp.f_existe_parametro(p_tabla,'forma_pago') THEN
-             
-                 v_forma_pago =  v_parametros.forma_pago;
-             
+               v_forma_pago =  v_parametros.forma_pago;
              END IF;
-             
              
              IF  pxp.f_existe_parametro(p_tabla,'nro_cheque') THEN
-             
-                 v_nro_cheque =  v_parametros.nro_cheque;
-             
+               v_nro_cheque =  v_parametros.nro_cheque;
              END IF;
-             
              
              IF  pxp.f_existe_parametro(p_tabla,'nro_cuenta_bancaria') THEN
-             
-                 v_nro_cuenta_bancaria =  v_parametros.nro_cuenta_bancaria;
-             
+                v_nro_cuenta_bancaria =  v_parametros.nro_cuenta_bancaria;
              END IF;
              
-             
              IF  pxp.f_existe_parametro(p_tabla,'porc_monto_excento_var') THEN
-             
-                 v_porc_monto_excento_var =  v_parametros.porc_monto_excento_var;
-             
+                v_porc_monto_excento_var =  v_parametros.porc_monto_excento_var;
              END IF;
              
              IF  pxp.f_existe_parametro(p_tabla,'monto_excento') THEN
-             
-                 v_monto_excento =  v_parametros.monto_excento;
-             
+                v_monto_excento =  v_parametros.monto_excento;
              END IF;
         
-        
-        
-        
             --validamos que el monto a pagar sea mayor que cero
-           
            IF  v_parametros.monto = 0 THEN
-           
               raise exception 'El monto a pagar no puede ser 0';
-           
            END IF;
            
            
@@ -537,20 +948,18 @@ BEGIN
             op.estado,
             op.id_depto,
             op.pago_variable
-            
           into v_registros  
            from tes.tobligacion_pago op
            where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
            
            
-           
-           
-           
-           select   
+          select   
             pp.monto,
             pp.estado,
             pp.tipo,
-            pp.id_plan_pago_fk
+            pp.id_plan_pago_fk,
+            pp.porc_monto_retgar,
+            pp.descuento_anticipo
            into
              v_registros_pp
            from tes.tplan_pago pp 
@@ -559,64 +968,210 @@ BEGIN
            
            
            IF v_codigo_estado = 'borrador' or v_codigo_estado = 'pagado'  or v_codigo_estado = 'pendiente' or v_codigo_estado = 'devengado' or v_codigo_estado = 'anulado' THEN
-           
              raise exception 'Solo puede modificar pagos en estado borrador';  
-           
            END IF;
            
           
            --valida que los valores no sean negativos
-                 
            IF  v_parametros.monto <0 or v_parametros.monto_no_pagado <0 or v_parametros.otros_descuentos  <0 THEN
-                  
                raise exception 'No se admiten cifras negativas'; 
            END IF;
            
-           --Si es una cuota de devengado
            
-           IF v_registros_pp.tipo != 'pagado' THEN
+           -------------------------------------
+           -- Si es una cuota de devengado
+           -- Segun el tipo de cuota
+           ------------------------------------
+           
+           -----------------------------------------------------------------------------------------------
+           -- EDICION DE CUOTAS QUE TIENEN DEVENGADO   ('devengado_pagado','devengado','devengado_pagado_1c')
+           -------------------------------------------------------------------------------------------------- 
+           
+           IF v_registros_pp.tipo in ('devengado_pagado','devengado','devengado_pagado_1c') THEN
             
-                    --si no es un proceso variable, verifica que el registro no sobrepase el total a pagar
-                   
-                   IF v_registros.pago_variable='no' THEN
-                      v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado');
-                      IF (v_monto_total + v_registros_pp.monto)  <  v_parametros.monto  THEN
-                      
+                     -- si no es un proceso variable, verifica que el registro no sobrepase el total a pagar
+                     IF v_registros.pago_variable='no' THEN
+                        v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado');
+                        IF (v_monto_total + v_registros_pp.monto)  <  v_parametros.monto  THEN
                           raise exception 'No puede exceder el total a pagar en obligaciones no variables';
+                        END IF;
+                        
+                        --   si es  un pago no variable  (si es una cuota de devengao_pagado, devegando_pagado_1c, pagado)
+                        --  validar que no se haga el ultimo pago sin  terminar de descontar el anticipo,
+                            
+                        IF   v_registros_pp.tipo in('devengado_pagado','devengado_pagado_1c')  THEN
+                            -- saldo_x_pagar = determinar cuanto falta por pagar (sin considerar el devengado)
+                            v_saldo_x_pagar = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago,'total_registrado_pagado');
+                                  
+                            -- saldo_x_descontar = determinar cuanto falta por descontar del anticipo
+                            v_saldo_x_descontar = v_monto_ant_parcial_descontado;
+                                   
+                             -- saldo_x_descontar - descuento_anticipo >  sando_x_pagar
+                            IF (v_saldo_x_descontar + v_registros_pp.descuento_anticipo -  COALESCE(v_parametros.descuento_anticipo,0))  > (v_saldo_x_pagar + v_registros_pp.monto - COALESCE(v_parametros.monto,0)) THEN
+                               raise exception 'El saldo a pagar no es sufuciente para recuperar el anticipo (%)',v_saldo_x_descontar;
+                            END IF;
                       
-                      END IF;
-                   
-                   END IF;
-                
-                
-                   
+                        END IF;
+                     
+                     END IF;
+                     
+                     -- si el descuento anticipo es mayor a cero verificar que nose sobrepase el total anticipado
+                     v_monto_ant_parcial_descontado = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'ant_parcial_descontado' );
+                     IF v_monto_ant_parcial_descontado + v_registros_pp.descuento_anticipo <  v_parametros.descuento_anticipo  THEN
+                     END IF;
+                  
                      -- calcula el liquido pagable y el monto a ejecutar presupeustaria mente
-                   v_liquido_pagable = COALESCE(v_parametros.monto,0) - COALESCE(v_parametros.monto_no_pagado,0) - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0) - COALESCE(v_parametros.descuento_ley,0);
-                   v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0) -  COALESCE(v_parametros.monto_no_pagado,0);
-              
+                     v_liquido_pagable = COALESCE(v_parametros.monto,0) - COALESCE(v_parametros.monto_no_pagado,0) - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0) - COALESCE(v_parametros.descuento_ley,0) - COALESCE(v_parametros.descuento_anticipo,0)- COALESCE(v_parametros.descuento_inter_serv,0);
+                     v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0) -  COALESCE(v_parametros.monto_no_pagado,0);
+                     v_porc_monto_retgar = COALESCE(v_parametros.monto_retgar_mo,0)/COALESCE(v_parametros.monto,0);
+                     
+                     IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
+                          raise exception ' Ni el  monto a ejecutar   ni el liquido pagable  puede ser menor a cero';
+                     END IF;
+                     
+                    
+                    
+                     
+                     
+           -------------------------------------------------------------
+           -- EDICION DE CUOTAS DEL ANTICIPO   (ant_parcial,anticipo)
+           --------------------------------------------------------------           
+           
+           ELSIF v_registros_pp.tipo in  ('ant_parcial','anticipo','dev_garantia') THEN
+           
+           
+           
+                   --  si es un proceso variable, verifica que el registro no sobrepase el total a pagar
+                  IF v_registros_pp.tipo in  ('ant_parcial') THEN
+                         v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'ant_parcial');
+                         v_porc_ant = pxp.f_get_variable_global('politica_porcentaje_anticipo')::numeric;
+                         
+                         IF v_monto_total <  COALESCE(v_parametros.monto,0)  THEN
+                            raise exception 'No puede exceder el total a pagar segun politica de anticipos % porc', v_porc_ant*100;
+                         END IF;
+                  
+                  ELSIF v_registros_pp.tipo in  ('anticipo') THEN
+                  
+                      -- validaciones segun el tipo de anticipo
+                      IF v_registros.pago_variable='no' THEN
+                            v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado');
+                         
+                            IF (v_monto_total + v_registros_pp.monto)  <  v_parametros.monto  THEN
+                               raise exception 'No puede exceder el total a pagar en obligaciones no variables: %',v_monto_total;
+                            END IF;                          
+                         
+                          ---------------------------- 
+                          --  si es  un pago no variable  (si es una cuota de devengao_pagado, devegando_pagado_1c, pagado)
+                          --  validar que no se haga el ultimo pago sin  terminar de descontar el anticipo,
+                          ------------------------------------------------
+                          
+                          -- saldo_x_pagar = determinar cuanto falta por pagar (sin considerar el devengado)
+                          
+                          v_saldo_x_pagar = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago,'total_registrado_pagado');
+                                
+                          -- saldo_x_descontar = determinar cuanto falta por descontar del anticipo parcial
+                          v_saldo_x_descontar = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago,'ant_parcial_descontado');
+                                 
+                          -- saldo_x_descontar - descuento_anticipo >  sando_x_pagar
+                          IF (v_saldo_x_descontar + v_registros_pp.descuento_anticipo)  > (v_saldo_x_pagar + v_registros_pp.monto - COALESCE(v_parametros.monto,0)) THEN
+                               raise exception 'El saldo a pagar no es sufuciente para recuperar el anticipo (%)',v_saldo_x_descontar;
+                          END IF; 
+                    
+                      END IF;
+                      
+                  
+                  ELSIF v_registros_pp.tipo in  ('dev_garantia') THEN    
+                      
+                         v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'dev_garantia');
+                         IF v_monto_total + v_registros_pp.monto <  v_parametros.monto  THEN
+                            raise exception 'No puede exceder el total de retencion de garantia devuelto: %', v_monto_total;
+                         END IF;
+                         
+                         --raise exception '% , %',v_monto_total,v_parametros.monto;
+                       
+                  END IF;
+                 
+                 
+                  v_liquido_pagable = COALESCE(v_parametros.monto,0) -  COALESCE(v_parametros.descuento_anticipo,0); --en anticipo el monto es el liquido pagable
+                  v_monto_ejecutar_total_mo  = 0;  -- el monto a ejecutar es cero los anticipo parciales no ejecutan presupeusto
+                          
+                  IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
+                      raise exception ' Ni  el monto a ejecutar   ni el liquido pagable  puede ser menor a cero';
+                  END IF; 
+                  
+            -------------------------------------------------------------
+            -- EDICION DE CUOTAS DEL ANTICIPO APLCIADO  (ant_aplicado)
+            --------------------------------------------------------------
+            
+            ELSIF v_registros_pp.tipo = 'ant_aplicado' THEN 
+            
+                    v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'ant_aplicado_descontado', v_registros_pp.id_plan_pago_fk);
+                   
+                    IF (v_monto_total + v_registros_pp.monto)  <  v_parametros.monto  THEN
+                      raise exception 'No puede exceder el total anticipado';
+                    END IF;
+                    
+                   --  calcula el liquido pagable y el monto a ejecutar presupeustaria mente
+                   --  en cuota de pago el monoto no pagado no se considera
+                    
+                   v_liquido_pagable = COALESCE(v_parametros.monto,0)  - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0)  - COALESCE(v_parametros.descuento_ley,0)- COALESCE(v_parametros.descuento_anticipo,0)- COALESCE(v_parametros.descuento_inter_serv,0);
+                   v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0);  -- TODO ver si es necesario el monto no pagado
+                   v_porc_monto_retgar= COALESCE(v_registros_pp.porc_monto_retgar,0);
+                   
                    IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
                         raise exception ' Ni el  monto a ejecutar   ni el liquido pagable  puede ser menor a cero';
                    END IF;
            
-           ELSE
-           --si es una cuota de pago
-           
+                  --modificamos el total pagado en la cuota padre
+                  
+                  update tes.tplan_pago pp set
+                  total_pagado = total_pagado - v_registros_pp.monto + COALESCE(v_parametros.monto,0)
+                  where id_plan_pago=v_registros_pp.id_plan_pago_fk;
+                 
+            -------------------------------------
+            -- EDICION DE CUOTAS DEL TIPO PAGADO
+            -------------------------------------
+            
+            
+            ELSIF v_registros_pp.tipo = 'pagado' THEN
+                    
                     --verifica el el registro que falta por pagar
-                     
                     v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado_pagado', v_registros_pp.id_plan_pago_fk);
-                   
                     IF (v_monto_total + v_registros_pp.monto)  <  v_parametros.monto  THEN
-                      
-                        raise exception 'No puede exceder el total a pagar en obligaciones no variables';
-                      
+                      raise exception 'No puede exceder el total a pagar en obligaciones no variables';
+                     END IF;
+                    
+                    --valida que la retencion de anticipo no sobre pase el total anticipado          
+                    v_monto_ant_parcial_descontado = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'ant_parcial_descontado' );
+                    -- si el descuento anticipo es mayor a cero verificar que nose sobrepase el total anticipado
+                    IF v_monto_ant_parcial_descontado + v_registros_pp.descuento_anticipo <  v_parametros.descuento_anticipo  THEN
+                        raise exception 'El decuento por anticipo no puede exceder el falta por descontar que es  %',v_monto_ant_parcial_descontado+descuento_anticipo;
+                     END IF;
+                     
+                   ------------------------------------------------------------  
+                   --   si es  un pago no variable  (si es una cuota de devengao_pagado, devegando_pagado_1c, pagado)
+                   --  validar que no se haga el ultimo pago sin  terminar de descontar el anticipo,
+                   --------------------------------------------------------  
+                   IF v_registros.pago_variable='no' THEN   
+                         -- saldo_x_pagar = determinar cuanto falta por pagar (sin considerar el devengado)
+                         v_saldo_x_pagar = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago,'total_registrado_pagado');
+                                    
+                         -- saldo_x_descontar = determinar cuanto falta por descontar del anticipo
+                         v_saldo_x_descontar = v_monto_ant_parcial_descontado;
+                                     
+                         -- saldo_x_descontar - descuento_anticipo >  sando_x_pagar
+                         IF (v_saldo_x_descontar + v_registros_pp.descuento_anticipo -  COALESCE(v_parametros.descuento_anticipo,0))  > (v_saldo_x_pagar + v_registros_pp.monto - COALESCE(v_parametros.monto,0)) THEN
+                               raise exception 'El saldo a pagar no es sufuciente para recuperar el anticipo (%)',v_saldo_x_descontar;
+                         END IF;  
                     END IF;
-                
+                     
+                    
                     -- calcula el liquido pagable y el monto a ejecutar presupeustaria mente
                     --  en cuota de pago el monoto no pagado no se considera
-                    --TO DO,  mas delante es necesario considerar la retencon por garantia y por anticipos 
-                   
-                   v_liquido_pagable = COALESCE(v_parametros.monto,0)  - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0)  - COALESCE(v_parametros.descuento_ley,0);
-                   v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0);
+                    
+                   v_liquido_pagable = COALESCE(v_parametros.monto,0)  - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0)  - COALESCE(v_parametros.descuento_ley,0)- COALESCE(v_parametros.descuento_anticipo,0)- COALESCE(v_parametros.descuento_inter_serv,0);
+                   v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0);  -- TODO ver si es necesario el monto no pagado
+                   v_porc_monto_retgar= COALESCE(v_registros_pp.porc_monto_retgar,0);
                    
                    IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
                         raise exception ' Ni el  monto a ejecutar   ni el liquido pagable  puede ser menor a cero';
@@ -628,9 +1183,11 @@ BEGIN
                   total_pagado = total_pagado - v_registros_pp.monto + COALESCE(v_parametros.monto,0)
                   where id_plan_pago=v_registros_pp.id_plan_pago_fk;
             
+            ELSE
             
+               raise exception 'Tipo no reconocido %',v_registros_pp.tipo;
+           
             END IF;
-            
             
            --RAC 11/02/2014 
            --calculo porcentaje monto excento
@@ -643,17 +1200,14 @@ BEGIN
            where p.id_plantilla =  v_parametros.id_plantilla;    
            
            IF v_sw_me_plantilla = 'si' and  v_monto_excento <= 0 THEN
-           
               raise exception  'Este documento necesita especificar un monto excento mayor a cero';
-           
            END IF;
            
-           
-           IF v_monto_excento >=  v_monto_ejecutar_total_mo THEN
+           IF COALESCE(v_monto_excento,0) >= COALESCE(v_monto_ejecutar_total_mo,0) and v_registros_pp.tipo not in ('ant_parcial','anticipo','dev_garantia') THEN
              raise exception 'El monto excento (%) debe ser menr que el total a ejecutar(%)',v_monto_excento, v_monto_ejecutar_total_mo  ;
            END IF;
            
-           IF v_monto_excento > 0 THEN
+           IF  COALESCE(v_monto_excento,0) > 0 THEN
               v_porc_monto_excento_var  = v_monto_excento / v_monto_ejecutar_total_mo;
            ELSE
               v_porc_monto_excento_var = 0;
@@ -664,9 +1218,11 @@ BEGIN
 			--Sentencia de la modificacion
 			update tes.tplan_pago set
 			monto_ejecutar_total_mo = v_monto_ejecutar_total_mo,
-			--obs_descuentos_anticipo = v_parametros.obs_descuentos_anticipo,
+			obs_descuentos_anticipo = v_parametros.obs_descuentos_anticipo,
 			id_plantilla = v_parametros.id_plantilla,
-			--descuento_anticipo = COALESCE(v_parametros.descuento_anticipo,0),
+			descuento_anticipo = COALESCE(v_parametros.descuento_anticipo,0),
+            descuento_inter_serv = COALESCE(v_parametros.descuento_inter_serv,0),
+            obs_descuento_inter_serv = v_parametros.obs_descuento_inter_serv,
 			otros_descuentos = COALESCE( v_parametros.otros_descuentos,0),
 			obs_monto_no_pagado = v_parametros.obs_monto_no_pagado,
 			obs_otros_descuentos = v_parametros.obs_otros_descuentos,
@@ -678,7 +1234,7 @@ BEGIN
             liquido_pagable=v_liquido_pagable,
 			fecha_mod = now(),
 			id_usuario_mod = p_id_usuario,
-            tipo_cambio= v_parametros.tipo_cambio,
+            --tipo_cambio= v_parametros.tipo_cambio,
             monto_retgar_mo= v_parametros.monto_retgar_mo,
             descuento_ley=v_parametros.descuento_ley,
             obs_descuentos_ley=v_parametros.obs_descuentos_ley,
@@ -690,53 +1246,51 @@ BEGIN
             porc_monto_excento_var = v_porc_monto_excento_var,
             monto_excento = COALESCE(v_monto_excento,0),
             id_usuario_ai = v_parametros._id_usuario_ai,
-            usuario_ai = v_parametros._nombre_usuario_ai
+            usuario_ai = v_parametros._nombre_usuario_ai,
+            porc_monto_retgar = v_porc_monto_retgar
             
             
-            
-            
-			where id_plan_pago=v_parametros.id_plan_pago;
+            where id_plan_pago=v_parametros.id_plan_pago;
            
+            IF v_registros_pp.tipo not in ('ant_parcial','anticipo','dev_garantia') THEN
             
+                   ----------------------------------------------------------------------
+                   -- Inserta prorrateo automatico  si no es algun tipo decuota sin prorrateo (sin presupeustos)
+                   ----------------------------------------------------------------------
+                   
+                   --si el monto del pago y el total de prorrateo no son iguales, reiniciamos el prorrateo
+                   
+                    select 
+                      sum(pr.monto_ejecutar_mo)
+                    into
+                      v_total_prorrateo
+                    from  tes.tprorrateo pr
+                    inner join tes.tobligacion_det od on od.id_obligacion_det = pr.id_obligacion_det
+                    where pr.id_plan_pago = v_parametros.id_plan_pago 
+                    and pr.estado_reg = 'activo' and od.estado_reg = 'activo';
+                   
+                   
+                   IF v_total_prorrateo != v_monto_ejecutar_total_mo THEN 
+                   
+                        --elimina el prorrateo si es automatico
+                         delete from tes.tprorrateo pro where pro.id_plan_pago = v_parametros.id_plan_pago;
+                     
+                        IF not ( SELECT * FROM tes.f_prorrateo_plan_pago( v_parametros.id_plan_pago,
+                                                                   v_parametros.id_obligacion_pago, 
+                                                                   v_registros.pago_variable, 
+                                                                   v_monto_ejecutar_total_mo,
+                                                                   p_id_usuario,
+                                                                   v_registros_pp.id_plan_pago_fk
+                                                                   
+                                                                   )) THEN
+                                                                   
+                                
+                            raise exception 'Error al prorratear';
+                                                            
+                         END IF;
+                    END IF;
             
-            
-            
-           --------------------------------------------------
-           -- Inserta prorrateo automatico
-           ------------------------------------------------
-           
-           --si el monto del pago y el total de prorrateo no son iguales, reiniciamos el prorrateo
-           
-            select 
-              sum(pr.monto_ejecutar_mo)
-            into
-              v_total_prorrateo
-            from  tes.tprorrateo pr
-            inner join tes.tobligacion_det od on od.id_obligacion_det = pr.id_obligacion_det
-            where pr.id_plan_pago = v_parametros.id_plan_pago 
-            and pr.estado_reg = 'activo' and od.estado_reg = 'activo';
-           
-           
-           IF v_total_prorrateo != v_monto_ejecutar_total_mo THEN 
-           
-                --elimina el prorrateo si es automatico
-                 delete from tes.tprorrateo pro where pro.id_plan_pago = v_parametros.id_plan_pago;
-             
-                IF not ( SELECT * FROM tes.f_prorrateo_plan_pago( v_parametros.id_plan_pago,
-                                                           v_parametros.id_obligacion_pago, 
-                                                           v_registros.pago_variable, 
-                                                           v_monto_ejecutar_total_mo,
-                                                           p_id_usuario,
-                                                           v_registros_pp.id_plan_pago_fk
-                                                           
-                                                           )) THEN
-                                                           
-                        
-                    raise exception 'Error al prorratear';
-                                                    
-                 END IF;
-            END IF;
-               
+            END IF;   
 			--Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Plan Pago modificado(a)'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_parametros.id_plan_pago::varchar);
@@ -748,7 +1302,7 @@ BEGIN
 
 	/*********************************    
  	#TRANSACCION:  'TES_PLAPA_ELI'
- 	#DESCRIPCION:	Eliminacion de registros
+ 	#DESCRIPCION:	Eliminacion de registros de plan de pagos
  	#AUTOR:		admin	
  	#FECHA:		10-04-2013 15:43:23
 	***********************************/
@@ -757,7 +1311,6 @@ BEGIN
 
 		begin
 			
-                
           --obtiene datos de plan de pago
           select
             pp.estado,
@@ -777,7 +1330,6 @@ BEGIN
            
           
           
-           
            IF  v_registros.estado != 'borrador' THEN
            
              raise exception 'No puede elimiar cuotas  que no esten en estado borrador';
@@ -788,8 +1340,10 @@ BEGIN
            --si es una cuota de devengao_pago o devengado validamos que elimine
            --primero la ultima cuota
            
-          
-           IF  v_registros.tipo in  ('devengado_pagado','devengado')   THEN
+           -------------------------------------------------
+           --  Eliminacion de cuentas de primer nivel
+           ------------------------------------------------
+           IF  v_registros.tipo in  ('devengado_pagado','devengado','devengado_pagado_1c','ant_parcial','anticipo','dev_garantia')   THEN
                      select 
                       max(pp.nro_cuota)
                      into
@@ -806,11 +1360,6 @@ BEGIN
                        raise exception 'Elimine primero la ultima cuota';
                      
                      END IF;
-                      
-                   
-                 
-                  
-                     
                      
                      --recuperamos el id_tipo_proceso en el WF para el estado anulado
                      --ya que este es un estado especial que no tiene padres definidos
@@ -825,8 +1374,12 @@ BEGIN
                      inner join wf.ttipo_estado te on te.id_tipo_proceso = tp.id_tipo_proceso and te.codigo = 'anulado'               
                      where pw.id_proceso_wf = v_registros.id_proceso_wf;
                      
+                     
+                     IF  v_id_tipo_estado is NULL THEN
                     
-                    
+                         raise exception 'no existe el estado enulado en la cofiguacion de WF para este tipo de proceso';
+                     
+                     END IF;
                      -- pasamos la cotizacion al siguiente estado
                  
                      v_id_estado_actual =  wf.f_registra_estado_wf(v_id_tipo_estado, 
@@ -837,7 +1390,7 @@ BEGIN
                                                                  v_parametros._id_usuario_ai,
                                                                  v_parametros._nombre_usuario_ai,
                                                                  v_registros.id_depto,
-                                                                 'Se elimina la cuota de devengado');
+                                                                 'Se elimina la cuota');
                   
                   
                      -- actualiza estado en la cotizacion
@@ -864,9 +1417,11 @@ BEGIN
                     update  tes.tprorrateo pro  set 
                      estado_reg='inactivo'
                     where pro.id_plan_pago =  v_parametros.id_plan_pago; 
-               
+      ------------------------------------------------------------------------------------
+      --  Eliminacion de cuotas de segundo nivel (que dependen de otro plan de pagos)
+      -------------------------------------------------------------------------------------         
           
-      ELSIF  v_registros.tipo in ('pagado')   THEN
+      ELSIF  v_registros.tipo in ('pagado','ant_aplicado')   THEN
              -- eliminacion de cuotas de pago
              
                      
@@ -937,9 +1492,7 @@ BEGIN
           
                  
              
-             
-            
-          ELSE
+           ELSE
             
                 raise exception 'Tipo no reconocido';
             
@@ -979,7 +1532,7 @@ BEGIN
            
            
             
-            IF  v_registros.tipo = 'pagado'  or  v_registros.tipo = 'devengado_pagado' THEN
+            IF  v_registros.tipo  in ('pagado' ,'devengado_pagado','devengado_pagado_1c','anticipo','ant_parcial') THEN
                 
                   IF v_registros.forma_pago = 'cheque' THEN
                 
@@ -988,7 +1541,7 @@ BEGIN
                          raise exception  'Tiene que especificar el  nro de cheque';
                       
                       END IF;
-                  ELSE 
+                   ELSE 
                 
                  		IF  v_registros.nro_cuenta_bancaria  = '' or  v_registros.nro_cuenta_bancaria is NULL THEN
                       
@@ -997,41 +1550,41 @@ BEGIN
                       END IF;  
                   
                
-               END IF; 
+                  END IF; 
                
                
-               IF v_registros.id_cuenta_bancaria is NULL THEN
-                  raise exception  'Tiene que especificar la cuenta bancaria origen de los fondos';
-               END IF ;    
+                  IF v_registros.id_cuenta_bancaria is NULL THEN
+                     raise exception  'Tiene que especificar la cuenta bancaria origen de los fondos';
+                  END IF ;    
                   
                 
                
-               --validacion de deposito, (solo BOA, puede retirarse)
-               IF v_registros.id_cuenta_bancaria_mov is NULL THEN
-               
-                    --TODO verificar si la cuenta es de centro
-                    
-                   select 
-                       cb.centro
-                   into 
-                       v_centro 
-                   from tes.tcuenta_bancaria cb
-                   where cb.id_cuenta_bancaria = v_registros.id_cuenta_bancaria;
-                    
-                    
-                    
-                    IF  v_registros.nro_cuenta_bancaria  = '' or  v_registros.nro_cuenta_bancaria is NULL THEN
-                      
-                         IF  v_centro = 'no' THEN
+                   --validacion de deposito, (solo BOA, puede retirarse)
+                   IF v_registros.id_cuenta_bancaria_mov is NULL THEN
+                   
+                        --TODO verificar si la cuenta es de centro
+                        
+                       select 
+                           cb.centro
+                       into 
+                           v_centro 
+                       from tes.tcuenta_bancaria cb
+                       where cb.id_cuenta_bancaria = v_registros.id_cuenta_bancaria;
+                        
+                        
+                        
+                        IF  v_registros.nro_cuenta_bancaria  = '' or  v_registros.nro_cuenta_bancaria is NULL THEN
                           
-                          raise exception  'Tiene que especificar el deposito  origen de los fondos';
-                         
-                         END IF;
-                         
-                      
-                    END IF;
-               
-               END IF ;
+                             IF  v_centro = 'no' THEN
+                              
+                              raise exception  'Tiene que especificar el deposito  origen de los fondos';
+                             
+                             END IF;
+                             
+                          
+                        END IF;
+                   
+                   END IF ;
             
            END IF;
            

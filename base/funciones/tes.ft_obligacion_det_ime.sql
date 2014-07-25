@@ -232,7 +232,12 @@ BEGIN
 	elsif(p_transaccion='TES_OBDET_ELI')then
 
 		begin
-			--Sentencia de la eliminacion
+           
+        
+            delete from tes.tprorrateo p 
+            where  p.id_obligacion_det = v_parametros.id_obligacion_det;
+            
+            --Sentencia de la eliminacion
 			delete from tes.tobligacion_det
             where id_obligacion_det=v_parametros.id_obligacion_det;
                

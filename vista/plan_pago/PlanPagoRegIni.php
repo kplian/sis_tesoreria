@@ -25,7 +25,6 @@ Phx.vista.PlanPagoRegIni = {
 	constructor: function(config) {
 	    this.maestro=config.maestro;
 	    Phx.vista.PlanPagoRegIni.superclass.constructor.call(this,config);
-        this.addButton('SincPresu',{text:'Inc. Pres.',iconCls: 'balert',disabled:true,handler:this.onBtnSincPresu,tooltip: '<b>Incrementar Presupuesto</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
         ////formulario de departamentos
         //this.crearFormularioEstados();
         //si la interface es pestanha este código es para iniciar 
@@ -55,12 +54,13 @@ Phx.vista.PlanPagoRegIni = {
        
     iniciarEventos:function(){
         
-         this.Cmp.monto.on('change',this.calculaMontoPago,this); 
-        //this.cmpDescuentoAnticipo.on('change',this.calculaMontoPago,this);
+        this.Cmp.monto.on('change',this.calculaMontoPago,this); 
+        this.Cmp.descuento_anticipo.on('change',this.calculaMontoPago,this);
         this.Cmp.monto_no_pagado.on('change',this.calculaMontoPago,this);
         this.Cmp.otros_descuentos.on('change',this.calculaMontoPago,this);
         this.Cmp.monto_retgar_mo.on('change',this.calculaMontoPago,this);
         this.Cmp.descuento_ley.on('change',this.calculaMontoPago,this);
+        this.Cmp.descuento_inter_serv.on('change',this.calculaMontoPago,this);
         
         this.Cmp.id_plantilla.on('select',function(cmb,rec,i){  
             this.getDecuentosPorAplicar(rec.data.id_plantilla);
@@ -71,74 +71,36 @@ Phx.vista.PlanPagoRegIni = {
             else{
                this.Cmp.monto_excento.disable();
             }
-            
-            
-        },this);
+         },this);
         
-        this.Cmp.tipo.on('change',function(groupRadio,radio){
-                                this.enableDisable(radio.inputValue);
-                            },this); 
-          
-        
-      /* this.cmpFechaDev.on('change',function(com,dat){
-              
-              if(this.maestro.tipo_moneda=='base'){
-                 this.cmpTipoCambio.disable();
-                 this.cmpTipoCambio.setValue(1); 
-                  
-              }
-              else{
-                   this.cmpTipoCambio.enable()
-                 this.obtenerTipoCambio();  
-              }
+       
+        //evento para definir los tipos de pago
+        this.Cmp.tipo.on('select',function(cmb,rec,i){
+             //segun el tipo define los campo visibles y no visibles
+             this.setTipoPago[rec.data.variable](this);
+             this.unblockGroup(1);
+             this.window.doLayout();
              
-              
-          },this);*/
-         
-       
-       
-       this.Cmp.tipo_pago.on('select',function(cmb,rec,i){
-           if(rec.data.variable=='anticipo' || rec.data.variable=='adelanto'){
-               this.Cmp.tipo.disable();
-               this.ocultarComponente(this.Cmp.tipo);
+             if(this.accionFormulario == 'NEW'){
                
-               this.deshabilitarDescuentos();
-               
-               if(rec.data.variable=='anticipo'){
-                   this.ocultarComponente(this.Cmp.monto_ejecutar_total_mo);
-                   this.Cmp.id_plantilla.disable();
-                   this.ocultarComponente(this.Cmp.id_plantilla);
-                   //RAC  11/02/2014 agrega monto ecento
-                   this.Cmp.monto_excento.disable();
-                   this.ocultarComponente(this.Cmp.monto_excento);
-               }
-               else{
-                   this.mostrarComponente(this.Cmp.monto_ejecutar_total_mo);
-                   this.Cmp.id_plantilla.enable();
-                   this.mostrarComponente(this.Cmp.id_plantilla);
-                   //RAC  11/02/2014 agrega monto ecento
-                   //this.Cmp.monto_excento.enable();
-                   this.mostrarComponente(this.Cmp.monto_excento);
-                   
-               }
-               
-           
-           
-           }
-           else{
-               this.Cmp.tipo.enable();
-               this.mostrarComponente(this.Cmp.tipo);
-               this.mostrarComponente(this.Cmp.monto_ejecutar_total_mo)
-               this.habilitarDescuentos();
-           }
-           
-           
-       },this);
+                 if(rec.data.variable == 'devengado'||
+                    rec.data.variable =='devengado_pagado'||
+                    rec.data.variable =='devengado_pagado_1c'||
+                    rec.data.variable =='rendicion'||
+                    rec.data.variable =='anticipo'){
+                    this.obtenerFaltante('registrado,ant_parcial_descontado');
+                 }
+                 
+                 if(rec.data.variable == 'ant_parcial'){
+                     this.obtenerFaltante('ant_parcial');
+                 }
+                 
+                 if(rec.data.variable == 'dev_garantia'){
+                     this.obtenerFaltante('dev_garantia');
+                 }
+              }
+        },this);
        
-       
-        
-       
-    
     },
     
     onBtnSolPlanPago:function(){        
@@ -158,8 +120,7 @@ Phx.vista.PlanPagoRegIni = {
     },
     
     setTipoPagoNormal:function(){
-        this.Cmp.tipo.enable();
-       this.mostrarComponente(this.Cmp.tipo);
+      
        this.mostrarComponente(this.Cmp.monto_ejecutar_total_mo)
        this.habilitarDescuentos();
         
@@ -167,53 +128,34 @@ Phx.vista.PlanPagoRegIni = {
     
      successAplicarDesc:function(resp){
             Phx.CP.loadingHide();
-           var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+            var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
             if(!reg.ROOT.error){
-                
                this.Cmp.porc_descuento_ley.setValue(reg.ROOT.datos.descuento_porc*1);
                this.Cmp.obs_descuentos_ley.setValue(reg.ROOT.datos.observaciones);
-               
                this.calculaMontoPago();
-               
-              
-             
-             }else{
+            }
+            else{
                 alert(reg.ROOT.mensaje)
             }
      },
      
    
-    calculaMontoPago:function(){
-        
-         var descuento_ley = this.Cmp.monto.getValue()*this.Cmp.porc_descuento_ley.getValue();
-         this.Cmp.descuento_ley.setValue(descuento_ley);
-         var liquido = this.Cmp.monto.getValue()  -  this.Cmp.monto_no_pagado.getValue() -  this.Cmp.otros_descuentos.getValue() - this.Cmp.monto_retgar_mo.getValue() -  this.Cmp.descuento_ley.getValue();
-        
-        
-        this.Cmp.liquido_pagable.setValue(liquido>0?liquido:0);
-        var eje = this.Cmp.monto.getValue()  -  this.Cmp.monto_no_pagado.getValue()
-        this.Cmp.monto_ejecutar_total_mo.setValue(eje>0?eje:0);
-     },
+    
      
      enableDisable:function(val){
-      if(val =='devengado'){
-            this.Cmp.nombre_pago.disable();
-            this.ocultarComponente(this.Cmp.nombre_pago);
+          //devengado
+      
+          this.Cmp.nombre_pago.disable();
+          this.ocultarComponente(this.Cmp.nombre_pago);
             
+          //pago 
             
+          this.deshabilitarDescuentos()
+          this.Cmp.nombre_pago.enable();
+          this.mostrarComponente(this.Cmp.nombre_pago);
+          this.habilitarDescuentos();
             
-           
-            
-           this.deshabilitarDescuentos()
-            
-        }
-        else{
-            this.Cmp.nombre_pago.enable();
-            this.mostrarComponente(this.Cmp.nombre_pago);
-            
-            this.habilitarDescuentos();
-            
-         }
+        
           this.Cmp.monto_no_pagado.setValue(0);
           this.Cmp.otros_descuentos.setValue(0);
           this.Cmp.liquido_pagable.setValue(0);
@@ -224,254 +166,130 @@ Phx.vista.PlanPagoRegIni = {
          
      },
      
-    habilitarDescuentos:function(){
-        //this.cmpDescuentoAnticipo.enable();
-        //this.mostrarComponente(this.cmpDescuentoAnticipo);
-        this.Cmp.otros_descuentos.enable();
-        this.mostrarComponente(this.Cmp.otros_descuentos);
-        
-        //calcular retenciones segun documento
-        
-        this.mostrarComponente(this.Cmp.descuento_ley);
-        
-        this.Cmp.monto_retgar_mo.enable();
-        this.mostrarComponente(this.Cmp.monto_retgar_mo);
-        
-        
-        
-        //this.cmpObsDescuentoAnticipo.enable();
-        //this.mostrarComponente(this.cmpObsDescuentoAnticipo);
-        this.Cmp.obs_otros_descuentos.enable();
-        this.mostrarComponente(this.Cmp.obs_otros_descuentos);
-        
-        this.mostrarComponente(this.Cmp.obs_descuentos_ley);
-        
-    } ,
-     deshabilitarDescuentos:function(){
-       // this.cmpDescuentoAnticipo.disable();
-       // this.ocultarComponente(this.cmpDescuentoAnticipo);
-        this.Cmp.otros_descuentos.disable();
-        this.ocultarComponente(this.Cmp.otros_descuentos);
-        
-        this.Cmp.monto_retgar_mo.disable();
-        this.ocultarComponente(this.Cmp.monto_retgar_mo);
-        
-        this.ocultarComponente(this.Cmp.descuento_ley);
-        
-        
-         
-        //this.cmpObsDescuentoAnticipo.disable();
-        //this.ocultarComponente(this.cmpObsDescuentoAnticipo);
-        this.Cmp.obs_otros_descuentos.disable();
-        this.ocultarComponente(this.Cmp.obs_otros_descuentos);
-        this.ocultarComponente(this.Cmp.obs_descuentos_ley);
-            
-        
-    } ,
-    
+   
     
     onButtonNew:function(){
         
-         var data = this.getSelectedData();
-         if(data){
-                
-                // para habilitar registros de cuotas de pago    
-                if(data.monto_ejecutar_total_mo*1  > data.total_pagado*1  && data.estado =='devengado'){
+            
+             this.porc_ret_gar = 0; //resetea valor por defecto de retencion de garantia
+             var data = this.getSelectedData();
+             if(data){
+                    
+                    // para habilitar registros de cuotas de pago 
+                    //sobre los devengados
                     Phx.vista.PlanPagoRegIni.superclass.onButtonNew.call(this); 
+                    this.Cmp.tipo.enable();
+                    this.blockGroup(1)//bloqueaos el grupo , detalle de pago
                     this.Cmp.id_obligacion_pago.setValue(this.maestro.id_obligacion_pago);
                     this.Cmp.id_plan_pago_fk.setValue(data.id_plan_pago);
-                    this.Cmp.tipo_pago.disable();
-                    this.ocultarComponente(this.Cmp.tipo_pago);
-                    this.Cmp.tipo.disable();
-                    this.ocultarComponente(this.Cmp.tipo);
-                    this.Cmp.id_plantilla.disable();
-                    this.ocultarComponente(this.Cmp.id_plantilla);
-                    //RAC  11/02/2014 agrega monto ecento
-                    this.Cmp.monto_excento.disable();
-                    this.ocultarComponente(this.Cmp.monto_excento);
-                    
-                    
-                    
-                    this.Cmp.nombre_pago.enable();
-                    this.mostrarComponente(this.Cmp.nombre_pago);
-                    
-                   
-                    
-                    
-                   
-                    this.habilitarDescuentos();
-                    this.Cmp.monto_no_pagado.disable();
-                    this.ocultarComponente(this.Cmp.monto_no_pagado);
-                    this.Cmp.obs_monto_no_pagado.disable();
-                    this.ocultarComponente(this.Cmp.obs_monto_no_pagado);
-                    this.obtenerFaltante('registrado_pagado',data.id_plan_pago);
-                    this.Cmp.tipo_cambio.setValue(0);
-                    this.Cmp.tipo_cambio.disable();
-                    this.ocultarComponente(this.Cmp.tipo_cambio);
-                    //calculo de descuentos por documento
-                    this.getDecuentosPorAplicar(data.id_plantilla);
-                    
-                    
-                    
-    
-                }
-                else{
-                    if(data.estado!='devengado'){
+                       
+                    if( data.tipo == 'devengado'||data.tipo == 'devengado_pagado'||data.tipo == 'devengado_pagado_1c'){
+                        //
+                        this.accionFormulario = 'NEW_PAGO';  //esta bandera modifica el ,  obtenerFaltante
+                        if(data.estado =='devengado'){
+                           if(data.monto_ejecutar_total_mo*1  > data.total_pagado*1){
+                                
+                                this.Cmp.tipo.store.loadData(this.arrayStore.DEVENGAR)
+                                
+                                //calcula el porcentaje de retencio de garantia si en el 
+                                //devengado es mayor a cero, se utiliza en la funcion calculaMontoPago
+                                this.Cmp.porc_monto_retgar.setValue(data.porc_monto_retgar);
+                                this.porc_ret_gar =  data.porc_monto_retgar;
+                                
+                                //carga la plantilla con el mismo documento que el devengado
+                                var me = this;
+                                this.Cmp.id_plantilla.store.load({
+                                     params:{start:0,limit:1,id_plantilla:data.id_plantilla},
+                                     callback:function(){
+                                         me.Cmp.id_plantilla.setValue(data.id_plantilla);
+                                         me.Cmp.id_plantilla.modificado = true;
+                                         me.getDecuentosPorAplicar(data.id_plantilla);
+                                     }  
+                                  });
+                                    
+                                 
+                                this.inicioValores();
+                                //obtiene el monto de apgo que falta registrar
+                                //y el monto de anticpo parcial que falta por descontar
+                                this.obtenerFaltante('registrado_pagado,ant_parcial_descontado',data.id_plan_pago);
+                           }else{
+                             alert('No queda nada por pagar');
+                          } 
+                        }
+                        else{
+                           alert('El devengado no fue completado'); 
+                        }
                         
-                        alert('El devengado no fue completado');
                     }
                     else{
-                        alert('No queda nada por pagar');
+                        if(data.tipo == 'anticipo'){
+                            this.accionFormulario = 'NEW_ANT_APLI';
+                            
+                            if(data.monto*1  > data.total_pagado*1  && data.estado =='anticipado'){
+                                
+                                this.Cmp.tipo.store.loadData(this.arrayStore.ANTICIPO)
+                                //carga la plantilla con el mismo documento que el devengado
+                                var me = this;
+                                this.Cmp.id_plantilla.store.load({
+                                     params:{start:0,limit:1,id_plantilla:data.id_plantilla},
+                                     callback:function(){
+                                         me.Cmp.id_plantilla.setValue(data.id_plantilla);
+                                         me.Cmp.id_plantilla.modificado = true;
+                                         me.getDecuentosPorAplicar(data.id_plantilla);
+                                     }  
+                                  });
+                                    
+                                 
+                                this.inicioValores();
+                                //obtiene el monto de apgo que falta registrar
+                                //y el monto de anticpo parcial que falta por descontar
+                                this.obtenerFaltante('ant_aplicado_descontado',data.id_plan_pago);
+                   
+                            }
+                            else{
+                                
+                            }
+                            
+                        }
+                        else{
+                           
+                        }
+                    
                     }
                 
-                }
-            
-             
-         }
-         else{
-             
-                //para habilitar registros de cuota de devengado  
-                Phx.vista.PlanPagoRegIni.superclass.onButtonNew.call(this); 
-                
-                this.Cmp.id_obligacion_pago.setValue(this.maestro.id_obligacion_pago);
-                
-               //tipo pago (OPERACION)
-               
-               if(this.maestro.nro_cuota_vigente ==0){
-                    this.Cmp.tipo_pago.setValue('normal');
-                    this.Cmp.tipo_pago.enable();
-                }
-                else{
-                     this.Cmp.tipo_pago.setValue('normal');
-                     this.Cmp.tipo_pago.disable();
-                }
-                
-                this.setTipoPagoNormal();
-                
-                this.Cmp.tipo.enable();
-                this.mostrarComponente(this.Cmp.tipo);
-                //plantilla (TIPO DOCUMENTO)
-                this.Cmp.id_plantilla.enable();
-                this.mostrarComponente(this.Cmp.id_plantilla);
-                //RAC  11/02/2014 agrega monto ecento
-                //this.Cmp.monto_excento.enable();
-                this.mostrarComponente(this.Cmp.monto_excento);
-                
-                
-                
-                this.Cmp.monto_no_pagado.enable();
-                this.mostrarComponente(this.Cmp.monto_no_pagado);
-                this.Cmp.obs_monto_no_pagado.enable();
-                this.mostrarComponente(this.Cmp.obs_monto_no_pagado);
-                this.obtenerFaltante('registrado');
-                
-                if(this.maestro.tipo_moneda=='base'){
-                   this.Cmp.tipo_cambio.setValue(1);  
-                   this.Cmp.tipo_cambio.disable();
-                   this.ocultarComponente(this.Cmp.tipo_cambio);
-                }
-                else{
-                    this.Cmp.tipo_cambio.enable();
-                    this.mostrarComponente(this.Cmp.tipo_cambio);
-                    this.Cmp.tipo_cambio.setValue(this.maestro.tipo_cambio_conv);  
-                }
-       
+                 
+             }
+             else{
+                    this.accionFormulario = 'NEW';  
+                   //para habilitar registros de cuota de devengado  
+                   Phx.vista.PlanPagoRegIni.superclass.onButtonNew.call(this); 
+                   this.Cmp.tipo.enable();
+                   this.Cmp.id_obligacion_pago.setValue(this.maestro.id_obligacion_pago);
+                   this.blockGroup(1)//bloqueaos el grupo , detalle de pago
+                   //tipo pago (OPERACION)
+                   
+                   if(this.maestro.nro_cuota_vigente == 0 && this.maestro.tipo_anticipo == 'si'){
+                       //prepara pagos de enticipo
+                       this.Cmp.tipo.store.loadData(this.arrayStore.ANT_PARCIAL)
+                       
+                   }
+                   else{
+                       
+                       //prepara pagos iniciales
+                       this.Cmp.tipo.store.loadData(this.arrayStore.INICIAL)
+                       
+                   }
+                   
+                   this.inicioValores()
+           }     
               
-                
-           }
-          
-            this.Cmp.fecha_tentativa.minValue=new Date();
-            this.Cmp.fecha_tentativa.setValue(new Date());
-            this.Cmp.nombre_pago.setValue(this.maestro.desc_proveedor);
-            this.Cmp.monto.setValue(0);
-           // this.cmpDescuentoAnticipo.setValue(0);
-            this.Cmp.monto_no_pagado.setValue(0);
-            this.Cmp.otros_descuentos.setValue(0);
-            this.Cmp.liquido_pagable.setValue(0);
-            this.Cmp.monto_ejecutar_total_mo.setValue(0);
-            this.Cmp.monto_retgar_mo.setValue(0);
-            this.Cmp.liquido_pagable.disable();
-            this.Cmp.monto_ejecutar_total_mo.disable();
-            
-            //calcular el descuento segun el documento
-            this.Cmp.descuento_ley.setValue(0);
-            
-            
       },
      
-      onButtonEdit:function(){
-       
-         var data = this.getSelectedData();
-        
+     onButtonEdit:function(){
          Phx.vista.PlanPagoRegIni.superclass.onButtonEdit.call(this); 
-         if(data.tipo=='pagado'){
-             
-                this.Cmp.tipo_pago.disable();
-                this.ocultarComponente(this.Cmp.tipo_pago);
-                
-                this.Cmp.tipo.disable();
-                this.ocultarComponente(this.Cmp.tipo);
-                
-                this.Cmp.id_plantilla.disable();
-                this.ocultarComponente(this.Cmp.id_plantilla);
-                
-                //RAC  11/02/2014 agrega monto ecento
-                this.Cmp.monto_excento.disable();
-                this.ocultarComponente(this.Cmp.monto_excento);
-                
-                this.Cmp.nombre_pago.enable();
-                this.mostrarComponente(this.Cmp.nombre_pago);
-                
-               
-                this.habilitarDescuentos();     
-                
-                this.Cmp.monto_no_pagado.disable();
-                this.ocultarComponente(this.Cmp.monto_no_pagado);
-                this.Cmp.obs_monto_no_pagado.disable();
-                this.ocultarComponente(this.Cmp.obs_monto_no_pagado);
-                this.Cmp.tipo_cambio.disable();
-                this.ocultarComponente(this.Cmp.tipo_cambio);
          
-         
-         }
-         else{
-                this.mostrarComponente(this.Cmp.tipo_pago);
-                this.Cmp.tipo.enable();
-                this.mostrarComponente(this.Cmp.tipo);
-               
-                
-                this.Cmp.id_plantilla.enable();
-                this.mostrarComponente(this.Cmp.id_plantilla);
-                
-                //RAC  11/02/2014 agrega monto ecento
-                //this.Cmp.monto_excento.enable();
-                this.mostrarComponente(this.Cmp.monto_excento);
-                
-                this.Cmp.monto_no_pagado.enable();
-                this.mostrarComponente(this.Cmp.monto_no_pagado);
-                 
-                this.Cmp.obs_monto_no_pagado.enable();
-                this.mostrarComponente(this.Cmp.obs_monto_no_pagado);
-                if(this.maestro.tipo_moneda=='base'){
-                 
-                   this.Cmp.tipo_cambio.disable();
-                   this.ocultarComponente(this.Cmp.tipo_cambio);
-                }
-                else{
-                    this.Cmp.tipo_cambio.enable();
-                    this.mostrarComponente(this.Cmp.tipo_cambio);
-                  
-                }
-                
-         }
-       
-           this.Cmp.fecha_tentativa.enable();
-           this.Cmp.tipo.disable();
-           this.Cmp.tipo_pago.disable(); 
-           
-           
-           
-       },
+                       
+     },
     
     obtenerFaltante:function(_filtro,_id_plan_pago){
         
@@ -495,6 +313,19 @@ Phx.vista.PlanPagoRegIni = {
             if(!reg.ROOT.error){
                 if(reg.ROOT.datos.monto_total_faltante > 0){
                     this.Cmp.monto.setValue(reg.ROOT.datos.monto_total_faltante);
+                    
+                    
+                    //si se trata de un nuevo pago
+                    if(this.accionFormulario == 'NEW_PAGO'){
+                        this.Cmp.monto_retgar_mo.setValue(this.porc_ret_gar*reg.ROOT.datos.monto_total_faltante);
+                        
+                    }
+                    
+                    if(this.Cmp.tipo.getValue()=='devengado_pagado'||this.Cmp.tipo.getValue()=='devengado_pagado_1c'||this.Cmp.tipo.getValue()=='pagado'){
+                        //si es un pago calculamos el descuento de anticipo
+                        this.Cmp.descuento_anticipo.setValue(reg.ROOT.datos.ant_parcial_descontado);
+                        this.Cmp.descuento_anticipo.maxValue=reg.ROOT.datos.ant_parcial_descontado
+                    }
                 }
                 else{
                     this.Cmp.monto.setValue(0);
@@ -506,23 +337,23 @@ Phx.vista.PlanPagoRegIni = {
             } 
     },
     
-    onReloadPage:function(m){
+       
+     onReloadPage:function(m){
         this.maestro=m;
         this.store.baseParams={id_obligacion_pago:this.maestro.id_obligacion_pago,tipo_interfaz:this.nombreVista};
         this.load({params:{start:0, limit:this.tam_pag}})
-        this.Cmp.tipo_cambio.setValue(1);  
-    },
+         
+     },
     
     successSave: function(resp) {
        Phx.CP.getPagina(this.idContenedorPadre).reload();  
        Phx.vista.PlanPagoRegIni.superclass.successSave.call(this,resp);
         
-        
     },
     successDel:function(resp){
        Phx.CP.getPagina(this.idContenedorPadre).reload(); 
        Phx.vista.PlanPagoRegIni.superclass.successDel.call(this,resp);
-     },
+    },
      
     preparaMenu:function(n){
           var data = this.getSelectedData();
@@ -533,7 +364,6 @@ Phx.vista.PlanPagoRegIni = {
           if (data['estado']== 'borrador'){
               this.getBoton('edit').enable();
               this.getBoton('del').enable(); 
-            
               this.getBoton('new').disable(); 
               this.getBoton('SolPlanPago').enable(); 
               this.getBoton('sig_estado').enable();   
@@ -545,12 +375,17 @@ Phx.vista.PlanPagoRegIni = {
             else{
                 this.getBoton('new').disable();
             }
+            
+            if(data['estado']== 'anticipado' && data['tipo']== 'anticipo'&& (data.monto*1)  > (data.total_pagado*1)){
+                this.getBoton('new').enable();
+            }
+             
              this.getBoton('edit').disable();
              this.getBoton('del').disable();
              this.getBoton('SolPlanPago').enable(); 
           }
           
-          if(data['sinc_presupuesto']=='si'){
+          if(data['sinc_presupuesto']=='si'&& (data['estado']== 'vbconta'||data['estado']== 'borrador')){
                this.getBoton('SincPresu').enable();
           }
           else{

@@ -79,7 +79,7 @@ BEGIN
                         left join conta.tauxiliar aux on aux.id_auxiliar=obdet.id_auxiliar
                         left join param.tconcepto_ingas cig on cig.id_concepto_ingas=obdet.id_concepto_ingas
                         left join param.vcentro_costo cc on cc.id_centro_costo=obdet.id_centro_costo
-                        where obdet.id_obligacion_pago='||v_parametros.id_obligacion_pago|| ' and ';
+                        where obdet.estado_reg = ''activo'' and obdet.id_obligacion_pago='||v_parametros.id_obligacion_pago|| ' and ';
 			
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
@@ -110,7 +110,7 @@ BEGIN
                         left join conta.tauxiliar aux on aux.id_auxiliar=obdet.id_auxiliar
                         left join param.tconcepto_ingas cig on cig.id_concepto_ingas=obdet.id_concepto_ingas
                         left join param.vcentro_costo cc on cc.id_centro_costo=obdet.id_centro_costo
-                        where obdet.id_obligacion_pago='||v_parametros.id_obligacion_pago|| ' and ';
+                        where obdet.estado_reg = ''activo'' and  obdet.id_obligacion_pago='||v_parametros.id_obligacion_pago|| ' and ';
 			
 			--Definicion de la respuesta		    
 			v_consulta:=v_consulta||v_parametros.filtro;

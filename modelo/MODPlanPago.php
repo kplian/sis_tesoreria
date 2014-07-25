@@ -93,6 +93,12 @@ class MODPlanPago extends MODbase{
 		$this->captura('monto_excento','numeric');
 		$this->captura('obs_wf','text');
 		
+		$this->captura('obs_descuento_inter_serv','text');
+		$this->captura('descuento_inter_serv','numeric');
+		$this->captura('porc_monto_retgar','numeric');
+		
+		
+		
 		
 		
 		//Ejecuta la instruccion
@@ -107,17 +113,36 @@ class MODPlanPago extends MODbase{
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.f_plan_pago_ime';
 		
-		if ($this->objParam->getParametro('id_plan_pago_fk') != ''){
-		   //insercion de cuota de pago         
-		    $this->transaccion='TES_PLAPAPA_INS';    
+		
+        
+        
+		if (in_array($this->objParam->getParametro('tipo'), array("devengado_pagado","devengado","devengado_pagado_1c"))){
+		   /////////////////////////////
+		   // Cuotas de primer nivel que tienen prorateo 
+		   //////////////////////////////       
+		    $this->transaccion='TES_PLAPA_INS';    //para cuotas de devengado 
 		    
 		}
-        else{
-          //insercion de cuota de devengado        
-          $this->transaccion='TES_PLAPA_INS';      
+		
+        elseif (in_array($this->objParam->getParametro('tipo'), array("pagado","ant_aplicado"))){
+             
+           ///////////////////////////////////////////////
+           // Cuotas de segundo  nivel que tienen prorateo  (dependen de un pan de pago)
+           /////////////////////////////////////////////        
+            $this->transaccion='TES_PLAPAPA_INS';  //para cuotas de pago  
             
         }
-			
+		
+		elseif (in_array($this->objParam->getParametro('tipo'), array("ant_parcial","anticipo","dev_garantia"))){
+           ///////////////////////////////////////////////
+           // Cuotas de prier que no tienen prorrateo
+           /////////////////////////////////////////////         
+            $this->transaccion='TES_PPANTPAR_INS';  //anticipo parcial  
+            
+        }
+        else{
+            throw new Exception('No se reconoce el tipo: '.$this->objParam->getParametro('tipo')); 
+        }
 		
 		
 		$this->tipo_procedimiento='IME';
@@ -144,19 +169,17 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('fecha_tentativa','fecha_tentativa','date');
 		$this->setParametro('tipo_cambio','tipo_cambio','numeric');
 		$this->setParametro('monto_retgar_mo','monto_retgar_mo','numeric');
-		
 		$this->setParametro('descuento_ley','descuento_ley','numeric');
 		$this->setParametro('obs_descuentos_ley','obs_descuentos_ley','text');
 		$this->setParametro('porc_descuento_ley','porc_descuento_ley','numeric');
-		
 		$this->setParametro('nro_cheque','nro_cheque','integer');
 		$this->setParametro('nro_cuenta_bancaria','nro_cuenta_bancaria','varchar');
 		$this->setParametro('id_cuenta_bancaria_mov','id_cuenta_bancaria_mov','integer');
-		
-		$this->setParametro('porc_monto_excento_var','porc_monto_excento_var','integer');
-		$this->setParametro('monto_excento','monto_excento','integer');
-		
-		 
+		$this->setParametro('porc_monto_excento_var','porc_monto_excento_var','numeric');
+		$this->setParametro('monto_excento','monto_excento','numeric');
+		$this->setParametro('descuento_inter_serv','descuento_inter_serv','numeric');
+		$this->setParametro('obs_descuento_inter_serv','obs_descuento_inter_serv','text');
+		$this->setParametro('porc_monto_retgar','porc_monto_retgar','numeric');
         
 		
 
@@ -176,8 +199,6 @@ class MODPlanPago extends MODbase{
 				
 		//Define los parametros para la funcion
 		$this->setParametro('id_plan_pago','id_plan_pago','int4');
-		
-		
 		$this->setParametro('tipo_pago','tipo_pago','varchar');
 		$this->setParametro('monto_ejecutar_total_mo','monto_ejecutar_total_mo','numeric');
 		$this->setParametro('obs_descuentos_anticipo','obs_descuentos_anticipo','text');
@@ -190,7 +211,6 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('obs_monto_no_pagado','obs_monto_no_pagado','text');
 		$this->setParametro('obs_otros_descuentos','obs_otros_descuentos','text');
 		$this->setParametro('monto','monto','numeric');
-		
 		$this->setParametro('nombre_pago','nombre_pago','varchar');
 		$this->setParametro('monto_no_pagado_mb','monto_no_pagado_mb','numeric');
 		$this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
@@ -202,15 +222,14 @@ class MODPlanPago extends MODbase{
         $this->setParametro('descuento_ley','descuento_ley','numeric');
         $this->setParametro('obs_descuentos_ley','obs_descuentos_ley','text');
         $this->setParametro('porc_descuento_ley','porc_descuento_ley','numeric');
-		
 		$this->setParametro('nro_cheque','nro_cheque','integer');
 		$this->setParametro('nro_cuenta_bancaria','nro_cuenta_bancaria','varchar');
-		
 		$this->setParametro('id_cuenta_bancaria_mov','id_cuenta_bancaria_mov','integer');
-		
-		
-		$this->setParametro('porc_monto_excento_var','porc_monto_excento_var','integer');
-        $this->setParametro('monto_excento','monto_excento','integer');
+		$this->setParametro('porc_monto_excento_var','porc_monto_excento_var','numeric');
+        $this->setParametro('monto_excento','monto_excento','numeric');
+        $this->setParametro('descuento_inter_serv','descuento_inter_serv','numeric');
+        $this->setParametro('obs_descuento_inter_serv','obs_descuento_inter_serv','text');
+        $this->setParametro('porc_monto_retgar','porc_monto_retgar','numeric');
         
 		//Ejecuta la instruccion
 		$this->armarConsulta();

@@ -11,7 +11,10 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
-
+    fheight: '80%',
+    fwidth: '80%',
+    accionFormulario:undefined, //define la accion que se ejcuta en formulario new o edit
+    porc_ret_gar:0,//valor por defecto de retencion de garantia
 	constructor:function(config){
 		//llama al constructor de la clase padre
 		Phx.vista.PlanPago.superclass.constructor.call(this,config);
@@ -28,10 +31,45 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 tooltip: '<b>Documentos de la Solicitud</b><br/>Subir los documetos requeridos en la solicitud seleccionada.'
             }
         );
+        this.addButton('SincPresu',{text:'Inc. Pres.',iconCls: 'balert',disabled:true,handler:this.onBtnSincPresu,tooltip: '<b>Incrementar Presupuesto</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
+        
 	},
 	tam_pag:50,
-
-
+	
+	arrayStore :{
+                	'TODOS':[
+                	            ['devengado_pagado','Devengar y pagar (2 comprobantes)'],
+                                ['devengado_pagado_1c','Devengar y pagar (1 comprobante)'],
+                                ['devengado','Devengar'],
+                                ['rendicion','Agrupar Dev y Pagar (Agrupa varios documentos)'], //es similr a un devengar y pagar pero no genera prorrateo directamente
+                                ['anticipo','Anticipo Fact/Rec (No ejecuta presupuesto, necesita Documento)'],
+                                ['ant_parcial','Anticipo Parcial(No ejecuta presupuesto, Con retenciones parciales en cada pago)'],
+                                ['pagado','Pagar'],
+                                ['ant_aplicado','Aplicacion de Anticipo'],
+                                ['dev_garantia','Devolucion de Garantia'],
+                                ['det_rendicion','Rendicion Ant']
+                     ],
+                	
+                	'INICIAL':[
+                	            ['devengado_pagado','Devengar y pagar (2 comprobantes)'],
+                	            ['devengado_pagado_1c','Devengar y pagar (1 comprobante)'],
+                                ['devengado','Devengar'],
+                                ['dev_garantia','Devolucion de Garantia'], //es similr a un devengar y pagar pero no genera prorrateo directamente
+                                ['anticipo','Anticipo Fact/Rec (No ejecuta presupuesto, necesita Documento)']
+                               ],
+                    
+                    'ANT_PARCIAL':[
+                               ['ant_parcial','Anticipo Parcial(No ejecuta presupuesto, Con retenciones parciales en cada pago)'],
+                               ],
+                    
+                    'DEVENGAR':[['pagado','Pagar']],
+                    
+                    'ANTICIPO':[['ant_aplicado','Aplicacion de Anticipo']],
+                    
+                    'RENDICION':[['det_rendicion','Rendicion Ant']]
+                                          
+	},
+	
 	Atributos:[
 		{
 			//configuracion del componente
@@ -44,6 +82,16 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 			form:true 
 		},
 		{
+            //configuracion del componente
+            config:{
+                    labelSeparator:'',
+                    inputType:'hidden',
+                    name: 'porc_monto_retgar'
+            },
+            type:'Field',
+            form:true 
+        },
+        {
             //configuracion del componente
             config:{
                     labelSeparator:'',
@@ -121,7 +169,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                                              return String.format('<b><font color="orange">{0}</font></b>', value);
                                          }
                                          else{
-                                             if(record.data.tipo=='pagado'){
+                                             if(record.data.tipo=='pagado' || record.data.tipo=='ant_aplicado'){
                                                  return String.format('--> {0}', value);  
                                              } 
                                              else{
@@ -163,59 +211,52 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:false
         },
+       
+        
          {
             config:{
-                name: 'tipo_pago',
+                name: 'tipo',
                 fieldLabel: 'Tipo de Cuota',
                 allowBlank: false,
-                 emptyText:'Tipo de Cuoata',
+                emptyText:'Tipo de Cuoata',
                 renderer:function (value, p, record){
                         var dato='';
-                        dato = (dato==''&&value=='anticipo')?'Anticipo':dato;
-                        dato = (dato==''&&value=='adelanto')?'Adelanto':dato;
-                        dato = (dato==''&&value=='normal')?'Normal':dato;
+                        dato = (dato==''&&value=='devengado')?'Devengar':dato;
+                        dato = (dato==''&&value=='devengado_pagado')?'Devengar y pagar (2 cbte)':dato;
+                        dato = (dato==''&&value=='devengado_pagado_1c')?'Devengar y pagar (1 cbte)':dato;
+                        dato = (dato==''&&value=='pagado')?'Pagar':dato;
+                        dato = (dato==''&&value=='anticipo')?'Anticipo Fact/Rec':dato;
+                        dato = (dato==''&&value=='ant_parcial')?'Anticipo Parcial':dato;
+                        dato = (dato==''&&value=='ant_rendicion')?'Ant. por Rendir':dato;
+                        dato = (dato==''&&value=='dev_garantia')?'Devolucion de Garantia':dato;
+                        dato = (dato==''&&value=='ant_aplicado')?'Aplicacion de Anticipo':dato;
+                        dato = (dato==''&&value=='rendicion')?'Rendicion Ant.':dato;
+                        dato = (dato==''&&value=='ret_rendicion')?'Detalle de Rendicion':dato;
                         return String.format('{0}', dato);
                     },
-            
-                    store:new Ext.data.ArrayStore({
-                            fields: ['variable', 'valor'],
-                            data : [ //['anticipo','Anticipo (No ejecuta Presupuesto)'],
-                                     ['adelanto','Adelanto (Ejecuta Presupueto)'],
-                                     ['normal','Normal']]
-                                    }),
+                
+                store:new Ext.data.ArrayStore({
+                            fields :['variable','valor'],
+                            data :  []}),
+               
                 valueField: 'variable',
                 displayField: 'valor',
                 forceSelection: true,
                 triggerAction: 'all',
                 lazyRender: true,
+                resizable:true,
+                listWidth:'500',
                 mode: 'local',
-                wisth: 250
+                wisth: 300
                 },
             type:'ComboBox',
-            filters:{pfiltro:'tipo_pago',type:'string'},
-            id_grupo:1,
+            filters:{pfiltro:'tipo',type:'string'},
+            id_grupo:0,
             grid:true,
             form:true
-        },{
-           config:{
-               name: 'tipo',
-               fieldLabel: 'Operación',
-               gwidth: 100,
-               maxLength:30,
-               renderer:this.renderFunction,
-               items: [
-                   {boxLabel: 'Devengar y Pagar',name: 'rg-auto',  inputValue: 'devengado_pagado', checked:true},
-                   {boxLabel: 'Devengar',name: 'rg-auto', inputValue: 'devengado'}
-               ]
-           },
-           type:'RadioGroupField',
-           filters:{pfiltro:'plapa.tipo',type:'string'},
-           id_grupo:1,
-           grid:false,
-           form:true
-          }
-         ,
-		{
+        },
+        
+        {
 			config:{
 				name: 'nro_sol_pago',
 				fieldLabel: 'Número',
@@ -248,25 +289,11 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             },
             type:'DateField',
             filters:{pfiltro:'plapa.fecha_dev',type:'date'},
-            id_grupo:1,
+            id_grupo:0,
             grid:true,
             form:true
         },
-         {
-            config:{
-                name: 'tipo_cambio',
-                fieldLabel: 'Tipo Cambio',
-                allowBlank: false,
-                anchor: '80%',
-                gwidth: 100,
-                maxLength:131074
-            },
-            type:'NumberField',
-            filters:{pfiltro:'tipo_cambio',type:'numeric'},
-            id_grupo:1,
-            grid:true,
-            form:true
-        },{
+        {
             config:{
                 name: 'id_plantilla',
                 fieldLabel: 'Tipo Documento',
@@ -306,7 +333,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             },
             type:'ComboBox',
             filters:{pfiltro:'pla.desc_plantilla',type:'string'},
-            id_grupo:0,
+            id_grupo:1,
             grid:true,
             form:true
         },
@@ -425,7 +452,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:true
         },
-        /*{
+        {
             config:{
                 name: 'descuento_anticipo',
                 currencyChar:' ',
@@ -440,7 +467,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             id_grupo:1,
             grid:true,
             form:true
-        },*/
+        },
        
        {
             config:{
@@ -478,7 +505,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             config:{
                 name: 'otros_descuentos',
                 currencyChar:' ',
-                fieldLabel: 'Otros Decuentos',
+                fieldLabel: 'Multas',
                 allowBlank: true,
                 allowNegative:false,
                 gwidth: 100,
@@ -492,11 +519,27 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         },
         {
             config:{
+                name: 'descuento_inter_serv',
+                currencyChar:' ',
+                fieldLabel: 'Desc. Inter Servicio',
+                allowBlank: true,
+                allowNegative:false,
+                gwidth: 100,
+                maxLength:1245186
+            },
+            type:'MoneyField',
+            filters:{pfiltro:'plapa.descuento_inter_serv',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
+        {
+            config:{
                 name: 'descuento_ley',
                 currencyChar:' ',
-                fieldLabel: 'Decuentos deLey',
+                fieldLabel: 'Decuentos de Ley',
                 allowBlank: true,
-                disabled:true,
+                readOnly:true,
                 allowNegative:false,
                 gwidth: 100,
                 maxLength:1245186
@@ -513,7 +556,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 currencyChar:' ',
                 fieldLabel: 'Monto a Ejecutar',
                 allowBlank: true,
-                disabled:true,
+                readOnly:true,
                 gwidth: 100,
                 maxLength:1245186
             },
@@ -529,7 +572,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 currencyChar:' ',
                 fieldLabel: 'Liquido Pagable',
                 allowBlank: true,
-                disabled:true,
+                readOnly:true,
                 gwidth: 100,
                 maxLength:1245186
             },
@@ -561,7 +604,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 						par_filtro : 'ctaban.nro_cuenta#inst.nombre'
 					}
                 }),
-                tpl:'<tpl for="."><div class="x-combo-list-item"><p>{nombre_institucion}</p>{nro_cuenta} - {codigo_moneda}</div></tpl>',
+                tpl:'<tpl for="."><div class="x-combo-list-item"><p>{nro_cuenta}</p><p>Moneda: {codigo_moneda}</p><p>{nombre_institucion}</p><p>{denominacion}</p></div></tpl>',
                 valueField: 'id_cuenta_bancaria',
                 hiddenValue: 'id_cuenta_bancaria',
                 displayField: 'nro_cuenta',
@@ -580,7 +623,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
              },
             type:'ComboBox',
             filters:{pfiltro:'cb.nro_cuenta',type:'string'},
-            id_grupo:0,
+            id_grupo:1,
             grid:true,
             form:false
         },
@@ -674,7 +717,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:false
         },
-        /*{
+        {
             config:{
                 name: 'obs_descuentos_anticipo',
                 fieldLabel: 'Obs. Desc. Antic.',
@@ -688,7 +731,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             id_grupo:1,
             grid:true,
             form:true
-        },*/
+        },
         {
             config:{
                 name: 'obs_monto_no_pagado',
@@ -726,7 +769,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 fieldLabel: 'Obs. desc. ley',
                 allowBlank: true,
                 anchor: '80%',
-                disabled:true,
+                readOnly:true,
                 gwidth: 100,
                 maxLength:300
             },
@@ -736,6 +779,24 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:true
         },
+        {
+            config:{
+                name: 'obs_descuento_inter_serv',
+                fieldLabel: 'Obs. desc. inter. serv.',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 100,
+                maxLength:300
+            },
+            type:'TextArea',
+            filters:{pfiltro:'plapa.obs_descuento_inter_serv',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
+        
+        
+        
         {
             config:{
                 name: 'estado_reg',
@@ -878,7 +939,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'id_depto_conta',
 		'id_moneda','tipo_moneda','desc_moneda',
 		'num_tramite','monto_excento',
-		'proc_monto_excento_var','obs_wf'
+		'proc_monto_excento_var','obs_wf','descuento_inter_serv',
+		'obs_descuento_inter_serv','porc_monto_retgar'
 		
 	],
 	
@@ -1014,127 +1076,38 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             }
      },
      
-     enableDisable:function(val){
-      
-      
-      if(val=='devengado'){
-            
-            //this.Cmp.id_plantilla.enable();
-            //this.ocultarComponente(this.Cmp.id_plantilla);
-            
-            this.Cmp.nombre_pago.disable();
-            this.ocultarComponente(this.Cmp.nombre_pago);
-            
-            this.Cmp.forma_pago.disable();
-            this.ocultarComponente(this.Cmp.forma_pago);
-            
-                      
-            
-            
-            this.Cmp.nro_cheque.disable()
-            this.ocultarComponente(this.Cmp.nro_cheque);
-            
-            this.Cmp.nro_cuenta_bancaria.disable()
-            this.ocultarComponente(this.Cmp.nro_cuenta_bancaria);
-            
-            //RCM, deshabilita deposito
-            if(this.Cmp.id_cuenta_bancaria_mov){
-               this.Cmp.id_cuenta_bancaria_mov.disable()
-               this.ocultarComponente(this.Cmp.id_cuenta_bancaria_mov);
-               this.Cmp.id_cuenta_bancaria.disable()
-               this.ocultarComponente(this.Cmp.id_cuenta_bancaria);
-                
-            }
-                       
-            
-            
-            this.deshabilitarDescuentos()
-            
-        }
-        else{
-            
-            //this.Cmp.id_plantilla.enable();
-            //this.mostrarComponente(this.Cmp.id_plantilla);
-            
-            this.Cmp.nombre_pago.enable();
-            this.mostrarComponente(this.Cmp.nombre_pago);
-            
-            this.Cmp.forma_pago.enable();
-            this.mostrarComponente(this.Cmp.forma_pago);
-            
-            
-            
-            this.Cmp.nro_cheque.enable()
-            this.mostrarComponente(this.Cmp.nro_cheque);
-            
-            this.Cmp.nro_cuenta_bancaria.enable()
-            this.mostrarComponente(this.Cmp.nro_cuenta_bancaria);
-            
-            //RCM, habilita deposito
-            if(this.Cmp.id_cuenta_bancaria_mov){
-               this.Cmp.id_cuenta_bancaria_mov.enable()
-               this.mostrarComponente(this.Cmp.id_cuenta_bancaria_mov);
-               this.Cmp.id_cuenta_bancaria.enable()
-               this.mostrarComponente(this.Cmp.id_cuenta_bancaria);
-            }
-            
-            this.habilitarDescuentos();
-            
-         }
-          
-          this.Cmp.monto_no_pagado.setValue(0);
-          this.Cmp.otros_descuentos.setValue(0);
-          this.Cmp.liquido_pagable.setValue(0);
-          this.Cmp.monto_ejecutar_total_mo.setValue(0);
-          this.Cmp.monto_retgar_mo.setValue(0);
-          this.Cmp.descuento_ley.setValue(0)
-          this.calculaMontoPago()
-         
-     },
      
-    habilitarDescuentos:function(){
-        //this.cmpDescuentoAnticipo.enable();
-        //this.mostrarComponente(this.cmpDescuentoAnticipo);
+     
+    habilitarDescuentos:function(me){
         
-        this.Cmp.otros_descuentos.enable();
-        this.mostrarComponente(this.Cmp.otros_descuentos);
+        me.mostrarComponente(me.Cmp.otros_descuentos);
+        me.mostrarComponente(me.Cmp.descuento_inter_serv);
+        me.mostrarComponente(me.Cmp.descuento_anticipo);
+        //me.mostrarComponente(me.Cmp.monto_retgar_mo);
+        //me.mostrarComponente(me.Cmp.descuento_ley);
+       
         
-        //calcular retenciones segun documento
-        
-        this.mostrarComponente(this.Cmp.descuento_ley);
-        
-        this.Cmp.monto_retgar_mo.enable();
-        this.mostrarComponente(this.Cmp.monto_retgar_mo);
-        
-        
-        
-        //this.cmpObsDescuentoAnticipo.enable();
-        //this.mostrarComponente(this.cmpObsDescuentoAnticipo);
-        this.Cmp.obs_otros_descuentos.enable();
-        this.mostrarComponente(this.Cmp.obs_otros_descuentos);
-        
-        this.mostrarComponente(this.Cmp.obs_descuentos_ley);
+       
+        me.mostrarComponente(me.Cmp.obs_descuento_inter_serv);
+        me.mostrarComponente(me.Cmp.obs_descuentos_anticipo);
+        me.mostrarComponente(me.Cmp.obs_otros_descuentos);
+        //me.mostrarComponente(me.Cmp.obs_descuentos_ley);
         
     } ,
-     deshabilitarDescuentos:function(){
-       // this.cmpDescuentoAnticipo.disable();
-       // this.ocultarComponente(this.cmpDescuentoAnticipo);
-        this.Cmp.otros_descuentos.disable();
-        this.ocultarComponente(this.Cmp.otros_descuentos);
+    deshabilitarDescuentos:function(me){
         
-        this.Cmp.monto_retgar_mo.disable();
-        this.ocultarComponente(this.Cmp.monto_retgar_mo);
+        me.ocultarComponente(me.Cmp.otros_descuentos);
+        me.ocultarComponente(me.Cmp.descuento_inter_serv);
+        me.ocultarComponente(me.Cmp.descuento_anticipo);
+        //me.ocultarComponente(me.Cmp.monto_retgar_mo);
+        //me.ocultarComponente(me.Cmp.descuento_ley);
+        me.ocultarComponente(me.Cmp.obs_descuento_inter_serv);
+        me.ocultarComponente(me.Cmp.obs_descuentos_anticipo);
+        me.ocultarComponente(me.Cmp.obs_otros_descuentos);
+        //me.ocultarComponente(me.Cmp.obs_descuentos_ley);
         
-        this.ocultarComponente(this.Cmp.descuento_ley);
         
         
-         
-        //this.cmpObsDescuentoAnticipo.disable();
-        //this.ocultarComponente(this.cmpObsDescuentoAnticipo);
-        this.Cmp.obs_otros_descuentos.disable();
-        this.ocultarComponente(this.Cmp.obs_otros_descuentos);
-        
-         this.ocultarComponente(this.Cmp.obs_descuentos_ley);
             
         
     } ,
@@ -1157,8 +1130,17 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
     
     calculaMontoPago:function(){
         var descuento_ley = this.Cmp.monto.getValue()*this.Cmp.porc_descuento_ley.getValue();
-         this.Cmp.descuento_ley.setValue(descuento_ley);
-         var liquido = this.Cmp.monto.getValue()  -  this.Cmp.monto_no_pagado.getValue() -  this.Cmp.otros_descuentos.getValue() - this.Cmp.monto_retgar_mo.getValue() -  this.Cmp.descuento_ley.getValue();
+        this.Cmp.descuento_ley.setValue(descuento_ley);
+        var monto_ret_gar =  0;
+        if(this.porc_ret_gar > 0  && this.Cmp.tipo.getValue()=='pagado')
+        {
+            this.Cmp.monto_retgar_mo.setValue(this.porc_ret_gar*this.Cmp.monto.getValue());
+        } 
+        
+        monto_ret_gar =  this.Cmp.monto_retgar_mo.getValue();
+        
+       
+        var liquido = this.Cmp.monto.getValue()  -  this.Cmp.monto_no_pagado.getValue() -  this.Cmp.otros_descuentos.getValue() - monto_ret_gar -  this.Cmp.descuento_ley.getValue() - this.Cmp.descuento_anticipo.getValue();
         this.Cmp.liquido_pagable.setValue(liquido>0?liquido:0);
         var eje = this.Cmp.monto.getValue()  -  this.Cmp.monto_no_pagado.getValue()
         this.Cmp.monto_ejecutar_total_mo.setValue(eje>0?eje:0);
@@ -1178,6 +1160,283 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                     'DocumentoWf'
         )
     },
+    
+    
+    inicioValores:function(){
+        
+        this.Cmp.fecha_tentativa.minValue=new Date();
+        this.Cmp.fecha_tentativa.setValue(new Date());
+        this.Cmp.nombre_pago.setValue(this.maestro.desc_proveedor);
+        this.Cmp.monto.setValue(0);
+        this.Cmp.descuento_anticipo.setValue(0);
+        this.Cmp.descuento_inter_serv.setValue(0);
+        this.Cmp.monto_no_pagado.setValue(0);
+        this.Cmp.otros_descuentos.setValue(0);
+        this.Cmp.liquido_pagable.setValue(0);
+        this.Cmp.monto_ejecutar_total_mo.setValue(0);
+        this.Cmp.monto_retgar_mo.setValue(0);
+        this.Cmp.descuento_ley.setValue(0);
+        this.Cmp.liquido_pagable.setReadOnly(true);
+        this.Cmp.monto_ejecutar_total_mo.setReadOnly(true);
+        
+    },
+    
+    ocultarCheCue: function(me,pFormaPago){
+        
+        if(pFormaPago=='transferencia'){
+            
+            //Deshabilita campo cheque
+            me.Cmp.nro_cheque.allowBlank=true;
+            me.Cmp.nro_cheque.setValue('');
+            me.Cmp.nro_cheque.disable();
+           
+            //Habilita nrocuenta bancaria destino
+            me.Cmp.nro_cuenta_bancaria.allowBlank=false;
+            me.Cmp.nro_cuenta_bancaria.enable();
+        
+        } 
+        else{
+            
+            //cheque
+            //Habilita campo cheque
+            me.Cmp.nro_cheque.allowBlank=false;
+            me.Cmp.nro_cheque.enable();
+            //Habilita nrocuenta bancaria destino
+            me.Cmp.nro_cuenta_bancaria.allowBlank=true;
+            me.Cmp.nro_cuenta_bancaria.setValue('');
+            me.Cmp.nro_cuenta_bancaria.disable();
+        }
+        
+    },
+    
+    
+    /*
+     * DATE    09/07/2014
+     * Author  RAC
+     * DESC    Prepara los componentes segun el tipo de pago
+     */
+     
+    
+    setTipoPago : {
+         'devengado':function(me){
+                //plantilla (TIPO DOCUMENTO)
+                me.mostrarComponente(me.Cmp.id_plantilla);
+                me.mostrarComponente(me.Cmp.monto_excento);
+                me.mostrarComponente(me.Cmp.monto_no_pagado);
+                me.mostrarComponente(me.Cmp.obs_monto_no_pagado);
+                me.mostrarComponente(me.Cmp.liquido_pagable); 
+                me.mostrarComponente(me.Cmp.monto_retgar_mo)   
+                me.mostrarComponente(me.Cmp.descuento_ley);
+                me.mostrarComponente(me.Cmp.obs_descuentos_ley);
+                
+                me.deshabilitarDescuentos(me);
+                me.ocultarComponentesPago(me);
+                
+                me.Cmp.monto_retgar_mo.setReadOnly(false)
+                
+           },
+           
+          'devengado_pagado':function(me){
+               //plantilla (TIPO DOCUMENTO)
+               me.mostrarComponente(me.Cmp.id_plantilla);
+               me.mostrarComponente(me.Cmp.monto_excento);
+               me.mostrarComponente(me.Cmp.monto_no_pagado);
+               me.mostrarComponente(me.Cmp.obs_monto_no_pagado);
+               me.mostrarComponente(me.Cmp.liquido_pagable); 
+               me.mostrarComponente(me.Cmp.monto_retgar_mo)
+               me.mostrarComponente(me.Cmp.obs_descuentos_ley);
+               me.mostrarComponente(me.Cmp.descuento_ley);
+               
+               me.habilitarDescuentos(me)
+               me.mostrarComponentesPago(me);
+               me.Cmp.monto_retgar_mo.setReadOnly(false)
+              
+        
+        
+           },
+           
+           'devengado_pagado_1c':function(me){
+               //plantilla (TIPO DOCUMENTO)
+               me.setTipoPago['devengado_pagado'](me);       
+           },
+           
+           'rendicion':function(me){
+               //plantilla (TIPO DOCUMENTO)
+               me.mostrarComponente(me.Cmp.id_plantilla);
+               me.mostrarComponente(me.Cmp.monto_excento);
+               me.mostrarComponente(me.Cmp.monto_no_pagado);
+               me.mostrarComponente(me.Cmp.obs_monto_no_pagado);
+               me.habilitarDescuentos(me);
+               },
+           'dev_garantia':function(me){
+              me.ocultarComponente(me.Cmp.id_plantilla);
+              me.mostrarComponente(me.Cmp.liquido_pagable);
+              me.mostrarComponentesPago(me);
+              me.deshabilitarDescuentos(me);
+              me.ocultarComponente(me.Cmp.descuento_ley);
+              me.ocultarComponente(me.Cmp.obs_descuentos_ley);
+              me.ocultarComponente(me.Cmp.monto_ejecutar_total_mo);
+              me.ocultarComponente(me.Cmp.monto_no_pagado);
+              me.ocultarComponente(me.Cmp.monto_retgar_mo);
+              
+           },
+           
+           'pagado':function(me){
+               me.Cmp.id_plantilla.disable();
+               me.habilitarDescuentos(me);
+               me.mostrarComponentesPago(me);
+               me.mostrarComponente(me.Cmp.liquido_pagable);
+               me.Cmp.monto_retgar_mo.setReadOnly(true)
+        },
+        'ant_parcial':function(me){
+                me.ocultarComponente(me.Cmp.id_plantilla);
+                
+                me.mostrarComponentesPago(me);              
+                me.ocultarComponente(me.Cmp.descuento_anticipo);
+                me.ocultarComponente(me.Cmp.descuento_inter_serv);
+                me.ocultarComponente(me.Cmp.monto_no_pagado);
+                me.ocultarComponente(me.Cmp.otros_descuentos);
+                me.ocultarComponente(me.Cmp.monto_ejecutar_total_mo);
+                me.ocultarComponente(me.Cmp.monto_retgar_mo);
+                me.ocultarComponente(me.Cmp.descuento_ley);
+                me.ocultarComponente(me.Cmp.monto_ejecutar_total_mo);
+                me.ocultarComponente(me.Cmp.obs_descuento_inter_serv);
+                me.ocultarComponente(me.Cmp.obs_descuentos_anticipo);
+                me.ocultarComponente(me.Cmp.obs_otros_descuentos);
+                me.ocultarComponente(me.Cmp.obs_descuentos_ley);
+                me.mostrarComponente(me.Cmp.liquido_pagable);
+            
+        },
+        
+        'anticipo':function(me){
+             
+                me.mostrarComponente(me.Cmp.id_plantilla);
+                
+                me.mostrarComponentesPago(me);
+                
+                me.ocultarComponente(me.Cmp.descuento_anticipo);
+                me.ocultarComponente(me.Cmp.descuento_inter_serv);
+                me.ocultarComponente(me.Cmp.monto_no_pagado);
+                me.ocultarComponente(me.Cmp.otros_descuentos);
+                me.ocultarComponente(me.Cmp.monto_ejecutar_total_mo);
+                me.ocultarComponente(me.Cmp.monto_retgar_mo);
+                me.ocultarComponente(me.Cmp.monto_ejecutar_total_mo);
+                me.ocultarComponente(me.Cmp.obs_descuento_inter_serv);
+                me.ocultarComponente(me.Cmp.obs_descuentos_anticipo);
+                me.ocultarComponente(me.Cmp.obs_otros_descuentos);
+                
+                me.mostrarComponente(me.Cmp.liquido_pagable);
+                me.mostrarComponente(me.Cmp.descuento_ley);
+                me.mostrarComponente(me.Cmp.obs_descuentos_ley);
+         },
+         'ant_aplicado':function(me){
+                me.Cmp.id_plantilla.disable();
+               
+                me.ocultarComponente(me.Cmp.descuento_ley);
+                me.ocultarComponente(me.Cmp.obs_descuentos_ley);
+                me.ocultarComponente(me.Cmp.monto_retgar_mo);                
+                me.ocultarComponente(me.Cmp.monto_no_pagado); 
+                //me.ocultarComponente(me.Cmp.liquido_pagable);                 
+                me.deshabilitarDescuentos(me);
+                
+                me.ocultarComponentesPago(me);
+          }
+    },
+    
+    mostrarComponentesPago:function(me){
+        me.mostrarComponente(me.Cmp.nombre_pago);
+        if(me.Cmp.id_cuenta_bancaria){
+           me.mostrarComponente(me.Cmp.id_cuenta_bancaria); 
+           me.mostrarComponente(me.Cmp.id_cuenta_bancaria_mov);
+        }
+        if(me.Cmp.forma_pago){
+           me.mostrarComponente(me.Cmp.forma_pago); 
+        }
+        if(me.Cmp.nro_cuenta_bancaria){
+           me.mostrarComponente(me.Cmp.nro_cuenta_bancaria); 
+        } 
+        if(me.Cmp.nro_cheque){
+           me.mostrarComponente(me.Cmp.nro_cheque); 
+        }
+        
+    },
+    ocultarComponentesPago:function(me){
+         me.ocultarComponente(me.Cmp.nombre_pago);
+         
+        if(me.Cmp.id_cuenta_bancaria){
+           me.ocultarComponente(me.Cmp.id_cuenta_bancaria);
+           me.ocultarComponente(me.Cmp.id_cuenta_bancaria_mov);
+        }
+        if(me.Cmp.forma_pago){
+           me.ocultarComponente(me.Cmp.forma_pago); 
+        }
+        if(me.Cmp.nro_cuenta_bancaria){
+           me.ocultarComponente(me.Cmp.nro_cuenta_bancaria); 
+        }
+        if(me.Cmp.nro_cheque){
+           me.ocultarComponente(me.Cmp.nro_cheque); 
+        }
+        
+    },
+    
+    Grupos: [
+            {
+                layout: 'hbox',
+                border: false,
+                defaults: {
+                   border: true
+                },            
+                items: [
+                              {
+                                xtype: 'fieldset',
+                                title: 'Tipo de Pago',
+                                autoHeight: true,
+                                //layout:'hbox',
+                                items: [],
+                                id_grupo:0,
+                                margins:'2 2 2 2'
+                             },
+                              
+                            {
+                                xtype: 'fieldset',
+                                title: 'Detalle de Pago',
+                                autoHeight: true,
+                                //layout:'hbox',
+                                items: [],
+                                margins:'2 10 2 2',
+                                id_grupo:1,
+                                flex:1
+                             }
+                       ]
+                  
+     }],
+    
+    onButtonNew:function(){
+         this.accionFormulario = 'NEW';
+         Phx.vista.PlanPago.superclass.onButtonNew.call(this); 
+    },
+    
+    
+    onButtonEdit:function(){
+         this.accionFormulario = 'EDIT';
+         var data = this.getSelectedData();
+         //deshabilita el cambio del tipo de pago
+         this.Cmp.tipo.disable();
+         this.Cmp.fecha_tentativa.enable();
+         this.Cmp.tipo.store.loadData(this.arrayStore.TODOS) 
+         //segun el tipo define los campo visibles y no visibles
+         this.setTipoPago[data.tipo](this);
+         if(data.tipo == 'pagado'){
+             this.accionFormulario = 'EDIT_PAGO';
+             this.porc_ret_gar = data.porc_monto_retgar;
+             
+         }
+        
+        
+        
+        Phx.vista.PlanPago.superclass.onButtonEdit.call(this); 
+    },
+      
     sortInfo:{
 		field: 'nro_cuota',
 		direction: 'ASC'

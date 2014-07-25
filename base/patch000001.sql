@@ -498,3 +498,58 @@ IS 'ultimo estado del plan de pago correpondiente a la cuota indicada en ultima_
 /***********************************F-SCP-RAC-TES-0-19/05/2014***************************************/
 
 
+
+/***********************************I-SCP-RAC-TES-0-08/07/2014***************************************/
+
+CREATE TABLE tes.ttipo_plan_pago (
+  id_tipo_plan_pago SERIAL NOT NULL, 
+  codigo VARCHAR NOT NULL, 
+  descripcion VARCHAR, 
+  codigo_proceso_llave_wf VARCHAR NOT NULL, 
+  codigo_plantilla_comprobante VARCHAR, 
+  PRIMARY KEY(id_tipo_plan_pago)
+) INHERITS (pxp.tbase)
+WITHOUT OIDS;
+
+COMMENT ON COLUMN tes.ttipo_plan_pago.codigo_proceso_llave_wf
+IS 'relaciona con tipo de proocesos wf para este pago';
+
+COMMENT ON COLUMN tes.ttipo_plan_pago.codigo_plantilla_comprobante
+IS 'relaciona con la plantilla de comprobante para este tipo de pago';
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN tipo_anticipo VARCHAR(5) DEFAULT 'no' NOT NULL;
+
+COMMENT ON COLUMN tes.tobligacion_pago.tipo_anticipo
+IS 'tipo anticipo, si o no';
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN descuento_inter_serv NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN obs_descuento_inter_serv TEXT;
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN porc_monto_retgar NUMERIC;
+
+/***********************************F-SCP-RAC-TES-0-08/07/2014***************************************/
+
+
+
+
+
+
+
+
+
+
+
+

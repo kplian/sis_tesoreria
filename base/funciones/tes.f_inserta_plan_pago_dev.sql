@@ -57,6 +57,13 @@ DECLARE
     v_monto_excento					numeric;
     v_porc_monto_excento_var		numeric;
     v_sw_me_plantilla               varchar;
+    
+    v_registros_tpp                 record;
+    v_porc_monto_retgar             numeric;
+    
+    v_monto_ant_parcial_descontado  numeric;
+    v_saldo_x_pagar  numeric; 
+    v_saldo_x_descontar   numeric; 
     			
     
     
@@ -119,12 +126,25 @@ BEGIN
              v_forma_pago =  (p_hstore->'forma_pago')::varchar;
              v_nro_cheque =  (p_hstore->'nro_cheque')::integer;
              v_nro_cuenta_bancaria =  (p_hstore->'nro_cuenta_bancaria')::varchar;
-             
              v_porc_monto_excento_var = (p_hstore->'porc_monto_excento_var')::numeric;
              v_monto_excento = (p_hstore->'monto_excento')::numeric;
              
              
-             
+           -- segun el tipo  recuepramos el tipo_plan_pago, determinamos el flujos para el WF
+           select 
+            tpp.id_tipo_plan_pago,
+            tpp.codigo_proceso_llave_wf
+           into
+           v_registros_tpp
+           from  tes.ttipo_plan_pago  tpp
+           where tpp.codigo =  (p_hstore->'tipo')::varchar; 
+           
+           
+           IF  v_registros_tpp.codigo_proceso_llave_wf is NULL or v_registros_tpp.codigo_proceso_llave_wf = '' THEN
+              
+               raise exception 'El tipo de plan de pago (%) no tiene un proceso de WF relacionado',(p_hstore->'tipo');
+           
+           END IF;
              
             
            
@@ -137,7 +157,7 @@ BEGIN
            END IF;
            
            
-           --obtiene datos de la obligacion
+          --  obtiene datos de la obligacion
            
           select
             op.porc_anticipo,
@@ -166,34 +186,64 @@ BEGIN
                pp.id_obligacion_pago = (p_hstore->'id_obligacion_pago')::integer
            and pp.estado_reg='activo';
            
-           
-           
-            --si es un proceso variable, verifica que el registro no sobrepase el total a pagar
-           
-           IF v_registros.pago_variable='no' THEN
-              v_monto_total= tes.f_determinar_total_faltante((p_hstore->'id_obligacion_pago')::integer, 'registrado');
-           
-              IF v_monto_total <  (p_hstore->'monto')::numeric  THEN
-              
-                  raise exception 'No puede exceder el total a pagar en obligaciones no variables';
-              
-              END IF;
-           
-           END IF;
-           
-         
-          IF  (p_hstore->'monto')::numeric < 0 or (p_hstore->'monto_no_pagado')::numeric < 0 or (p_hstore->'otros_descuentos')::numeric  < 0 THEN
+          -------------------------------------------------------------------
+          --  VALIDACION DE MONTO FALTANTE, SEGUN TIPO DE CUOTA
+          ------------------------------------------------------------
           
-             raise exception 'No se admiten cifras negativas'; 
+          IF (p_hstore->'tipo') in('devengado','devengado_pagado','devengado_pagado_1c') THEN 
+           
+                --si es un proceso variable, verifica que el registro no sobrepase el total a pagar
+                IF v_registros.pago_variable='no' THEN                
+                
+                        v_monto_total= tes.f_determinar_total_faltante((p_hstore->'id_obligacion_pago')::integer, 'registrado');
+                        IF v_monto_total <  (p_hstore->'monto')::numeric  THEN
+                           raise exception 'No puede exceder el total a pagar en obligaciones no variables';
+                        END IF;
+                        
+                        --   si es  un pago no variable  (si es una cuota de devengao_pagado, devegando_pagado_1c, pagado)
+                        --  validar que no se haga el ultimo pago sin  terminar de descontar el anticipo,
+                        
+                        IF   (p_hstore->'tipo') in('devengado_pagado','devengado_pagado_1c')  THEN
+                            -- saldo_x_pagar = determinar cuanto falta por pagar (sin considerar el devengado)
+                            v_saldo_x_pagar = tes.f_determinar_total_faltante((p_hstore->'id_obligacion_pago')::integer,'total_registrado_pagado');
+                              
+                            -- saldo_x_descontar = determinar cuanto falta por descontar del anticipo
+                            v_saldo_x_descontar = tes.f_determinar_total_faltante((p_hstore->'id_obligacion_pago')::integer,'ant_parcial_descontado');
+                               
+                            -- saldo_x_descontar - descuento_anticipo >  sando_x_pagar
+                            IF (v_saldo_x_descontar -  COALESCE((p_hstore->'descuento_anticipo')::numeric,0))  > (v_saldo_x_pagar  - COALESCE((p_hstore->'monto')::numeric,0)) THEN
+                                raise exception 'El saldo a pagar no es sufuciente para recuperar el anticipo (%)',v_saldo_x_descontar;
+                            END IF;
+                            
+                         END IF;
+                 
+                END IF;
+          
+          ELSE
+            
+            raise exception 'tipo no reconocido %',(p_hstore->'tipo');
+          
+          END IF; 
+          
+           
+          -- valida que la retencion de anticipo no sobrepase el total del anticipo parcial
+                 
+          v_monto_ant_parcial_descontado = tes.f_determinar_total_faltante((p_hstore->'id_obligacion_pago')::integer, 'ant_parcial_descontado' );
+          IF v_monto_ant_parcial_descontado <  COALESCE((p_hstore->'descuento_anticipo')::numeric,0)  THEN
+              raise exception 'El decuento por anticipo no puede exceder el faltante por descontar que es  %',v_monto_ant_parcial_descontado;
           END IF;
-        
-           
-          -- calcula el liquido pagable y el monsto a ejecutar presupeustaria mente
-           
-           v_liquido_pagable = COALESCE((p_hstore->'monto')::numeric,0) - COALESCE((p_hstore->'monto_no_pagado')::numeric,0) - COALESCE((p_hstore->'otros_descuentos')::numeric,0) - COALESCE((p_hstore->'monto_retgar_mo')::numeric,0) - COALESCE((p_hstore->'descuento_ley')::numeric,0);
           
-           v_monto_ejecutar_total_mo  = COALESCE((p_hstore->'monto')::numeric,0) -  COALESCE((p_hstore->'monto_no_pagado')::numeric,0);
           
+          IF  (p_hstore->'monto')::numeric < 0 or (p_hstore->'monto_no_pagado')::numeric < 0 or (p_hstore->'otros_descuentos')::numeric  < 0 or COALESCE((p_hstore->'descuento_anticipo')::numeric,0)  < 0 THEN
+               raise exception 'No se admiten cifras negativas'; 
+          END IF;
+          
+          
+          -- calcula el liquido pagable y el monto a ejecutar presupeustariamente
+           
+          v_liquido_pagable = COALESCE((p_hstore->'monto')::numeric,0) - COALESCE((p_hstore->'monto_no_pagado')::numeric,0) - COALESCE((p_hstore->'otros_descuentos')::numeric,0) - COALESCE((p_hstore->'monto_retgar_mo')::numeric,0) - COALESCE((p_hstore->'descuento_ley')::numeric,0) - COALESCE((p_hstore->'descuento_anticipo')::numeric,0) - COALESCE((p_hstore->'descuento_inter_serv')::numeric,0);
+          v_monto_ejecutar_total_mo  = COALESCE((p_hstore->'monto')::numeric,0) -  COALESCE((p_hstore->'monto_no_pagado')::numeric,0);
+          v_porc_monto_retgar = COALESCE((p_hstore->'monto_retgar_mo')::numeric,0)/COALESCE((p_hstore->'monto')::numeric,0);
           
           
           IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
@@ -219,7 +269,7 @@ BEGIN
          
          
          IF v_monto_excento >=  v_monto_ejecutar_total_mo THEN
-           raise exception 'El monto excento (%) debe ser menr que el total a ejecutar(%)',v_monto_excento, v_monto_ejecutar_total_mo  ;
+           raise exception 'El monto excento (%) debe ser menor que el total a ejecutar(%)',v_monto_excento, v_monto_ejecutar_total_mo  ;
          END IF;
          
          IF v_monto_excento > 0 THEN
@@ -242,7 +292,7 @@ BEGIN
           --cambia de estado al obligacion
           IF  v_registros.estado = 'registrado' THEN
           
-                   SELECT 
+               SELECT 
                      ps_id_tipo_estado,
                      ps_codigo_estado,
                      ps_disparador,
@@ -260,7 +310,7 @@ BEGIN
         
                 IF  va_id_tipo_estado_pro[2] is not null  THEN
                            
-                          raise exception 'La obligacion se encuentra mal parametrizado dentro de Work Flow,  el estado registro  solo  admite un estado siguiente,  no admitido (%)',va_codigo_estado_pro[2];
+                     raise exception 'La obligacion se encuentra mal parametrizado dentro de Work Flow,  el estado registro  solo  admite un estado siguiente,  no admitido (%)',va_codigo_estado_pro[2];
                            
                 END IF;
                           
@@ -313,7 +363,7 @@ BEGIN
                                NULL, 
                                v_registros.id_depto,
                               ('Solicutd de devengado para la OP:'|| COALESCE(v_registros.numero,'s/n')||' cuota nro'||v_nro_cuota::varchar),
-                               '',
+                               v_registros_tpp.codigo_proceso_llave_wf,
                                COALESCE(v_registros.numero,'s/n')||'-N# '||v_nro_cuota::varchar
                            );
                   
@@ -324,9 +374,7 @@ BEGIN
           
                  --registra estado de cotizacion
                  
-                 
-          
-                 SELECT
+                  SELECT
                            ps_id_proceso_wf,
                            ps_id_estado_wf,
                            ps_codigo_estado
@@ -342,7 +390,7 @@ BEGIN
                            NULL, 
                            v_registros.id_depto,
                            ('Solicutd de devengado para la OP:'|| v_registros.numero||' cuota nro'||v_nro_cuota::varchar),
-                           '',
+                           v_registros_tpp.codigo_proceso_llave_wf,
                            v_registros.numero||'-N# '||v_nro_cuota::varchar
                          );
           
@@ -356,11 +404,7 @@ BEGIN
         
         
       
-         
-           
-          
-           
-           --actualiza la cuota vigente en la obligacion
+          --actualiza la cuota vigente en la obligacion
            update tes.tobligacion_pago  p set 
                   nro_cuota_vigente =  v_nro_cuota
            where id_obligacion_pago = (p_hstore->'id_obligacion_pago')::integer; 
@@ -374,7 +418,7 @@ BEGIN
           
           END IF;
         
-           
+           -- TODO este bloque ya no se utuliza  hay que quitarlo
            -------------------------------------------
            -- valida tipo_pago anticipo o adelanto solo en la primera cuota
            ----------------------------------------------
@@ -404,11 +448,11 @@ BEGIN
 		    estado,
 			tipo_pago,
 			monto_ejecutar_total_mo,
-			--obs_descuentos_anticipo,
+			obs_descuentos_anticipo,
 			id_plan_pago_fk,
 			id_obligacion_pago,
 			id_plantilla,
-			--descuento_anticipo,
+			descuento_anticipo,
 			otros_descuentos,
 			tipo,
 			obs_monto_no_pagado,
@@ -425,7 +469,7 @@ BEGIN
 			id_usuario_mod,
             liquido_pagable,
             fecha_tentativa,
-            tipo_cambio,
+            --tipo_cambio,
             monto_retgar_mo,
             descuento_ley,
             obs_descuentos_ley,
@@ -436,7 +480,10 @@ BEGIN
             porc_monto_excento_var,
             monto_excento,
             id_usuario_ai,
-            usuario_ai
+            usuario_ai,
+            descuento_inter_serv,
+            obs_descuento_inter_serv,
+            porc_monto_retgar
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -445,11 +492,11 @@ BEGIN
 			v_codigo_estado,
 			(p_hstore->'tipo_pago')::varchar,
 			v_monto_ejecutar_total_mo,
-			--obs_descuentos_anticipo,
+            (p_hstore->'obs_descuentos_anticipo'),
 			(p_hstore->'id_plan_pago_fk')::integer,
 			(p_hstore->'id_obligacion_pago')::integer,
 			(p_hstore->'id_plantilla')::integer,
-			--descuento_anticipo,
+			COALESCE((p_hstore->'descuento_anticipo')::numeric,0),
 			(p_hstore->'otros_descuentos')::numeric,
 			(p_hstore->'tipo')::varchar,
 			(p_hstore->'obs_monto_no_pagado')::text,
@@ -466,7 +513,7 @@ BEGIN
 			null,
             v_liquido_pagable,
             (p_hstore->'fecha_tentativa')::date,
-            (p_hstore->'tipo_cambio')::numeric,
+            --(p_hstore->'tipo_cambio')::numeric,
             (p_hstore->'monto_retgar_mo')::numeric,
             (p_hstore->'descuento_ley')::numeric,
             (p_hstore->'obs_descuentos_ley'),
@@ -477,10 +524,16 @@ BEGIN
             v_porc_monto_excento_var,
             COALESCE(v_monto_excento,0)	,
             (p_hstore->'_id_usuario_ai')::integer,
-            (p_hstore->'_nombre_usuario_ai')::varchar	
+            (p_hstore->'_nombre_usuario_ai')::varchar,
+             COALESCE((p_hstore->'descuento_inter_serv')::numeric,0),
+            (p_hstore->'obs_descuento_inter_serv'),
+            v_porc_monto_retgar
+            	
 			)RETURNING id_plan_pago into v_id_plan_pago;
             
-             --------------------------------------------------
+            
+            
+            --------------------------------------------------
             -- Inserta prorrateo automatico
             ------------------------------------------------
            IF not ( SELECT * FROM tes.f_prorrateo_plan_pago( v_id_plan_pago,

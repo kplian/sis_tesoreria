@@ -26,7 +26,7 @@ DECLARE
     v_registros_pro   	record;
     v_ejecutado 		numeric;
     v_comprometido		numeric;
-    v_tipo_sol			varchar;
+   
     v_monto_ejecutar_mo	numeric;
     
     va_id_tipo_estado   integer[];
@@ -54,13 +54,7 @@ BEGIN
     v_id_moneda_base =  param.f_get_moneda_base();
     
   
-    
-    
-    
     --  obtinen datos del plan de pagos
-    
-    
-  
            
            SELECT
            pp.id_plan_pago,
@@ -77,11 +71,14 @@ BEGIN
            pp.id_obligacion_pago,
            op.id_depto_conta,
            op.id_obligacion_pago,
-           op.id_moneda
+           op.id_moneda,
+           pp.tipo,
+           tpp.codigo_plantilla_comprobante
            into
            v_registros
            FROM tes.tplan_pago pp
-           inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
+           inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago and op.estado_reg = 'activo'
+           inner join tes.ttipo_plan_pago tpp on tpp.codigo = pp.tipo and tpp.estado_reg = 'activo'
            where pp.id_plan_pago = p_id_plan_pago;
         
         
@@ -125,7 +122,7 @@ BEGIN
                 IF  EXISTS (SELECT 1 
                 FROM tes.tplan_pago pp 
                 WHERE pp.id_obligacion_pago = v_registros.id_obligacion_pago
-                      and (pp.estado != 'devengado' and pp.estado != 'pagado' and pp.estado != 'anulado')
+                      and (pp.estado != 'devengado' and pp.estado != 'pagado' and pp.estado != 'anulado' and pp.estado != 'anticipado')
                       and pp.estado_reg = 'activo'
                       and  pp.nro_cuota < v_registros.nro_cuota ) THEN
                       
@@ -145,11 +142,10 @@ BEGIN
           v_cont =1;
           
           
-          IF v_registros.id_plan_pago_fk is NULL THEN
+          IF v_registros.tipo in ('devengado_pagado','devengado_pagado_1c','devengado_pagado_1c','ant_aplicado','rendicion') THEN
+                 
            
-           		v_tipo_sol = 'devengado';
-                
-                --verifica si el presupuesto comprometido sobrante alcanza para pagar el monto de la cuota prorrateada correspondiente al pago
+           		--verifica si el presupuesto comprometido sobrante alcanza para pagar el monto de la cuota prorrateada correspondiente al pago
                 
                   FOR  v_registros_pro in ( 
                                  select  
@@ -217,17 +213,7 @@ BEGIN
                   END IF;
            
            
-           
-           
-           
-           ELSE
-               --VALIDAR QUE nose se salte el orden de los pagos
-           
-           		v_tipo_sol = 'pago';
-                
-              
-           
-           END IF;
+          END IF;
           
           
           
@@ -253,33 +239,13 @@ BEGIN
             
              
           
-          ---------------------------------------
-          ----  Generacion del Comprobante  -----
-          ---------------------------------------
+           ---------------------------------------
+           ----  Generacion del Comprobante  -----
+           ---------------------------------------
         
-            IF v_tipo_sol ='devengado' THEN
-            
-                -- TODO llamda a la generaciond e comprobante de devengado 
-                
-                 v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,'DEVTESPROV',p_id_usuario,p_id_usuario_ai,p_usuario_ai);
-                 
-           
-            ELSIF v_tipo_sol ='pago' THEN
-                
-            
-                --TODO,  llamada a la generacion de comprobante de pago
-                
-            
-                --- select conta.f_gen_comprobante (120  ,'DEVTESPROV',1) 
-                v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,'PAGTESPROV',p_id_usuario,p_id_usuario_ai,p_usuario_ai);
-            
-            
-                      
-            END IF;
-            
+            v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,v_registros.codigo_plantilla_comprobante,p_id_usuario,p_id_usuario_ai,p_usuario_ai);
             
             --  actualiza el id_comprobante en el registro del plan de pago
-            
             
             update tes.tplan_pago set
               id_int_comprobante = v_id_int_comprobante
@@ -327,7 +293,7 @@ BEGIN
                                                            p_id_usuario_ai,
                                                            p_usuario_ai,
                                                            v_registros.id_depto,
-                                                           'La solicitud de '||v_tipo_sol ||'pasa a Contabilidad');
+                                                           'La solicitud de '||v_registros.tipo ||'pasa a Contabilidad');
             
             
             

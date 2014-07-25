@@ -61,14 +61,15 @@ class MODObligacionPago extends MODbase{
 		$this->captura('total_pago','numeric');
 		$this->captura('pago_variable','varchar');
 		$this->captura('id_depto_conta','integer');
-		$this->captura('total_nro_cuota','integer');
-		
+		$this->captura('total_nro_cuota','integer');		
 		$this->captura('fecha_pp_ini','date');
 		$this->captura('rotacion','integer');
 		$this->captura('id_plantilla','integer');
 		$this->captura('desc_plantilla','varchar');
 		$this->captura('ultima_cuota_pp','numeric');
         $this->captura('ultimo_estado_pp','varchar');
+        
+        $this->captura('tipo_anticipo','varchar');
 		
 		
 		
@@ -145,6 +146,8 @@ class MODObligacionPago extends MODbase{
         $this->captura('ultima_cuota_pp','numeric');
         $this->captura('ultimo_estado_pp','varchar');
         
+         $this->captura('tipo_anticipo','varchar');
+        
         
         
         
@@ -201,6 +204,9 @@ class MODObligacionPago extends MODbase{
 		$this->setParametro('rotacion','rotacion','int4');
 		$this->setParametro('id_plantilla','id_plantilla','int4');
 		
+		$this->setParametro('tipo_anticipo','tipo_anticipo','varchar');
+		
+		
 		
 		
 		//Ejecuta la instruccion
@@ -236,6 +242,9 @@ class MODObligacionPago extends MODbase{
         $this->setParametro('fecha_pp_ini','fecha_pp_ini','date');
         $this->setParametro('rotacion','rotacion','int4');
         $this->setParametro('id_plantilla','id_plantilla','int4');
+        
+        $this->setParametro('tipo_anticipo','tipo_anticipo','varchar');
+        
         
         
         

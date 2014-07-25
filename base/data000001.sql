@@ -982,3 +982,10 @@ select pxp.f_insert_trol ('Solicitudes de Pago Directas', 'OP - Solicitudes de P
 
 /***********************************F-DAT-JRR-TES-0-12/05/2014*****************************************/
 
+
+/***********************************I-DAT-RAC-TES-0-17/07/2014*****************************************/
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES (E'politica_porcentaje_anticipo', E'0.5', E'politica de anticipo parciales, no puede ser mayor al 50%del total a pagar');
+
+/***********************************F-DAT-RAC-TES-0-17/07/2014*****************************************/

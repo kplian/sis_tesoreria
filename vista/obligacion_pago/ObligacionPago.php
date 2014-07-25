@@ -213,6 +213,9 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 			grid:true,
 			form:true
 		},
+		
+		
+		
         {
             config:{
                 name: 'fecha',
@@ -363,6 +366,36 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 			grid: true,
 			form: true
 		},
+		
+		{
+            config:{
+                name: 'tipo_anticipo',
+                fieldLabel: 'Tiene Anticipo',
+                allowBlank: false,
+                anchor: '80%',
+                emptyText:'Tipo Obligacion',
+                store:new Ext.data.ArrayStore({
+                            fields: ['variable', 'valor'],
+                            data : [  ['si','si'],
+                                      ['no','no']]
+                                    }),
+                valueField: 'variable',
+                value:'no',
+                displayField: 'valor',
+                forceSelection: true,
+                triggerAction: 'all',
+                lazyRender: true,
+                mode: 'local',
+                wisth: 250
+            },
+            type:'ComboBox',
+            valorInicial:'no',
+            filters:{pfiltro:'obpg.tipo_anticipo',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
+		
 				
 		{
 			config:{
@@ -622,7 +655,9 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		'id_gestion','comprometido','nro_cuota_vigente','tipo_moneda',
 		'total_nro_cuota','id_plantilla','desc_plantilla',
 		{name:'fecha_pp_ini', type: 'date',dateFormat:'Y-m-d'},
-		'rotacion','ultima_cuota_pp','ultimo_estado_pp'
+		'rotacion',
+		'ultima_cuota_pp',
+		'ultimo_estado_pp','tipo_anticipo'
 		
 	],
 	
@@ -818,6 +853,8 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             else{
                 if(d.estado =='en_pago'){
                     if(confirm('¿Está seguro finalizar la obligacion?. \n Esta acción no  puede revertirse')){
+                            
+                            Phx.CP.loadingShow();
                             Ext.Ajax.request({
                             // form:this.form.getForm().getEl(),
                             url:'../../sis_tesoreria/control/ObligacionPago/finalizarRegistro',
