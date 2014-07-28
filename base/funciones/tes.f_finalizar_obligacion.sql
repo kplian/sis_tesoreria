@@ -125,7 +125,7 @@ BEGIN
         
           
         
-      --  verificamos que el total de los devengados esten pagados
+          --  verificamos que el total de los devengados esten pagados
           v_mensaje = '';
           FOR v_registros in ( select 
                                pp.monto_ejecutar_total_mo,
