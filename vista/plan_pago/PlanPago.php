@@ -247,7 +247,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 resizable:true,
                 listWidth:'500',
                 mode: 'local',
-                wisth: 300
+                wisth: 380
                 },
             type:'ComboBox',
             filters:{pfiltro:'tipo',type:'string'},

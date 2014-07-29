@@ -35,53 +35,7 @@ Phx.vista.ObligacionPagoSol = {
        Phx.vista.ObligacionPagoSol.superclass.constructor.call(this,config);
     },
     
-    preparaMenu:function(n){
-          var data = this.getSelectedData();
-          var tb =this.tbar;
-          
-          
-          Phx.vista.ObligacionPagoSol.superclass.preparaMenu.call(this,n); 
-          if (data['estado']== 'borrador'){
-              this.getBoton('edit').enable();
-              this.getBoton('new').enable();
-              this.getBoton('del').enable();    
-              this.getBoton('fin_registro').enable();
-              this.getBoton('ant_estado').disable();
-              this.TabPanelSouth.get(1).disable();
-          
-          }
-          else{
-              
-              
-               if (data['estado']== 'registrado'){   
-                  this.getBoton('ant_estado').enable();
-                  this.getBoton('fin_registro').disable();
-                  this.TabPanelSouth.get(1).enable()
-                }
-                
-                if (data['estado']== 'en_pago'){
-                    this.TabPanelSouth.get(1).enable()
-                    this.getBoton('ant_estado').enable();
-                    this.getBoton('fin_registro').enable();
-                    
-                }
-                
-               
-                
-               if (data['estado']== 'anulado'){
-                    this.getBoton('fin_registro').disable();
-                    this.TabPanelSouth.get(1).disable();
-               }
-              
-              this.getBoton('edit').disable();
-              this.getBoton('del').disable();
-          }
-          
-          
-          //RCM: menú de reportes de adquisiciones
-          this.menuAdq.disable();
-     },
-    
+        
      tabsouth:[
             { 
                  url:'../../../sis_tesoreria/vista/obligacion_det/ObligacionDet.php',
@@ -129,15 +83,7 @@ Phx.vista.ObligacionPagoSol = {
                  
              },this);
              
-            // this.cmpFecha.on('',function(f){
-                 
-                // this.cmpFecha.fireEvent('select')
-                 
-            // },this);
-             
-           
-           // this.cmpPorcAnticipo=this.getComponente('porc_anticipo');
-           // this.cmpPorcRetgar=this.getComponente('porc_retgar');
+            
             
             this.ocultarComponente(this.cmpProveedor);
             this.mostrarComponente(this.cmpFuncionario);
@@ -170,20 +116,20 @@ Phx.vista.ObligacionPagoSol = {
                         this.cmpFuncionario.reset();
                     }else{
                         if(n=='viatico' || n=='fondo_en_avance'){
-                                    this.cmpFuncionario.enable();
-                                    this.mostrarComponente(this.cmpFuncionario);
-                                    this.ocultarComponente(this.cmpProveedor);
-                                    this.ocultarComponente(this.cmpFuncionarioProveedor);                               
-                                    this.cmpProveedor.reset();
-                            }else{                          
+                                this.cmpFuncionario.enable();
+                                this.mostrarComponente(this.cmpFuncionario);
+                                this.ocultarComponente(this.cmpProveedor);
+                                this.ocultarComponente(this.cmpFuncionarioProveedor);                               
+                                this.cmpProveedor.reset();
+                            }
+                            else{                          
                                  this.cmpFuncionarioProveedor.reset();
                                  this.cmpFuncionarioProveedor.enable();
                                  this.mostrarComponente(this.cmpFuncionarioProveedor);                          
                                  this.mostrarComponente(this.cmpFuncionario);
                                  this.ocultarComponente(this.cmpProveedor);
-                                
-                                this.cmpFuncionarioProveedor.on('change',function(groupRadio,radio){
-                                    this.enableDisable(radio.inputValue);
+                                 this.cmpFuncionarioProveedor.on('change',function(groupRadio,radio){
+                                 this.enableDisable(radio.inputValue);
                                 },this);
                             }
                     }               

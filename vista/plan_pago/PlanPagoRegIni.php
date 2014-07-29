@@ -183,7 +183,7 @@ Phx.vista.PlanPagoRegIni = {
                     this.Cmp.id_obligacion_pago.setValue(this.maestro.id_obligacion_pago);
                     this.Cmp.id_plan_pago_fk.setValue(data.id_plan_pago);
                        
-                    if( data.tipo == 'devengado'||data.tipo == 'devengado_pagado'||data.tipo == 'devengado_pagado_1c'){
+                    if( data.tipo == 'devengado'||data.tipo == 'devengado_pagado'){
                         //
                         this.accionFormulario = 'NEW_PAGO';  //esta bandera modifica el ,  obtenerFaltante
                         if(data.estado =='devengado'){
@@ -246,19 +246,9 @@ Phx.vista.PlanPagoRegIni = {
                                 this.obtenerFaltante('ant_aplicado_descontado',data.id_plan_pago);
                    
                             }
-                            else{
-                                
-                            }
-                            
                         }
-                        else{
-                           
-                        }
-                    
                     }
-                
-                 
-             }
+              }
              else{
                     this.accionFormulario = 'NEW';  
                    //para habilitar registros de cuota de devengado  
@@ -369,7 +359,7 @@ Phx.vista.PlanPagoRegIni = {
               this.getBoton('sig_estado').enable();   
           }
           else{
-            if (data['estado']== 'devengado'  && (data.monto_ejecutar_total_mo*1)  > (data.total_pagado*1) ){ 
+            if ((data['tipo'] == 'devengado'||data['tipo']== 'devengado_pagado') && data['estado']== 'devengado'&& (data.monto_ejecutar_total_mo*1)  > (data.total_pagado*1) ){ 
                 this.getBoton('new').enable();
             }
             else{

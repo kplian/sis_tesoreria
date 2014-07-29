@@ -27,53 +27,7 @@ Phx.vista.ObligacionPagoTes = {
 	  Phx.vista.ObligacionPagoTes.superclass.constructor.call(this,config);
     },
     
-    preparaMenu:function(n){
-          var data = this.getSelectedData();
-          var tb =this.tbar;
-          
-          
-          Phx.vista.ObligacionPagoTes.superclass.preparaMenu.call(this,n); 
-          if (data['estado']== 'borrador'){
-              this.getBoton('edit').enable();
-              this.getBoton('new').enable();
-              this.getBoton('del').enable();    
-              this.getBoton('fin_registro').enable();
-              this.getBoton('ant_estado').disable();
-              this.TabPanelSouth.get(1).disable();
-          
-          }
-          else{
-              
-              
-               if (data['estado']== 'registrado'){   
-                  this.getBoton('ant_estado').enable();
-                  this.getBoton('fin_registro').disable();
-                  this.TabPanelSouth.get(1).enable()
-                }
-                
-                if (data['estado']== 'en_pago'){
-                    this.TabPanelSouth.get(1).enable()
-                    this.getBoton('ant_estado').enable();
-                    this.getBoton('fin_registro').enable();
-                    
-                }
-                
-               
-                
-               if (data['estado']== 'anulado'){
-                    this.getBoton('fin_registro').disable();
-                    this.TabPanelSouth.get(1).disable();
-               }
-              
-              this.getBoton('edit').disable();
-              this.getBoton('del').disable();
-          }
-          
-          
-          //RCM: menú de reportes de adquisiciones
-          this.menuAdq.enable();
-     },
-    
+        
      tabsouth:[
             { 
                  url:'../../../sis_tesoreria/vista/obligacion_det/ObligacionDet.php',

@@ -937,6 +937,11 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                if (data['estado']== 'anulado'){
                     this.getBoton('fin_registro').disable();
                     this.TabPanelSouth.get(1).disable();
+                    this.getBoton('ant_estado').disable();
+               }
+               if (data['estado']== 'finalizado'){
+                    this.getBoton('ant_estado').disable();
+                    this.getBoton('fin_registro').disable();
                }
               
               this.getBoton('edit').disable();

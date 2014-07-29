@@ -134,6 +134,7 @@ BEGIN
                                from tes.tplan_pago pp
                                where pp.id_obligacion_pago =  p_id_obligacion_pago  
                                     and pp.estado_reg = 'activo'
+                                    and pp.tipo in ('devengado','devengado_pagado')
                                     and pp.monto_ejecutar_total_mo != pp.total_pagado
                                     and pp.estado = 'devengado') LOOP
                       

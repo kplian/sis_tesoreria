@@ -122,7 +122,7 @@ BEGIN
                 IF  EXISTS (SELECT 1 
                 FROM tes.tplan_pago pp 
                 WHERE pp.id_obligacion_pago = v_registros.id_obligacion_pago
-                      and (pp.estado != 'devengado' and pp.estado != 'pagado' and pp.estado != 'anulado' and pp.estado != 'anticipado')
+                      and (pp.estado != 'devengado' and pp.estado != 'pagado' and pp.estado != 'anulado' and pp.estado != 'anticipado' and pp.estado != 'aplicado')
                       and pp.estado_reg = 'activo'
                       and  pp.nro_cuota < v_registros.nro_cuota ) THEN
                       
