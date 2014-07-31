@@ -542,6 +542,22 @@ ALTER TABLE tes.tplan_pago
 
 /***********************************F-SCP-RAC-TES-0-08/07/2014***************************************/
 
+/***********************************I-SCP-JRR-TES-0-31/07/2014***************************************/
+
+CREATE TABLE tes.ttipo_prorrateo (
+  id_tipo_prorrateo SERIAL, 
+  codigo VARCHAR (50) NOT NULL, 
+  nombre VARCHAR (150) NOT NULL,
+  descripcion TEXT,
+  es_plantilla VARCHAR (2) NOT NULL,
+  tiene_cuenta VARCHAR (2) NOT NULL,  
+  CONSTRAINT ttipo_prorrateo_pkey PRIMARY KEY(id_tipo_prorrateo)
+) INHERITS (pxp.tbase)
+WITHOUT OIDS;
+
+/***********************************F-SCP-JRR-TES-0-31/07/2014***************************************/
+
+
 
 
 
