@@ -1021,6 +1021,11 @@ VALUES (1, 1, E'2014-07-23 12:23:47.391', E'2014-07-23 14:54:16.327', E'activo',
 
 
 
+/***********************************I-DAT-RAC-TES-0-1/08/2014*****************************************/
+select pxp.f_insert_tgui ('Tipo Plan Pago', 'Configuracion de  tipos de Plan de Pago', 'TIPP', 'si', 6, 'sis_tesoreria/vista/tipo_plan_pago/TipoPlanPago.php', 2, '', 'TipoPlanPago', 'TES');
+select pxp.f_insert_testructura_gui ('TIPP', 'TES');
+
+/***********************************F-DAT-RAC-TES-0-1/08/2014*****************************************/
 
 
 

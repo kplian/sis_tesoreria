@@ -558,10 +558,26 @@ WITHOUT OIDS;
 /***********************************F-SCP-JRR-TES-0-31/07/2014***************************************/
 
 
+/***********************************I-SCP-JRR-TES-0-01/08/2014***************************************/
+
+ALTER TABLE tes.ttipo_prorrateo
+  ADD COLUMN tiene_lugar VARCHAR(2);
+
+/***********************************F-SCP-JRR-TES-0-01/08/2014***************************************/
 
 
+/***********************************I-SCP-RAC-TES-0-01/08/2014***************************************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN id_categoria_compra INTEGER;
+
+COMMENT ON COLUMN tes.tobligacion_pago.id_categoria_compra
+IS 'ei la obligacion de pago es de adquisiciones para acceso mas rapido al datos copiamos la categoria dde compra que viene en la solicitud';
 
 
+/***********************************F-SCP-RAC-TES-0-01/08/2014***************************************/
 
 
 

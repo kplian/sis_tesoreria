@@ -35,6 +35,7 @@ class MODTipoProrrateo extends MODbase{
 		$this->captura('usr_reg','varchar');
 		$this->captura('usr_mod','varchar');
 		$this->captura('tiene_cuenta','varchar');
+		$this->captura('tiene_lugar','varchar');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -57,6 +58,7 @@ class MODTipoProrrateo extends MODbase{
 		$this->setParametro('nombre','nombre','varchar');
 		$this->setParametro('codigo','codigo','varchar');
 		$this->setParametro('tiene_cuenta','tiene_cuenta','varchar');
+		$this->setParametro('tiene_lugar','tiene_lugar','varchar');	
 		
 
 		//Ejecuta la instruccion
@@ -81,11 +83,47 @@ class MODTipoProrrateo extends MODbase{
 		$this->setParametro('nombre','nombre','varchar');
 		$this->setParametro('codigo','codigo','varchar');
 		$this->setParametro('tiene_cuenta','tiene_cuenta','varchar');
+		$this->setParametro('tiene_lugar','tiene_lugar','varchar');	
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
 
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
+	function ejecutarTipoProrrateo(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_tipo_prorrateo_ime';
+		$this->transaccion='TES_TIPOEJE_UPD';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		/*Parametros del formulario*/
+		$this->setParametro('id_tipo_prorrateo','id_tipo_prorrateo','int4');
+		$this->setParametro('id_concepto_ingas','id_concepto_ingas','int4');
+		$this->setParametro('monto','monto','numeric');
+		$this->setParametro('id_oficina_cuenta','id_oficina_cuenta','int4');
+		$this->setParametro('id_lugar','id_lugar','int4');
+		$this->setParametro('id_periodo','id_periodo','int4');
+		
+		/*Parametros obligatorios de la interfaz que llama*/
+		$this->setParametro('nombre_tabla','nombre_tabla','varchar');
+		$this->setParametro('nombre_id','nombre_id','varchar');
+		$this->setParametro('nombre_monto','nombre_monto','varchar');
+		$this->setParametro('tiene_tipo_cambio','tiene_tipo_cambio','varchar');
+		$this->setParametro('id_valor','id_valor','int4');
+		
+		/*Parametros opcionales de la interfaz que llama*/
+		$this->setParametro('nombre_funcion_ejecutar','nombre_funcion_ejecutar','varchar');		
+		$this->setParametro('nombre_monto_mb','nombre_monto_mb','varchar');
+		$this->setParametro('tipo_cambio','tipo_cambio','numeric');		
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}

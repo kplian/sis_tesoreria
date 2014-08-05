@@ -96,6 +96,7 @@ class MODPlanPago extends MODbase{
 		$this->captura('obs_descuento_inter_serv','text');
 		$this->captura('descuento_inter_serv','numeric');
 		$this->captura('porc_monto_retgar','numeric');
+		$this->captura('desc_funcionario1','text');
 		
 		
 		

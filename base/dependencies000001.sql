@@ -2318,3 +2318,70 @@ AS
        JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor;
 
 /***********************************F-DEP-RAC-TES-0-16/07/2014*****************************************/
+
+
+
+/***********************************I-DEP-RAC-TES-0-01/08/2014*****************************************/
+
+--------------- SQL ---------------
+
+ --------------- SQL ---------------
+
+ -- object recreation
+DROP VIEW tes.vcomp_devtesprov_plan_pago;
+
+CREATE VIEW tes.vcomp_devtesprov_plan_pago
+AS
+  SELECT pp.id_plan_pago,
+         op.id_proveedor,
+         p.desc_proveedor,
+         op.id_moneda,
+         op.id_depto_conta,
+         op.numero,
+         now() AS fecha_actual,
+         pp.estado,
+         pp.monto_ejecutar_total_mb,
+         pp.monto_ejecutar_total_mo,
+         pp.monto,
+         pp.monto_mb,
+         pp.monto_retgar_mb,
+         pp.monto_retgar_mo,
+         pp.monto_no_pagado,
+         pp.monto_no_pagado_mb,
+         pp.otros_descuentos,
+         pp.otros_descuentos_mb,
+         pp.id_plantilla,
+         pp.id_cuenta_bancaria,
+         pp.id_cuenta_bancaria_mov,
+         pp.nro_cheque,
+         pp.nro_cuenta_bancaria,
+         op.num_tramite,
+         pp.tipo,
+         op.id_gestion AS id_gestion_cuentas,
+         pp.id_int_comprobante,
+         pp.liquido_pagable,
+         pp.liquido_pagable_mb,
+         pp.nombre_pago,
+         pp.porc_monto_excento_var,
+         ((COALESCE(op.numero, '' ::character varying) ::text || ' ' ::text) ||
+          COALESCE(pp.obs_monto_no_pagado, '' ::text)) ::character varying AS
+           obs_pp,
+         pp.descuento_anticipo,
+         pp.descuento_inter_serv,
+         op.tipo_obligacion,
+         op.id_categoria_compra,
+         COALESCE(cac.codigo, '' ::character varying) AS codigo_categoria,
+         COALESCE(cac.nombre, '' ::character varying) AS nombre_categoria,
+         pp.id_proceso_wf
+  FROM tes.tplan_pago pp
+       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
+        op.id_obligacion_pago
+       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
+       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
+        op.id_categoria_compra;
+
+ALTER TABLE tes.vcomp_devtesprov_plan_pago
+  OWNER TO postgres;
+  
+/***********************************F-DEP-RAC-TES-0-01/08/2014*****************************************/
+

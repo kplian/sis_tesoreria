@@ -35,10 +35,18 @@ class ACTTipoProrrateo extends ACTbase{
 	}
 						
 	function eliminarTipoProrrateo(){
-			$this->objFunc=$this->create('MODTipoProrrateo');	
+		$this->objFunc=$this->create('MODTipoProrrateo');	
 		$this->res=$this->objFunc->eliminarTipoProrrateo($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	
+	function ejecutarTipoProrrateo(){
+		$this->objFunc=$this->create('MODTipoProrrateo');	
+		$this->res=$this->objFunc->ejecutarTipoProrrateo($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	
+	
 			
 }
 

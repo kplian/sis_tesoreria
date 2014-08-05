@@ -112,6 +112,29 @@ Phx.vista.TipoProrrateo=Ext.extend(Phx.gridInterfaz,{
 		
 		{
 			config:{
+				name: 'tiene_lugar',
+				fieldLabel: 'Necesita Lugar',
+				allowBlank: false,
+				emptyText:'elija...',
+	       		typeAhead: true,
+	       		triggerAction: 'all',
+	       		lazyRender:true,
+	       		mode: 'local',
+				gwidth: 100,
+				store:['si','no']
+			},
+				type:'ComboBox',
+				filters:{	
+	       		         type: 'list',
+	       				 options: ['si','no'],	
+	       		 	},
+				id_grupo:1,
+				grid:true,
+				form:true
+		},
+		
+		{
+			config:{
 				name: 'descripcion',
 				fieldLabel: 'Descripcion',
 				allowBlank: true,
@@ -249,6 +272,7 @@ Phx.vista.TipoProrrateo=Ext.extend(Phx.gridInterfaz,{
 		{name:'descripcion', type: 'string'},
 		{name:'es_plantilla', type: 'string'},
 		{name:'tiene_cuenta', type: 'string'},
+		{name:'tiene_lugar', type: 'string'},
 		{name:'nombre', type: 'string'},
 		{name:'codigo', type: 'string'},
 		{name:'fecha_reg', type: 'date',dateFormat:'Y-m-d H:i:s.u'},

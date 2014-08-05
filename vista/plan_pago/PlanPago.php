@@ -255,6 +255,21 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:true
         },
+         {
+            config:{
+                name: 'nombre_pago',
+                fieldLabel: 'Nombre Pago',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 250,
+                maxLength:255
+            },
+            type:'TextField',
+            filters:{pfiltro:'plapa.nombre_pago',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
         
         {
 			config:{
@@ -372,21 +387,6 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
            grid:false,
            form:false
           },
-		 {
-            config:{
-                name: 'nombre_pago',
-                fieldLabel: 'Nombre Pago',
-                allowBlank: true,
-                anchor: '80%',
-                gwidth: 100,
-                maxLength:255
-            },
-            type:'TextField',
-            filters:{pfiltro:'plapa.nombre_pago',type:'string'},
-            id_grupo:1,
-            grid:true,
-            form:true
-        },
         {
             config:{
                 name: 'nro_cheque',
@@ -794,6 +794,21 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:true
         },
+        {
+            config:{
+                name: 'desc_funcionario1',
+                fieldLabel: 'Fun Solicitante',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 250,
+                maxLength:255
+            },
+            type:'TextField',
+            filters:{pfiltro:'fun.desc_funcionario1',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
         
         
         
@@ -940,7 +955,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'id_moneda','tipo_moneda','desc_moneda',
 		'num_tramite','monto_excento',
 		'proc_monto_excento_var','obs_wf','descuento_inter_serv',
-		'obs_descuento_inter_serv','porc_monto_retgar'
+		'obs_descuento_inter_serv','porc_monto_retgar','desc_funcionario1'
 		
 	],
 	
@@ -1438,8 +1453,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
     },
       
     sortInfo:{
-		field: 'nro_cuota',
-		direction: 'ASC'
+		field: 'fecha_reg',
+		direction: 'DESC'
 	},
 	onButtonNew: function(){
 		Phx.vista.PlanPago.superclass.onButtonNew.call(this);

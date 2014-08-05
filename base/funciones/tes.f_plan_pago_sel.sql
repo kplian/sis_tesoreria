@@ -203,7 +203,8 @@ BEGIN
                         '||v_strg_obs||' ,
                         plapa.obs_descuento_inter_serv,
                         plapa.descuento_inter_serv,
-                        plapa.porc_monto_retgar           
+                        plapa.porc_monto_retgar,
+                        fun.desc_funcionario1::text             
 						from tes.tplan_pago plapa
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
                         inner join param.tmoneda mon on mon.id_moneda = op.id_moneda
@@ -213,6 +214,8 @@ BEGIN
                         left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = plapa.id_cuenta_bancaria
                         left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
                         left join tes.tcuenta_bancaria_mov cbanmo on cbanmo.id_cuenta_bancaria_mov = plapa.id_cuenta_bancaria_mov
+                        inner join param.vproveedor pro on pro.id_proveedor = op.id_proveedor
+                        left join orga.vfuncionario fun on fun.id_funcionario = op.id_funcionario
                        where  plapa.estado_reg=''activo''  and '||v_filtro;
 			
 			--Definicion de la respuesta
@@ -304,6 +307,7 @@ BEGIN
                         inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
                         left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = plapa.id_cuenta_bancaria
                         left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
+                        left join orga.vfuncionario fun on fun.id_funcionario = op.id_funcionario
                         left join tes.tcuenta_bancaria_mov cbanmo on cbanmo.id_cuenta_bancaria_mov = plapa.id_cuenta_bancaria_mov
                       where  plapa.estado_reg=''activo''   and '||v_filtro;
 			

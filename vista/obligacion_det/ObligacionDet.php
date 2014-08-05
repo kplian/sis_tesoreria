@@ -18,8 +18,45 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
 		this.grid.getTopToolbar().disable();
 		this.grid.getBottomToolbar().disable();
 		this.init();
-		this.iniciarEventos()
+		this.iniciarEventos();
+		
+		this.addButton('btnProrrateo',
+            {
+                text: 'Prorrateo',
+                iconCls: 'bchecklist',
+                disabled: true,
+                handler: this.cargarProrrateo,
+                tooltip: '<b>Prorrateo</b><br/>Esta funcionalidad ayuda a cargar el prorrateo (servicios basicos)'
+            }
+        );
+		
 	},
+	
+	cargarProrrateo:function() {
+	    
+	    	var data ={
+	           nombre_tabla:'tes.tobligacion_det',
+	           nombre_id:'id_obligacion_pago',
+	           nombre_monto:'monto_pago_mo',
+	           tiene_tipo_cambio:'si',
+	           id_valor:this.maestro.id_obligacion_pago,
+	           nombre_monto_mb:'monto_pago_mb',
+	           tipo_cambio:this.maestro.tipo_cambio_conv
+	       };
+	    
+	    
+            Phx.CP.loadWindows('../../../sis_tesoreria/vista/tipo_prorrateo/WizardProrrateo.php',
+                    'Prorrateo ...',
+                    {
+                        width:'90%',
+                        height:500
+                    },
+                    data,
+                    this.idContenedor,
+                    'WizardProrrateo'
+            );
+    },
+	
 	tam_pag:50,
 			
 	Atributos:[
@@ -502,12 +539,17 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                this.getBoton('edit').enable();
                this.getBoton('new').enable();
                this.getBoton('del').enable();
+               
+               this.getBoton('bchecklist').enable();
+               
+               
          }
          else{
              
                this.getBoton('edit').disable();
                this.getBoton('new').disable();
                this.getBoton('del').disable();
+               this.getBoton('bchecklist').disable();
          }
          
           if(this.maestro&&(this.maestro.estado ==  'borrador' && this.maestro.tipo_obligacion=='adquisiciones')){
@@ -515,6 +557,7 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                this.getBoton('edit').enable();
                this.getBoton('new').disable();
                this.getBoton('del').disable();
+               this.getBoton('bchecklist').disable();
          }
           
         
