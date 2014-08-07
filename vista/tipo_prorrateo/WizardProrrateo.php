@@ -177,7 +177,7 @@ header("content-type: text/javascript; charset=UTF-8");
 					fields: ['id_oficina_cuenta', 'nombre_cuenta','nro_cuenta', 'nro_medidor',],
 					// turn on remote sorting
 					remoteSort: true,
-					baseParams: {par_filtro: 'ofcu.nro_cuenta#of.nombre_cuenta#of.nro_medidor'}
+					baseParams: {par_filtro: 'ofcu.nro_cuenta#ofcu.nombre_cuenta#ofcu.nro_medidor'}
 				}),
 				valueField: 'id_oficina_cuenta',
 				displayField: 'nombre_cuenta',
