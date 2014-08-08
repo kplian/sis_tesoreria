@@ -88,6 +88,7 @@ DECLARE
      v_ope_filtro       varchar[];
      v_ind              varchar;
      v_sw               boolean;
+     v_resp_doc     boolean;
 			    
 BEGIN
 
@@ -297,7 +298,14 @@ BEGIN
 							
 			)RETURNING id_obligacion_pago into v_id_obligacion_pago;
 			
-			--Definicion de la respuesta
+			
+             -- inserta documentos en estado borrador si estan configurados
+            v_resp_doc =  wf.f_inserta_documento_wf(p_id_usuario, v_id_proceso_wf, v_id_estado_wf);
+            -- verificar documentos
+            v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_wf);
+            
+            
+            --Definicion de la respuesta
 			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligaciones de Pago almacenado(a) con exito (id_obligacion_pago'||v_id_obligacion_pago||')'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_id_obligacion_pago::varchar);
 

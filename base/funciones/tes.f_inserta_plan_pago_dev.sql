@@ -64,6 +64,8 @@ DECLARE
     v_monto_ant_parcial_descontado  numeric;
     v_saldo_x_pagar  numeric; 
     v_saldo_x_descontar   numeric; 
+    
+    v_resp_doc   boolean;
     			
     
     
@@ -532,6 +534,13 @@ BEGIN
 			)RETURNING id_plan_pago into v_id_plan_pago;
             
             
+            
+            
+            
+            -- inserta documentos en estado borrador si estan configurados
+            v_resp_doc =  wf.f_inserta_documento_wf(p_id_usuario, v_id_proceso_wf, v_id_estado_wf);
+            -- verificar documentos
+            v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_wf);
             
             --------------------------------------------------
             -- Inserta prorrateo automatico
