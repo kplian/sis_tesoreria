@@ -250,6 +250,7 @@ class MODPlanPago extends MODbase{
         
         //Define los parametros para la funcion
         $this->setParametro('id_proceso_wf_act','id_proceso_wf_act','int4');
+        $this->setParametro('id_estado_wf_act','id_estado_wf_act','int4');
         $this->setParametro('id_funcionario_usu','id_funcionario_usu','int4');
         $this->setParametro('id_tipo_estado','id_tipo_estado','int4');
         $this->setParametro('id_funcionario_wf','id_funcionario_wf','int4');

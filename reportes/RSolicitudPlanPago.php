@@ -122,6 +122,12 @@ Class RSolicitudPlanPago extends Report {
         $pdf->Cell($width2*2, $height, 'Numero Orden de Compra: ', 0, 0, 'L', false, '', 0, false, 'T', 'C');
         $pdf->SetFont('', '');
         $pdf->Cell($width3, $height, $this->getDataSource()->getParameter('numero_oc'), 0, 0, 'L', false, '', 0, false, 'T', 'C');
+		$pdf->Ln();
+		$pdf->SetFontSize(8);
+		$pdf->SetFont('', 'B');
+        $pdf->Cell($width2*2, $height, 'Numero Tramite: ', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+        $pdf->SetFont('', '');
+        $pdf->Cell($width3, $height, $this->getDataSource()->getParameter('num_tramite'), 0, 0, 'L', false, '', 0, false, 'T', 'C');
         $pdf->Ln();
         $pdf->SetFont('', 'B');
         $pdf->Cell($width2*2, $height, 'Proveedor: ', 0, 0, 'L', false, '', 0, false, 'T', 'C');
