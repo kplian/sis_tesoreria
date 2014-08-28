@@ -329,12 +329,13 @@ Phx.vista.PlanPagoVb = {
                             
                             
         //Eventos
-        this.Cmp.id_cuenta_bancaria.on('select',function(a,b,c){
+       /* this.Cmp.id_cuenta_bancaria.on('select',function(a,b,c){
             this.Cmp.id_cuenta_bancaria_mov.setValue('');
             this.Cmp.id_cuenta_bancaria_mov.store.baseParams.id_cuenta_bancaria = this.Cmp.id_cuenta_bancaria.getValue();
             Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: this.Cmp.id_cuenta_bancaria.getValue()})
             this.Cmp.id_cuenta_bancaria_mov.modificado=true;
         },this);
+       */
             
         this.Cmp.fecha_tentativa.on('blur',function(a){
             this.Cmp.id_cuenta_bancaria_mov.setValue('');
@@ -343,12 +344,16 @@ Phx.vista.PlanPagoVb = {
         },this); 
          
         
-      
-         
-       
-       
        //Evento para filtrar los depósitos a partir de la cuenta bancaria
         this.Cmp.id_cuenta_bancaria.on('select',function(data,rec,ind){
+            
+            if(rec.data.centro=='no'){
+                this.Cmp.id_cuenta_bancaria_mov.allowBlank= false;
+                
+            }
+            else{
+               this.Cmp.id_cuenta_bancaria_mov.allowBlank = true;
+            }
             this.Cmp.id_cuenta_bancaria_mov.setValue('');
             this.Cmp.id_cuenta_bancaria_mov.modificado=true;
             Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: rec.id});

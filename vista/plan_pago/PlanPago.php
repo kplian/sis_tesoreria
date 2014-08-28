@@ -598,13 +598,13 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                         direction:'ASC'
                     },
                     totalProperty:'total',
-                    fields: ['id_cuenta_bancaria','nro_cuenta','nombre_institucion','codigo_moneda'],
+                    fields: ['id_cuenta_bancaria','nro_cuenta','nombre_institucion','codigo_moneda','centro','denominacion'],
                     remoteSort: true,
                     baseParams : {
-						par_filtro : 'ctaban.nro_cuenta#inst.nombre'
+						par_filtro : 'ctaban.nro_cuenta#inst.nombre#ctaban.denominacion'
 					}
                 }),
-                tpl:'<tpl for="."><div class="x-combo-list-item"><p>{nro_cuenta}</p><p>Moneda: {codigo_moneda}</p><p>{nombre_institucion}</p><p>{denominacion}</p></div></tpl>',
+                tpl:'<tpl for="."><div class="x-combo-list-item"><p><b>{nro_cuenta}</b></p><p>Moneda: {codigo_moneda}, {nombre_institucion}</p><p>{denominacion}, Centro: {centro}</p></div></tpl>',
                 valueField: 'id_cuenta_bancaria',
                 hiddenValue: 'id_cuenta_bancaria',
                 displayField: 'nro_cuenta',
