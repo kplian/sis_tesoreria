@@ -1001,7 +1001,7 @@ BEGIN
             
                      -- si no es un proceso variable, verifica que el registro no sobrepase el total a pagar
                      IF v_registros.pago_variable='no' THEN
-                        v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado');
+                        v_monto_total = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado');
                         IF (v_monto_total + v_registros_pp.monto)  <  v_parametros.monto  THEN
                           raise exception 'No puede exceder el total a pagar en obligaciones no variables';
                         END IF;
@@ -1028,6 +1028,9 @@ BEGIN
                      -- si el descuento anticipo es mayor a cero verificar que nose sobrepase el total anticipado
                      v_monto_ant_parcial_descontado = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'ant_parcial_descontado' );
                      IF v_monto_ant_parcial_descontado + v_registros_pp.descuento_anticipo <  v_parametros.descuento_anticipo  THEN
+                     
+                          raise exception 'El decuento por anticipo no puede exceder el faltante por descontar que es  %',v_monto_ant_parcial_descontado;
+         
                      END IF;
                   
                      -- calcula el liquido pagable y el monto a ejecutar presupeustaria mente

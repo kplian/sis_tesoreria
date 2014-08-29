@@ -1157,7 +1157,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         monto_ret_gar =  this.Cmp.monto_retgar_mo.getValue();
         
        
-        var liquido = this.Cmp.monto.getValue()  -  this.Cmp.monto_no_pagado.getValue() -  this.Cmp.otros_descuentos.getValue() - monto_ret_gar -  this.Cmp.descuento_ley.getValue() - this.Cmp.descuento_anticipo.getValue();
+        var liquido = this.Cmp.monto.getValue()  -  this.Cmp.monto_no_pagado.getValue() -  this.Cmp.otros_descuentos.getValue() - monto_ret_gar -  this.Cmp.descuento_ley.getValue() -  this.Cmp.descuento_inter_serv.getValue() -  this.Cmp.descuento_anticipo.getValue();
         this.Cmp.liquido_pagable.setValue(liquido>0?liquido:0);
         var eje = this.Cmp.monto.getValue()  -  this.Cmp.monto_no_pagado.getValue()
         this.Cmp.monto_ejecutar_total_mo.setValue(eje>0?eje:0);

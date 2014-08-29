@@ -113,7 +113,7 @@ BEGIN
     
     
     */
-
+         
 
           v_nombre_funcion = 'tes.f_inserta_plan_pago_dev';
           
@@ -290,9 +290,13 @@ BEGIN
           -------------------------------------
           --  Manejo de estados con el WF
           -------------------------------------
-            
+           
+         
+           
           --cambia de estado al obligacion
           IF  v_registros.estado = 'registrado' THEN
+          
+          
           
                SELECT 
                      ps_id_tipo_estado,
@@ -315,6 +319,8 @@ BEGIN
                      raise exception 'La obligacion se encuentra mal parametrizado dentro de Work Flow,  el estado registro  solo  admite un estado siguiente,  no admitido (%)',va_codigo_estado_pro[2];
                            
                 END IF;
+                
+                
                           
                      
                 IF  va_codigo_estado_pro[1] != 'en_pago'  THEN
@@ -323,7 +329,9 @@ BEGIN
                 
                  -- registra estado eactual en el WF para rl procesod e compra
                      
-                     v_id_estado_actual =  wf.f_registra_estado_wf(va_id_tipo_estado_pro[1], 
+                    
+                 
+                  v_id_estado_actual =  wf.f_registra_estado_wf(va_id_tipo_estado_pro[1], 
                                                                    NULL, --id_funcionario
                                                                     v_registros.id_estado_wf, 
                                                                     v_registros.id_proceso_wf,
@@ -374,6 +382,8 @@ BEGIN
       
           ELSEIF   v_registros.estado = 'en_pago' THEN
           
+          
+          
                  --registra estado de cotizacion
                  
                   SELECT
@@ -395,6 +405,7 @@ BEGIN
                            v_registros_tpp.codigo_proceso_llave_wf,
                            v_registros.numero||'-N# '||v_nro_cuota::varchar
                          );
+                          
           
           
           ELSE
@@ -439,8 +450,7 @@ BEGIN
             END IF;
             
           
-            
-                      
+        
             --Sentencia de la insercion
         	insert into tes.tplan_pago(
 			estado_reg,

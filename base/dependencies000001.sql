@@ -2388,6 +2388,9 @@ ALTER TABLE tes.vcomp_devtesprov_plan_pago
 
 /***********************************I-DEP-RAC-TES-0-19/08/2014*****************************************/
 
+DROP VIEW tes.vcomp_devtesprov_plan_pago_2;
+
+--------------- SQL ---------------
 --------------- SQL ---------------
 
 CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
@@ -2434,9 +2437,11 @@ CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
     codigo_moneda,
     nro_cuota,
     tipo_pago,
-    total_pago,
     tipo_solicitud,
-    tipo_concepto_solicitud)
+    tipo_concepto_solicitud,
+    total_monto_op_mb,
+    total_monto_op_mo,
+    total_pago)
 AS
   SELECT pp.id_plan_pago,
          op.id_proveedor,
@@ -2479,15 +2484,17 @@ AS
          COALESCE(cac.codigo, '' ::character varying) AS codigo_categoria,
          COALESCE(cac.nombre, '' ::character varying) AS nombre_categoria,
          pp.id_proceso_wf,
-         ('<table>' ::text || pxp.html_rows((('<td>' ::text ||
-          ci.desc_ingas::text) || '</td>' ::text) ::character varying) ::text)
-           || '</table>' ::text AS detalle,
+         ('<table>' ::text || pxp.html_rows((((('<td>' ::text ||
+          ci.desc_ingas::text) || '<br/>' ::text) || od.descripcion) || '</td>'
+           ::text) ::character varying) ::text) || '</table>' ::text AS detalle,
          mon.codigo AS codigo_moneda,
          pp.nro_cuota,
          pp.tipo_pago,
-         op.total_pago,
          op.tipo_solicitud,
-         op.tipo_concepto_solicitud
+         op.tipo_concepto_solicitud,
+         sum(od.monto_pago_mb) AS total_monto_op_mb,
+         sum(od.monto_pago_mo) AS total_monto_op_mo,
+         op.total_pago
   FROM tes.tplan_pago pp
        JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
         op.id_obligacion_pago
