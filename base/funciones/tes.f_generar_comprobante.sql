@@ -239,17 +239,8 @@ BEGIN
             
              
           
-           ---------------------------------------
-           ----  Generacion del Comprobante  -----
-           ---------------------------------------
-        
-            v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,v_registros.codigo_plantilla_comprobante,p_id_usuario,p_id_usuario_ai,p_usuario_ai);
             
-            --  actualiza el id_comprobante en el registro del plan de pago
             
-            update tes.tplan_pago set
-              id_int_comprobante = v_id_int_comprobante
-            where id_plan_pago = v_registros.id_plan_pago;
             
                   
             --------------------------------------------------------
@@ -296,7 +287,19 @@ BEGIN
                                                            'La solicitud de '||v_registros.tipo ||'pasa a Contabilidad');
             
             
+            ---------------------------------------
+           ----  Generacion del Comprobante  -----
+           ---------------------------------------
+        
+            v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,v_registros.codigo_plantilla_comprobante,p_id_usuario,p_id_usuario_ai,p_usuario_ai);
+           
+             --  actualiza el id_comprobante en el registro del plan de pago
             
+            update tes.tplan_pago set
+              id_int_comprobante = v_id_int_comprobante
+            where id_plan_pago = v_registros.id_plan_pago;
+             
+             
              -- actualiza estado en la solicitud
             
              update tes.tplan_pago  set 

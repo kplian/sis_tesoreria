@@ -2553,3 +2553,19 @@ AS
 
 
 /***********************************F-DEP-RAC-TES-0-19/08/2014*****************************************/
+
+
+
+/***********************************I-DEP-RAC-TES-0-01/09/2014*****************************************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_det
+  ADD CONSTRAINT fk_tobligacion_det__id_orden_trabajo FOREIGN KEY (id_orden_trabajo)
+    REFERENCES conta.torden_trabajo(id_orden_trabajo)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+/***********************************F-DEP-RAC-TES-0-01/09/2014*****************************************/
+

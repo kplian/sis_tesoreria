@@ -119,12 +119,11 @@ BEGIN
 			id_centro_costo,
 			monto_pago_mb,
             descripcion,
-			
-			
 			fecha_reg,
 			id_usuario_reg,
 			fecha_mod,
-			id_usuario_mod
+			id_usuario_mod,
+            id_orden_trabajo
           	) values(
 			'activo',
 			--v_parametros.id_cuenta,
@@ -135,12 +134,12 @@ BEGIN
 			v_parametros.id_obligacion_pago,
 			v_parametros.id_centro_costo,
 			v_monto_mb,
-            v_parametros.descripcion,
-		
+            v_parametros.descripcion,		
 			now(),
 			p_id_usuario,
 			null,
-			null
+			null,
+            v_parametros.id_orden_trabajo
 							
 			)RETURNING id_obligacion_det into v_id_obligacion_det;
 			
@@ -210,7 +209,8 @@ BEGIN
 			monto_pago_mb = v_monto_mb,
 		    fecha_mod = now(),
             descripcion=v_parametros.descripcion,
-			id_usuario_mod = p_id_usuario
+			id_usuario_mod = p_id_usuario,
+            id_orden_trabajo = v_parametros.id_orden_trabajo
 			where id_obligacion_det=v_parametros.id_obligacion_det;
                
 			--Definicion de la respuesta

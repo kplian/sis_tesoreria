@@ -770,5 +770,15 @@ AS
 
 
 
+/***********************************I-SCP-RAC-TES-0-1/09/2014***************************************/
 
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_det
+  ADD COLUMN id_orden_trabajo INTEGER;
+
+COMMENT ON COLUMN tes.tobligacion_det.id_orden_trabajo
+IS 'orden de trabajo';
+
+/***********************************F-SCP-RAC-TES-0-1/09/2014***************************************/
 

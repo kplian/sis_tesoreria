@@ -159,6 +159,23 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
             id_grupo:1,
             grid:true,
             form:true
+        },
+        {
+            config:{
+                    name:'id_orden_trabajo',
+                    fieldLabel: 'Orden Trabajo',
+                    sysorigen:'sis_contabilidad',
+	       		    origen:'OT',
+                    allowBlank:true,
+                    gwidth:200,
+                    renderer:function(value, p, record){return String.format('{0}', record.data['desc_orden']);}
+            
+            },
+            type:'ComboRec',
+            id_grupo:0,
+            filters:{pfiltro:'ot.motivo_orden#ot.desc_orden',type:'string'},
+            grid:true,
+            form:true
         }
         ,
 		{
@@ -465,7 +482,8 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'usr_reg', type: 'string'},
-		{name:'usr_mod', type: 'string'},'desc_ingas','nombre_ingas','descripcion'
+		{name:'usr_mod', type: 'string'},'desc_ingas','nombre_ingas','descripcion',
+		'id_orden_trabajo','desc_orden'
 	],
 	onButtonEdit:function(){
 	    
@@ -516,7 +534,8 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
         this.Cmp.id_concepto_ingas.store.baseParams.id_gestion=this.maestro.id_gestion
         this.Cmp.id_concepto_ingas.modificado=true;
         
-        
+        this.Cmp.id_orden_trabajo.store.baseParams.fecha_solicitud = this.maestro.fecha.dateFormat('d/m/Y');
+        this.Cmp.id_orden_trabajo.modificado = true;
         
         
         /*this.cmpPartida.store.baseParams.id_gestion=this.maestro.id_gestion

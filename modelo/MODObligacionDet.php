@@ -45,6 +45,8 @@ class MODObligacionDet extends MODbase{
 		$this->captura('usr_reg','varchar');
 		$this->captura('usr_mod','varchar');
 		$this->captura('descripcion','text');
+		$this->captura('id_orden_trabajo','int4');
+		$this->captura('desc_orden','varchar');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -72,6 +74,7 @@ class MODObligacionDet extends MODbase{
 		$this->setParametro('factor_porcentual','factor_porcentual','numeric');
 		$this->setParametro('id_partida_ejecucion_com','id_partida_ejecucion_com','int4');
         $this->setParametro('descripcion','descripcion','text');
+		$this->setParametro('id_orden_trabajo','id_orden_trabajo','int4');
         
 		
 		//Ejecuta la instruccion
@@ -101,6 +104,7 @@ class MODObligacionDet extends MODbase{
 		$this->setParametro('factor_porcentual','factor_porcentual','numeric');
 		$this->setParametro('id_partida_ejecucion_com','id_partida_ejecucion_com','int4');
         $this->setParametro('descripcion','descripcion','text');
+		$this->setParametro('id_orden_trabajo','id_orden_trabajo','int4');
         
 		//Ejecuta la instruccion
 		$this->armarConsulta();

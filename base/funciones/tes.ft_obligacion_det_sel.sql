@@ -70,7 +70,9 @@ BEGIN
 						obdet.id_usuario_mod,
 						usu1.cuenta as usr_reg,
 						usu2.cuenta as usr_mod,
-                        obdet.descripcion	
+                        obdet.descripcion,
+                        ot.id_orden_trabajo,
+                        ot.desc_orden
 						from tes.tobligacion_det obdet
 						inner join segu.tusuario usu1 on usu1.id_usuario = obdet.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = obdet.id_usuario_mod
@@ -79,6 +81,7 @@ BEGIN
                         left join conta.tauxiliar aux on aux.id_auxiliar=obdet.id_auxiliar
                         left join param.tconcepto_ingas cig on cig.id_concepto_ingas=obdet.id_concepto_ingas
                         left join param.vcentro_costo cc on cc.id_centro_costo=obdet.id_centro_costo
+                        left join conta.torden_trabajo ot on ot.id_orden_trabajo = obdet.id_orden_trabajo
                         where obdet.estado_reg = ''activo'' and obdet.id_obligacion_pago='||v_parametros.id_obligacion_pago|| ' and ';
 			
 			--Definicion de la respuesta
@@ -110,6 +113,7 @@ BEGIN
                         left join conta.tauxiliar aux on aux.id_auxiliar=obdet.id_auxiliar
                         left join param.tconcepto_ingas cig on cig.id_concepto_ingas=obdet.id_concepto_ingas
                         left join param.vcentro_costo cc on cc.id_centro_costo=obdet.id_centro_costo
+                        left join conta.torden_trabajo ot on ot.id_orden_trabajo = obdet.id_orden_trabajo
                         where obdet.estado_reg = ''activo'' and  obdet.id_obligacion_pago='||v_parametros.id_obligacion_pago|| ' and ';
 			
 			--Definicion de la respuesta		    
