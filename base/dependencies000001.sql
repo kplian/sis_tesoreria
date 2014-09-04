@@ -2569,3 +2569,37 @@ ALTER TABLE tes.tobligacion_det
 
 /***********************************F-DEP-RAC-TES-0-01/09/2014*****************************************/
 
+
+/***********************************I-DEP-RAC-TES-0-04/09/2014*****************************************/
+
+
+CREATE OR REPLACE VIEW tes.vcomp_devtesprov_det_plan_pago(
+    id_concepto_ingas,
+    id_partida,
+    id_partida_ejecucion_com,
+    monto_pago_mo,
+    monto_pago_mb,
+    id_centro_costo,
+    descripcion,
+    id_plan_pago,
+    id_prorrateo,
+    id_int_transaccion,
+    id_orden_trabajo)
+AS
+  SELECT od.id_concepto_ingas,
+         od.id_partida,
+         od.id_partida_ejecucion_com,
+         pro.monto_ejecutar_mo AS monto_pago_mo,
+         pro.monto_ejecutar_mb AS monto_pago_mb,
+         od.id_centro_costo,
+         od.descripcion,
+         pro.id_plan_pago,
+         pro.id_prorrateo,
+         pro.id_int_transaccion,
+         od.id_orden_trabajo
+  FROM tes.tprorrateo pro
+       JOIN tes.tobligacion_det od ON od.id_obligacion_det =
+         pro.id_obligacion_det;
+         
+/***********************************F-DEP-RAC-TES-0-04/09/2014*****************************************/
+
