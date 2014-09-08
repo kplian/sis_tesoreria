@@ -129,6 +129,52 @@ class MODCuentaDocumentadaEndesis extends MODbase{
 		
   
 	}
+
+	function contarFondoAvance() {		
+		
+		$parametros_consulta = $this->aParam->getParametrosconsulta();
+		$ordenacion = $parametros_consulta['ordenacion'] . ' ' . $parametros_consulta['dir_ordenacion'];
+		$filtro = $parametros_consulta['filtro'];
+		$dir_ordenacion = $parametros_consulta['dir_ordenacion'];
+		$puntero = $parametros_consulta['puntero'];
+		$cantidad = $parametros_consulta['cantidad'];
+		$id_usuario = $_SESSION["ss_id_usuario"];
+		$ip = $_SERVER['REMOTE_ADDR'];
+		
+				 
+		 $query_count = "SELECT * FROM tesoro.f_tts_cuenta_doc_sel($id_usuario,'$ip','00:19:d1:09:22:7e','TS_SOLVIA2_COUNT',NULL,
+		  $cantidad, $puntero, '$ordenacion', '$dir_ordenacion', '$filtro','%','%','%','%','%','pendiente_aprobacion') AS (total bigint)";
+		
+		try {
+			
+			//crear conexion pdo		 
+	        $cone=new conexion();			
+			$link = $cone->conectarpdo('ENDESIS');
+			
+			$link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);	
+				
+		  	$link->beginTransaction();
+		  	$link->exec("set names 'UTF8'");		
+			
+			$stmt = $link->prepare($query_count);
+			$stmt->execute();
+			$count = $stmt->fetchColumn(0);
+							
+			$link->commit();
+						
+			$this->respuesta=new Mensaje();			
+			$this->respuesta->setMensaje('EXITO',$this->nombre_archivo,'Consulta de FA ejecutada con exito','Consulta de FA ejecutada con exito','base','tesoro.f_tts_cuenta_doc_sel(Endesis)','TS_SOLVIA2_SEL','SEL','');
+			$this->respuesta->setTotal($count);
+			
+		} catch (Exception $e) {
+							
+		    $this->respuesta=new Mensaje();		
+		    $this->respuesta->setMensaje('ERROR',$this->nombre_archivo,$e->getMessage(),$e->getMessage(),'base','tesoro.f_tts_cuenta_doc_sel(Endesis)','TS_SOLVIA2_SEL','SEL','');			
+		}			
+        return $this->respuesta;
+		
+  
+	}
 	function aprobarFondoAvance() {
 		$separador = "#@@@#";
 		$id_usuario = $_SESSION["ss_id_usuario"];
