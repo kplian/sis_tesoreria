@@ -89,6 +89,7 @@ DECLARE
      v_ind              varchar;
      v_sw               boolean;
      v_resp_doc     boolean;
+     va_id_funcionario_gerente   INTEGER[];
 			    
 BEGIN
 
@@ -137,8 +138,21 @@ BEGIN
                            NULL);
                            
         
-                v_codigo_proceso_macro = 'TES-PD';          
-                           
+                v_codigo_proceso_macro = 'TES-PD'; 
+                
+                
+                --si tiene funcionario identificar el gerente correspondientes
+                IF v_parametros.id_funcionario is not NULL THEN
+                
+                    SELECT  
+                       pxp.aggarray(id_funcionario) 
+                     into
+                       va_id_funcionario_gerente
+                     FROM orga.f_get_aprobadores_x_funcionario(v_parametros.fecha,  v_parametros.id_funcionario, 'todos', 'si', 'todos', 'ninguno') AS (id_funcionario integer);      
+                    --NOTA el valor en la primera posicion del array es el genre de menor nivel
+                END IF;  
+                
+                       
               
         ELSE
               
@@ -262,7 +276,8 @@ BEGIN
             id_plantilla,
             id_usuario_ai,
             usuario_ai,
-            tipo_anticipo
+            tipo_anticipo,
+            id_funcionario_gerente
             
           	) values(
 			v_parametros.id_proveedor,
@@ -294,7 +309,8 @@ BEGIN
             v_parametros.id_plantilla,
             v_parametros._id_usuario_ai,
             v_parametros._nombre_usuario_ai,
-            v_parametros.tipo_anticipo
+            v_parametros.tipo_anticipo,
+            va_id_funcionario_gerente[1]
 							
 			)RETURNING id_obligacion_pago into v_id_obligacion_pago;
 			

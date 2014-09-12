@@ -782,3 +782,17 @@ IS 'orden de trabajo';
 
 /***********************************F-SCP-RAC-TES-0-1/09/2014***************************************/
 
+
+/***********************************I-SCP-RAC-TES-0-12/09/2014***************************************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN id_funcionario_gerente INTEGER;
+
+COMMENT ON COLUMN tes.tobligacion_pago.id_funcionario_gerente
+IS 'se campo se define en funcion del funcionario solcitante,  se asigna el gerente de menor nivel en la escala jerarquica';
+
+
+/***********************************F-SCP-RAC-TES-0-12/09/2014***************************************/
+
