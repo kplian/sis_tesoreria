@@ -79,18 +79,21 @@ BEGIN
             IF  lower(v_parametros.tipo_interfaz) = 'planpagovb' THEN
                 
                 IF p_administrador !=1 THEN
-                
-                              
-                      v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))    ) and  (lower(plapa.estado)!=''borrador'') and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'' and  ';
-                  
+                   v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))    ) and  (lower(plapa.estado)!=''borrador'') and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'' and  ';
                  ELSE
-                      
-                      v_filtro = ' (lower(plapa.estado)!=''borrador''  and lower(plapa.estado)!=''pendiente''  and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'') and ';
-                  
+                     v_filtro = ' (lower(plapa.estado)!=''borrador''  and lower(plapa.estado)!=''pendiente''  and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'') and ';
                 END IF;
                 
                 
+            END IF; 
+            
+            
+            IF  lower(v_parametros.tipo_interfaz) = 'planpagovbasistente' THEN
+              v_filtro = ' (ew.id_funcionario  IN (select * FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date,'||p_id_usuario||') AS (id_funcionario INTEGER))) and ';
             END IF;
+            
+            
+            
             
             
             IF  pxp.f_existe_parametro(p_tabla,'historico') THEN
@@ -244,36 +247,27 @@ BEGIN
         v_filtro='';
             
             IF (v_parametros.id_funcionario_usu is null) then
-              	
-                v_parametros.id_funcionario_usu = -1;
-            
+              	v_parametros.id_funcionario_usu = -1;
             END IF;
             
             
             IF  lower(v_parametros.tipo_interfaz) = 'planpagovb' THEN
-            
                  IF p_administrador !=1 THEN
-                
-                              
-                      v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (lower(plapa.estado)!=''borrador'') and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado''  and ';
-                  
+                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (lower(plapa.estado)!=''borrador'') and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado''  and ';
                  ELSE
                       v_filtro = ' (lower(plapa.estado)!=''borrador''  and lower(plapa.estado)!=''pendiente''  and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'') and ';
-                  
-                END IF;
-                
-                
+                 END IF;
+            END IF;
+            
+            IF  lower(v_parametros.tipo_interfaz) = 'planpagovbasistente' THEN
+              v_filtro = ' (ew.id_funcionario  IN (select * FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date,'||p_id_usuario||') AS (id_funcionario INTEGER))) and ';
             END IF;
             
             
             IF  pxp.f_existe_parametro(p_tabla,'historico') THEN
-             
-             v_historico =  v_parametros.historico;
-            
+                v_historico =  v_parametros.historico;
             ELSE
-            
-            v_historico = 'no';
-            
+               v_historico = 'no';
             END IF;
             
             IF v_historico =  'si' THEN
