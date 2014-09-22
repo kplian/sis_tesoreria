@@ -796,3 +796,16 @@ IS 'se campo se define en funcion del funcionario solcitante,  se asigna el gere
 
 /***********************************F-SCP-RAC-TES-0-12/09/2014***************************************/
 
+
+/***********************************I-SCP-RAC-TES-0-18/09/2014***************************************/
+
+--------------- SQL ---------------
+
+ -- object recreation
+ALTER TABLE tes.tobligacion_pago
+  DROP CONSTRAINT chk_tobligacion_pago__estado RESTRICT;
+
+ALTER TABLE tes.tobligacion_pago
+  ADD CONSTRAINT chk_tobligacion_pago__estado CHECK ((estado)::text = ANY (ARRAY[('borrador'::character varying)::text, ('registrado'::character varying)::text, ('en_pago'::character varying)::text, ('finalizado'::character varying)::text, ('vbpresupuestos'::character varying)::text,('anulado'::character varying)::text]));
+
+/***********************************F-SCP-RAC-TES-0-18/09/2014***************************************/

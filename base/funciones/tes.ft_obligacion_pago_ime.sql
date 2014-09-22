@@ -44,6 +44,7 @@ DECLARE
      v_id_proceso_wf integer;
      v_id_estado_wf integer;
      v_codigo_estado varchar;
+     v_codigo_estado_ant varchar;
      v_anho integer;
      v_id_gestion integer;
      v_id_subsistema integer;
@@ -90,6 +91,10 @@ DECLARE
      v_sw               boolean;
      v_resp_doc     boolean;
      va_id_funcionario_gerente   INTEGER[];
+     v_num_estados integer;
+     v_num_funcionarios integer;
+     v_id_funcionario_estado integer;
+     v_obs varchar;
 			    
 BEGIN
 
@@ -155,8 +160,7 @@ BEGIN
                        
               
         ELSE
-              
-              
+          
           raise exception 'falta agregar la funcionalidad'; 
               
         END IF;
@@ -598,12 +602,12 @@ BEGIN
              
              --VALIDACIONES
              
-             IF  v_codigo_estado NOT in  ('borrador','en_pago') THEN
-               raise exception 'Solo se admiten obligaciones  en borrador o en pago';
+             IF  v_codigo_estado NOT in  ('borrador','vbpresupuestos','en_pago') THEN
+               raise exception 'Solo se admiten obligaciones  en borrador o en pago o visto vbpresupuestos';
              END IF;
 			
             
-            IF  v_codigo_estado = 'borrador' THEN
+            IF  v_codigo_estado in ('borrador', 'vbpresupuestos' ) THEN
         
              --validamos que el detalle tenga por lo menos un item con valor
              
@@ -668,6 +672,51 @@ BEGIN
             FROM wf.f_obtener_estado_wf(v_id_proceso_wf, v_id_estado_wf,NULL,'siguiente');
             
             
+            
+            v_num_estados= array_length(va_id_tipo_estado, 1);
+            
+            
+            
+            IF v_num_estados = 1 and  (va_codigo_estado[1] in  ('vbpresupuestos')) then
+            
+            
+                           -- si solo hay un estado,  verificamos si tiene mas de un funcionario por este estado
+                               SELECT 
+                               *
+                                into
+                               v_num_funcionarios 
+                               FROM wf.f_funcionario_wf_sel(
+                                   p_id_usuario, 
+                                   va_id_tipo_estado[1], 
+                                   now()::date,
+                                   v_id_estado_wf,
+                                   TRUE) AS (total bigint);
+                                   
+                              IF v_num_funcionarios = 1 THEN
+                              -- si solo es un funcionario, recuperamos el funcionario correspondiente
+                                   SELECT 
+                                       id_funcionario
+                                         into
+                                       v_id_funcionario_estado
+                                   FROM wf.f_funcionario_wf_sel(
+                                       p_id_usuario, 
+                                       va_id_tipo_estado[1], 
+                                       now()::date,
+                                       v_id_estado_wf,
+                                       FALSE) 
+                                       AS (id_funcionario integer,
+                                         desc_funcionario text,
+                                         desc_funcionario_cargo text,
+                                         prioridad integer);
+                              END IF;
+                              
+                              
+                              IF v_id_funcionario_estado is NULL THEN
+                                raise exception 'No se encontro ningun funcionario activo para el estado %' ,va_codigo_estado[1];
+                              END IF;
+            
+           
+            END IF;
             --raise exception '--  % ,  % ,% ',v_id_proceso_wf,v_id_estado_wf,va_codigo_estado;
             
             
@@ -688,7 +737,7 @@ BEGIN
             
             -- hay que recuperar  el estado inmediato,...
              v_id_estado_actual =  wf.f_registra_estado_wf(va_id_tipo_estado[1], 
-                                                           NULL, 
+                                                           v_id_funcionario_estado, 
                                                            v_id_estado_wf, 
                                                            v_id_proceso_wf,
                                                            p_id_usuario,
@@ -700,7 +749,7 @@ BEGIN
            
        
           --TEMP, SE COMENTA EL COMPROMISO TEMORALMENTE, PARA PRUEBAS
-            IF  va_codigo_estado[1] = 'registrado'  and v_tipo_obligacion != 'adquisiciones' THEN
+            IF  v_codigo_estado = 'borrador'  and v_tipo_obligacion != 'adquisiciones' THEN
             
                -- verficar presupuesto y comprometer
                IF not tes.f_gestionar_presupuesto_tesoreria(v_parametros.id_obligacion_pago, p_id_usuario, 'comprometer')  THEN
@@ -711,7 +760,11 @@ BEGIN
            
            END IF;
            
-           
+           IF  va_codigo_estado[1] in  ('vbpresupuestos','registrado','finalizado','en_pago') THEN
+                v_comprometido = 'si';
+           ELSE
+                v_comprometido = 'no'; 
+           END IF;
             
              -- actualiza estado en la solicitud
             
@@ -719,7 +772,7 @@ BEGIN
                id_estado_wf =  v_id_estado_actual,
                estado = va_codigo_estado[1],
                id_usuario_mod=p_id_usuario,
-               comprometido = 'si',
+               comprometido = v_comprometido,
                total_pago=v_total_detalle,
                fecha_mod=now(),
                id_usuario_ai = v_parametros._id_usuario_ai,
@@ -732,9 +785,6 @@ BEGIN
             --  con la plantilla por defecto 
             IF  v_codigo_estado = 'borrador'  and v_total_nro_cuota > 0 THEN 
             
-            
-              
-               
                      select  
                        ps_descuento_porc,
                        ps_descuento,
@@ -859,7 +909,7 @@ BEGIN
             into
             v_id_estado_wf,
             v_id_proceso_wf,
-            v_codigo_estado,
+            v_codigo_estado_ant,
             v_comprometido,
             v_tipo_obligacion
             
@@ -875,7 +925,7 @@ BEGIN
                      
                        --validaciones
                        
-                       IF v_codigo_estado= 'en_pago' THEN
+                       IF v_codigo_estado_ant = 'en_pago' THEN
                        --verificar que no tenga plnes de pago
                        
                          IF  EXISTS(select 1
@@ -920,6 +970,14 @@ BEGIN
                       from wf.testado_wf ew
                       where ew.id_estado_wf= v_id_estado_wf_ant;
                       
+                      v_obs = '';
+                      
+                      IF  pxp.f_existe_parametro(p_tabla,'obs') THEN
+                         v_obs = '-'||v_obs||COALESCE(v_parametros.obs,'---');
+                      END IF;
+                      
+                     
+                      
                       
                       -- registra nuevo estado
                       
@@ -931,7 +989,8 @@ BEGIN
                           p_id_usuario,
                           v_parametros._id_usuario_ai,
                           v_parametros._nombre_usuario_ai,
-                          v_id_depto);
+                          v_id_depto,
+                          v_obs);
                       
                     
                       
@@ -940,7 +999,8 @@ BEGIN
                            id_estado_wf =  v_id_estado_actual,
                            estado = v_codigo_estado,
                            id_usuario_mod=p_id_usuario,
-                           fecha_mod=now()
+                           fecha_mod=now(),
+                           obs = obs ||v_obs
                          where id_obligacion_pago = v_parametros.id_obligacion_pago;
                          
                         

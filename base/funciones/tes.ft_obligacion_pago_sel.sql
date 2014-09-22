@@ -59,7 +59,7 @@ BEGIN
         --  raise exception 'cc  %',v_parametros.tipo_interfaz  ;
         IF   v_parametros.tipo_interfaz ='obligacionPagoTes' THEN
            
-            IF   p_administrador != 1 THEN
+                 IF   p_administrador != 1 THEN
                  
                    select  
                        pxp.aggarray(depu.id_depto)
@@ -72,6 +72,20 @@ BEGIN
                 
                 END IF;
                 
+         ELSIF  v_parametros.tipo_interfaz =  'ObligacionPagoVb' THEN
+         
+         
+                select  
+                       pxp.aggarray(depu.id_depto)
+                    into 
+                       va_id_depto
+                   from param.tdepto_usuario depu 
+                   where depu.id_usuario =  p_id_usuario; 
+              
+                 v_filadd=' (obpg.estado = ''vbpresupuestos'') and';
+              
+         
+         
          ELSE
 
                 --SI LA NTERFACE VIENE DE ADQUISIONES   
@@ -207,7 +221,20 @@ BEGIN
                  v_filadd='(obpg.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||')) and';
                 
                 END IF;
-                
+        
+        ELSIF  v_parametros.tipo_interfaz =  'ObligacionPagoVb' THEN
+         
+         
+                select  
+                       pxp.aggarray(depu.id_depto)
+                    into 
+                       va_id_depto
+                   from param.tdepto_usuario depu 
+                   where depu.id_usuario =  p_id_usuario; 
+              
+                 v_filadd=' (obpg.estado = ''vbpresupuestos'') and';        
+        
+        
          ELSE
 
                 --SI LA NTERFACE VIENE DE ADQUISIONES   

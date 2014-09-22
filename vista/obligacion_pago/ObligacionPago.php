@@ -27,14 +27,14 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 	    
          this.addButton('ant_estado',{
               argument: {estado: 'anterior'},
-              text:'Anterior',
+              text:'Rechazar',
               iconCls: 'batras',
               disabled:true,
               handler:this.antEstado,
               tooltip: '<b>Pasar al Anterior Estado</b>'
           });
           
-        this.addButton('fin_registro',{text:'Fin Reg.',iconCls: 'badelante',disabled:true,handler:this.fin_registro,tooltip: '<b>Finalizar</b><p>Finalizar registro de obligacion de pago</p>'});
+        this.addButton('fin_registro',{text:'Aprobar',iconCls: 'badelante',disabled:true,handler:this.fin_registro,tooltip: '<b>Finalizar</b><p>Finalizar registro de obligacion de pago</p>'});
         this.addButton('reporte_com_ejec_pag',{text:'Rep.',iconCls: 'bpdf32',disabled:true,handler:this.repComEjePag,tooltip: '<b>Reporte</b><p>Reporte Obligacion de Pago</p>'});
         this.addButton('reporte_plan_pago',{text:'Planes de Pago',iconCls: 'bpdf32',disabled:true,handler:this.repPlanPago,tooltip: '<b>Reporte Plan Pago</b><p>Reporte Planes de Pago</p>'});
         this.TabPanelSouth.get(1).disable()
@@ -872,7 +872,9 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             Phx.CP.loadingHide();
              var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
             if(!reg.ROOT.error){
-                
+                if(this.wEstado){
+                	this.wEstado.hide();
+                }
                 this.reload();
              }else{
                 alert('ocurrio un error durante el proceso')
@@ -942,6 +944,20 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                if (data['estado']== 'finalizado'){
                     this.getBoton('ant_estado').disable();
                     this.getBoton('fin_registro').disable();
+               }
+               if (data['estado']== 'vbpresupuestos'){
+                    
+                    if (this.nombreVista == 'ObligacionPagoVb'){
+                    	this.getBoton('fin_registro').enable();
+                    	this.getBoton('ant_estado').enable();
+                    }
+                    else{
+                    	this.getBoton('fin_registro').disable();
+                    	this.getBoton('ant_estado').disable();
+                    
+                    }
+                    
+                    
                }
               
               this.getBoton('edit').disable();
