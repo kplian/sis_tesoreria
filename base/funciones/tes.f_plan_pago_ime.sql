@@ -136,6 +136,7 @@ DECLARE
     v_monto_ant_parcial_descontado  numeric;
     v_saldo_x_descontar numeric;
     v_saldo_x_pagar numeric;
+    v_revisado varchar;
     
     
 			    
@@ -1948,7 +1949,45 @@ BEGIN
             --Devuelve la respuesta
             return v_resp;        
         end;
-    
+    /*********************************    
+ 	#TRANSACCION:  'TES_REVPP_IME'
+ 	#DESCRIPCION:	Sirve cpara marcar como revisado o no revisado, sirve como un indicador  de que la documentacion fue revisada por el asistente
+ 	#AUTOR:		rac
+ 	#FECHA:		23-09-2014 15:43:23
+	***********************************/
+
+	elsif(p_transaccion='TES_REVPP_IME')then
+
+		begin
+        
+            select 
+              pp.revisado_asistente
+            into
+              v_registros_tpp
+            from tes.tplan_pago pp
+            where pp.id_plan_pago = v_parametros.id_plan_pago;
+            
+            IF v_registros_tpp.revisado_asistente = 'si' THEN
+               v_revisado = 'no';
+            ELSE
+               v_revisado = 'si';
+            END IF;
+            
+            update tes.tplan_pago  pp set 
+               revisado_asistente = v_revisado,
+               id_usuario_mod=p_id_usuario,
+               fecha_mod=now(),
+               id_usuario_ai = v_parametros._id_usuario_ai,
+               usuario_ai = v_parametros._nombre_usuario_ai
+             where pp.id_plan_pago  = v_parametros.id_plan_pago;
+          
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','el plan de pago fue marcado como revisado'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_parametros.id_plan_pago::varchar);
+            
+            --Devuelve la respuesta
+            return v_resp;        
+        end;
     else
      
     	raise exception 'Transaccion inexistente: %',p_transaccion;

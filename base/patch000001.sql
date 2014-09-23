@@ -809,3 +809,16 @@ ALTER TABLE tes.tobligacion_pago
   ADD CONSTRAINT chk_tobligacion_pago__estado CHECK ((estado)::text = ANY (ARRAY[('borrador'::character varying)::text, ('registrado'::character varying)::text, ('en_pago'::character varying)::text, ('finalizado'::character varying)::text, ('vbpresupuestos'::character varying)::text,('anulado'::character varying)::text]));
 
 /***********************************F-SCP-RAC-TES-0-18/09/2014***************************************/
+
+
+/***********************************I-SCP-RAC-TES-0-23/09/2014***************************************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN revisado_asistente VARCHAR(5) DEFAULT 'no' NOT NULL;
+
+COMMENT ON COLUMN tes.tplan_pago.revisado_asistente
+IS 'este campo sirve para marcar los pagos revisados por las asistente';
+
+/***********************************F-SCP-RAC-TES-0-23/09/2014***************************************/

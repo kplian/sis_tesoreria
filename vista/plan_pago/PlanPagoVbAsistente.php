@@ -16,6 +16,7 @@ Phx.vista.PlanPagoVbAsistente = {
     bnew:false,
     bsave:false,
     bdel:false,
+    //checkGrid:true,
     require:'../../../sis_tesoreria/vista/plan_pago/PlanPago.php',
     requireclase:'Phx.vista.PlanPago',
     title:'Plan de Pagos',
@@ -25,7 +26,8 @@ Phx.vista.PlanPagoVbAsistente = {
         
        this.Atributos[this.getIndAtributo('num_tramite')].grid=true;
        this.Atributos[this.getIndAtributo('desc_moneda')].grid=true;
-       this.Atributos[this.getIndAtributo('numero_op')].grid=true; 
+       this.Atributos[this.getIndAtributo('numero_op')].grid=true;
+       this.Atributos[this.getIndAtributo('revisado_asistente')].grid=true; 
        
        
        //funcionalidad para listado de historicos
@@ -54,7 +56,13 @@ Phx.vista.PlanPagoVbAsistente = {
        Phx.vista.PlanPagoVbAsistente.superclass.constructor.call(this,config);
        
        this.iniciarEventos();
-       this.addButton('SolDevPag',{text:'Solicitar Devengado/Pago',iconCls: 'bpagar',disabled:true,handler:this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente, devengado o pago  '});
+       this.addButton('btnRev', {
+                text : 'Revisado',
+                iconCls : 'bball_green',
+                disabled : true,
+                handler : this.cambiarRev,
+                tooltip : '<b>Revisado</b><br/>Sirve como un indicador de que la documentacion fue revisada por el asistente'
+        });
        this.addButton('diagrama_gantt',{text:'Gant',iconCls: 'bgantt',disabled:true,handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
   
        function diagramGantt(){            
@@ -86,6 +94,27 @@ Phx.vista.PlanPagoVbAsistente = {
         }});
        
     },
+   
+   cambiarRev:function(){
+	    Phx.CP.loadingShow();
+	    var d = this.sm.getSelected().data;
+        Ext.Ajax.request({
+            url:'../../sis_tesoreria/control/PlanPago/marcarRevisadoPlanPago',
+            params:{id_plan_pago:d.id_plan_pago},
+            success:this.successRev,
+            failure: this.conexionFailure,
+            timeout:this.timeout,
+            scope:this
+        }); 
+	    
+	},
+	successRev:function(resp){
+       Phx.CP.loadingHide();
+       var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+       if(!reg.ROOT.error){
+         this.reload();
+       }
+    },
 	
     
    preparaMenu:function(n){
@@ -93,12 +122,22 @@ Phx.vista.PlanPagoVbAsistente = {
    	  this.getBoton('edit').disable(); 
    	  this.getBoton('diagrama_gantt').enable();
       this.getBoton('btnChequeoDocumentosWf').enable();
+      
+      var data = this.getSelectedData();
+        if(data['revisado_asistente']== 'si'){
+            this.getBoton('btnRev').setIconClass('bball_white')
+        }
+        else{
+            this.getBoton('btnRev').setIconClass('bball_green')
+        }
+       this.getBoton('btnRev').enable();
    },
    
    liberaMenu:function(){
-        var tb = Phx.vista.PlanPagoVb.superclass.liberaMenu.call(this);
+        var tb = Phx.vista.PlanPagoVbAsistente.superclass.liberaMenu.call(this);
         this.getBoton('diagrama_gantt').disable();
         this.getBoton('btnChequeoDocumentosWf').disable();
+        this.getBoton('btnRev').disable();
         
     
       return tb

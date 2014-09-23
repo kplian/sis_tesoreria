@@ -119,6 +119,26 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         },
         {
             config:{
+                name: 'revisado_asistente',
+                fieldLabel: 'Rev',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 65,
+                renderer:function (value, p, record){  
+                            if(record.data['revisado_asistente'] == 'si')
+                                return  String.format('{0}',"<div style='text-align:center'><img src = '../../../lib/imagenes/ball_green.png' align='center' width='24' height='24'/></div>");
+                            else
+                                return  String.format('{0}',"<div style='text-align:center'><img src = '../../../lib/imagenes/ball_white.png' align='center' width='24' height='24'/></div>");
+                        },
+            },
+            type:'Checkbox',
+            filters:{pfiltro:'plapa.revisado_asistente',type:'string'},
+            id_grupo:1,
+            grid:false,
+            form:false
+        },
+        {
+            config:{
                 name: 'num_tramite',
                 fieldLabel: 'Num. Tramite',
                 allowBlank: true,
@@ -955,7 +975,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'id_moneda','tipo_moneda','desc_moneda',
 		'num_tramite','monto_excento',
 		'proc_monto_excento_var','obs_wf','descuento_inter_serv',
-		'obs_descuento_inter_serv','porc_monto_retgar','desc_funcionario1'
+		'obs_descuento_inter_serv','porc_monto_retgar','desc_funcionario1','revisado_asistente'
 		
 	],
 	

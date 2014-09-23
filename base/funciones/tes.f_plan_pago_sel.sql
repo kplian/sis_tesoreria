@@ -207,7 +207,8 @@ BEGIN
                         plapa.obs_descuento_inter_serv,
                         plapa.descuento_inter_serv,
                         plapa.porc_monto_retgar,
-                        fun.desc_funcionario1::text             
+                        fun.desc_funcionario1::text,
+                        plapa.revisado_asistente           
 						from tes.tplan_pago plapa
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
                         inner join param.tmoneda mon on mon.id_moneda = op.id_moneda

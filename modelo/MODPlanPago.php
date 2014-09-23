@@ -97,6 +97,9 @@ class MODPlanPago extends MODbase{
 		$this->captura('descuento_inter_serv','numeric');
 		$this->captura('porc_monto_retgar','numeric');
 		$this->captura('desc_funcionario1','text');
+		$this->captura('revisado_asistente','varchar');
+		
+		
 		
 		
 		
@@ -350,6 +353,25 @@ class MODPlanPago extends MODbase{
         //Devuelve la respuesta
         return $this->respuesta;
     }
+	
+	
+	 function marcarRevisadoPlanPago(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.f_plan_pago_ime';
+        $this->transaccion='TES_REVPP_IME';
+        $this->tipo_procedimiento='IME';
+                
+        //Define los parametros para la funcion
+        $this->setParametro('id_plan_pago','id_plan_pago','int4');
+
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+	
 				
 	function listarPlanesPagoPorObligacion(){
 		//Definicion de variables para ejecucion del procedimientp

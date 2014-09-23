@@ -25,6 +25,7 @@ Phx.vista.PlanPagoVb = {
         
        this.Atributos[this.getIndAtributo('num_tramite')].grid=true;
        this.Atributos[this.getIndAtributo('desc_moneda')].grid=true;
+       this.Atributos[this.getIndAtributo('revisado_asistente')].grid=true; 
        
        this.Atributos[this.getIndAtributo('numero_op')].grid=true; 
        this.Atributos[this.getIndAtributo('nro_cuota')].form=false; 

@@ -177,6 +177,15 @@ class ACTPlanPago extends ACTbase{
         $this->res=$this->objFunc->anteriorEstadoPlanPago($this->objParam);
         $this->res->imprimirRespuesta($this->res->generarJson());
     }
+	 
+	 function marcarRevisadoPlanPago(){
+        $this->objFunc=$this->create('MODPlanPago');  
+        $this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]); 
+        $this->res=$this->objFunc->marcarRevisadoPlanPago($this->objParam);
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
+	 
+	 
     
 	
 	function verificarDisponibilidad(){
