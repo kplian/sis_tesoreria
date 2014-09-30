@@ -69,11 +69,11 @@ BEGIN
             END IF;
      END IF;
      
-     IF p_codigo_estado  in ('vbgerente','vbfin')  THEN
+     /*IF p_codigo_estado  in ('vbgerente','vbfin')  THEN
      	if (v_registros.fecha_conformidad is null or v_registros.conformidad is null) then
         	raise exception 'Registre la conformidad antes de pasar al siguiente estado';
         end if;
-     END IF; 
+     END IF; */
      
      IF p_codigo_estado = 'pendiente' THEN
          raise exception 'Error el estado pendiente debe generar comprobantes';
