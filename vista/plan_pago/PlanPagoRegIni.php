@@ -23,6 +23,7 @@ Phx.vista.PlanPagoRegIni = {
 	nombreVista: 'PlanPagoRegIni',
 	
 	constructor: function(config) {
+		
 	    this.maestro=config.maestro;
 	    Phx.vista.PlanPagoRegIni.superclass.constructor.call(this,config);
         ////formulario de departamentos
@@ -37,6 +38,8 @@ Phx.vista.PlanPagoRegIni = {
              this.bloquearMenus();
           }
           
+          this.creaFormularioConformidad();
+          
           this.addButton('btnVerifPresup', {
                 text : 'Disponibilidad',
                 iconCls : 'bassign',
@@ -44,6 +47,17 @@ Phx.vista.PlanPagoRegIni = {
                 handler : this.onBtnVerifPresup,
                 tooltip : '<b>Verificación de la disponibilidad presupuestaria</b>'
             });
+            
+            this.addButton('btnConformidad',
+            {
+                text: 'Conformidad',
+                iconCls: 'bchecklist',
+                disabled: true,
+                handler: this.onButtonConformidad,
+                tooltip: '<b>Conformidad</b><br/>Se registra información del acta de conformidad'
+            });
+            
+        
        
          
          this.iniciarEventos();
@@ -348,15 +362,19 @@ Phx.vista.PlanPagoRegIni = {
     preparaMenu:function(n){
           var data = this.getSelectedData();
           var tb =this.tbar;
+          this.getBoton('btnConformidad').enable();
           this.getBoton('ant_estado').disable();
           this.getBoton('sig_estado').disable();
           Phx.vista.PlanPagoRegIni.superclass.preparaMenu.call(this,n); 
           if (data['estado']== 'borrador'){
               this.getBoton('edit').enable();
+              this.getBoton('btnConformidad').enable();
               this.getBoton('del').enable(); 
               this.getBoton('new').disable(); 
               this.getBoton('SolPlanPago').enable(); 
               this.getBoton('sig_estado').enable();   
+          } else if (data['estado']== 'vbsolicitante') {
+          	 this.getBoton('btnConformidad').enable();
           }
           else{
             if ((data['tipo'] == 'devengado'||data['tipo']== 'devengado_pagado') && data['estado']== 'devengado'&& (data.monto_ejecutar_total_mo*1)  > (data.total_pagado*1) ){ 
@@ -388,7 +406,7 @@ Phx.vista.PlanPagoRegIni = {
     liberaMenu:function(){
         var tb = Phx.vista.PlanPagoRegIni.superclass.liberaMenu.call(this);
         if(tb){
-          
+          this.getBoton('btnConformidad').disable();
            this.getBoton('SincPresu').disable();
            this.getBoton('SolPlanPago').disable();
            this.getBoton('btnVerifPresup').disable();

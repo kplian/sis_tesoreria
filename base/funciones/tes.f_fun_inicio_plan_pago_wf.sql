@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_fun_inicio_plan_pago_wf (
   p_id_usuario integer,
   p_id_usuario_ai integer,
@@ -42,7 +40,9 @@ BEGIN
             pp.fecha_tentativa,
             op.numero,
             pp.total_prorrateado ,
-            pp.monto_ejecutar_total_mo
+            pp.monto_ejecutar_total_mo,
+            pp.fecha_conformidad,
+            pp.conformidad
      into 
             v_registros
             
@@ -67,6 +67,12 @@ BEGIN
             IF v_registros.total_prorrateado != v_registros.monto_ejecutar_total_mo  or  v_registros.monto_ejecutar_total_mo != v_monto_ejecutar_mo THEN
                 raise exception 'El total prorrateado no iguala con el monto total a ejecutar';
             END IF;
+     END IF;
+     
+     IF p_codigo_estado  in ('vbgerente','vbfin')  THEN
+     	if (v_registros.fecha_conformidad is null or v_registros.conformidad is null) then
+        	raise exception 'Registre la conformidad antes de pasar al siguiente estado';
+        end if;
      END IF; 
      
      IF p_codigo_estado = 'pendiente' THEN

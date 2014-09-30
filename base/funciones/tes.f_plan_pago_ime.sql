@@ -1949,6 +1949,30 @@ BEGIN
             --Devuelve la respuesta
             return v_resp;        
         end;
+    
+    /*********************************    
+ 	#TRANSACCION:  'TES_GENCONF_IME'
+ 	#DESCRIPCION:	Actualiza los Datos del Acta de Conformidad
+ 	#AUTOR:		jrr
+ 	#FECHA:		26-09-2014
+	***********************************/
+
+	elsif(p_transaccion='TES_GENCONF_IME')then
+
+		begin
+         
+           update tes.tplan_pago
+           set conformidad = v_parametros.conformidad,
+           fecha_conformidad = v_parametros.fecha_conformidad
+           where id_plan_pago = v_parametros.id_plan_pago;
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se modificaron los datos de la conformidad exitosamente'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_parametros.id_plan_pago::varchar);
+            
+            --Devuelve la respuesta
+            return v_resp;        
+        end;
+        
     /*********************************    
  	#TRANSACCION:  'TES_REVPP_IME'
  	#DESCRIPCION:	Sirve cpara marcar como revisado o no revisado, sirve como un indicador  de que la documentacion fue revisada por el asistente
@@ -1961,7 +1985,8 @@ BEGIN
 		begin
         
             select 
-              pp.revisado_asistente
+              pp.revisado_asistente,
+              pp.id_proceso_wf
             into
               v_registros_tpp
             from tes.tplan_pago pp
@@ -1980,7 +2005,13 @@ BEGIN
                id_usuario_ai = v_parametros._id_usuario_ai,
                usuario_ai = v_parametros._nombre_usuario_ai
              where pp.id_plan_pago  = v_parametros.id_plan_pago;
-          
+           
+            --modifica el proeso wf para actulizar el mismo campo
+             update wf.tproceso_wf  set 
+               revisado_asistente = v_revisado
+             where id_proceso_wf  = v_registros_tpp.id_proceso_wf;
+             
+             
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','el plan de pago fue marcado como revisado'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_parametros.id_plan_pago::varchar);

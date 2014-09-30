@@ -83,6 +83,15 @@ Phx.vista.PlanPagoVb = {
         } 
         
        
+       this.addButton('btnConformidad',
+        {
+            text: 'Conformidad',
+            iconCls: 'bchecklist',
+            disabled: true,
+            handler: this.onButtonConformidad,
+            tooltip: '<b>Conformidad</b><br/>Se registra información del acta de conformidad'
+        });
+            
        //this.crearFormularioEstados();
        this.crearFomularioDepto()
        //RAC: Se agrega menú de reportes de adquisiciones
@@ -105,7 +114,8 @@ Phx.vista.PlanPagoVb = {
           this.getBoton('sig_estado').disable();
           this.getBoton('SolDevPag').disable(); 
           this.getBoton('edit').disable(); 
-          this.getBoton('SincPresu').disable();  
+          this.getBoton('SincPresu').disable();
+          this.getBoton('btnConformidad').disable();  
      }, 
     
     crearFomularioDepto:function(){
@@ -373,7 +383,9 @@ Phx.vista.PlanPagoVb = {
          var tb =this.tbar;
          Phx.vista.PlanPagoVb.superclass.preparaMenu.call(this,n); 
          if(this.historico == 'no'){    
-          
+          	  if (data['estado']== 'borrador' || data['estado']== 'vbsolicitante') {
+          	  		this.getBoton('btnConformidad').enable();
+          	  }
               if (data['estado']== 'borrador' || data['estado']== 'pendiente' || data['estado']== 'devengado' || data['estado']== 'pagado'|| data['estado']== 'anticipado'|| data['estado']== 'aplicado'|| data['estado']== 'devuelto' ){
                       this.getBoton('ant_estado').disable();
                       this.getBoton('sig_estado').disable();
@@ -430,7 +442,7 @@ Phx.vista.PlanPagoVb = {
            this.getBoton('diagrama_gantt').disable();
            this.getBoton('btnChequeoDocumentosWf').disable();
            this.getBoton('SincPresu').disable();
-           
+           this.getBoton('btnConformidad').disable();
            this.menuAdq.disable();
            
            

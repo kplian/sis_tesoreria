@@ -208,7 +208,9 @@ BEGIN
                         plapa.descuento_inter_serv,
                         plapa.porc_monto_retgar,
                         fun.desc_funcionario1::text,
-                        plapa.revisado_asistente           
+                        plapa.revisado_asistente,
+                        plapa.conformidad,
+                        plapa.fecha_conformidad           
 						from tes.tplan_pago plapa
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
                         inner join param.tmoneda mon on mon.id_moneda = op.id_moneda
@@ -488,6 +490,40 @@ BEGIN
 						presupuesto varchar,
 						desc_partida text, desc_presupuesto text)
                         where ';
+			
+			--Definicion de la respuesta
+			v_consulta:=v_consulta||v_parametros.filtro;
+            
+            raise notice '%',v_consulta;
+			
+			--Devuelve la respuesta
+			return v_consulta;
+
+		end;
+	
+	/*********************************    
+ 	#TRANSACCION:  'TES_ACTCONFPP_SEL'
+ 	#DESCRIPCION:	Acta de Conformidad Maestro Plan de Pago
+ 	#AUTOR:			JRR	
+ 	#FECHA:			30/09/2014
+	***********************************/
+
+	elsif(p_transaccion='TES_ACTCONFPP_SEL')then
+
+		begin
+        
+			--Sentencia de la consulta de conteo de registros
+			v_consulta:='select fun.desc_funcionario1, prov.desc_proveedor, to_char( pp.fecha_conformidad,''DD/MM/YYYY''),pp.conformidad, cot.numero_oc,op.numero, pp.nro_cuota
+						from tes.tplan_pago pp
+						inner join tes.tobligacion_pago op
+							on pp.id_obligacion_pago = op.id_obligacion_pago
+						inner join param.vproveedor prov 
+							on prov.id_proveedor = op.id_proveedor
+						inner join orga.vfuncionario fun
+							on fun.id_funcionario = op.id_funcionario
+						left join adq.tcotizacion cot
+							on cot.id_obligacion_pago = op.id_obligacion_pago
+						where ';
 			
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;

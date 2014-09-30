@@ -144,7 +144,16 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 allowBlank: true,
                 anchor: '80%',
                 gwidth: 150,
-                maxLength:200
+                maxLength:200,
+                renderer:function(value,p,record){
+                	if(record.data.usr_reg=='vitalia.penia'|| record.data.usr_reg=='shirley.torrez'|| record.data.usr_reg=='patricia.lopez'|| record.data.usr_reg=='patricia.lopez'){
+                        return String.format('<b><font color="orange">{0}</font></b>', value);
+                    }
+                    else {
+                        return value;
+                    }
+                	
+                }
             },
             type:'TextField',
             filters:{pfiltro:'op.num_tramite',type:'string'},
@@ -975,7 +984,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'id_moneda','tipo_moneda','desc_moneda',
 		'num_tramite','monto_excento',
 		'proc_monto_excento_var','obs_wf','descuento_inter_serv',
-		'obs_descuento_inter_serv','porc_monto_retgar','desc_funcionario1','revisado_asistente'
+		'obs_descuento_inter_serv','porc_monto_retgar','desc_funcionario1','revisado_asistente',
+		{name:'fecha_conformidad', type: 'date',dateFormat:'Y-m-d'},'conformidad'
 		
 	],
 	
@@ -1197,6 +1207,105 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                     'DocumentoWf'
         )
     },
+    
+    creaFormularioConformidad:function(){
+    	
+        this.formConformidad = new Ext.form.FormPanel({
+            id: this.idContenedor + '_CONFOR',            
+            items: [new Ext.form.TextArea({
+                fieldLabel: 'Conformidad',                 
+                name: 'conformidad',
+                height:150,
+                allowBlank:false,
+                width:'95%'
+            }),
+            new Ext.form.DateField({
+                fieldLabel: 'Fecha Recepción/Informe',
+                format: 'd/m/Y', 
+                name: 'fecha_conformidad',
+                allowBlank:false,
+                width:'70%'
+            })],
+            autoScroll: false,
+            //height: this.fheight,
+            autoDestroy: true,
+            autoScroll: true
+        });
+        
+        
+        // Definicion de la ventana que contiene al formulario
+        this.windowConformidad = new Ext.Window({
+            // id:this.idContenedor+'_W',
+            title: 'Datos Acta Conformidad',
+            modal: true,
+            width: 400,
+            height: 300,
+            bodyStyle: 'padding:5px;',
+            layout: 'fit',
+            hidden: true,
+            autoScroll: false,
+            maximizable: true,
+            buttons: [{
+	                text: 'Guardar',
+	                arrowAlign: 'bottom',
+	                handler: this.onSubmitConformidad,
+	                argument: {
+	                    'news': false
+	                },
+	                scope: this
+
+                },
+                {
+	                text: 'Declinar',
+	                handler: this.onDeclinarConformidad,
+					scope: this
+               }],
+            items: this.formConformidad,
+            // autoShow:true,
+            autoDestroy: true,
+            closeAction: 'hide'
+        });
+     }, 
+     
+     onButtonConformidad : function () {
+     	var d= this.sm.getSelected().data;
+     	this.formConformidad.getForm().findField('conformidad').setValue(d.conformidad);
+     	this.formConformidad.getForm().findField('fecha_conformidad').setValue(d.fecha_conformidad);
+     	this.windowConformidad.show();
+     },
+     
+     onSubmitConformidad : function () {
+     	var d= this.sm.getSelected().data;
+     	Phx.CP.loadingShow();	
+		Ext.Ajax.request({
+				url:'../../sis_tesoreria/control/PlanPago/generarConformidad',
+				success:this.successConformidad,
+				failure:this.failureConformidad,
+				params:{
+						'id_plan_pago' : d.id_plan_pago,
+						'conformidad' : this.formConformidad.getForm().findField('conformidad').getValue(), 
+						'fecha_conformidad' : this.formConformidad.getForm().findField('fecha_conformidad').getValue().dateFormat('d/m/Y')},
+				timeout:this.timeout,
+				scope:this
+		});
+     	
+     },
+     
+     successConformidad : function (resp) {
+     	this.windowConformidad.hide();
+     	Phx.vista.PlanPago.superclass.successDel.call(this,resp); 
+     	
+     },
+     
+     failureConformidad : function (resp) {
+     	Phx.CP.loadingHide();
+     	Phx.vista.PlanPago.superclass.conexionFailure.call(this,resp);    	
+     	
+     },
+     
+     onDeclinarConformidad : function () {
+     	this.windowConformidad.hide();
+     },
     
     
     inicioValores:function(){

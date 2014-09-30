@@ -52,6 +52,21 @@ Phx.vista.Prorrateo=Ext.extend(Phx.gridInterfaz,{
         },
         {
             config:{
+                name: 'monto_ejecutar_mo',
+                fieldLabel: 'Monto a Ejecutar',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 100,
+                maxLength:1245186
+            },
+            type:'NumberField',
+            filters:{pfiltro:'pro.monto_ejecutar_mo',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
+        {
+            config:{
                 name: 'desc_ingas',
                 fieldLabel: 'Concepto de Gasto',
                 allowBlank: false,
@@ -96,20 +111,37 @@ Phx.vista.Prorrateo=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:false
         },
+        
         {
             config:{
-                name: 'monto_ejecutar_mo',
-                fieldLabel: 'Monto a Ejecutar',
+                name: 'codigo_partida',
+                fieldLabel: 'Partida',
                 allowBlank: true,
                 anchor: '80%',
                 gwidth: 100,
-                maxLength:1245186
+                maxLength:10
             },
-            type:'NumberField',
-            filters:{pfiltro:'pro.monto_ejecutar_mo',type:'numeric'},
+            type:'Text',
+            filters:{pfiltro:'par.codigo',type:'string'},
             id_grupo:1,
             grid:true,
-            form:true
+            form:false
+        },
+        
+        {
+            config:{
+                name: 'nombre_partida',
+                fieldLabel: 'Desc Partida',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 300,
+                maxLength:10
+            },
+            type:'Text',
+            filters:{pfiltro:'par.nombre_partida',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:false
         },
         {
             config:{
@@ -226,7 +258,8 @@ Phx.vista.Prorrateo=Ext.extend(Phx.gridInterfaz,{
         {name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
         {name:'id_usuario_mod', type: 'numeric'},
         {name:'usr_reg', type: 'string'},'descripcion',
-        {name:'usr_mod', type: 'string'},'codigo_cc','desc_ingas','total_prorrateado'
+        {name:'usr_mod', type: 'string'},'codigo_cc','desc_ingas',
+        'total_prorrateado','codigo_partida','nombre_partida'
         
     ],
     successSave: function(resp) {

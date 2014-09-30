@@ -98,6 +98,8 @@ class MODPlanPago extends MODbase{
 		$this->captura('porc_monto_retgar','numeric');
 		$this->captura('desc_funcionario1','text');
 		$this->captura('revisado_asistente','varchar');
+		$this->captura('conformidad','text');
+		$this->captura('fecha_conformidad','date');
 		
 		
 		
@@ -354,6 +356,25 @@ class MODPlanPago extends MODbase{
         return $this->respuesta;
     }
 	
+	function generarConformidad(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.f_plan_pago_ime';
+        $this->transaccion='TES_GENCONF_IME';
+        $this->tipo_procedimiento='IME';
+                
+        //Define los parametros para la funcion
+        $this->setParametro('id_plan_pago','id_plan_pago','int4');
+		$this->setParametro('conformidad','conformidad','text');
+		$this->setParametro('fecha_conformidad','fecha_conformidad','date');
+
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+	
 	
 	 function marcarRevisadoPlanPago(){
         //Definicion de variables para ejecucion del procedimiento
@@ -493,6 +514,31 @@ class MODPlanPago extends MODbase{
 		$this->captura('disponibilidad','varchar');
 		$this->captura('desc_partida','text');
 		$this->captura('desc_cc','text');
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
+	function listarActaMaestro(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.f_plan_pago_sel';
+		$this->transaccion='TES_ACTCONFPP_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this->setCount(false);
+		
+				
+		//Definicion de la lista del resultado del query
+		$this->captura('nombre_solicitante','text');		
+		$this->captura('proveedor','varchar');
+		$this->captura('fecha_conformidad','text');		
+		$this->captura('conformidad','text');		
+		$this->captura('numero_oc','varchar');
+		$this->captura('numero_op','varchar');
+		$this->captura('numero_cuota','numeric');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();

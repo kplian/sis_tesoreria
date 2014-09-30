@@ -10,6 +10,7 @@
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
 require_once(dirname(__FILE__).'/../reportes/RSolicitudPlanPago.php');
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
+require_once(dirname(__FILE__).'/../reportes/RConformidad.php');
 
 class ACTPlanPago extends ACTbase{    
 			
@@ -185,6 +186,12 @@ class ACTPlanPago extends ACTbase{
         $this->res->imprimirRespuesta($this->res->generarJson());
     }
 	 
+	 function generarConformidad(){
+        $this->objFunc=$this->create('MODPlanPago');  
+        $this->res=$this->objFunc->generarConformidad($this->objParam);
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
+	 
 	 
     
 	
@@ -200,6 +207,43 @@ class ACTPlanPago extends ACTbase{
 			$this->res=$this->objFunc->verificarDisponibilidad($this->objParam);
 		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	
+	function reporteActaConformidad()	{
+		
+		if ($this->objParam->getParametro('id_proceso_wf') != '') {
+			$this->objParam->addFiltro("pp.id_proceso_wf = ". $this->objParam->getParametro('id_proceso_wf'));
+		}
+		
+		$this->objFunc=$this->create('MODPlanPago');	
+		
+		$this->res=$this->objFunc->listarActaMaestro($this->objParam);
+		
+		//$this->objFunc=$this->create('MODPlanPago');
+		//$this->res2=$this->objFunc->listarActaDetalle($this->objParam);
+		//obtener titulo del reporte
+		
+		//Genera el nombre del archivo (aleatorio + titulo)
+		$nombreArchivo=uniqid(md5(session_id()).'ACTACONFORMIDAD');
+		
+		
+		$nombreArchivo.='.pdf';
+		$this->objParam->addParametro('orientacion',$orientacion);
+		$this->objParam->addParametro('tamano',$tamano);		
+		$this->objParam->addParametro('titulo_archivo','ACTA DE CONFORMIDAD');
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+		//Instancia la clase de pdf
+		$this->objReporteFormato=new RConformidad($this->objParam);
+				
+		$this->objReporteFormato->generarReporte($this->res->getDatos());
+		$this->objReporteFormato->output($this->objReporteFormato->url_archivo,'F');
+		
+		$this->mensajeExito=new Mensaje();
+		$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
+										'Se generó con éxito el reporte: '.$nombreArchivo,'control');
+		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+				
 	}
 			
 }

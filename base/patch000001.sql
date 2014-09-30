@@ -822,3 +822,35 @@ COMMENT ON COLUMN tes.tplan_pago.revisado_asistente
 IS 'este campo sirve para marcar los pagos revisados por las asistente';
 
 /***********************************F-SCP-RAC-TES-0-23/09/2014***************************************/
+
+
+
+
+
+/***********************************I-SCP-RAC-TES-0-25/09/2014***************************************/
+
+
+--------------- SQL ---------------
+
+DROP VIEW tes.vcomp_devtesprov_plan_pago;
+
+--------------- SQL ---------------
+
+DROP VIEW tes.vcomp_devtesprov_plan_pago_2;
+--------------- SQL ---------------
+
+ALTER TABLE tes.tplan_pago
+  ALTER COLUMN nro_cuenta_bancaria TYPE VARCHAR(100) COLLATE pg_catalog."default";
+
+/***********************************F-SCP-RAC-TES-0-25/09/2014***************************************/
+
+/***********************************I-SCP-JRR-TES-0-26/09/2014***************************************/
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN conformidad TEXT;
+  
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN fecha_conformidad DATE;
+
+/***********************************F-SCP-JRR-TES-0-26/09/2014***************************************/
+
