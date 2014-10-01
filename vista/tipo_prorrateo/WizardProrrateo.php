@@ -174,10 +174,10 @@ header("content-type: text/javascript; charset=UTF-8");
 						direction: 'ASC'
 					},
 					totalProperty: 'total',
-					fields: ['id_oficina_cuenta', 'nombre_cuenta','nro_cuenta', 'nro_medidor',],
+					fields: ['id_oficina_cuenta', 'nombre_cuenta','nro_cuenta', 'nro_medidor','oficina','lugar'],
 					// turn on remote sorting
 					remoteSort: true,
-					baseParams: {par_filtro: 'ofcu.nro_cuenta#ofcu.nombre_cuenta#ofcu.nro_medidor'}
+					baseParams: {par_filtro: 'ofcu.nro_cuenta#ofcu.nombre_cuenta#ofcu.nro_medidor#of.nombre,lug.nombre'}
 				}),
 				valueField: 'id_oficina_cuenta',
 				displayField: 'nombre_cuenta',
@@ -192,7 +192,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				disabled:true,
 				minChars: 2,
 				gwidth: 120,
-				tpl: '<tpl for="."><div class="x-combo-list-item"><p>No Cuenta : <b>{nro_cuenta}</b></p><p><b>{nombre_cuenta}</b></p><p>No Medidor : <b>{nro_medidor}</b></p> </div></tpl>'
+				tpl: '<tpl for="."><div class="x-combo-list-item"><p>No Cuenta : <b>{nro_cuenta}</b></p><p><b>{nombre_cuenta}</b></p><p>No Medidor : <b>{nro_medidor}</b></p> <p>Oficina : <b>{oficina}</b></p><p>Lugar : <b>{lugar}</b></p></div></tpl>'
 			},
 			type: 'ComboBox',
 			id_grupo: 0,			
