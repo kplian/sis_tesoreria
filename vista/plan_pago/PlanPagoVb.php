@@ -67,6 +67,7 @@ Phx.vista.PlanPagoVb = {
        
        this.iniciarEventos();
        this.addButton('SolDevPag',{text:'Solicitar Devengado/Pago',iconCls: 'bpagar',disabled:true,handler:this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente, devengado o pago  '});
+       this.addButton('ModAprop',{text:'Modificar Apropiación',iconCls: 'bengine',disabled:true,handler:this.onBtnApropiacion,tooltip: 'Modificar la apropiación (solo cuando es el primer pago de un pago directo y el estado es vbconta)'});
        this.addButton('diagrama_gantt',{text:'Gant',iconCls: 'bgantt',disabled:true,handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
   
        function diagramGantt(){            
@@ -81,17 +82,8 @@ Phx.vista.PlanPagoVb = {
                 scope:this
             });         
         } 
-        
-       
-       this.addButton('btnConformidad',
-        {
-            text: 'Conformidad',
-            iconCls: 'bchecklist',
-            disabled: true,
-            handler: this.onButtonConformidad,
-            tooltip: '<b>Conformidad</b><br/>Se registra información del acta de conformidad'
-        });
-            
+               
+                   
        //this.crearFormularioEstados();
        this.crearFomularioDepto()
        //RAC: Se agrega menú de reportes de adquisiciones
@@ -195,7 +187,19 @@ Phx.vista.PlanPagoVb = {
         
     },
     
-   
+   onBtnApropiacion : function() {
+    	var rec = {maestro: this.sm.getSelected().data};
+						      
+            Phx.CP.loadWindows('../../../sis_tesoreria/vista/obligacion_pago/ObligacionPagoApropiacion.php',
+                    'Cambio de Apropiación',
+                    {
+                        width:800,
+                        height:'90%'
+                    },
+                    rec,
+                    this.idContenedor,
+                    'ObligacionPagoApropiacion');
+    },
    onButtonEdit:function(){
          var data = this.getSelectedData();
          Phx.vista.PlanPagoVb.superclass.onButtonEdit.call(this);
@@ -383,21 +387,25 @@ Phx.vista.PlanPagoVb = {
          var tb =this.tbar;
          Phx.vista.PlanPagoVb.superclass.preparaMenu.call(this,n); 
          if(this.historico == 'no'){    
-          	  if (data['estado']== 'borrador' || data['estado']== 'vbsolicitante') {
-          	  		this.getBoton('btnConformidad').enable();
-          	  }
+          	  
               if (data['estado']== 'borrador' || data['estado']== 'pendiente' || data['estado']== 'devengado' || data['estado']== 'pagado'|| data['estado']== 'anticipado'|| data['estado']== 'aplicado'|| data['estado']== 'devuelto' ){
                       this.getBoton('ant_estado').disable();
                       this.getBoton('sig_estado').disable();
                       this.getBoton('SolDevPag').disable(); 
-                      this.getBoton('edit').disable();   
+                      this.getBoton('edit').disable();
+                      this.getBoton('ModAprop').disable();    
               }
               else{
                        if (data['estado']== 'vbconta'){
                            this.getBoton('ant_estado').enable();
                            this.getBoton('sig_estado').disable();
                            this.getBoton('SolDevPag').enable();
-                            this.getBoton('edit').enable(); 
+                           this.getBoton('edit').enable();
+                           if (data['nro_cuota']== 1.00 && data['tipo_obligacion']== 'pago_directo') {
+                           		this.getBoton('ModAprop').enable();                           		
+                           } else {
+                           		this.getBoton('ModAprop').disable(); 
+                           }
                        }
                        else{
                            this.getBoton('ant_estado').enable();
@@ -441,8 +449,8 @@ Phx.vista.PlanPagoVb = {
            this.getBoton('SolPlanPago').disable();
            this.getBoton('diagrama_gantt').disable();
            this.getBoton('btnChequeoDocumentosWf').disable();
-           this.getBoton('SincPresu').disable();
-           this.getBoton('btnConformidad').disable();
+           this.getBoton('SincPresu').disable();          
+           this.getBoton('ModAprop').disable(); 
            this.menuAdq.disable();
            
            

@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_det_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -37,7 +35,15 @@ DECLARE
     v_tipo_obligacion varchar;
     v_id_moneda integer;
     v_id_partida integer;
-    v_id_gestion integer;
+    v_id_gestion integer;    
+    v_id_obligacion integer;    
+    v_id_partida_ejecucion integer;     
+    v_id_partida_anterior	integer;
+    v_id_cc_anterior		integer;   
+    v_monto					numeric;
+    v_res					boolean;
+    v_nombre_conexion		varchar;
+    
       
     
 BEGIN
@@ -249,6 +255,89 @@ BEGIN
             return v_resp;
 
 		end;
+        
+    /*********************************    
+ 	#TRANSACCION:  'TES_OBDETAPRO_MOD'
+ 	#DESCRIPCION:	Cambio en la apropacion de un detalle de obligacion
+ 	#AUTOR:		admin	
+ 	#FECHA:		02-04-2013 20:27:35
+	***********************************/
+
+	elsif(p_transaccion='TES_OBDETAPRO_MOD')then
+
+		begin
+        	
+        
+            /************************OBTENER DATOS**********************/
+            select od.id_partida_ejecucion_com,od.id_obligacion_pago, od.id_partida,od.id_centro_costo,op.id_moneda,od.monto_pago_mo,op.id_gestion 
+            into v_id_partida_ejecucion,v_id_obligacion,v_id_partida_anterior, v_id_cc_anterior,v_id_moneda,v_monto,v_id_gestion
+            from tes.tobligacion_det od
+            inner join tes.tobligacion_pago op on op.id_obligacion_pago = od.id_obligacion_pago
+            where id_obligacion_det = v_parametros.id_obligacion_det;
+			
+            /*Validacion de que no haya ninguna cuota de tipo devengado y devengado_pago en estado devengado*/
+            
+            if exists (	select 1 
+            			from tes.tplan_pago pp
+                        where ((pp.tipo in ('devengado','devengado_pagado','devengado_pagado_1c') and pp.estado = 'devengado') OR
+                        	pp.tipo in ('ant_aplicado') and pp.estado = 'aplicado') and 
+                            pp.id_obligacion_pago = v_id_obligacion and pp.estado_reg != 'inactivo' ) then
+            	raise exception 'Existe un pago devengado para esta solicitud. Por lo que no es posible modificar la apropiacion';
+            end if;
+            
+                    
+            /************************OBTENER NUEVA PARTIDA**********************/
+            SELECT 
+            ps_id_partida into v_id_partida           
+            FROM conta.f_get_config_relacion_contable('CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo);
+            
+            IF v_id_partida is NULL THEN
+          
+            raise exception 'No se tiene una parametrizacion de partida  para este concepto de gasto en la relacion contable de código CUECOMP  (%,%,%,%)','CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo;
+            
+           END IF;           
+           
+           select * into v_nombre_conexion from migra.f_crear_conexion(); 
+
+             /************************REVERTIR COMPROMETIDO**********************/
+            select tes.f_gestionar_presupuesto_tesoreria(v_id_obligacion, 1, 'revertir',NULL,v_nombre_conexion) into v_res;
+            if v_res = false then
+                raise exception 'Error al revertir el presupuesto';
+            end if;
+            
+            update tes.tobligacion_pago
+            set comprometido = 'no'
+            where id_obligacion_pago = v_id_obligacion;
+             
+
+            /************************ACTUALIZAR DATOS EN TABLA OBPDET**********************/
+           
+            update tes.tobligacion_det set 
+            id_concepto_ingas = v_parametros.id_concepto_ingas,
+            id_partida = v_id_partida,
+            id_centro_costo = v_parametros.id_centro_costo,
+            id_orden_trabajo = v_parametros.id_orden_trabajo
+            where id_obligacion_det = v_parametros.id_obligacion_det;
+            /************************VOLVER A COMPROMETER**********************/
+            select tes.f_gestionar_presupuesto_tesoreria(v_id_obligacion, 1, 'comprometer',NULL,v_nombre_conexion) into v_res;
+            
+            if v_res = false then
+                raise exception 'Ha ocurrido un error al comprometer el presupuesto';
+            end if;
+           
+            
+            update tes.tobligacion_pago
+            set comprometido = 'si'
+            where id_obligacion_pago = v_id_obligacion;
+            select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'exito'); 
+             --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Cambio en apropiacon realizado'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_det',v_parametros.id_obligacion_det::varchar);
+              
+            --Devuelve la respuesta
+            return v_resp;  
+            
+        END;
          
 	else
      
@@ -259,7 +348,8 @@ BEGIN
 EXCEPTION
 				
 	WHEN OTHERS THEN
-		v_resp='';
+		select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'error'); 
+        v_resp='';       
 		v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
 		v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
 		v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);

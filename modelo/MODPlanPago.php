@@ -100,6 +100,7 @@ class MODPlanPago extends MODbase{
 		$this->captura('revisado_asistente','varchar');
 		$this->captura('conformidad','text');
 		$this->captura('fecha_conformidad','date');
+		$this->captura('tipo_obligacion','varchar');
 		
 		
 		

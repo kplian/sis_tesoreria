@@ -210,7 +210,8 @@ BEGIN
                         fun.desc_funcionario1::text,
                         plapa.revisado_asistente,
                         plapa.conformidad,
-                        plapa.fecha_conformidad           
+                        plapa.fecha_conformidad,
+                        op.tipo_obligacion           
 						from tes.tplan_pago plapa
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
                         inner join param.tmoneda mon on mon.id_moneda = op.id_moneda

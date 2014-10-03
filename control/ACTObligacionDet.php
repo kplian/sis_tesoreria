@@ -33,6 +33,14 @@ class ACTObligacionDet extends ACTbase{
 		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	
+	function guardarObligacionDetApropiacion(){
+		$this->objFunc=$this->create('MODObligacionDet');	
+		$this->res=$this->objFunc->guardarObligacionDetApropiacion($this->objParam);		
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	
+	
 						
 	function eliminarObligacionDet(){
 			$this->objFunc=$this->create('MODObligacionDet');	

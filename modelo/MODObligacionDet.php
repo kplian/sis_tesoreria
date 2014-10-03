@@ -113,6 +113,27 @@ class MODObligacionDet extends MODbase{
 	    //Devuelve la respuesta
 		return $this->respuesta;
 	}
+
+	function guardarObligacionDetApropiacion(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_obligacion_det_ime';
+		$this->transaccion='TES_OBDETAPRO_MOD';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_obligacion_det','id_obligacion_det','int4');		
+		$this->setParametro('id_concepto_ingas','id_concepto_ingas','int4');		
+		$this->setParametro('id_centro_costo','id_centro_costo','int4');		
+		$this->setParametro('id_orden_trabajo','id_orden_trabajo','int4');
+        
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+	    //Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
 			
 	function eliminarObligacionDet(){
 		//Definicion de variables para ejecucion del procedimiento

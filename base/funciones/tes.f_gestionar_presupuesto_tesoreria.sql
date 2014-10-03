@@ -1,10 +1,9 @@
---------------- SQL ---------------
-
-CREATE OR REPLACE FUNCTION tes.f_gestionar_presupuesto_tesoreria (
+CREATE OR REPLACE FUNCTION pre.f_gestionar_presupuesto_tesoreria (
   p_id_obligacion_pago integer,
   p_id_usuario integer,
   p_operacion varchar,
-  p_id_plan_pago integer = NULL::integer
+  p_id_plan_pago integer = NULL::integer,
+  p_conexion varchar = NULL::character varying
 )
 RETURNS boolean AS
 $body$
@@ -126,7 +125,9 @@ BEGIN
                                                                va_momento, 
                                                                NULL,--  p_id_partida_ejecucion 
                                                                va_columna_relacion, 
-                                                               va_fk_llave);
+                                                               va_fk_llave,
+                                                               NULL,
+                                                               p_conexion);
                  
                 
                  
@@ -229,7 +230,10 @@ BEGIN
                                                              va_momento, 
                                                              va_id_partida_ejecucion,--  p_id_partida_ejecucion 
                                                              va_columna_relacion, 
-                                                             va_fk_llave);
+                                                             va_fk_llave,
+                                                             NULL,
+                                                             p_conexion
+                                                             );
                END IF;
                      
       
@@ -322,7 +326,9 @@ BEGIN
                                                              va_momento, 
                                                              va_id_partida_ejecucion,--  p_id_partida_ejecucion 
                                                              va_columna_relacion, 
-                                                             va_fk_llave);
+                                                             va_fk_llave,
+                                                             NULL,
+                                                             p_conexion);
               
                        --quitamos la bandera de sincronizacion del plan de pago
                        update tes.tplan_pago pp set

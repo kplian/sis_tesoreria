@@ -12,7 +12,7 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 Phx.vista.ObligacionPagoVb = {
-    bedit:true,
+    bedit:false,
     bnew:false,
     bsave:false,
     bdel:true,

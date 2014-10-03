@@ -25,7 +25,7 @@ require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
        
         if($this->getDataSource()->getParameter('tipo')=='devengado_pagado'){
                 
-             $titulo='Devengadoo y Pago';
+             $titulo='Devengado y Pago';
         }
         elseif(($this->getDataSource()->getParameter('tipo'))=='devengado'){
                 

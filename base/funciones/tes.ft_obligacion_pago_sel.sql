@@ -83,6 +83,7 @@ BEGIN
                    where depu.id_usuario =  p_id_usuario; 
               
                  v_filadd=' (obpg.estado = ''vbpresupuestos'') and';
+         ELSIF v_parametros.tipo_interfaz =  'ObligacionPagoApropiacion' THEN
               
          
          

@@ -985,7 +985,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'num_tramite','monto_excento',
 		'proc_monto_excento_var','obs_wf','descuento_inter_serv',
 		'obs_descuento_inter_serv','porc_monto_retgar','desc_funcionario1','revisado_asistente',
-		{name:'fecha_conformidad', type: 'date',dateFormat:'Y-m-d'},'conformidad'
+		{name:'fecha_conformidad', type: 'date',dateFormat:'Y-m-d'},'conformidad','tipo_obligacion'
 		
 	],
 	
