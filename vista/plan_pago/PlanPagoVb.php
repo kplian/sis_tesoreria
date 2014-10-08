@@ -107,7 +107,7 @@ Phx.vista.PlanPagoVb = {
           this.getBoton('SolDevPag').disable(); 
           this.getBoton('edit').disable(); 
           this.getBoton('SincPresu').disable();
-          this.getBoton('btnConformidad').disable();  
+          
      }, 
     
     crearFomularioDepto:function(){
