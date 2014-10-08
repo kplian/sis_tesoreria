@@ -507,18 +507,36 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
 	onButtonNew:function(){
 	    Phx.vista.ObligacionDet.superclass.onButtonNew.call(this); 
 	    this.cmpMontoPagoMo.enable(); 
-	    this.cmpObligacionPago.setValue(this.maestro.id_obligacion_pago)
+	    this.cmpObligacionPago.setValue(this.maestro.id_obligacion_pago);
+	    //this.Cmp.id_orden_trabajo.disable();
 	    
 	},
 	iniciarEventos:function(){
 	    
-	    this.cmpMontoPagoMo=this.getComponente('monto_pago_mo');
-	    this.cmpConceptoIngas=this.getComponente('id_concepto_ingas');
-	    this.cmpCentroCostos=this.getComponente('id_centro_costo');
-        //this.cmpPartida=this.getComponente('id_partida');
-        //this.cmpCuenta=this.getComponente('id_cuenta');
-        //this.cmpAuxiliar=this.getComponente('id_auxiliar');
-        this.cmpObligacionPago=this.getComponente('id_obligacion_pago');
+		    this.cmpMontoPagoMo=this.getComponente('monto_pago_mo');
+		    this.cmpConceptoIngas=this.getComponente('id_concepto_ingas');
+		    this.cmpCentroCostos=this.getComponente('id_centro_costo');
+	        //this.cmpPartida=this.getComponente('id_partida');
+	        //this.cmpCuenta=this.getComponente('id_cuenta');
+	        //this.cmpAuxiliar=this.getComponente('id_auxiliar');
+	        this.cmpObligacionPago=this.getComponente('id_obligacion_pago');
+	        /*
+	        this.Cmp.id_concepto_ingas.on('select',function( cmb, rec, ind){
+			        this.Cmp.id_orden_trabajo.store.baseParams = {
+			        		                                           filtro_ot:rec.data.filtro_or,
+			        		 										   requiere_ot:rec.data.requiere_ot,
+			        		 										   id_grupo_ots:rec.data.filtro_ots
+			        		 										 };
+			        this.Cmp.id_orden_trabajo.modificado = true;
+			        this.Cmp.id_orden_trabajo.enable();
+			        if(rec.data.requiere_ot =='obligatorio'){
+			        	this.Cmp.id_orden_trabajo.allowBlank = false;
+			        }
+			        else{
+			        	this.Cmp.id_orden_trabajo.allowBlank = true;
+			        }
+        	
+             },this);*/
 	    
 	},
 	onReloadPage:function(m){

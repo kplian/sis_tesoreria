@@ -24,7 +24,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         this.addButton('SolPlanPago',{text:'Sol. Plan Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnSolPlanPago,tooltip: '<b>Solicitud Plan Pago</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
 		this.addButton('btnChequeoDocumentosWf',
             {
-                text: 'Chequear Documentos',
+                text: 'Documentos',
                 iconCls: 'bchecklist',
                 disabled: true,
                 handler: this.loadCheckDocumentosSolWf,
@@ -1076,7 +1076,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                                             }],
                                     
                                     scope:this
-                                 });
+                                 });        
                
      },
      

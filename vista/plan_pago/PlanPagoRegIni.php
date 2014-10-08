@@ -354,7 +354,7 @@ Phx.vista.PlanPagoRegIni = {
           Phx.vista.PlanPagoRegIni.superclass.preparaMenu.call(this,n); 
           if (data['estado']== 'borrador'){
               this.getBoton('edit').enable();
-              this.getBoton('btnConformidad').enable();
+              
               this.getBoton('del').enable(); 
               this.getBoton('new').disable(); 
               this.getBoton('SolPlanPago').enable(); 
@@ -429,6 +429,32 @@ Phx.vista.PlanPagoRegIni = {
             height : '50%',
         }, rec.data, this.idContenedor, 'VerificacionPresup');
     },
+    sigEstado:function(){   
+    	              
+      	Phx.vista.PlanPagoRegIni.superclass.sigEstado.call(this);
+      	console.log(this.objWizard);
+        this.objWizard.addTarjetaItems([
+        	{
+	           xtype:'checkbox',
+	           fieldLabel: 'Generar Conformidad',
+	           name:'conformidad_check',
+	           itemId: this.idContenedor+'-conformidad_check',
+	           checked :true,
+	           disabled : true 
+	        }, {
+           		xtype: 'textarea',
+           		name: 'obs_conformidad',
+           		itemId: this.idContenedor+'-obs_conformidad',
+           		fieldLabel: 'Observaciones a la Conformidad',
+           		allowBlank: false,
+                anchor: '80%',
+                maxLength:500        	
+        	}
+        ]);
+        //define contador maximo para habilitar o habilitar boton next y submit
+        this.objWizard.maxCount = this.objWizard.maxCount +1
+               
+     },
     
     east:{
           url:'../../../sis_tesoreria/vista/prorrateo/Prorrateo.php',

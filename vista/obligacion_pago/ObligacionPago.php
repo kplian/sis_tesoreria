@@ -40,7 +40,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
         this.TabPanelSouth.get(1).disable()
         this.addButton('btnChequeoDocumentosWf',
             {
-                text: 'Chequear Documentos',
+                text: 'Documentos',
                 iconCls: 'bchecklist',
                 disabled: true,
                 handler: this.loadCheckDocumentosSolWf,
