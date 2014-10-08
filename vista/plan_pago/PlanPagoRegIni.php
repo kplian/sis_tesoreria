@@ -429,7 +429,7 @@ Phx.vista.PlanPagoRegIni = {
             height : '50%',
         }, rec.data, this.idContenedor, 'VerificacionPresup');
     },
-    sigEstado:function(){   
+    /*sigEstado:function(){   
     	              
       	Phx.vista.PlanPagoRegIni.superclass.sigEstado.call(this);
       	console.log(this.objWizard);
@@ -454,7 +454,7 @@ Phx.vista.PlanPagoRegIni = {
         //define contador maximo para habilitar o habilitar boton next y submit
         this.objWizard.maxCount = this.objWizard.maxCount +1
                
-     },
+     },*/
     
     east:{
           url:'../../../sis_tesoreria/vista/prorrateo/Prorrateo.php',
