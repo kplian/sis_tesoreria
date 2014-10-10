@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -95,6 +93,7 @@ DECLARE
      v_num_funcionarios integer;
      v_id_funcionario_estado integer;
      v_obs varchar;
+     v_pago_variable	varchar;
 			    
 BEGIN
 
@@ -577,7 +576,8 @@ BEGIN
               op.rotacion,
               op.id_plantilla,
               op.tipo_cambio_conv,
-              pr.desc_proveedor
+              pr.desc_proveedor,
+              op.pago_variable
               
              into
               v_id_proceso_wf,
@@ -590,7 +590,8 @@ BEGIN
               v_rotacion,
               v_id_plantilla,
               v_tipo_cambio_conv,
-              v_desc_proveedor
+              v_desc_proveedor,
+              v_pago_variable
               
               
              from tes.tobligacion_pago op
@@ -781,9 +782,9 @@ BEGIN
         
            
            
-            --  si esta saliendo de borrador,  verifica el total de cuotas y las inserta
+            --  si llegando al estado registrado,  verifica el total de cuotas y las inserta
             --  con la plantilla por defecto 
-            IF  v_codigo_estado = 'borrador'  and v_total_nro_cuota > 0 THEN 
+            IF  va_codigo_estado[1] = 'registrado'  and v_total_nro_cuota > 0 THEN 
             
                      select  
                        ps_descuento_porc,
@@ -792,9 +793,12 @@ BEGIN
                      into
                       v_registros_plan
                      FROM  conta.f_get_descuento_plantilla_calculo(v_id_plantilla);
-                      
-                      
-                     v_monto_cuota =  floor( v_total_detalle/v_total_nro_cuota);
+                     /*jrr(10/10/2014): En caso de que sea pago variable el valor de la cuota sera 0*/ 
+                     if (v_pago_variable = 'si') then
+                      	v_monto_cuota = 0;
+                     else
+                     	v_monto_cuota =  floor( v_total_detalle/v_total_nro_cuota);
+                     end if;
                      
                       FOR v_i  IN 1..v_total_nro_cuota LOOP
                           
@@ -802,7 +806,10 @@ BEGIN
                          IF v_i = v_total_nro_cuota THEN
                          
                            v_monto_cuota = v_total_detalle - (v_monto_cuota*v_total_nro_cuota) + v_monto_cuota;
-                         
+                         	/*jrr(10/10/2014): En caso de que sea pago variable el valor de la cuota sera 0*/ 
+                            if (v_pago_variable = 'si') then
+                              v_monto_cuota = 0;
+                           	end if;
                          END IF;
                          
                          v_descuentos_ley = v_monto_cuota * v_registros_plan.ps_descuento_porc;

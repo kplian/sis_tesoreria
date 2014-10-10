@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_inserta_plan_pago_dev (
   p_administrador integer,
   p_id_usuario integer,
@@ -66,6 +64,7 @@ DECLARE
     v_saldo_x_descontar   numeric; 
     
     v_resp_doc   boolean;
+    v_obligacion	record;
     			
     
     
@@ -117,7 +116,10 @@ BEGIN
 
           v_nombre_funcion = 'tes.f_inserta_plan_pago_dev';
           
-        
+          select * into v_obligacion
+          from tes.tobligacion_pago op
+          where id_obligacion_pago = (p_hstore->'id_obligacion_pago')::integer;
+          
          --determinar exixtencia de parametros dinamicos para registro  
          -- (Interface de obligacions de adquisocines o interface de obligaciones tesoeria)
          -- la adquisiciones tiene menos parametros presentes
@@ -151,8 +153,8 @@ BEGIN
             
            
            --validamos que el monto a pagar sea mayor que cero
-           
-           IF  (p_hstore->'monto')::numeric = 0 THEN
+           /*jrr(10/10/2014): El monto puede ser 0 en pagos variables*/ 
+           IF  (p_hstore->'monto')::numeric = 0 and v_obligacion.pago_variable = 'no' THEN
            
               raise exception 'El monto a pagar no puede ser 0';
            
@@ -245,7 +247,11 @@ BEGIN
            
           v_liquido_pagable = COALESCE((p_hstore->'monto')::numeric,0) - COALESCE((p_hstore->'monto_no_pagado')::numeric,0) - COALESCE((p_hstore->'otros_descuentos')::numeric,0) - COALESCE((p_hstore->'monto_retgar_mo')::numeric,0) - COALESCE((p_hstore->'descuento_ley')::numeric,0) - COALESCE((p_hstore->'descuento_anticipo')::numeric,0) - COALESCE((p_hstore->'descuento_inter_serv')::numeric,0);
           v_monto_ejecutar_total_mo  = COALESCE((p_hstore->'monto')::numeric,0) -  COALESCE((p_hstore->'monto_no_pagado')::numeric,0);
-          v_porc_monto_retgar = COALESCE((p_hstore->'monto_retgar_mo')::numeric,0)/COALESCE((p_hstore->'monto')::numeric,0);
+          /*jrr(10/10/2014): El monto puede ser 0 en pagos variables*/ 
+          if (COALESCE((p_hstore->'monto')::numeric,0) > 0) then
+          	v_porc_monto_retgar = COALESCE((p_hstore->'monto_retgar_mo')::numeric,0)/COALESCE((p_hstore->'monto')::numeric,0);
+          end if;
+          
           
           
           IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
@@ -269,8 +275,8 @@ BEGIN
          
          END IF;
          
-         
-         IF v_monto_excento >=  v_monto_ejecutar_total_mo THEN
+         /*jrr(10/10/2014): El monto puede ser 0 en pagos variables*/ 
+         IF v_monto_excento >=  v_monto_ejecutar_total_mo and v_monto_ejecutar_total_mo != 0 THEN
            raise exception 'El monto excento (%) debe ser menor que el total a ejecutar(%)',v_monto_excento, v_monto_ejecutar_total_mo  ;
          END IF;
          

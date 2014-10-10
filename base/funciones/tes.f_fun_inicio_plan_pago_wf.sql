@@ -55,7 +55,7 @@ BEGIN
     -----------------------------------------------------------------------------------
           
      IF p_codigo_estado  in ('vbsolicitante')  THEN
-                
+              
              select
                 sum(pro.monto_ejecutar_mo)
              into
@@ -68,12 +68,15 @@ BEGIN
                 raise exception 'El total prorrateado no iguala con el monto total a ejecutar';
             END IF;
      END IF;
-     
-     /*IF p_codigo_estado  in ('vbgerente','vbfin')  THEN
-     	if (v_registros.fecha_conformidad is null or v_registros.conformidad is null) then
+     /*jrr(10/10/2014): El monto no puede ser menor o igual a 0*/ 
+     IF p_codigo_estado  in ('vbgerente','vbfin','vbsolicitante')  THEN
+     	/*if (v_registros.fecha_conformidad is null or v_registros.conformidad is null) then
         	raise exception 'Registre la conformidad antes de pasar al siguiente estado';
+        end if;*/
+        if (v_registros.monto_ejecutar_total_mo <= 0 ) then
+        	raise exception 'El monto del pago no puede ser 0 ni menor a 0';
         end if;
-     END IF; */
+     END IF; 
      
      IF p_codigo_estado = 'pendiente' THEN
          raise exception 'Error el estado pendiente debe generar comprobantes';

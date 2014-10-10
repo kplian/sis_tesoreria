@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_prorrateo_plan_pago (
   p_id_plan_pago integer,
   p_id_obligacion_pago integer,
@@ -23,6 +21,7 @@ v_registros_plan_pago record;
 
 v_monto_total numeric;
 v_monto_total_mb numeric;
+v_monto_prorrateo numeric;
 v_cont numeric;
 v_id_prorrateo integer;
 v_monto  numeric;
@@ -132,10 +131,16 @@ BEGIN
                     FOR  v_registros in (
                                                select
                                                 od.id_obligacion_det,
-                                                od.factor_porcentual
+                                                od.factor_porcentual,
+                                                count(id_obligacion_det) OVER () as cantidad
                                                from tes.tobligacion_det od
                                                where  od.estado_reg = 'activo' and od.id_obligacion_pago = p_id_obligacion_pago) LOOP
-                          
+                            /*jrr(10/10/2014): Para registrar el prorrateo con el monto correcto en caso de que es un solo detalle de obligacion*/
+                            if (v_registros.cantidad = 1) then
+                            	v_monto_prorrateo = p_monto_ejecutar_total_mo;
+                            else
+                            	v_monto_prorrateo = 0;
+                            end if;
                             INSERT INTO 
                                   tes.tprorrateo
                                 (
@@ -144,8 +149,7 @@ BEGIN
                                   estado_reg,
                                   id_plan_pago,
                                   id_obligacion_det,
-                                  monto_ejecutar_mo,
-                                  monto_ejecutar_mb
+                                  monto_ejecutar_mo
                                 ) 
                                 VALUES (
                                   p_id_usuario,
@@ -153,8 +157,7 @@ BEGIN
                                   'activo',
                                   p_id_plan_pago,
                                   v_registros.id_obligacion_det,
-                                  0,
-                                  0
+                                  v_monto_prorrateo
                                 )RETURNING id_prorrateo into v_id_prorrateo;
                   
                     END LOOP;
