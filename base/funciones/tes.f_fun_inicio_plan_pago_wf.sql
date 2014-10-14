@@ -42,7 +42,8 @@ BEGIN
             pp.total_prorrateado ,
             pp.monto_ejecutar_total_mo,
             pp.fecha_conformidad,
-            pp.conformidad
+            pp.conformidad,
+            pp.monto
      into 
             v_registros
             
@@ -73,7 +74,7 @@ BEGIN
      	/*if (v_registros.fecha_conformidad is null or v_registros.conformidad is null) then
         	raise exception 'Registre la conformidad antes de pasar al siguiente estado';
         end if;*/
-        if (v_registros.monto_ejecutar_total_mo <= 0 ) then
+        if (v_registros.monto <= 0 ) then
         	raise exception 'El monto del pago no puede ser 0 ni menor a 0';
         end if;
      END IF; 
