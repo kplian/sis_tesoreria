@@ -161,6 +161,10 @@ BEGIN
                                 )RETURNING id_prorrateo into v_id_prorrateo;
                   
                     END LOOP;
+                    --actualiza el monto prorrateado para alerta en la interface cuando no cuadre
+                    update  tes.tplan_pago pp set
+                    total_prorrateado=p_monto_ejecutar_total_mo
+                    where pp.id_plan_pago = p_id_plan_pago;
               END IF;
       ELSE
       -------------------------------------------------------------------------------
