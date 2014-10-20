@@ -20,6 +20,12 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		
 		this.store.baseParams = {tipo_interfaz: this.nombreVista,
                    id_obligacion_pago: this.maestro.id_obligacion_pago}
+		
+		if(config.filtro_directo){
+           this.store.baseParams.filtro_valor = config.filtro_directo.valor;
+           this.store.baseParams.filtro_campo = config.filtro_directo.campo;
+        }
+		
 		this.load({params:{start:0, 
 		           limit:this.tam_pag}});
 		           
@@ -307,8 +313,9 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                gwidth: 100,
                maxLength:30,
                items: [
-                   {boxLabel: 'Si',name: 'pg-var',  inputValue: 'si'},
-                   {boxLabel: 'No',name: 'pg-var', inputValue: 'no', checked:true}
+                   {boxLabel: 'Si',name: 'pg-var',  inputValue: 'si',qtip:'Los pagos variables se utilizan cuando NO se conocen los montos exactos que serán pagados (devengados o pagos presupuestariamente).<br> En el caso de anticipos se utiliza pagos variable cuando no sabemos si el total anticipado va ser el total gastado.<br> Ejemplo combustibles, si anticipamos 7000 $us no conocemos con exactitud si vamos a consumir este total puede sobrar o faltar'
+               },
+                   {boxLabel: 'No',name: 'pg-var', inputValue: 'no', checked:true, qtip:'Los pagos no variable (fijos) se utilizan cuando se conocen los montos exactos que se pagaran.<br> Ejemplo los sueldos de los consultores de línea. Por lo general esta es la opcion mas utiliza (además permite que el sistema le ayude con el cálculo del prorrateo lo que no se puede hacer automáticamente cuando el pago es variable) '}
                ]
            },
            type:'RadioGroupField',

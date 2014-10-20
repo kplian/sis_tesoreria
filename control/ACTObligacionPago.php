@@ -24,6 +24,10 @@ class ACTObligacionPago extends ACTbase{
 			$this->objParam->addFiltro("obpg.id_obligacion_pago = ".$this->objParam->getParametro('id_obligacion_pago'));
 		}
 		
+		if($this->objParam->getParametro('filtro_campo')!=''){
+            $this->objParam->addFiltro($this->objParam->getParametro('filtro_campo')." = ".$this->objParam->getParametro('filtro_valor'));  
+        }
+		
 		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
 			$this->objReporte = new Reporte($this->objParam,$this);
 			$this->res = $this->objReporte->generarReporteListado('MODObligacionPago','listarObligacionPago');
@@ -49,6 +53,10 @@ class ACTObligacionPago extends ACTbase{
         
         if($this->objParam->getParametro('id_obligacion_pago')!=''){
             $this->objParam->addFiltro("obpg.id_obligacion_pago = ".$this->objParam->getParametro('id_obligacion_pago'));
+        }
+		
+		if($this->objParam->getParametro('filtro_campo')!=''){
+            $this->objParam->addFiltro($this->objParam->getParametro('filtro_campo')." = ".$this->objParam->getParametro('filtro_valor'));  
         }
         
         if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){

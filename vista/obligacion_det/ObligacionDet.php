@@ -113,7 +113,7 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                             direction: 'ASC'
                     },
                     totalProperty: 'total',
-                    fields: ['id_concepto_ingas','tipo','desc_ingas','movimiento','desc_partida'],
+                    fields: ['id_concepto_ingas','tipo','desc_ingas','movimiento','desc_partida','id_grupo_ots','filtro_ot','requiere_ot'],
                     // turn on remote sorting
                     remoteSort: true,
                     baseParams:{par_filtro:'desc_ingas#par.codigo#par.nombre_partida',movimiento:'gasto'}
@@ -121,7 +121,7 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                 valueField: 'id_concepto_ingas',
                 displayField: 'desc_ingas',
                 gdisplayField:'nombre_ingas',
-                tpl:'<tpl for="."><div class="x-combo-list-item"><p>{desc_ingas}</p><p>TIPO:{tipo}</p><p>MOVIMIENTO:{movimiento}</p> <p>PARTIDA:{desc_partida}</p></div></tpl>',
+                tpl:'<tpl for="."><div class="x-combo-list-item"><p><b>{desc_ingas}</b></p><p>TIPO:{tipo}</p><p>MOVIMIENTO:{movimiento}</p> <p>PARTIDA:{desc_partida}</p></div></tpl>',
                 hiddenName: 'id_concepto_ingas',
                 forceSelection:true,
                 typeAhead: false,
@@ -130,7 +130,7 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                 mode:'remote',
                 pageSize:10,
                 queryDelay:1000,
-                 listWidth:350,
+                 listWidth:500,
                 resizable:true,
                 anchor:'80%', 
                 gwidth: 200,      
@@ -501,6 +501,9 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
 	      this.cmpConceptoIngas.enable();
 	       this.cmpCentroCostos.enable();
 	  }
+	  
+	  this.Cmp.id_orden_trabajo.allowBlank = true;
+	  this.Cmp.id_orden_trabajo.disable();
 	
 	
 	},
@@ -508,7 +511,8 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
 	    Phx.vista.ObligacionDet.superclass.onButtonNew.call(this); 
 	    this.cmpMontoPagoMo.enable(); 
 	    this.cmpObligacionPago.setValue(this.maestro.id_obligacion_pago);
-	    //this.Cmp.id_orden_trabajo.disable();
+	    this.Cmp.id_orden_trabajo.allowBlank = true;
+	    this.Cmp.id_orden_trabajo.disable();  
 	    
 	},
 	iniciarEventos:function(){
@@ -520,12 +524,20 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
 	        //this.cmpCuenta=this.getComponente('id_cuenta');
 	        //this.cmpAuxiliar=this.getComponente('id_auxiliar');
 	        this.cmpObligacionPago=this.getComponente('id_obligacion_pago');
-	        /*
+	        
+	        this.Cmp.id_concepto_ingas.on('change',function( cmb, rec, ind){
+	        	    this.Cmp.id_orden_trabajo.reset();
+	           },this);
+	        
 	        this.Cmp.id_concepto_ingas.on('select',function( cmb, rec, ind){
+	        	
+	        	console.log(cmb, rec, ind);
+	        	
+	        	console.log(rec.data.requiere_ot)
 			        this.Cmp.id_orden_trabajo.store.baseParams = {
-			        		                                           filtro_ot:rec.data.filtro_or,
+			        		                                           filtro_ot:rec.data.filtro_ot,
 			        		 										   requiere_ot:rec.data.requiere_ot,
-			        		 										   id_grupo_ots:rec.data.filtro_ots
+			        		 										   id_grupo_ots:rec.data.id_grupo_ots
 			        		 										 };
 			        this.Cmp.id_orden_trabajo.modificado = true;
 			        this.Cmp.id_orden_trabajo.enable();
@@ -535,8 +547,10 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
 			        else{
 			        	this.Cmp.id_orden_trabajo.allowBlank = true;
 			        }
+			        this.Cmp.id_orden_trabajo.reset();
+			        this.Cmp.id_orden_trabajo.enable();
         	
-             },this);*/
+             },this);
 	    
 	},
 	onReloadPage:function(m){

@@ -393,6 +393,23 @@ class MODPlanPago extends MODbase{
         //Devuelve la respuesta
         return $this->respuesta;
     }
+	 
+	 
+	  function alertarPagosPendientes(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.f_pagos_pendientes_ime';
+        $this->transaccion='TES_PPPREV_INS';
+        $this->tipo_procedimiento='IME';
+                
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+	
+	
 	
 				
 	function listarPlanesPagoPorObligacion(){
@@ -541,6 +558,53 @@ class MODPlanPago extends MODbase{
 		$this->captura('numero_op','varchar');
 		$this->captura('numero_cuota','numeric');
 		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
+    function listarPagosPendientes(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.f_pagos_pendientes_sel';
+		$this->transaccion='TES_PAGOPEN_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this->setCount(false);
+		$this->captura('id_plan_pago','integer');
+		$this->captura('fecha_tentativa','date');
+		$this->captura('id_estado_wf','integer');
+		$this->captura('id_proceso_wf','integer');
+		$this->captura('monto','numeric');
+		$this->captura('liquido_pagable','numeric');
+		$this->captura('monto_retgar_mo','numeric');
+		$this->captura('monto_ejecutar_total_mo','numeric');
+		$this->captura('estado','varchar');
+		$this->captura('list','text');
+		$this->captura('list_unique','text');
+		$this->captura('desc_funcionario_solicitante','text');
+		$this->captura('email_empresa_fun_sol','varchar');
+		$this->captura('email_empresa_usu_reg','varchar');
+		$this->captura('desc_funcionario_usu_reg','text');
+		$this->captura('tipo','varchar');
+		$this->captura('tipo_pago','varchar');
+		$this->captura('tipo_obligacion','varchar');
+		$this->captura('tipo_solicitud','varchar');
+		$this->captura('tipo_concepto_solicitud','varchar');
+		$this->captura('pago_variable','varchar');
+		$this->captura('tipo_anticipo','varchar');
+		$this->captura('num_tramite','varchar');
+		$this->captura('nro_cuota','numeric');
+		$this->captura('nombre_pago','varchar');
+		$this->captura('obs','varchar');
+		$this->captura('codigo_moneda','varchar');
+		
+		
+		
+		
+		
+
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();

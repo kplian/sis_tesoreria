@@ -3657,3 +3657,223 @@ AS
            op.id_funcionario_gerente;
            
 /**********************************F-DEP-RAC-TES-0-03/10/2014*****************************************/
+
+
+/**********************************I-DEP-RAC-TES-0-10/10/2014*****************************************/
+
+CREATE OR REPLACE VIEW tes.vpago_pendientes_al_dia(
+    id_plan_pago,
+    fecha_tentativa,
+    id_estado_wf,
+    id_proceso_wf,
+    monto,
+    liquido_pagable,
+    monto_retgar_mo,
+    monto_ejecutar_total_mo,
+    estado,
+    list,
+    list_unique,
+    desc_funcionario_solicitante,
+    email_empresa_fun_sol,
+    email_empresa_usu_reg,
+    desc_funcionario_usu_reg,
+    tipo,
+    tipo_pago,
+    tipo_obligacion,
+    tipo_solicitud,
+    tipo_concepto_solicitud,
+    pago_variable,
+    tipo_anticipo,
+    estado_reg)
+AS
+  SELECT pp.id_plan_pago,
+         pp.fecha_tentativa,
+         pp.id_estado_wf,
+         pp.id_proceso_wf,
+         pp.monto,
+         pp.liquido_pagable,
+         pp.monto_retgar_mo,
+         pp.monto_ejecutar_total_mo,
+         pp.estado,
+         pxp.list(od.id_obligacion_det::text) AS list,
+         pxp.list_unique(cig.pago_automatico::text) AS list_unique,
+         fun.desc_funcionario1 AS desc_funcionario_solicitante,
+         fun.email_empresa AS email_empresa_fun_sol,
+         freg.email_empresa AS email_empresa_usu_reg,
+         freg.desc_funcionario1 AS desc_funcionario_usu_reg,
+         pp.tipo,
+         pp.tipo_pago,
+         op.tipo_obligacion,
+         op.tipo_solicitud,
+         op.tipo_concepto_solicitud,
+         op.pago_variable,
+         op.tipo_anticipo,
+         pp.estado_reg
+  FROM tes.tplan_pago pp
+       JOIN tes.tobligacion_pago op ON op.id_obligacion_pago =
+         pp.id_obligacion_pago
+       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
+         op.id_obligacion_pago
+       JOIN param.tconcepto_ingas cig ON cig.id_concepto_ingas =
+         od.id_concepto_ingas
+       JOIN segu.tusuario usu ON usu.id_usuario = pp.id_usuario_reg
+       JOIN orga.vfuncionario_persona freg ON freg.id_persona = usu.id_persona
+       LEFT JOIN orga.vfuncionario_persona fun ON op.id_funcionario =
+         fun.id_funcionario
+  WHERE (pp.estado::text = ANY (ARRAY [ 'borrador'::character varying::text,
+    'vbsolicitante'::character varying::text ])) AND
+        pp.fecha_tentativa <= now()::date AND
+        pp.monto_ejecutar_total_mo > 0::numeric AND
+        (pp.tipo::text = ANY (ARRAY [ 'devengado_pagado'::character varying::
+          text, 'devengado_pagado_1c'::character varying::text, 'ant_aplicado'::
+          character varying::text ])) AND
+        (op.tipo_obligacion::text = ANY (ARRAY [ 'adquisiciones'::character
+          varying::text, 'pago_directo'::character varying::text ])) AND
+        pp.estado_reg::text = 'activo'::text
+  GROUP BY pp.id_plan_pago,
+           pp.fecha_tentativa,
+           pp.id_estado_wf,
+           pp.id_proceso_wf,
+           pp.monto,
+           pp.liquido_pagable,
+           pp.monto_retgar_mo,
+           pp.monto_ejecutar_total_mo,
+           pp.estado,
+           fun.desc_funcionario1,
+           fun.email_empresa,
+           freg.email_empresa,
+           freg.desc_funcionario1,
+           pp.tipo,
+           pp.tipo_pago,
+           op.tipo_obligacion,
+           op.tipo_solicitud,
+           op.tipo_concepto_solicitud,
+           op.pago_variable,
+           op.tipo_anticipo;
+           
+/**********************************F-DEP-RAC-TES-0-10/10/2014*****************************************/
+
+
+/**********************************I-DEP-RAC-TES-0-13/10/2014*****************************************/
+
+
+--------------- SQL ---------------
+
+CREATE OR REPLACE VIEW tes.vpago_pendientes_al_dia(
+    id_plan_pago,
+    fecha_tentativa,
+    id_estado_wf,
+    id_proceso_wf,
+    monto,
+    liquido_pagable,
+    monto_retgar_mo,
+    monto_ejecutar_total_mo,
+    estado,
+    id_obligacion_dets,
+    pagos_automaticos,
+    desc_funcionario_solicitante,
+    email_empresa_fun_sol,
+    email_empresa_usu_reg,
+    desc_funcionario_usu_reg,
+    tipo,
+    tipo_pago,
+    tipo_obligacion,
+    tipo_solicitud,
+    tipo_concepto_solicitud,
+    pago_variable,
+    tipo_anticipo,
+    estado_reg,
+    num_tramite,
+    nro_cuota,
+    nombre_pago,
+    obs,
+    codigo_moneda,
+    id_funcionario_solicitante,
+    id_funcionario_registro,
+    id_proceso_wf_op,
+    estado_op)
+AS
+  SELECT pp.id_plan_pago,
+         pp.fecha_tentativa,
+         pp.id_estado_wf,
+         pp.id_proceso_wf,
+         pp.monto,
+         pp.liquido_pagable,
+         pp.monto_retgar_mo,
+         pp.monto_ejecutar_total_mo,
+         pp.estado,
+         pxp.list(od.id_obligacion_det::text) AS id_obligacion_dets,
+         pxp.list_unique(cig.pago_automatico::text) AS pagos_automaticos,
+         fun.desc_funcionario1 AS desc_funcionario_solicitante,
+         fun.email_empresa AS email_empresa_fun_sol,
+         freg.email_empresa AS email_empresa_usu_reg,
+         freg.desc_funcionario1 AS desc_funcionario_usu_reg,
+         pp.tipo,
+         pp.tipo_pago,
+         op.tipo_obligacion,
+         op.tipo_solicitud,
+         op.tipo_concepto_solicitud,
+         op.pago_variable,
+         op.tipo_anticipo,
+         pp.estado_reg,
+         op.num_tramite,
+         pp.nro_cuota,
+         pp.nombre_pago,
+         op.obs,
+         mon.codigo AS codigo_moneda,
+         fun.id_funcionario AS id_funcionario_solicitante,
+         freg.id_funcionario AS id_funcionario_registro,
+         op.id_proceso_wf AS id_proceso_wf_op,
+         op.estado AS estado_op
+  FROM tes.tplan_pago pp
+       JOIN tes.tobligacion_pago op ON op.id_obligacion_pago =
+         pp.id_obligacion_pago
+       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
+       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
+         op.id_obligacion_pago
+       JOIN param.tconcepto_ingas cig ON cig.id_concepto_ingas =
+         od.id_concepto_ingas
+       JOIN segu.tusuario usu ON usu.id_usuario = pp.id_usuario_reg
+       JOIN orga.vfuncionario_persona freg ON freg.id_persona = usu.id_persona
+       LEFT JOIN orga.vfuncionario_persona fun ON op.id_funcionario =
+         fun.id_funcionario
+  WHERE (pp.estado::text = ANY (ARRAY [ 'borrador'::character varying::text,
+    'vbsolicitante'::character varying::text ])) AND
+        pp.fecha_tentativa <= now()::date AND
+        pp.monto_ejecutar_total_mo > 0::numeric AND
+        (pp.tipo::text = ANY (ARRAY [ 'devengado_pagado'::character varying::
+          text, 'devengado_pagado_1c'::character varying::text, 'ant_aplicado'::
+          character varying::text ])) AND
+        (op.tipo_obligacion::text = ANY (ARRAY [ 'adquisiciones'::character
+          varying::text, 'pago_directo'::character varying::text ])) AND
+        pp.estado_reg::text = 'activo'::text 
+  GROUP BY pp.id_plan_pago,
+           pp.fecha_tentativa,
+           pp.id_estado_wf,
+           pp.id_proceso_wf,
+           pp.monto,
+           pp.liquido_pagable,
+           pp.monto_retgar_mo,
+           pp.monto_ejecutar_total_mo,
+           pp.estado,
+           fun.desc_funcionario1,
+           fun.email_empresa,
+           freg.email_empresa,
+           freg.desc_funcionario1,
+           pp.tipo,
+           pp.tipo_pago,
+           op.tipo_obligacion,
+           op.tipo_solicitud,
+           op.tipo_concepto_solicitud,
+           op.pago_variable,
+           op.tipo_anticipo,
+           op.num_tramite,
+           pp.nro_cuota,
+           pp.nombre_pago,
+           op.obs,
+           mon.codigo,
+           fun.id_funcionario,
+           freg.id_funcionario,
+           op.id_proceso_wf,
+           op.estado;
+/**********************************F-DEP-RAC-TES-0-13/10/2014*****************************************/
