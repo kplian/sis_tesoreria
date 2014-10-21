@@ -130,7 +130,7 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                 mode:'remote',
                 pageSize:10,
                 queryDelay:1000,
-                 listWidth:500,
+                listWidth:600,
                 resizable:true,
                 anchor:'80%', 
                 gwidth: 200,      
@@ -591,7 +591,7 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                this.getBoton('new').enable();
                this.getBoton('del').enable();
                
-               this.getBoton('bchecklist').enable();
+               this.getBoton('btnProrrateo').enable();
                
                
          }
@@ -600,7 +600,7 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                this.getBoton('edit').disable();
                this.getBoton('new').disable();
                this.getBoton('del').disable();
-               this.getBoton('bchecklist').disable();
+               this.getBoton('btnProrrateo').disable();
          }
          
           if(this.maestro&&(this.maestro.estado ==  'borrador' && this.maestro.tipo_obligacion=='adquisiciones')){
@@ -608,7 +608,7 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                this.getBoton('edit').enable();
                this.getBoton('new').disable();
                this.getBoton('del').disable();
-               this.getBoton('bchecklist').disable();
+               this.getBoton('btnProrrateo').disable();
          }
           
         
@@ -617,17 +617,20 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
      
      liberaMenu: function() {
          Phx.vista.ObligacionDet.superclass.liberaMenu.call(this); 
+           this.getBoton('btnProrrateo').enable();
            if(this.maestro&&(this.maestro.estado !=  'borrador')){
                
                this.getBoton('edit').disable();
                this.getBoton('new').disable();
                this.getBoton('del').disable();
+               this.getBoton('btnProrrateo').disable();
          }
           if(this.maestro&&(this.maestro.estado ==  'borrador' && this.maestro.tipo_obligacion=='adquisiciones')){
                
                this.getBoton('edit').disable();
                this.getBoton('new').disable();
                this.getBoton('del').disable();
+               this.getBoton('btnProrrateo').disable();
          }
          
     },
