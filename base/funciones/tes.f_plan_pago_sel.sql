@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -210,7 +212,11 @@ BEGIN
                         plapa.revisado_asistente,
                         plapa.conformidad,
                         plapa.fecha_conformidad,
-                        op.tipo_obligacion           
+                        op.tipo_obligacion,
+                        plapa.monto_ajuste_ag,
+                        plapa.monto_ajuste_siguiente_pago,
+                        op.pago_variable
+                                  
 						from tes.tplan_pago plapa
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
                         inner join param.tmoneda mon on mon.id_moneda = op.id_moneda
