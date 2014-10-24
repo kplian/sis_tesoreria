@@ -77,8 +77,9 @@ Phx.vista.PlanPagoRegIni = {
        
         //evento para definir los tipos de pago
         this.Cmp.tipo.on('select',function(cmb,rec,i){
+        	 var data = this.getSelectedData();
              //segun el tipo define los campo visibles y no visibles
-             this.setTipoPago[rec.data.variable](this);
+             this.setTipoPago[rec.data.variable](this,data);
              this.unblockGroup(1);
              this.window.doLayout();
              
@@ -100,6 +101,16 @@ Phx.vista.PlanPagoRegIni = {
                      this.obtenerFaltante('dev_garantia');
                  }
               }
+        },this);
+        
+        
+        this.Cmp.monto_ajuste_ag.on('change',function(cmp, newValue, oldValue){
+        	
+        	if(newValue > this.Cmp.monto_ejecutar_total_mo.getValue()){
+        		console.log('---',oldValue, newValue)
+        		cmp.setValue(oldValue);
+        	}
+        	
         },this);
        
     },
@@ -174,6 +185,7 @@ Phx.vista.PlanPagoRegIni = {
             
              this.porc_ret_gar = 0; //resetea valor por defecto de retencion de garantia
              var data = this.getSelectedData();
+             this.ocultarGrupo(2); //ocultar el grupo de ajustes
              if(data){
                     
                     // para habilitar registros de cuotas de pago 
@@ -244,7 +256,13 @@ Phx.vista.PlanPagoRegIni = {
                                 this.inicioValores();
                                 //obtiene el monto de apgo que falta registrar
                                 //y el monto de anticpo parcial que falta por descontar
-                                this.obtenerFaltante('ant_aplicado_descontado',data.id_plan_pago);
+                                if(data.pago_variable == 'si'){
+                                	this.obtenerFaltante('ant_aplicado_descontado_op_variable',data.id_plan_pago);	
+                                }
+                                else{
+                                    this.obtenerFaltante('ant_aplicado_descontado',data.id_plan_pago);	
+                                }
+                                
                    
                             }
                         }

@@ -241,7 +241,8 @@ BEGIN
             pp.monto,
             pp.descuento_ley,
             pp.monto_retgar_mo,
-            op.numero 
+            op.numero,
+            op.pago_variable
             
           into v_registros  
            from tes.tplan_pago pp
@@ -313,11 +314,18 @@ BEGIN
                
          ELSEIF v_parametros.tipo in ('ant_aplicado')  THEN
                           
-                v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'ant_aplicado_descontado', v_parametros.id_plan_pago_fk);
-                IF (v_monto_total)  <  v_parametros.monto::numeric  THEN
-                   raise exception 'No puede exceder el total anticipado: %',v_monto_total;
+                IF  v_registros.pago_variable = 'no' THEN
+                     v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'ant_aplicado_descontado', v_parametros.id_plan_pago_fk);
+                     IF (v_monto_total)  <  v_parametros.monto::numeric  THEN
+                       raise exception 'No puede exceder el total anticipado: %',v_monto_total;
+                     END IF;
+                
+                ELSE
+                     v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'ant_aplicado_descontado_op_variable', v_parametros.id_plan_pago_fk);
+                     
+                
                 END IF;
-                  
+                
          ELSE
             
             raise exception 'tipo no reconocido %',v_parametros.tipo;
@@ -387,85 +395,89 @@ BEGIN
                      
             --Sentencia de la insercion
         	insert into tes.tplan_pago(
-			estado_reg,
-			nro_cuota,
-		    nro_sol_pago,
-            id_proceso_wf,
-		    estado,
-			--tipo_pago,
-			monto_ejecutar_total_mo,
-			obs_descuentos_anticipo,
-			id_plan_pago_fk,
-			id_obligacion_pago,
-			id_plantilla,
-			descuento_anticipo,
-			otros_descuentos,
-			tipo,
-			obs_monto_no_pagado,
-			obs_otros_descuentos,
-			monto,
-		    nombre_pago,
-            id_estado_wf,
-		    id_cuenta_bancaria,
-			forma_pago,
-			monto_no_pagado,
-			fecha_reg,
-			id_usuario_reg,
-			fecha_mod,
-			id_usuario_mod,
-            liquido_pagable,
-            fecha_tentativa,
-            --tipo_cambio,
-            monto_retgar_mo,
-            descuento_ley,
-            obs_descuentos_ley,
-            porc_descuento_ley,
-            nro_cheque,
-            nro_cuenta_bancaria,
-            id_cuenta_bancaria_mov,
-            id_usuario_ai,
-            usuario_ai,
-            porc_monto_retgar
-          	) values(
-			'activo',
-			v_nro_cuota,
-			'---',--'v_parametros.nro_sol_pago',
-			v_id_proceso_wf,
-			v_codigo_estado,
-			--v_parametros.tipo_pago,
-			v_monto_ejecutar_total_mo,
-			v_parametros.obs_descuentos_anticipo,
-			v_parametros.id_plan_pago_fk,
-			v_parametros.id_obligacion_pago,
-			v_parametros.id_plantilla,
-			v_parametros.descuento_anticipo,
-			v_parametros.otros_descuentos,
-			v_parametros.tipo,
-			v_parametros.obs_monto_no_pagado,
-			v_parametros.obs_otros_descuentos,
-			v_parametros.monto,
-			v_parametros.nombre_pago,
-		    v_id_estado_wf,
-			v_id_cuenta_bancaria,
-			v_forma_pago,
-			v_parametros.monto_no_pagado,
-			now(),
-			p_id_usuario,
-			null,
-			null,
-            v_liquido_pagable,
-            v_parametros.fecha_tentativa,
-            --v_parametros.tipo_cambio,
-            v_parametros.monto_retgar_mo,
-            v_parametros.descuento_ley,
-            v_parametros.obs_descuentos_ley,
-            v_parametros.porc_descuento_ley,
-            COALESCE(v_nro_cheque,0),
-            v_nro_cuenta_bancaria,
-			v_id_cuenta_bancaria_mov,
-            v_parametros._id_usuario_ai,
-            v_parametros._nombre_usuario_ai,
-            v_parametros.porc_monto_retgar				
+                estado_reg,
+                nro_cuota,
+                nro_sol_pago,
+                id_proceso_wf,
+                estado,
+                --tipo_pago,
+                monto_ejecutar_total_mo,
+                obs_descuentos_anticipo,
+                id_plan_pago_fk,
+                id_obligacion_pago,
+                id_plantilla,
+                descuento_anticipo,
+                otros_descuentos,
+                tipo,
+                obs_monto_no_pagado,
+                obs_otros_descuentos,
+                monto,
+                nombre_pago,
+                id_estado_wf,
+                id_cuenta_bancaria,
+                forma_pago,
+                monto_no_pagado,
+                fecha_reg,
+                id_usuario_reg,
+                fecha_mod,
+                id_usuario_mod,
+                liquido_pagable,
+                fecha_tentativa,
+                --tipo_cambio,
+                monto_retgar_mo,
+                descuento_ley,
+                obs_descuentos_ley,
+                porc_descuento_ley,
+                nro_cheque,
+                nro_cuenta_bancaria,
+                id_cuenta_bancaria_mov,
+                id_usuario_ai,
+                usuario_ai,
+                porc_monto_retgar,
+                monto_ajuste_ag
+          	) 
+            values
+            (
+              'activo',
+              v_nro_cuota,
+              '---',--'v_parametros.nro_sol_pago',
+              v_id_proceso_wf,
+              v_codigo_estado,
+              --v_parametros.tipo_pago,
+              v_monto_ejecutar_total_mo,
+              v_parametros.obs_descuentos_anticipo,
+              v_parametros.id_plan_pago_fk,
+              v_parametros.id_obligacion_pago,
+              v_parametros.id_plantilla,
+              v_parametros.descuento_anticipo,
+              v_parametros.otros_descuentos,
+              v_parametros.tipo,
+              v_parametros.obs_monto_no_pagado,
+              v_parametros.obs_otros_descuentos,
+              v_parametros.monto,
+              v_parametros.nombre_pago,
+              v_id_estado_wf,
+              v_id_cuenta_bancaria,
+              v_forma_pago,
+              v_parametros.monto_no_pagado,
+              now(),
+              p_id_usuario,
+              null,
+              null,
+              v_liquido_pagable,
+              v_parametros.fecha_tentativa,
+              --v_parametros.tipo_cambio,
+              v_parametros.monto_retgar_mo,
+              v_parametros.descuento_ley,
+              v_parametros.obs_descuentos_ley,
+              v_parametros.porc_descuento_ley,
+              COALESCE(v_nro_cheque,0),
+              v_nro_cuenta_bancaria,
+              v_id_cuenta_bancaria_mov,
+              v_parametros._id_usuario_ai,
+              v_parametros._nombre_usuario_ai,
+              v_parametros.porc_monto_retgar,
+              v_parametros.monto_ajuste_ag				
 		)RETURNING id_plan_pago into v_id_plan_pago;
             
             -- actualiza el monto pagado en el plan_pago padre
@@ -958,6 +970,7 @@ BEGIN
             op.id_estado_wf,
             op.estado,
             op.id_depto,
+            op.pago_variable,
             op.pago_variable
           into v_registros  
            from tes.tobligacion_pago op
@@ -1119,11 +1132,19 @@ BEGIN
             
             ELSIF v_registros_pp.tipo = 'ant_aplicado' THEN 
             
-                    v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'ant_aplicado_descontado', v_registros_pp.id_plan_pago_fk);
-                   
-                    IF (v_monto_total + v_registros_pp.monto)  <  v_parametros.monto  THEN
-                      raise exception 'No puede exceder el total anticipado';
-                    END IF;
+                   IF  v_registros.pago_variable = 'no' THEN 
+                      
+                      v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'ant_aplicado_descontado', v_registros_pp.id_plan_pago_fk);
+                      IF (v_monto_total + v_registros_pp.monto)  <  v_parametros.monto  THEN
+                         raise exception 'No puede exceder el total anticipado';
+                      END IF;
+                    
+                   ELSE
+                     v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'ant_aplicado_descontado_op_variable', v_parametros.id_plan_pago_fk);
+                    
+                   END IF;
+                    
+                    
                     
                    --  calcula el liquido pagable y el monto a ejecutar presupeustaria mente
                    --  en cuota de pago el monoto no pagado no se considera
@@ -1261,7 +1282,8 @@ BEGIN
             monto_excento = COALESCE(v_monto_excento,0),
             id_usuario_ai = v_parametros._id_usuario_ai,
             usuario_ai = v_parametros._nombre_usuario_ai,
-            porc_monto_retgar = v_porc_monto_retgar
+            porc_monto_retgar = v_porc_monto_retgar,
+            monto_ajuste_ag = v_parametros.monto_ajuste_ag
             
             
             where id_plan_pago=v_parametros.id_plan_pago;

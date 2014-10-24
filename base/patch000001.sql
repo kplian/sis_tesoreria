@@ -863,3 +863,47 @@ ALTER TABLE tes.tplan_pago
   ALTER COLUMN nro_cheque DROP DEFAULT;
   
 /***********************************F-SCP-RAC-TES-0-02/10/2014***************************************/
+
+
+
+/***********************************I-SCP-RAC-TES-0-21/10/2014***************************************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN monto_ajuste_ag NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tplan_pago.monto_ajuste_ag
+IS 'monto de ajuste anterior gestion, (se usa en anticipos parciales). Si sobro dinero de un anticipo en la anterior gestion se utuliza este campo para ajustar contra ese sobrante';
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN monto_ajuste_siguiente_pago NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tplan_pago.monto_ajuste_siguiente_pago
+IS 'Se utiliza par la aplicacion de anticipos totales,  si falta dinero para cubrir la aplicacion en este monto,  en este campo ponemos el monto a cubrir con el siguiente anticipo';
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN ajuste_anticipo NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tobligacion_pago.ajuste_anticipo
+IS 'Ajuste de anticipo se utuliza para cuaadrar y poder cerrar el proceso de obligacion de pago cuando de falta en el monto anticipado. Se tiene un monto aplicado mayor que el monto aplicado';
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN ajuste_aplicado NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tobligacion_pago.ajuste_aplicado
+IS 'Se utiliza para hacer cuadrad el monto anticipado total con el monto aplicado, se utilia cuando el monto anticipado total sobrepasa el monto aplicado';
+
+
+/***********************************F-SCP-RAC-TES-0-21/10/2014***************************************/
+
+

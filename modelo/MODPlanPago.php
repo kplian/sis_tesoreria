@@ -72,7 +72,6 @@ class MODPlanPago extends MODbase{
         $this->captura('sinc_presupuesto','varchar'); 
         $this->captura('monto_retgar_mb','numeric');
         $this->captura('monto_retgar_mo','numeric'); 
-        
         $this->captura('descuento_ley','numeric'); 
         $this->captura('obs_descuentos_ley','text'); 
         $this->captura('descuento_ley_mb','numeric'); 
@@ -87,12 +86,9 @@ class MODPlanPago extends MODbase{
 		$this->captura('tipo_moneda','varchar');
 		$this->captura('desc_moneda','varchar');
 		$this->captura('num_tramite','varchar');
-		
-		
 		$this->captura('porc_monto_excento_var','numeric');
 		$this->captura('monto_excento','numeric');
 		$this->captura('obs_wf','text');
-		
 		$this->captura('obs_descuento_inter_serv','text');
 		$this->captura('descuento_inter_serv','numeric');
 		$this->captura('porc_monto_retgar','numeric');
@@ -101,9 +97,9 @@ class MODPlanPago extends MODbase{
 		$this->captura('conformidad','text');
 		$this->captura('fecha_conformidad','date');
 		$this->captura('tipo_obligacion','varchar');
-		
-		
-		
+		$this->captura('monto_ajuste_ag','numeric');
+		$this->captura('monto_ajuste_siguiente_pag','numeric');
+		$this->captura('pago_variable','varchar');
 		
 		
 		
@@ -142,7 +138,7 @@ class MODPlanPago extends MODbase{
 		
 		elseif (in_array($this->objParam->getParametro('tipo'), array("ant_parcial","anticipo","dev_garantia"))){
            ///////////////////////////////////////////////
-           // Cuotas de prier que no tienen prorrateo
+           // Cuotas de primer nivel que no tienen prorrateo
            /////////////////////////////////////////////         
             $this->transaccion='TES_PPANTPAR_INS';  //anticipo parcial  
             
@@ -187,6 +183,10 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('descuento_inter_serv','descuento_inter_serv','numeric');
 		$this->setParametro('obs_descuento_inter_serv','obs_descuento_inter_serv','text');
 		$this->setParametro('porc_monto_retgar','porc_monto_retgar','numeric');
+		
+		
+		$this->setParametro('monto_ajuste_ag','monto_ajuste_ag','numeric');
+		$this->setParametro('monto_ajuste_siguiente_pag','monto_ajuste_siguiente_pag','numeric');
 
         
 		
@@ -238,6 +238,8 @@ class MODPlanPago extends MODbase{
         $this->setParametro('descuento_inter_serv','descuento_inter_serv','numeric');
         $this->setParametro('obs_descuento_inter_serv','obs_descuento_inter_serv','text');
         $this->setParametro('porc_monto_retgar','porc_monto_retgar','numeric');
+		$this->setParametro('monto_ajuste_ag','monto_ajuste_ag','numeric');
+		$this->setParametro('monto_ajuste_siguiente_pag','monto_ajuste_siguiente_pag','numeric');
 
         
 		//Ejecuta la instruccion
@@ -289,13 +291,6 @@ class MODPlanPago extends MODbase{
         $this->setParametro('id_estado_wf','id_estado_wf','int4');
         $this->setParametro('obs','obs','text');
         
-        
-       
-       
-      
-         
-        
-
         //Ejecuta la instruccion
         $this->armarConsulta();
         $this->ejecutarConsulta();
@@ -605,6 +600,36 @@ class MODPlanPago extends MODbase{
 		
 		
 
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
+	function listarPagosXConcepto(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.f_plan_pago_sel';
+		$this->transaccion='TES_PAXCIG_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		
+		$this->setParametro('id_concepto','id_concepto','int4');
+        
+		
+		$this->captura('id_plan_pago','int4');
+		$this->captura('orden_trabajo','text');
+		$this->captura('num_tramite','varchar');
+		$this->captura('nro_cuota','numeric');
+		$this->captura('desc_proveedor','varchar');
+		$this->captura('estado','varchar');
+		$this->captura('fecha','date');
+		$this->captura('moneda','varchar');
+		$this->captura('monto','numeric');
+		$this->captura('monto_ejecutar_mo','numeric');
+		
+		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();

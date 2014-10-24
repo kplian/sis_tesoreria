@@ -44,6 +44,7 @@ DECLARE
     v_mensaje varchar;
     v_id_cotizacion integer;
     v_monto_total  numeric;
+    v_saldo_x_pagar   numeric;
 	
     
 BEGIN
@@ -57,7 +58,8 @@ BEGIN
        select
        op.id_obligacion_pago,
        op.tipo_obligacion,
-       op.estado
+       op.estado,
+       op.pago_variable
        into
        v_registros_obli
        from tes.tobligacion_pago op
@@ -65,7 +67,7 @@ BEGIN
     
     
     
-     --  verificamos que el total de cuotas esten en su estado final
+       --  verificamos que el total de cuotas esten en su estado final
          IF EXISTS( select 
                  1
                from tes.tplan_pago pp
@@ -74,7 +76,7 @@ BEGIN
                      and pp.estado not in ('devengado','pagado', 'anticipado', 'aplicado', 'devuelto')) THEN
           
           
-          raise exception 'existen cuotas pendientes de finanización';
+             raise exception 'existen cuotas pendientes de finanización';
           
           END IF;
           
@@ -96,32 +98,45 @@ BEGIN
          END IF;
       
       
-          -- validamos que si tienes anticipos totales   el total este aplicado
-      
-          v_mensaje = '';
-          FOR v_registros in ( select 
-                               pp.monto,
-                               pp.total_pagado,
-                               pp.nro_cuota
-                               from tes.tplan_pago pp
-                               where pp.id_obligacion_pago =  p_id_obligacion_pago  
-                                    and pp.estado_reg = 'activo'
-                                    and pp.tipo = 'anticipo'
-                                    and pp.monto != pp.total_pagado
-                                    and pp.estado = 'anticipado') LOOP
-                      
-                      
-                       v_mensaje = v_mensaje||'La cuota '||v_registros.nro_cuota::varchar||'  le fatal aplicar '|| (COALESCE(v_registros.monto,0)-COALESCE(v_registros.total_pagado,0))::varchar||' </br>';
-          
-          END LOOP;
-          
-          IF v_mensaje!='' THEN
-          
-             raise exception 'Existen anticipos no aplicados, % ',v_mensaje;
-          
-          END IF;
-      
-      
+         -- validamos que si tienes anticipos totales   el total este aplicado para procesos no variables
+         IF  v_registros_obli.pago_variable = 'no'   THEN
+         
+                v_mensaje = '';
+                FOR v_registros in ( select 
+                                     pp.monto,
+                                     pp.total_pagado,
+                                     pp.nro_cuota
+                                     from tes.tplan_pago pp
+                                     where pp.id_obligacion_pago =  p_id_obligacion_pago  
+                                          and pp.estado_reg = 'activo'
+                                          and pp.tipo = 'anticipo'
+                                          and pp.monto != pp.total_pagado
+                                          and pp.estado = 'anticipado') LOOP
+                            
+                            
+                             v_mensaje = v_mensaje||'La cuota '||v_registros.nro_cuota::varchar||'  le fatal aplicar '|| (COALESCE(v_registros.monto,0)-COALESCE(v_registros.total_pagado,0))::varchar||' </br>';
+                
+                END LOOP;
+                
+                IF v_mensaje!='' THEN
+                
+                   raise exception 'Existen anticipos no aplicados, % ',v_mensaje;
+                
+                END IF;
+         
+         ELSE
+             --  Si es un proceso variable validamos 
+             v_saldo_x_pagar = tes.f_determinar_total_faltante(v_registros_obli.id_obligacion_pago,'ant_aplicado_descontado_op_variable');
+             
+             IF v_saldo_x_pagar > 0  THEN
+                raise exception 'Tiene un anticipo total que no ha sido aplicado (%),  si desesa continuar de todas formas, primero ajuste el monto aplicado para la obligación',v_saldo_x_pagar;
+             END IF; 
+             
+             IF v_saldo_x_pagar < 0  THEN
+                raise exception 'Sus aplicaciones sobre pasan el monto anticipado, de un anticipo por el faltante (%) o haga un ajuste al monto anticipado en la obligacion',v_saldo_x_pagar*-1;
+             END IF;
+             
+        END IF;
         
           
         

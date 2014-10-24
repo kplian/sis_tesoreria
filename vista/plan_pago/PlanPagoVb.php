@@ -377,7 +377,9 @@ Phx.vista.PlanPagoVb = {
         //Evento para ocultar/motrar componentes por cheque o transferencia
         this.Cmp.forma_pago.on('change',function(groupRadio,radio){
             this.ocultarCheCue(this,radio.inputValue);
-        },this);           
+        },this);   
+        
+                
     
     }, 
     

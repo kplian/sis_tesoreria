@@ -20,7 +20,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		Phx.vista.PlanPago.superclass.constructor.call(this,config);
 		this.init();
 		this.addButton('ant_estado',{argument: {estado: 'anterior'},text:'Anterior',iconCls: 'batras',disabled:true,handler:this.antEstado,tooltip: '<b>Pasar al Anterior Estado</b>'});
-        this.addButton('sig_estado',{text:'Siguiente',iconCls: 'badelante',disabled:true,handler:this.sigEstado,tooltip: '<b>Pasar al Siguiente Estado</b>'});
+        this.addButton('sig_estado',{text:'Aprobar/Sig.',iconCls: 'badelante',disabled:true,handler:this.sigEstado,tooltip: '<b>Apueba y pasar al Siguiente Estado</b>'});
         this.addButton('SolPlanPago',{text:'Sol. Plan Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnSolPlanPago,tooltip: '<b>Solicitud Plan Pago</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
 		this.addButton('btnChequeoDocumentosWf',
             {
@@ -917,7 +917,41 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 			id_grupo:1,
 			grid:true,
 			form:false
-		}
+		},
+        {
+            config:{
+                name: 'monto_ajuste_ag',
+                currencyChar:' ',
+                fieldLabel: 'Ajuste Anterior Gestión',
+                qtip:'Si en la anterior gestión el proveedor quedo con anticipo a favor de nuestra empresa, acá colocamos el monto que queremos cubrir con dicho sobrante',
+                allowBlank: true,
+                allowNegative:false,
+                gwidth: 100,
+                maxLength:1245186
+            },
+            type:'MoneyField',
+            filters:{pfiltro:'plapa.descuento_inter_serv',type:'numeric'},
+            id_grupo:2,
+            grid:true,
+            form:true
+        },
+        {
+            config:{
+                name: 'monto_ajuste_siguiente_pag',
+                currencyChar:' ',
+                fieldLabel: 'Ajuste Anticipo siguiente',
+                qtip:'Si el anticipo no alcanza para cubrir, acá colocamos el monto a cubrir con el siguiente anticipo',
+                allowBlank: true,
+                allowNegative:false,
+                gwidth: 100,
+                maxLength:1245186
+            },
+            type:'MoneyField',
+            filters:{pfiltro:'plapa.descuento_inter_serv',type:'numeric'},
+            id_grupo:2,
+            grid:true,
+            form:true
+        }
 	],
 	
 	title:'Plan Pago',
@@ -985,7 +1019,11 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'num_tramite','monto_excento',
 		'proc_monto_excento_var','obs_wf','descuento_inter_serv',
 		'obs_descuento_inter_serv','porc_monto_retgar','desc_funcionario1','revisado_asistente',
-		{name:'fecha_conformidad', type: 'date',dateFormat:'Y-m-d'},'conformidad','tipo_obligacion'
+		{name:'fecha_conformidad', type: 'date',dateFormat:'Y-m-d'},
+		'conformidad',
+		'tipo_obligacion',
+		'monto_ajuste_ag',
+		'monto_ajuste_siguiente_pag','pago_variable'
 		
 	],
 	
@@ -1325,6 +1363,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         this.Cmp.liquido_pagable.setReadOnly(true);
         this.Cmp.monto_ejecutar_total_mo.setReadOnly(true);
         
+        this.Cmp.monto_ajuste_ag.setValue(0);
+        this.Cmp.monto_ajuste_siguiente_pag.setValue(0);
+        
     },
     
     ocultarCheCue: function(me,pFormaPago){
@@ -1374,11 +1415,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 me.mostrarComponente(me.Cmp.monto_retgar_mo)   
                 me.mostrarComponente(me.Cmp.descuento_ley);
                 me.mostrarComponente(me.Cmp.obs_descuentos_ley);
-                
                 me.deshabilitarDescuentos(me);
                 me.ocultarComponentesPago(me);
+                me.Cmp.monto_retgar_mo.setReadOnly(false);
                 
-                me.Cmp.monto_retgar_mo.setReadOnly(false)
                 
            },
            
@@ -1395,7 +1435,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                
                me.habilitarDescuentos(me)
                me.mostrarComponentesPago(me);
-               me.Cmp.monto_retgar_mo.setReadOnly(false)
+               me.Cmp.monto_retgar_mo.setReadOnly(false);
+               
               
         
         
@@ -1413,7 +1454,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                me.mostrarComponente(me.Cmp.monto_no_pagado);
                me.mostrarComponente(me.Cmp.obs_monto_no_pagado);
                me.habilitarDescuentos(me);
-               },
+              
+          },
            'dev_garantia':function(me){
               me.ocultarComponente(me.Cmp.id_plantilla);
               me.mostrarComponente(me.Cmp.liquido_pagable);
@@ -1424,6 +1466,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
               me.ocultarComponente(me.Cmp.monto_ejecutar_total_mo);
               me.ocultarComponente(me.Cmp.monto_no_pagado);
               me.ocultarComponente(me.Cmp.monto_retgar_mo);
+             
               
            },
            
@@ -1432,7 +1475,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                me.habilitarDescuentos(me);
                me.mostrarComponentesPago(me);
                me.mostrarComponente(me.Cmp.liquido_pagable);
-               me.Cmp.monto_retgar_mo.setReadOnly(true)
+               me.Cmp.monto_retgar_mo.setReadOnly(true);
+              
         },
         'ant_parcial':function(me){
                 me.ocultarComponente(me.Cmp.id_plantilla);
@@ -1451,6 +1495,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 me.ocultarComponente(me.Cmp.obs_otros_descuentos);
                 me.ocultarComponente(me.Cmp.obs_descuentos_ley);
                 me.mostrarComponente(me.Cmp.liquido_pagable);
+               
             
         },
         
@@ -1474,8 +1519,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 me.mostrarComponente(me.Cmp.liquido_pagable);
                 me.mostrarComponente(me.Cmp.descuento_ley);
                 me.mostrarComponente(me.Cmp.obs_descuentos_ley);
+                
          },
-         'ant_aplicado':function(me){
+         'ant_aplicado':function(me, data){
                 me.Cmp.id_plantilla.disable();
                
                 me.ocultarComponente(me.Cmp.descuento_ley);
@@ -1486,6 +1532,15 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 me.deshabilitarDescuentos(me);
                 
                 me.ocultarComponentesPago(me);
+                // solo para pagos variable se pueden insertar ajustes
+                if(data.pago_variable == 'si'){
+                    me.mostrarGrupo(2); //mostra el grupo de ajustes
+                    me.Cmp.monto_ajuste_siguiente_pag.setReadOnly(true);	
+                }
+                else{
+                	me.ocultarGrupo(2); //ocultar el grupo de ajustes
+                }
+                
           }
     },
     
@@ -1552,6 +1607,18 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                                 margins:'2 10 2 2',
                                 id_grupo:1,
                                 flex:1
+                             },
+                              
+                            {
+                                xtype: 'fieldset',
+                                title: 'Ajustes',
+                                autoHeight: true,
+                                hiden: true,
+                                //layout:'hbox',
+                                items: [],
+                                margins:'2 10 2 2',
+                                id_grupo: 2,
+                                flex: 1
                              }
                        ]
                   
@@ -1559,7 +1626,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
     
     onButtonNew:function(){
          this.accionFormulario = 'NEW';
-         Phx.vista.PlanPago.superclass.onButtonNew.call(this); 
+         Phx.vista.PlanPago.superclass.onButtonNew.call(this);
+         this.ocultarGrupo(2); //ocultar el grupo de ajustes 
     },
     
     
@@ -1569,9 +1637,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
          //deshabilita el cambio del tipo de pago
          this.Cmp.tipo.disable();
          this.Cmp.fecha_tentativa.enable();
-         this.Cmp.tipo.store.loadData(this.arrayStore.TODOS) 
+         this.Cmp.tipo.store.loadData(this.arrayStore.TODOS) ;
+         this.ocultarGrupo(2); //ocultar el grupo de ajustes
          //segun el tipo define los campo visibles y no visibles
-         this.setTipoPago[data.tipo](this);
+         this.setTipoPago[data.tipo](this, data);
          if(data.tipo == 'pagado'){
              this.accionFormulario = 'EDIT_PAGO';
              this.porc_ret_gar = data.porc_monto_retgar;

@@ -25,10 +25,11 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
            this.store.baseParams.filtro_valor = config.filtro_directo.valor;
            this.store.baseParams.filtro_campo = config.filtro_directo.campo;
         }
-		
+		//carga de grilla
 		this.load({params:{start:0, 
 		           limit:this.tam_pag}});
-		           
+		//crear venta de ajuste para pagos variable           
+		this.crearFormAjustes();  
 		this.iniciarEventos();
 	    
          this.addButton('ant_estado',{
@@ -67,7 +68,10 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                 tooltip : '<b>Verificación de la disponibilidad presupuestaria</b>'
             });
         
-        this.addButton('diagrama_gantt',{text:'Gant',iconCls: 'bgantt',disabled:true,handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
+        this.addButton('diagrama_gantt',{text:'Gant', iconCls: 'bgantt', disabled:true, handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
+  
+         this.addButton('ajustes',{text:'Ajustes', iconCls: 'blist', disabled:true, handler:this.showAjustes,tooltip: '<b>Ajustes a los anticipos totaltes para pagos variables</b>'});
+  
   
         function diagramGantt(){            
             var data=this.sm.getSelected().data.id_proceso_wf;
@@ -377,8 +381,9 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		{
             config:{
                 name: 'tipo_anticipo',
-                fieldLabel: 'Tiene Anticipo',
+                fieldLabel: 'Tiene Anticipo Parcial',
                 allowBlank: false,
+                qtip:'Se habilita en SI,  solo para el caso de anticipos parcial, estos anticipos se tendran que descontar de los pagos sucesivos (Se descuenta del ligado pagable). Los anticipos parciales no van contra factura u otro similar. <br>Para el caso de anticipo totales  escoger la opcion NO',
                 anchor: '80%',
                 emptyText:'Tipo Obligacion',
                 store:new Ext.data.ArrayStore({
@@ -407,9 +412,9 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'obs',
-				fieldLabel: 'Obs',
-				allowBlank: true,
-				qtip:'OBS, o Si el proveedor es PASAJEROS PERJUDICADOS aqui va el nombre del pasajero',
+				fieldLabel: 'Desc',
+				allowBlank: false,
+				qtip: 'Descripcion del objetivo del pago, o Si el proveedor es PASAJEROS PERJUDICADOS aqui va el nombre del pasajero',
 				anchor: '80%',
 				gwidth: 100,
 				maxLength:1000
@@ -664,7 +669,8 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		{name:'fecha_pp_ini', type: 'date',dateFormat:'Y-m-d'},
 		'rotacion',
 		'ultima_cuota_pp',
-		'ultimo_estado_pp','tipo_anticipo'
+		'ultimo_estado_pp','tipo_anticipo',
+		'ajuste_anticipo','ajuste_aplicado'
 		
 	],
 	
@@ -922,6 +928,10 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
               
               this.getBoton('reporte_com_ejec_pag').disable();
               this.getBoton('reporte_plan_pago').disable();
+              this.getBoton('ajustes').disable();
+             
+               
+               
                
                
           
@@ -966,6 +976,13 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                     
                     
                }
+              if(data['pago_variable'] == 'si' &&  data['estado'] == 'en_pago'){
+              	this.getBoton('ajustes').enable();
+              }
+              else{
+              	this.getBoton('ajustes').disable();
+              }
+              
               
               this.getBoton('edit').disable();
               this.getBoton('del').disable();
@@ -1009,6 +1026,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 			this.getBoton('reporte_plan_pago').disable();
 			this.getBoton('diagrama_gantt').disable();
 			this.getBoton('btnChequeoDocumentosWf').disable();
+			this.getBoton('ajustes').disable();
 			
 			//Inhabilita el reporte de disponibilidad
             this.getBoton('btnVerifPresup').disable();
@@ -1057,7 +1075,114 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                     'DocumentoWf'
         )
     },
-	
+    
+    showAjustes:function(){
+    	this.windowAjustes.show();
+    	this.formAjustes.getForm().reset();
+    	var d= this.sm.getSelected().data;
+     	this.formAjustes.getForm().findField('ajuste_anticipo').setValue(d.ajuste_anticipo);
+     	this.formAjustes.getForm().findField('ajuste_aplicado').setValue(d.ajuste_aplicado);
+    },
+    
+    crearFormAjustes: function(){
+    	
+    	 this.formAjustes = new Ext.form.FormPanel({
+            id: this.idContenedor + '_AJUSTES',  
+            margins:' 10 10 10 10',          
+            items: [
+            {
+            	name: 'ajuste_anticipo',
+            	xtype: 'numberfield',
+            	fieldLabel: 'Ajuste anticipo',
+            	allowDecimals: true,
+            	value: 0,
+            	allowNegative: false,
+            	qtip: 'Si se debe al proveedor por aplicar mas de lo que anticipaste'
+            	
+            },
+            {
+            	name: 'ajuste_aplicado',
+            	xtype: 'numberfield',
+            	fieldLabel: 'Ajuste aplicacón',
+            	allowDecimals: true,
+            	value: 0,
+            	allowNegative: false,
+            	qtip: 'Si el proveedor debe a la empesa por que anticipo mas de lo aplicado'
+            	
+            }],
+            autoScroll: false,
+            autoDestroy: true,
+            autoScroll: true
+        });
+        
+        // Definicion de la ventana que contiene al formulario
+        this.windowAjustes = new Ext.Window({
+            // id:this.idContenedor+'_W',
+            title: 'Ajustes para anticipos totales',
+            margins:' 10 10 10 10',
+            modal: true,
+            width: 400,
+            height: 200,
+            bodyStyle: 'padding:5px;',
+            layout: 'fit',
+            hidden: true,
+            autoScroll: false,
+            maximizable: true,
+            buttons: [{
+	                text: 'Guardar',
+	                arrowAlign: 'bottom',
+	                handler: this.saveAjustes,
+	                argument: {
+	                    'news': false
+	                },
+	                scope: this
+
+                },
+                {
+	                text: 'Declinar',
+	                handler: this.onDeclinarAjustes,
+					scope: this
+               }],
+            items: this.formAjustes,
+            autoDestroy: true,
+            closeAction: 'hide'
+        });
+        
+        
+    },
+	saveAjustes:function(){
+		var d= this.sm.getSelected().data;
+     	Phx.CP.loadingShow();	
+		Ext.Ajax.request({
+				url:'../../sis_tesoreria/control/ObligacionPago/insertarAjustes',
+				success:this.successAjustes,
+				failure:this.failureAjustes,
+				params:{
+						'id_obligacion_pago' : d.id_obligacion_pago,
+						'ajuste_aplicado' : this.formAjustes.getForm().findField('ajuste_aplicado').getValue(), 
+						'ajuste_anticipo' : this.formAjustes.getForm().findField('ajuste_anticipo').getValue()},
+				timeout:this.timeout,
+				scope:this
+		});
+     	
+		
+	},
+	successAjustes : function (resp) {
+		Phx.CP.loadingHide();
+     	this.windowAjustes.hide();
+     	this.reload();
+     	
+     },
+     
+     failureAjustes : function (resp) {
+     	Phx.CP.loadingHide();
+     	Phx.vista.PlanPago.superclass.conexionFailure.call(this,resp);    	
+     	
+     },
+	onDeclinarAjustes:function(){
+		this.windowAjustes.close();
+		
+	},
 	addBotones: function() {
         this.menuAdq = new Ext.Toolbar.SplitButton({
             id: 'btn-adq-' + this.idContenedor,

@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_gestionar_presupuesto_tesoreria (
   p_id_obligacion_pago integer,
   p_id_usuario integer,
@@ -207,7 +209,7 @@ BEGIN
                         va_id_presupuesto[v_i] = v_registros.id_presupuesto;
                         va_id_partida[v_i]= v_registros.id_partida;
                         va_momento[v_i]	= 2; --el momento 2 con signo positivo es revertir
-                        va_monto[v_i]  = v_comprometido*-1;  -- considera la posibilidad de que a este item se le aya revertido algun monto
+                        va_monto[v_i]  = (v_comprometido  - v_ejecutado)*-1;  -- considera la posibilidad de que a este item se le aya revertido algun monto
                         va_id_moneda[v_i]  = v_registros.id_moneda;
                         va_id_partida_ejecucion[v_i]= v_registros.id_partida_ejecucion_com;
                         va_columna_relacion[v_i]= 'id_obligacion_pago';

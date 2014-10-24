@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -1212,7 +1214,51 @@ BEGIN
 			return v_resp;
 
 		end;
-        
+   
+   /*********************************    
+ 	#TRANSACCION:  'TES_OBLAJUS_IME'
+ 	#DESCRIPCION:	Inserta ajustes en la obligacion de pagos variables
+ 	#AUTOR:	    Rensi Arteaga COpari (KPLIAN) 
+ 	#FECHA:		23-10-2014 16:01:32
+	***********************************/
+
+	elsif(p_transaccion='TES_OBLAJUS_IME')then
+
+		begin
+			
+            select 
+            op.estado,
+            op.pago_variable
+            into
+            v_registros
+            from tes.tobligacion_pago op
+            where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
+            
+            IF v_registros.pago_variable = 'no' THEN
+              raise exception 'Solo puede insertar ajustes en pagos variables';
+            END IF;
+            
+            IF v_registros.estado != 'en_pago' THEN
+              raise exception 'Solo puede insertar ajustes cuando la obligacion este en estado: en_pago';
+            END IF;
+            
+            
+            --Sentencia de la modificacion
+			update tes.tobligacion_pago  set
+			ajuste_aplicado = v_parametros.ajuste_aplicado,
+            ajuste_anticipo = v_parametros.ajuste_anticipo,
+            id_usuario_mod = p_id_usuario,
+            fecha_mod = now()
+			where id_obligacion_pago=v_parametros.id_obligacion_pago;
+               
+			--Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se insertaron ajustes a la obligacion de pago'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_parametros.id_obligacion_pago::varchar);
+               
+            --Devuelve la respuesta
+            return v_resp;
+            
+		end;     
    
     
     else

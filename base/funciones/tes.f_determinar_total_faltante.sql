@@ -7,6 +7,14 @@ CREATE OR REPLACE FUNCTION tes.f_determinar_total_faltante (
 )
 RETURNS numeric AS
 $body$
+/*
+*
+*  Autor:   RAC  (KPLIAN)
+*  DESC:    Calcula montos totales sobrantes de diferente tipos para el plan de pagos
+*  Fecha:   10/06/2014
+*
+*/
+
 DECLARE
     v_consulta   		 		varchar;
 	v_parametros  				record;
@@ -21,17 +29,24 @@ DECLARE
      
      v_tipo_fil  varchar;
      v_monto    numeric;
+     v_monto_total_ajuste_ag    numeric;
+     v_monto_ajuste_anticipo  numeric;
+     v_monto_ajuste_aplicado numeric;
 			    
 BEGIN
 
 	v_nombre_funcion = 'tes.f_determinar_total_faltante';
    
  
-            IF p_filtro not in ('registrado','registrado_pagado','total_registrado_pagado','devengado','pagado','ant_parcial','ant_parcial_descontado','ant_aplicado_descontado','dev_garantia') THEN
+            IF p_filtro not in ('registrado','registrado_pagado','total_registrado_pagado','devengado','pagado','ant_parcial','ant_parcial_descontado','ant_aplicado_descontado','dev_garantia','ant_aplicado_descontado_op_variable') THEN
               
               		raise exception 'filtro no reconocido';
             
             END IF;
+            
+            ---------------------------
+            -- devengados registrados
+            ---------------------------
             
             IF   p_filtro = 'registrado' THEN
             
@@ -59,7 +74,10 @@ BEGIN
                             
                         
                       return v_monto_total;    
-           
+             
+             ---------------------------------
+             --  REGISTRADO PAGADO POR CUOTA
+             ----------------------------------
         
              ELSEIF     p_filtro in ('registrado_pagado') THEN
              
@@ -87,6 +105,11 @@ BEGIN
                               
                           
                         return v_monto_total; 
+           
+    
+            ------------------------------------------
+            -- ANTICIPO APLICADO DESCONTADO
+            --------------------------------------------
             
              ELSEIF     p_filtro  = 'ant_aplicado_descontado' THEN
              
@@ -112,9 +135,57 @@ BEGIN
                             and pp.id_plan_pago_fk = p_id_plan_pago; 
                             
                      v_monto_total  = COALESCE(v_monto,0)- COALESCE(v_monto_total_registrado,0);
+    
+    
                      return v_monto_total; 
-            
-            ELSEIF  p_filtro = 'ant_parcial' THEN
+                     
+            ------------------------------------------------------------------------------
+            --  Calcula el monto aplicado considerando anticipos totales para obligaciones variables
+            -----------------------------------------------------------------------------  
+                  
+            ELSEIF     p_filtro  = 'ant_aplicado_descontado_op_variable' THEN
+                     
+                     select 
+                      op.ajuste_anticipo,
+                      op.ajuste_aplicado
+                     into
+                       v_monto_ajuste_anticipo,
+                       v_monto_ajuste_aplicado
+                     from tes.tobligacion_pago op
+                     where op.id_obligacion_pago = p_id_obligacion_pago;              
+    
+                     --  recupera el total de anticipos totales
+                   
+                     select 
+                      sum(pp.monto)
+                     into
+                       v_monto
+                     from tes.tplan_pago pp
+                     where pp.estado_reg = 'activo' and 
+                           pp.id_obligacion_pago = p_id_obligacion_pago and
+                           pp.tipo = 'anticipo'; 
+                    
+                     -- determina el total registrado  con antticipo faltante
+                      select 
+                       sum(pp.monto),
+                       sum(COALESCE(pp.monto_ajuste_ag,0)) --montos ajustado a la anterior gestion
+                      into
+                       v_monto_total_registrado,
+                       v_monto_total_ajuste_ag
+                      from tes.tplan_pago pp
+                      where  pp.estado_reg = 'activo'  
+                            and pp.tipo = 'ant_aplicado'                --recupera la suma de los anticipos aplicados
+                            and pp.id_obligacion_pago = p_id_obligacion_pago; 
+                            
+                     v_monto_total  = COALESCE(v_monto,0)- COALESCE(v_monto_total_registrado,0) + COALESCE(v_monto_total_ajuste_ag,0) + COALESCE(v_monto_ajuste_anticipo) -  COALESCE(v_monto_ajuste_aplicado);
+                     return v_monto_total;       
+          
+          
+          --------------------------
+          --  ANTICIPOS PARCIALES
+          ---------------------------
+     
+           ELSEIF  p_filtro = 'ant_parcial' THEN
                     --  recupera el monto maximo que se puede anticipar segun politica
                 
                      select 
@@ -131,6 +202,11 @@ BEGIN
                      END IF;
                      
                      return v_monto_total*v_porc_ant;
+            
+           
+          -------------------------------------
+          --  ANTICIPOS PARCIALES DSECONTADOS
+          -------------------------------------
             
             ELSEIF  p_filtro = 'ant_parcial_descontado' THEN
             
@@ -179,7 +255,9 @@ BEGIN
                      return COALESCE(v_monto_total_registrado,0) - COALESCE(v_monto_ant_descontado,0) - COALESCE(v_monto_aux,0);
             
             
-            
+             -----------------------------
+             --  DEVOLUCIONES DE GARANTIA
+             ------------------------------
             
              ELSEIF  p_filtro = 'dev_garantia' THEN
             
@@ -208,6 +286,10 @@ BEGIN
                       
                        return COALESCE(v_monto_total_registrado,0) - COALESCE(v_monto_ant_descontado,0);
             
+            
+             -----------------------------
+             -- TOTAL REGISTRADO PAGADO
+             ------------------------------
             
             ELSEIF     p_filtro in ('total_registrado_pagado') THEN
              

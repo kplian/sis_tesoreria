@@ -263,8 +263,7 @@ BEGIN
             END IF;
             
             IF  lower(v_parametros.tipo_interfaz) = 'planpagovbasistente' THEN
-              	v_filtro = ' (ew.id_funcionario  IN (select * FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date,'||p_id_usuario||') AS (id_funcionario INTEGER))) and ';
-            	v_filtro = v_filtro || ' (lower(plapa.estado)=''vbgerente'') and ';
+              v_filtro = ' (ew.id_funcionario  IN (select * FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date,'||p_id_usuario||') AS (id_funcionario INTEGER))) and ';
             END IF;
             
             
@@ -531,6 +530,101 @@ BEGIN
             
             raise notice '%',v_consulta;
 			
+			--Devuelve la respuesta
+			return v_consulta;
+
+		end;
+    
+    /*********************************    
+ 	#TRANSACCION:  'TES_PAXCIG_SEL'
+ 	#DESCRIPCION:	Listado de pagos por concepto
+ 	#AUTOR:			JRR	
+ 	#FECHA:			15/12/2013
+	***********************************/
+
+	elsif(p_transaccion='TES_PAXCIG_SEL')then
+
+		begin
+        
+			--Sentencia de la consulta de conteo de registros
+			v_consulta:='WITH obligacion_pago_concepto AS(
+						    SELECT
+						        pxp.aggarray(od.id_obligacion_det) as id_obligacion_det,
+						        od.id_obligacion_pago,
+						        pxp.list(ot.desc_orden) as desc_orden      
+						    FROM tes.tobligacion_det od
+						    inner join conta.torden_trabajo ot on ot.id_orden_trabajo = od.id_orden_trabajo
+						    where od.id_concepto_ingas = ' || v_parametros.id_concepto || ' and od.estado_reg = ''activo''
+						    group by od.id_obligacion_pago
+						)
+						
+						SELECT pp.id_plan_pago,
+                        		(case when ot.id_orden_trabajo is not null then 
+								ot.desc_orden
+						        ELSE
+						        opc.desc_orden 
+						        end) as orden_trabajo, op.num_tramite,pp.nro_cuota,prov.desc_proveedor as proveedor,pp.estado,
+						        (case when com.fecha is null THEN
+						        pp.fecha_tentativa else
+						        com.fecha
+						        end) as fecha
+						        ,mon.moneda,pp.monto,pro.monto_ejecutar_mo
+						    
+						FROM tes.tobligacion_pago op
+						inner join obligacion_pago_concepto opc on op.id_obligacion_pago = opc.id_obligacion_pago
+						inner join tes.tplan_pago pp on op.id_obligacion_pago = pp.id_obligacion_pago and pp.estado_reg = ''activo''
+						left join tes.tprorrateo pro on pro.id_plan_pago = pp.id_plan_pago and  pro.id_obligacion_det = ANY(opc.id_obligacion_det) and pro.estado_reg = ''activo''
+						left join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det
+						left join conta.torden_trabajo ot on od.id_orden_trabajo = ot.id_orden_trabajo
+						inner join param.vproveedor prov on prov.id_proveedor = op.id_proveedor 
+						inner join param.tmoneda mon on op.id_moneda = mon.id_moneda
+						left join conta.tint_comprobante com on com.id_int_comprobante = pp.id_int_comprobante
+						where pp.tipo = ''devengado_pagado''  and  op.estado_reg = ''activo'' and '||v_parametros.filtro ||
+						'order by opc.desc_orden,com.fecha, op.num_tramite,pp.nro_cuota';
+			
+						
+			--Devuelve la respuesta
+			return v_consulta;
+
+		end;
+	
+	/*********************************    
+ 	#TRANSACCION:  'TES_PAXCIG_CONT'
+ 	#DESCRIPCION:	Conteo de pagos por concepto
+ 	#AUTOR:			JRR	
+ 	#FECHA:			15/12/2013
+	***********************************/
+
+	elsif(p_transaccion='TES_PAXCIG_CONT')then
+
+		begin
+        
+			--Sentencia de la consulta de conteo de registros
+			v_consulta:='WITH obligacion_pago_concepto AS(
+						    SELECT
+						        pxp.aggarray(od.id_obligacion_det) as id_obligacion_det,
+						        od.id_obligacion_pago,
+						        pxp.list(ot.desc_orden) as desc_orden      
+						    FROM tes.tobligacion_det od
+						    inner join conta.torden_trabajo ot on ot.id_orden_trabajo = od.id_orden_trabajo
+						    where od.id_concepto_ingas = ' || v_parametros.id_concepto || ' and od.estado_reg = ''activo''
+						    group by od.id_obligacion_pago
+						)
+						
+						SELECT count(pp.id_plan_pago)
+						    
+						FROM tes.tobligacion_pago op
+						inner join obligacion_pago_concepto opc on op.id_obligacion_pago = opc.id_obligacion_pago
+						inner join tes.tplan_pago pp on op.id_obligacion_pago = pp.id_obligacion_pago and pp.estado_reg = ''activo''
+						left join tes.tprorrateo pro on pro.id_plan_pago = pp.id_plan_pago and  pro.id_obligacion_det = ANY(opc.id_obligacion_det) and pro.estado_reg = ''activo''
+						left join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det
+						left join conta.torden_trabajo ot on od.id_orden_trabajo = ot.id_orden_trabajo
+						inner join param.vproveedor prov on prov.id_proveedor = op.id_proveedor 
+						inner join param.tmoneda mon on op.id_moneda = mon.id_moneda
+						left join conta.tint_comprobante com on com.id_int_comprobante = pp.id_int_comprobante
+						where pp.tipo = ''devengado_pagado''  and  op.estado_reg = ''activo'' and '||v_parametros.filtro;
+			
+						
 			--Devuelve la respuesta
 			return v_consulta;
 

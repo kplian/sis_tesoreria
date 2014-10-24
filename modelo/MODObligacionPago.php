@@ -68,8 +68,11 @@ class MODObligacionPago extends MODbase{
 		$this->captura('desc_plantilla','varchar');
 		$this->captura('ultima_cuota_pp','numeric');
         $this->captura('ultimo_estado_pp','varchar');
-        
         $this->captura('tipo_anticipo','varchar');
+		$this->captura('ajuste_anticipo','numeric');
+		$this->captura('ajuste_aplicado','numeric');
+		
+		
 		
 		
 		
@@ -136,17 +139,16 @@ class MODObligacionPago extends MODbase{
         $this->captura('pago_variable','varchar');
         $this->captura('id_depto_conta','integer');
         $this->captura('total_nro_cuota','integer');
-        
         $this->captura('fecha_pp_ini','date');
         $this->captura('rotacion','integer');
         $this->captura('id_plantilla','integer');
         $this->captura('desc_plantilla','varchar');
-        
         $this->captura('desc_funcionario','text');
         $this->captura('ultima_cuota_pp','numeric');
         $this->captura('ultimo_estado_pp','varchar');
-        
-         $this->captura('tipo_anticipo','varchar');
+        $this->captura('tipo_anticipo','varchar');
+		$this->captura('ajuste_anticipo','numeric');
+		$this->captura('ajuste_aplicado','numeric');
         
         
         
@@ -274,6 +276,27 @@ class MODObligacionPago extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+	
+	function insertarAjustes(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_obligacion_pago_ime';
+		$this->transaccion='TES_OBLAJUS_IME';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
+		$this->setParametro('ajuste_aplicado','ajuste_aplicado','int4');
+		$this->setParametro('ajuste_anticipo','ajuste_anticipo','int4');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
+	
 	
 	
 	
