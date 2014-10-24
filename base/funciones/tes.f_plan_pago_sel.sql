@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -569,7 +567,7 @@ BEGIN
 								ot.desc_orden
 						        ELSE
 						        opc.desc_orden 
-						        end) as orden_trabajo, op.num_tramite,pp.nro_cuota,prov.desc_proveedor as proveedor,pp.estado,
+						        end) as orden_trabajo, op.num_tramite,pp.nro_cuota,prov.rotulo_comercial as proveedor,pp.estado,
 						        (case when com.fecha is null THEN
 						        pp.fecha_tentativa else
 						        com.fecha

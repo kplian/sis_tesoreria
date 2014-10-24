@@ -87,7 +87,7 @@ header("content-type:text/javascript; charset=UTF-8");
 			},
 			type : 'Field',
 			filters : {
-			    pfiltro : 'prov.desc_proveedor',
+			    pfiltro : 'prov.rotulo_comercial',
 				type : 'string'
 			},
 			grid : true,
