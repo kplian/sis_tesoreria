@@ -62,6 +62,8 @@ Phx.vista.PlanPagoRegIni = {
         this.Cmp.monto_retgar_mo.on('change',this.calculaMontoPago,this);
         this.Cmp.descuento_ley.on('change',this.calculaMontoPago,this);
         this.Cmp.descuento_inter_serv.on('change',this.calculaMontoPago,this);
+        this.Cmp.monto_anticipo.on('change',this.calculaMontoPago,this);
+        this.Cmp.monto_excento.on('change',this.calculaMontoPago,this);
         
         this.Cmp.id_plantilla.on('select',function(cmb,rec,i){  
             this.getDecuentosPorAplicar(rec.data.id_plantilla);
@@ -93,6 +95,7 @@ Phx.vista.PlanPagoRegIni = {
                     this.obtenerFaltante('registrado,ant_parcial_descontado');
                  }
                  
+                
                  if(rec.data.variable == 'ant_parcial'){
                      this.obtenerFaltante('ant_parcial');
                  }
@@ -101,13 +104,22 @@ Phx.vista.PlanPagoRegIni = {
                      this.obtenerFaltante('dev_garantia');
                  }
               }
+              
+              if (this.accionFormulario == 'NEW_PAGO' || this.accionFormulario == 'NEW'){
+              	if(rec.data.variable == 'pagado'){
+                     this.iniciaPagoDelDevengado(data);
+                 }
+                 
+                 if(rec.data.variable == 'ant_aplicado'){
+                    this.iniciaAplicacion(data);
+                 }
+              }
         },this);
         
         
         this.Cmp.monto_ajuste_ag.on('change',function(cmp, newValue, oldValue){
         	
         	if(newValue > this.Cmp.monto_ejecutar_total_mo.getValue()){
-        		console.log('---',oldValue, newValue)
         		cmp.setValue(oldValue);
         	}
         	
@@ -125,7 +137,7 @@ Phx.vista.PlanPagoRegIni = {
                 //console.log("fail");
             },
             timeout: function() {
-                //console.log("timeout");
+                //console.log("timeout");  
             },
             scope:this
         });  
@@ -138,20 +150,6 @@ Phx.vista.PlanPagoRegIni = {
         
     },
     
-     successAplicarDesc:function(resp){
-            Phx.CP.loadingHide();
-            var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
-            if(!reg.ROOT.error){
-               this.Cmp.porc_descuento_ley.setValue(reg.ROOT.datos.descuento_porc*1);
-               this.Cmp.obs_descuentos_ley.setValue(reg.ROOT.datos.observaciones);
-               this.calculaMontoPago();
-            }
-            else{
-                alert(reg.ROOT.mensaje)
-            }
-     },
-     
-   
     
      
      enableDisable:function(val){
@@ -178,16 +176,66 @@ Phx.vista.PlanPagoRegIni = {
          
      },
      
-   
+    iniciaAplicacion:function(data){
+    	    //carga la plantilla con el mismo documento que el devengado
+            var me = this;
+            this.Cmp.id_plantilla.store.load({
+                 params:{start:0,limit:1,id_plantilla:data.id_plantilla},
+                 callback:function(){
+                     me.Cmp.id_plantilla.setValue(data.id_plantilla);
+                     me.Cmp.id_plantilla.modificado = true;
+                     me.getDecuentosPorAplicar(data.id_plantilla);
+                 }  
+              });
+                
+             
+            this.inicioValores();
+            this.tmp_porc_monto_excento_var = data.porc_monto_excento_var;
+            //obtiene el monto de apgo que falta registrar
+            //y el monto de anticpo parcial que falta por descontar
+            if(data.pago_variable == 'si'){
+            	this.obtenerFaltante('ant_aplicado_descontado_op_variable',data.id_plan_pago);	
+            }
+            else{
+                this.obtenerFaltante('ant_aplicado_descontado',data.id_plan_pago);	
+            }
+    },
+    iniciaPagoDelDevengado:function(data){
+    	//carga la plantilla con el mismo documento que el devengado
+	    var me = this;
+	    this.Cmp.id_plantilla.store.load({
+	         params:{start:0, limit:1, id_plantilla: data.id_plantilla},
+	         callback:function(){
+	             me.Cmp.id_plantilla.setValue(data.id_plantilla);
+	             me.Cmp.id_plantilla.modificado = true;
+	             me.getDecuentosPorAplicar(data.id_plantilla);
+	         }  
+	      });
+	        
+	     
+	    this.inicioValores();
+	    
+	    //calcula el porcentaje de retencio de garantia si en el 
+	    //devengado es mayor a cero, se utiliza en la funcion calculaMontoPago
+	    this.Cmp.porc_monto_retgar.setValue(data.porc_monto_retgar);
+	    this.porc_ret_gar =  data.porc_monto_retgar;
+	    this.tmp_porc_monto_excento_var = data.porc_monto_excento_var;
+	    
+	    //obtiene el monto de apgo que falta registrar
+	    //y el monto de anticpo parcial que falta por descontar
+	    this.obtenerFaltante('registrado_pagado,ant_parcial_descontado',data.id_plan_pago);
+    },
     
     onButtonNew:function(){
         
-            
              this.porc_ret_gar = 0; //resetea valor por defecto de retencion de garantia
              var data = this.getSelectedData();
              this.ocultarGrupo(2); //ocultar el grupo de ajustes
+             
+             //variables temporales
+             this.tmp_porc_monto_excento_var = undefined;
              if(data){
-                    
+                   
                     // para habilitar registros de cuotas de pago 
                     //sobre los devengados
                     Phx.vista.PlanPagoRegIni.superclass.onButtonNew.call(this); 
@@ -200,31 +248,12 @@ Phx.vista.PlanPagoRegIni = {
                         //
                         this.accionFormulario = 'NEW_PAGO';  //esta bandera modifica el ,  obtenerFaltante
                         if(data.estado =='devengado'){
-                           if(data.monto_ejecutar_total_mo*1  > data.total_pagado*1){
+                           if(data.monto*1  > data.total_pagado*1){
                                 
-                                this.Cmp.tipo.store.loadData(this.arrayStore.DEVENGAR)
+                                this.Cmp.tipo.store.loadData(this.arrayStore.DEVENGAR);
                                 
-                                //calcula el porcentaje de retencio de garantia si en el 
-                                //devengado es mayor a cero, se utiliza en la funcion calculaMontoPago
-                                this.Cmp.porc_monto_retgar.setValue(data.porc_monto_retgar);
-                                this.porc_ret_gar =  data.porc_monto_retgar;
                                 
-                                //carga la plantilla con el mismo documento que el devengado
-                                var me = this;
-                                this.Cmp.id_plantilla.store.load({
-                                     params:{start:0,limit:1,id_plantilla:data.id_plantilla},
-                                     callback:function(){
-                                         me.Cmp.id_plantilla.setValue(data.id_plantilla);
-                                         me.Cmp.id_plantilla.modificado = true;
-                                         me.getDecuentosPorAplicar(data.id_plantilla);
-                                     }  
-                                  });
-                                    
-                                 
-                                this.inicioValores();
-                                //obtiene el monto de apgo que falta registrar
-                                //y el monto de anticpo parcial que falta por descontar
-                                this.obtenerFaltante('registrado_pagado,ant_parcial_descontado',data.id_plan_pago);
+                                
                            }else{
                              alert('No queda nada por pagar');
                           } 
@@ -240,30 +269,9 @@ Phx.vista.PlanPagoRegIni = {
                             
                             if(data.monto*1  > data.total_pagado*1  && data.estado =='anticipado'){
                                 
-                                this.Cmp.tipo.store.loadData(this.arrayStore.ANTICIPO)
-                                //carga la plantilla con el mismo documento que el devengado
-                                var me = this;
-                                this.Cmp.id_plantilla.store.load({
-                                     params:{start:0,limit:1,id_plantilla:data.id_plantilla},
-                                     callback:function(){
-                                         me.Cmp.id_plantilla.setValue(data.id_plantilla);
-                                         me.Cmp.id_plantilla.modificado = true;
-                                         me.getDecuentosPorAplicar(data.id_plantilla);
-                                     }  
-                                  });
-                                    
-                                 
-                                this.inicioValores();
-                                //obtiene el monto de apgo que falta registrar
-                                //y el monto de anticpo parcial que falta por descontar
-                                if(data.pago_variable == 'si'){
-                                	this.obtenerFaltante('ant_aplicado_descontado_op_variable',data.id_plan_pago);	
-                                }
-                                else{
-                                    this.obtenerFaltante('ant_aplicado_descontado',data.id_plan_pago);	
-                                }
+                                this.Cmp.tipo.store.loadData(this.arrayStore.ANTICIPO);
                                 
-                   
+                                
                             }
                         }
                     }
@@ -330,10 +338,15 @@ Phx.vista.PlanPagoRegIni = {
                         
                     }
                     
+                    if (this.tmp_porc_monto_excento_var > 0 ){
+                    	this.Cmp.monto_excento.setValue(reg.ROOT.datos.monto_total_faltante*this.tmp_porc_monto_excento_var);
+                    }
+                    
+                    
                     if(this.Cmp.tipo.getValue()=='devengado_pagado'||this.Cmp.tipo.getValue()=='devengado_pagado_1c'||this.Cmp.tipo.getValue()=='pagado'){
                         //si es un pago calculamos el descuento de anticipo
                         this.Cmp.descuento_anticipo.setValue(reg.ROOT.datos.ant_parcial_descontado);
-                        this.Cmp.descuento_anticipo.maxValue=reg.ROOT.datos.ant_parcial_descontado
+                        this.Cmp.descuento_anticipo.maxValue=reg.ROOT.datos.ant_parcial_descontado;
                     }
                 }
                 else{
@@ -379,7 +392,7 @@ Phx.vista.PlanPagoRegIni = {
               this.getBoton('sig_estado').enable();   
           }
           else{
-            if ((data['tipo'] == 'devengado'||data['tipo']== 'devengado_pagado') && data['estado']== 'devengado'&& (data.monto_ejecutar_total_mo*1)  > (data.total_pagado*1) ){ 
+            if ((data['tipo'] == 'devengado'||data['tipo']== 'devengado_pagado') && data['estado']== 'devengado'&& (data.monto*1)  > (data.total_pagado*1) ){ 
                 this.getBoton('new').enable();
             }
             else{

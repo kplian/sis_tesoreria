@@ -13,9 +13,9 @@ header("content-type: text/javascript; charset=UTF-8");
 <script>
 Phx.vista.ObligacionDetApropiacion = {
     bedit:true,
-    bnew:false,
+    bnew:true,
     bsave:false,
-    bdel:false,
+    bdel:true,
 	require:'../../../sis_tesoreria/vista/obligacion_det/ObligacionDet.php',
 	requireclase:'Phx.vista.ObligacionDet',
 	title:'Cambio de Apropiación',
@@ -30,12 +30,11 @@ Phx.vista.ObligacionDetApropiacion = {
 	   	this.maestro=config.maestro; 
 	   	Phx.vista.ObligacionDet.superclass.constructor.call(this,config);
 	    this.init();
-	    this.Cmp.monto_pago_mo.setDisabled(true);
-	    this.Cmp.descripcion.setDisabled(true);
-	    	    
+	    this.iniciarEventos();	    	    
     },
     
-     ActSave:'../../sis_tesoreria/control/ObligacionDet/guardarObligacionDetApropiacion',  
+     ActSave:'../../sis_tesoreria/control/ObligacionDet/guardarObligacionDetApropiacion', 
+     ActDel:'../../sis_tesoreria/control/ObligacionDet/eliminarObligacionDetApropiacion',  
     
      
      preparaMenu : function (n) {

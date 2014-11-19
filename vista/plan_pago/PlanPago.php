@@ -62,7 +62,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                                ['ant_parcial','Anticipo Parcial(No ejecuta presupuesto, Con retenciones parciales en cada pago)'],
                                ],
                     
-                    'DEVENGAR':[['pagado','Pagar']],
+                    'DEVENGAR':[['pagado','Pagar'],
+                                ['ant_aplicado','Aplicacion de Anticipo']],
                     
                     'ANTICIPO':[['ant_aplicado','Aplicacion de Anticipo']],
                     
@@ -96,9 +97,11 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             config:{
                     labelSeparator:'',
                     inputType:'hidden',
-                    name: 'porc_descuento_ley'
+                    name: 'porc_descuento_ley',
+                    allowDecimals: true,
+                    decimalPrecision: 10
             },
-            type:'Field',
+            type:'NumberField',
             form:true 
         },
         {
@@ -483,7 +486,25 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         },
         {
             config:{
+                name: 'monto_anticipo',
+                currencyChar:' ',
+                allowNegative:false,
+                qtip: 'Este monto incrementa el liquido pagable y figura como un anticipo',
+                fieldLabel: 'Monto anticipado',
+                allowBlank: false,
+                gwidth: 100,
+                maxLength:1245186
+            },
+            type:'MoneyField',
+            filters:{pfiltro:'plapa.monto_anticipo',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
+        {
+            config:{
                 name: 'descuento_anticipo',
+                qtip:'Si anteriormente se le dio un anticipo parcial,  en este campo se colocan las retenciones para recuperar el anticipo',
                 currencyChar:' ',
                 fieldLabel: 'Desc. Anticipo',
                 allowBlank: true,
@@ -595,6 +616,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:true
         },
+        
+        
+        
         {
             config:{
                 name: 'liquido_pagable',
@@ -1007,6 +1031,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		{name:'monto_retgar_mo', type: 'numeric'},
 		{name:'descuento_ley', type: 'numeric'},
 		{name:'porc_descuento_ley', type: 'numeric'},
+		{name:'porc_monto_excento_var', type: 'numeric'},
+		
 		'desc_plantilla','desc_cuenta_bancaria','sinc_presupuesto','obs_descuentos_ley',
 		{name:'nro_cheque', type: 'numeric'},
 		{name:'nro_cuenta_bancaria', type: 'string'},
@@ -1023,7 +1049,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'conformidad',
 		'tipo_obligacion',
 		'monto_ajuste_ag',
-		'monto_ajuste_siguiente_pag','pago_variable'
+		'monto_ajuste_siguiente_pag','pago_variable','monto_anticipo'
 		
 	],
 	
@@ -1214,8 +1240,30 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
     },
     
     calculaMontoPago:function(){
-        var descuento_ley = this.Cmp.monto.getValue()*this.Cmp.porc_descuento_ley.getValue();
-        this.Cmp.descuento_ley.setValue(descuento_ley);
+        var descuento_ley = 0.00;
+        
+        //TODO monto exento en pp de segundo nivel
+        if(this.tmp_porc_monto_excento_var){
+        	this.Cmp.monto_excento.setValue(this.Cmp.monto.getValue()*this.tmp_porc_monto_excento_var)
+        }
+       
+        if(this.Cmp.monto_excento.getValue() == 0){
+        	descuento_ley = this.Cmp.monto.getValue()*this.Cmp.porc_descuento_ley.getValue()*1.00;
+            this.Cmp.descuento_ley.setValue(descuento_ley);
+        }
+        else{
+        	if(this.Cmp.monto_excento.getValue() > 0 ){
+        	  descuento_ley = (this.Cmp.monto.getValue()*1.00 - this.Cmp.monto_excento.getValue()*1.00)*this.Cmp.porc_descuento_ley.getValue();
+              this.Cmp.descuento_ley.setValue(descuento_ley);	
+        	}
+        	else{
+        		alert('El monto exento no puede ser menor que cero');
+        		return; 
+        	}
+        	
+        }	
+        
+          
         var monto_ret_gar =  0;
         if(this.porc_ret_gar > 0  && this.Cmp.tipo.getValue()=='pagado')
         {
@@ -1225,9 +1273,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         monto_ret_gar =  this.Cmp.monto_retgar_mo.getValue();
         
        
-        var liquido = this.Cmp.monto.getValue()  -  this.Cmp.monto_no_pagado.getValue() -  this.Cmp.otros_descuentos.getValue() - monto_ret_gar -  this.Cmp.descuento_ley.getValue() -  this.Cmp.descuento_inter_serv.getValue() -  this.Cmp.descuento_anticipo.getValue();
+        var liquido =  this.Cmp.monto.getValue()  -  this.Cmp.monto_no_pagado.getValue() -  this.Cmp.otros_descuentos.getValue() - monto_ret_gar -  this.Cmp.descuento_ley.getValue() -  this.Cmp.descuento_inter_serv.getValue() -  this.Cmp.descuento_anticipo.getValue();
         this.Cmp.liquido_pagable.setValue(liquido>0?liquido:0);
-        var eje = this.Cmp.monto.getValue()  -  this.Cmp.monto_no_pagado.getValue()
+        var eje = this.Cmp.monto.getValue()  -  this.Cmp.monto_no_pagado.getValue() - this.Cmp.monto_anticipo.getValue()
         this.Cmp.monto_ejecutar_total_mo.setValue(eje>0?eje:0);
      }, 
     
@@ -1354,6 +1402,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         this.Cmp.monto.setValue(0);
         this.Cmp.descuento_anticipo.setValue(0);
         this.Cmp.descuento_inter_serv.setValue(0);
+        this.Cmp.descuento_ley.setValue(0)
+        this.Cmp.porc_descuento_ley.setValue(0)
+        this.Cmp.monto_anticipo.setValue(0);
         this.Cmp.monto_no_pagado.setValue(0);
         this.Cmp.otros_descuentos.setValue(0);
         this.Cmp.liquido_pagable.setValue(0);
@@ -1414,6 +1465,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 me.mostrarComponente(me.Cmp.liquido_pagable); 
                 me.mostrarComponente(me.Cmp.monto_retgar_mo)   
                 me.mostrarComponente(me.Cmp.descuento_ley);
+                me.mostrarComponente(me.Cmp.monto_anticipo);
                 me.mostrarComponente(me.Cmp.obs_descuentos_ley);
                 me.deshabilitarDescuentos(me);
                 me.ocultarComponentesPago(me);
@@ -1432,6 +1484,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                me.mostrarComponente(me.Cmp.monto_retgar_mo)
                me.mostrarComponente(me.Cmp.obs_descuentos_ley);
                me.mostrarComponente(me.Cmp.descuento_ley);
+               me.mostrarComponente(me.Cmp.monto_anticipo);
                
                me.habilitarDescuentos(me)
                me.mostrarComponentesPago(me);
@@ -1453,6 +1506,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                me.mostrarComponente(me.Cmp.monto_excento);
                me.mostrarComponente(me.Cmp.monto_no_pagado);
                me.mostrarComponente(me.Cmp.obs_monto_no_pagado);
+               me.ocultarComponente(me.Cmp.monto_anticipo);
                me.habilitarDescuentos(me);
               
           },
@@ -1466,6 +1520,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
               me.ocultarComponente(me.Cmp.monto_ejecutar_total_mo);
               me.ocultarComponente(me.Cmp.monto_no_pagado);
               me.ocultarComponente(me.Cmp.monto_retgar_mo);
+              me.ocultarComponente(me.Cmp.monto_anticipo);
              
               
            },
@@ -1475,6 +1530,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                me.habilitarDescuentos(me);
                me.mostrarComponentesPago(me);
                me.mostrarComponente(me.Cmp.liquido_pagable);
+               me.ocultarComponente(me.Cmp.monto_anticipo);
                me.Cmp.monto_retgar_mo.setReadOnly(true);
               
         },
@@ -1495,16 +1551,14 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 me.ocultarComponente(me.Cmp.obs_otros_descuentos);
                 me.ocultarComponente(me.Cmp.obs_descuentos_ley);
                 me.mostrarComponente(me.Cmp.liquido_pagable);
-               
+                me.ocultarComponente(me.Cmp.monto_anticipo);
             
         },
         
         'anticipo':function(me){
              
                 me.mostrarComponente(me.Cmp.id_plantilla);
-                
                 me.mostrarComponentesPago(me);
-                
                 me.ocultarComponente(me.Cmp.descuento_anticipo);
                 me.ocultarComponente(me.Cmp.descuento_inter_serv);
                 me.ocultarComponente(me.Cmp.monto_no_pagado);
@@ -1515,7 +1569,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 me.ocultarComponente(me.Cmp.obs_descuento_inter_serv);
                 me.ocultarComponente(me.Cmp.obs_descuentos_anticipo);
                 me.ocultarComponente(me.Cmp.obs_otros_descuentos);
-                
+                me.ocultarComponente(me.Cmp.monto_anticipo);
                 me.mostrarComponente(me.Cmp.liquido_pagable);
                 me.mostrarComponente(me.Cmp.descuento_ley);
                 me.mostrarComponente(me.Cmp.obs_descuentos_ley);
@@ -1523,12 +1577,12 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
          },
          'ant_aplicado':function(me, data){
                 me.Cmp.id_plantilla.disable();
-               
                 me.ocultarComponente(me.Cmp.descuento_ley);
                 me.ocultarComponente(me.Cmp.obs_descuentos_ley);
                 me.ocultarComponente(me.Cmp.monto_retgar_mo);                
                 me.ocultarComponente(me.Cmp.monto_no_pagado); 
-                //me.ocultarComponente(me.Cmp.liquido_pagable);                 
+                me.ocultarComponente(me.Cmp.monto_anticipo);
+                me.ocultarComponente(me.Cmp.liquido_pagable);                 
                 me.deshabilitarDescuentos(me);
                 
                 me.ocultarComponentesPago(me);
@@ -1630,6 +1684,18 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
          this.ocultarGrupo(2); //ocultar el grupo de ajustes 
     },
     
+    successAplicarDesc:function(resp){
+            Phx.CP.loadingHide();
+           var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+            if(!reg.ROOT.error){                
+               this.Cmp.porc_descuento_ley.setValue(reg.ROOT.datos.descuento_porc*1.00);
+               this.Cmp.obs_descuentos_ley.setValue(reg.ROOT.datos.observaciones);               
+               this.calculaMontoPago();
+             }else{
+                alert(reg.ROOT.mensaje)
+            }
+     },
+    
     
     onButtonEdit:function(){
          this.accionFormulario = 'EDIT';
@@ -1641,13 +1707,20 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
          this.ocultarGrupo(2); //ocultar el grupo de ajustes
          //segun el tipo define los campo visibles y no visibles
          this.setTipoPago[data.tipo](this, data);
+         
+         this.tmp_porc_monto_excento_var = undefined;
+         
          if(data.tipo == 'pagado'){
              this.accionFormulario = 'EDIT_PAGO';
              this.porc_ret_gar = data.porc_monto_retgar;
-             
          }
-        
-        
+         
+         if(data.tipo == 'ant_aplicado' || data.tipo == 'pagado'){
+         	this.tmp_porc_monto_excento_var = data.porc_monto_excento_var;
+         }
+         else{
+         	this.tmp_porc_monto_excento_var = undefined;
+         }
         
         Phx.vista.PlanPago.superclass.onButtonEdit.call(this); 
     },

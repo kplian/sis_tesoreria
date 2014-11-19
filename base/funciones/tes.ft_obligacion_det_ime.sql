@@ -43,6 +43,9 @@ DECLARE
     v_monto					numeric;
     v_res					boolean;
     v_nombre_conexion		varchar;
+    v_comprometido			varchar;
+    v_monto_total_obligacion	numeric;
+    v_registros				record;
     
       
     
@@ -269,8 +272,10 @@ BEGIN
         	
         
             /************************OBTENER DATOS**********************/
-            select od.id_partida_ejecucion_com,od.id_obligacion_pago, od.id_partida,od.id_centro_costo,op.id_moneda,od.monto_pago_mo,op.id_gestion 
-            into v_id_partida_ejecucion,v_id_obligacion,v_id_partida_anterior, v_id_cc_anterior,v_id_moneda,v_monto,v_id_gestion
+            select od.id_partida_ejecucion_com,od.id_obligacion_pago, od.id_partida,od.id_centro_costo,op.id_moneda,
+            od.monto_pago_mo,op.id_gestion,op.total_pago,op.comprometido 
+            into v_id_partida_ejecucion,v_id_obligacion,v_id_partida_anterior, v_id_cc_anterior,v_id_moneda,
+            v_monto,v_id_gestion,v_monto_total_obligacion,v_comprometido
             from tes.tobligacion_det od
             inner join tes.tobligacion_pago op on op.id_obligacion_pago = od.id_obligacion_pago
             where id_obligacion_det = v_parametros.id_obligacion_det;
@@ -300,38 +305,255 @@ BEGIN
            select * into v_nombre_conexion from migra.f_crear_conexion(); 
 
              /************************REVERTIR COMPROMETIDO**********************/
-            select tes.f_gestionar_presupuesto_tesoreria(v_id_obligacion, 1, 'revertir',NULL,v_nombre_conexion) into v_res;
-            if v_res = false then
-                raise exception 'Error al revertir el presupuesto';
+            if (v_comprometido = 'si') then
+                select tes.f_gestionar_presupuesto_tesoreria(v_id_obligacion, 1, 'revertir',NULL,v_nombre_conexion) into v_res;
+                if v_res = false then
+                    raise exception 'Error al revertir el presupuesto';
+                end if;
+                
+                update tes.tobligacion_pago
+                set comprometido = 'no'
+                where id_obligacion_pago = v_id_obligacion;
             end if;
-            
-            update tes.tobligacion_pago
-            set comprometido = 'no'
-            where id_obligacion_pago = v_id_obligacion;
-             
+            /******************************ELIMINAR DATOS DE PRORRATEO***********************************/
+             delete from tes.tprorrateo using tes.tplan_pago
+             where tes.tprorrateo.id_plan_pago = tes.tplan_pago.id_plan_pago 
+             and tes.tplan_pago.id_obligacion_pago = v_id_obligacion; 
 
             /************************ACTUALIZAR DATOS EN TABLA OBPDET**********************/
-           
+            v_monto_mb = v_parametros.monto_pago_mo * v_tipo_cambio_conv;
             update tes.tobligacion_det set 
             id_concepto_ingas = v_parametros.id_concepto_ingas,
             id_partida = v_id_partida,
             id_centro_costo = v_parametros.id_centro_costo,
-            id_orden_trabajo = v_parametros.id_orden_trabajo
+            id_orden_trabajo = v_parametros.id_orden_trabajo,
+            monto_pago_mo = v_parametros.monto_pago_mo,		
+			monto_pago_mb = v_monto_mb,
+		    fecha_mod = now(),
+            descripcion=v_parametros.descripcion,
+			id_usuario_mod = p_id_usuario
             where id_obligacion_det = v_parametros.id_obligacion_det;
-            /************************VOLVER A COMPROMETER**********************/
-            select tes.f_gestionar_presupuesto_tesoreria(v_id_obligacion, 1, 'comprometer',NULL,v_nombre_conexion) into v_res;
             
-            if v_res = false then
-                raise exception 'Ha ocurrido un error al comprometer el presupuesto';
+            /***********GENERAR PRORRATEOS**********/
+            if ((select sum(od.monto_pago_mo) 
+            	from tes.tobligacion_det od 
+                where id_obligacion_pago = v_id_obligacion and estado_reg = 'activo') = v_monto_total_obligacion) THEN
+                v_resp = tes.f_calcular_factor_obligacion_det(v_id_obligacion);
+                for v_registros in (select id_plan_pago,op.pago_variable,pp.monto_ejecutar_total_mo,pp.id_plan_pago_fk 
+                					from tes.tplan_pago pp
+                                    inner join tes.tobligacion_pago op on  op.id_obligacion_pago = pp.id_obligacion_pago
+                                    where op.id_obligacion_pago = v_id_obligacion and pp.tipo in ('devengado','devengado_pagado','devengado_pagado_1c')
+                                    and pp.estado != 'anulado' and pp.estado_reg = 'activo') loop
+                                    
+            		 v_res = tes.f_prorrateo_plan_pago(v_registros.id_plan_pago, v_id_obligacion,
+                     v_registros.pago_variable, v_registros.monto_ejecutar_total_mo, p_id_usuario, NULL);
+                end loop;
             end if;
            
-            
-            update tes.tobligacion_pago
-            set comprometido = 'si'
-            where id_obligacion_pago = v_id_obligacion;
             select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'exito'); 
              --Definicion de la respuesta
+            v_resp = '';
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Cambio en apropiacon realizado'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_det',v_parametros.id_obligacion_det::varchar);
+              
+            --Devuelve la respuesta
+            return v_resp;  
+            
+        END;
+    	
+        /*********************************    
+ 	#TRANSACCION:  'TES_OBDETAPRO_INS'
+ 	#DESCRIPCION:	Cambio en la apropacion de un detalle de obligacion
+ 	#AUTOR:		admin	
+ 	#FECHA:		02-04-2013 20:27:35
+	***********************************/
+
+	elsif(p_transaccion='TES_OBDETAPRO_INS')then
+
+		begin
+        	
+        
+            /************************OBTENER DATOS**********************/
+            select op.id_obligacion_pago,op.id_moneda,op.id_gestion, comprometido,op.total_pago 
+            into v_id_obligacion,v_id_moneda,v_id_gestion,v_comprometido,v_monto_total_obligacion
+            from tes.tobligacion_pago op            
+            where id_obligacion_pago = v_parametros.id_obligacion_pago;
+			
+            /*Validacion de que no haya ninguna cuota de tipo devengado y devengado_pago en estado devengado*/
+            
+            if exists (	select 1 
+            			from tes.tplan_pago pp
+                        where ((pp.tipo in ('devengado','devengado_pagado','devengado_pagado_1c') and pp.estado = 'devengado') OR
+                        	pp.tipo in ('ant_aplicado') and pp.estado = 'aplicado') and 
+                            pp.id_obligacion_pago = v_id_obligacion and pp.estado_reg != 'inactivo' ) then
+            	raise exception 'Existe un pago devengado para esta solicitud. Por lo que no es posible modificar la apropiacion';
+            end if;
+            
+                    
+            /************************OBTENER NUEVA PARTIDA**********************/
+            --raise exception '%', v_parametros.id_obligacion_pago;
+            SELECT 
+            ps_id_partida into v_id_partida           
+            FROM conta.f_get_config_relacion_contable('CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo);
+            
+            IF v_id_partida is NULL THEN
+          
+            raise exception 'No se tiene una parametrizacion de partida  para este concepto de gasto en la relacion contable de código CUECOMP  (%,%,%,%)','CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo;
+            
+           END IF;           
+           
+           select * into v_nombre_conexion from migra.f_crear_conexion(); 
+
+             /************************REVERTIR COMPROMETIDO**********************/
+             if (v_comprometido = 'si') then
+                select tes.f_gestionar_presupuesto_tesoreria(v_id_obligacion, 1, 'revertir',NULL,v_nombre_conexion) into v_res;
+                if v_res = false then
+                    raise exception 'Error al revertir el presupuesto';
+                end if;
+                
+                update tes.tobligacion_pago
+                set comprometido = 'no'
+                where id_obligacion_pago = v_id_obligacion;
+             end if;
+           
+           /******************************ELIMINAR DATOS DE PRORRATEO***********************************/
+             delete from tes.tprorrateo using tes.tplan_pago
+             where tes.tprorrateo.id_plan_pago = tes.tplan_pago.id_plan_pago 
+             and tes.tplan_pago.id_obligacion_pago = v_parametros.id_obligacion_pago;
+
+            /************************ACTUALIZAR DATOS EN TABLA OBPDET**********************/
+            v_monto_mb = v_parametros.monto_pago_mo * v_tipo_cambio_conv;
+            --Sentencia de la insercion
+        	insert into tes.tobligacion_det(
+			estado_reg,			
+			id_partida,			
+			id_concepto_ingas,
+			monto_pago_mo,
+			id_obligacion_pago,
+			id_centro_costo,
+			monto_pago_mb,
+            descripcion,
+			fecha_reg,
+			id_usuario_reg,
+			fecha_mod,
+			id_usuario_mod,
+            id_orden_trabajo
+          	) values(
+			'activo',			
+			v_id_partida,			
+			v_parametros.id_concepto_ingas,
+			v_parametros.monto_pago_mo,
+			v_parametros.id_obligacion_pago,
+			v_parametros.id_centro_costo,
+			v_monto_mb,
+            v_parametros.descripcion,		
+			now(),
+			p_id_usuario,
+			null,
+			null,
+            v_parametros.id_orden_trabajo
+							
+			)RETURNING id_obligacion_det into v_id_obligacion_det;
+            
+            /***********GENERAR PRORRATEOS**********/
+            if ((select sum(od.monto_pago_mo) 
+            	from tes.tobligacion_det od 
+                where id_obligacion_pago = v_id_obligacion and estado_reg = 'activo') = v_monto_total_obligacion) THEN
+                v_resp = tes.f_calcular_factor_obligacion_det(v_id_obligacion);
+                for v_registros in (select id_plan_pago,op.pago_variable,pp.monto_ejecutar_total_mo,pp.id_plan_pago_fk 
+                					from tes.tplan_pago pp
+                                    inner join tes.tobligacion_pago op on  op.id_obligacion_pago = pp.id_obligacion_pago
+                                    where op.id_obligacion_pago = v_id_obligacion and pp.tipo in ('devengado','devengado_pagado','devengado_pagado_1c')
+                                    and pp.estado != 'anulado' and pp.estado_reg = 'activo') loop
+            		 
+                     v_res = tes.f_prorrateo_plan_pago(v_registros.id_plan_pago, v_id_obligacion,
+                     v_registros.pago_variable, v_registros.monto_ejecutar_total_mo, p_id_usuario, NULL);
+                end loop;
+            end if;
+           
+            select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'exito'); 
+             --Definicion de la respuesta
+             v_resp = '';
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Detalle almacenado(a) con exito (id_obligacion_det'||v_id_obligacion_det||')'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_det',v_id_obligacion_det::varchar);
+              
+            --Devuelve la respuesta
+            return v_resp;  
+            
+        END;
+    
+    /*********************************    
+ 	#TRANSACCION:  'TES_OBDETAPRO_ELI'
+ 	#DESCRIPCION:	Cambio en la apropacion de un detalle de obligacion
+ 	#AUTOR:		admin	
+ 	#FECHA:		02-04-2013 20:27:35
+	***********************************/
+
+	elsif(p_transaccion='TES_OBDETAPRO_ELI')then
+
+		begin
+        	
+        
+            /************************OBTENER DATOS**********************/
+            select od.id_partida_ejecucion_com,od.id_obligacion_pago, od.id_partida,od.id_centro_costo,op.id_moneda,
+            od.monto_pago_mo,op.id_gestion,op.total_pago,op.comprometido 
+            into v_id_partida_ejecucion,v_id_obligacion,v_id_partida_anterior, v_id_cc_anterior,v_id_moneda,
+            v_monto,v_id_gestion,v_monto_total_obligacion,v_comprometido
+            from tes.tobligacion_det od
+            inner join tes.tobligacion_pago op on op.id_obligacion_pago = od.id_obligacion_pago
+            where id_obligacion_det = v_parametros.id_obligacion_det;
+			
+            /*Validacion de que no haya ninguna cuota de tipo devengado y devengado_pago en estado devengado*/
+            
+            if exists (	select 1 
+            			from tes.tplan_pago pp
+                        where ((pp.tipo in ('devengado','devengado_pagado','devengado_pagado_1c') and pp.estado = 'devengado') OR
+                        	pp.tipo in ('ant_aplicado') and pp.estado = 'aplicado') and 
+                            pp.id_obligacion_pago = v_id_obligacion and pp.estado_reg != 'inactivo' ) then
+            	raise exception 'Existe un pago devengado para esta solicitud. Por lo que no es posible modificar la apropiacion';
+            end if;            
+                    
+           
+             /************************REVERTIR COMPROMETIDO**********************/
+             if (v_comprometido = 'si') then
+                  select tes.f_gestionar_presupuesto_tesoreria(v_id_obligacion, 1, 'revertir',NULL,v_nombre_conexion) into v_res;
+                  if v_res = false then
+                      raise exception 'Error al revertir el presupuesto';
+                  end if;
+                  
+                  update tes.tobligacion_pago
+                  set comprometido = 'no'
+                  where id_obligacion_pago = v_id_obligacion;
+             end if;
+            /******************************ELIMINAR DATOS DE PRORRATEO***********************************/
+             delete from tes.tprorrateo using tes.tplan_pago
+             where tes.tprorrateo.id_plan_pago = tes.tplan_pago.id_plan_pago 
+             and tes.tplan_pago.id_obligacion_pago = v_id_obligacion; 
+
+            /************************ACTUALIZAR DATOS EN TABLA OBPDET**********************/
+            delete from tes.tobligacion_det
+            where id_obligacion_det=v_parametros.id_obligacion_det;
+            
+            /***********GENERAR PRORRATEOS**********/
+            if ((select sum(od.monto_pago_mo) 
+            	from tes.tobligacion_det od 
+                where id_obligacion_pago = v_id_obligacion and estado_reg = 'activo') = v_monto_total_obligacion) THEN
+                v_resp = tes.f_calcular_factor_obligacion_det(v_id_obligacion);
+                for v_registros in (select id_plan_pago,op.pago_variable,pp.monto_ejecutar_total_mo,pp.id_plan_pago_fk 
+                					from tes.tplan_pago pp
+                                    inner join tes.tobligacion_pago op on  op.id_obligacion_pago = pp.id_obligacion_pago
+                                    where op.id_obligacion_pago = v_id_obligacion and pp.tipo in ('devengado','devengado_pagado','devengado_pagado_1c')
+                                    and pp.estado != 'anulado' and pp.estado_reg = 'activo') loop
+            		 v_res = tes.f_prorrateo_plan_pago(v_registros.id_plan_pago, v_id_obligacion,
+                     v_registros.pago_variable, v_registros.monto_ejecutar_total_mo, p_id_usuario, NULL);
+                end loop;
+            end if;
+            
+            select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'exito'); 
+             --Definicion de la respuesta
+            --Definicion de la respuesta
+             v_resp = '';
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Detalle eliminado(a)'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_det',v_parametros.id_obligacion_det::varchar);
               
             --Devuelve la respuesta

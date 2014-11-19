@@ -55,9 +55,8 @@ BEGIN
           v_filadd='';
           v_inner='';
           
-          
-        --  raise exception 'cc  %',v_parametros.tipo_interfaz  ;
-        IF   v_parametros.tipo_interfaz ='obligacionPagoTes' THEN
+        
+         IF   v_parametros.tipo_interfaz ='obligacionPagoTes' THEN
            
                  IF   p_administrador != 1 THEN
                  
@@ -75,7 +74,7 @@ BEGIN
          ELSIF  v_parametros.tipo_interfaz =  'ObligacionPagoVb' THEN
          
          
-                select  
+                    select  
                        pxp.aggarray(depu.id_depto)
                     into 
                        va_id_depto
@@ -83,10 +82,13 @@ BEGIN
                    where depu.id_usuario =  p_id_usuario; 
               
                  v_filadd=' (obpg.estado = ''vbpresupuestos'') and';
+        
+         ELSIF v_parametros.tipo_interfaz =  'ObligacionPagoConsulta' THEN
+            --no hay limitaciones ...     
          ELSIF v_parametros.tipo_interfaz =  'ObligacionPagoApropiacion' THEN
-              
-         
-         
+            --no hay limitaciones ... 
+         ELSIF v_parametros.tipo_interfaz =  'ObligacionPagoConta' THEN
+            --no hay limitaciones ...
          ELSE
 
                 --SI LA NTERFACE VIENE DE ADQUISIONES   
@@ -158,7 +160,8 @@ BEGIN
                               obpg.ultimo_estado_pp,
                               obpg.tipo_anticipo,
                               obpg.ajuste_anticipo,
-                              obpg.ajuste_aplicado
+                              obpg.ajuste_aplicado,
+                              obpg.monto_estimado_sg
                               
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
@@ -237,7 +240,12 @@ BEGIN
               
                  v_filadd=' (obpg.estado = ''vbpresupuestos'') and';        
         
-        
+         ELSIF v_parametros.tipo_interfaz =  'ObligacionPagoConsulta' THEN
+           --no se colocan retricciones
+         ELSIF v_parametros.tipo_interfaz =  'ObligacionPagoApropiacion' THEN
+           --no hay limitaciones ...
+         ELSIF v_parametros.tipo_interfaz =  'ObligacionPagoConta' THEN
+           --no hay limitaciones ... 
          ELSE
 
                 --SI LA NTERFACE VIENE DE ADQUISIONES   
@@ -298,13 +306,12 @@ BEGIN
           v_inner='';
           
           
-          IF   p_administrador != 1 THEN
-                 
-                    v_filadd = '(obpg.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or obpg.id_usuario_reg='||p_id_usuario||' ) and ';
-                    
-                    
-           END IF;
-                 
+          IF  v_parametros.tipo_interfaz !=  'ObligacionPagoConta' THEN
+            --no hay limitaciones ...
+            IF   p_administrador != 1 THEN
+                   v_filadd = '(obpg.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or obpg.id_usuario_reg='||p_id_usuario||' ) and ';
+            END IF;
+          END IF;       
                 
           
               
@@ -356,7 +363,8 @@ BEGIN
                               obpg.ultimo_estado_pp,
                               obpg.tipo_anticipo,
                               obpg.ajuste_anticipo,
-                              obpg.ajuste_aplicado
+                              obpg.ajuste_aplicado,
+                              obpg.monto_estimado_sg
                               
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
@@ -399,12 +407,12 @@ BEGIN
            v_filadd='';
            v_inner='';
           
-          IF   p_administrador != 1 THEN
-                 
-                    v_filadd = '(obpg.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or obpg.id_usuario_reg='||p_id_usuario||' ) and ';
-                    
-                    
-           END IF;
+          IF  v_parametros.tipo_interfaz !=  'ObligacionPagoConta' THEN
+            --no hay limitaciones ...
+            IF   p_administrador != 1 THEN
+                   v_filadd = '(obpg.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or obpg.id_usuario_reg='||p_id_usuario||' ) and ';
+            END IF;
+          END IF; 
         
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(obpg.id_obligacion_pago)

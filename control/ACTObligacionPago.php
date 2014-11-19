@@ -87,6 +87,14 @@ class ACTObligacionPago extends ACTbase{
 		$this->res=$this->objFunc->eliminarObligacionPago($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	
+	function extenderOp(){
+		$this->objFunc=$this->create('MODObligacionPago');	
+		$this->res=$this->objFunc->extenderOp($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	
+	
 	function insertarAjustes(){
 			$this->objFunc=$this->create('MODObligacionPago');	
 		$this->res=$this->objFunc->insertarAjustes($this->objParam);

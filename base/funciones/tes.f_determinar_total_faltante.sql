@@ -18,6 +18,7 @@ $body$
 DECLARE
     v_consulta   		 		varchar;
 	v_parametros  				record;
+    v_registros                 record;
 	v_nombre_funcion   			text;
 	v_resp						varchar;
      v_monto_total_registrado 	numeric;
@@ -32,15 +33,26 @@ DECLARE
      v_monto_total_ajuste_ag    numeric;
      v_monto_ajuste_anticipo  numeric;
      v_monto_ajuste_aplicado numeric;
+     v_monto_est_sig_gestion numeric;
+     v_total_anticipo   numeric;
+     v_monto_pagado numeric;
+     v_total_anticipo_mix numeric;
+     v_total_devengado numeric;
+     v_monto_pagado_1c numeric;
+     v_total_aplicado numeric;
+     v_total_efectivo  numeric;
+     v_total_pago_aplicado  numeric;
+     v_saldo_anticipo  numeric;
+     v_monto_ajuste numeric;
 			    
 BEGIN
 
 	v_nombre_funcion = 'tes.f_determinar_total_faltante';
    
  
-            IF p_filtro not in ('registrado','registrado_pagado','total_registrado_pagado','devengado','pagado','ant_parcial','ant_parcial_descontado','ant_aplicado_descontado','dev_garantia','ant_aplicado_descontado_op_variable') THEN
+            IF p_filtro not in ('registrado','registrado_pagado','registrado_monto_ejecutar','anticipo_sin_aplicar','total_registrado_pagado','devengado','pagado','ant_parcial','ant_parcial_descontado','ant_aplicado_descontado','dev_garantia','ant_aplicado_descontado_op_variable') THEN
               
-              		raise exception 'filtro no reconocido';
+              		raise exception 'filtro no reconocido (%) para determinar el total faltante ', p_filtro;
             
             END IF;
             
@@ -53,9 +65,11 @@ BEGIN
                      -- determina el total por registrar
                    
                      select 
-                      op.total_pago
+                      op.total_pago,
+                      op.monto_estimado_sg
                      into
-                       v_monto_total
+                       v_monto_total,
+                       v_monto_est_sig_gestion
                      from tes.tobligacion_pago op
                      where op.id_obligacion_pago = p_id_obligacion_pago; 
                     
@@ -70,11 +84,46 @@ BEGIN
                             and pp.id_obligacion_pago = p_id_obligacion_pago; 
                             
                           
-                      v_monto_total  = COALESCE(v_monto_total,0)- COALESCE(v_monto_total_registrado,0);
+                      v_monto_total  = COALESCE(v_monto_total,0) +  COALESCE(v_monto_est_sig_gestion,0) - COALESCE(v_monto_total_registrado,0);
                             
                         
                       return v_monto_total;    
              
+            ---------------------------------------------------------------------------------
+            -- MONTO A EJECUTAR REGISTRADO ,   incluye montos a pagar la siguiente gestion 
+            ---------------------------------------------------------------------------------
+            
+            ELSIF   p_filtro = 'registrado_monto_ejecutar' THEN
+            
+                     -- determina el total por registrar
+                   
+                     select 
+                      op.total_pago,
+                      op.monto_estimado_sg
+                     into
+                       v_monto_total,
+                       v_monto_est_sig_gestion
+                     from tes.tobligacion_pago op
+                     where op.id_obligacion_pago = p_id_obligacion_pago; 
+                    
+                     -- determina el total registrado 
+                      select 
+                       sum(pp.monto_ejecutar_total_mo),
+                       sum(pp.monto_anticipo)
+                      into
+                       v_monto_total_registrado,
+                       v_total_anticipo_mix
+                      from tes.tplan_pago pp
+                      where  pp.estado_reg='activo'  
+                            and pp.tipo in('devengado','devengado_pagado','rendicion','anticipo','devengado_pagado_1c')
+                            and pp.id_obligacion_pago = p_id_obligacion_pago; 
+                         
+                      
+                      v_monto_total = COALESCE(v_monto_total,0) +  COALESCE(v_monto_est_sig_gestion,0) - COALESCE(v_monto_total_registrado,0) - COALESCE(v_total_anticipo_mix,0);
+                            
+                        
+                      return v_monto_total;
+            
              ---------------------------------
              --  REGISTRADO PAGADO POR CUOTA
              ----------------------------------
@@ -107,13 +156,14 @@ BEGIN
                         return v_monto_total; 
            
     
-            ------------------------------------------
+            -----------------------------------
             -- ANTICIPO APLICADO DESCONTADO
-            --------------------------------------------
+            -----------------------------------
             
              ELSEIF     p_filtro  = 'ant_aplicado_descontado' THEN
              
-            
+                     v_monto = 0;
+                     v_total_anticipo = 0;
              
                      --  fltro para recupera el total del anticipo total
                    
@@ -122,9 +172,21 @@ BEGIN
                      into
                        v_monto
                      from tes.tplan_pago pp
-                     where pp.id_plan_pago = p_id_plan_pago; 
-                    
-                     -- determina el total registrado  como antticipo faltante
+                     where  pp.tipo = 'anticipo' and
+                            pp.id_plan_pago = p_id_plan_pago; 
+                            
+                     
+                     --  es es una cueta de de enga revisamos el monto_acnticipado
+                     select 
+                        pp.monto_anticipo
+                     into
+                        v_total_anticipo
+                     from tes.tplan_pago pp
+                     where  pp.tipo in ('devengado','devengado_pagado','devengado_pagado_1c')
+                            and pp.id_plan_pago = p_id_plan_pago;
+                            
+                            
+                     -- determina el total registrado  como anticipo faltante
                       select 
                        sum(pp.monto)
                       into
@@ -134,16 +196,19 @@ BEGIN
                             and pp.tipo = 'ant_aplicado'                --recupera la suma de los anticipos aplicados
                             and pp.id_plan_pago_fk = p_id_plan_pago; 
                             
-                     v_monto_total  = COALESCE(v_monto,0)- COALESCE(v_monto_total_registrado,0);
+                     v_monto_total  = COALESCE(v_monto,0) +  COALESCE(v_total_anticipo, 0) - COALESCE(v_monto_total_registrado,0);
     
     
                      return v_monto_total; 
                      
-            ------------------------------------------------------------------------------
+            ----------------------------------------------------------------------------------------
             --  Calcula el monto aplicado considerando anticipos totales para obligaciones variables
-            -----------------------------------------------------------------------------  
+            ----------------------------------------------------------------------------------------  
                   
             ELSEIF     p_filtro  = 'ant_aplicado_descontado_op_variable' THEN
+                     
+                     v_monto = 0;
+                     v_total_anticipo = 0;
                      
                      select 
                       op.ajuste_anticipo,
@@ -164,6 +229,14 @@ BEGIN
                      where pp.estado_reg = 'activo' and 
                            pp.id_obligacion_pago = p_id_obligacion_pago and
                            pp.tipo = 'anticipo'; 
+                           
+                     select 
+                        sum(pp.monto_anticipo)
+                     into
+                        v_total_anticipo
+                     from tes.tplan_pago pp
+                     where      pp.tipo in ('devengado','devengado_pagado','devengado_pagado_1c')
+                            and pp.id_obligacion_pago = p_id_obligacion_pago;
                     
                      -- determina el total registrado  con antticipo faltante
                       select 
@@ -177,8 +250,84 @@ BEGIN
                             and pp.tipo = 'ant_aplicado'                --recupera la suma de los anticipos aplicados
                             and pp.id_obligacion_pago = p_id_obligacion_pago; 
                             
-                     v_monto_total  = COALESCE(v_monto,0)- COALESCE(v_monto_total_registrado,0) + COALESCE(v_monto_total_ajuste_ag,0) + COALESCE(v_monto_ajuste_anticipo) -  COALESCE(v_monto_ajuste_aplicado);
+                     v_monto_total  = COALESCE(v_monto,0) + COALESCE(v_total_anticipo,0)- COALESCE(v_monto_total_registrado,0) + COALESCE(v_monto_total_ajuste_ag,0) + COALESCE(v_monto_ajuste_anticipo) -  COALESCE(v_monto_ajuste_aplicado);
                      return v_monto_total;       
+          
+          
+           ------------------------------------------------------------------------------------------------------------
+            -- TOTAL ANTICIPO SIN APLICAR (CUANTO FALTA POR APLICAR)  si es negativo es que le debemos al proveedor
+            ------------------------------------------------------------------------------------------------------
+            
+             ELSEIF     p_filtro  = 'anticipo_sin_aplicar' THEN
+             
+                     select 
+                      op.total_pago,
+                      op.monto_estimado_sg,
+                      op.ajuste_anticipo,
+                      op.ajuste_aplicado
+                     into
+                       v_registros
+                     from tes.tobligacion_pago op
+                     where op.id_obligacion_pago = p_id_obligacion_pago;
+             
+                     --  total anticipado con cuota del tipo anticipo total
+                   
+                     select 
+                      sum(pp.monto)
+                     into
+                       v_total_anticipo
+                     from tes.tplan_pago pp
+                     where pp.estado_reg = 'activo'  
+                              and pp.tipo in('anticipo')
+                              and pp.estado = 'anticipado'
+                              and pp.id_obligacion_pago = p_id_obligacion_pago;
+                     
+                     --total anticipos mixtos , total devengado
+                     select 
+                      sum(pp.monto_anticipo),
+                      sum(pp.monto)
+                     into
+                       v_total_anticipo_mix,
+                       v_total_devengado
+                     from tes.tplan_pago pp
+                     where pp.estado_reg='activo'  
+                              and pp.tipo in('devengado','devengado_pagado','devengado_pagado_1c')
+                              and pp.estado in ( 'devengado')
+                              and pp.id_obligacion_pago = p_id_obligacion_pago;
+                     
+                     /*
+                                                 
+                     --total monto pagado con un solo comprobante
+                     select 
+                        sum(pp.monto - pp.monto_anticipo)
+                     into
+                        v_monto_pagado_1c
+                     from tes.tplan_pago pp
+                     where pp.estado_reg='activo'  
+                              and pp.tipo in('devengado_pagado_1c')
+                              and pp.estado in ( 'devengado')
+                              and pp.id_obligacion_pago = p_id_obligacion_pago;
+                     
+                     */
+                              
+                     -- determinar el total aplicado
+                      select 
+                       sum(pp.monto)
+                      into
+                       v_total_aplicado
+                      from tes.tplan_pago pp
+                      where  pp.estado_reg = 'activo'  
+                            and pp.tipo = 'ant_aplicado' -- recupera la suma de los anticipos aplicados
+                            and pp.estado = 'aplicado'
+                            and pp.id_obligacion_pago = p_id_obligacion_pago;
+                            
+                     
+                     
+                     
+                  v_saldo_anticipo = COALESCE(v_total_anticipo,0) + COALESCE(v_total_anticipo_mix,0)  - COALESCE(v_total_aplicado,0);
+                  
+    
+                 return v_saldo_anticipo;  
           
           
           --------------------------
@@ -205,12 +354,19 @@ BEGIN
             
            
           -------------------------------------
-          --  ANTICIPOS PARCIALES DSECONTADOS
+          --  ANTICIPOS PARCIALES DESCONTADOS
           -------------------------------------
             
             ELSEIF  p_filtro = 'ant_parcial_descontado' THEN
             
                      --recuperar el total de anticipo parcial que falta descontar
+                     
+                       select 
+                        op.monto_ajuste_ret_anticipo_par_ga
+                       into
+                         v_monto_ajuste
+                       from tes.tobligacion_pago op
+                       where op.id_obligacion_pago = p_id_obligacion_pago;
                      
                      select 
                          sum(pp.monto)
@@ -252,16 +408,23 @@ BEGIN
                      
                      --devolver la diferencias, el monto que falta descontar
                      
-                     return COALESCE(v_monto_total_registrado,0) - COALESCE(v_monto_ant_descontado,0) - COALESCE(v_monto_aux,0);
+                     return COALESCE(v_monto_total_registrado,0) + COALESCE(v_monto_aux,0) - COALESCE(v_monto_ant_descontado,0) - COALESCE(v_monto_aux,0);
             
             
-             -----------------------------
+             -------------------------------
              --  DEVOLUCIONES DE GARANTIA
-             ------------------------------
+             -------------------------------
             
              ELSEIF  p_filtro = 'dev_garantia' THEN
             
                        --recupera los montos retenidos por garantia en las trasacciones de devengado unicamente
+                       
+                       select 
+                        op.monto_ajuste_ret_garantia_ga
+                       into
+                         v_monto_ajuste
+                       from tes.tobligacion_pago op
+                       where op.id_obligacion_pago = p_id_obligacion_pago;
                        
                         select 
                          sum(pp.monto_retgar_mo)
@@ -284,12 +447,12 @@ BEGIN
                               and pp.id_obligacion_pago = p_id_obligacion_pago;
                        
                       
-                       return COALESCE(v_monto_total_registrado,0) - COALESCE(v_monto_ant_descontado,0);
+                       return COALESCE(v_monto_total_registrado,0) + COALESCE(v_monto_ajuste,0) - COALESCE(v_monto_ant_descontado,0);
             
             
-             -----------------------------
+             ---------------------------
              -- TOTAL REGISTRADO PAGADO
-             ------------------------------
+             ---------------------------
             
             ELSEIF     p_filtro in ('total_registrado_pagado') THEN
              
@@ -299,9 +462,11 @@ BEGIN
                        -- determina el total a pagar
                    
                        select 
-                        op.total_pago
+                        op.total_pago,
+                        op.monto_estimado_sg
                        into
-                         v_monto_total
+                         v_monto_total,
+                         v_monto_est_sig_gestion
                        from tes.tobligacion_pago op
                        where op.id_obligacion_pago = p_id_obligacion_pago; 
                       
@@ -334,7 +499,7 @@ BEGIN
                                                               and pp2.id_obligacion_pago = p_id_obligacion_pago);  
                               
                             
-                        v_monto_total  = COALESCE(v_monto_total,0) - COALESCE(v_monto_total_registrado,0) - COALESCE(v_monto_aux,0);
+                        v_monto_total  = COALESCE(v_monto_total,0)+ COALESCE(v_monto_est_sig_gestion,0) - COALESCE(v_monto_total_registrado,0) - COALESCE(v_monto_aux,0);
                               
                           
                         return v_monto_total; 

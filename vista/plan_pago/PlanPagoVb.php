@@ -8,7 +8,7 @@
 *dar el visto a solicitudes de compra
 *
 */
-header("content-type: text/javascript; charset=UTF-8");
+header("content-type: text/javascript; charset=UTF-8"); 
 ?>
 <script>
 Phx.vista.PlanPagoVb = {
@@ -300,31 +300,19 @@ Phx.vista.PlanPagoVb = {
             });
      },
      
-     successAplicarDesc:function(resp){
-            Phx.CP.loadingHide();
-           var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
-            if(!reg.ROOT.error){
-                
-               this.Cmp.porc_descuento_ley.setValue(reg.ROOT.datos.descuento_porc*1);
-               this.Cmp.obs_descuentos_ley.setValue(reg.ROOT.datos.observaciones);
-               
-               this.calculaMontoPago();
-               
-              
-             
-             }else{
-                alert(reg.ROOT.mensaje)
-            }
-     },
+     
     
     iniciarEventos:function(){
         
         this.Cmp.monto.on('change',this.calculaMontoPago,this); 
-        //this.cmpDescuentoAnticipo.on('change',this.calculaMontoPago,this);
+        this.Cmp.descuento_anticipo.on('change',this.calculaMontoPago,this);
         this.Cmp.monto_no_pagado.on('change',this.calculaMontoPago,this);
         this.Cmp.otros_descuentos.on('change',this.calculaMontoPago,this);
         this.Cmp.monto_retgar_mo.on('change',this.calculaMontoPago,this);
         this.Cmp.descuento_ley.on('change',this.calculaMontoPago,this);
+        this.Cmp.descuento_inter_serv.on('change',this.calculaMontoPago,this);
+        this.Cmp.monto_anticipo.on('change',this.calculaMontoPago,this);
+        this.Cmp.monto_excento.on('change',this.calculaMontoPago,this);
         
         this.Cmp.id_plantilla.on('select',function(cmb,rec,i){
             this.getDecuentosPorAplicar(rec.data.id_plantilla);

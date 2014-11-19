@@ -4,9 +4,10 @@ CREATE OR REPLACE FUNCTION tes.f_finalizar_obligacion (
   p_id_obligacion_pago integer,
   p_id_usuario integer,
   p_id_usuario_ai integer,
-  p_usuario_ai varchar
+  p_usuario_ai varchar,
+  p_forzar_fin varchar = 'no'::character varying
 )
-RETURNS boolean AS
+RETURNS varchar [] AS
 $body$
 /*
 *
@@ -45,6 +46,8 @@ DECLARE
     v_id_cotizacion integer;
     v_monto_total  numeric;
     v_saldo_x_pagar   numeric;
+    v_mensaje_cuotas varchar;
+    v_mensaje_error  varchar;
 	
     
 BEGIN
@@ -59,7 +62,11 @@ BEGIN
        op.id_obligacion_pago,
        op.tipo_obligacion,
        op.estado,
-       op.pago_variable
+       op.pago_variable,
+       op.id_obligacion_pago_extendida,
+       op.monto_estimado_sg,
+       op.ajuste_anticipo,
+       op.ajuste_aplicado
        into
        v_registros_obli
        from tes.tobligacion_pago op
@@ -69,11 +76,11 @@ BEGIN
     
        --  verificamos que el total de cuotas esten en su estado final
          IF EXISTS( select 
-                 1
-               from tes.tplan_pago pp
-               where pp.id_obligacion_pago =  p_id_obligacion_pago  
-                    and pp.estado_reg = 'activo'
-                     and pp.estado not in ('devengado','pagado', 'anticipado', 'aplicado', 'devuelto')) THEN
+                 		1
+                   from tes.tplan_pago pp
+                   where pp.id_obligacion_pago =  p_id_obligacion_pago  
+                        and pp.estado_reg = 'activo'
+                         and pp.estado not in ('devengado','pagado', 'anticipado', 'aplicado', 'devuelto')) THEN
           
           
              raise exception 'existen cuotas pendientes de finanización';
@@ -83,52 +90,115 @@ BEGIN
           -----------------
           -- VALIDACIONES
           -----------------
+          
+          v_mensaje_error = '';
+          
            
           -- validar que  si tiene anticipo parciales exista retenciones por el total
           v_monto_total= tes.f_determinar_total_faltante(p_id_obligacion_pago, 'ant_parcial_descontado');
-          IF v_monto_total > 0 THEN
-            raise exception 'Tiene pendiente la recuperacion del anticipo por un monto de: %', v_monto_total;
+          IF v_monto_total > 0   and p_forzar_fin = 'no' THEN
+            v_mensaje_error  =  'Tiene pendiente la recuperacion del anticipo por un monto de: '|| v_monto_total::varchar ||'
+            ';
           END IF;
           
          --validamos que si tiene retencion de garantia esten devueltas 
       
-         v_monto_total= tes.f_determinar_total_faltante(p_id_obligacion_pago, 'dev_garantia');
-         IF v_monto_total > 0 THEN
-            raise exception 'Tiene devoluciones de garantia pendiente por un monto de : %', v_monto_total;
+         v_monto_total = tes.f_determinar_total_faltante(p_id_obligacion_pago, 'dev_garantia');
+         IF v_monto_total > 0  and p_forzar_fin = 'no' THEN
+            v_mensaje_error  =  v_mensaje_error||' Tiene devoluciones de garantia pendiente por un monto de : '|| v_monto_total;
          END IF;
+         
+         
+         IF v_mensaje_error != '' and  p_forzar_fin = 'no' THEN
+         
+               v_respuesta[1] = 'false';
+               v_respuesta[2] = v_mensaje_error; 
+               
+               RETURN   v_respuesta;
+         END IF;
+         
+         --monto_estimado_sg,
+         --op.ajuste_anticipo,
+         --op.ajuste_aplicado
       
       
          -- validamos que si tienes anticipos totales   el total este aplicado para procesos no variables
          IF  v_registros_obli.pago_variable = 'no'   THEN
          
+                
+                v_saldo_x_pagar = tes.f_determinar_total_faltante(v_registros_obli.id_obligacion_pago,'anticipo_sin_aplicar');
+                
                 v_mensaje = '';
-                FOR v_registros in ( select 
-                                     pp.monto,
-                                     pp.total_pagado,
-                                     pp.nro_cuota
-                                     from tes.tplan_pago pp
-                                     where pp.id_obligacion_pago =  p_id_obligacion_pago  
-                                          and pp.estado_reg = 'activo'
-                                          and pp.tipo = 'anticipo'
-                                          and pp.monto != pp.total_pagado
-                                          and pp.estado = 'anticipado') LOOP
+                IF  v_saldo_x_pagar  > 0 THEN
+                
+                    IF  v_registros_obli.monto_estimado_sg  > v_saldo_x_pagar THEN
+                         v_mensaje =  'Tiene saldo anticipado por aplicar ('||v_saldo_x_pagar::varchar||'),  reduzca el monto de ampliación en ('||(v_registros_obli.monto_estimado_sg  - v_saldo_x_pagar)::varchar||')';
+                    
+                    ELSEIF v_registros_obli.monto_estimado_sg  < v_saldo_x_pagar THEN
+                        v_mensaje =  'Tiene saldo anticipado por aplicar ('||v_saldo_x_pagar::varchar||'), Puede incrementar el monto de ampliación ('||(v_saldo_x_pagar - v_registros_obli.monto_estimado_sg)::varchar||') o aplicar el anticipo si tiene presupuesto suficiente';
+                    END IF;
+                    
+                  
+                    
+                    v_mensaje_cuotas= '';
+                    --revisa cuota de anticipo ...
+                    FOR v_registros in ( select 
+                                         pp.monto,
+                                         pp.total_pagado,
+                                         pp.nro_cuota
+                                         from tes.tplan_pago pp
+                                         where pp.id_obligacion_pago =  p_id_obligacion_pago  
+                                              and pp.estado_reg = 'activo'
+                                              and pp.tipo = 'anticipo'
+                                              and pp.monto != pp.total_pagado
+                                              and pp.estado = 'anticipado') LOOP
+                                        
+                                 IF v_mensaje_cuotas = '' THEN
+                                    v_mensaje_cuotas = 'Revise las cuotas: <br>';
+                                 END IF;       
+                                 v_mensaje_cuotas = v_mensaje_cuotas||'La cuota '|| COALESCE(v_registros.nro_cuota::varchar,'NAN')||'  le falta aplicar '|| (COALESCE(v_registros.monto,0) - COALESCE(v_registros.total_pagado,0))::varchar||' </br>';
                             
+                    END LOOP;
+                    --revisa cuota de devengado con monto anticipado
+                    FOR v_registros in ( 
+                                         select 
+                                           pp.monto,
+                                           pp.total_pagado,
+                                           pp.nro_cuota
+                                         from tes.tplan_pago pp
+                                         where pp.id_obligacion_pago =  p_id_obligacion_pago  
+                                              and pp.estado_reg = 'activo'
+                                              and pp.tipo in ('devengado','devengado_pagado','devengado_pagado_1c')
+                                              and pp.monto_anticipo > 0
+                                              and pp.monto != pp.total_pagado
+                                              and pp.estado = 'devengado') LOOP
+                                        
+                                 IF v_mensaje_cuotas = '' THEN
+                                    v_mensaje_cuotas = 'Revise las cuotas: <br>';
+                                 END IF;       
+                                 v_mensaje_cuotas = v_mensaje_cuotas||'La cuota '|| COALESCE(v_registros.nro_cuota::varchar,'NAN')||'  le falta aplicar '|| (COALESCE(v_registros.monto,0) - COALESCE(v_registros.total_pagado,0))::varchar||' </br>';
                             
-                             v_mensaje = v_mensaje||'La cuota '||v_registros.nro_cuota::varchar||'  le fatal aplicar '|| (COALESCE(v_registros.monto,0)-COALESCE(v_registros.total_pagado,0))::varchar||' </br>';
-                
-                END LOOP;
-                
-                IF v_mensaje!='' THEN
-                
-                   raise exception 'Existen anticipos no aplicados, % ',v_mensaje;
-                
+                    END LOOP;
+                    
+                    IF v_mensaje!='' THEN
+                         raise exception ' % <br>  %',v_mensaje, v_mensaje_cuotas;
+                    END IF;
+                    
+                    
+                ELSEIF  v_saldo_x_pagar < 0 THEN
+                   raise exception 'El monto de  ampliacion se excede en (%). Reduzaca el monto de ampliacion', v_saldo_x_pagar;
                 END IF;
+             
+                
+                
          
          ELSE
              --  Si es un proceso variable validamos 
              v_saldo_x_pagar = tes.f_determinar_total_faltante(v_registros_obli.id_obligacion_pago,'ant_aplicado_descontado_op_variable');
              
              IF v_saldo_x_pagar > 0  THEN
+             
+             
                 raise exception 'Tiene un anticipo total que no ha sido aplicado (%),  si desesa continuar de todas formas, primero ajuste el monto aplicado para la obligación',v_saldo_x_pagar;
              END IF; 
              
@@ -138,11 +208,10 @@ BEGIN
              
         END IF;
         
-          
-        
-          --  verificamos que el total de los devengados esten pagados
-          v_mensaje = '';
-          FOR v_registros in ( select 
+       
+        --  verificamos que el total de los devengados esten pagados
+        v_mensaje = '';
+        FOR v_registros in ( select 
                                pp.monto_ejecutar_total_mo,
                                pp.total_pagado,
                                pp.nro_cuota
@@ -150,7 +219,7 @@ BEGIN
                                where pp.id_obligacion_pago =  p_id_obligacion_pago  
                                     and pp.estado_reg = 'activo'
                                     and pp.tipo in ('devengado','devengado_pagado')
-                                    and pp.monto_ejecutar_total_mo != pp.total_pagado
+                                    and pp.monto_ejecutar_total_mo > (pp.total_pagado)
                                     and pp.estado = 'devengado') LOOP
                       
                       
@@ -163,6 +232,8 @@ BEGIN
              raise exception 'Existen devengados incompletos % ',v_mensaje;
           
           END IF;
+          
+         
        
           --  si tiene relacionado una cotizacion, se llama a la funcion de finalizar cotizacion              
           IF v_registros_obli.tipo_obligacion ='adquisiciones' THEN      
@@ -179,6 +250,8 @@ BEGIN
                     raise exception  'No existe relacion con ninguna cotizacion en adquisiciones.';
                  
                  END IF;
+                 
+                 --v_parametros.forzar
                  
                  
                  IF not adq.f_finalizar_cotizacion(v_id_cotizacion, 
@@ -207,6 +280,8 @@ BEGIN
                END IF;
        END IF;
       
+      
+     v_respuesta[1] = 'true'; 
 
 RETURN   v_respuesta;
 

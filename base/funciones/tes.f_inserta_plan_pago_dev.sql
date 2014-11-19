@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_inserta_plan_pago_dev (
   p_administrador integer,
   p_id_usuario integer,
@@ -65,6 +67,9 @@ DECLARE
     
     v_resp_doc   boolean;
     v_obligacion	record;
+    
+    v_monto_anticipo  numeric;
+    v_check_ant_mixto numeric;
     			
     
     
@@ -132,6 +137,7 @@ BEGIN
              v_nro_cuenta_bancaria =  (p_hstore->'nro_cuenta_bancaria')::varchar;
              v_porc_monto_excento_var = (p_hstore->'porc_monto_excento_var')::numeric;
              v_monto_excento = (p_hstore->'monto_excento')::numeric;
+             v_monto_anticipo = COALESCE((p_hstore->'monto_anticipo')::numeric, 0);
              
              
            -- segun el tipo  recuepramos el tipo_plan_pago, determinamos el flujos para el WF
@@ -159,6 +165,11 @@ BEGIN
               raise exception 'El monto a pagar no puede ser 0';
            
            END IF;
+           
+           IF  v_monto_anticipo  < 0 THEN
+              raise exception 'El monto para anticipo no puede ser menor a cero';
+           END IF;
+           
            
            
           --  obtiene datos de la obligacion
@@ -200,10 +211,11 @@ BEGIN
                 IF v_registros.pago_variable='no' THEN                
                 
                         v_monto_total= tes.f_determinar_total_faltante((p_hstore->'id_obligacion_pago')::integer, 'registrado');
-                        IF v_monto_total <  (p_hstore->'monto')::numeric  THEN
-                           raise exception 'No puede exceder el total a pagar en obligaciones no variables';
+                        IF v_monto_total  <  (p_hstore->'monto')::numeric  THEN
+                           raise exception 'No puede exceder el total a pagar en obligaciones no variables.  Si tiene gasto para la siguiente gestión incremente el monto estimado en la obligacion de pago';
                         END IF;
                         
+                                                
                         --   si es  un pago no variable  (si es una cuota de devengao_pagado, devegando_pagado_1c, pagado)
                         --  validar que no se haga el ultimo pago sin  terminar de descontar el anticipo,
                         
@@ -245,8 +257,22 @@ BEGIN
           
           -- calcula el liquido pagable y el monto a ejecutar presupeustariamente
            
-          v_liquido_pagable = COALESCE((p_hstore->'monto')::numeric,0) - COALESCE((p_hstore->'monto_no_pagado')::numeric,0) - COALESCE((p_hstore->'otros_descuentos')::numeric,0) - COALESCE((p_hstore->'monto_retgar_mo')::numeric,0) - COALESCE((p_hstore->'descuento_ley')::numeric,0) - COALESCE((p_hstore->'descuento_anticipo')::numeric,0) - COALESCE((p_hstore->'descuento_inter_serv')::numeric,0);
-          v_monto_ejecutar_total_mo  = COALESCE((p_hstore->'monto')::numeric,0) -  COALESCE((p_hstore->'monto_no_pagado')::numeric,0);
+          v_liquido_pagable = COALESCE((p_hstore->'monto')::numeric,0)  - COALESCE((p_hstore->'monto_no_pagado')::numeric,0) - COALESCE((p_hstore->'otros_descuentos')::numeric,0) - COALESCE((p_hstore->'monto_retgar_mo')::numeric,0) - COALESCE((p_hstore->'descuento_ley')::numeric,0) - COALESCE((p_hstore->'descuento_anticipo')::numeric,0) - COALESCE((p_hstore->'descuento_inter_serv')::numeric,0);
+          v_monto_ejecutar_total_mo  = COALESCE((p_hstore->'monto')::numeric,0) -  COALESCE((p_hstore->'monto_no_pagado')::numeric,0) - v_monto_anticipo;
+          
+          --revision de anticipo
+          IF (p_hstore->'tipo') in('devengado','devengado_pagado','devengado_pagado_1c') THEN 
+               --si es un proceso variable, verifica que el registro no sobrepase el total a pagar
+               IF v_registros.pago_variable='no' THEN                
+                        -- Validamos anticipos mistos
+                        -- total a ejecutar + total_anticipo (mixto) <= total a pagar (presupuestado) +(total a pagar siguiente gestion)
+                        v_check_ant_mixto = tes.f_determinar_total_faltante((p_hstore->'id_obligacion_pago')::integer, 'registrado_monto_ejecutar');
+                        IF v_check_ant_mixto - v_monto_ejecutar_total_mo - v_monto_anticipo  < 0 THEN
+                             raise exception 'El monto del anticipo sobre pasa lo previsto para la siguiente gestion, ajuste el monto a ejecutarpara la siguiente gestión';
+                        END IF;
+               END IF;
+          END IF;
+          
           /*jrr(10/10/2014): El monto puede ser 0 en pagos variables*/ 
           if (COALESCE((p_hstore->'monto')::numeric,0) > 0) then
           	v_porc_monto_retgar = COALESCE((p_hstore->'monto_retgar_mo')::numeric,0)/COALESCE((p_hstore->'monto')::numeric,0);
@@ -269,7 +295,8 @@ BEGIN
          from param.tplantilla p 
          where p.id_plantilla =  (p_hstore->'id_plantilla')::integer;    
          
-         IF v_sw_me_plantilla = 'si' and  v_monto_excento <= 0 THEN
+         --si es una plantilla de monto excento
+         IF v_sw_me_plantilla = 'si' and  v_monto_excento < 0 THEN
          
             raise exception  'Este documento necesita especificar un monto excento mayor a cero';
          
@@ -281,7 +308,7 @@ BEGIN
          END IF;
          
          IF v_monto_excento > 0 THEN
-            v_porc_monto_excento_var  = v_monto_excento / v_monto_ejecutar_total_mo;
+            v_porc_monto_excento_var  = v_monto_excento / COALESCE((p_hstore->'monto')::numeric,0);
          ELSE
             v_porc_monto_excento_var = 0;
          END IF;
@@ -501,7 +528,8 @@ BEGIN
             usuario_ai,
             descuento_inter_serv,
             obs_descuento_inter_serv,
-            porc_monto_retgar
+            porc_monto_retgar,
+            monto_anticipo
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -545,7 +573,8 @@ BEGIN
             (p_hstore->'_nombre_usuario_ai')::varchar,
              COALESCE((p_hstore->'descuento_inter_serv')::numeric,0),
             (p_hstore->'obs_descuento_inter_serv'),
-            v_porc_monto_retgar
+            v_porc_monto_retgar,
+            v_monto_anticipo
             	
 			)RETURNING id_plan_pago into v_id_plan_pago;
             

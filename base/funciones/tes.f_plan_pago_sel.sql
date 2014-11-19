@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -77,16 +79,22 @@ BEGIN
             IF  lower(v_parametros.tipo_interfaz) = 'planpagovb' THEN
                 
                 IF p_administrador !=1 THEN
-                   v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))    ) and  (lower(plapa.estado)!=''borrador'') and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'' and  ';
+                   v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))    ) and  (lower(plapa.estado)!=''borrador'') and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'' and lower(plapa.estado)!=''anticipado'' and lower(plapa.estado)!=''aplicado'' and  ';
                  ELSE
-                     v_filtro = ' (lower(plapa.estado)!=''borrador''  and lower(plapa.estado)!=''pendiente''  and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'') and ';
+                     v_filtro = ' (lower(plapa.estado)!=''borrador''  and lower(plapa.estado)!=''pendiente''  and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'' and lower(plapa.estado)!=''anticipado'' and lower(plapa.estado)!=''aplicado'') and ';
                 END IF;
                 
                 
             END IF; 
             
+            IF  pxp.f_existe_parametro(p_tabla,'historico') THEN
+             v_historico =  v_parametros.historico;
+            ELSE
+               v_historico = 'no';
+            END IF;
             
-            IF  lower(v_parametros.tipo_interfaz) = 'planpagovbasistente' THEN
+            
+            IF  lower(v_parametros.tipo_interfaz) = 'planpagovbasistente' and v_historico != 'si'  THEN
               	v_filtro = ' (ew.id_funcionario  IN (select * FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date,'||p_id_usuario||') AS (id_funcionario INTEGER))) and ';
             	v_filtro = v_filtro || ' (lower(plapa.estado)=''vbgerente'') and ';
             END IF;
@@ -95,34 +103,27 @@ BEGIN
             
             
             
-            IF  pxp.f_existe_parametro(p_tabla,'historico') THEN
-             
-             v_historico =  v_parametros.historico;
             
-            ELSE
-            
-            v_historico = 'no';
-            
-            END IF;
             
             IF v_historico =  'si' THEN
             
-               v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = plapa.id_proceso_wf ';
-               v_strg_pp = 'DISTINCT(plapa.id_plan_pago)';
-               v_strg_obs = '''---''::text  as obs_wf'; 
               
-               
-                 IF p_administrador !=1 THEN
-                
-                        --v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  ';
-                        v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))    ) and  ';
-                  
-                 ELSE 
-                 
-                      v_filtro = '';
+                v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = plapa.id_proceso_wf ';
+                v_strg_pp = 'DISTINCT(plapa.id_plan_pago)';
+                v_strg_obs = '''---''::text  as obs_wf'; 
               
-                
-                 END IF;
+               IF  lower(v_parametros.tipo_interfaz) != 'planpagovbasistente'  THEN
+                      IF p_administrador !=1 THEN                    
+                            --v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  ';
+                       v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))    ) and  ';
+                     ELSE 
+                        v_filtro = '';
+                     END IF;
+               ELSE
+                  --historico para interface de asistentes
+                  v_filtro = ' (ew.id_funcionario  IN (select * FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date,'||p_id_usuario||') AS (id_funcionario INTEGER))) and ';
+            	
+               END IF;
                
             
             ELSE
@@ -213,7 +214,8 @@ BEGIN
                         op.tipo_obligacion,
                         plapa.monto_ajuste_ag,
                         plapa.monto_ajuste_siguiente_pago,
-                        op.pago_variable
+                        op.pago_variable,
+                        plapa.monto_anticipo
                                   
 						from tes.tplan_pago plapa
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
@@ -260,9 +262,9 @@ BEGIN
             
             IF  lower(v_parametros.tipo_interfaz) = 'planpagovb' THEN
                  IF p_administrador !=1 THEN
-                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (lower(plapa.estado)!=''borrador'') and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado''  and ';
+                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (lower(plapa.estado)!=''borrador'') and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'' and lower(plapa.estado)!=''anticipado'' and lower(plapa.estado)!=''aplicado''  and ';
                  ELSE
-                      v_filtro = ' (lower(plapa.estado)!=''borrador''  and lower(plapa.estado)!=''pendiente''  and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'') and ';
+                      v_filtro = ' (lower(plapa.estado)!=''borrador''  and lower(plapa.estado)!=''pendiente''  and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'' and lower(plapa.estado)!=''anticipado'' and lower(plapa.estado)!=''aplicado'') and ';
                  END IF;
             END IF;
             

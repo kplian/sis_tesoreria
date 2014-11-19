@@ -907,3 +907,92 @@ IS 'Se utiliza para hacer cuadrad el monto anticipado total con el monto aplicad
 /***********************************F-SCP-RAC-TES-0-21/10/2014***************************************/
 
 
+
+
+
+/***********************************I-SCP-GSS-TES-0-27/10/2014***************************************/
+CREATE TABLE tes.tfinalidad (
+  id_finalidad SERIAL, 
+  nombre_finalidad VARCHAR(200), 
+  color VARCHAR(50), 
+  estado VARCHAR(20), 
+  CONSTRAINT pk_tfinalidad__id_finalidad PRIMARY KEY(id_finalidad)
+) INHERITS (pxp.tbase)
+
+WITH (oids = false);
+
+/***********************************F-SCP-GSS-TES-0-27/10/2014***************************************/
+
+/***********************************I-SCP-RAC-TES-0-27/10/2014***************************************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN monto_anticipo NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tplan_pago.monto_anticipo
+IS 'monto anticipar que puede ser aplicado con otro comprobante  o puede ser llevado al gasto en la siguiente gestion,  si este valor es mayor a cero al cerrar la obligacion de pagos y no a sido totalmente aplicado, debe crearce una obligacion de pago extentida  para la siguiente gestion con un plan de pagos del tipo anticipo en estado anticipado por la suma de estos valores en registors activos';
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN monto_estimado_sg NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tobligacion_pago.monto_estimado_sg
+IS 'monto estimado para ser pagado en la siguiente gestion , este campo afecta la validacion del total por pagar';
+
+/***********************************F-SCP-RAC-TES-0-27/10/2014***************************************/
+
+
+/***********************************I-SCP-RAC-TES-0-28/10/2014***************************************/
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN id_obligacion_pago_extendida INTEGER;
+
+COMMENT ON COLUMN tes.tobligacion_pago.id_obligacion_pago_extendida
+IS 'Este campo sirve para relacionar la obligacion que se extiende a la siguiente gestion por tener un saldo anticipado';
+
+
+/***********************************F-SCP-RAC-TES-0-28/10/2014***************************************/
+
+
+/***********************************I-SCP-RAC-TES-0-06/11/2014***************************************/
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN monto_ajuste_ret_garantia_ga NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tobligacion_pago.monto_ajuste_ret_garantia_ga
+IS 'Este campo almacena en obligaciones extendidas saldo de retenciones de garantia por devolver';
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN monto_ajuste_ret_anticipo_par_ga NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tobligacion_pago.monto_ajuste_ret_anticipo_par_ga
+IS 'este campo almacena en obligaciones entendidas el saldo de anticipo parcial por retener de la gestion anterior';
+/***********************************F-SCP-RAC-TES-0-06/11/2014***************************************/
+
+
+
+
+/***********************************I-SCP-RAC-TES-0-10/11/2014***************************************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tplan_pago
+  ALTER COLUMN porc_descuento_ley TYPE NUMERIC;
+  
+/***********************************F-SCP-RAC-TES-0-10/11/2014***************************************/
+
+/***********************************I-SCP-JRR-TES-0-18/11/2014***************************************/
+
+ALTER TABLE tes.tobligacion_pago
+  ALTER COLUMN id_proveedor DROP NOT NULL;
+/***********************************F-SCP-JRR-TES-0-18/11/2014***************************************/
+

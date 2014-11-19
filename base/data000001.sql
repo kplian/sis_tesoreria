@@ -1028,4 +1028,9 @@ select pxp.f_insert_testructura_gui ('TIPP', 'TES');
 /***********************************F-DAT-RAC-TES-0-1/08/2014*****************************************/
 
 
+/***********************************I-DAT-GSS-TES-0-30/10/2014*****************************************/
 
+select pxp.f_insert_tgui ('Libro Bancos', 'cuenta bancaria endesis', 'CTABANCEND', 'si', 4, 'sis_tesoreria/vista/cuenta_bancaria/CuentaBancariaENDESIS.php', 2, '', 'CuentaBancariaENDESIS', 'TES');
+select pxp.f_insert_testructura_gui ('CTABANCEND', 'TES');
+
+/***********************************F-DAT-GSS-TES-0-30/10/2014*****************************************/

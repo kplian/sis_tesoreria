@@ -36,11 +36,19 @@ class ACTObligacionDet extends ACTbase{
 	
 	function guardarObligacionDetApropiacion(){
 		$this->objFunc=$this->create('MODObligacionDet');	
-		$this->res=$this->objFunc->guardarObligacionDetApropiacion($this->objParam);		
+		if($this->objParam->insertar('id_obligacion_det')){
+			$this->res=$this->objFunc->insertarObligacionDetApropiacion($this->objParam);			
+		} else{			
+			$this->res=$this->objFunc->modificarObligacionDetApropiacion($this->objParam);
+		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 	
-	
+	function eliminarObligacionDetApropiacion(){
+		$this->objFunc=$this->create('MODObligacionDet');	
+		$this->res=$this->objFunc->eliminarObligacionDetApropiacion($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
 						
 	function eliminarObligacionDet(){
 			$this->objFunc=$this->create('MODObligacionDet');	

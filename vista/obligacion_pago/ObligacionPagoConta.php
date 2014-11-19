@@ -11,12 +11,13 @@
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
-Phx.vista.ObligacionPagoSol = {
+Phx.vista.ObligacionPagoConta = {
     require:'../../../sis_tesoreria/vista/obligacion_pago/ObligacionPago.php',
 	requireclase:'Phx.vista.ObligacionPago',
-	title:'Obligacion de Pago (Solicitudes individuales)',
-	nombreVista: 'obligacionPagoSol',
+	title:'Obligacion de Pago (Contabilidad)',
+	nombreVista: 'ObligacionPagoConta',
 	ActList:'../../sis_tesoreria/control/ObligacionPago/listarObligacionPagoSol',
+	bnew: false,
 	
 	/*
 	 *  Interface heredada para solicitantes individuales
@@ -26,13 +27,13 @@ Phx.vista.ObligacionPagoSol = {
 	constructor: function(config) {
 	   
 	  
-	   this.Atributos[this.getIndAtributo('id_depto')].config.url = '../../sis_parametros/control/Depto/listarDeptoFiltradoXUsuario';
-       this.Atributos[this.getIndAtributo('id_depto')].config.baseParams = {estado:'activo',codigo_subsistema:'TES'},
-       this.Atributos[this.getIndAtributo('id_funcionario')].grid = true;
-       this.Atributos[this.getIndAtributo('id_funcionario')].form = true;
+	   this.Atributos[this.getIndAtributo('id_depto')].config.url= '../../sis_parametros/control/Depto/listarDeptoFiltradoXUsuario';
+       this.Atributos[this.getIndAtributo('id_depto')].config.baseParams={estado:'activo',codigo_subsistema:'TES'},
+       this.Atributos[this.getIndAtributo('id_funcionario')].grid= true;
+       this.Atributos[this.getIndAtributo('id_funcionario')].form= true;
        
        
-       Phx.vista.ObligacionPagoSol.superclass.constructor.call(this, config);
+       Phx.vista.ObligacionPagoConta.superclass.constructor.call(this,config);
     },
     
         
@@ -91,7 +92,7 @@ Phx.vista.ObligacionPagoSol = {
             
              this.cmpMoneda.on('select',function(com,dat){
                   
-                  if(dat.data.tipo_moneda == 'base'){
+                  if(dat.data.tipo_moneda=='base'){
                      this.cmpTipoCambioConv.disable();
                      this.cmpTipoCambioConv.setValue(1); 
                       
@@ -108,14 +109,14 @@ Phx.vista.ObligacionPagoSol = {
                     
                     n=rec.data.variable;
                     
-                    if(n=='adquisiciones' ||n == 'pago_directo'){
+                    if(n=='adquisiciones' ||n=='pago_directo'){
                         this.cmpProveedor.enable();
                         this.mostrarComponente(this.cmpProveedor);
                         this.mostrarComponente(this.cmpFuncionario);
                         this.ocultarComponente(this.cmpFuncionarioProveedor);
                         this.cmpFuncionario.reset();
                     }else{
-                        if(n=='viatico' || n == 'fondo_en_avance'){
+                        if(n=='viatico' || n=='fondo_en_avance'){
                                 this.cmpFuncionario.enable();
                                 this.mostrarComponente(this.cmpFuncionario);
                                 this.ocultarComponente(this.cmpProveedor);
@@ -171,13 +172,13 @@ Phx.vista.ObligacionPagoSol = {
        this.cmpFecha.disable(); 
        this.cmpTipoCambioConv.disable();
        
-       Phx.vista.ObligacionPagoSol.superclass.onButtonEdit.call(this);
+       Phx.vista.ObligacionPagoConta.superclass.onButtonEdit.call(this);
        
-       if(data.tipo_obligacion == 'adquisiciones'){
+       if(data.tipo_obligacion=='adquisiciones'){
             this.mostrarComponente(this.cmpProveedor);
             this.mostrarComponente(this.cmpFuncionario);
-            this.cmpFuncionario.store.baseParams.fecha = this.cmpFecha.getValue().dateFormat(this.cmpFecha.format);
             this.ocultarComponente(this.cmpFuncionarioProveedor);
+            this.cmpFuncionario.reset();
             this.cmpProveedor.disable();
             this.cmpMoneda.disable();
        }
@@ -203,38 +204,7 @@ Phx.vista.ObligacionPagoSol = {
            this.cmpMoneda.enable();
        }
            
-    },
-    
-    onButtonNew:function(){
-        Phx.vista.ObligacionPagoSol.superclass.onButtonNew.call(this);
-       
-        
-        this.cmpTipoObligacion.enable();
-        this.cmpDepto.enable(); 
-        this.mostrarComponente(this.cmpProveedor);
-        this.mostrarComponente(this.cmpFuncionario);
-        this.ocultarComponente(this.cmpFuncionarioProveedor);
-        this.cmpFuncionario.reset();
-        this.cmpFecha.enable(); 
-        this.cmpTipoCambioConv.enable();
-        this.cmpProveedor.enable();
-        this.cmpDepto.enable(); 
-        this.cmpMoneda.enable();
-        
-        this.cmpFuncionario.disable();
-        //defecto total nro cuota cero, entoces ocultamos los componentes
-        this.ocultarComponente(this.Cmp.id_plantilla);
-        this.ocultarComponente(this.Cmp.fecha_pp_ini);
-        this.ocultarComponente(this.Cmp.rotacion);
-        
-        this.cmpFecha.setValue(new Date());
-        this.cmpFecha.fireEvent('change')
-        this.cmpTipoObligacion.setValue('pago_directo');
-        
-        
-        
-    },
-    
+    }
        
 };
 </script>

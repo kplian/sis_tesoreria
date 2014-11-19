@@ -105,7 +105,8 @@ BEGIN
       pp.descuento_inter_serv,             --descuento por intercambio de servicios
       pp.obs_descuento_inter_serv,
       pp.porc_monto_retgar,
-      pp.descuento_anticipo
+      pp.descuento_anticipo,
+      pp.monto_anticipo
       into
       v_registros
       from  tes.tplan_pago pp
@@ -302,7 +303,8 @@ BEGIN
                                     
                                     descuento_anticipo,
                                     id_plantilla,
-                                    porc_monto_retgar
+                                    porc_monto_retgar,
+                                    monto_anticipo
                                    
                                   ) 
                                   VALUES (
@@ -346,7 +348,8 @@ BEGIN
                                     v_registros.obs_descuento_inter_serv,
                                     v_registros.descuento_anticipo,
                                     v_registros.id_plantilla,
-                                    v_registros.porc_monto_retgar
+                                    v_registros.porc_monto_retgar,
+                                    v_registros.monto_anticipo
                                    
                                   )RETURNING id_plan_pago into v_id_plan_pago;
                                 

@@ -71,12 +71,7 @@ class MODObligacionPago extends MODbase{
         $this->captura('tipo_anticipo','varchar');
 		$this->captura('ajuste_anticipo','numeric');
 		$this->captura('ajuste_aplicado','numeric');
-		
-		
-		
-		
-		
-		
+		$this->captura('monto_estimado_sg','numeric');
 		
 		
 		//Ejecuta la instruccion
@@ -149,10 +144,7 @@ class MODObligacionPago extends MODbase{
         $this->captura('tipo_anticipo','varchar');
 		$this->captura('ajuste_anticipo','numeric');
 		$this->captura('ajuste_aplicado','numeric');
-        
-        
-        
-        
+		$this->captura('monto_estimado_sg','numeric');
         
         
         //Ejecuta la instruccion
@@ -277,6 +269,23 @@ class MODObligacionPago extends MODbase{
 		return $this->respuesta;
 	}
 	
+	function extenderOp(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_obligacion_pago_ime';
+		$this->transaccion='TES_EXTOP_IME';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
 	function insertarAjustes(){
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.ft_obligacion_pago_ime';
@@ -285,8 +294,10 @@ class MODObligacionPago extends MODbase{
 				
 		//Define los parametros para la funcion
 		$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
-		$this->setParametro('ajuste_aplicado','ajuste_aplicado','int4');
-		$this->setParametro('ajuste_anticipo','ajuste_anticipo','int4');
+		$this->setParametro('ajuste_aplicado','ajuste_aplicado','numeric');
+		$this->setParametro('ajuste_anticipo','ajuste_anticipo','numeric');
+		$this->setParametro('monto_estimado_sg','monto_estimado_sg','numeric');
+		$this->setParametro('tipo_ajuste','tipo_ajuste','varchar');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -308,6 +319,7 @@ class MODObligacionPago extends MODbase{
                 
         //Define los parametros para la funcion
         $this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
+		$this->setParametro('forzar_fin','forzar_fin','varchar');
 
         //Ejecuta la instruccion
         $this->armarConsulta();

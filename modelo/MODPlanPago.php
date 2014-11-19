@@ -101,7 +101,7 @@ class MODPlanPago extends MODbase{
 		$this->captura('monto_ajuste_siguiente_pag','numeric');
 		$this->captura('pago_variable','varchar');
 		
-		
+		$this->captura('monto_anticipo','numeric');
 		
 		
 		//Ejecuta la instruccion
@@ -116,9 +116,6 @@ class MODPlanPago extends MODbase{
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.f_plan_pago_ime';
 		
-		
-        
-        
 		if (in_array($this->objParam->getParametro('tipo'), array("devengado_pagado","devengado","devengado_pagado_1c"))){
 		   /////////////////////////////
 		   // Cuotas de primer nivel que tienen prorateo 
@@ -151,8 +148,6 @@ class MODPlanPago extends MODbase{
 		$this->tipo_procedimiento='IME';
 				
 		//Define los parametros para la funcion
-		
-		
 		$this->setParametro('tipo_pago','tipo_pago','varchar');
 		$this->setParametro('monto_ejecutar_total_mo','monto_ejecutar_total_mo','numeric');
 		$this->setParametro('obs_descuentos_anticipo','obs_descuentos_anticipo','text');
@@ -183,13 +178,12 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('descuento_inter_serv','descuento_inter_serv','numeric');
 		$this->setParametro('obs_descuento_inter_serv','obs_descuento_inter_serv','text');
 		$this->setParametro('porc_monto_retgar','porc_monto_retgar','numeric');
-		
-		
 		$this->setParametro('monto_ajuste_ag','monto_ajuste_ag','numeric');
 		$this->setParametro('monto_ajuste_siguiente_pag','monto_ajuste_siguiente_pag','numeric');
-
-        
+		$this->setParametro('monto_anticipo','monto_anticipo','numeric');
 		
+		
+
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -240,6 +234,7 @@ class MODPlanPago extends MODbase{
         $this->setParametro('porc_monto_retgar','porc_monto_retgar','numeric');
 		$this->setParametro('monto_ajuste_ag','monto_ajuste_ag','numeric');
 		$this->setParametro('monto_ajuste_siguiente_pag','monto_ajuste_siguiente_pag','numeric');
+		$this->setParametro('monto_anticipo','monto_anticipo','numeric');
 
         
 		//Ejecuta la instruccion

@@ -1,52 +1,47 @@
 <?php
 /**
- * @package pxP
- * @file 	CuentaBancariaENDESIS.php
- * @author 	Gonzalo Sarmiento
- * @date	21-09-2012
- * @description	Archivo con la interfaz de usuario que permite la ejecucion de las funcionales del sistema
- */
-header("content-type:text/javascript; charset=UTF-8");
+*@package pXP
+*@file CuentaBancaria.php
+*@author  Gonzalo Sarmiento Sejas
+*@date 16-10-2014 15:19:30
+*@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
+*/
+
+header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
-	Phx.vista.CuentaBancariaENDESIS = Ext.extend(Phx.gridInterfaz, {
-		constructor : function(config) {
-			this.maestro = config.maestro;
-			Phx.vista.CuentaBancariaENDESIS.superclass.constructor.call(this, config);
-			this.init();
-			this.load({
-				params : {
-					start : 0,
-					limit : 50
-				}
-			});
-			this.addButton('btnDepositosCheques', {
-				text : 'Depositos y Cheques',
-				iconCls : 'bmoney',
-				disabled : true,
-				handler : this.onBtnDepositosCheques,
-				tooltip : '<b>Despositos y cheques</b>'
-			});
-		},
-		onBtnDepositosCheques : function() {
-			var rec = this.sm.getSelected();
-			Phx.CP.loadWindows('../../../sis_migracion/vista/ts_libro_bancos_depositos/TsLibroBancosDeposito.php', 'Depositos', {
-				modal : true,
-				width : '90%',
-				height : 500,
-			}, rec.data, this.idContenedor, 'TsLibroBancosDeposito');
-		},
-		
-		Atributos : [{
-			config : {
-				labelSeparator : '',
-				inputType : 'hidden',
-				name : 'id_cuenta_bancaria'
+Phx.vista.CuentaBancariaENDESIS=Ext.extend(Phx.gridInterfaz,{
+
+	constructor:function(config){
+		this.maestro=config.maestro;
+    	//llama al constructor de la clase padre
+		Phx.vista.CuentaBancariaENDESIS.superclass.constructor.call(this,config);
+		this.init();
+		this.load({params:{start:0, limit:this.tam_pag}});
+		this.addButton('btnDepositosCheques',
+            {
+                text: 'Depositos y Cheques',
+                iconCls: 'bmoney',
+                disabled: true,
+                handler: this.loadDepositosCheques,
+                tooltip: '<b>Depositos y Cheques</b><br/>Registrar Depositos y Cheques de la Cuenta Bancaria'
+            }
+        );
+	},
+	tam_pag:50,
+			
+	Atributos:[
+		{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_cuenta_bancaria'
 			},
-			type : 'Field',
-			form : true
-			},
-			{
+			type:'Field',
+			form:true 
+		},
+		{
 			config: {
 				name: 'id_institucion',
 				fieldLabel: 'Institucion',
@@ -243,13 +238,15 @@ header("content-type:text/javascript; charset=UTF-8");
 			id_grupo:1,
 			grid:true,
 			form:false
-		}],
-		title : 'Depositos y Cheques',
-		ActSave:'../../sis_tesoreria/control/CuentaBancaria/insertarCuentaBancaria',
-		ActDel:'../../sis_tesoreria/control/CuentaBancaria/eliminarCuentaBancaria',
-		ActList:'../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancaria',
-		id_store : 'id_cuenta_bancaria',
-		fields: [
+		}
+	],
+	
+	title:'Cuenta Bancaria',
+	ActSave:'../../sis_tesoreria/control/CuentaBancaria/insertarCuentaBancaria',
+	ActDel:'../../sis_tesoreria/control/CuentaBancaria/eliminarCuentaBancaria',
+	ActList:'../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancaria',
+	id_store:'id_cuenta_bancaria',
+	fields: [
 		{name:'id_cuenta_bancaria', type: 'numeric'},
 		{name:'estado_reg', type: 'string'},
 		{name:'fecha_baja', type: 'date',dateFormat:'Y-m-d'},
@@ -267,35 +264,89 @@ header("content-type:text/javascript; charset=UTF-8");
 		{name:'usr_mod', type: 'string'},'id_moneda','codigo_moneda'
 		
 	],
-		sortInfo : {
-			field : 'id_cuenta_bancaria',
-			direction : 'ASC'
-		},
-		bdel:false,
-		bsave:false,
-		bnew:false,
-		bedit:false,
+	sortInfo:{
+		field: 'id_cuenta_bancaria',
+		direction: 'ASC'
+	},
+	bdel:false,
+	bsave:false,
+	bnew:false,
+	bedit:false,
 	
-		fwidth : 420,
-		fheight : 250,
+	loadDepositosCheques:function() {
+            var rec=this.sm.getSelected();
+            rec.data.nombreVista = this.nombreVista;
+            Phx.CP.loadWindows('../../../sis_migracion/vista/ts_libro_bancos_depositos/TsLibroBancosDeposito.php',
+                    'Depositos',
+                    {
+                        width:'90%',
+                        height:500
+                    },
+                    rec.data,
+                    this.idContenedor,
+                    'TsLibroBancosDeposito'
+        )
+    },
+	
+	preparaMenu:function(n){
+          var data = this.getSelectedData();
+          var tb =this.tbar;
+		  
+          Phx.vista.CuentaBancariaENDESIS.superclass.preparaMenu.call(this,n); 
+		  if (data['id_moneda']==null){
+            this.getBoton('btnDepositosCheques').disable();
+          }else{
+			this.getBoton('btnDepositosCheques').enable();
+		  }
+          /*if (data['estado']== 'borrador'){
+              this.getBoton('edit').enable();
+              //this.TabPanelSouth.get(1).disable();
+          }
+          else{
+              
+               if (data['estado']== 'registrado'){   
+                  this.getBoton('fin_registro').disable();
+                  this.TabPanelSouth.get(1).enable();
+                }                                            
+          }          
+          
+          if(data.tipo_obligacion=='adquisiciones'){
+              //RCM: menú de reportes de adquisiciones
+              this.menuAdq.enable();
+              //Inhabilita el reporte de disponibilidad
+              this.getBoton('btnVerifPresup').disable();              
+          }*/          
+     },
+     
+     
+     liberaMenu:function(){
+        var tb = Phx.vista.CuentaBancariaENDESIS.superclass.liberaMenu.call(this);
+        /*if(tb){
+			//Inhabilita el reporte de disponibilidad
+            this.getBoton('btnVerifPresup').disable();
+        }
+       this.TabPanelSouth.get(1).disable();
+       
+       //RCM: menú de reportes de adquisiciones
+       this.menuAdq.disable();
+        */
 		
-		preparaMenu : function(tb) {
-			Phx.vista.CuentaBancariaENDESIS.superclass.preparaMenu.call(this, tb);
-			var rec = this.sm.getSelected();
-			var data = rec.data;
-			
-			if (data['id_moneda']==null){
-				this.getBoton('btnDepositosCheques').disable();
-			  }else{
-				this.getBoton('btnDepositosCheques').enable();
-			  }
-		},
-		/*
-		liberaMenu : function() {
-			Phx.vista.CuentaBancariaENDESIS.superclass.liberaMenu.call(this);
-			this.getBoton('btnCuentaBancariaENDESISUsuario').disable();
-			this.getBoton('btnSwitchEstado').disable();
-			this.getBoton('btnGestion').disable();
-		}*/
-}); 
+       return tb
+    },
+	/*south:{	   
+        url:'../../../sis_tesoreria/vista/chequera/Chequera.php',
+        title:'Chequeras', 
+        height : '50%',
+        cls:'Chequera'
+   },*/
+
+	onButtonEdit: function(){
+		Phx.vista.CuentaBancariaENDESIS.superclass.onButtonEdit.call(this);
+		this.Cmp.nro_cuenta.disable();
+	},
+	onButtonNew: function(){
+		Phx.vista.CuentaBancariaENDESIS.superclass.onButtonNew.call(this);
+		this.Cmp.nro_cuenta.enable();
+	}
+})	
 </script>

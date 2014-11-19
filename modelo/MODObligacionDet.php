@@ -114,7 +114,7 @@ class MODObligacionDet extends MODbase{
 		return $this->respuesta;
 	}
 
-	function guardarObligacionDetApropiacion(){
+	function modificarObligacionDetApropiacion(){
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.ft_obligacion_det_ime';
 		$this->transaccion='TES_OBDETAPRO_MOD';
@@ -125,6 +125,34 @@ class MODObligacionDet extends MODbase{
 		$this->setParametro('id_concepto_ingas','id_concepto_ingas','int4');		
 		$this->setParametro('id_centro_costo','id_centro_costo','int4');		
 		$this->setParametro('id_orden_trabajo','id_orden_trabajo','int4');
+		$this->setParametro('monto_pago_mo','monto_pago_mo','numeric');
+		$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');		
+        $this->setParametro('descripcion','descripcion','text');
+		
+        
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+	    //Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
+	function insertarObligacionDetApropiacion(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_obligacion_det_ime';
+		$this->transaccion='TES_OBDETAPRO_INS';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_obligacion_det','id_obligacion_det','int4');		
+		$this->setParametro('id_concepto_ingas','id_concepto_ingas','int4');		
+		$this->setParametro('id_centro_costo','id_centro_costo','int4');		
+		$this->setParametro('id_orden_trabajo','id_orden_trabajo','int4');
+		$this->setParametro('monto_pago_mo','monto_pago_mo','numeric');
+		$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');		
+        $this->setParametro('descripcion','descripcion','text');
+		
         
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -139,6 +167,23 @@ class MODObligacionDet extends MODbase{
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.ft_obligacion_det_ime';
 		$this->transaccion='TES_OBDET_ELI';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_obligacion_det','id_obligacion_det','int4');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
+	function eliminarObligacionDetApropiacion(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_obligacion_det_ime';
+		$this->transaccion='TES_OBDETAPRO_ELI';
 		$this->tipo_procedimiento='IME';
 				
 		//Define los parametros para la funcion
