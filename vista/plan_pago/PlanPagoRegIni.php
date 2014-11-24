@@ -104,8 +104,7 @@ Phx.vista.PlanPagoRegIni = {
                      this.obtenerFaltante('dev_garantia');
                  }
               }
-              
-              if (this.accionFormulario == 'NEW_PAGO' || this.accionFormulario == 'NEW'){
+              if (this.accionFormulario == 'NEW_PAGO' || this.accionFormulario == 'NEW' || this.accionFormulario ==  'NEW_ANT_APLI'){
               	if(rec.data.variable == 'pagado'){
                      this.iniciaPagoDelDevengado(data);
                  }
@@ -178,7 +177,7 @@ Phx.vista.PlanPagoRegIni = {
      
     iniciaAplicacion:function(data){
     	    //carga la plantilla con el mismo documento que el devengado
-            var me = this;
+    	    var me = this;
             this.Cmp.id_plantilla.store.load({
                  params:{start:0,limit:1,id_plantilla:data.id_plantilla},
                  callback:function(){

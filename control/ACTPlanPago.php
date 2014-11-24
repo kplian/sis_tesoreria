@@ -15,9 +15,18 @@ require_once(dirname(__FILE__).'/../reportes/RConformidad.php');
 class ACTPlanPago extends ACTbase{    
 			
 	function listarPlanPago(){
-		$this->objParam->defecto('ordenacion','id_plan_pago');
-
-		$this->objParam->defecto('dir_ordenacion','asc');
+		
+		if($this->objParam->getParametro('tipo_interfaz')=='PlanPagoRegIni'){
+			 $this->objParam->defecto('ordenacion','nro_cuota');
+             $this->objParam->defecto('dir_ordenacion','asc');	
+        }
+		else{
+		   $this->objParam->defecto('ordenacion','id_plan_pago');
+           $this->objParam->defecto('dir_ordenacion','asc');	
+		}
+		
+		
+		
 		
 		if($this->objParam->getParametro('id_obligacion_pago')!=''){
             $this->objParam->addFiltro("plapa.id_obligacion_pago = ".$this->objParam->getParametro('id_obligacion_pago'));  

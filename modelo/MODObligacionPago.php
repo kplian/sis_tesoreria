@@ -72,6 +72,10 @@ class MODObligacionPago extends MODbase{
 		$this->captura('ajuste_anticipo','numeric');
 		$this->captura('ajuste_aplicado','numeric');
 		$this->captura('monto_estimado_sg','numeric');
+		$this->captura('id_obligacion_pago_extendida','integer');
+		
+		
+		
 		
 		
 		//Ejecuta la instruccion
@@ -145,6 +149,7 @@ class MODObligacionPago extends MODbase{
 		$this->captura('ajuste_anticipo','numeric');
 		$this->captura('ajuste_aplicado','numeric');
 		$this->captura('monto_estimado_sg','numeric');
+		$this->captura('id_obligacion_pago_extendida','integer');
         
         
         //Ejecuta la instruccion

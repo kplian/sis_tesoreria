@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_pago_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -161,12 +159,13 @@ BEGIN
                               obpg.tipo_anticipo,
                               obpg.ajuste_anticipo,
                               obpg.ajuste_aplicado,
-                              obpg.monto_estimado_sg
+                              obpg.monto_estimado_sg,
+                              obpg.id_obligacion_pago_extendida
                               
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
                               left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
-                              inner join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
+                              left join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
                               inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
                               inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
                               inner join param.tdepto dep on dep.id_depto=obpg.id_depto
@@ -178,7 +177,7 @@ BEGIN
                   --Definicion de la respuesta
                   v_consulta:=v_consulta||v_parametros.filtro;
                   v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
-
+				  
 
 
             -- raise notice '%',v_consulta;
@@ -273,7 +272,7 @@ BEGIN
 					    from tes.tobligacion_pago obpg
 						inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
-                        inner join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
+                        left join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
                         inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
                         inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
 						inner join param.tdepto dep on dep.id_depto=obpg.id_depto
@@ -364,12 +363,13 @@ BEGIN
                               obpg.tipo_anticipo,
                               obpg.ajuste_anticipo,
                               obpg.ajuste_aplicado,
-                              obpg.monto_estimado_sg
+                              obpg.monto_estimado_sg,
+                              obpg.id_obligacion_pago_extendida
                               
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
                               left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
-                              inner join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
+                              left join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
                               inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
                               inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
                               inner join param.tdepto dep on dep.id_depto=obpg.id_depto
@@ -419,7 +419,7 @@ BEGIN
 					    from tes.tobligacion_pago obpg
 						inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
-                        inner join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
+                        left join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
                         inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
                         inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
 						inner join param.tdepto dep on dep.id_depto=obpg.id_depto

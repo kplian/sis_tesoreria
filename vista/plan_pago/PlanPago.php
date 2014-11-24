@@ -1725,10 +1725,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         Phx.vista.PlanPago.superclass.onButtonEdit.call(this); 
     },
       
-    sortInfo:{
+    /*sortInfo:{
 		field: 'fecha_reg',
 		direction: 'DESC'
-	},
+	},*/
 	onButtonNew: function(){
 		Phx.vista.PlanPago.superclass.onButtonNew.call(this);
 		//this.Cmp.f.store.baseParams={id_cuenta_bancaria:-1,fecha:new Date()}

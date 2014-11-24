@@ -53,6 +53,7 @@ DECLARE
   v_ejecutado    numeric;
   v_registros_pro record;
   v_aux_mb numeric;
+  v_fecha date;
 
   
 
@@ -81,7 +82,8 @@ BEGIN
                               opd.monto_pago_mo,
                               p.id_presupuesto,
                               op.comprometido,
-                              op.id_moneda
+                              op.id_moneda,
+                              op.fecha
                               
                               FROM  tes.tobligacion_pago  op
                               INNER JOIN tes.tobligacion_det opd  on  opd.id_obligacion_pago = op.id_obligacion_pago and opd.estado_reg = 'activo'
@@ -111,7 +113,7 @@ BEGIN
                     va_columna_relacion[v_i]= 'id_obligacion_pago';
                     va_fk_llave[v_i] = v_registros.id_obligacion_pago;
                     va_id_obligacion_det[v_i]= v_registros.id_obligacion_det;
-                    va_fecha[v_i]=now()::date;
+                    va_fecha[v_i]= v_registros.fecha::date;
              
              
              END LOOP;
@@ -174,7 +176,8 @@ BEGIN
                               opd.revertido_mb,
                               opd.revertido_mo,
                               opd.id_partida_ejecucion_com,
-                              op.id_moneda
+                              op.id_moneda,
+                              op.fecha
                               
                               FROM  tes.tobligacion_pago  op
                               INNER JOIN tes.tobligacion_det opd  on  opd.id_obligacion_pago = op.id_obligacion_pago and opd.estado_reg = 'activo'
@@ -199,7 +202,13 @@ BEGIN
                              v_ejecutado
                      FROM pre.f_verificar_com_eje_pag(v_registros.id_partida_ejecucion_com,v_registros.id_moneda);
                 
-                     
+                    --la fecha de reversion no puede ser anterior a la fecha de la solictud
+                    -- la fecha de solictud es la fecha de compromiso 
+                    IF  now()  < v_registros.fecha THEN
+                      v_fecha = v_registros.fecha::Date;
+                    ELSE
+                       v_fecha = now()::date;
+                    END IF ; 
                      
                       --armamos los array para enviar a presupuestos          
                     IF v_comprometido - v_ejecutado > 0 THEN
@@ -215,7 +224,7 @@ BEGIN
                         va_columna_relacion[v_i]= 'id_obligacion_pago';
                         va_fk_llave[v_i] = v_registros.id_obligacion_pago;
                         va_id_obligacion_det[v_i]= v_registros.id_obligacion_det;
-                        va_fecha[v_i]=now()::date;
+                        va_fecha[v_i]=v_fecha;
                     END IF;
              
              END LOOP;

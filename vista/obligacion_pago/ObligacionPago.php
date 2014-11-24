@@ -70,9 +70,9 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
         
         this.addButton('diagrama_gantt',{text:'Gant', iconCls: 'bgantt', disabled:true, handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
   
-        this.addButton('ajustes',{text:'Ajus.', iconCls: 'blist', disabled:true, handler:this.showAjustes,tooltip: '<b>Ajustes a los anticipos totales para pagos variables</b>'});
-        this.addButton('est_anticipo',{text:'Ampli.', iconCls: 'blist', disabled:true, handler:this.showAnticipo,tooltip: '<b>Define el monto de ampliación util cuando necesitamos hacer pagos anticipados para la siguiente gestión</b>'});
-        this.addButton('extenderop',{text:'Ext.', iconCls: 'blist', disabled:true, handler:this.extenederOp,tooltip: '<b>Extender la obligación de pago para la siguiente gestión</b>'});
+        this.addButton('ajustes',{text:'Ajus.', iconCls: 'blist', disabled: true, handler: this.showAjustes,tooltip: '<b>Ajustes a los anticipos totales para pagos variables</b>'});
+        this.addButton('est_anticipo',{text:'Ampli.', iconCls: 'blist', disabled: true, handler: this.showAnticipo,tooltip: '<b>Define el monto de ampliación util cuando necesitamos hacer pagos anticipados para la siguiente gestión</b>'});
+        this.addButton('extenderop',{text:'Ext.', iconCls: 'blist', disabled: true, handler: this.extenederOp,tooltip: '<b>Extender la obligación de pago para la siguiente gestión</b>'});
   
   
         function diagramGantt(){            
@@ -110,16 +110,35 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                 allowBlank: true,
                 anchor: '80%',
                 gwidth: 150,
-                maxLength:200
+                maxLength:200,
+                renderer: function(value, p, record){
+                        if(record.data.monto_estimado_sg > 0 && !record.data.id_obligacion_pago_extendida){
+                             return String.format('<div ext:qtip="La extención de la obligación esta pendiente"><b><font color="red">{0}</font></b><br><b>Monto ampliado: </b>{1}</div>', value, record.data.monto_estimado_sg);
+                        }
+                        else{
+	                        if(record.data.monto_estimado_sg > 0 && record.data.id_obligacion_pago_extendida > 0){
+	                             return String.format('<div ext:qtip="La obligación fue extendida"><b><font color="orange">{0}</font></b><br><b>Monto ampliado: </b>{1}</div>', value, record.data.monto_estimado_sg);
+	                        }	
+	                        else{
+	                        	if(record.data.id_obligacion_pago_extendida > 0){
+	                              return String.format('<div ext:qtip="La obligación fue extendida"><b><font color="orange">{0}</font></b></div>', value, record.data.monto_estimado_sg);
+	                            }
+	                            else{
+	                            	
+	                            }
+	                        	 return String.format('{0}', value);
+	                        }
+                        }
+                 }      
             },
-            type:'TextField',
-            filters:{pfiltro:'obpg.num_tramite',type:'string'},
-            id_grupo:1,
-            grid:true,
-            form:false
+            type: 'TextField',
+            filters: { pfiltro: 'obpg.num_tramite', type: 'string' },
+            id_grupo: 1,
+            grid: true,
+            form: false
         },
 		{
-		config:{
+		config: {
 				name: 'estado',
 				fieldLabel: 'estado',
 				allowBlank: true,
@@ -127,11 +146,11 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 				gwidth: 100,
 				maxLength:50
 			},
-			type:'TextField',
-			filters:{pfiltro:'obpg.estado',type:'string'},
-			id_grupo:1,
-			grid:true,
-			form:false
+			type: 'TextField',
+			filters: {pfiltro:'obpg.estado',type:'string'},
+			id_grupo: 1,
+			grid: true,
+			form: false
 		},
         {
         config:{
@@ -196,20 +215,15 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 				renderer:function (value, p, record){
                         var dato='';
                         dato = (dato==''&&value=='pago_directo')?'Pago Directo':dato;
-                        //dato = (dato==''&&value=='caja_chica')?'Caja Chica':dato;
-                        //dato = (dato==''&&value=='viaticos')?'Viáticos':dato;
-                        //dato = (dato==''&&value=='fondo_en_avance')?'Fondo en Avance':dato;
                         dato = (dato==''&&value=='aduisiciones')?'Adquisiciones':dato;
                         return String.format('{0}', dato);
                     },
             
                 store:new Ext.data.ArrayStore({
                         fields: ['variable', 'valor'],
-                        data : [ ['pago_directo','Pago Directo']
-                                 //,['caja_chica','Caja Chica'],
-                                 //['viaticos','Viáticos'],
-                                // ['fondo_en_avance','Fondo en Avance']
-                                ]
+                        data : [ 
+                                ['pago_directo','Pago Directo']
+                               ]
                                 }),
 			    valueField: 'variable',
 				displayField: 'valor',
@@ -675,7 +689,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		'tipo_anticipo',
 		'ajuste_anticipo',
 		'ajuste_aplicado',
-		'monto_estimado_sg'
+		'monto_estimado_sg','id_obligacion_pago_extendida'
 		
 	],
 	
