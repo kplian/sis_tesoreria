@@ -780,10 +780,11 @@ BEGIN
             END IF;
             
             
-          ------------------------------
+          ------------------------------------------------------------------------------
           -- COMPROMISO PRESUPUESTARIO
-          -------------------------------
-          IF  v_codigo_estado = 'vbpresupuestos'  and  v_comprometido = 'no' and v_tipo_obligacion != 'adquisiciones' THEN
+          -- cuando pasa al estado registrado y el presupeusto no esta comprometido
+          ------------------------------------------------------------------------------
+          IF  va_codigo_estado[1] = 'registrado'  and  v_comprometido = 'no' and v_tipo_obligacion != 'adquisiciones' THEN
                
                --TODO aumentar capacidad de rollback
                -- verficar presupuesto y comprometer
@@ -801,7 +802,7 @@ BEGIN
            
            -- cuando viene de adquisiciones no es necesario comprometer pero dejamos la bancera de compromiso barcada
            --  ya que los montos se comprometiron en la solicitud de compra
-           IF v_codigo_estado = 'vbpresupuestos'  and  v_comprometido = 'no' and v_tipo_obligacion = 'adquisiciones' THEN
+           IF va_codigo_estado[1] = 'registrado'  and  v_comprometido = 'no' and v_tipo_obligacion = 'adquisiciones' THEN
                v_comprometido = 'si';
                --cambia la bandera del comprometido
                update tes.tobligacion_pago  set 
@@ -842,7 +843,9 @@ BEGIN
             ELSE
                 v_resp = pxp.f_agrega_clave(v_resp,'mensaje','La obligacion paso al siguiente estado');
             
-            END IF;     
+            END IF;
+            
+               
                
             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_parametros.id_obligacion_pago::varchar);
             
@@ -996,6 +999,14 @@ BEGIN
                               where id_obligacion_pago = v_parametros.id_obligacion_pago; 
                          
                           END IF;
+                          
+                          --jrr: llamamos a la funcion que revierte de planillas en caso de que sea de recursos humanos
+                          if (v_tipo_obligacion = 'rrhh') then
+                              IF NOT plani.f_anular_obligacion_tesoreria(p_id_usuario,v_parametros._id_usuario_ai,
+                                        v_parametros._nombre_usuario_ai,v_parametros.id_obligacion_pago,v_obs) THEN                                                         
+                                   raise exception 'Error al anular la obligacion';                          
+                                END IF;            	
+                          end if;
                         -- si hay mas de un estado disponible  preguntamos al usuario
                         v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado)'); 
                         v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
@@ -1014,10 +1025,8 @@ BEGIN
               
                    raise exception 'Operacion no implementada';   
            END IF; 
-      
-        
-        
-        
+           
+      		          
 			
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Retrocede estado de la obligacion'); 

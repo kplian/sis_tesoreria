@@ -996,3 +996,14 @@ ALTER TABLE tes.tobligacion_pago
   ALTER COLUMN id_proveedor DROP NOT NULL;
 /***********************************F-SCP-JRR-TES-0-18/11/2014***************************************/
 
+/***********************************I-SCP-GSS-TES-0-24/11/2014***************************************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tcuenta_bancaria
+  ADD COLUMN id_finalidad INTEGER[];
+
+COMMENT ON COLUMN tes.tcuenta_bancaria.id_finalidad
+IS 'arreglo que almacena los ids de la tabla finalidad al cual corresponde la cuenta bancaria';
+
+/***********************************F-SCP-GSS-TES-0-24/11/2014***************************************/

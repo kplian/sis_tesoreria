@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -39,6 +41,18 @@ DECLARE
     g_max_nro_cheque		integer;
     g_registros				record;
     g_fecha_ant				date;
+    g_estado_actual			varchar;
+    v_id_proceso_wf			integer;
+    v_id_estado_wf			integer;
+    v_codigo_estado			varchar;
+    v_id_tipo_estado		integer;
+    v_id_estado_actual		integer;
+    v_pedir_obs				varchar;
+    v_codigo_estado_siguiente	varchar;
+    v_id_depto				integer;
+    v_obs					varchar;
+    v_registros_proc				record;
+    v_codigo_tipo_pro		varchar;
 			    
 BEGIN
 
@@ -125,52 +139,8 @@ BEGIN
             else
                 g_nro_cheque=null;
             end if;               
-                     
-        	--Sentencia de la insercion
-        	insert into tes.tts_libro_bancos(
-			id_cuenta_bancaria,
-			fecha,
-			a_favor,
-			nro_cheque,
-			importe_deposito,
-			nro_liquidacion,
-			detalle,
-			origen,
-			observaciones,
-			importe_cheque,
-			id_libro_bancos_fk,
-			estado,
-			nro_comprobante,
-			estado_reg,
-			tipo,
-			fecha_reg,
-			id_usuario_reg,
-			fecha_mod,
-			id_usuario_mod
-          	) values(
-			v_parametros.id_cuenta_bancaria,
-			v_parametros.fecha,
-			upper(translate (v_parametros.a_favor, 'áéíóúÁÉÍÓÚäëïöüÄËÏÖÜñ', 'aeiouAEIOUaeiouAEIOUÑ')),
-			v_parametros.nro_cheque,
-			v_parametros.importe_deposito,
-			upper(translate (v_parametros.nro_liquidacion, 'áéíóúÁÉÍÓÚäëïöüÄËÏÖÜñ', 'aeiouAEIOUaeiouAEIOUÑ')),
-			upper(translate (v_parametros.detalle, 'áéíóúÁÉÍÓÚäëïöüÄËÏÖÜñ', 'aeiouAEIOUaeiouAEIOUÑ')),
-			v_parametros.origen,
-			upper(translate (v_parametros.observaciones, 'áéíóúÁÉÍÓÚäëïöüÄËÏÖÜñ', 'aeiouAEIOUaeiouAEIOUÑ')),
-			v_parametros.importe_cheque,
-			v_parametros.id_libro_bancos_fk,
-			'borrador',
-			v_parametros.nro_comprobante,
-			'activo',
-			v_parametros.tipo,
-			now(),
-			p_id_usuario,
-			null,
-			null
-							
-			)RETURNING id_libro_bancos into v_id_libro_bancos;
-			
-            
+           
+            v_id_libro_bancos = tes.f_inserta_libro_bancos(p_administrador,p_id_usuario,hstore(v_parametros));
          --ALGORITMO DE ORDENACION DE REGISTROS
          
          --VERIFICAMOS SI ES UN DEPOSITO, transferencia o debito automatico
@@ -588,10 +558,20 @@ BEGIN
 	elsif(p_transaccion='TES_LBAN_ELI')then
 
 		begin
-			--Sentencia de la eliminacion
-			delete from tes.tts_libro_bancos
-            where id_libro_bancos=v_parametros.id_libro_bancos;
-               
+        
+        	--obtenermos el estado actual del registro
+            Select lb.estado into g_estado_actual
+            From tes.tts_libro_bancos lb 
+            where lb.id_libro_bancos=v_parametros.id_libro_bancos;
+            
+            --eliminamos solo los que estan en estado borrador	
+    		if(g_estado_actual = 'borrador')then 
+	        	delete from tes.tts_libro_bancos
+            	where id_libro_bancos=v_parametros.id_libro_bancos;            
+			else
+            	raise exception 'Solo los registros en estado BORRADOR pueden ser eliminados. El estado actual del registro es: %.',upper( g_estado_actual);
+            end if;
+			   
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Depósitos eliminado(a)'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_parametros.id_libro_bancos::varchar);
@@ -600,7 +580,189 @@ BEGIN
             return v_resp;
 
 		end;
+        
+    /*********************************    
+ 	#TRANSACCION:  'TES_SIGELB_IME'
+ 	#DESCRIPCION:	funcion que controla el cambio al Siguiente estado de los movimientos bancarios, integrado  con el WF
+ 	#AUTOR:		Gonzalo Sarmiento Sejas
+ 	#FECHA:		18-11-2014
+	***********************************/
+
+	elseif(p_transaccion='TES_SIGELB_IME')then   
+        begin
+        
+         /*   PARAMETROS
          
+        $this->setParametro('id_proceso_wf_act','id_proceso_wf_act','int4');
+        $this->setParametro('id_tipo_estado','id_tipo_estado','int4');
+        $this->setParametro('id_funcionario_wf','id_funcionario_wf','int4');
+        $this->setParametro('id_depto_wf','id_depto_wf','int4');
+        $this->setParametro('obs','obs','text');
+        $this->setParametro('json_procesos','json_procesos','text');
+        */
+        
+        --obtenermos datos basicos
+        select
+            lb.id_libro_bancos,
+            lb.id_proceso_wf,
+            lb.estado
+            --pp.fecha_tentativa,
+            --op.numero,
+            --pp.total_prorrateado ,
+            --pp.monto_ejecutar_total_mo
+        into 
+            v_id_libro_bancos,
+            v_id_proceso_wf,
+            v_codigo_estado
+            --v_fecha_tentativa,
+            --v_num_obliacion_pago,
+            --v_total_prorrateo,
+            --v_monto_ejecutar_total_mo            
+        from tes.tts_libro_bancos  lb
+        --inner  join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
+        where lb.id_proceso_wf  = v_parametros.id_proceso_wf_act;
+          
+          select 
+            ew.id_tipo_estado ,
+            te.pedir_obs,
+            ew.id_estado_wf
+           into 
+            v_id_tipo_estado,
+            v_pedir_obs,
+            v_id_estado_wf
+            
+          from wf.testado_wf ew
+          inner join wf.ttipo_estado te on te.id_tipo_estado = ew.id_tipo_estado
+          where ew.id_estado_wf =  v_parametros.id_estado_wf_act;
+          
+           -- obtener datos tipo estado
+                
+                select
+                 te.codigo
+                into
+                 v_codigo_estado_siguiente
+                from wf.ttipo_estado te
+                where te.id_tipo_estado = v_parametros.id_tipo_estado;
+      
+             IF  pxp.f_existe_parametro(p_tabla,'id_depto_wf') THEN
+                 
+               v_id_depto = v_parametros.id_depto_wf;
+                
+             END IF;
+                
+                
+                
+             IF  pxp.f_existe_parametro(p_tabla,'obs') THEN
+                  v_obs=v_parametros.obs;
+             ELSE
+                   v_obs='---';
+                
+             END IF;
+             /*  
+             --configurar acceso directo para la alarma   
+             v_acceso_directo = '';
+             v_clase = '';
+             v_parametros_ad = '';
+             v_tipo_noti = 'notificacion';
+             v_titulo  = 'Visto Bueno';
+             
+           
+             IF   v_codigo_estado_siguiente not in('borrador','pendiente','pagado','devengado','anulado')   THEN
+                  v_acceso_directo = '../../../sis_tesoreria/vista/plan_pago/PlanPagoVb.php';
+                  v_clase = 'PlanPagoVb';
+                  v_parametros_ad = '{filtro_directo:{campo:"plapa.id_proceso_wf",valor:"'||v_id_proceso_wf::varchar||'"}}';
+                  v_tipo_noti = 'notificacion';
+                  v_titulo  = 'Visto Bueno';
+             
+             END IF;
+            */ 
+             
+             -- hay que recuperar el supervidor que seria el estado inmediato,...
+             v_id_estado_actual =  wf.f_registra_estado_wf(v_parametros.id_tipo_estado, 
+                                                             v_parametros.id_funcionario_wf, 
+                                                             v_parametros.id_estado_wf_act, 
+                                                             v_id_proceso_wf,
+                                                             p_id_usuario,
+                                                             v_parametros._id_usuario_ai,
+                                                             v_parametros._nombre_usuario_ai,
+                                                             v_id_depto,
+                                                             ' Obs:'||v_obs,
+                                                             NULL,	--v_acceso_directo ,
+                                                             NULL, 	--v_clase,
+                                                             NULL, 	--v_parametros_ad,
+                                                             NULL,	--v_tipo_noti,
+                                                             NULL);	--v_titulo);
+
+          --------------------------------------
+          -- registra los procesos disparados
+          --------------------------------------
+         
+          FOR v_registros_proc in ( select * from json_populate_recordset(null::wf.proceso_disparado_wf, v_parametros.json_procesos::json)) LOOP
+    
+               --get cdigo tipo proceso
+               select   
+                  tp.codigo 
+               into 
+                  v_codigo_tipo_pro   
+               from wf.ttipo_proceso tp 
+               where  tp.id_tipo_proceso =  v_registros_proc.id_tipo_proceso_pro;
+          
+          
+               -- disparar creacion de procesos seleccionados
+              
+              SELECT
+                       ps_id_proceso_wf,
+                       ps_id_estado_wf,
+                       ps_codigo_estado
+                 into
+                       v_id_proceso_wf,
+                       v_id_estado_wf,
+                       v_codigo_estado
+              FROM wf.f_registra_proceso_disparado_wf(
+                       p_id_usuario,
+                       v_parametros._id_usuario_ai,
+                       v_parametros._nombre_usuario_ai,
+                       v_id_estado_actual, 
+                       v_registros_proc.id_funcionario_wf_pro, 
+                       v_registros_proc.id_depto_wf_pro,
+                       v_registros_proc.obs_pro,
+                       v_codigo_tipo_pro,    
+                       v_codigo_tipo_pro);
+                       
+                       
+           END LOOP; 
+           
+           -- actualiza estado en la solicitud
+           -- funcion para cambio de estado     
+           /*
+          IF  tes.f_fun_inicio_plan_pago_wf(p_id_usuario, 
+           									v_parametros._id_usuario_ai, 
+                                            v_parametros._nombre_usuario_ai, 
+                                            v_id_estado_actual, 
+                                            v_parametros.id_proceso_wf_act, 
+                                            v_codigo_estado_siguiente) THEN
+                                            
+          END IF;*/
+          --actualiza estado en el libro bancos
+          -- actualiza estado en la solicitud
+          update tes.tts_libro_bancos  t set 
+             id_estado_wf =  v_id_estado_actual,
+             estado = v_codigo_estado_siguiente,
+             id_usuario_mod=p_id_usuario,
+             fecha_mod=now()
+                           
+          where id_proceso_wf = v_parametros.id_proceso_wf_act;
+           
+          
+          -- si hay mas de un estado disponible  preguntamos al usuario
+          v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado del libro bancos)'); 
+          v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
+          
+          
+          -- Devuelve la respuesta
+          return v_resp;
+        
+     end;     
 	else
      
     	raise exception 'Transaccion inexistente: %',p_transaccion;

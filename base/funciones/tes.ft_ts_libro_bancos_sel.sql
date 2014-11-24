@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -10,8 +12,8 @@ $body$
  SISTEMA:		Tesoreria
  FUNCION: 		tes.ft_ts_libro_bancos_sel
  DESCRIPCION:   Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'migra.tts_libro_bancos'
- AUTOR: 		 (admin)
- FECHA:	        01-12-2013 09:10:17
+ AUTOR: 		Gonzalo Sarmiento Sejas
+ FECHA:	        17-11-2014 09:10:17
  COMENTARIOS:	
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
@@ -36,8 +38,8 @@ BEGIN
 	/*********************************    
  	#TRANSACCION:  'TES_LBAN_SEL'
  	#DESCRIPCION:	Consulta de datos
- 	#AUTOR:		admin	
- 	#FECHA:		01-12-2013 09:10:17
+ 	#AUTOR:		Gonzalo Sarmiento Sejas
+ 	#FECHA:		17-11-2014
 	***********************************/
 
 	if(p_transaccion='TES_LBAN_SEL')then
@@ -46,6 +48,7 @@ BEGIN
     		--Sentencia de la consulta
 			v_consulta:='select
 						lban.id_libro_bancos,
+                        lban.num_tramite,
 						lban.id_cuenta_bancaria,
 						lban.fecha,
 						lban.a_favor,
@@ -67,9 +70,15 @@ BEGIN
 						lban.fecha_mod,
 						lban.id_usuario_mod,
 						usu1.cuenta as usr_reg,
-						usu2.cuenta as usr_mod	
+						usu2.cuenta as usr_mod,
+                        lban.id_depto,
+                        depto.nombre,
+                        lban.id_proceso_wf,
+                        lban.id_estado_wf,
+                        pxp.f_fecha_literal(lban.fecha) as fecha_cheque_literal	
 						from tes.tts_libro_bancos lban
 						inner join segu.tusuario usu1 on usu1.id_usuario = lban.id_usuario_reg
+                        left join param.tdepto depto on depto.id_depto=lban.id_depto
 						left join segu.tusuario usu2 on usu2.id_usuario = lban.id_usuario_mod
 				        where  ';
 			
@@ -85,8 +94,8 @@ BEGIN
 	/*********************************    
  	#TRANSACCION:  'TES_LBAN_CONT'
  	#DESCRIPCION:	Conteo de registros
- 	#AUTOR:		admin	
- 	#FECHA:		01-12-2013 09:10:17
+ 	#AUTOR:		Gonzalo Sarmiento Sejas
+ 	#FECHA:		17-11-2014
 	***********************************/
 
 	elsif(p_transaccion='TES_LBAN_CONT')then
