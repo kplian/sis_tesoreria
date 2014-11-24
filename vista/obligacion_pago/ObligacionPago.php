@@ -868,6 +868,9 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
            
             var d= this.sm.getSelected().data;
            
+            if(d.estado =='borrador'  && d.tipo_obligacion != 'adquisiciones'){
+               alert('La solicitud pasara al área de presupuestos para verificación')
+            }
             if(d.estado !='en_pago'){
             //if(confirm('¿Está seguro de eliminar el registro?')){
             Phx.CP.loadingShow();
