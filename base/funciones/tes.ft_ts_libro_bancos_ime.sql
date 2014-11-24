@@ -1,4 +1,4 @@
---------------- SQL ---------------
+﻿--------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_ime (
   p_administrador integer,
