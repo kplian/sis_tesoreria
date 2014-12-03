@@ -1007,3 +1007,41 @@ COMMENT ON COLUMN tes.tcuenta_bancaria.id_finalidad
 IS 'arreglo que almacena los ids de la tabla finalidad al cual corresponde la cuenta bancaria';
 
 /***********************************F-SCP-GSS-TES-0-24/11/2014***************************************/
+
+/***********************************I-SCP-GSS-TES-0-27/11/2014***************************************/
+
+--------------- SQL ---------------
+
+CREATE TABLE tes.tusuario_cuenta_banc (
+  id_usuario_cuenta_banc SERIAL, 
+  id_usuario INTEGER NOT NULL, 
+  id_cuenta_bancaria INTEGER NOT NULL, 
+  tipo_permiso VARCHAR(20) DEFAULT 'todos'::character varying NOT NULL, 
+  CONSTRAINT pk_tusuario_cuenta_banc__id_usuario_cuenta_banc PRIMARY KEY(id_usuario_cuenta_banc)
+  
+) INHERITS (pxp.tbase);
+
+/***********************************F-SCP-GSS-TES-0-27/11/2014***************************************/
+
+
+/***********************************I-SCP-RAC-TES-0-03/12/2014***************************************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN fecha_costo_ini DATE;
+
+COMMENT ON COLUMN tes.tplan_pago.fecha_costo_ini
+IS 'Cuando un concepto de gasto es del tipo servicio, esta fecha indica el inico del costo';
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN fecha_costo_fin DATE;
+
+COMMENT ON COLUMN tes.tplan_pago.fecha_costo_fin
+IS 'Cuando un concepto de gasto es del tipo servicio, esta fecha indica el fin del costo';
+
+/***********************************I-SCP-RAC-TES-0-03/12/2014***************************************/
+
+
