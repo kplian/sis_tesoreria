@@ -141,6 +141,7 @@ DECLARE
     v_check_ant_mixto numeric;
     v_nombre_conexion varchar;
     v_res			boolean;
+    v_tipo_obligacion	varchar;
     
     
 			    
@@ -160,6 +161,14 @@ BEGIN
 					
         begin
         
+        	select tipo_obligacion into v_tipo_obligacion
+            from tes.tobligacion_pago
+            where id_obligacion_pago = v_parametros.id_obligacion_pago;
+            
+            if (v_tipo_obligacion = 'rrhh') then
+            	raise exception 'No es posible insertar pagos de devengado a una obligacion de RRHH';
+            end if;
+            
             v_resp = tes.f_inserta_plan_pago_dev(p_administrador, p_id_usuario,hstore(v_parametros));
 
             --Devuelve la respuesta
@@ -177,7 +186,15 @@ BEGIN
 	elsif(p_transaccion='TES_PLAPAPA_INS')then
 					
         begin       
-        
+        	select tipo_obligacion into v_tipo_obligacion
+            from tes.tobligacion_pago
+            where id_obligacion_pago = v_parametros.id_obligacion_pago;
+            
+            if (v_tipo_obligacion = 'rrhh') then
+            	raise exception 'No es posible insertar pagos a una obligacion de RRHH';
+            end if;
+            
+            
             v_resp = tes.f_inserta_plan_pago_pago(p_administrador, p_id_usuario,hstore(v_parametros));
             --Devuelve la respuesta
             return v_resp;
@@ -195,7 +212,13 @@ BEGIN
 	elsif(p_transaccion='TES_PPANTPAR_INS')then
 					
         begin       
-        
+        	select tipo_obligacion into v_tipo_obligacion
+            from tes.tobligacion_pago
+            where id_obligacion_pago = v_parametros.id_obligacion_pago;
+            
+            if (v_tipo_obligacion = 'rrhh') then
+            	raise exception 'No es posible insertar pagos a una obligacion de RRHH';
+            end if;
             v_resp = tes.f_inserta_plan_pago_anticipo(p_administrador, p_id_usuario,hstore(v_parametros)); 
             --Devuelve la respuesta
             return v_resp;
@@ -487,7 +510,7 @@ BEGIN
             -------------------------------------
             
             
-            ELSIF v_registros_pp.tipo = 'pagado' THEN
+            ELSIF v_registros_pp.tipo IN ('pagado','pagado_rrhh') THEN
                     
                     --verifica el el registro que falta por pagar
                     v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado_pagado', v_registros_pp.id_plan_pago_fk);
@@ -606,11 +629,14 @@ BEGIN
             usuario_ai = v_parametros._nombre_usuario_ai,
             porc_monto_retgar = v_porc_monto_retgar,
             monto_ajuste_ag = v_parametros.monto_ajuste_ag,
-            monto_anticipo = v_monto_anticipo
-            
-            
-            where id_plan_pago=v_parametros.id_plan_pago;
+            monto_anticipo = v_monto_anticipo,
+            fecha_costo_ini = v_parametros.fecha_costo_ini, 
+            fecha_costo_fin = v_parametros.fecha_costo_fin	
+            where id_plan_pago = v_parametros.id_plan_pago;
            
+            -- chequea fechas de costos inicio y fin
+            v_resp_doc =  tes.f_validar_periodo_costo(v_parametros.id_plan_pago);
+            
             IF v_registros_pp.tipo not in ('ant_parcial','anticipo','dev_garantia') THEN
             
                    ----------------------------------------------------------------------
@@ -681,14 +707,17 @@ BEGIN
             op.id_depto,
             pp.id_estado_wf,
             pp.id_plan_pago_fk,
-            pp.monto_ejecutar_total_mo
+            pp.monto_ejecutar_total_mo,
+            op.tipo_obligacion
           into v_registros  
            from tes.tplan_pago pp
            inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
-           where pp.id_plan_pago = v_parametros.id_plan_pago;
-           
-          
-          
+           where pp.id_plan_pago = v_parametros.id_plan_pago;         
+            
+            if (v_registros.tipo_obligacion = 'rrhh') then
+            	raise exception 'No es posible eliminar pagos de una obligacion de RRHH';
+            end if;
+            
            IF  v_registros.estado != 'borrador' THEN
            
              raise exception 'No puede elimiar cuotas  que no esten en estado borrador';
@@ -1153,7 +1182,9 @@ BEGIN
         inner  join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
         where pp.id_proceso_wf  = v_parametros.id_proceso_wf_act;
         
-       
+         --si esta saliendo de borrador vadamos el rango de gasto
+         -- chequea fechas de costos inicio y fin
+         v_resp_doc =  tes.f_validar_periodo_costo(v_id_plan_pago);
           
           
           select 

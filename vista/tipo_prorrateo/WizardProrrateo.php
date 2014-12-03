@@ -112,7 +112,7 @@ header("content-type: text/javascript; charset=UTF-8");
                     fields: ['id_concepto_ingas','tipo','desc_ingas','movimiento','desc_partida'],
                     // turn on remote sorting
                     remoteSort: true,
-                    baseParams:{par_filtro:'desc_ingas#par.codigo#par.nombre_partida',movimiento:'gasto'}
+                    baseParams:{par_filtro:'desc_ingas#par.codigo#par.nombre_partida',movimiento:'gasto', autorizacion: 'pago_directo'}
                     }),
                 valueField: 'id_concepto_ingas',
                 displayField: 'desc_ingas',

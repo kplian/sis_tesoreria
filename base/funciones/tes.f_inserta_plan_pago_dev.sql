@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_inserta_plan_pago_dev (
   p_administrador integer,
   p_id_usuario integer,
@@ -109,7 +111,10 @@ BEGIN
    (p_hstore->'porc_descuento_ley')::numeric,
    
    (p_hstore->'_id_usuario_ai')::integer, 
-   (p_hstore->'_nombre_usuario_ai')::varchar,   
+   (p_hstore->'_nombre_usuario_ai')::varchar,
+    
+   (p_hstore->'fecha_costo_ini')::date, 
+   (p_hstore->'fecha_costo_fin')::date,   
     
     
     
@@ -527,7 +532,9 @@ BEGIN
             descuento_inter_serv,
             obs_descuento_inter_serv,
             porc_monto_retgar,
-            monto_anticipo
+            monto_anticipo,
+            fecha_costo_ini,
+            fecha_costo_fin
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -572,16 +579,20 @@ BEGIN
              COALESCE((p_hstore->'descuento_inter_serv')::numeric,0),
             (p_hstore->'obs_descuento_inter_serv'),
             v_porc_monto_retgar,
-            v_monto_anticipo
-            	
-			)RETURNING id_plan_pago into v_id_plan_pago;
+            v_monto_anticipo,
+            (p_hstore->'fecha_costo_ini')::date, 
+            (p_hstore->'fecha_costo_fin')::date
+           )RETURNING id_plan_pago into v_id_plan_pago;
             
             
             
-            
-            
+            -- chequea fechas de costos inicio y fin
+            v_resp_doc =  tes.f_validar_periodo_costo(v_id_plan_pago);
+           
+           
             -- inserta documentos en estado borrador si estan configurados
             v_resp_doc =  wf.f_inserta_documento_wf(p_id_usuario, v_id_proceso_wf, v_id_estado_wf);
+            
             -- verificar documentos
             v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_wf);
             
@@ -599,13 +610,9 @@ BEGIN
                      
 			END IF;
 			--Definicion de la respuesta
-			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Plan Pago almacenado(a) con exito (id_plan_pago'||v_id_plan_pago||')'); 
+			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Plan Pago almacenado(a) con exito (id_plan_pago'||v_id_plan_pago::varchar||')'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_id_plan_pago::varchar);
     
-    
-    
-    
-
             --Devuelve la respuesta
           return v_resp;
 

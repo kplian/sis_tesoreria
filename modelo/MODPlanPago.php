@@ -99,9 +99,10 @@ class MODPlanPago extends MODbase{
 		$this->captura('tipo_obligacion','varchar');
 		$this->captura('monto_ajuste_ag','numeric');
 		$this->captura('monto_ajuste_siguiente_pag','numeric');
-		$this->captura('pago_variable','varchar');
-		
+		$this->captura('pago_variable','varchar');		
 		$this->captura('monto_anticipo','numeric');
+		$this->captura('fecha_costo_ini','date');
+		$this->captura('fecha_costo_fin','date');
 		
 		
 		//Ejecuta la instruccion
@@ -181,6 +182,8 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('monto_ajuste_ag','monto_ajuste_ag','numeric');
 		$this->setParametro('monto_ajuste_siguiente_pag','monto_ajuste_siguiente_pag','numeric');
 		$this->setParametro('monto_anticipo','monto_anticipo','numeric');
+		$this->setParametro('fecha_costo_ini','fecha_costo_ini','date');
+		$this->setParametro('fecha_costo_fin','fecha_costo_fin','date');
 		
 		
 
@@ -235,6 +238,10 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('monto_ajuste_ag','monto_ajuste_ag','numeric');
 		$this->setParametro('monto_ajuste_siguiente_pag','monto_ajuste_siguiente_pag','numeric');
 		$this->setParametro('monto_anticipo','monto_anticipo','numeric');
+		$this->setParametro('fecha_costo_ini','fecha_costo_ini','date');
+		$this->setParametro('fecha_costo_fin','fecha_costo_fin','date');
+		
+		
 
         
 		//Ejecuta la instruccion

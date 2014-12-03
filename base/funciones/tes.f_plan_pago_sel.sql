@@ -215,7 +215,9 @@ BEGIN
                         plapa.monto_ajuste_ag,
                         plapa.monto_ajuste_siguiente_pago,
                         op.pago_variable,
-                        plapa.monto_anticipo
+                        plapa.monto_anticipo,
+                        plapa.fecha_costo_ini,
+                        plapa.fecha_costo_fin
                                   
 						from tes.tplan_pago plapa
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
@@ -226,7 +228,7 @@ BEGIN
                         left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = plapa.id_cuenta_bancaria
                         left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
                         left join tes.tcuenta_bancaria_mov cbanmo on cbanmo.id_cuenta_bancaria_mov = plapa.id_cuenta_bancaria_mov
-                        inner join param.vproveedor pro on pro.id_proveedor = op.id_proveedor
+                        left join param.vproveedor pro on pro.id_proveedor = op.id_proveedor
                         left join orga.vfuncionario fun on fun.id_funcionario = op.id_funcionario
                        where  plapa.estado_reg=''activo''  and '||v_filtro;
 			

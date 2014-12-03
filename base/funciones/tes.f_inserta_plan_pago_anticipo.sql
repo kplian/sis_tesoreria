@@ -120,6 +120,9 @@ BEGIN
     (p_hstore->'id_plantilla')::integer,
     (p_hstore->'porc_monto_retgar')::numeric
     (p_hstore->'monto_ajuste_ag')::numeric
+    
+    (p_hstore->'fecha_costo_ini')::date, 
+    (p_hstore->'fecha_costo_fin')::date,
    
  */
          
@@ -435,7 +438,9 @@ BEGIN
                   usuario_ai,
                   porc_monto_retgar,
                   porc_monto_excento_var,
-                  monto_excento
+                  monto_excento,
+                  fecha_costo_ini,
+                  fecha_costo_fin
               )
                values
               (
@@ -479,7 +484,9 @@ BEGIN
                 (p_hstore->'_nombre_usuario_ai')::varchar,
                 (p_hstore->'porc_monto_retgar')::numeric,
                 v_porc_monto_excento_var,
-                v_monto_excento				
+                v_monto_excento,
+                (p_hstore->'fecha_costo_ini')::date, 
+                (p_hstore->'fecha_costo_fin')::date				
             )RETURNING id_plan_pago into v_id_plan_pago;
           
             --actualiza la cuota vigente en la obligacion
@@ -487,9 +494,12 @@ BEGIN
                   nro_cuota_vigente =  v_nro_cuota
             where id_obligacion_pago =  (p_hstore->'id_obligacion_pago')::integer; 
            
-           
+            -- chequea fechas de costos inicio y fin
+            v_resp_doc =  tes.f_validar_periodo_costo(v_id_plan_pago);
+            
             -- inserta documentos en estado borrador si estan configurados
             v_resp_doc =  wf.f_inserta_documento_wf(p_id_usuario, v_id_proceso_wf, v_id_estado_wf);
+            
             -- verificar documentos
             v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_wf);
             

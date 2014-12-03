@@ -41,10 +41,12 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 	            ['devengado_pagado','Devengar y pagar (2 comprobantes)'],
                                 ['devengado_pagado_1c','Devengar y pagar (1 comprobante)'],
                                 ['devengado','Devengar'],
+                                ['devengado_rrhh','Devengar RH'],
                                 ['rendicion','Agrupar Dev y Pagar (Agrupa varios documentos)'], //es similr a un devengar y pagar pero no genera prorrateo directamente
                                 ['anticipo','Anticipo Fact/Rec (No ejecuta presupuesto, necesita Documento)'],
                                 ['ant_parcial','Anticipo Parcial(No ejecuta presupuesto, Con retenciones parciales en cada pago)'],
                                 ['pagado','Pagar'],
+                                ['pagado_rrh','Pagar RH'],
                                 ['ant_aplicado','Aplicacion de Anticipo'],
                                 ['dev_garantia','Devolucion de Garantia'],
                                 ['det_rendicion','Rendicion Ant']
@@ -54,6 +56,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 	            ['devengado_pagado','Devengar y pagar (2 comprobantes)'],
                 	            ['devengado_pagado_1c','Devengar y pagar (1 comprobante)'],
                                 ['devengado','Devengar'],
+                                ['devengado_rrhh','Devengar RH'],
                                 ['dev_garantia','Devolucion de Garantia'], //es similr a un devengar y pagar pero no genera prorrateo directamente
                                 ['anticipo','Anticipo Fact/Rec (No ejecuta presupuesto, necesita Documento)']
                                ],
@@ -63,6 +66,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                                ],
                     
                     'DEVENGAR':[['pagado','Pagar'],
+                    			['pagado_rrh','Pagar RH'],
                                 ['ant_aplicado','Aplicacion de Anticipo']],
                     
                     'ANTICIPO':[['ant_aplicado','Aplicacion de Anticipo']],
@@ -254,9 +258,11 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 renderer:function (value, p, record){
                         var dato='';
                         dato = (dato==''&&value=='devengado')?'Devengar':dato;
+                        dato = (dato==''&&value=='devengado_rrhh')?'Devengar':dato;
                         dato = (dato==''&&value=='devengado_pagado')?'Devengar y pagar (2 cbte)':dato;
                         dato = (dato==''&&value=='devengado_pagado_1c')?'Devengar y pagar (1 cbte)':dato;
                         dato = (dato==''&&value=='pagado')?'Pagar':dato;
+                        dato = (dato==''&&value=='pagado_rrhh')?'Pagar':dato;
                         dato = (dato==''&&value=='anticipo')?'Anticipo Fact/Rec':dato;
                         dato = (dato==''&&value=='ant_parcial')?'Anticipo Parcial':dato;
                         dato = (dato==''&&value=='ant_rendicion')?'Ant. por Rendir':dato;
@@ -862,6 +868,70 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:false
         },
+        {
+            config:{
+                name: 'monto_ajuste_ag',
+                currencyChar:' ',
+                fieldLabel: 'Ajuste Anterior Gestión',
+                qtip:'Si en la anterior gestión el proveedor quedo con anticipo a favor de nuestra empresa, acá colocamos el monto que queremos cubrir con dicho sobrante',
+                allowBlank: true,
+                allowNegative:false,
+                gwidth: 100,
+                maxLength:1245186
+            },
+            type:'MoneyField',
+            filters:{pfiltro:'plapa.descuento_inter_serv',type:'numeric'},
+            id_grupo:2,
+            grid:true,
+            form:true
+        },
+        {
+            config:{
+                name: 'monto_ajuste_siguiente_pag',
+                currencyChar:' ',
+                fieldLabel: 'Ajuste Anticipo siguiente',
+                qtip:'Si el anticipo no alcanza para cubrir, acá colocamos el monto a cubrir con el siguiente anticipo',
+                allowBlank: true,
+                allowNegative:false,
+                gwidth: 100,
+                maxLength:1245186
+            },
+            type:'MoneyField',
+            filters:{pfiltro:'plapa.descuento_inter_serv',type:'numeric'},
+            id_grupo:2,
+            grid:true,
+            form:true
+        },
+        {
+            config:{
+                name: 'fecha_costo_ini',
+                fieldLabel: 'Fecha Inicio.',
+                allowBlank: true,
+                gwidth: 100,
+                        format: 'd/m/Y', 
+                        renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+            },
+            type:'DateField',
+            filters: { pfiltro: 'plapa.fecha_costo_ini', type: 'date' },
+            id_grupo: 3,
+            grid: true,
+            form: true
+        },
+        {
+            config:{
+                name: 'fecha_costo_fin',
+                fieldLabel: 'Fecha Fin.',
+                allowBlank: true,
+                gwidth: 100,
+                        format: 'd/m/Y', 
+                        renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+            },
+            type: 'DateField',
+            filters: {pfiltro:'plapa.fecha_costo_fin',type:'date'},
+            id_grupo: 3,
+            grid: true,
+            form: true
+        },
         
         
         
@@ -937,45 +1007,11 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 				maxLength:4
 			},
 			type:'NumberField',
-			filters:{pfiltro:'usu2.cuenta',type:'string'},
-			id_grupo:1,
-			grid:true,
-			form:false
-		},
-        {
-            config:{
-                name: 'monto_ajuste_ag',
-                currencyChar:' ',
-                fieldLabel: 'Ajuste Anterior Gestión',
-                qtip:'Si en la anterior gestión el proveedor quedo con anticipo a favor de nuestra empresa, acá colocamos el monto que queremos cubrir con dicho sobrante',
-                allowBlank: true,
-                allowNegative:false,
-                gwidth: 100,
-                maxLength:1245186
-            },
-            type:'MoneyField',
-            filters:{pfiltro:'plapa.descuento_inter_serv',type:'numeric'},
-            id_grupo:2,
-            grid:true,
-            form:true
-        },
-        {
-            config:{
-                name: 'monto_ajuste_siguiente_pag',
-                currencyChar:' ',
-                fieldLabel: 'Ajuste Anticipo siguiente',
-                qtip:'Si el anticipo no alcanza para cubrir, acá colocamos el monto a cubrir con el siguiente anticipo',
-                allowBlank: true,
-                allowNegative:false,
-                gwidth: 100,
-                maxLength:1245186
-            },
-            type:'MoneyField',
-            filters:{pfiltro:'plapa.descuento_inter_serv',type:'numeric'},
-            id_grupo:2,
-            grid:true,
-            form:true
-        }
+			filters: { pfiltro: 'usu2.cuenta', type:'string'} ,
+			id_grupo: 1,
+			grid: true,
+			form: false
+		}
 	],
 	
 	title:'Plan Pago',
@@ -1049,7 +1085,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'conformidad',
 		'tipo_obligacion',
 		'monto_ajuste_ag',
-		'monto_ajuste_siguiente_pag','pago_variable','monto_anticipo'
+		'monto_ajuste_siguiente_pag','pago_variable','monto_anticipo',
+		{name:'fecha_costo_ini', type: 'date',dateFormat:'Y-m-d'},
+		{name:'fecha_costo_fin', type: 'date',dateFormat:'Y-m-d'}
 		
 	],
 	
@@ -1265,7 +1303,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         
           
         var monto_ret_gar =  0;
-        if(this.porc_ret_gar > 0  && this.Cmp.tipo.getValue()=='pagado')
+        if(this.porc_ret_gar > 0  && (this.Cmp.tipo.getValue()=='pagado' || this.Cmp.tipo.getValue()=='pagado_rrhh'))
         {
             this.Cmp.monto_retgar_mo.setValue(this.porc_ret_gar*this.Cmp.monto.getValue());
         } 
@@ -1470,6 +1508,29 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 me.deshabilitarDescuentos(me);
                 me.ocultarComponentesPago(me);
                 me.Cmp.monto_retgar_mo.setReadOnly(false);
+                me.mostrarGrupo(3); //mostra el grupo rango de costo
+                me.ocultarGrupo(2); //ocultar el grupo de ajustes
+                
+                
+           },
+           
+           'devengado_rrhh':function(me){
+                //plantilla (TIPO DOCUMENTO)
+                me.mostrarComponente(me.Cmp.id_plantilla);
+                me.mostrarComponente(me.Cmp.monto_excento);
+                me.mostrarComponente(me.Cmp.monto_no_pagado);
+                me.mostrarComponente(me.Cmp.obs_monto_no_pagado);
+                me.mostrarComponente(me.Cmp.liquido_pagable); 
+                me.mostrarComponente(me.Cmp.monto_retgar_mo)   
+                me.mostrarComponente(me.Cmp.descuento_ley);
+                me.mostrarComponente(me.Cmp.monto_anticipo);
+                me.mostrarComponente(me.Cmp.obs_descuentos_ley);
+                me.deshabilitarDescuentos(me);
+                me.ocultarComponentesPago(me);
+                me.Cmp.monto_retgar_mo.setReadOnly(false);
+                me.ocultarGrupo(2); //ocultar el grupo de ajustes
+                me.ocultarGrupo(3); //ocultar el grupo de periodo del costo
+                
                 
                 
            },
@@ -1489,6 +1550,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                me.habilitarDescuentos(me)
                me.mostrarComponentesPago(me);
                me.Cmp.monto_retgar_mo.setReadOnly(false);
+               me.mostrarGrupo(3); //mostra el grupo rango de costo
+               me.ocultarGrupo(2); //ocultar el grupo de ajustes
+               
                
               
         
@@ -1497,7 +1561,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
            
            'devengado_pagado_1c':function(me){
                //plantilla (TIPO DOCUMENTO)
-               me.setTipoPago['devengado_pagado'](me);       
+               me.setTipoPago['devengado_pagado'](me); 
+                     
            },
            
            'rendicion':function(me){
@@ -1508,6 +1573,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                me.mostrarComponente(me.Cmp.obs_monto_no_pagado);
                me.ocultarComponente(me.Cmp.monto_anticipo);
                me.habilitarDescuentos(me);
+               me.ocultarGrupo(2); //ocultar el grupo de ajustes
+               me.ocultarGrupo(3); //ocultar el grupo de periodo del costo
               
           },
            'dev_garantia':function(me){
@@ -1521,6 +1588,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
               me.ocultarComponente(me.Cmp.monto_no_pagado);
               me.ocultarComponente(me.Cmp.monto_retgar_mo);
               me.ocultarComponente(me.Cmp.monto_anticipo);
+              me.ocultarGrupo(2); //ocultar el grupo de ajustes
+              me.ocultarGrupo(3); //ocultar el grupo de periodo del costo
              
               
            },
@@ -1532,6 +1601,19 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                me.mostrarComponente(me.Cmp.liquido_pagable);
                me.ocultarComponente(me.Cmp.monto_anticipo);
                me.Cmp.monto_retgar_mo.setReadOnly(true);
+               me.ocultarGrupo(2); //ocultar el grupo de ajustes
+               me.ocultarGrupo(3); //ocultar el grupo de periodo del costo
+              
+        }, 
+        'pagado_rrhh':function(me){
+               me.Cmp.id_plantilla.disable();
+               me.habilitarDescuentos(me);
+               me.mostrarComponentesPago(me);
+               me.mostrarComponente(me.Cmp.liquido_pagable);
+               me.ocultarComponente(me.Cmp.monto_anticipo);
+               me.Cmp.monto_retgar_mo.setReadOnly(true);
+               me.ocultarGrupo(2); //ocultar el grupo de ajustes
+               me.ocultarGrupo(3); //ocultar el grupo de periodo del costo
               
         },
         'ant_parcial':function(me){
@@ -1552,6 +1634,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 me.ocultarComponente(me.Cmp.obs_descuentos_ley);
                 me.mostrarComponente(me.Cmp.liquido_pagable);
                 me.ocultarComponente(me.Cmp.monto_anticipo);
+                me.ocultarGrupo(2); //ocultar el grupo de ajustes
+                me.ocultarGrupo(3); //ocultar el grupo de periodo del costo
             
         },
         
@@ -1573,6 +1657,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 me.mostrarComponente(me.Cmp.liquido_pagable);
                 me.mostrarComponente(me.Cmp.descuento_ley);
                 me.mostrarComponente(me.Cmp.obs_descuentos_ley);
+                me.ocultarGrupo(2); //ocultar el grupo de ajustes
+                me.mostrarGrupo(3); //ocultar el grupo de periodo del costo
                 
          },
          'ant_aplicado':function(me, data){
@@ -1672,6 +1758,18 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                                 items: [],
                                 margins:'2 10 2 2',
                                 id_grupo: 2,
+                                flex: 1
+                             },
+                              
+                            {
+                                xtype: 'fieldset',
+                                title: 'Periodo al que corresponde el gasto',
+                                autoHeight: true,
+                                hiden: true,
+                                //layout:'hbox',
+                                items: [],
+                                margins:'2 10 2 2',
+                                id_grupo: 3,
                                 flex: 1
                              }
                        ]
