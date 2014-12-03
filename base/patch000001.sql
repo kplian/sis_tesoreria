@@ -1042,6 +1042,11 @@ ALTER TABLE tes.tplan_pago
 COMMENT ON COLUMN tes.tplan_pago.fecha_costo_fin
 IS 'Cuando un concepto de gasto es del tipo servicio, esta fecha indica el fin del costo';
 
+--------------- SQL ---------------
+
+COMMENT ON COLUMN tes.tplan_pago.tipo
+IS 'det_rendicion, dev_garantia, ant_aplicado , pagado_rrh, pagado, ant_parcial, anticipo, rendicion, devengado_rrhh, devengado, devengado_pagado_1c, devengado_pagado';
+
 /***********************************I-SCP-RAC-TES-0-03/12/2014***************************************/
 
 
