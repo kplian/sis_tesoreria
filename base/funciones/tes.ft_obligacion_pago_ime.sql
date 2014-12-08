@@ -27,6 +27,7 @@ DECLARE
 
 	v_nro_requerimiento    	integer;
 	v_parametros           	record;
+    v_registros_op          record;
    
 	v_id_requerimiento     	integer;
 	v_resp		            varchar;
@@ -120,6 +121,24 @@ DECLARE
      v_resp_fin varchar[];
      v_preguntar varchar;
      v_id_funcionario_sol integer;
+     
+     va_id_presupuesto 			integer[];
+     va_id_partida 	    		integer[];
+     va_momento					INTEGER[];
+     va_monto          			numeric[];
+     va_id_moneda    			integer[];
+     va_id_partida_ejecucion	integer[];
+     va_columna_relacion   		varchar[];
+     va_fk_llave             	integer[];
+     va_id_obligacion_det	  	integer[];
+     va_fecha 					date[];
+     v_fecha     				date;
+     va_id_obligacion_det_tmp   integer[];
+     va_revertir  				numeric[];
+     v_tam        				integer;
+     v_indice 					integer;
+     va_resp_ges              numeric[];
+     
 			    
 BEGIN
 
@@ -423,7 +442,7 @@ BEGIN
               
               
              from tes.tobligacion_pago op
-             inner join param.vproveedor pr  on pr.id_proveedor = op.id_proveedor
+             left join param.vproveedor pr  on pr.id_proveedor = op.id_proveedor
              where op.id_obligacion_pago = v_parametros.id_obligacion_pago; 
              
              
@@ -845,6 +864,13 @@ BEGIN
             
             END IF;
             
+            --jrr: llamamos a la funcion que revierte de planillas en caso de que sea de recursos humanos
+            if (v_tipo_obligacion = 'rrhh') then
+                IF NOT plani.f_generar_pago_tesoreria(p_administrador,p_id_usuario,v_parametros._id_usuario_ai,
+                          v_parametros._nombre_usuario_ai,v_parametros.id_obligacion_pago,v_obs) THEN                                                         
+                     raise exception 'Error al generar el pago de devengado';                          
+                  END IF;            	
+            end if;
                
                
             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_parametros.id_obligacion_pago::varchar);
@@ -1429,6 +1455,97 @@ BEGIN
           return v_resp;
             
 		end;  
+    /*********************************    
+ 	#TRANSACCION:  'TES_REVPARPRE_IME'
+ 	#DESCRIPCION:	Revierte el presupeusto parcialmente
+ 	#AUTOR:		RAC - KPLIAN	
+ 	#FECHA:		10-04-2013 15:43:23
+	***********************************/
+
+	elsif(p_transaccion='TES_REVPARPRE_IME')then
+
+		begin
+		    
+            select 
+               op.id_obligacion_pago,
+               op.id_moneda,
+               op.estado
+            into
+               v_registros_op
+            from tes.tobligacion_pago op
+            where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
+          
+            IF v_registros_op.estado = 'finalizado' THEN
+               raise exception 'no puede modificar el presupuesto de obligaciones finalizadas';
+            END IF;
+        
+            v_fecha = now();
+            va_id_obligacion_det_tmp =  string_to_array(v_parametros.id_ob_dets::text,',')::integer[];
+            va_revertir = string_to_array(v_parametros.revertir::text,',')::numeric[];
+            v_tam = array_length(va_id_obligacion_det_tmp, 1);
+           
+            v_i = 1;
+            FOR v_registros in (
+                            SELECT  od.id_obligacion_det,
+                                    od.id_centro_costo,
+                                    od.id_partida_ejecucion_com,
+                                    od.id_partida,
+                                    p.id_presupuesto
+                            FROM  tes.tobligacion_det od 
+                            INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = od.id_centro_costo
+                            WHERE od.id_obligacion_det = ANY(va_id_obligacion_det_tmp)
+                         ) LOOP
+                
+              
+                va_id_presupuesto[v_i] = v_registros.id_presupuesto;
+                va_id_partida[v_i] = v_registros.id_partida;
+                va_momento[v_i]	= 2; --el momento 2 con signo negativo  es revertir
+                va_id_moneda[v_i]  = v_registros_op.id_moneda;
+                
+              
+                va_id_partida_ejecucion[v_i] = v_registros.id_partida_ejecucion_com;
+                va_columna_relacion[v_i] = 'id_obligacion_pago';
+                va_fk_llave[v_i] = v_registros_op.id_obligacion_pago;
+                va_fecha[v_i] = v_fecha ;
+                va_id_obligacion_det[v_i] = v_registros.id_obligacion_det;
+                v_indice = v_i;
+                
+                FOR v_j IN 1..v_tam LOOP
+                   IF v_registros.id_obligacion_det = va_id_obligacion_det_tmp[v_j] THEN
+                       v_indice = v_j;
+                       v_j = v_tam + 1;
+                   END IF;
+                END LOOP;
+                
+                va_monto[v_i]  = va_revertir[v_indice]*-1; 
+                
+                v_i = v_i + 1;
+                
+          END LOOP;
+             
+           
+          va_resp_ges =  pre.f_gestionar_presupuesto(  va_id_presupuesto, 
+                                                       va_id_partida, 
+                                                       va_id_moneda, 
+                                                       va_monto, 
+                                                       va_fecha, --p_fecha
+                                                       va_momento, 
+                                                       va_id_partida_ejecucion,--  p_id_partida_ejecucion 
+                                                       va_columna_relacion, 
+                                                       va_fk_llave,
+                                                       NULL
+                                                       );	
+            
+          
+            -- Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se extendio la obligacion de pago a la siguiente gestion'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_parametros.id_obligacion_pago::varchar);
+           
+            
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;   
     
     else
      

@@ -458,6 +458,10 @@ class MODObligacionPago extends MODbase{
 			$this->captura('comprometido','numeric');
 			$this->captura('ejecutado','numeric');
 			$this->captura('pagado','numeric');
+			$this->captura('revertible','numeric');
+			$this->captura('revertir','numeric');
+			
+			
 			
 			//Ejecuta la instruccion
 			$this->armarConsulta();
@@ -483,6 +487,25 @@ class MODObligacionPago extends MODbase{
         //Devuelve la respuesta
         return $this->respuesta;
     }
+
+    function revertirParcialmentePresupuesto(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_obligacion_pago_ime';
+		$this->transaccion='TES_REVPARPRE_IME';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_ob_dets','id_ob_dets','varchar');
+		$this->setParametro('revertir','revertir','varchar');
+		$this->setParametro('id_obligacion_pago','id_obligacion_pago','integer');
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
 
 }
 ?>

@@ -206,6 +206,18 @@ BEGIN
            -- 3.1)  si es tipo es devengado_pago  , se genera automaticamente un plan de PAGO relacionado por el total
            --------------------------------------------
            
+           IF   v_registros.tipo = 'devengado_rrhh' THEN
+           		IF NOT plani.f_valida_devengado(p_id_usuario,p_id_usuario_ai,p_usuario_ai,
+                          v_registros.id_plan_pago) THEN                                                         
+                     raise exception 'Error al generar el pago de devengado';                          
+                END IF;  
+           ELSIF v_registros.tipo = 'pagado_rrhh' THEN
+           		IF NOT plani.f_valida_pagado(p_id_usuario,p_id_usuario_ai,p_usuario_ai,
+                          v_registros.id_plan_pago) THEN                                                         
+                     raise exception 'Error al validar el pagado';                          
+                END IF;  
+           END IF;
+           
            IF   v_registros.tipo = 'devengado_pagado' THEN
            
                           --determinar el numero de cuota

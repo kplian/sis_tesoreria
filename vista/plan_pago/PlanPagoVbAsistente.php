@@ -131,6 +131,7 @@ Phx.vista.PlanPagoVbAsistente = {
             this.getBoton('btnRev').setIconClass('bball_green')
         }
        this.getBoton('btnRev').enable();
+       this.getBoton('btnObs').enable();   
    },
    
    liberaMenu:function(){
@@ -138,6 +139,7 @@ Phx.vista.PlanPagoVbAsistente = {
         this.getBoton('diagrama_gantt').disable();
         this.getBoton('btnChequeoDocumentosWf').disable();
         this.getBoton('btnRev').disable();
+        this.getBoton('btnObs').disable();   
         
     
       return tb

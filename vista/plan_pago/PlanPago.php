@@ -16,6 +16,66 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
     accionFormulario:undefined, //define la accion que se ejcuta en formulario new o edit
     porc_ret_gar:0,//valor por defecto de retencion de garantia
 	constructor:function(config){
+		//definicion de grupos para fomrulario
+		var me = this;
+		this.Grupos = [
+		            {
+		                layout: 'hbox',
+		                border: false,
+		                defaults: {
+		                   border: true
+		                },            
+		                items: [
+		                              {
+		                                xtype: 'fieldset',
+		                                title: 'Tipo de Pago',
+		                                autoHeight: true,
+		                                //layout:'hbox',
+		                                items: [],
+		                                id_grupo:0,
+		                                margins:'2 2 2 2'
+		                             },
+		                              
+		                            {
+		                                xtype: 'fieldset',
+		                                title: 'Detalle de Pago',
+		                                autoHeight: true,
+		                                //layout:'hbox',
+		                                items: [],
+		                                margins:'2 10 2 2',
+		                                id_grupo:1,
+		                                flex:1
+		                             },
+		                              
+		                            {
+		                                xtype: 'fieldset',
+		                                title: 'Ajustes',
+		                                autoHeight: true,
+		                                hiden: true,
+		                                //layout:'hbox',
+		                                items: [],
+		                                margins:'2 10 2 2',
+		                                id_grupo: 2,
+		                                flex: 1
+		                             },
+		                              
+		                            {
+		                                xtype: 'fieldset',
+		                                title: 'Periodo al que corresponde el gasto',
+		                                autoHeight: true,
+		                                hiden: true,
+		                                //layout:'hbox',
+		                                items: [],
+		                                margins:'2 10 2 2',
+		                                buttons: [{ text: 'Dividir gasto', handler: me.calcularAnticipo, scope: me, tooltip: 'Según las fechas,  ayuda con el calculo  del importe anticipado'}],
+		                                id_grupo: 3,
+		                                flex: 1
+		                             }
+		                       ]
+		                  
+		     }];
+		
+		
 		//llama al constructor de la clase padre
 		Phx.vista.PlanPago.superclass.constructor.call(this,config);
 		this.init();
@@ -31,6 +91,13 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 tooltip: '<b>Documentos de la Solicitud</b><br/>Subir los documetos requeridos en la solicitud seleccionada.'
             }
         );
+        this.addButton('btnObs',{
+                    text :'Obs Wf',
+                    iconCls : 'bchecklist',
+                    disabled: true,
+                    handler : this.onOpenObs,
+                    tooltip : '<b>Observaciones</b><br/><b>Observaciones del WF</b>'
+          });
         this.addButton('SincPresu',{text:'Inc. Pres.',iconCls: 'balert',disabled:true,handler:this.onBtnSincPresu,tooltip: '<b>Incrementar Presupuesto</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
         
 	},
@@ -1454,6 +1521,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         
         this.Cmp.monto_ajuste_ag.setValue(0);
         this.Cmp.monto_ajuste_siguiente_pag.setValue(0);
+        this.Cmp.monto_anticipo.setValue(0);
         
     },
     
@@ -1720,66 +1788,48 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         
     },
     
-    Grupos: [
-            {
-                layout: 'hbox',
-                border: false,
-                defaults: {
-                   border: true
-                },            
-                items: [
-                              {
-                                xtype: 'fieldset',
-                                title: 'Tipo de Pago',
-                                autoHeight: true,
-                                //layout:'hbox',
-                                items: [],
-                                id_grupo:0,
-                                margins:'2 2 2 2'
-                             },
-                              
-                            {
-                                xtype: 'fieldset',
-                                title: 'Detalle de Pago',
-                                autoHeight: true,
-                                //layout:'hbox',
-                                items: [],
-                                margins:'2 10 2 2',
-                                id_grupo:1,
-                                flex:1
-                             },
-                              
-                            {
-                                xtype: 'fieldset',
-                                title: 'Ajustes',
-                                autoHeight: true,
-                                hiden: true,
-                                //layout:'hbox',
-                                items: [],
-                                margins:'2 10 2 2',
-                                id_grupo: 2,
-                                flex: 1
-                             },
-                              
-                            {
-                                xtype: 'fieldset',
-                                title: 'Periodo al que corresponde el gasto',
-                                autoHeight: true,
-                                hiden: true,
-                                //layout:'hbox',
-                                items: [],
-                                margins:'2 10 2 2',
-                                id_grupo: 3,
-                                flex: 1
-                             }
-                       ]
-                  
-     }],
     
-    onButtonNew:function(){
+    calcularAnticipo: function(){
+    	
+    	var fecha_ini = this.Cmp.fecha_costo_ini.getValue(),
+    	    fecha_fin = this.Cmp.fecha_costo_fin.getValue();
+    	    
+    	if(fecha_ini&&fecha_fin&&(fecha_ini<fecha_fin)){
+	    	var    monto = this.Cmp.monto.getValue(),
+	    	    dias_total = this.restaFechas(fecha_ini, fecha_fin).dias + 1,
+	    	    costo_dia = monto / dias_total,
+	    	    fecha_fin_mes = new Date(fecha_ini.getFullYear(), fecha_ini.getMonth() + 1 , 0),
+	    	    dias_mes =  this.restaFechas(fecha_ini,fecha_fin_mes).dias + 1,
+	    	    dias_restantes = dias_total - dias_mes,
+	    	    monto_anticipo = dias_restantes*costo_dia;
+	    	 this.Cmp.monto_anticipo.setValue(Math.floor(monto_anticipo));	
+    	} 
+    	else{
+    		
+    		console.log('xxxxxxx')
+    	}   
+    	 
+    	
+       
+    },
+    
+    restaFechas: function(f1,f2){
+		    var segundos = (f2 - f1) / 1000,
+		        minutos = segundos /60,
+		        horas = minutos / 60,
+		        horas = Math.round (horas),
+		        dias = horas / 24,
+		        dias = Math.round (dias);
+		        
+		        
+		 return {'dias':dias,'horas':horas,'minutos':minutos,'segundos':segundos};
+	 },
+    
+    onButtonNew: function(){
          this.accionFormulario = 'NEW';
          Phx.vista.PlanPago.superclass.onButtonNew.call(this);
          this.ocultarGrupo(2); //ocultar el grupo de ajustes 
+         this.ocultarGrupo(3); //ocultar el grupo de ajustes 
     },
     
     successAplicarDesc:function(resp){
@@ -1823,14 +1873,28 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         Phx.vista.PlanPago.superclass.onButtonEdit.call(this); 
     },
       
-    /*sortInfo:{
-		field: 'fecha_reg',
-		direction: 'DESC'
-	},*/
-	onButtonNew: function(){
-		Phx.vista.PlanPago.superclass.onButtonNew.call(this);
-		//this.Cmp.f.store.baseParams={id_cuenta_bancaria:-1,fecha:new Date()}
-	}
+    
+	 onOpenObs:function() {
+            var rec=this.sm.getSelected();
+            
+            var data = {
+            	id_proceso_wf: rec.data.id_proceso_wf,
+            	id_estado_wf: rec.data.id_estado_wf,
+            	num_tramite: rec.data.num_tramite
+            }
+            
+            console.log(rec.data)
+            Phx.CP.loadWindows('../../../sis_workflow/vista/obs/Obs.php',
+                    'Observaciones del WF',
+                    {
+                        width:'80%',
+                        height:'70%'
+                    },
+                    data,
+                    this.idContenedor,
+                    'Obs'
+        )
+    }
 	
 })
 </script>

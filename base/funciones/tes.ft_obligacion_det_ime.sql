@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_det_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -46,6 +48,7 @@ DECLARE
     v_comprometido			varchar;
     v_monto_total_obligacion	numeric;
     v_registros				record;
+    v_registros_cig         record;
     
       
     
@@ -98,13 +101,20 @@ BEGIN
           
           raise notice '(''CUECOMP'', %, %, %)',  v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo;
          
-        
+          --recupera el nombre del concepto de gasto
+           
+            select
+            cig.desc_ingas
+            into
+            v_registros_cig
+            from param.tconcepto_ingas cig
+            where cig.id_concepto_ingas =  v_parametros.id_concepto_ingas;
           
           SELECT 
               ps_id_partida 
             into 
               v_id_partida 
-          FROM conta.f_get_config_relacion_contable('CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo);
+          FROM conta.f_get_config_relacion_contable('CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo, 'No se encontro relación contable para el conceto de gasto: '||v_registros_cig.desc_ingas||'. <br> Mensaje: ');
           
         
            
@@ -190,14 +200,22 @@ BEGIN
            --recueprar la partida de la parametrizacion
           v_id_partida = NULL;
           
+          
+          select
+            cig.desc_ingas
+            into
+            v_registros_cig
+            from param.tconcepto_ingas cig
+            where cig.id_concepto_ingas =  v_parametros.id_concepto_ingas;
+          
           SELECT 
               ps_id_partida 
             into 
               v_id_partida 
-          FROM conta.f_get_config_relacion_contable('CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo);
+          FROM conta.f_get_config_relacion_contable('CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo, 'No se encontro relación contable para el conceto de gasto: '||v_registros_cig.desc_ingas||'. <br> Mensaje: ');
           
-        
-           
+          
+                    
         
            IF v_id_partida is NULL THEN
           

@@ -3992,3 +3992,1591 @@ ALTER TABLE tes.tobligacion_pago
   ADD CONSTRAINT chk_tobligacion_pago__tipo_obligacion CHECK ((tipo_obligacion)::text = ANY (ARRAY[('adquisiciones'::character varying)::text, ('caja_chica'::character varying)::text, ('viaticos'::character varying)::text, ('fondos_en_avance'::character varying)::text, ('pago_directo'::character varying)::text, ('rrhh'::character varying)::text]));
 
 /**********************************F-DEP-JRR-TES-0-18/11/2014*****************************************/
+
+/**********************************I-DEP-JRR-TES-0-24/11/2014*****************************************/
+
+CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
+    id_plan_pago,
+    id_proveedor,
+    desc_proveedor,
+    id_moneda,
+    id_depto_conta,
+    numero,
+    fecha_actual,
+    estado,
+    monto_ejecutar_total_mb,
+    monto_ejecutar_total_mo,
+    monto,
+    monto_mb,
+    monto_retgar_mb,
+    monto_retgar_mo,
+    monto_no_pagado,
+    monto_no_pagado_mb,
+    otros_descuentos,
+    otros_descuentos_mb,
+    id_plantilla,
+    id_cuenta_bancaria,
+    id_cuenta_bancaria_mov,
+    nro_cheque,
+    nro_cuenta_bancaria,
+    num_tramite,
+    tipo,
+    id_gestion_cuentas,
+    id_int_comprobante,
+    liquido_pagable,
+    liquido_pagable_mb,
+    nombre_pago,
+    porc_monto_excento_var,
+    obs_pp,
+    descuento_anticipo,
+    descuento_inter_serv,
+    tipo_obligacion,
+    id_categoria_compra,
+    codigo_categoria,
+    nombre_categoria,
+    id_proceso_wf,
+    detalle,
+    codigo_moneda,
+    nro_cuota,
+    tipo_pago,
+    tipo_solicitud,
+    tipo_concepto_solicitud,
+    total_monto_op_mb,
+    total_monto_op_mo,
+    total_pago,
+    fecha_tentativa,
+    desc_funcionario,
+    email_empresa,
+    desc_usuario,
+    id_funcionario_gerente)
+AS
+  SELECT pp.id_plan_pago,
+         op.id_proveedor,
+         p.desc_proveedor,
+         op.id_moneda,
+         op.id_depto_conta,
+         op.numero,
+         now() AS fecha_actual,
+         pp.estado,
+         pp.monto_ejecutar_total_mb,
+         pp.monto_ejecutar_total_mo,
+         pp.monto,
+         pp.monto_mb,
+         pp.monto_retgar_mb,
+         pp.monto_retgar_mo,
+         pp.monto_no_pagado,
+         pp.monto_no_pagado_mb,
+         pp.otros_descuentos,
+         pp.otros_descuentos_mb,
+         pp.id_plantilla,
+         pp.id_cuenta_bancaria,
+         pp.id_cuenta_bancaria_mov,
+         pp.nro_cheque,
+         pp.nro_cuenta_bancaria,
+         op.num_tramite,
+         pp.tipo,
+         op.id_gestion AS id_gestion_cuentas,
+         pp.id_int_comprobante,
+         pp.liquido_pagable,
+         pp.liquido_pagable_mb,
+         pp.nombre_pago,
+         pp.porc_monto_excento_var,
+         ((COALESCE(op.numero, '' ::character varying) ::text || ' ' ::text) ||
+          COALESCE(pp.obs_monto_no_pagado, '' ::text)) ::character varying AS
+           obs_pp,
+         pp.descuento_anticipo,
+         pp.descuento_inter_serv,
+         op.tipo_obligacion,
+         op.id_categoria_compra,
+         COALESCE(cac.codigo, '' ::character varying) AS codigo_categoria,
+         COALESCE(cac.nombre, '' ::character varying) AS nombre_categoria,
+         pp.id_proceso_wf,
+         ('<table>' ::text || pxp.html_rows((((('<td>' ::text ||
+          ci.desc_ingas::text) || '<br/>' ::text) || od.descripcion) || '</td>'
+           ::text) ::character varying) ::text) || '</table>' ::text AS detalle,
+         mon.codigo AS codigo_moneda,
+         pp.nro_cuota,
+         pp.tipo_pago,
+         op.tipo_solicitud,
+         op.tipo_concepto_solicitud,
+         COALESCE(sum(od.monto_pago_mb), 0::numeric) AS total_monto_op_mb,
+         COALESCE(sum(od.monto_pago_mo), 0::numeric) AS total_monto_op_mo,
+         op.total_pago,
+         pp.fecha_tentativa,
+         fun.desc_funcionario1 AS desc_funcionario,
+         fun.email_empresa,
+         usu.desc_persona AS desc_usuario,
+         COALESCE(op.id_funcionario_gerente, 0) AS id_funcionario_gerente
+  FROM tes.tplan_pago pp
+       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
+        op.id_obligacion_pago
+       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
+       LEFT JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
+       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
+        op.id_categoria_compra
+       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
+        op.id_obligacion_pago AND od.estado_reg::text = 'activo' ::text
+       JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas =
+        od.id_concepto_ingas
+       JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario =
+        op.id_funcionario AND fun.estado_reg_asi::text = 'activo' ::text
+       JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
+  GROUP BY pp.id_plan_pago,
+           op.id_proveedor,
+           p.desc_proveedor,
+           op.id_moneda,
+           op.id_depto_conta,
+           op.numero,
+           pp.estado,
+           pp.monto_ejecutar_total_mb,
+           pp.monto_ejecutar_total_mo,
+           pp.monto,
+           pp.monto_mb,
+           pp.monto_retgar_mb,
+           pp.monto_retgar_mo,
+           pp.monto_no_pagado,
+           pp.monto_no_pagado_mb,
+           pp.otros_descuentos,
+           pp.otros_descuentos_mb,
+           pp.id_plantilla,
+           pp.id_cuenta_bancaria,
+           pp.id_cuenta_bancaria_mov,
+           pp.nro_cheque,
+           pp.nro_cuenta_bancaria,
+           op.num_tramite,
+           pp.tipo,
+           op.id_gestion,
+           pp.id_int_comprobante,
+           pp.liquido_pagable,
+           pp.liquido_pagable_mb,
+           pp.nombre_pago,
+           pp.porc_monto_excento_var,
+           pp.obs_monto_no_pagado,
+           pp.descuento_anticipo,
+           pp.descuento_inter_serv,
+           op.tipo_obligacion,
+           op.id_categoria_compra,
+           cac.codigo,
+           cac.nombre,
+           pp.id_proceso_wf,
+           mon.codigo,
+           pp.nro_cuota,
+           pp.tipo_pago,
+           op.total_pago,
+           op.tipo_solicitud,
+           op.tipo_concepto_solicitud,
+           pp.fecha_tentativa,
+           fun.desc_funcionario1,
+           fun.email_empresa,
+           usu.desc_persona,
+           op.id_funcionario_gerente;
+           
+/**********************************F-DEP-JRR-TES-0-24/11/2014*****************************************/
+
+/***********************************I-DEP-GSS-TES-0-27/11/2014****************************************/
+--tabla tes.tusuario_cuenta_banc
+    
+ALTER TABLE	tes.tusuario_cuenta_banc
+  ADD CONSTRAINT fk_tusuario_cuenta_banc__id_cuenta_bancaria FOREIGN KEY (id_cuenta_bancaria)
+    REFERENCES tes.tcuenta_bancaria(id_cuenta_bancaria)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE, 
+
+ALTER TABLE	tes.tusuario_cuenta_banc
+  ADD CONSTRAINT fk_tusuario_cuenta_banc__id_usuario FOREIGN KEY (id_usuario)
+    REFERENCES segu.tusuario(id_usuario)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE
+
+/***********************************F-DEP-GSS-TES-0-27/11/2014****************************************/
+
+
+/***********************************I-DEP-RAC-TES-0-27/11/2014****************************************/
+
+select pxp.f_insert_testructura_gui ('OBPG.1.1', 'OBPG.1');
+select pxp.f_insert_testructura_gui ('SOLPD.1.1', 'SOLPD.1');
+select pxp.f_insert_testructura_gui ('REVBPP', 'TES');
+select pxp.f_insert_testructura_gui ('REVBPP.1', 'REVBPP');
+select pxp.f_insert_testructura_gui ('REVBPP.2', 'REVBPP');
+select pxp.f_insert_testructura_gui ('REVBPP.3', 'REVBPP');
+select pxp.f_insert_testructura_gui ('REVBPP.4', 'REVBPP');
+select pxp.f_insert_testructura_gui ('REVBPP.5', 'REVBPP');
+select pxp.f_insert_testructura_gui ('REVBPP.2.1', 'REVBPP.2');
+select pxp.f_insert_testructura_gui ('REVBPP.2.2', 'REVBPP.2');
+select pxp.f_insert_testructura_gui ('REVBPP.2.2.1', 'REVBPP.2.2');
+select pxp.f_insert_testructura_gui ('REVBPP.2.2.2', 'REVBPP.2.2');
+select pxp.f_insert_testructura_gui ('REVBPP.2.2.3', 'REVBPP.2.2');
+select pxp.f_insert_testructura_gui ('REVBPP.2.2.2.1', 'REVBPP.2.2.2');
+select pxp.f_insert_testructura_gui ('REVBPP.2.2.3.1', 'REVBPP.2.2.3');
+select pxp.f_insert_testructura_gui ('REVBPP.2.2.3.1.1', 'REVBPP.2.2.3.1');
+select pxp.f_insert_testructura_gui ('REVBPP.5.1', 'REVBPP.5');
+select pxp.f_insert_testructura_gui ('REVBPP.5.2', 'REVBPP.5');
+select pxp.f_insert_testructura_gui ('VBOP', 'TES');
+select pxp.f_insert_testructura_gui ('VBOP.1', 'VBOP');
+select pxp.f_insert_testructura_gui ('VBOP.2', 'VBOP');
+select pxp.f_insert_testructura_gui ('VBOP.3', 'VBOP');
+select pxp.f_insert_testructura_gui ('VBOP.4', 'VBOP');
+select pxp.f_insert_testructura_gui ('VBOP.5', 'VBOP');
+select pxp.f_insert_testructura_gui ('VBOP.6', 'VBOP');
+select pxp.f_insert_testructura_gui ('VBOP.7', 'VBOP');
+select pxp.f_insert_testructura_gui ('VBOP.1.1', 'VBOP.1');
+select pxp.f_insert_testructura_gui ('VBOP.2.1', 'VBOP.2');
+select pxp.f_insert_testructura_gui ('VBOP.2.2', 'VBOP.2');
+select pxp.f_insert_testructura_gui ('VBOP.2.3', 'VBOP.2');
+select pxp.f_insert_testructura_gui ('VBOP.2.4', 'VBOP.2');
+select pxp.f_insert_testructura_gui ('VBOP.2.5', 'VBOP.2');
+select pxp.f_insert_testructura_gui ('VBOP.2.5.1', 'VBOP.2.5');
+select pxp.f_insert_testructura_gui ('VBOP.2.5.2', 'VBOP.2.5');
+select pxp.f_insert_testructura_gui ('VBOP.4.1', 'VBOP.4');
+select pxp.f_insert_testructura_gui ('VBOP.4.2', 'VBOP.4');
+select pxp.f_insert_testructura_gui ('VBOP.4.3', 'VBOP.4');
+select pxp.f_insert_testructura_gui ('VBOP.4.4', 'VBOP.4');
+select pxp.f_insert_testructura_gui ('VBOP.4.5', 'VBOP.4');
+select pxp.f_insert_testructura_gui ('VBOP.4.5.1', 'VBOP.4.5');
+select pxp.f_insert_testructura_gui ('VBOP.4.5.2', 'VBOP.4.5');
+select pxp.f_insert_testructura_gui ('VBOP.5.1', 'VBOP.5');
+select pxp.f_insert_testructura_gui ('VBOP.5.2', 'VBOP.5');
+select pxp.f_insert_testructura_gui ('VBOP.7.1', 'VBOP.7');
+select pxp.f_insert_testructura_gui ('VBOP.7.2', 'VBOP.7');
+select pxp.f_insert_testructura_gui ('VBOP.7.3', 'VBOP.7');
+select pxp.f_insert_testructura_gui ('VBOP.7.2.1', 'VBOP.7.2');
+select pxp.f_insert_testructura_gui ('VBOP.7.3.1', 'VBOP.7.3');
+select pxp.f_insert_testructura_gui ('VBOP.7.3.1.1', 'VBOP.7.3.1');
+select pxp.f_insert_testructura_gui ('TIPPRO', 'TES');
+select pxp.f_insert_testructura_gui ('VBDP.6', 'VBDP');
+select pxp.f_insert_testructura_gui ('VBDP.6.1', 'VBDP.6');
+select pxp.f_insert_testructura_gui ('VBDP.6.2', 'VBDP.6');
+select pxp.f_insert_testructura_gui ('VBDP.6.3', 'VBDP.6');
+select pxp.f_insert_testructura_gui ('VBDP.6.4', 'VBDP.6');
+select pxp.f_insert_testructura_gui ('VBDP.6.5', 'VBDP.6');
+select pxp.f_insert_testructura_gui ('VBDP.6.6', 'VBDP.6');
+select pxp.f_insert_testructura_gui ('VBDP.6.7', 'VBDP.6');
+select pxp.f_insert_testructura_gui ('VBDP.6.1.1', 'VBDP.6.1');
+select pxp.f_insert_testructura_gui ('VBDP.6.3.1', 'VBDP.6.3');
+select pxp.f_insert_testructura_gui ('VBDP.6.4.1', 'VBDP.6.4');
+select pxp.f_insert_testructura_gui ('VBDP.6.4.2', 'VBDP.6.4');
+select pxp.f_insert_testructura_gui ('VBDP.6.4.3', 'VBDP.6.4');
+select pxp.f_insert_testructura_gui ('VBDP.6.4.4', 'VBDP.6.4');
+select pxp.f_insert_testructura_gui ('VBDP.6.4.5', 'VBDP.6.4');
+select pxp.f_insert_testructura_gui ('VBDP.6.4.5.1', 'VBDP.6.4.5');
+select pxp.f_insert_testructura_gui ('VBDP.6.4.5.2', 'VBDP.6.4.5');
+select pxp.f_insert_testructura_gui ('VBDP.6.5.1', 'VBDP.6.5');
+select pxp.f_insert_testructura_gui ('VBDP.6.5.2', 'VBDP.6.5');
+select pxp.f_insert_testructura_gui ('VBDP.6.7.1', 'VBDP.6.7');
+select pxp.f_insert_testructura_gui ('VBDP.6.7.2', 'VBDP.6.7');
+select pxp.f_insert_testructura_gui ('VBDP.6.7.3', 'VBDP.6.7');
+select pxp.f_insert_testructura_gui ('VBDP.6.7.2.1', 'VBDP.6.7.2');
+select pxp.f_insert_testructura_gui ('VBDP.6.7.3.1', 'VBDP.6.7.3');
+select pxp.f_insert_testructura_gui ('VBDP.6.7.3.1.1', 'VBDP.6.7.3.1');
+select pxp.f_insert_testructura_gui ('REPOP', 'TES');
+select pxp.f_insert_testructura_gui ('REPPAGCON', 'REPOP');
+select pxp.f_insert_testructura_gui ('REPPAGCON.1', 'REPPAGCON');
+select pxp.f_insert_testructura_gui ('OPCONTA', 'TES');
+select pxp.f_insert_testructura_gui ('CONOP', 'TES');
+select pxp.f_insert_tprocedimiento_gui ('PM_CONIGPAR_SEL', 'OBPG.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_TIPO_SEL', 'OBPG.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CONIGPAR_SEL', 'OBPG.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('OR_OFCU_SEL', 'OBPG.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_SEL', 'OBPG.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_ARB_SEL', 'OBPG.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_TIPOEJE_UPD', 'OBPG.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_GES_SEL', 'OBPG.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PER_SEL', 'OBPG.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CONIGPAR_SEL', 'SOLPD.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_TIPO_SEL', 'SOLPD.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CONIGPAR_SEL', 'SOLPD.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('OR_OFCU_SEL', 'SOLPD.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_SEL', 'SOLPD.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_ARB_SEL', 'SOLPD.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_TIPOEJE_UPD', 'SOLPD.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_GES_SEL', 'SOLPD.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PER_SEL', 'SOLPD.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_GATNREP_SEL', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_IDSEXT_GET', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COTOC_REP', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_CTD_SEL', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COTREP_SEL', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_SOLREP_SEL', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_SOLD_SEL', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_SOLDETCOT_SEL', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_VERPRE_IME', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_PROCPED_SEL', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COT_SEL', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COTPROC_SEL', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COTRPC_SEL', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PLT_SEL', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_CTABAN_SEL', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_INS', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAPA_INS', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PPANTPAR_INS', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_MOD', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_ELI', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_SEL', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_SINPRE_IME', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_ANTEPP_IME', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_SIGEPP_IME', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAREP_SEL', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_SEL', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_MOD', 'REVBPP.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_SEL', 'REVBPP.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_DOCSOL_SEL', 'REVBPP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_DOCSOLAR_SEL', 'REVBPP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_DOCSOL_INS', 'REVBPP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_DOCSOL_MOD', 'REVBPP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_DOCSOL_ELI', 'REVBPP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEEV_SEL', 'REVBPP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_DOCSOLAR_MOD', 'REVBPP.2.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_SERVIC_SEL', 'REVBPP.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SAL_ITEMNOTBASE_SEL', 'REVBPP.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_SEL', 'REVBPP.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_ARB_SEL', 'REVBPP.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEE_INS', 'REVBPP.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEE_MOD', 'REVBPP.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEE_ELI', 'REVBPP.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEE_SEL', 'REVBPP.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEEV_SEL', 'REVBPP.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_SEL', 'REVBPP.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSONMIN_SEL', 'REVBPP.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_SEL', 'REVBPP.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SAL_ITEM_SEL', 'REVBPP.2.2.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SAL_ITEMNOTBASE_SEL', 'REVBPP.2.2.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SAL_ITMALM_SEL', 'REVBPP.2.2.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_SERVIC_SEL', 'REVBPP.2.2.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PRITSE_INS', 'REVBPP.2.2.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PRITSE_MOD', 'REVBPP.2.2.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PRITSE_ELI', 'REVBPP.2.2.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PRITSE_SEL', 'REVBPP.2.2.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_INS', 'REVBPP.2.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_MOD', 'REVBPP.2.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_ELI', 'REVBPP.2.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSONMIN_SEL', 'REVBPP.2.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_UPFOTOPER_MOD', 'REVBPP.2.2.2.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_INS', 'REVBPP.2.2.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_MOD', 'REVBPP.2.2.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_ELI', 'REVBPP.2.2.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_SEL', 'REVBPP.2.2.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_SEL', 'REVBPP.2.2.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSONMIN_SEL', 'REVBPP.2.2.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_INS', 'REVBPP.2.2.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_MOD', 'REVBPP.2.2.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_ELI', 'REVBPP.2.2.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSONMIN_SEL', 'REVBPP.2.2.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_UPFOTOPER_MOD', 'REVBPP.2.2.3.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'REVBPP.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'REVBPP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_VERSIGPRO_IME', 'REVBPP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CHKSTA_IME', 'REVBPP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'REVBPP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_FUNTIPES_SEL', 'REVBPP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DEPTIPES_SEL', 'REVBPP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_MOD', 'REVBPP.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_ELI', 'REVBPP.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_SEL', 'REVBPP.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CABMOM_IME', 'REVBPP.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'REVBPP.5.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPPROC_SEL', 'REVBPP.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'REVBPP.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_INS', 'REVBPP.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_MOD', 'REVBPP.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_ELI', 'REVBPP.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_SEL', 'REVBPP.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_ANTEOB_IME', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_GATNREP_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PLT_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPG_INS', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPG_MOD', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPG_ELI', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPG_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPGSOL_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPGSEL_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAOB_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_OBTTCB_GET', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_FINREG_IME', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_IDSEXT_GET', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COTOC_REP', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_CTD_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COTREP_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_SOLREP_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_SOLD_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_SOLDETCOT_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_VERPRE_IME', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_PROCPED_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COT_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COTPROC_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COTRPC_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_DEPUSUCOMB_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('RH_FUNCIOCAR_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_MONEDA_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEEV_SEL', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CCFILDEP_SEL', 'VBOP.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CONIGPAR_SEL', 'VBOP.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_CTA_SEL', 'VBOP.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_CTA_ARB_SEL', 'VBOP.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_PAR_SEL', 'VBOP.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_PAR_ARB_SEL', 'VBOP.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_AUXCTA_SEL', 'VBOP.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBDET_INS', 'VBOP.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBDET_MOD', 'VBOP.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBDET_ELI', 'VBOP.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBDET_SEL', 'VBOP.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CEC_SEL', 'VBOP.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CECCOM_SEL', 'VBOP.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CECCOMFU_SEL', 'VBOP.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_TIPO_SEL', 'VBOP.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CONIGPAR_SEL', 'VBOP.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('OR_OFCU_SEL', 'VBOP.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_SEL', 'VBOP.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_ARB_SEL', 'VBOP.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_TIPOEJE_UPD', 'VBOP.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_GES_SEL', 'VBOP.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PER_SEL', 'VBOP.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAREP_SEL', 'VBOP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_SEL', 'VBOP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PAFPP_IME', 'VBOP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_GETDEC_IME', 'VBOP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PLT_SEL', 'VBOP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_CTABAN_SEL', 'VBOP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'VBOP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_INS', 'VBOP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAPA_INS', 'VBOP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PPANTPAR_INS', 'VBOP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_MOD', 'VBOP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_ELI', 'VBOP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_SEL', 'VBOP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_SINPRE_IME', 'VBOP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_ANTEPP_IME', 'VBOP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_SIGEPP_IME', 'VBOP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_VERPRE_SEL', 'VBOP.2.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_MOD', 'VBOP.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_SEL', 'VBOP.2.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'VBOP.2.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'VBOP.2.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_VERSIGPRO_IME', 'VBOP.2.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CHKSTA_IME', 'VBOP.2.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'VBOP.2.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_FUNTIPES_SEL', 'VBOP.2.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DEPTIPES_SEL', 'VBOP.2.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_MOD', 'VBOP.2.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_ELI', 'VBOP.2.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_SEL', 'VBOP.2.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CABMOM_IME', 'VBOP.2.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'VBOP.2.5.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPPROC_SEL', 'VBOP.2.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'VBOP.2.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_INS', 'VBOP.2.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_MOD', 'VBOP.2.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_ELI', 'VBOP.2.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_SEL', 'VBOP.2.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPGSEL_SEL', 'VBOP.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPG_SEL', 'VBOP.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPGSOL_SEL', 'VBOP.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_COMEJEPAG_SEL', 'VBOP.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_MONEDA_SEL', 'VBOP.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PAFPP_IME', 'VBOP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_GETDEC_IME', 'VBOP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PLT_SEL', 'VBOP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_CTABAN_SEL', 'VBOP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'VBOP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_INS', 'VBOP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAPA_INS', 'VBOP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PPANTPAR_INS', 'VBOP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_MOD', 'VBOP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_ELI', 'VBOP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_SEL', 'VBOP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_SINPRE_IME', 'VBOP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_ANTEPP_IME', 'VBOP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_SIGEPP_IME', 'VBOP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAREP_SEL', 'VBOP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_SEL', 'VBOP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_VERPRE_SEL', 'VBOP.4.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_MOD', 'VBOP.4.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_SEL', 'VBOP.4.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'VBOP.4.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'VBOP.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_VERSIGPRO_IME', 'VBOP.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CHKSTA_IME', 'VBOP.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'VBOP.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_FUNTIPES_SEL', 'VBOP.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DEPTIPES_SEL', 'VBOP.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_MOD', 'VBOP.4.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_ELI', 'VBOP.4.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_SEL', 'VBOP.4.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CABMOM_IME', 'VBOP.4.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'VBOP.4.5.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPPROC_SEL', 'VBOP.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'VBOP.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_INS', 'VBOP.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_MOD', 'VBOP.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_ELI', 'VBOP.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_SEL', 'VBOP.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_MOD', 'VBOP.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_ELI', 'VBOP.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_SEL', 'VBOP.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CABMOM_IME', 'VBOP.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'VBOP.5.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPPROC_SEL', 'VBOP.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'VBOP.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_INS', 'VBOP.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_MOD', 'VBOP.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_ELI', 'VBOP.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_SEL', 'VBOP.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_VERPRE_SEL', 'VBOP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_SERVIC_SEL', 'VBOP.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SAL_ITEMNOTBASE_SEL', 'VBOP.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_SEL', 'VBOP.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_ARB_SEL', 'VBOP.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEE_INS', 'VBOP.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEE_MOD', 'VBOP.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEE_ELI', 'VBOP.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEE_SEL', 'VBOP.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEEV_SEL', 'VBOP.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_SEL', 'VBOP.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSONMIN_SEL', 'VBOP.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_SEL', 'VBOP.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SAL_ITEM_SEL', 'VBOP.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SAL_ITEMNOTBASE_SEL', 'VBOP.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SAL_ITMALM_SEL', 'VBOP.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_SERVIC_SEL', 'VBOP.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PRITSE_INS', 'VBOP.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PRITSE_MOD', 'VBOP.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PRITSE_ELI', 'VBOP.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PRITSE_SEL', 'VBOP.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_INS', 'VBOP.7.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_MOD', 'VBOP.7.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_ELI', 'VBOP.7.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSONMIN_SEL', 'VBOP.7.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_UPFOTOPER_MOD', 'VBOP.7.2.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_INS', 'VBOP.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_MOD', 'VBOP.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_ELI', 'VBOP.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_SEL', 'VBOP.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_SEL', 'VBOP.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSONMIN_SEL', 'VBOP.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_INS', 'VBOP.7.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_MOD', 'VBOP.7.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_ELI', 'VBOP.7.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSONMIN_SEL', 'VBOP.7.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_UPFOTOPER_MOD', 'VBOP.7.3.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_REVPP_IME', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_TIPO_INS', 'TIPPRO', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_TIPO_MOD', 'TIPPRO', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_TIPO_ELI', 'TIPPRO', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_TIPO_SEL', 'TIPPRO', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_GENCONF_IME', 'OBPG.8', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_GENCONF_IME', 'OBPG.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_GENCONF_IME', 'VBDP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_GENCONF_IME', 'SOLPD.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_GENCONF_IME', 'SOLPD.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_GENCONF_IME', 'REVBPP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_GENCONF_IME', 'VBOP.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_GENCONF_IME', 'VBOP.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_GATNREP_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PLT_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPG_INS', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPG_MOD', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPG_ELI', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPG_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPGSOL_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPGSEL_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAOB_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_OBTTCB_GET', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_FINREG_IME', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_ANTEOB_IME', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_IDSEXT_GET', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COTOC_REP', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_CTD_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COTREP_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_SOLREP_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_SOLD_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_SOLDETCOT_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_VERPRE_IME', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_PROCPED_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COT_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COTPROC_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('ADQ_COTRPC_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_DEPUSUCOMB_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('RH_FUNCIOCAR_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_MONEDA_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEEV_SEL', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBDETAPRO_MOD', 'VBDP.6.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CCFILDEP_SEL', 'VBDP.6.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CONIGPAR_SEL', 'VBDP.6.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_CTA_SEL', 'VBDP.6.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_CTA_ARB_SEL', 'VBDP.6.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_PAR_SEL', 'VBDP.6.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_PAR_ARB_SEL', 'VBDP.6.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_AUXCTA_SEL', 'VBDP.6.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBDET_INS', 'VBDP.6.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBDET_MOD', 'VBDP.6.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBDET_ELI', 'VBDP.6.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBDET_SEL', 'VBDP.6.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CEC_SEL', 'VBDP.6.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CECCOM_SEL', 'VBDP.6.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CECCOMFU_SEL', 'VBDP.6.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_TIPO_SEL', 'VBDP.6.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CONIGPAR_SEL', 'VBDP.6.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('OR_OFCU_SEL', 'VBDP.6.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_SEL', 'VBDP.6.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_ARB_SEL', 'VBDP.6.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_TIPOEJE_UPD', 'VBDP.6.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_GES_SEL', 'VBDP.6.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PER_SEL', 'VBDP.6.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPGSEL_SEL', 'VBDP.6.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPG_SEL', 'VBDP.6.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBPGSOL_SEL', 'VBDP.6.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_COMEJEPAG_SEL', 'VBDP.6.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_MONEDA_SEL', 'VBDP.6.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CCFILDEP_SEL', 'VBDP.6.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CONIGPAR_SEL', 'VBDP.6.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_CTA_SEL', 'VBDP.6.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_CTA_ARB_SEL', 'VBDP.6.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_PAR_SEL', 'VBDP.6.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_PAR_ARB_SEL', 'VBDP.6.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_AUXCTA_SEL', 'VBDP.6.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBDET_INS', 'VBDP.6.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBDET_MOD', 'VBDP.6.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBDET_ELI', 'VBDP.6.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBDET_SEL', 'VBDP.6.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CEC_SEL', 'VBDP.6.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CECCOM_SEL', 'VBDP.6.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CECCOMFU_SEL', 'VBDP.6.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_TIPO_SEL', 'VBDP.6.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CONIGPAR_SEL', 'VBDP.6.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('OR_OFCU_SEL', 'VBDP.6.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_SEL', 'VBDP.6.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_ARB_SEL', 'VBDP.6.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_TIPOEJE_UPD', 'VBDP.6.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_GES_SEL', 'VBDP.6.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PER_SEL', 'VBDP.6.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PAFPP_IME', 'VBDP.6.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_GETDEC_IME', 'VBDP.6.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PLT_SEL', 'VBDP.6.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_CTABAN_SEL', 'VBDP.6.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'VBDP.6.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_INS', 'VBDP.6.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAPA_INS', 'VBDP.6.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PPANTPAR_INS', 'VBDP.6.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_MOD', 'VBDP.6.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_ELI', 'VBDP.6.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_SEL', 'VBDP.6.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_SINPRE_IME', 'VBDP.6.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_ANTEPP_IME', 'VBDP.6.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_SIGEPP_IME', 'VBDP.6.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAREP_SEL', 'VBDP.6.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_SEL', 'VBDP.6.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_GENCONF_IME', 'VBDP.6.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_VERPRE_SEL', 'VBDP.6.4.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_MOD', 'VBDP.6.4.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PRO_SEL', 'VBDP.6.4.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'VBDP.6.4.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'VBDP.6.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_VERSIGPRO_IME', 'VBDP.6.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CHKSTA_IME', 'VBDP.6.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'VBDP.6.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_FUNTIPES_SEL', 'VBDP.6.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DEPTIPES_SEL', 'VBDP.6.4.4', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_MOD', 'VBDP.6.4.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_ELI', 'VBDP.6.4.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_SEL', 'VBDP.6.4.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CABMOM_IME', 'VBDP.6.4.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'VBDP.6.4.5.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPPROC_SEL', 'VBDP.6.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'VBDP.6.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_INS', 'VBDP.6.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_MOD', 'VBDP.6.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_ELI', 'VBDP.6.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_SEL', 'VBDP.6.4.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_MOD', 'VBDP.6.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_ELI', 'VBDP.6.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DWF_SEL', 'VBDP.6.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_CABMOM_IME', 'VBDP.6.5', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'VBDP.6.5.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPPROC_SEL', 'VBDP.6.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'VBDP.6.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_INS', 'VBDP.6.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_MOD', 'VBDP.6.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_ELI', 'VBDP.6.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('WF_DES_SEL', 'VBDP.6.5.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PRE_VERPRE_SEL', 'VBDP.6.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_SERVIC_SEL', 'VBDP.6.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SAL_ITEMNOTBASE_SEL', 'VBDP.6.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_SEL', 'VBDP.6.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_LUG_ARB_SEL', 'VBDP.6.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEE_INS', 'VBDP.6.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEE_MOD', 'VBDP.6.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEE_ELI', 'VBDP.6.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEE_SEL', 'VBDP.6.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PROVEEV_SEL', 'VBDP.6.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_SEL', 'VBDP.6.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSONMIN_SEL', 'VBDP.6.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_SEL', 'VBDP.6.7', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SAL_ITEM_SEL', 'VBDP.6.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SAL_ITEMNOTBASE_SEL', 'VBDP.6.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SAL_ITMALM_SEL', 'VBDP.6.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_SERVIC_SEL', 'VBDP.6.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PRITSE_INS', 'VBDP.6.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PRITSE_MOD', 'VBDP.6.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PRITSE_ELI', 'VBDP.6.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_PRITSE_SEL', 'VBDP.6.7.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_INS', 'VBDP.6.7.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_MOD', 'VBDP.6.7.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_ELI', 'VBDP.6.7.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSONMIN_SEL', 'VBDP.6.7.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_UPFOTOPER_MOD', 'VBDP.6.7.2.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_INS', 'VBDP.6.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_MOD', 'VBDP.6.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_ELI', 'VBDP.6.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_INSTIT_SEL', 'VBDP.6.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_SEL', 'VBDP.6.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSONMIN_SEL', 'VBDP.6.7.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_INS', 'VBDP.6.7.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_MOD', 'VBDP.6.7.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSON_ELI', 'VBDP.6.7.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_PERSONMIN_SEL', 'VBDP.6.7.3.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('SEG_UPFOTOPER_MOD', 'VBDP.6.7.3.1.1', 'no');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_ODT_SEL', 'SOLPD.1', 'si');
+select pxp.f_insert_tprocedimiento_gui ('CONTA_ODT_SEL', 'OBPG', 'si');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBLAJUS_IME', 'OBPG', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBLAJUS_IME', 'VBDP.6', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBLAJUS_IME', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_OBLAJUS_IME', 'VBOP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_CONIGPAR_SEL', 'REPPAGCON', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_GES_SEL', 'REPPAGCON', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PAXCIG_SEL', 'REPPAGCON.1', 'no');
+select pxp.f_insert_tgui_rol ('VBDP', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('TES', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('SISTEMA', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.4', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.5', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.1', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.2', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.2.1', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.2.2', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.2.2.1', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.2.2.2', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.2.2.2.1', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.2.2.3', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.2.2.3.1', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.2.2.3.1.1', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.3', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.3.1', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.3.2', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('APFAENDE', 'OP -VoBo Fondos en Avance');
+select pxp.f_insert_tgui_rol ('TES', 'OP -VoBo Fondos en Avance');
+select pxp.f_insert_tgui_rol ('SISTEMA', 'OP -VoBo Fondos en Avance');
+select pxp.f_insert_tgui_rol ('REVBPP', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('TES', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('SISTEMA', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('REVBPP.5', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('REVBPP.5.2', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('REVBPP.5.1', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('REVBPP.4', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('REVBPP.3', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('REVBPP.2', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('REVBPP.2.2', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('REVBPP.2.2.3', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('REVBPP.2.2.3.1', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('REVBPP.2.2.3.1.1', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('REVBPP.2.2.2', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('REVBPP.2.2.2.1', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('REVBPP.2.2.1', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('REVBPP.2.1', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('REVBPP.1', 'OP - VoBo Ppagos (Asistentes)');
+select pxp.f_insert_tgui_rol ('VBDP.1', 'OP - Plan de Pagos Consulta');
+select pxp.f_insert_tgui_rol ('VBDP', 'OP - Plan de Pagos Consulta');
+select pxp.f_insert_tgui_rol ('TES', 'OP - Plan de Pagos Consulta');
+select pxp.f_insert_tgui_rol ('SISTEMA', 'OP - Plan de Pagos Consulta');
+select pxp.f_insert_tgui_rol ('VBDP.2.2.1', 'OP - Plan de Pagos Consulta');
+select pxp.f_insert_tgui_rol ('VBDP.2.2', 'OP - Plan de Pagos Consulta');
+select pxp.f_insert_tgui_rol ('VBDP.2', 'OP - Plan de Pagos Consulta');
+select pxp.f_insert_tgui_rol ('VBDP.2.2.2', 'OP - Plan de Pagos Consulta');
+select pxp.f_insert_tgui_rol ('VBDP.2.2.3.1', 'OP - Plan de Pagos Consulta');
+select pxp.f_insert_tgui_rol ('VBDP.2.2.3', 'OP - Plan de Pagos Consulta');
+select pxp.f_insert_tgui_rol ('VBDP.3.2', 'OP - Plan de Pagos Consulta');
+select pxp.f_insert_tgui_rol ('VBDP.3', 'OP - Plan de Pagos Consulta');
+select pxp.f_insert_tgui_rol ('OBPG.1.1', 'OP - Obligaciones de PAgo');
+select pxp.f_insert_tgui_rol ('SOLPD.1.1', 'OP - Solicitudes de Pago Directas');
+select pxp.f_insert_tgui_rol ('VBDP.5', 'OP - VoBo Plan de Pagos');
+select pxp.f_insert_tgui_rol ('VBDP.4', 'OP - VoBo Plan de Pagos');
+select pxp.f_insert_tgui_rol ('VBDP.6', 'OP - VoBo Pago Contabilidad');
+select pxp.f_delete_tgui_rol ('VBDP.6.7', 'OP - VoBo Pago Contabilidad');
+select pxp.f_delete_tgui_rol ('VBDP.6.7.3', 'OP - VoBo Pago Contabilidad');
+select pxp.f_delete_tgui_rol ('VBDP.6.7.3.1', 'OP - VoBo Pago Contabilidad');
+select pxp.f_delete_tgui_rol ('VBDP.6.7.3.1.1', 'OP - VoBo Pago Contabilidad');
+select pxp.f_delete_tgui_rol ('VBDP.6.7.2', 'OP - VoBo Pago Contabilidad');
+select pxp.f_delete_tgui_rol ('VBDP.6.7.2.1', 'OP - VoBo Pago Contabilidad');
+select pxp.f_delete_tgui_rol ('VBDP.6.7.1', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.6.6', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.6.5', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.6.5.2', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.6.5.1', 'OP - VoBo Pago Contabilidad');
+select pxp.f_delete_tgui_rol ('VBDP.6.4', 'OP - VoBo Pago Contabilidad');
+select pxp.f_delete_tgui_rol ('VBDP.6.4.5', 'OP - VoBo Pago Contabilidad');
+select pxp.f_delete_tgui_rol ('VBDP.6.4.5.2', 'OP - VoBo Pago Contabilidad');
+select pxp.f_delete_tgui_rol ('VBDP.6.4.5.1', 'OP - VoBo Pago Contabilidad');
+select pxp.f_delete_tgui_rol ('VBDP.6.4.4', 'OP - VoBo Pago Contabilidad');
+select pxp.f_delete_tgui_rol ('VBDP.6.4.3', 'OP - VoBo Pago Contabilidad');
+select pxp.f_delete_tgui_rol ('VBDP.6.4.2', 'OP - VoBo Pago Contabilidad');
+select pxp.f_delete_tgui_rol ('VBDP.6.4.1', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.6.3', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.6.3.1', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.6.2', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.6.1', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('VBDP.6.1.1', 'OP - VoBo Pago Contabilidad');
+select pxp.f_insert_tgui_rol ('REPPAGCON', 'OP - Reporte Pagos X Concepto');
+select pxp.f_insert_tgui_rol ('REPOP', 'OP - Reporte Pagos X Concepto');
+select pxp.f_insert_tgui_rol ('TES', 'OP - Reporte Pagos X Concepto');
+select pxp.f_insert_tgui_rol ('SISTEMA', 'OP - Reporte Pagos X Concepto');
+select pxp.f_insert_tgui_rol ('REPPAGCON.1', 'OP - Reporte Pagos X Concepto');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_DWF_MOD', 'VBDP.3');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_DWF_ELI', 'VBDP.3');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Obligaciones de PAgo', 'WF_DWF_MOD', 'OBPG.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Obligaciones de PAgo', 'WF_DWF_ELI', 'OBPG.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'PM_PLT_SEL', 'OBPG');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DWF_MOD', 'OBPG.3.3');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_CABMOM_IME', 'OBPG.3.3');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_TIPES_SEL', 'OBPG.3.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_TIPPROC_SEL', 'OBPG.3.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_INS', 'OBPG.3.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_MOD', 'OBPG.3.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_ELI', 'OBPG.3.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_SEL', 'OBPG.3.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DWF_MOD', 'OBPG.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_CABMOM_IME', 'OBPG.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_TIPES_SEL', 'OBPG.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_TIPPROC_SEL', 'OBPG.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_INS', 'OBPG.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_MOD', 'OBPG.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_ELI', 'OBPG.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_SEL', 'OBPG.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DOCWFAR_MOD', 'OBPG.4.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'SEG_UPFOTOPER_MOD', 'OBPG.6.3.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'SEG_UPFOTOPER_MOD', 'OBPG.7.2.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'SEG_PERSONMIN_SEL', 'OBPG.7.1.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'SEG_PERSON_ELI', 'OBPG.7.1.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'SEG_PERSON_MOD', 'OBPG.7.1.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'SEG_PERSON_INS', 'OBPG.7.1.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'SEG_UPFOTOPER_MOD', 'OBPG.7.1.1.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_SEL', 'OBPG.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_DES_INS', 'VBDP.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_DES_MOD', 'VBDP.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_DES_ELI', 'VBDP.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_SEL', 'OBPG.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_SEL', 'OBPG.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_PPANTPAR_INS', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'MIG_CBANESIS_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_TIPES_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_FUNTIPES_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_SINPRE_IME', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_SIGEPP_IME', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_ANTEPP_IME', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_PLAPAREP_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_PRO_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_GATNREP_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_OBEPUO_IME', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_DEPFILEPUO_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_SOLDEVPAG_IME', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_IDSEXT_GET', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'ADQ_COTOC_REP', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'ADQ_CTD_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'ADQ_COTREP_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'ADQ_SOLREP_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'ADQ_SOLD_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'ADQ_SOLDETCOT_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PRE_VERPRE_IME', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'ADQ_PROCPED_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'ADQ_COT_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'ADQ_COTPROC_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'ADQ_COTRPC_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_PLT_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_CTABAN_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_PLAPAPA_INS', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_PLAPA_INS', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_PLAPA_MOD', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_PLAPA_ELI', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_PLAPA_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'CONTA_GETDEC_IME', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_DOCWFAR_MOD', 'VBDP.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_DOCWFAR_MOD', 'VBDP.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_VERSIGPRO_IME', 'VBDP.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_CHKSTA_IME', 'VBDP.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_TIPES_SEL', 'VBDP.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_FUNTIPES_SEL', 'VBDP.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_DEPTIPES_SEL', 'VBDP.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_PRO_MOD', 'VBDP.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_PRO_SEL', 'VBDP.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'ADQ_DOCSOL_SEL', 'VBDP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'ADQ_DOCSOLAR_SEL', 'VBDP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'ADQ_DOCSOL_INS', 'VBDP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'ADQ_DOCSOL_MOD', 'VBDP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'ADQ_DOCSOL_ELI', 'VBDP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_PROVEEV_SEL', 'VBDP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'ADQ_DOCSOLAR_MOD', 'VBDP.2.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_SERVIC_SEL', 'VBDP.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SAL_ITEMNOTBASE_SEL', 'VBDP.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_LUG_SEL', 'VBDP.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_LUG_ARB_SEL', 'VBDP.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_PROVEE_INS', 'VBDP.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_PROVEE_MOD', 'VBDP.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_PROVEE_ELI', 'VBDP.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_PROVEE_SEL', 'VBDP.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_PROVEEV_SEL', 'VBDP.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SEG_PERSON_SEL', 'VBDP.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SEG_PERSONMIN_SEL', 'VBDP.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_INSTIT_SEL', 'VBDP.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SAL_ITEM_SEL', 'VBDP.2.2.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SAL_ITEMNOTBASE_SEL', 'VBDP.2.2.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SAL_ITMALM_SEL', 'VBDP.2.2.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_SERVIC_SEL', 'VBDP.2.2.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_PRITSE_INS', 'VBDP.2.2.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_PRITSE_MOD', 'VBDP.2.2.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_PRITSE_ELI', 'VBDP.2.2.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_PRITSE_SEL', 'VBDP.2.2.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SEG_PERSON_INS', 'VBDP.2.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SEG_PERSON_MOD', 'VBDP.2.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SEG_PERSON_ELI', 'VBDP.2.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SEG_PERSONMIN_SEL', 'VBDP.2.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SEG_UPFOTOPER_MOD', 'VBDP.2.2.2.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_INSTIT_INS', 'VBDP.2.2.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_INSTIT_MOD', 'VBDP.2.2.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_INSTIT_ELI', 'VBDP.2.2.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'PM_INSTIT_SEL', 'VBDP.2.2.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SEG_PERSON_SEL', 'VBDP.2.2.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SEG_PERSONMIN_SEL', 'VBDP.2.2.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SEG_PERSON_INS', 'VBDP.2.2.3.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SEG_PERSON_MOD', 'VBDP.2.2.3.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SEG_PERSON_ELI', 'VBDP.2.2.3.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SEG_PERSONMIN_SEL', 'VBDP.2.2.3.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'SEG_UPFOTOPER_MOD', 'VBDP.2.2.3.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_DWF_MOD', 'VBDP.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_DWF_ELI', 'VBDP.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_DWF_SEL', 'VBDP.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_CABMOM_IME', 'VBDP.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_DOCWFAR_MOD', 'VBDP.3.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_TIPPROC_SEL', 'VBDP.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_TIPES_SEL', 'VBDP.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_DES_INS', 'VBDP.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_DES_MOD', 'VBDP.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_DES_ELI', 'VBDP.3.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_DES_SEL', 'VBDP.3.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PPANTPAR_INS', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'MIG_CBANESIS_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_TIPES_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_FUNTIPES_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_SINPRE_IME', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_SIGEPP_IME', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_ANTEPP_IME', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PLAPAREP_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PRO_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_GATNREP_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBEPUO_IME', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_DEPFILEPUO_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_SOLDEVPAG_IME', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_IDSEXT_GET', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_COTOC_REP', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_CTD_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_COTREP_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_SOLREP_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_SOLD_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_SOLDETCOT_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PRE_VERPRE_IME', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_PROCPED_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_COT_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_COTPROC_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_COTRPC_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PLT_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_CTABAN_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PLAPAPA_INS', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PLAPA_INS', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PLAPA_MOD', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PLAPA_ELI', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PLAPA_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'CONTA_GETDEC_IME', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DOCWFAR_MOD', 'VBDP.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DOCWFAR_MOD', 'VBDP.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_VERSIGPRO_IME', 'VBDP.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_CHKSTA_IME', 'VBDP.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_TIPES_SEL', 'VBDP.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_FUNTIPES_SEL', 'VBDP.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DEPTIPES_SEL', 'VBDP.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PRO_MOD', 'VBDP.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PRO_SEL', 'VBDP.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_DOCSOL_SEL', 'VBDP.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_DOCSOLAR_SEL', 'VBDP.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_DOCSOL_INS', 'VBDP.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_DOCSOL_MOD', 'VBDP.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_DOCSOL_ELI', 'VBDP.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PROVEEV_SEL', 'VBDP.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_DOCSOLAR_MOD', 'VBDP.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_SERVIC_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SAL_ITEMNOTBASE_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_LUG_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_LUG_ARB_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PROVEE_INS', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PROVEE_MOD', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PROVEE_ELI', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PROVEE_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PROVEEV_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSON_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSONMIN_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_INSTIT_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SAL_ITEM_SEL', 'VBDP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SAL_ITEMNOTBASE_SEL', 'VBDP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SAL_ITMALM_SEL', 'VBDP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_SERVIC_SEL', 'VBDP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PRITSE_INS', 'VBDP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PRITSE_MOD', 'VBDP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PRITSE_ELI', 'VBDP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PRITSE_SEL', 'VBDP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSON_INS', 'VBDP.2.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSON_MOD', 'VBDP.2.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSON_ELI', 'VBDP.2.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSONMIN_SEL', 'VBDP.2.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_UPFOTOPER_MOD', 'VBDP.2.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_INSTIT_INS', 'VBDP.2.2.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_INSTIT_MOD', 'VBDP.2.2.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_INSTIT_ELI', 'VBDP.2.2.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_INSTIT_SEL', 'VBDP.2.2.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSON_SEL', 'VBDP.2.2.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSONMIN_SEL', 'VBDP.2.2.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSON_INS', 'VBDP.2.2.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSON_MOD', 'VBDP.2.2.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSON_ELI', 'VBDP.2.2.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSONMIN_SEL', 'VBDP.2.2.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_UPFOTOPER_MOD', 'VBDP.2.2.3.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DWF_MOD', 'VBDP.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DWF_ELI', 'VBDP.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DWF_SEL', 'VBDP.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_CABMOM_IME', 'VBDP.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DOCWFAR_MOD', 'VBDP.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_TIPPROC_SEL', 'VBDP.3.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_TIPES_SEL', 'VBDP.3.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DES_INS', 'VBDP.3.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DES_MOD', 'VBDP.3.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DES_ELI', 'VBDP.3.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DES_SEL', 'VBDP.3.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_DEPFILUSU_SEL', 'SOLPD');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_GATNREP_SEL', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_IDSEXT_GET', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'ADQ_COTOC_REP', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'ADQ_CTD_SEL', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'ADQ_COTREP_SEL', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'ADQ_SOLREP_SEL', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'ADQ_SOLD_SEL', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'ADQ_SOLDETCOT_SEL', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PRE_VERPRE_IME', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'ADQ_PROCPED_SEL', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'ADQ_COT_SEL', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'ADQ_COTPROC_SEL', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'ADQ_COTRPC_SEL', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_PLT_SEL', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_CTABAN_SEL', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'MIG_CBANESIS_SEL', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_PLAPA_INS', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_PLAPAPA_INS', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_PPANTPAR_INS', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_PLAPA_MOD', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_PLAPA_ELI', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_PLAPA_SEL', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_SINPRE_IME', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_ANTEPP_IME', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_SIGEPP_IME', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_PLAPAREP_SEL', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_PRO_SEL', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_DWF_MOD', 'REVBPP.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_DWF_ELI', 'REVBPP.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_DWF_SEL', 'REVBPP.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_CABMOM_IME', 'REVBPP.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_TIPPROC_SEL', 'REVBPP.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_TIPES_SEL', 'REVBPP.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_DES_INS', 'REVBPP.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_DES_MOD', 'REVBPP.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_DES_ELI', 'REVBPP.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_DES_SEL', 'REVBPP.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_DOCWFAR_MOD', 'REVBPP.5.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_DOCWFAR_MOD', 'REVBPP.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_VERSIGPRO_IME', 'REVBPP.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_CHKSTA_IME', 'REVBPP.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_TIPES_SEL', 'REVBPP.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_FUNTIPES_SEL', 'REVBPP.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_DEPTIPES_SEL', 'REVBPP.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'WF_DOCWFAR_MOD', 'REVBPP.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_PROVEEV_SEL', 'REVBPP.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'ADQ_DOCSOL_SEL', 'REVBPP.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'ADQ_DOCSOLAR_SEL', 'REVBPP.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'ADQ_DOCSOL_INS', 'REVBPP.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'ADQ_DOCSOL_MOD', 'REVBPP.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'ADQ_DOCSOL_ELI', 'REVBPP.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_SERVIC_SEL', 'REVBPP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SAL_ITEMNOTBASE_SEL', 'REVBPP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_LUG_SEL', 'REVBPP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_LUG_ARB_SEL', 'REVBPP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_PROVEE_INS', 'REVBPP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_PROVEE_MOD', 'REVBPP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_PROVEE_ELI', 'REVBPP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_PROVEE_SEL', 'REVBPP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_PROVEEV_SEL', 'REVBPP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SEG_PERSON_SEL', 'REVBPP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SEG_PERSONMIN_SEL', 'REVBPP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_INSTIT_SEL', 'REVBPP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_INSTIT_INS', 'REVBPP.2.2.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_INSTIT_MOD', 'REVBPP.2.2.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_INSTIT_ELI', 'REVBPP.2.2.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_INSTIT_SEL', 'REVBPP.2.2.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SEG_PERSON_SEL', 'REVBPP.2.2.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SEG_PERSONMIN_SEL', 'REVBPP.2.2.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SEG_PERSON_INS', 'REVBPP.2.2.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SEG_PERSON_MOD', 'REVBPP.2.2.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SEG_PERSON_ELI', 'REVBPP.2.2.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SEG_PERSONMIN_SEL', 'REVBPP.2.2.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SEG_UPFOTOPER_MOD', 'REVBPP.2.2.3.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SEG_PERSON_INS', 'REVBPP.2.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SEG_PERSON_MOD', 'REVBPP.2.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SEG_PERSON_ELI', 'REVBPP.2.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SEG_PERSONMIN_SEL', 'REVBPP.2.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SEG_UPFOTOPER_MOD', 'REVBPP.2.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SAL_ITEM_SEL', 'REVBPP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SAL_ITEMNOTBASE_SEL', 'REVBPP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'SAL_ITMALM_SEL', 'REVBPP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_SERVIC_SEL', 'REVBPP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_PRITSE_INS', 'REVBPP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_PRITSE_MOD', 'REVBPP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_PRITSE_ELI', 'REVBPP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_PRITSE_SEL', 'REVBPP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'ADQ_DOCSOLAR_MOD', 'REVBPP.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_PRO_MOD', 'REVBPP.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_PRO_SEL', 'REVBPP.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'ADQ_COTREP_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'ADQ_SOLREP_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'ADQ_SOLD_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'ADQ_SOLDETCOT_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PRE_VERPRE_IME', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'ADQ_PROCPED_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'ADQ_COT_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'ADQ_COTPROC_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'ADQ_COTRPC_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_DEPUSUCOMB_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'RH_FUNCIOCAR_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_MONEDA_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_PROVEEV_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_ANTEOB_IME', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_GATNREP_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_PLT_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_OBPG_INS', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_OBPG_MOD', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_OBPG_ELI', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_OBPG_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_OBPGSOL_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_OBPGSEL_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PLAPAOB_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_OBTTCB_GET', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_FINREG_IME', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_IDSEXT_GET', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'ADQ_COTOC_REP', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'ADQ_CTD_SEL', 'VBOP');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_SERVIC_SEL', 'VBOP.7');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SAL_ITEMNOTBASE_SEL', 'VBOP.7');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_LUG_SEL', 'VBOP.7');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_LUG_ARB_SEL', 'VBOP.7');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_PROVEE_INS', 'VBOP.7');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_PROVEE_MOD', 'VBOP.7');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_PROVEE_ELI', 'VBOP.7');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_PROVEE_SEL', 'VBOP.7');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_PROVEEV_SEL', 'VBOP.7');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SEG_PERSON_SEL', 'VBOP.7');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SEG_PERSONMIN_SEL', 'VBOP.7');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_INSTIT_SEL', 'VBOP.7');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_INSTIT_INS', 'VBOP.7.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_INSTIT_MOD', 'VBOP.7.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_INSTIT_ELI', 'VBOP.7.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_INSTIT_SEL', 'VBOP.7.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SEG_PERSON_SEL', 'VBOP.7.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SEG_PERSONMIN_SEL', 'VBOP.7.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SEG_PERSON_INS', 'VBOP.7.3.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SEG_PERSON_MOD', 'VBOP.7.3.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SEG_PERSON_ELI', 'VBOP.7.3.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SEG_PERSONMIN_SEL', 'VBOP.7.3.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SEG_UPFOTOPER_MOD', 'VBOP.7.3.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SEG_PERSON_INS', 'VBOP.7.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SEG_PERSON_MOD', 'VBOP.7.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SEG_PERSON_ELI', 'VBOP.7.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SEG_PERSONMIN_SEL', 'VBOP.7.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SEG_UPFOTOPER_MOD', 'VBOP.7.2.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_PRITSE_ELI', 'VBOP.7.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_PRITSE_SEL', 'VBOP.7.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SAL_ITEM_SEL', 'VBOP.7.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SAL_ITEMNOTBASE_SEL', 'VBOP.7.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'SAL_ITMALM_SEL', 'VBOP.7.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_SERVIC_SEL', 'VBOP.7.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_PRITSE_INS', 'VBOP.7.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_PRITSE_MOD', 'VBOP.7.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PRE_VERPRE_SEL', 'VBOP.6');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DWF_MOD', 'VBOP.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DWF_ELI', 'VBOP.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DWF_SEL', 'VBOP.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_CABMOM_IME', 'VBOP.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_TIPPROC_SEL', 'VBOP.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_TIPES_SEL', 'VBOP.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DES_INS', 'VBOP.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DES_MOD', 'VBOP.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DES_ELI', 'VBOP.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DES_SEL', 'VBOP.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DOCWFAR_MOD', 'VBOP.5.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PAFPP_IME', 'VBOP.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'CONTA_GETDEC_IME', 'VBOP.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_PLT_SEL', 'VBOP.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_CTABAN_SEL', 'VBOP.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'MIG_CBANESIS_SEL', 'VBOP.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PLAPA_INS', 'VBOP.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PLAPAPA_INS', 'VBOP.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PPANTPAR_INS', 'VBOP.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PLAPA_MOD', 'VBOP.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PLAPA_ELI', 'VBOP.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PLAPA_SEL', 'VBOP.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_SINPRE_IME', 'VBOP.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_ANTEPP_IME', 'VBOP.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_SIGEPP_IME', 'VBOP.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PLAPAREP_SEL', 'VBOP.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PRO_SEL', 'VBOP.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DWF_MOD', 'VBOP.4.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DWF_ELI', 'VBOP.4.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DWF_SEL', 'VBOP.4.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_CABMOM_IME', 'VBOP.4.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_TIPPROC_SEL', 'VBOP.4.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_TIPES_SEL', 'VBOP.4.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DES_INS', 'VBOP.4.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DES_MOD', 'VBOP.4.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DES_ELI', 'VBOP.4.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DES_SEL', 'VBOP.4.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DOCWFAR_MOD', 'VBOP.4.5.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DOCWFAR_MOD', 'VBOP.4.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_VERSIGPRO_IME', 'VBOP.4.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_CHKSTA_IME', 'VBOP.4.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_TIPES_SEL', 'VBOP.4.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_FUNTIPES_SEL', 'VBOP.4.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DEPTIPES_SEL', 'VBOP.4.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DOCWFAR_MOD', 'VBOP.4.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PRO_MOD', 'VBOP.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PRO_SEL', 'VBOP.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PRE_VERPRE_SEL', 'VBOP.4.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_OBPGSEL_SEL', 'VBOP.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_OBPG_SEL', 'VBOP.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_OBPGSOL_SEL', 'VBOP.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_COMEJEPAG_SEL', 'VBOP.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_MONEDA_SEL', 'VBOP.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PRO_SEL', 'VBOP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PAFPP_IME', 'VBOP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'CONTA_GETDEC_IME', 'VBOP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_PLT_SEL', 'VBOP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_CTABAN_SEL', 'VBOP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'MIG_CBANESIS_SEL', 'VBOP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PLAPA_INS', 'VBOP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PLAPAPA_INS', 'VBOP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PPANTPAR_INS', 'VBOP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PLAPA_MOD', 'VBOP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PLAPA_ELI', 'VBOP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PLAPA_SEL', 'VBOP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_SINPRE_IME', 'VBOP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_ANTEPP_IME', 'VBOP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_SIGEPP_IME', 'VBOP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PLAPAREP_SEL', 'VBOP.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DWF_MOD', 'VBOP.2.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DWF_ELI', 'VBOP.2.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DWF_SEL', 'VBOP.2.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_CABMOM_IME', 'VBOP.2.5');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_TIPPROC_SEL', 'VBOP.2.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_TIPES_SEL', 'VBOP.2.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DES_INS', 'VBOP.2.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DES_MOD', 'VBOP.2.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DES_ELI', 'VBOP.2.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DES_SEL', 'VBOP.2.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DOCWFAR_MOD', 'VBOP.2.5.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DOCWFAR_MOD', 'VBOP.2.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_VERSIGPRO_IME', 'VBOP.2.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_CHKSTA_IME', 'VBOP.2.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_TIPES_SEL', 'VBOP.2.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_FUNTIPES_SEL', 'VBOP.2.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DEPTIPES_SEL', 'VBOP.2.4');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'WF_DOCWFAR_MOD', 'VBOP.2.3');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PRO_MOD', 'VBOP.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PRO_SEL', 'VBOP.2.2');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PRE_VERPRE_SEL', 'VBOP.2.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_CCFILDEP_SEL', 'VBOP.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_CONIGPAR_SEL', 'VBOP.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'CONTA_CTA_SEL', 'VBOP.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'CONTA_CTA_ARB_SEL', 'VBOP.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PRE_PAR_SEL', 'VBOP.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PRE_PAR_ARB_SEL', 'VBOP.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'CONTA_AUXCTA_SEL', 'VBOP.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_OBDET_INS', 'VBOP.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_OBDET_MOD', 'VBOP.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_OBDET_ELI', 'VBOP.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_OBDET_SEL', 'VBOP.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_CEC_SEL', 'VBOP.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_CECCOM_SEL', 'VBOP.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_CECCOMFU_SEL', 'VBOP.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_TIPO_SEL', 'VBOP.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_CONIGPAR_SEL', 'VBOP.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'OR_OFCU_SEL', 'VBOP.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_LUG_SEL', 'VBOP.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_LUG_ARB_SEL', 'VBOP.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_TIPOEJE_UPD', 'VBOP.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_GES_SEL', 'VBOP.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_PER_SEL', 'VBOP.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'TES_PRO_SEL', 'VBDP.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'SAL_ITEM_SEL', 'VBDP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'SAL_ITEMNOTBASE_SEL', 'VBDP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'SAL_ITMALM_SEL', 'VBDP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'PM_SERVIC_SEL', 'VBDP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'PM_PRITSE_SEL', 'VBDP.2.2.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'SEG_PERSONMIN_SEL', 'VBDP.2.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'SEG_PERSONMIN_SEL', 'VBDP.2.2.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'PM_INSTIT_SEL', 'VBDP.2.2.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'SEG_PERSON_SEL', 'VBDP.2.2.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'SEG_PERSONMIN_SEL', 'VBDP.2.2.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'PM_SERVIC_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'SAL_ITEMNOTBASE_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'PM_LUG_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'PM_LUG_ARB_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'PM_PROVEE_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'PM_PROVEEV_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'SEG_PERSON_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'SEG_PERSONMIN_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'PM_INSTIT_SEL', 'VBDP.2.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'ADQ_DOCSOL_SEL', 'VBDP.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'ADQ_DOCSOLAR_SEL', 'VBDP.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'PM_PROVEEV_SEL', 'VBDP.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'WF_TIPPROC_SEL', 'VBDP.3.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'WF_TIPES_SEL', 'VBDP.3.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'WF_DES_SEL', 'VBDP.3.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'WF_DWF_SEL', 'VBDP.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'MIG_CBANESIS_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'WF_TIPES_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'WF_FUNTIPES_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'TES_PLAPAREP_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'TES_PRO_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'WF_GATNREP_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'PM_DEPFILEPUO_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'ADQ_CTD_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'TES_IDSEXT_GET', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'ADQ_COTOC_REP', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'ADQ_COTREP_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'ADQ_SOLREP_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'ADQ_SOLD_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'ADQ_SOLDETCOT_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'ADQ_PROCPED_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'ADQ_COT_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'ADQ_COTPROC_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'ADQ_COTRPC_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'PM_PLT_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'TES_CTABAN_SEL', 'VBDP');
+select pxp.f_delete_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'TES_PLAPAPA_INS', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'TES_PLAPA_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_REVPP_IME', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Obligaciones de PAgo', 'PM_PLT_SEL', 'OBPG');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Obligaciones de PAgo', 'TES_OBPGSOL_SEL', 'OBPG');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Obligaciones de PAgo', 'TES_TIPO_SEL', 'OBPG.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Obligaciones de PAgo', 'PM_CONIGPAR_SEL', 'OBPG.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Obligaciones de PAgo', 'OR_OFCU_SEL', 'OBPG.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Obligaciones de PAgo', 'PM_LUG_SEL', 'OBPG.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Obligaciones de PAgo', 'PM_LUG_ARB_SEL', 'OBPG.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Obligaciones de PAgo', 'TES_TIPOEJE_UPD', 'OBPG.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Obligaciones de PAgo', 'PM_GES_SEL', 'OBPG.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Obligaciones de PAgo', 'PM_PER_SEL', 'OBPG.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Obligaciones de PAgo', 'PM_CONIGPAR_SEL', 'OBPG.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_LUG_ARB_SEL', 'SOLPD.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_TIPOEJE_UPD', 'SOLPD.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_GES_SEL', 'SOLPD.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_PER_SEL', 'SOLPD.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_TIPO_SEL', 'SOLPD.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_CONIGPAR_SEL', 'SOLPD.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'OR_OFCU_SEL', 'SOLPD.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_LUG_SEL', 'SOLPD.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_CONIGPAR_SEL', 'SOLPD.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_GENCONF_IME', 'SOLPD.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PPANTPAR_INS', 'SOLPD.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'MIG_CBANESIS_SEL', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'TES_PPANTPAR_INS', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'TES_GENCONF_IME', 'VBDP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_GENCONF_IME', 'REVBPP');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_VERSIGPRO_IME', 'VBDP.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_DOCWFAR_MOD', 'VBDP.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_CHKSTA_IME', 'VBDP.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_TIPES_SEL', 'VBDP.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_FUNTIPES_SEL', 'VBDP.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_DEPTIPES_SEL', 'VBDP.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_DOCWFAR_MOD', 'VBDP.4');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_GATNREP_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PLT_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBPG_INS', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBPG_MOD', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBPG_ELI', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBPG_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBPGSOL_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBPGSEL_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PLAPAOB_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_OBTTCB_GET', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_FINREG_IME', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_ANTEOB_IME', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_IDSEXT_GET', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_COTOC_REP', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_CTD_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_COTREP_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_SOLREP_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_SOLD_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_SOLDETCOT_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PRE_VERPRE_IME', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_PROCPED_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_COT_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_COTPROC_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'ADQ_COTRPC_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_DEPUSUCOMB_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'RH_FUNCIOCAR_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_MONEDA_SEL', 'VBDP.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PROVEEV_SEL', 'VBDP.6');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_SERVIC_SEL', 'VBDP.6.7');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SAL_ITEMNOTBASE_SEL', 'VBDP.6.7');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_LUG_SEL', 'VBDP.6.7');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_LUG_ARB_SEL', 'VBDP.6.7');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PROVEE_INS', 'VBDP.6.7');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PROVEE_MOD', 'VBDP.6.7');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PROVEE_ELI', 'VBDP.6.7');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PROVEE_SEL', 'VBDP.6.7');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PROVEEV_SEL', 'VBDP.6.7');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSON_SEL', 'VBDP.6.7');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSONMIN_SEL', 'VBDP.6.7');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_INSTIT_SEL', 'VBDP.6.7');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_INSTIT_INS', 'VBDP.6.7.3');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_INSTIT_MOD', 'VBDP.6.7.3');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_INSTIT_ELI', 'VBDP.6.7.3');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_INSTIT_SEL', 'VBDP.6.7.3');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSON_SEL', 'VBDP.6.7.3');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSONMIN_SEL', 'VBDP.6.7.3');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSON_INS', 'VBDP.6.7.3.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSON_MOD', 'VBDP.6.7.3.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSON_ELI', 'VBDP.6.7.3.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSONMIN_SEL', 'VBDP.6.7.3.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_UPFOTOPER_MOD', 'VBDP.6.7.3.1.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSON_ELI', 'VBDP.6.7.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSONMIN_SEL', 'VBDP.6.7.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSON_INS', 'VBDP.6.7.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_PERSON_MOD', 'VBDP.6.7.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SEG_UPFOTOPER_MOD', 'VBDP.6.7.2.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SAL_ITEM_SEL', 'VBDP.6.7.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SAL_ITEMNOTBASE_SEL', 'VBDP.6.7.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'SAL_ITMALM_SEL', 'VBDP.6.7.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_SERVIC_SEL', 'VBDP.6.7.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PRITSE_INS', 'VBDP.6.7.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PRITSE_MOD', 'VBDP.6.7.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PRITSE_ELI', 'VBDP.6.7.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PRITSE_SEL', 'VBDP.6.7.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PRE_VERPRE_SEL', 'VBDP.6.6');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DWF_MOD', 'VBDP.6.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DWF_ELI', 'VBDP.6.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DWF_SEL', 'VBDP.6.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_CABMOM_IME', 'VBDP.6.5');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DES_ELI', 'VBDP.6.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DES_SEL', 'VBDP.6.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_TIPPROC_SEL', 'VBDP.6.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_TIPES_SEL', 'VBDP.6.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DES_INS', 'VBDP.6.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DES_MOD', 'VBDP.6.5.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DOCWFAR_MOD', 'VBDP.6.5.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PAFPP_IME', 'VBDP.6.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'CONTA_GETDEC_IME', 'VBDP.6.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PLT_SEL', 'VBDP.6.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_CTABAN_SEL', 'VBDP.6.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'MIG_CBANESIS_SEL', 'VBDP.6.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PLAPA_INS', 'VBDP.6.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PLAPAPA_INS', 'VBDP.6.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PPANTPAR_INS', 'VBDP.6.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PLAPA_MOD', 'VBDP.6.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PLAPA_ELI', 'VBDP.6.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PLAPA_SEL', 'VBDP.6.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_SINPRE_IME', 'VBDP.6.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_ANTEPP_IME', 'VBDP.6.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_SIGEPP_IME', 'VBDP.6.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PLAPAREP_SEL', 'VBDP.6.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PRO_SEL', 'VBDP.6.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_GENCONF_IME', 'VBDP.6.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DWF_MOD', 'VBDP.6.4.5');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DWF_ELI', 'VBDP.6.4.5');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DWF_SEL', 'VBDP.6.4.5');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_CABMOM_IME', 'VBDP.6.4.5');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_TIPPROC_SEL', 'VBDP.6.4.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_TIPES_SEL', 'VBDP.6.4.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DES_INS', 'VBDP.6.4.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DES_MOD', 'VBDP.6.4.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DES_ELI', 'VBDP.6.4.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DES_SEL', 'VBDP.6.4.5.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DOCWFAR_MOD', 'VBDP.6.4.5.1');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DOCWFAR_MOD', 'VBDP.6.4.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_VERSIGPRO_IME', 'VBDP.6.4.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_CHKSTA_IME', 'VBDP.6.4.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_TIPES_SEL', 'VBDP.6.4.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_FUNTIPES_SEL', 'VBDP.6.4.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DEPTIPES_SEL', 'VBDP.6.4.4');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_DOCWFAR_MOD', 'VBDP.6.4.3');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PRO_SEL', 'VBDP.6.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PRO_MOD', 'VBDP.6.4.2');
+select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PRE_VERPRE_SEL', 'VBDP.6.4.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_CECCOM_SEL', 'VBDP.6.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_CECCOMFU_SEL', 'VBDP.6.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_CCFILDEP_SEL', 'VBDP.6.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_CONIGPAR_SEL', 'VBDP.6.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'CONTA_CTA_SEL', 'VBDP.6.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'CONTA_CTA_ARB_SEL', 'VBDP.6.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PRE_PAR_SEL', 'VBDP.6.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PRE_PAR_ARB_SEL', 'VBDP.6.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'CONTA_AUXCTA_SEL', 'VBDP.6.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBDET_INS', 'VBDP.6.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBDET_MOD', 'VBDP.6.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBDET_ELI', 'VBDP.6.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBDET_SEL', 'VBDP.6.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_CEC_SEL', 'VBDP.6.3');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_TIPO_SEL', 'VBDP.6.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_CONIGPAR_SEL', 'VBDP.6.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'OR_OFCU_SEL', 'VBDP.6.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_LUG_SEL', 'VBDP.6.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_LUG_ARB_SEL', 'VBDP.6.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_TIPOEJE_UPD', 'VBDP.6.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_GES_SEL', 'VBDP.6.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PER_SEL', 'VBDP.6.3.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBPGSEL_SEL', 'VBDP.6.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBPG_SEL', 'VBDP.6.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBPGSOL_SEL', 'VBDP.6.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_COMEJEPAG_SEL', 'VBDP.6.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_MONEDA_SEL', 'VBDP.6.2');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBDET_ELI', 'VBDP.6.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBDET_SEL', 'VBDP.6.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_CEC_SEL', 'VBDP.6.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_CECCOM_SEL', 'VBDP.6.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_CECCOMFU_SEL', 'VBDP.6.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBDETAPRO_MOD', 'VBDP.6.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_CCFILDEP_SEL', 'VBDP.6.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_CONIGPAR_SEL', 'VBDP.6.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'CONTA_CTA_SEL', 'VBDP.6.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'CONTA_CTA_ARB_SEL', 'VBDP.6.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PRE_PAR_SEL', 'VBDP.6.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PRE_PAR_ARB_SEL', 'VBDP.6.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'CONTA_AUXCTA_SEL', 'VBDP.6.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBDET_INS', 'VBDP.6.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_OBDET_MOD', 'VBDP.6.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_TIPO_SEL', 'VBDP.6.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_CONIGPAR_SEL', 'VBDP.6.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'OR_OFCU_SEL', 'VBDP.6.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_LUG_SEL', 'VBDP.6.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_LUG_ARB_SEL', 'VBDP.6.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_TIPOEJE_UPD', 'VBDP.6.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_GES_SEL', 'VBDP.6.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PER_SEL', 'VBDP.6.1.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'CONTA_ODT_SEL', 'SOLPD.1');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Reporte Pagos X Concepto', 'PM_CONIGPAR_SEL', 'REPPAGCON');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Reporte Pagos X Concepto', 'PM_GES_SEL', 'REPPAGCON');
+select pxp.f_insert_trol_procedimiento_gui ('OP - Reporte Pagos X Concepto', 'TES_PAXCIG_SEL', 'REPPAGCON.1');
+
+/***********************************F-DEP-RAC-TES-0-27/11/2014****************************************/
+

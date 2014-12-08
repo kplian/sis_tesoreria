@@ -68,6 +68,15 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                 tooltip : '<b>Verificación de la disponibilidad presupuestaria</b>'
             });
         
+        //RCM: reporte de verificacion presupeustaria
+        this.addButton('btnCheckPresupeusto', {
+                text : 'Rev. Pres.',
+                iconCls : 'bassign',
+                disabled : false,
+                handler : this.onBtnCheckPresup,
+                tooltip : '<b>Revertir  presupuestos,  permite ver la evolucón presupuestaria y revertir parcialmente</b>'
+            });
+        
         this.addButton('diagrama_gantt',{text:'Gant', iconCls: 'bgantt', disabled:true, handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
   
         this.addButton('ajustes',{text:'Ajus.', iconCls: 'blist', disabled: true, handler: this.showAjustes,tooltip: '<b>Ajustes a los anticipos totales para pagos variables</b>'});
@@ -1039,6 +1048,12 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
               	this.getBoton('ajustes').disable();
               }
               
+              if(data['pago_variable'] != 'finalizado' &&  data['estado'] != 'anulado' ){
+              	this.getBoton('btnCheckPresupeusto').enable();
+              }
+              
+              
+              
               if(this.getBoton('edit'))
               	this.getBoton('edit').disable();
               if(this.getBoton('del'))
@@ -1086,6 +1101,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 			this.getBoton('ajustes').disable();
 			this.getBoton('est_anticipo').disable();
 			this.getBoton('extenderop').disable();
+			this.getBoton('btnCheckPresupeusto').disable();
 			
 			//Inhabilita el reporte de disponibilidad
             this.getBoton('btnVerifPresup').disable();
@@ -1487,6 +1503,21 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             height : '50%',
         }, rec.data, this.idContenedor, 'VerificacionPresup');
     },
+    
+    onBtnCheckPresup : function() {
+        var rec = this.sm.getSelected();
+        //Se define el nombre de la columna de la llave primaria
+        
+        
+        Phx.CP.loadWindows('../../../sis_tesoreria/vista/presupuesto/CheckPresupuesto.php', 'Evolución presupuestaria ('+rec.data.moneda+')', {
+            modal : true,
+            width : '98%',
+            height : '70%',
+        }, rec.data, this.idContenedor, 'CheckPresupuesto');
+    },
+    
+    
+    
 	
 	sistema: 'ADQ',
 	id_cotizacion: 0,

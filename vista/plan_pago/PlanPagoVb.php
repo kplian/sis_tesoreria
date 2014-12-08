@@ -426,6 +426,7 @@ Phx.vista.PlanPagoVb = {
          this.menuAdq.enable();
          this.getBoton('diagrama_gantt').enable();
          this.getBoton('btnChequeoDocumentosWf').enable();
+         this.getBoton('btnObs').enable();
            
      },
     
@@ -441,6 +442,7 @@ Phx.vista.PlanPagoVb = {
            this.getBoton('btnChequeoDocumentosWf').disable();
            this.getBoton('SincPresu').disable();          
            this.getBoton('ModAprop').disable(); 
+           this.getBoton('btnObs').disable();
            this.menuAdq.disable();
            
            

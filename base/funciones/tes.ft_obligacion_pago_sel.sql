@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_pago_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -561,7 +563,9 @@ BEGIN
                     descripcion			text,
                     comprometido		numeric DEFAULT 0.00,
                     ejecutado			numeric DEFAULT 0.00,
-                    pagado				numeric DEFAULT 0.00
+                    pagado				numeric DEFAULT 0.00,
+                    revertible			numeric DEFAULT 0.00,
+                    revertir			numeric DEFAULT 0.00
             ) on commit drop;
             
             insert into obligaciones (id_obligacion_det,
@@ -608,14 +612,20 @@ BEGIN
             	update obligaciones set
                 comprometido = COALESCE(v_respuesta_verificar.ps_comprometido,0.00::numeric),
                 ejecutado = COALESCE(v_respuesta_verificar.ps_ejecutado,0.00::numeric),
-                pagado = COALESCE(v_respuesta_verificar.ps_pagado,0.00::numeric) 
+                pagado = COALESCE(v_respuesta_verificar.ps_pagado,0.00::numeric),
+                revertible =  COALESCE(v_respuesta_verificar.ps_comprometido,0.00::numeric) - COALESCE(v_respuesta_verificar.ps_ejecutado,0.00::numeric)
                 where obligaciones.id_obligacion_det=v_obligaciones_partida.id_obligacion_det;
                         
         	END LOOP;
             
             --raise exception 'Moneda %', v_parametros.id_moneda ;
             
-            v_consulta:='select * from obligaciones';
+              v_consulta:='select * from obligaciones where  ';
+      			
+              --Definicion de la respuesta
+              v_consulta:=v_consulta||v_parametros.filtro;
+              v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion;
+				  
             
 			--Devuelve la respuesta
 			return v_consulta;
