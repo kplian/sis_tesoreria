@@ -196,7 +196,11 @@ BEGIN
           where  pp.id_plan_pago_fk =  (p_hstore->'id_plan_pago_fk')::integer 
                  and pp.estado_reg = 'activo';  
            
-           v_nro_cuota =   ((floor(COALESCE(v_registros.nro_cuota,0))::integer)::varchar ||'.'||TRIM(to_char((COALESCE(v_count,0)+1 ),'00'))::varchar)::numeric  ;
+           --IF (p_hstore->'tipo')::varchar in('pagado_rrhh') THEN 
+           		v_nro_cuota =   ((floor(COALESCE(v_registros.nro_cuota,0))::integer)::varchar ||'.'||TRIM(to_char((COALESCE(v_count,0)+1 ),'000'))::varchar)::numeric  ;
+           --else
+           --		v_nro_cuota =   ((floor(COALESCE(v_registros.nro_cuota,0))::integer)::varchar ||'.'||TRIM(to_char((COALESCE(v_count,0)+1 ),'00'))::varchar)::numeric  ;
+           --end if;
            
            
           --valida que la fecha tentativa
@@ -209,7 +213,7 @@ BEGIN
          --  VALIDACION DE MONTO FALTANTE, SEGUN TIPO DE CUOTA
          ------------------------------------------------------------
           
-         IF (p_hstore->'tipo')::varchar in('pagado') THEN 
+         IF (p_hstore->'tipo')::varchar in('pagado','pagado_rrhh') THEN 
           
                 -- verifica que el registro no sobrepase el total a devengado
                 v_monto_total= tes.f_determinar_total_faltante((p_hstore->'id_obligacion_pago')::integer, 'registrado_pagado',(p_hstore->'id_plan_pago_fk')::integer );

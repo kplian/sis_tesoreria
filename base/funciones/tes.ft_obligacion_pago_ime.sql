@@ -1478,6 +1478,15 @@ BEGIN
             IF v_registros_op.estado = 'finalizado' THEN
                raise exception 'no puede modificar el presupuesto de obligaciones finalizadas';
             END IF;
+            
+            --validar que no tenga comprobantes  pendientes sin validar
+            IF exists( select 1
+                      from tes.tplan_pago pp 
+                      where pp.id_obligacion_pago  = v_parametros.id_obligacion_pago and pp.estado_reg ='activo' and pp.estado = 'pendiente') THEN
+            
+                 raise exception 'Tiene algun comprobnate pendiente de valiación, eliminelo o validaelo antes de volver a intentar';
+            
+             END IF;
         
             v_fecha = now();
             va_id_obligacion_det_tmp =  string_to_array(v_parametros.id_ob_dets::text,',')::integer[];
