@@ -32,7 +32,8 @@ DECLARE
 	v_resp		            varchar;
 	v_nombre_funcion        text;
 	v_mensaje_error         text;
-	v_id_plan_pago	integer;
+	v_id_plan_pago			integer;
+    v_estado_aux			varchar;
     
     v_otros_descuentos_mb numeric;
     v_monto_no_pagado_mb numeric;
@@ -1168,7 +1169,8 @@ BEGIN
             pp.fecha_tentativa,
             op.numero,
             pp.total_prorrateado ,
-            pp.monto_ejecutar_total_mo
+            pp.monto_ejecutar_total_mo,
+            pp.estado
         into 
             v_id_plan_pago,
             v_id_proceso_wf,
@@ -1176,7 +1178,8 @@ BEGIN
             v_fecha_tentativa,
             v_num_obliacion_pago,
             v_total_prorrateo,
-            v_monto_ejecutar_total_mo
+            v_monto_ejecutar_total_mo,
+            v_estado_aux
             
         from tes.tplan_pago  pp
         inner  join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
@@ -1184,8 +1187,9 @@ BEGIN
         
          --si esta saliendo de borrador vadamos el rango de gasto
          -- chequea fechas de costos inicio y fin
-         v_resp_doc =  tes.f_validar_periodo_costo(v_id_plan_pago);
-          
+         IF(v_estado_aux in ('borrador','vbconta')) THEN
+         	v_resp_doc =  tes.f_validar_periodo_costo(v_id_plan_pago);
+         END IF; 
           
           select 
             ew.id_tipo_estado ,
