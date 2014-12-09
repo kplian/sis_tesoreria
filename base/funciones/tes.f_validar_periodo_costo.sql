@@ -21,15 +21,20 @@ BEGIN
       pp.fecha_costo_fin,
       pp.fecha_costo_ini,
       pp.id_plan_pago,
-      pp.id_obligacion_pago
+      pp.id_obligacion_pago,
+      op.tipo_obligacion
       into
        v_registros_pp
-      from tes.tplan_pago pp
-      where pp.id_plan_pago = p_id_plan_pago;
+      from   tes.tplan_pago pp
+      inner  join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
+      where  pp.id_plan_pago = p_id_plan_pago;
+      
+      
+      
       
       -- verificamos que sea un tipo de plan pago de devengado exluimos recusos humanos
     
-     IF  v_registros_pp.tipo  in ('devengado', 'devengado_pagado_1c', 'devengado_pagado','anticipo') THEN 
+     IF  v_registros_pp.tipo  in ('devengado', 'devengado_pagado_1c', 'devengado_pagado','anticipo')  and v_registros_pp.tipo_obligacion != 'adquisiciones' THEN 
         
         -- verificamos si tiene un concepto de gasto del tipo servicio
        
