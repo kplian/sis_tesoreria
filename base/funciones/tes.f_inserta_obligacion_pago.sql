@@ -96,6 +96,7 @@ BEGIN
         
         IF   (p_hstore->'tipo_obligacion')::varchar = 'adquisiciones'    THEN
              raise exception 'Los pagos de adquisiciones tienen que ser habilitados desde el sistema de adquisiciones';   
+       
         ELSIF   (p_hstore->'tipo_obligacion')::varchar ='pago_directo'    THEN
               
                 v_tipo_documento = 'PGD';
@@ -113,18 +114,27 @@ BEGIN
         
                 v_codigo_proceso_macro = 'TES-PD'; 
                 
+                --si el funcionario que solicita es un gerente .... es el mimso encargado de aprobar
                 
-                --si tiene funcionario identificar el gerente correspondientes
-                IF (p_hstore->'id_funcionario')::integer  is not NULL THEN
-                
-                    SELECT  
-                       pxp.aggarray(id_funcionario) 
-                     into
-                       va_id_funcionario_gerente
-                     FROM orga.f_get_aprobadores_x_funcionario((p_hstore->'fecha')::date,  (p_hstore->'id_funcionario')::integer , 'todos', 'si', 'todos', 'ninguno') AS (id_funcionario integer);      
-                    --NOTA el valor en la primera posicion del array es el genre de menor nivel
-                END IF;  
-                
+                 IF exists(select 1 from orga.tuo_funcionario uof 
+                           inner join orga.tuo uo on uo.id_uo = uof.id_uo and uo.estado_reg = 'activo'
+                           inner join orga.tnivel_organizacional no on no.id_nivel_organizacional = uo.id_nivel_organizacional and no.numero_nivel in (1,2)
+                           where  uof.estado_reg = 'activo' and  uof.id_funcionario = (p_hstore->'id_funcionario')::integer ) THEN
+                  
+                      va_id_funcionario_gerente[1] = (p_hstore->'id_funcionario')::integer;
+                 
+                 ELSE
+                    --si tiene funcionario identificar el gerente correspondientes
+                    IF (p_hstore->'id_funcionario')::integer  is not NULL THEN
+                    
+                        SELECT  
+                           pxp.aggarray(id_funcionario) 
+                         into
+                           va_id_funcionario_gerente
+                         FROM orga.f_get_aprobadores_x_funcionario((p_hstore->'fecha')::date,  (p_hstore->'id_funcionario')::integer , 'todos', 'si', 'todos', 'ninguno') AS (id_funcionario integer);      
+                        --NOTA el valor en la primera posicion del array es el genre de menor nivel
+                    END IF;  
+                END IF;
                        
               
         ELSE
@@ -293,9 +303,10 @@ BEGIN
             v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_wf);
             
             
-            --Definicion de la respuesta
-			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligaciones de Pago almacenado(a) con exito (id_obligacion_pago'||v_id_obligacion_pago||')'); 
-            v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_id_obligacion_pago::varchar);
+             --Definicion de la respuesta
+			 v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligaciones de Pago almacenado(a) con exito (id_obligacion_pago'||v_id_obligacion_pago||')'); 
+             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_id_obligacion_pago::varchar);
+             v_resp = pxp.f_agrega_clave(v_resp,'id_gestion',v_id_gestion::varchar);
 
             --Devuelve la respuesta
             return v_resp;

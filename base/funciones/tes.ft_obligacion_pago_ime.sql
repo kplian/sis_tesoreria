@@ -138,6 +138,7 @@ DECLARE
      v_tam        				integer;
      v_indice 					integer;
      va_resp_ges              numeric[];
+   
      
 			    
 BEGIN
@@ -175,7 +176,9 @@ BEGIN
 		begin
         
             select 
-               op.id_funcionario
+               op.id_funcionario,
+               op.fecha,
+               op.tipo_obligacion
             into
                v_registros
             from tes.tobligacion_pago op
@@ -188,6 +191,27 @@ BEGIN
                v_id_funcionario_sol = v_parametros.id_funcionario;
             END IF;
             
+            IF   v_registros.tipo_obligacion = 'pago_directo'  and v_id_funcionario_sol is not NULL  THEN
+              
+                 --OJO  si el funcionario que solicita es un gerente .... es el mimso encargado de aprobar
+                 IF exists(select 1 from orga.tuo_funcionario uof 
+                           inner join orga.tuo uo on uo.id_uo = uof.id_uo and uo.estado_reg = 'activo'
+                           inner join orga.tnivel_organizacional no on no.id_nivel_organizacional = uo.id_nivel_organizacional and no.numero_nivel in (1,2)
+                           where  uof.estado_reg = 'activo' and  uof.id_funcionario = v_id_funcionario_sol ) THEN
+                  
+                      va_id_funcionario_gerente[1] = v_id_funcionario_sol;
+                 
+                 ELSE
+                    --si tiene funcionario identificar el gerente correspondientes
+                     SELECT  
+                           pxp.aggarray(id_funcionario) 
+                       into
+                           va_id_funcionario_gerente
+                     FROM orga.f_get_aprobadores_x_funcionario(v_registros.fecha,  v_id_funcionario_sol , 'todos', 'si', 'todos', 'ninguno') AS (id_funcionario integer);      
+                        --NOTA el valor en la primera posicion del array es el genre de menor nivel
+                   
+                END IF;
+            END IF;
 			--Sentencia de la modificacion
 			update tes.tobligacion_pago set
 			id_proveedor = v_parametros.id_proveedor,
@@ -207,7 +231,8 @@ BEGIN
             id_plantilla = v_parametros.id_plantilla,
             id_usuario_ai = v_parametros._id_usuario_ai,
             usuario_ai = v_parametros._nombre_usuario_ai,
-            tipo_anticipo = v_parametros.tipo_anticipo
+            tipo_anticipo = v_parametros.tipo_anticipo,
+            id_funcionario_gerente = va_id_funcionario_gerente[1]
             
             
 			where id_obligacion_pago = v_parametros.id_obligacion_pago;
