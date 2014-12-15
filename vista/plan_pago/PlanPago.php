@@ -999,8 +999,19 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             grid: true,
             form: true
         },
-        
-        
+        {
+            config:{
+                name: 'funcionario_wf',
+                fieldLabel: 'Funcionario Res WF',
+                anchor: '80%',
+                gwidth: 250
+            },
+            type:'Field',
+            filters:{pfiltro:'funwf.desc_funcionario1',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
         
         {
             config:{
@@ -1154,7 +1165,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'monto_ajuste_ag',
 		'monto_ajuste_siguiente_pag','pago_variable','monto_anticipo',
 		{name:'fecha_costo_ini', type: 'date',dateFormat:'Y-m-d'},
-		{name:'fecha_costo_fin', type: 'date',dateFormat:'Y-m-d'}
+		{name:'fecha_costo_fin', type: 'date',dateFormat:'Y-m-d'},'funcionario_wf'
 		
 	],
 	
@@ -1802,15 +1813,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 	    	    dias_mes =  this.restaFechas(fecha_ini,fecha_fin_mes).dias + 1,
 	    	    dias_restantes = dias_total - dias_mes,
 	    	    monto_anticipo = dias_restantes*costo_dia;
-	    	 this.Cmp.monto_anticipo.setValue(Math.floor(monto_anticipo));	
-    	} 
-    	else{
-    		
-    		console.log('xxxxxxx')
-    	}   
-    	 
-    	
-       
+	    	 this.Cmp.monto_anticipo.setValue(monto_anticipo.toFixed(2));	
+    	}    
     },
     
     restaFechas: function(f1,f2){

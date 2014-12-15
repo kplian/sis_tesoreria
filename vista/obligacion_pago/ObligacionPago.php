@@ -357,7 +357,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             config:{
                 name: 'tipo_cambio_conv',
                 fieldLabel: 'Tipo Cambio',
-                allowBlank: true,
+                allowBlank: false,
                 anchor: '80%',
                 gwidth: 100,
                 maxLength:131074

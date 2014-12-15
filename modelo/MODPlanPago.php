@@ -103,6 +103,9 @@ class MODPlanPago extends MODbase{
 		$this->captura('monto_anticipo','numeric');
 		$this->captura('fecha_costo_ini','date');
 		$this->captura('fecha_costo_fin','date');
+		$this->captura('funcionario_wf','text');
+		
+		
 		
 		
 		//Ejecuta la instruccion
