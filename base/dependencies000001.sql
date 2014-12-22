@@ -4174,7 +4174,9 @@ AS
 /**********************************F-DEP-JRR-TES-0-24/11/2014*****************************************/
 
 /***********************************I-DEP-GSS-TES-0-27/11/2014****************************************/
---tabla tes.tusuario_cuenta_banc
+
+/*
+ --tabla tes.tusuario_cuenta_banc
     
 ALTER TABLE	tes.tusuario_cuenta_banc
   ADD CONSTRAINT fk_tusuario_cuenta_banc__id_cuenta_bancaria FOREIGN KEY (id_cuenta_bancaria)
@@ -4189,7 +4191,7 @@ ALTER TABLE	tes.tusuario_cuenta_banc
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     NOT DEFERRABLE
-
+*/
 /***********************************F-DEP-GSS-TES-0-27/11/2014****************************************/
 
 
@@ -5665,4 +5667,4 @@ FROM tes.tobligacion_pago op
    JOIN tes.tplan_pago ppp ON ppp.id_obligacion_pago = op.id_obligacion_pago
        AND ppp.estado_reg::text = 'activo'::text;
        
-/***********************************I-DEP-RAC-TES-0-22/12/2014****************************************/
+/***********************************F-DEP-RAC-TES-0-22/12/2014****************************************/
