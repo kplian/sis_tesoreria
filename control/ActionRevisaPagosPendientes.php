@@ -4,13 +4,11 @@
  Proposito: revisa los pagos penxdientes al dia e insertar las alamras correspondientes
  Autor:	Kplian (RAC)
  Fecha:	14/10/2014 */
-
 include_once(dirname(__FILE__)."/../../lib/lib_control/CTSesion.php");
 session_start();
 $_SESSION["_SESION"]= new CTSesion(); 
 include(dirname(__FILE__).'/../../lib/DatosGenerales.php');
 include_once(dirname(__FILE__).'/../../lib/lib_general/Errores.php');
-
 include_once(dirname(__FILE__).'/../../lib/PHPMailer/class.phpmailer.php');
 include_once(dirname(__FILE__).'/../../lib/PHPMailer/class.smtp.php');
 include_once(dirname(__FILE__).'/../../lib/lib_general/cls_correo_externo.php');

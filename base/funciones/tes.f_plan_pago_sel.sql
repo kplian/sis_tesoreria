@@ -641,7 +641,107 @@ BEGIN
 			return v_consulta;
 
 		end;
-					
+	/*********************************    
+ 	#TRANSACCION:  'TES_PAGOS_SEL'
+ 	#DESCRIPCION:	COnsulta para reporte de pagos
+ 	#AUTOR:		rac	
+ 	#FECHA:		22-12-2014 15:43:23
+	***********************************/
+
+	ELSIF(p_transaccion='TES_PAGOS_SEL')then
+     				
+    	begin
+        
+            --Sentencia de la consulta
+			v_consulta:='SELECT 
+                            id_plan_pago,
+                            id_gestion,
+                            gestion,
+                            id_obligacion_pago,
+                            num_tramite,
+                            orden_compra,
+                            tipo_obligacion,
+                            pago_variable,
+                            desc_proveedor,
+                            estado,
+                            usuario_reg,
+                            fecha,
+                            fecha_reg,
+                            ob_obligacion_pago,
+                            fecha_tentativa_de_pago,
+                            nro_cuota,
+                            tipo_plan_pago,
+                            estado_plan_pago,
+                            obs_descuento_inter_serv,
+                            obs_descuentos_anticipo,
+                            obs_descuentos_ley,
+                            obs_monto_no_pagado,
+                            obs_otros_descuentos,
+                            codigo,
+                            monto_cuota,
+                            monto_anticipo,
+                            monto_excento,
+                            monto_retgar_mo,
+                            monto_ajuste_ag,
+                            monto_ajuste_siguiente_pago,
+                            liquido_pagable,
+                            monto_presupuestado
+                          FROM 
+                            tes.vpago_x_proveedor 
+							WHERE  ';
+			
+			--Definicion de la respuesta
+			v_consulta:=v_consulta||v_parametros.filtro;
+			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ', nro_cuota ASC limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+
+             raise notice '%',v_consulta;
+
+			--Devuelve la respuesta
+			return v_consulta;
+						
+		end;
+        
+   /*********************************    
+ 	#TRANSACCION:  'TES_PAGOS_CONT'
+ 	#DESCRIPCION:	Conteo de registros para el reporte de  pagos
+ 	#AUTOR:		rac	
+ 	#FECHA:		22-12-2014 15:43:23
+	***********************************/
+
+	elsif(p_transaccion='TES_PAGOS_CONT')then
+
+		begin
+        
+        
+        v_filtro='';
+            /*
+           
+			--Sentencia de la consulta de conteo de registros
+			v_consulta:='SELECT count(id_plan_pago),
+                                sum(monto_cuota) as monto_cuota,
+                                sum(monto_anticipo) as monto_anticipo,
+                                sum(monto_excento) as monto_excento,
+                                sum(monto_retgar_mo) as monto_retgar_mo,
+                                sum(monto_ajuste_ag) as monto_ajuste_ag,
+                                sum(monto_ajuste_siguiente_pago) as monto_ajuste_siguiente_pago,
+                                sum(liquido_pagable) as liquido_pagable,
+                                sum(monto_presupuestado) as monto_presupuestado
+						 FROM  tes.vpago_x_proveedor  
+                         WHERE ';*/
+			
+            
+            v_consulta:='SELECT count(id_plan_pago)
+						 FROM  tes.vpago_x_proveedor  
+                         WHERE ';
+            
+			--Definicion de la respuesta		    
+			v_consulta:=v_consulta||v_parametros.filtro;
+         
+            raise notice '% .',v_consulta;
+			--Devuelve la respuesta
+			return v_consulta;
+
+		end;				
 	else
 					     
 		raise exception 'Transaccion inexistente';

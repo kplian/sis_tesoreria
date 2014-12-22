@@ -395,12 +395,13 @@ class MODPlanPago extends MODbase{
     }
 	 
 	 
-	  function alertarPagosPendientes(){
+	function alertarPagosPendientes(){
         //Definicion de variables para ejecucion del procedimiento
         $this->procedimiento='tes.f_pagos_pendientes_ime';
         $this->transaccion='TES_PPPREV_INS';
         $this->tipo_procedimiento='IME';
-                
+        //definicion de variables
+		$this->tipo_conexion='seguridad';        
         //Ejecuta la instruccion
         $this->armarConsulta();
         $this->ejecutarConsulta();
@@ -634,6 +635,80 @@ class MODPlanPago extends MODbase{
 		$this->captura('monto','numeric');
 		$this->captura('monto_ejecutar_mo','numeric');
 		
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
+	function listarPagosXProveedor(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.f_plan_pago_sel';
+		$this->transaccion='TES_PAGOS_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this->setCount(false);
+		
+		  $this->captura('id_plan_pago', 'INTEGER');
+		  $this->captura('id_gestion', 'INTEGER');
+		  $this->captura('gestion', 'INTEGER');
+		  $this->captura('id_obligacion_pago', 'INTEGER');
+		  $this->captura('num_tramite', 'VARCHAR');
+		  $this->captura('orden_compra ','VARCHAR');
+		  $this->captura('tipo_obligacion', 'VARCHAR');
+		  $this->captura('pago_variable', 'VARCHAR');
+		  $this->captura('desc_proveedor', 'VARCHAR');
+		  $this->captura('estado', 'VARCHAR');
+		  $this->captura('usuario_reg', 'VARCHAR');
+		  $this->captura('fecha', 'DATE');
+		  $this->captura('fecha_reg', 'TIMESTAMP');
+		  $this->captura('ob_obligacion_pago', 'VARCHAR');
+		  $this->captura('fecha_tentativa_de_pago', 'DATE');
+		  $this->captura('nro_cuota', 'NUMERIC');
+		  $this->captura('tipo_plan_pago', 'VARCHAR');
+		  $this->captura('estado_plan_pago', 'VARCHAR');
+		  $this->captura('obs_descuento_inter_serv', 'TEXT');
+		  $this->captura('obs_descuentos_anticipo', 'TEXT');
+		  $this->captura('obs_descuentos_ley', 'TEXT');
+		  $this->captura('obs_monto_no_pagado', 'TEXT');
+		  $this->captura('obs_otros_descuentos', 'TEXT');
+		  $this->captura('codigo', 'VARCHAR');
+		  $this->captura('monto_cuota', 'NUMERIC');
+		  $this->captura('monto_anticipo', 'NUMERIC');
+		  $this->captura('monto_excento', 'NUMERIC');
+		  $this->captura('monto_retgar_mo', 'NUMERIC');
+		  $this->captura('monto_ajuste_ag', 'NUMERIC');
+		  $this->captura('monto_ajuste_siguiente_pago', 'NUMERIC');
+		  $this->captura('liquido_pagable', 'NUMERIC');
+		  $this->captura('monto_presupuestado', 'NUMERIC');
+				
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
+function resumenPagosXProveedor(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.f_plan_pago_sel';
+		$this->transaccion='TES_PAGOS_CONT';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		//$this->setCount(false);
+		
+		$this->captura('taotal', 'BIGINT');
+		$this->captura('monto_cuota', 'NUMERIC');
+		$this->captura('monto_anticipo', 'NUMERIC');
+		$this->captura('monto_excento', 'NUMERIC');
+		$this->captura('monto_retgar_mo', 'NUMERIC');
+		$this->captura('monto_ajuste_ag', 'NUMERIC');
+		$this->captura('monto_ajuste_siguiente_pago', 'NUMERIC');
+		$this->captura('liquido_pagable', 'NUMERIC');
+		$this->captura('monto_presupuestado', 'NUMERIC');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
