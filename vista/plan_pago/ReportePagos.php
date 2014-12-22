@@ -171,7 +171,7 @@ Phx.vista.ReportePagos=Ext.extend(Phx.gridInterfaz,{
 			type:'Field',
 			filters:{	
 	       		         type: 'list',
-	       				 options: ['det_rendicion', 'dev_garantia', 'ant_aplicado' , 'pagado_rrh', 'pagado', 'ant_parcial', 'anticipo', 'rendicion', 'devengado_rrhh', 'devengado']	
+	       				 options: ['det_rendicion', 'dev_garantia', 'ant_aplicado' , 'pagado_rrh', 'pagado', 'ant_parcial', 'anticipo', 'rendicion', 'devengado_rrhh', 'devengado','devengado_pagado','devengado_pagado_1c']	
 	       		 	},
 			grid:true,
 			form:false
