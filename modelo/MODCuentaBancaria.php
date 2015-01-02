@@ -47,7 +47,40 @@ class MODCuentaBancaria extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
-			
+	
+	function listarCuentaBancariaUsuario(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.f_cuenta_bancaria_sel';
+		$this->transaccion='TES_USRCTABAN_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		//Definicion de la lista del resultado del query
+		$this->captura('id_cuenta_bancaria','int4');
+		$this->captura('estado_reg','varchar');
+		$this->captura('fecha_baja','date');
+		$this->captura('nro_cuenta','varchar');
+		$this->captura('fecha_alta','date');
+		$this->captura('id_institucion','int4');
+		$this->captura('nombre_institucion','varchar');
+		$this->captura('fecha_reg','timestamp');
+		$this->captura('id_usuario_reg','int4');
+		$this->captura('fecha_mod','timestamp');
+		$this->captura('id_usuario_mod','int4');
+		$this->captura('usr_reg','varchar');
+		$this->captura('usr_mod','varchar');
+		$this->captura('id_moneda','integer');
+		$this->captura('codigo_moneda','varchar');
+		$this->captura('denominacion','varchar');
+		$this->captura('centro','varchar');
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
 	function insertarCuentaBancaria(){
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.f_cuenta_bancaria_ime';

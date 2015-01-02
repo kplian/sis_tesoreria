@@ -247,7 +247,7 @@ header("content-type:text/javascript; charset=UTF-8");
 		title : 'Depositos y Cheques',
 		ActSave:'../../sis_tesoreria/control/CuentaBancaria/insertarCuentaBancaria',
 		ActDel:'../../sis_tesoreria/control/CuentaBancaria/eliminarCuentaBancaria',
-		ActList:'../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancaria',
+		ActList:'../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancariaUsuario',
 		id_store : 'id_cuenta_bancaria',
 		fields: [
 		{name:'id_cuenta_bancaria', type: 'numeric'},

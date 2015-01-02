@@ -235,7 +235,7 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 	title:'Cuenta Bancaria',
 	ActSave:'../../sis_tesoreria/control/CuentaBancaria/insertarCuentaBancaria',
 	ActDel:'../../sis_tesoreria/control/CuentaBancaria/eliminarCuentaBancaria',
-	ActList:'../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancaria',
+	ActList:'../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancariaUsuario',
 	id_store:'id_cuenta_bancaria',
 	fields: [
 		{name:'id_cuenta_bancaria', type: 'numeric'},

@@ -23,6 +23,14 @@ class ACTCuentaBancaria extends ACTbase{
 		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	
+	function listarCuentaBancariaUsuario(){
+		$this->objParam->defecto('ordenacion','id_cuenta_bancaria');
+		$this->objParam->defecto('dir_ordenacion','asc');
+		$this->objFunc=$this->create('MODCuentaBancaria');			
+		$this->res=$this->objFunc->listarCuentaBancariaUsuario($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
 				
 	function insertarCuentaBancaria(){
 		$this->objFunc=$this->create('MODCuentaBancaria');	

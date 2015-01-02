@@ -53,7 +53,9 @@ DECLARE
     v_obs					varchar;
     v_registros_proc				record;
     v_codigo_tipo_pro		varchar;
-			    
+	v_origen				varchar;			    
+    v_sql					varchar;
+    v_cadena_cnx			varchar;
 BEGIN
 
     v_nombre_funcion = 'tes.ft_ts_libro_bancos_ime';
@@ -255,7 +257,7 @@ BEGIN
          END IF; --fin comparacion tipo
          
 			--Definicion de la respuesta
-			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','DepÛsitos almacenado(a) con exito (id_libro_bancos'||v_id_libro_bancos||')'); 
+			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Dep√≥sitos almacenado(a) con exito (id_libro_bancos'||v_id_libro_bancos||')'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_id_libro_bancos::varchar);
 
             --Devuelve la respuesta
@@ -278,7 +280,7 @@ BEGIN
             IF NOT EXISTS(SELECT 1 FROM tes.tts_libro_bancos LBRBAN
                           WHERE LBRBAN.id_libro_bancos=v_parametros.id_libro_bancos) THEN
                               
-                raise exception 'ModificaciÛn no realizada: no existe el registro % en la tabla tes.tts_libro_bancos', v_parametros.id_libro_bancos;
+                raise exception 'Modificaci√≥n no realizada: no existe el registro % en la tabla tes.tts_libro_bancos', v_parametros.id_libro_bancos;
                     
             END IF;
 			--verificacion de nueva fecha de cheque esta en la gestion correcta
@@ -384,49 +386,22 @@ BEGIN
 		UPDATE tes.tts_libro_bancos SET 
 		id_cuenta_bancaria=v_parametros.id_cuenta_bancaria,
 		fecha=v_parametros.fecha,
-		a_favor=upper(translate (v_parametros.a_favor, '·ÈÌÛ˙¡…Õ”⁄‰ÎÔˆ¸ƒÀœ÷‹Ò', 'aeiouAEIOUaeiouAEIOU—')),
+		a_favor=upper(translate (v_parametros.a_favor, '√°√©√≠√≥√∫√Å√â√ç√ì√ö√§√´√Ø√∂√º√Ñ√ã√è√ñ√ú√±', 'aeiouAEIOUaeiouAEIOU√ë')),
 		nro_cheque=g_nro_cheque,
         importe_deposito=v_parametros.importe_deposito,
 		nro_comprobante=v_parametros.nro_comprobante,
-        nro_liquidacion=upper(translate (v_parametros.nro_liquidacion, '·ÈÌÛ˙¡…Õ”⁄‰ÎÔˆ¸ƒÀœ÷‹Ò', 'aeiouAEIOUaeiouAEIOU—')),
-        detalle=upper(translate (v_parametros.detalle, '·ÈÌÛ˙¡…Õ”⁄‰ÎÔˆ¸ƒÀœ÷‹Ò', 'aeiouAEIOUaeiouAEIOU—')),
+        nro_liquidacion=upper(translate (v_parametros.nro_liquidacion, '√°√©√≠√≥√∫√Å√â√ç√ì√ö√§√´√Ø√∂√º√Ñ√ã√è√ñ√ú√±', 'aeiouAEIOUaeiouAEIOU√ë')),
+        detalle=upper(translate (v_parametros.detalle, '√°√©√≠√≥√∫√Å√â√ç√ì√ö√§√´√Ø√∂√º√Ñ√ã√è√ñ√ú√±', 'aeiouAEIOUaeiouAEIOU√ë')),
 		origen=v_parametros.origen,
-        observaciones=upper(translate (v_parametros.observaciones, '·ÈÌÛ˙¡…Õ”⁄‰ÎÔˆ¸ƒÀœ÷‹Ò', 'aeiouAEIOUaeiouAEIOU—')),
+        observaciones=upper(translate (v_parametros.observaciones, '√°√©√≠√≥√∫√Å√â√ç√ì√ö√§√´√Ø√∂√º√Ñ√ã√è√ñ√ú√±', 'aeiouAEIOUaeiouAEIOU√ë')),
 		importe_cheque=v_parametros.importe_cheque,
         id_libro_bancos_fk=v_parametros.id_libro_bancos_fk,
         tipo=v_parametros.tipo,
 		fecha_mod=now(),
-		id_usuario_mod = p_id_usuario
+		id_usuario_mod = p_id_usuario,
+        id_finalidad = v_parametros.id_finalidad
 		WHERE tes.tts_libro_bancos.id_libro_bancos = v_parametros.id_libro_bancos;
         
-        
-        /*
-         --en el caso de tener FA asociado registramos la relacion
-         IF(ts_id_comprobante_libro_bancos is not null and ts_tipo = 'cheque')THEN
-
-			--obtenemos los datos del fondo en avance anterior
-            select cl.id_comprobante, cl.id_libro_bancos_deposito, cl.tipo
-            into g_id_comprobante, g_id_libro_bancos_deposito, g_tipo
-            from sci.tct_comprobante_libro_bancos cl
-            where cl.id_comprobante_libro_bancos=ts_id_comprobante_libro_bancos;
-            
-            --insertamos el nuevo registro
-         	INSERT INTO sci.tct_comprobante_libro_bancos (
-            	id_comprobante,
-                id_libro_bancos_deposito,
-                tipo,
-                id_libro_bancos_cheque            
-            )
-            VALUES
-            (
-            	g_id_comprobante,
-                g_id_libro_bancos_deposito,
-                g_tipo,
-            	ts_id_libro_bancos
-            );
-            
-         END IF;
-        */
             
         If (v_parametros.fecha<> g_fecha_ant) Then
         	--ALGORITMO DE ORDENACION DE REGISTROS
@@ -539,7 +514,7 @@ BEGIN
         End If;
 
 			--Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','DepÛsitos modificado(a)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Dep√≥sitos modificado(a)'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_parametros.id_libro_bancos::varchar);
                
             --Devuelve la respuesta
@@ -573,7 +548,7 @@ BEGIN
             end if;
 			   
             --Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','DepÛsitos eliminado(a)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Dep√≥sitos eliminado(a)'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_parametros.id_libro_bancos::varchar);
               
             --Devuelve la respuesta
@@ -605,7 +580,8 @@ BEGIN
         select
             lb.id_libro_bancos,
             lb.id_proceso_wf,
-            lb.estado
+            lb.estado,
+            lb.origen
             --pp.fecha_tentativa,
             --op.numero,
             --pp.total_prorrateado ,
@@ -613,7 +589,8 @@ BEGIN
         into 
             v_id_libro_bancos,
             v_id_proceso_wf,
-            v_codigo_estado
+            v_codigo_estado,
+            v_origen
             --v_fecha_tentativa,
             --v_num_obliacion_pago,
             --v_total_prorrateo,
@@ -752,8 +729,29 @@ BEGIN
              fecha_mod=now()
                            
           where id_proceso_wf = v_parametros.id_proceso_wf_act;
-           
           
+           
+          if(v_codigo_estado_siguiente='impreso' AND v_origen='FONDOS_AVANCE')then
+          
+			v_sql:='select tesoro.f_solicitud_avance_pagado_pxp('||v_id_libro_bancos||')';
+            
+            --Obtenci√≥n de la cadena de conexi√≥n
+            v_cadena_cnx =  migra.f_obtener_cadena_conexion();
+            
+            --Abrir conexi√≥n
+            v_resp = dblink_connect(v_cadena_cnx);
+         
+            IF v_resp!='OK' THEN
+                raise exception 'FALLO LA CONEXION A LA BASE DE DATOS CON DBLINK';
+            END IF;
+            
+            --Ejecuta la funci√≥n remotamente
+            perform * from dblink(v_sql, true) as (respuesta varchar);
+            
+            --Cierra la conexi√≥n abierta
+            perform dblink_disconnect();              	
+          	
+          end if;
           -- si hay mas de un estado disponible  preguntamos al usuario
           v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado del libro bancos)'); 
           v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
