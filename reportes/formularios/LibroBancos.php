@@ -19,7 +19,7 @@ header("content-type: text/javascript; charset=UTF-8");
                 allowBlank:true,
                 emptyText:'Cuenta Bancaria...',
                 store: new Ext.data.JsonStore({
-                         url: '../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancaria',
+                         url: '../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancariaUsuario',
                          id: 'id_cuenta_bancaria',
                          root: 'datos',
                          sortInfo:{
