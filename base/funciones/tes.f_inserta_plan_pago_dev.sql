@@ -587,7 +587,7 @@ BEGIN
             
             
             -- chequea fechas de costos inicio y fin
-            v_resp_doc =  tes.f_validar_periodo_costo(v_id_plan_pago);
+            --v_resp_doc =  tes.f_validar_periodo_costo(v_id_plan_pago);
            
            
             -- inserta documentos en estado borrador si estan configurados

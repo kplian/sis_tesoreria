@@ -649,7 +649,7 @@ class MODPlanPago extends MODbase{
 		$this->procedimiento='tes.f_plan_pago_sel';
 		$this->transaccion='TES_PAGOS_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
-		$this->setCount(false);
+		//$this->setCount(true);
 		
 		  $this->captura('id_plan_pago', 'INTEGER');
 		  $this->captura('id_gestion', 'INTEGER');

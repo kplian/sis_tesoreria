@@ -54,6 +54,8 @@ DECLARE
   v_registros_pro record;
   v_aux_mb numeric;
   v_fecha date;
+  v_ano_1 integer;
+  v_ano_2 integer;
 
   
 
@@ -205,10 +207,19 @@ BEGIN
                     --la fecha de reversion no puede ser anterior a la fecha de la solictud
                     -- la fecha de solictud es la fecha de compromiso 
                     IF  now()  < v_registros.fecha THEN
-                      v_fecha = v_registros.fecha::Date;
+                      v_fecha = v_registros.fecha::date;
                     ELSE
+                       -- la fecha de reversion como maximo puede ser el 31 de diciembre   
                        v_fecha = now()::date;
-                    END IF ; 
+                       v_ano_1 =  EXTRACT(YEAR FROM  now()::date);
+                       v_ano_2 =  EXTRACT(YEAR FROM  v_registros.fecha::date);
+                       
+                       IF  v_ano_1  >  v_ano_2 THEN
+                         v_fecha = ('31-12-'|| v_ano_2::varchar)::date;
+                       END IF;
+                    END IF; 
+                    
+                   
                      
                       --armamos los array para enviar a presupuestos          
                     IF v_comprometido - v_ejecutado > 0 THEN
@@ -264,7 +275,8 @@ BEGIN
                                    p.id_presupuesto,
                                    od.id_obligacion_pago,
                                    od.id_obligacion_det,
-                                   op.id_moneda
+                                   op.id_moneda,
+                                   op.fecha
                                  from  tes.tprorrateo pro
                                  inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det   and od.estado_reg = 'activo'
                                  inner join tes.tobligacion_pago op on op.id_obligacion_pago = od.id_obligacion_pago
@@ -302,7 +314,16 @@ BEGIN
                                 va_columna_relacion[v_i]= 'id_obligacion_pago';
                                 va_fk_llave[v_i] = v_registros_pro.id_obligacion_pago;
                                 va_id_obligacion_det[v_i]= v_registros_pro.id_obligacion_det;
+                                
+                                --si la el año de pago es mayor que el año del devengado , el pago va con fecha de 31 de diciembre del año del devengado
                                 va_fecha[v_i]=now()::date;
+                                v_ano_1 =  EXTRACT(YEAR FROM  va_fecha[v_i]::date);
+                                v_ano_2 =  EXTRACT(YEAR FROM  v_registros_pro.fecha::date);
+                                               
+                                IF  v_ano_1  >  v_ano_2 THEN
+                                   va_fecha[v_i] = ('31-12-'|| v_ano_2::varchar)::date;
+                                END IF;
+                                
                            
                                 v_aux_mb = param.f_convertir_moneda(
                                           v_registros_pro.id_moneda, 
