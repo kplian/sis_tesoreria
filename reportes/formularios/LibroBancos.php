@@ -30,7 +30,7 @@ header("content-type: text/javascript; charset=UTF-8");
                     fields: ['id_cuenta_bancaria','nro_cuenta','denominacion','centro'],
                     // turn on remote sorting
                     remoteSort: true,
-                    baseParams:{par_filtro:'nro_cuenta#denominacion#centro'}
+                    baseParams:{par_filtro:'nro_cuenta#denominacion#centro', permiso:'todos'}
                     }),
                 valueField: 'id_cuenta_bancaria',
                 displayField: 'nro_cuenta',
