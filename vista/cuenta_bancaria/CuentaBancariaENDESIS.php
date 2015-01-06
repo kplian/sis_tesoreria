@@ -17,7 +17,8 @@ header("content-type:text/javascript; charset=UTF-8");
 			this.load({
 				params : {
 					start : 0,
-					limit : 50
+					limit : 50,
+					permiso : 'todos'
 				}
 			});
 			this.addButton('btnDepositosCheques', {

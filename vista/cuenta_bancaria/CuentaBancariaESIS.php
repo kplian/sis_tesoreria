@@ -22,7 +22,7 @@ Phx.vista.CuentaBancariaESIS = {
 	constructor: function(config) {
 	    this.maestro=config.maestro;
     	Phx.vista.CuentaBancariaESIS.superclass.constructor.call(this,config);
-	    this.load({params:{start:0, limit:this.tam_pag}});
+	    this.load({params:{start:0, limit:this.tam_pag, permiso : 'todos'}});
 	},
       
 	preparaMenu:function(n){

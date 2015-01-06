@@ -276,7 +276,7 @@ BEGIN
  			
             return v_consulta;
         END;
-    ELSEIF (p_transaccion = 'TS_RELIBA_SEL') THEN
+    ELSEIF (p_transaccion = 'TES_RELIBA_SEL') THEN
        BEGIN  
         --to_char(now(), ''dd/mm/yyyy'') as fecha, 
         raise notice 'fecha unio %', v_parametros.fecha_ini;

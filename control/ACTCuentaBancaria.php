@@ -27,6 +27,11 @@ class ACTCuentaBancaria extends ACTbase{
 	function listarCuentaBancariaUsuario(){
 		$this->objParam->defecto('ordenacion','id_cuenta_bancaria');
 		$this->objParam->defecto('dir_ordenacion','asc');
+		
+		if($this->objParam->getParametro('permiso')!=''){
+			$this->objParam->addFiltro("usrbanc.tipo_permiso= ''".$this->objParam->getParametro('permiso')."''");
+		}
+		
 		$this->objFunc=$this->create('MODCuentaBancaria');			
 		$this->res=$this->objFunc->listarCuentaBancariaUsuario($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
