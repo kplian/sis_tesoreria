@@ -47,7 +47,8 @@ class MODFinalidad extends MODbase{
 		$this->procedimiento='tes.ft_finalidad_sel';
 		$this->transaccion='TES_FINCTABAN_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
-				
+		
+		$this->setParametro('vista','vista','varchar');
 		//Definicion de la lista del resultado del query
 		$this->captura('id_finalidad','int4');
 		$this->captura('estado','varchar');

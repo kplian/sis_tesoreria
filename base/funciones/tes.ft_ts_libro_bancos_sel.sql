@@ -361,7 +361,11 @@ BEGIN
                                 else lbr.tipo in ('''||v_parametros.tipo||''') 
                                 end
                                 
-                                and   lbr.id_finalidad  = '''|| v_parametros.id_finalidad ||'''        
+                                and 
+                                case when ('||v_parametros.id_finalidad||'=0)
+                                then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13) 
+                                else lbr.id_finalidad in ('||v_parametros.id_finalidad||') 
+                                end                  
                                ),''999G999G999G999D99'') as total_debe,
                                
               to_char((Select sum(lbr.importe_cheque) 
@@ -389,9 +393,11 @@ BEGIN
                                                                 ''transferencia_carta'') 
                                 else lbr.tipo in ('''||v_parametros.tipo||''') 
                                 end 
-                                     
-                                        
-                                and   lbr.id_finalidad  = '''|| v_parametros.id_finalidad ||'''   
+                                and
+                                case when ('||v_parametros.id_finalidad||'=0)
+                                then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13) 
+                                else lbr.id_finalidad in ('||v_parametros.id_finalidad||') 
+                                end 
                                 ),''999G999G999G999D99'') as total_haber,
                                
                                
@@ -427,8 +433,11 @@ BEGIN
               else LB.tipo in ('''||v_parametros.tipo||''') 
               end  
               
-              and   LB.id_finalidad  = '''|| v_parametros.id_finalidad ||'''         
-              
+              and  
+              case when ('||v_parametros.id_finalidad||'=0)
+              then   LB.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13) 
+              else LB.id_finalidad in ('||v_parametros.id_finalidad||') 
+              end
               
               )  order by fecha, indice, nro_cheque asc'; 
                       

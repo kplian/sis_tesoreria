@@ -32,6 +32,10 @@ class ACTFinalidad extends ACTbase{
 			$this->objParam->addFiltro("cb.id_cuenta_bancaria = ".$this->objParam->getParametro('id_cuenta_bancaria'));
 		}
 		
+		if($this->objParam->getParametro('vista')!=''){
+			$this->objParam->addParametro('vista',$this->objParam->getParametro('vista'));
+		}
+		
 		$this->objFunc=$this->create('MODFinalidad');
 		$this->res=$this->objFunc->listarFinalidadCuentaBancaria($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());

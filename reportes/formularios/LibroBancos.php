@@ -173,7 +173,7 @@ header("content-type: text/javascript; charset=UTF-8");
                          id: 'id_finalidad',
                          root: 'datos',
                          sortInfo:{
-                            field: 'nombre_finalidad',
+                            field: 'id_finalidad',
                             direction: 'ASC'
                     },
                     totalProperty: 'total',
@@ -244,7 +244,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.getComponente('id_cuenta_bancaria').on('select',function(c,r,n){
 				this.getComponente('nro_cuenta').setValue(c.lastSelectionText);
 				this.getComponente('id_finalidad').reset();
-				this.getComponente('id_finalidad').store.baseParams={id_cuenta_bancaria:c.value};				
+				this.getComponente('id_finalidad').store.baseParams={id_cuenta_bancaria:c.value, vista: 'reporte'};				
 				this.getComponente('id_finalidad').modificado=true;
 			},this);
 		},
