@@ -138,6 +138,10 @@ DECLARE
      v_tam        				integer;
      v_indice 					integer;
      va_resp_ges              numeric[];
+     v_id_contrato				integer;
+     v_registros_documento		record;
+     v_registros_con			record;
+     v_id_documento_wf_op		integer;
    
      
 			    
@@ -178,7 +182,8 @@ BEGIN
             select 
                op.id_funcionario,
                op.fecha,
-               op.tipo_obligacion
+               op.tipo_obligacion,
+               op.id_proceso_wf
             into
                v_registros
             from tes.tobligacion_pago op
@@ -212,6 +217,15 @@ BEGIN
                    
                 END IF;
             END IF;
+            
+             
+            IF   pxp.f_existe_parametro(p_tabla,'id_contrato')    THEN
+              v_id_contrato = v_parametros.id_contrato;
+            END IF;
+            
+           
+            
+            
 			--Sentencia de la modificacion
 			update tes.tobligacion_pago set
 			id_proveedor = v_parametros.id_proveedor,
@@ -232,10 +246,76 @@ BEGIN
             id_usuario_ai = v_parametros._id_usuario_ai,
             usuario_ai = v_parametros._nombre_usuario_ai,
             tipo_anticipo = v_parametros.tipo_anticipo,
-            id_funcionario_gerente = va_id_funcionario_gerente[1]
+            id_funcionario_gerente = va_id_funcionario_gerente[1],
+            id_contrato = v_id_contrato
+            
             
             
 			where id_obligacion_pago = v_parametros.id_obligacion_pago;
+            
+            
+             -------------------------------------
+            -- COPIA CONTRATOS
+            -------------------------------------
+            
+            --  Si el la referencia al contrato esta presente ..  copiar el documento de contrato
+            IF v_id_contrato  is not  NULL THEN
+                 --con el ide de contrato obtenet el id_proceso_wf
+                 SELECT
+                   con.id_proceso_wf,
+                   con.numero,
+                   con.estado,
+                   pwf.nro_tramite
+                 INTO
+                  v_registros_con
+                 FROM leg.tcontrato con
+                 INNER JOIN wf.tproceso_wf pwf on pwf.id_proceso_wf = con.id_proceso_wf
+                 WHERE con.id_contrato = v_id_contrato;
+                
+                  -- con el proceso del contrato buscar el documento con codigo CONTRATO 
+               
+                  SELECT
+                    d.*
+                  into
+                   v_registros_documento
+                  FROM wf.tdocumento_wf d
+                  INNER JOIN wf.ttipo_documento td on td.id_tipo_documento = d.id_tipo_documento
+                  WHERE td.codigo = 'CONTRATO' and 
+                        d.id_proceso_wf = v_registros_con.id_proceso_wf;
+                 
+                    -- copiamos el link de referencia del contrato
+                    select
+                     dwf.id_documento_wf
+                    into
+                     v_id_documento_wf_op
+                    from wf.tdocumento_wf dwf
+                    inner  join  wf.ttipo_documento td on td.id_tipo_documento = dwf.id_tipo_documento
+                    where td.codigo = 'CONTRATO'  and dwf.id_proceso_wf = v_registros.id_proceso_wf;
+                 
+                  
+                 
+                    UPDATE 
+                      wf.tdocumento_wf  
+                    SET 
+                       id_usuario_mod = p_id_usuario,
+                       fecha_mod = now(),
+                       chequeado = v_registros_documento.chequeado,
+                       url = v_registros_documento.url,
+                       extension = v_registros_documento.extension,
+                       obs = v_registros_documento.obs,
+                       chequeado_fisico = v_registros_documento.chequeado_fisico,
+                       id_usuario_upload = v_registros_documento.id_usuario_upload,
+                       fecha_upload = v_registros_documento.fecha_upload,
+                       id_proceso_wf_ori = v_registros_documento.id_proceso_wf,
+                       id_documento_wf_ori = v_registros_documento.id_documento_wf,
+                       nro_tramite_ori = v_registros_con.nro_tramite
+                    WHERE 
+                      id_documento_wf = v_id_documento_wf_op;    
+                
+            
+            END IF;
+            
+            
                
 			--Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligaciones de Pago modificado(a)'); 
@@ -529,7 +609,7 @@ BEGIN
             -- CHEQUEA ESTADO DE VoBo PRESUPUESTOS si que existe
             ------------------------------------------------------
             
-            IF v_num_estados = 1 and  (va_codigo_estado[1] in  ('vbpresupuestos')) then
+            IF v_num_estados = 1 and  (va_codigo_estado[1] in  ('vbpresupuestos','registrado')) then
             
             
                            -- si solo hay un estado,  verificamos si tiene mas de un funcionario por este estado
@@ -741,9 +821,16 @@ BEGIN
                  END IF;
              
             END IF;
+            -------------------------------------------
+            --  VERIFICA SI ES NECESARIO UN CONTRATO
+            -----------------------------------------
+             IF  v_codigo_estado = 'borrador'  THEN 
              
+                 IF not tes.f_validar_contrato(v_parametros.id_obligacion_pago) THEN
+                   raise exception 'contrato no validao';
+                 END IF;
              
-        
+             END IF;
             --------------------------------------------------
             --  INSERCION AUTOMATICA DE CUOTAS
             --------------------------------------------------

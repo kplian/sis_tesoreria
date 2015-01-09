@@ -6,7 +6,6 @@
 *@date 10-04-2013 15:43:23
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
 */
-
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
@@ -125,11 +124,12 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                                 ['devengado','Devengar'],
                                 ['devengado_rrhh','Devengar RH'],
                                 ['dev_garantia','Devolucion de Garantia'], //es similr a un devengar y pagar pero no genera prorrateo directamente
-                                ['anticipo','Anticipo Fact/Rec (No ejecuta presupuesto, necesita Documento)']
+                                ['anticipo','Anticipo Fact/Rec (No ejecuta presupuesto, necesita Documento)'],
+                                ['ant_parcial','Anticipo Parcial(No ejecuta presupuesto, Con retenciones parciales en cada pago)']
                                ],
                     
                     'ANT_PARCIAL':[
-                               ['ant_parcial','Anticipo Parcial(No ejecuta presupuesto, Con retenciones parciales en cada pago)'],
+                               ['ant_parcial','Anticipo Parcial(No ejecuta presupuesto, Con retenciones parciales en cada pago)']
                                ],
                     
                     'DEVENGAR':[['pagado','Pagar'],
@@ -760,21 +760,21 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 allowBlank: true,
                 emptyText : 'Depósito...',
                 store: new Ext.data.JsonStore({
-                    url:'../../sis_migracion/control/TsLibroBancos/listarDepositosENDESIS',
+                    url:'../../sis_migracion/control/TsLibroBancos/listarTsLibroBancosDepositosConSaldo',
                     id : 'id_cuenta_bancaria_mov',
                     root: 'datos',
                     sortInfo:{
-                            field: 'nro_doc_tipo',
-                            direction: 'ASC'
+                            field: 'fecha',
+                            direction: 'DESC'
                     },
                     totalProperty: 'total',
-                    fields: ['id_cuenta_bancaria_mov','id_cuenta_bancaria','fecha','detalle','observaciones','importe_deposito','saldo'],
+                    fields: ['id_libro_bancos','id_cuenta_bancaria','fecha','detalle','observaciones','importe_deposito','saldo'],
                     remoteSort: true,
                     baseParams:{par_filtro:'detalle#observaciones#fecha'}
                }),
-               valueField: 'id_cuenta_bancaria_mov',
-               displayField: 'detalle',
-               gdisplayField: 'desc_deposito',
+               valueField: 'id_libro_bancos',
+               displayField: 'importe_deposito',
+               gdisplayField: 'observaciones',
                hiddenName: 'id_cuenta_bancaria_mov',
                forceSelection:true,
                typeAhead: false,

@@ -74,6 +74,9 @@ class MODObligacionPago extends MODbase{
 		$this->captura('monto_estimado_sg','numeric');
 		$this->captura('id_obligacion_pago_extendida','integer');
 		
+		$this->captura('desc_contrato','text');
+		$this->captura('id_contrato','integer');
+		
 		
 		
 		
@@ -150,6 +153,8 @@ class MODObligacionPago extends MODbase{
 		$this->captura('ajuste_aplicado','numeric');
 		$this->captura('monto_estimado_sg','numeric');
 		$this->captura('id_obligacion_pago_extendida','integer');
+		$this->captura('desc_contrato','text');
+		$this->captura('id_contrato','integer');
         
         
         //Ejecuta la instruccion
@@ -196,14 +201,12 @@ class MODObligacionPago extends MODbase{
 		$this->setParametro('fecha','fecha','date');
 		$this->setParametro('tipo_cambio_conv','tipo_cambio_conv','numeric');
         $this->setParametro('pago_variable','pago_variable','varchar');
-		
-
 		$this->setParametro('total_nro_cuota','total_nro_cuota','int4');
 		$this->setParametro('fecha_pp_ini','fecha_pp_ini','date');
 		$this->setParametro('rotacion','rotacion','int4');
 		$this->setParametro('id_plantilla','id_plantilla','int4');
-		
 		$this->setParametro('tipo_anticipo','tipo_anticipo','varchar');
+		$this->setParametro('id_contrato','id_contrato','int4');
 		
 		
 		
@@ -243,6 +246,7 @@ class MODObligacionPago extends MODbase{
         $this->setParametro('id_plantilla','id_plantilla','int4');
         
         $this->setParametro('tipo_anticipo','tipo_anticipo','varchar');
+		$this->setParametro('id_contrato','id_contrato','int4');
         
         
         

@@ -344,13 +344,25 @@ BEGIN
                      from tes.tobligacion_pago op
                      where op.id_obligacion_pago = p_id_obligacion_pago; 
                     
+                     -- recupera los anticipo ya registrados
+                      select 
+                         sum(pp.monto)
+                      into
+                         v_monto_total_registrado
+                      from tes.tplan_pago pp
+                      where  pp.estado_reg='activo'  
+                              and pp.tipo in('ant_parcial')
+                              and pp.id_obligacion_pago = p_id_obligacion_pago; 
+                     
+                     
                      v_porc_ant = pxp.f_get_variable_global('politica_porcentaje_anticipo')::numeric;
                      
                      IF v_porc_ant is NULL THEN
                        raise exception 'No se tiene valor en la variable global,  politica_porcentaje_anticipo';
                      END IF;
                      
-                     return v_monto_total*v_porc_ant;
+                     
+                     return (v_monto_total - COALESCE(v_monto_total_registrado) )*v_porc_ant;
             
            
           -------------------------------------
@@ -408,7 +420,7 @@ BEGIN
                      
                      --devolver la diferencias, el monto que falta descontar
                      
-                     return COALESCE(v_monto_total_registrado,0) + COALESCE(v_monto_aux,0) - COALESCE(v_monto_ant_descontado,0) - COALESCE(v_monto_aux,0);
+                     return COALESCE(v_monto_total_registrado,0) + COALESCE(v_monto_ajuste,0)  - COALESCE(v_monto_ant_descontado,0) - COALESCE(v_monto_aux,0);
             
             
              -------------------------------

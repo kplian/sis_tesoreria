@@ -88,15 +88,17 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             var data=this.sm.getSelected().data.id_proceso_wf;
             Phx.CP.loadingShow();
             Ext.Ajax.request({
-                url:'../../sis_workflow/control/ProcesoWf/diagramaGanttTramite',
-                params:{'id_proceso_wf':data},
-                success:this.successExport,
+                url: '../../sis_workflow/control/ProcesoWf/diagramaGanttTramite',
+                params: { 'id_proceso_wf': data },
+                success: this.successExport,
                 failure: this.conexionFailure,
-                timeout:this.timeout,
-                scope:this
+                timeout: this.timeout,
+                scope: this
             });         
         }
 	
+	
+	   this.construyeVariablesContratos();
 	
 	},
 	tam_pag:50,
@@ -324,7 +326,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 				name: 'id_moneda',
 				fieldLabel: 'Moneda',
 				anchor: '80%',
-				tinit: true,
+				tinit: false,
 				allowBlank: false,
 				origen: 'MONEDA',
 				gdisplayField: 'moneda',
@@ -395,10 +397,62 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 				origen: 'PROVEEDOR',
 				gdisplayField: 'desc_proveedor',
 				gwidth: 100,
+				listWidth: '280',
+				resizable: true
 			},
 			type: 'ComboRec',
 			id_grupo: 1,
 			filters:{pfiltro:'pv.desc_proveedor',type:'string'},
+			grid: true,
+			form: true
+		},
+		{
+			config: {
+				name: 'id_contrato',
+				hiddenName: 'id_contrato',
+				fieldLabel: 'Contrato',
+				typeAhead: false,
+				forceSelection: false,
+				allowBlank: true,
+				disabled: true,
+				emptyText: 'Contratos...',
+				store: new Ext.data.JsonStore({
+					url: '../../sis_workflow/control/Tabla/listarTablaInstancia',
+					id: 'id_contrato',
+					root: 'datos',
+					sortInfo: {
+						field: 'id_contrato',
+						direction: 'ASC'
+					},
+					totalProperty: 'total',
+					fields: ['id_contrato', 'numero', 'tipo', 'objeto', 'estado', 'desc_proveedor','monto','moneda','fecha_inicio','fecha_fin'],
+					// turn on remote sorting
+					remoteSort: true,
+					baseParams: {par_filtro:'con.numero#con.tipo#con.monto#prov.desc_proveedor#con.objeto#con.monto', tipo_proceso:"CON",tipo_estado:"finalizado"}
+				}),
+				valueField: 'id_contrato',
+				displayField: 'numero',
+				gdisplayField: 'desc_contrato',
+				triggerAction: 'all',
+				lazyRender: true,
+				mode: 'remote',
+				pageSize: 20,
+				queryDelay: 200,
+				listWidth:280,
+				minChars: 2,
+				gwidth: 100,
+				anchor: '80%',
+				renderer: function(value, p, record) {
+					return String.format('{0}', record.data['desc_contrato']);
+				},
+				tpl: '<tpl for="."><div class="x-combo-list-item"><p>Nro: {numero} ({tipo})</p><p>Obj: <strong>{objeto}</strong></p><p>Prov : {desc_proveedor}</p> <p>Monto: {monto} {moneda}</p><p>Rango: {fecha_inicio} al {fecha_fin}</p></div></tpl>'
+			},
+			type: 'ComboBox',
+			id_grupo: 0,
+			filters: {
+				pfiltro: 'con.numero',
+				type: 'numeric'
+			},
 			grid: true,
 			form: true
 		},
@@ -408,7 +462,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                 name: 'tipo_anticipo',
                 fieldLabel: 'Tiene Anticipo Parcial',
                 allowBlank: false,
-                qtip:'Se habilita en SI,  solo para el caso de anticipos parcial, estos anticipos se tendran que descontar de los pagos sucesivos (Se descuenta del ligado pagable). Los anticipos parciales no van contra factura u otro similar. <br>Para el caso de anticipo totales  escoger la opcion NO',
+                qtip:'Se habilita en SI,  solo para el caso de anticipos parcial, estos anticipos se tendran que descontar de los pagos sucesivos (Se descuenta del liquido  pagable). Los anticipos parciales no van contra factura u otro similar. <br>Para el caso de anticipo totales  escoger la opcion NO',
                 anchor: '80%',
                 emptyText:'Tipo Obligacion',
                 store:new Ext.data.ArrayStore({
@@ -769,6 +823,14 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
              
               
           },this);
+		
+		this.Cmp.id_proveedor.on('select', function(cmb,rec,ind){
+			this.Cmp.id_contrato.enable();
+			this.Cmp.id_contrato.reset();
+			this.Cmp.id_contrato.store.baseParams.filter = "[{\"type\":\"numeric\",\"comparison\":\"eq\", \"value\":\""+cmb.getValue()+"\",\"field\":\"CON.id_proveedor\"}]";
+			this.Cmp.id_contrato.modificado = true;
+			
+		}, this);
 		
 		this.cmpTipoObligacion.on('select',function(c,rec,ind){
 				
@@ -1516,8 +1578,33 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
         }, rec.data, this.idContenedor, 'CheckPresupuesto');
     },
     
-    
-    
+    construyeVariablesContratos:function(){
+    	Phx.CP.loadingShow();
+    	Ext.Ajax.request({
+                url: '../../sis_workflow/control/Tabla/cargarDatosTablaProceso',
+                params: { "tipo_proceso": "CON", "tipo_estado": "finalizado" , "limit":"100","start":"0"},
+                success: this.successCotratos,
+                failure: this.conexionFailure,
+                timeout: this.timeout,
+                scope:   this
+            });
+           
+    	
+    	
+    },
+    successCotratos:function(resp){
+           Phx.CP.loadingHide();
+           var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+           if(reg.datos){
+                
+              this.ID_CONT = reg.datos[0].atributos.id_tabla
+              
+              this.Cmp.id_contrato.store.baseParams.id_tabla = this.ID_CONT;
+             
+             }else{
+                alert('Error al cargar datos de contratos')
+            }
+     },
 	
 	sistema: 'ADQ',
 	id_cotizacion: 0,

@@ -1049,4 +1049,16 @@ IS 'det_rendicion, dev_garantia, ant_aplicado , pagado_rrh, pagado, ant_parcial,
 
 /***********************************F-SCP-RAC-TES-0-03/12/2014***************************************/
 
+/***********************************I-SCP-RAC-TES-0-09/01/2015***************************************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN id_contrato INTEGER;
+
+COMMENT ON COLUMN tes.tobligacion_pago.id_contrato
+IS 'si la obligacion tiene un contrato de referencia';
+
+
+/***********************************F-SCP-RAC-TES-0-09/01/2015***************************************/
 

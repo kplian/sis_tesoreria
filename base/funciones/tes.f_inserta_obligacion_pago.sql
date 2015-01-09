@@ -166,6 +166,17 @@ BEGIN
         
         END IF;
         
+        
+        
+        -- TODO,  Si el la referencia al contrato esta presente ..  copiar el documento de contrato
+        
+        --con el ide de contrato obtenet el id_proceso_wf
+        
+        -- con el proceso del contrato buscar el documento con codigo CONTRATO
+        
+        -- con el documento identificado y el nuemro de tramite,  llenamos el documento correpondiente para la OP , 
+        -- en documento hacer referencia al id_proceso_wf original
+        
         --   obtener el codigo del tipo_proceso
        
         select   tp.codigo 

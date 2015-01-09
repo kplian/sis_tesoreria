@@ -159,7 +159,13 @@ Phx.vista.ObligacionPagoSol = {
             },this);
             
             
-            
+       
+		this.Cmp.id_proveedor.on('select', function(cmb,rec,ind){
+			this.Cmp.id_contrato.enable();
+			this.Cmp.id_contrato.reset();
+			this.Cmp.id_contrato.store.baseParams.filter = "[{\"type\":\"numeric\",\"comparison\":\"eq\", \"value\":\""+cmb.getValue()+"\",\"field\":\"CON.id_proveedor\"}]";
+			this.Cmp.id_contrato.modificado = true;
+		}, this);
     
     },
     
