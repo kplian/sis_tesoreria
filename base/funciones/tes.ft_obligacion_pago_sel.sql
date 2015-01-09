@@ -162,15 +162,18 @@ BEGIN
                               obpg.ajuste_anticipo,
                               obpg.ajuste_aplicado,
                               obpg.monto_estimado_sg,
-                              obpg.id_obligacion_pago_extendida
+                              obpg.id_obligacion_pago_extendida,
+                              con.tipo||'' - ''||con.numero::varchar as desc_contrato,
+                              con.id_contrato
                               
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
                               left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
-                              left join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
                               inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
                               inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
                               inner join param.tdepto dep on dep.id_depto=obpg.id_depto
+                              left join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
+                              left join leg.tcontrato con on con.id_contrato = obpg.id_contrato
                               left join param.tplantilla pla on pla.id_plantilla = obpg.id_plantilla
                               '||v_inner ||'
                              -- left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
@@ -273,11 +276,13 @@ BEGIN
 			v_consulta:='select count(obpg.id_obligacion_pago)
 					    from tes.tobligacion_pago obpg
 						inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
-						left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
-                        left join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
+                        left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
                         inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
                         inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
-						inner join param.tdepto dep on dep.id_depto=obpg.id_depto
+                        inner join param.tdepto dep on dep.id_depto=obpg.id_depto
+                        left join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
+                        left join leg.tcontrato con on con.id_contrato = obpg.id_contrato
+                        left join param.tplantilla pla on pla.id_plantilla = obpg.id_plantilla
                         '|| v_inner ||'  
                        -- left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
                         where  '||v_filadd;
@@ -366,7 +371,9 @@ BEGIN
                               obpg.ajuste_anticipo,
                               obpg.ajuste_aplicado,
                               obpg.monto_estimado_sg,
-                              obpg.id_obligacion_pago_extendida
+                              obpg.id_obligacion_pago_extendida,
+                              con.tipo||'' - ''||con.numero::varchar as desc_contrato,
+                              con.id_contrato
                               
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
@@ -377,6 +384,7 @@ BEGIN
                               inner join param.tdepto dep on dep.id_depto=obpg.id_depto
                               left join param.tplantilla pla on pla.id_plantilla = obpg.id_plantilla
                               inner join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
+                              left join leg.tcontrato con on con.id_contrato = obpg.id_contrato
                               where  '||v_filadd;
       			
                   --Definicion de la respuesta
@@ -425,7 +433,8 @@ BEGIN
                         inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
                         inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
 						inner join param.tdepto dep on dep.id_depto=obpg.id_depto
-                        inner join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario  
+                        inner join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario 
+                        left join leg.tcontrato con on con.id_contrato = obpg.id_contrato 
                         where  '||v_filadd;
 			
 			--Definicion de la respuesta		    
