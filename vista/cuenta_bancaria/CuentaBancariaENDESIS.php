@@ -33,8 +33,8 @@ header("content-type:text/javascript; charset=UTF-8");
 			var rec = this.sm.getSelected();
 			Phx.CP.loadWindows('../../../sis_migracion/vista/ts_libro_bancos_depositos/TsLibroBancosDeposito.php', 'Depositos', {
 				modal : true,
-				width : '90%',
-				height : 500,
+				width : '95%',
+				height : '95%',
 			}, rec.data, this.idContenedor, 'TsLibroBancosDeposito');
 		},
 		
