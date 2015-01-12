@@ -36,12 +36,15 @@ BEGIN
     --TODO, validaciones  adiconales sobre el  contrtao, fecha, montos  etc....
     --TODO validar que obligacione de adquisicioens deberian tener contrato 
     
-    IF v_count > 1  and v_registros_op.tipo_obligacion = 'pago_directo' THEN
-       IF v_registros_op.id_cotrato is null then
+    IF v_count > 0  and v_registros_op.tipo_obligacion = 'pago_directo' THEN
+       IF v_registros_op.id_contrato is null then
               raise exception 'Para esta obligacion de pago es requerido un contrato de referencia';
        END IF;
     END IF;
     
+     
+     
+     
     return True;
 EXCEPTION
 				

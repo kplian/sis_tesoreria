@@ -1148,3 +1148,16 @@ select pxp.f_insert_trol ('OP - Reporte Pagos X Concepto', 'OP - Reporte Pagos X
 
 
 /***********************************F-DAT-RAC-TES-0-27/11/2014*****************************************/
+
+
+/***********************************I-DAT-RAC-TES-0-12/01/2015*****************************************/
+
+
+select pxp.f_insert_tgui ('Visto Bueno de Pagos (Conta)', 'Visto Bueno de Pagos (Conta)', 'VBPDC', 'si', 3, 'sis_tesoreria/vista/plan_pago/PlanPagoVbConta.php', 2, '', 'PlanPagoVbConta', 'TES');
+select pxp.f_insert_testructura_gui ('VBPDC', 'TES');
+
+
+/***********************************F-DAT-RAC-TES-0-12/01/2015*****************************************/
+
+
+

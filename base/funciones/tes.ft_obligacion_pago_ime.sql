@@ -142,6 +142,7 @@ DECLARE
      v_registros_documento		record;
      v_registros_con			record;
      v_id_documento_wf_op		integer;
+     v_id_usuario_reg_op        integer;
    
      
 			    
@@ -528,7 +529,8 @@ BEGIN
               op.tipo_cambio_conv,
               pr.desc_proveedor,
               op.pago_variable,
-              op.comprometido
+              op.comprometido,
+              op.id_usuario_reg
               
              into
               v_id_proceso_wf,
@@ -543,7 +545,8 @@ BEGIN
               v_tipo_cambio_conv,
               v_desc_proveedor,
               v_pago_variable,
-              v_comprometido
+              v_comprometido,
+              v_id_usuario_reg_op
               
               
              from tes.tobligacion_pago op
@@ -821,16 +824,20 @@ BEGIN
                  END IF;
              
             END IF;
+            
+           
             -------------------------------------------
             --  VERIFICA SI ES NECESARIO UN CONTRATO
             -----------------------------------------
              IF  v_codigo_estado = 'borrador'  THEN 
-             
+               
                  IF not tes.f_validar_contrato(v_parametros.id_obligacion_pago) THEN
                    raise exception 'contrato no validao';
                  END IF;
              
              END IF;
+             
+            
             --------------------------------------------------
             --  INSERCION AUTOMATICA DE CUOTAS
             --------------------------------------------------
@@ -901,7 +908,7 @@ BEGIN
                             --TODO,  bloquear en formulario de OP  facturas con monto excento
                            
                             -- llamada para insertar plan de pagos
-                            v_resp = tes.f_inserta_plan_pago_dev(p_administrador, p_id_usuario,v_hstore_pp);
+                            v_resp = tes.f_inserta_plan_pago_dev(p_administrador, v_id_usuario_reg_op,v_hstore_pp);
                             
                             -- calcula la fecha para la siguiente insercion
                             v_fecha_pp_ini =  v_fecha_pp_ini + interval  '1 month'*v_rotacion;

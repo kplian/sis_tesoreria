@@ -26,7 +26,9 @@ class ACTPlanPago extends ACTbase{
 		}
 		
 		
-		
+		if($this->objParam->getParametro('id_gestion')!=''){
+            $this->objParam->addFiltro("op.id_gestion = ".$this->objParam->getParametro('id_gestion'));  
+        }
 		
 		if($this->objParam->getParametro('id_obligacion_pago')!=''){
             $this->objParam->addFiltro("plapa.id_obligacion_pago = ".$this->objParam->getParametro('id_obligacion_pago'));  

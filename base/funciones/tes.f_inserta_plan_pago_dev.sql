@@ -478,7 +478,7 @@ BEGIN
             
             ELSIF  (p_hstore->'tipo_pago')::varchar in ('anticipo') and  v_nro_cuota=1 THEN
             
-            --validamos que la obligacion tenga definido el  porceentaje por descuento de anticipo
+               -- validamos que la obligacion tenga definido el  porceentaje por descuento de anticipo
                IF v_registros.porc_anticipo = 0 THEN
                  raise exception 'para registrar una ciota de anticipo tiene que definir un porcentaje de retención en la boligación';
                END IF;

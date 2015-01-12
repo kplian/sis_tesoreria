@@ -52,7 +52,8 @@ Phx.vista.ObligacionPagoVb = {
                     name: 'obs',
                     xtype: 'textarea',
                     fieldLabel: 'Obs',
-                    allowBlank: true,
+                    allowBlank: false,
+                    qtip: 'Por que esta retrocediendo?',
                     value:'',
                     anchor: '80%',
                     maxLength:500
@@ -105,20 +106,23 @@ Phx.vista.ObligacionPagoVb = {
         
      antEstadoSubmmit:function(res,eve){                   
             var d= this.sm.getSelected().data;
-            Phx.CP.loadingShow();
-            var operacion = 'cambiar';
-            operacion=  res.argument.estado == 'inicio'?'inicio':operacion; 
-            
-            Ext.Ajax.request({
-                url:'../../sis_tesoreria/control/ObligacionPago/anteriorEstadoObligacion',
-                params:{id_obligacion_pago:d.id_obligacion_pago, 
-                        operacion: operacion,
-                        obs:this.cmpObs.getValue()},
-                success:this.successSinc,
-                failure: this.conexionFailure,
-                timeout:this.timeout,
-                scope:this
-            });     
+            if(this.formEstado.getForm().isValid()){
+		            Phx.CP.loadingShow();
+		            var operacion = 'cambiar';
+		            operacion=  res.argument.estado == 'inicio'?'inicio':operacion; 
+		            
+		            Ext.Ajax.request({
+		                url:'../../sis_tesoreria/control/ObligacionPago/anteriorEstadoObligacion',
+		                params:{id_obligacion_pago:d.id_obligacion_pago, 
+		                        operacion: operacion,
+		                        obs:this.cmpObs.getValue()},
+		                success:this.successSinc,
+		                failure: this.conexionFailure,
+		                timeout:this.timeout,
+		                scope:this
+		            }); 	
+            }
+                
       },    
    
     
