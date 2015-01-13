@@ -56,6 +56,14 @@ DECLARE
 	v_origen				varchar;			    
     v_sql					varchar;
     v_cadena_cnx			varchar;
+    v_id_funcionario		integer;
+    v_id_estado_wf_ant		integer;
+    v_id_usuario_reg		integer;
+    v_acceso_directo 		varchar;
+    v_clase 				varchar;
+    v_parametros_ad 		varchar;
+    v_tipo_noti 			varchar;
+    v_titulo 				varchar;
 BEGIN
 
     v_nombre_funcion = 'tes.ft_ts_libro_bancos_ime';
@@ -730,11 +738,12 @@ BEGIN
                            
           where id_proceso_wf = v_parametros.id_proceso_wf_act;
           
+          
           if(v_codigo_estado_siguiente='anulado')then
           	update tes.tts_libro_bancos  t set 
              importe_cheque = 0, 
              importe_deposito = 0,
-             a_favor = 'ANULADO'                        
+             a_favor = 'ANULADO'                          
           	where id_libro_bancos = v_id_libro_bancos;
           end if;
            
@@ -767,7 +776,88 @@ BEGIN
           -- Devuelve la respuesta
           return v_resp;
         
-     end;     
+     end;
+     /*********************************    
+ 	#TRANSACCION:  'TES_ANTELB_IME'
+ 	#DESCRIPCION:	Transaccion utilizada  pasar a  estados anterior en el libro bancos
+                    segun la operacion definida
+ 	#AUTOR:		GSS
+ 	#FECHA:		13-01-2015
+	***********************************/
+
+	elseif(p_transaccion='TES_ANTELB_IME')then   
+        BEGIN
+        	--------------------------------------------------
+        	--Retrocede al estado inmediatamente anterior
+       		-------------------------------------------------
+       		--recuperaq estado anterior segun Log del WF
+          
+          SELECT           
+             ps_id_tipo_estado,
+             ps_id_funcionario,
+             ps_id_usuario_reg,
+             ps_id_depto,
+             ps_codigo_estado,
+             ps_id_estado_wf_ant
+          into
+             v_id_tipo_estado,
+             v_id_funcionario,
+             v_id_usuario_reg,
+             v_id_depto,
+             v_codigo_estado,
+             v_id_estado_wf_ant 
+          FROM wf.f_obtener_estado_ant_log_wf(v_parametros.id_estado_wf);
+          
+          select 
+               ew.id_proceso_wf 
+            into 
+               v_id_proceso_wf
+          from wf.testado_wf ew
+          where ew.id_estado_wf= v_id_estado_wf_ant;
+          
+          --configurar acceso directo para la alarma   
+             v_acceso_directo = '';
+             v_clase = '';
+             v_parametros_ad = '';
+             v_tipo_noti = '';
+             v_titulo  = '';
+             
+          v_id_estado_actual = wf.f_registra_estado_wf(
+              v_id_tipo_estado, 
+              v_id_funcionario, 
+              v_parametros.id_estado_wf, 
+              v_id_proceso_wf, 
+              p_id_usuario,
+              v_parametros._id_usuario_ai,
+              v_parametros._nombre_usuario_ai,
+              v_id_depto,
+              '[RETROCESO] ',
+              v_acceso_directo,
+              v_clase,
+              v_parametros_ad,
+              v_tipo_noti,
+              v_titulo);
+           
+           IF  not tes.f_fun_regreso_libro_bancos_wf(p_id_usuario, 
+                                                   v_parametros._id_usuario_ai, 
+                                                   v_parametros._nombre_usuario_ai, 
+                                                   v_id_estado_actual, 
+                                                   v_parametros.id_proceso_wf, 
+                                                   v_codigo_estado) THEN
+            
+               raise exception 'Error al retroceder estado';
+            
+            END IF;        
+                    
+         -- si hay mas de un estado disponible  preguntamos al usuario
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');                        
+                              
+          --Devuelve la respuesta
+            return v_resp;
+                        
+        END;
+             
 	else
      
     	raise exception 'Transaccion inexistente: %',p_transaccion;
