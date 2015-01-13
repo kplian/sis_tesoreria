@@ -77,7 +77,7 @@ BEGIN
                         depto.nombre,
                         lban.id_proceso_wf,
                         lban.id_estado_wf,
-                        pxp.f_fecha_literal(lban.fecha) as fecha_cheque_literal,
+                        upper(pxp.f_fecha_literal(lban.fecha)) as fecha_cheque_literal,
                         lban.id_finalidad,
                         fin.nombre_finalidad,
                         fin.color,
@@ -112,12 +112,14 @@ BEGIN
                                      and lb2.tipo <> ''deposito'' )
                                     
                                 Else 0
-                            END as saldo_deposito	
+                            END as saldo_deposito,
+                        reg.nombre_regional		
 						from tes.tts_libro_bancos lban
 						inner join segu.tusuario usu1 on usu1.id_usuario = lban.id_usuario_reg
                         left join param.tdepto depto on depto.id_depto=lban.id_depto
 						left join segu.tusuario usu2 on usu2.id_usuario = lban.id_usuario_mod
                         inner join tes.tfinalidad fin on fin.id_finalidad = lban.id_finalidad
+                        left join param.tregional reg on reg.codigo_regional = lban.origen
 				        where  ';
 			
 			--Definicion de la respuesta

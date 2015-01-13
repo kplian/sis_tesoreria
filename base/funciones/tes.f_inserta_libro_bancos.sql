@@ -272,7 +272,8 @@ BEGIN
                 id_proceso_wf,
                 num_tramite,
                 id_depto,
-                id_finalidad
+                id_finalidad,
+                sistema_origen
                 ) values(            
                 (p_hstore->'id_cuenta_bancaria')::integer,
                 (p_hstore->'fecha')::date,
@@ -297,7 +298,8 @@ BEGIN
                 v_id_proceso_wf,
                 v_num_tramite,
                 (p_hstore->'id_depto')::integer,				
-                (p_hstore->'id_finalidad')::integer				
+                (p_hstore->'id_finalidad')::integer,
+                (p_hstore->'sistema_origen')::varchar				
                 )RETURNING id_libro_bancos into v_id_libro_bancos;
     			
                  -- inserta documentos en estado borrador si estan configurados

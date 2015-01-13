@@ -555,7 +555,7 @@ BEGIN
             return v_resp;
 
 		end;
-        
+            
     /*********************************    
  	#TRANSACCION:  'TES_SIGELB_IME'
  	#DESCRIPCION:	funcion que controla el cambio al Siguiente estado de los movimientos bancarios, integrado  con el WF
@@ -581,7 +581,7 @@ BEGIN
             lb.id_libro_bancos,
             lb.id_proceso_wf,
             lb.estado,
-            lb.origen
+            lb.sistema_origen
             --pp.fecha_tentativa,
             --op.numero,
             --pp.total_prorrateado ,
@@ -730,6 +730,13 @@ BEGIN
                            
           where id_proceso_wf = v_parametros.id_proceso_wf_act;
           
+          if(v_codigo_estado_siguiente='anulado')then
+          	update tes.tts_libro_bancos  t set 
+             importe_cheque = 0, 
+             importe_deposito = 0,
+             a_favor = 'ANULADO'                        
+          	where id_libro_bancos = v_id_libro_bancos;
+          end if;
            
           if(v_codigo_estado_siguiente='impreso' AND v_origen='FONDOS_AVANCE')then
           
