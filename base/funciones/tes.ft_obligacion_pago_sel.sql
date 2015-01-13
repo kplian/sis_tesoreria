@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_pago_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -127,7 +125,7 @@ BEGIN
                               obpg.id_subsistema,
                               ss.nombre as nombre_subsistema,
                               obpg.id_funcionario,
-                            --  fun.desc_funcionario1,
+                              fun.desc_funcionario1,
                               obpg.estado_reg,
                               obpg.porc_anticipo,
                               obpg.id_estado_wf,
@@ -176,7 +174,7 @@ BEGIN
                               left join leg.tcontrato con on con.id_contrato = obpg.id_contrato
                               left join param.tplantilla pla on pla.id_plantilla = obpg.id_plantilla
                               '||v_inner ||'
-                             -- left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
+                              left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
                               where  '||v_filadd;
       			
                   --Definicion de la respuesta
@@ -335,7 +333,7 @@ BEGIN
                               obpg.id_subsistema,
                               ss.nombre as nombre_subsistema,
                               obpg.id_funcionario,
-                            --  fun.desc_funcionario1,
+                              fun.desc_funcionario1,
                               obpg.estado_reg,
                               obpg.porc_anticipo,
                               obpg.id_estado_wf,
