@@ -417,7 +417,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 				disabled: true,
 				emptyText: 'Contratos...',
 				store: new Ext.data.JsonStore({
-					url: '../../sis_workflow/control/Tabla/listarTablaInstancia',
+					url: '../../sis_workflow/control/Tabla/listarTablaCombo',
 					id: 'id_contrato',
 					root: 'datos',
 					sortInfo: {
