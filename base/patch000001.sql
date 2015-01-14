@@ -1062,3 +1062,16 @@ IS 'si la obligacion tiene un contrato de referencia';
 
 /***********************************F-SCP-RAC-TES-0-09/01/2015***************************************/
 
+
+/***********************************I-SCP-RAC-TES-0-14/01/2015***************************************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN obs_presupuestos VARCHAR;
+
+COMMENT ON COLUMN tes.tobligacion_pago.obs_presupuestos
+IS 'para inotrducir obs en el area de presupuestos';
+
+
+/***********************************F-SCP-RAC-TES-0-14/01/2015***************************************/

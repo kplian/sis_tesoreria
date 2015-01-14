@@ -23,6 +23,7 @@ class MODObligacionPago extends MODbase{
 		
 		$this->setParametro('id_funcionario_usu','id_funcionario_usu','int4');
         $this->setParametro('tipo_interfaz','tipo_interfaz','varchar');
+		$this->setParametro('historico','historico','varchar');
 				
 		//Definicion de la lista del resultado del query
 		$this->captura('id_obligacion_pago','int4');
@@ -76,6 +77,8 @@ class MODObligacionPago extends MODbase{
 		
 		$this->captura('desc_contrato','text');
 		$this->captura('id_contrato','integer');
+		$this->captura('obs_presupuestos','varchar');
+		
 		
 		
 		
@@ -155,6 +158,7 @@ class MODObligacionPago extends MODbase{
 		$this->captura('id_obligacion_pago_extendida','integer');
 		$this->captura('desc_contrato','text');
 		$this->captura('id_contrato','integer');
+		$this->captura('obs_presupuestos','varchar');
         
         
         //Ejecuta la instruccion
@@ -278,6 +282,26 @@ class MODObligacionPago extends MODbase{
 		return $this->respuesta;
 	}
 	
+	function modificarObsPresupuestos(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_obligacion_pago_ime';
+		$this->transaccion='TES_OBSPRE_MOD';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
+		$this->setParametro('obs','obs','varchar');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
+	
+	
 	function extenderOp(){
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.ft_obligacion_pago_ime';
@@ -329,6 +353,7 @@ class MODObligacionPago extends MODbase{
         //Define los parametros para la funcion
         $this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
 		$this->setParametro('forzar_fin','forzar_fin','varchar');
+		$this->setParametro('obs','obs','varchar');
 
         //Ejecuta la instruccion
         $this->armarConsulta();

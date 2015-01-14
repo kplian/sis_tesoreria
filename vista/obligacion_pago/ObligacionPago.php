@@ -34,17 +34,21 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 	    
          this.addButton('ant_estado',{
               argument: {estado: 'anterior'},
-              text:'Rechazar',
+              text: 'Retroceder',
               iconCls: 'batras',
-              disabled:true,
-              handler:this.antEstado,
+              disabled: true,
+              handler: this.antEstado,
               tooltip: '<b>Pasar al Anterior Estado</b>'
           });
           
         this.addButton('fin_registro',{text:'Siguiente',iconCls: 'badelante',disabled:true,handler:this.fin_registro,tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado, si esta en borrador comprometera presupuesto</p>'});
         this.addButton('reporte_com_ejec_pag',{text:'Rep.',iconCls: 'bpdf32',disabled:true,handler:this.repComEjePag,tooltip: '<b>Reporte</b><p>Reporte Obligacion de Pago</p>'});
         this.addButton('reporte_plan_pago',{text:'Planes de Pago',iconCls: 'bpdf32',disabled:true,handler:this.repPlanPago,tooltip: '<b>Reporte Plan Pago</b><p>Reporte Planes de Pago</p>'});
-        this.TabPanelSouth.get(1).disable()
+        
+        this.disableTabPagos();
+      
+        
+        
         this.addButton('btnChequeoDocumentosWf',
             {
                 text: 'Documentos',
@@ -636,7 +640,18 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		},		
 		{
 			config:{
-				labelSeparator:'Estado Reg.',
+				fieldLabel:'Obs Presupuestos',
+				gwidth: 180,
+				name: 'obs_presupuestos'
+			},
+			type:'Field',
+			filters:{pfiltro:'obpg.obs_presupuestos',type:'string'},
+			grid:true,
+			form:false
+		},		
+		{
+			config:{
+				fieldLabel:'Estado Reg.',
 				name: 'estado_reg'
 			},
 			type:'Field',
@@ -752,7 +767,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		'tipo_anticipo',
 		'ajuste_anticipo',
 		'ajuste_aplicado',
-		'monto_estimado_sg','id_obligacion_pago_extendida'
+		'monto_estimado_sg','id_obligacion_pago_extendida', 'obs_presupuestos'
 		
 	],
 	
@@ -939,22 +954,35 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
            
             var d= this.sm.getSelected().data;
            
-            if(d.estado =='borrador'  && d.tipo_obligacion != 'adquisiciones'){
-               alert('La solicitud pasara al área de presupuestos para verificación')
-            }
-            if(d.estado !='en_pago'){
-            //if(confirm('¿Está seguro de eliminar el registro?')){
-            Phx.CP.loadingShow();
             
-                Ext.Ajax.request({
-                    // form:this.form.getForm().getEl(),
-                    url:'../../sis_tesoreria/control/ObligacionPago/finalizarRegistro',
-                    params:{id_obligacion_pago:d.id_obligacion_pago,operacion:'fin_registro'},
-                    success:this.successSinc,
-                    failure: this.conexionFailure,
-                    timeout:this.timeout,
-                    scope:this
-                }); 
+            if(d.estado !='en_pago'){
+	            //if(confirm('¿Está seguro de eliminar el registro?')){
+	            
+                if(d.estado =='vbpresupuestos'){
+                    
+                    //lla funcion se encuentra en ObligacionPagoVb
+                    this.showObsEstado();
+                      
+                
+                }
+                else{
+                	if(d.estado =='borrador'  && d.tipo_obligacion != 'adquisiciones'){
+                        alert('La solicitud pasara al área de presupuestos para verificación')
+                    }
+                
+	                Phx.CP.loadingShow();
+		            Ext.Ajax.request({
+	                    // form:this.form.getForm().getEl(),
+	                    url:'../../sis_tesoreria/control/ObligacionPago/finalizarRegistro',
+	                    params:{id_obligacion_pago:d.id_obligacion_pago,operacion:'fin_registro'},
+	                    success:this.successSinc,
+	                    failure: this.conexionFailure,
+	                    timeout:this.timeout,
+	                    scope:this
+	                });	
+                	
+                }	
+	             
             
             }
             else{
@@ -1026,6 +1054,20 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             });     
       },
      
+     enableTabPagos:function(){
+     	if(this.TabPanelSouth.get(1)){
+     		      this.TabPanelSouth.get(1).enable();	
+		          this.TabPanelSouth.setActiveTab(1)
+		        }
+     },
+     
+     disableTabPagos:function(){
+     	if(this.TabPanelSouth.get(1)){
+     		      this.TabPanelSouth.get(1).disable();	
+		          this.TabPanelSouth.setActiveTab(0)
+		          
+		}
+     },
       preparaMenu:function(n){
           var data = this.getSelectedData();
           var tb =this.tbar;
@@ -1045,7 +1087,8 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
               this.getBoton('reporte_plan_pago').disable();
               this.getBoton('ajustes').disable();
              
-              this.TabPanelSouth.get(1).disable();
+              this.disableTabPagos();
+		      
           
           }
           else{
@@ -1054,12 +1097,14 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                if (data['estado'] == 'registrado'){   
                   this.getBoton('ant_estado').enable();
                   this.getBoton('fin_registro').disable();
-                  this.TabPanelSouth.get(1).enable();
+                 
+                  this.enableTabPagos();
+      
                   this.getBoton('est_anticipo').enable();
                 }
                 
                 if (data['estado'] == 'en_pago'){
-                    this.TabPanelSouth.get(1).enable()
+                    this.enableTabPagos();
                     this.getBoton('ant_estado').enable();
                     this.getBoton('fin_registro').enable();
                     this.getBoton('est_anticipo').enable();
@@ -1067,7 +1112,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                 
                if (data['estado'] == 'anulado'){
                     this.getBoton('fin_registro').disable();
-                    this.TabPanelSouth.get(1).disable();
+                    this.disableTabPagos();
                     this.getBoton('ant_estado').disable();
                     this.getBoton('est_anticipo').disable();
                }
@@ -1075,7 +1120,6 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                     this.getBoton('ant_estado').disable();
                     this.getBoton('fin_registro').disable();
                     this.getBoton('est_anticipo').disable();
-                    console.log(data['id_obligacion_pago_extendida'])
                     if(data['id_obligacion_pago_extendida']=='' || !data['id_obligacion_pago_extendida'] ){
                     	this.getBoton('extenderop').enable();
                     }
@@ -1168,7 +1212,10 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 			//Inhabilita el reporte de disponibilidad
             this.getBoton('btnVerifPresup').disable();
         }
-       this.TabPanelSouth.get(1).disable();
+        
+        
+        this.disableTabPagos();
+      
        
        //RCM: menú de reportes de adquisiciones
        this.menuAdq.disable();

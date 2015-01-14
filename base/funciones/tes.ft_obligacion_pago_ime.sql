@@ -660,8 +660,15 @@ BEGIN
                raise exception 'El proceso de WF esta mal parametrizado, no se encuentra el estado siguiente ';
             END IF;
             
-            
-          
+            v_obs = '';
+            -- si es estado actual es vbpresupeustos registras las observaciones de presupeustos
+             IF  v_codigo_estado  in  ('vbpresupuestos') THEN
+                 update tes.tobligacion_pago  set 
+                  obs_presupuestos = v_parametros.obs
+                 where id_obligacion_pago  = v_parametros.id_obligacion_pago;
+                 v_obs = v_parametros.obs;
+             END IF;
+           
             ---------------------------------------
             -- REGISTA EL SIGUIENTE ESTADO DEL WF.
             ---------------------------------------
@@ -672,7 +679,8 @@ BEGIN
                                                            p_id_usuario,
                                                            v_parametros._id_usuario_ai,
                                                            v_parametros._nombre_usuario_ai,
-                                                           v_id_depto);
+                                                           v_id_depto,
+                                                           v_obs);
             
             
              -- chequear si es una obligacion de pago extendida,
@@ -1673,7 +1681,36 @@ BEGIN
             --Devuelve la respuesta
             return v_resp;
 
-		end;   
+		end;
+        
+    /*********************************    
+ 	#TRANSACCION:  'TES_OBSPRE_MOD'
+ 	#DESCRIPCION:	Modificar las observaciones de presupeustos
+                    
+ 	#AUTOR:	        Rensi Arteaga Copari
+ 	#FECHA:		    1-4-2015 14:48:35
+	***********************************/
+
+	elsif(p_transaccion='TES_OBSPRE_MOD')then
+
+		begin
+			
+         
+             update tes.tobligacion_pago set  
+              obs_presupuestos = v_parametros.obs
+             where id_obligacion_pago = v_parametros.id_obligacion_pago;
+           
+             --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','UOs, EPs retornados'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_parametros.id_obligacion_pago::varchar);
+            
+              
+            --Devuelve la respuesta
+            return v_resp;
+
+		end; 
+        
+          
     
     else
      

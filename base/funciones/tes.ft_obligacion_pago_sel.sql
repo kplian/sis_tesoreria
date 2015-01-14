@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_pago_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -33,6 +35,7 @@ DECLARE
     v_obligaciones_partida	record;
     v_respuesta_verificar	record;
     v_inner 			varchar;
+    v_historico         varchar;
     
 BEGIN
 
@@ -52,6 +55,12 @@ BEGIN
         
           v_filadd='';
           v_inner='';
+          
+          IF  pxp.f_existe_parametro(p_tabla,'historico') THEN
+             v_historico =  v_parametros.historico;
+          ELSE
+            v_historico = 'no';
+          END IF;
           
         
          IF   v_parametros.tipo_interfaz ='obligacionPagoTes' THEN
@@ -79,7 +88,11 @@ BEGIN
                    from param.tdepto_usuario depu 
                    where depu.id_usuario =  p_id_usuario; 
               
+              IF v_historico = 'no' THEN
                  v_filadd=' (obpg.estado = ''vbpresupuestos'') and';
+              ELSE
+                 v_filadd=' (obpg.estado not in  (''borrador'')) and';
+              END IF;
         
          ELSIF v_parametros.tipo_interfaz =  'ObligacionPagoConsulta' THEN
             --no hay limitaciones ...     
@@ -162,7 +175,8 @@ BEGIN
                               obpg.monto_estimado_sg,
                               obpg.id_obligacion_pago_extendida,
                               con.tipo||'' - ''||con.numero::varchar as desc_contrato,
-                              con.id_contrato
+                              con.id_contrato,
+                              obpg.obs_presupuestos
                               
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
@@ -201,8 +215,14 @@ BEGIN
 
 		begin
         
-           v_filadd='';
-           v_inner='';
+          v_filadd='';
+          v_inner='';
+           
+          IF  pxp.f_existe_parametro(p_tabla,'historico') THEN
+             v_historico =  v_parametros.historico;
+          ELSE
+            v_historico = 'no';
+          END IF;
           
           --  raise exception 'cc  %',v_parametros.tipo_interfaz  ;
         IF   v_parametros.tipo_interfaz ='obligacionPagoSol' THEN
@@ -240,7 +260,11 @@ BEGIN
                    from param.tdepto_usuario depu 
                    where depu.id_usuario =  p_id_usuario; 
               
-                 v_filadd=' (obpg.estado = ''vbpresupuestos'') and';        
+              IF v_historico = 'no' THEN
+                 v_filadd=' (obpg.estado = ''vbpresupuestos'') and';
+              ELSE
+                 v_filadd=' (obpg.estado not in  (''borrador'')) and';
+              END IF;        
         
          ELSIF v_parametros.tipo_interfaz =  'ObligacionPagoConsulta' THEN
            --no se colocan retricciones
@@ -371,7 +395,8 @@ BEGIN
                               obpg.monto_estimado_sg,
                               obpg.id_obligacion_pago_extendida,
                               con.tipo||'' - ''||con.numero::varchar as desc_contrato,
-                              con.id_contrato
+                              con.id_contrato,
+                              obpg.obs_presupuestos
                               
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
