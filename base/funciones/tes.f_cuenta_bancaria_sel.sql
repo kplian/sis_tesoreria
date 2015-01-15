@@ -124,7 +124,8 @@ BEGIN
     	begin
             	raise notice 'id_usuario_otro %', v_id_usuario;
     		--Sentencia de la consulta
-			v_consulta:='select
+            if(v_id_usuario!=1)then
+				v_consulta:='select
 						ctaban.id_cuenta_bancaria,
 						ctaban.estado_reg,
 						ctaban.fecha_baja,
@@ -150,8 +151,33 @@ BEGIN
 						left join segu.tusuario usu2 on usu2.id_usuario = ctaban.id_usuario_mod
 				        where usrbanc.id_usuario='||v_id_usuario|| ' and ';
 			
-			--Definicion de la respuesta
-			v_consulta:=v_consulta||v_parametros.filtro;
+				--Definicion de la respuesta
+				v_consulta:=v_consulta||v_parametros.filtro;
+            else
+            	v_consulta:='select
+						ctaban.id_cuenta_bancaria,
+						ctaban.estado_reg,
+						ctaban.fecha_baja,
+						ctaban.nro_cuenta,
+						ctaban.fecha_alta,
+						ctaban.id_institucion,
+                        inst.nombre as nombre_institucion,
+						ctaban.fecha_reg,
+						ctaban.id_usuario_reg,
+						ctaban.fecha_mod,
+						ctaban.id_usuario_mod,
+						usu1.cuenta as usr_reg,
+						usu2.cuenta as usr_mod,
+                        mon.id_moneda,	
+                        mon.codigo as codigo_moneda,
+                        ctaban.denominacion,
+                        ctaban.centro
+						from tes.tcuenta_bancaria ctaban
+                        inner join param.tinstitucion inst on inst.id_institucion = ctaban.id_institucion
+                        left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda
+						inner join segu.tusuario usu1 on usu1.id_usuario = ctaban.id_usuario_reg
+						left join segu.tusuario usu2 on usu2.id_usuario = ctaban.id_usuario_mod';
+            end if;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 			raise notice 'consulta %', v_consulta;
 			--Devuelve la respuesta

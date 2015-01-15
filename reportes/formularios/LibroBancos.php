@@ -27,7 +27,7 @@ header("content-type: text/javascript; charset=UTF-8");
                             direction: 'ASC'
                     },
                     totalProperty: 'total',
-                    fields: ['id_cuenta_bancaria','nro_cuenta','denominacion','centro'],
+                    fields: ['id_cuenta_bancaria','nro_cuenta','denominacion','centro', 'nombre_institucion'],
                     // turn on remote sorting
                     remoteSort: true,
                     baseParams:{par_filtro:'nro_cuenta#denominacion#centro', permiso:'todos'}
@@ -70,6 +70,15 @@ header("content-type: text/javascript; charset=UTF-8");
 			filters:{pfiltro:'nro_cuenta',type:'string'},
 			id_grupo:1,
 			form:true
+		},
+		{
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'nombre_banco'
+			},
+			type:'Field',
+			form:true 
 		},
 		{
 			config:{
@@ -220,9 +229,34 @@ header("content-type: text/javascript; charset=UTF-8");
 			filters:{pfiltro:'finalidad',type:'string'},
 			id_grupo:1,
 			form:true
+		},
+		{
+			config:{
+				name:'formato_reporte',
+				fieldLabel:'Formato del Reporte',
+				typeAhead: true,
+				allowBlank:false,
+	    		triggerAction: 'all',
+	    		emptyText:'Formato...',
+	    		selectOnFocus:true,
+				mode:'local',
+				store:new Ext.data.ArrayStore({
+	        	fields: ['ID', 'valor'],
+	        	data :	[['1','PDF'],	
+						['2','Excel']]	        				
+	    		}),
+				valueField:'ID',
+				displayField:'valor',
+				width:250,			
+				
+			},
+			type:'ComboBox',
+			id_grupo:1,
+			form:true
 		}],
 		title : 'Reporte Libro Bancos',		
 		ActSave : '../../sis_migracion/control/TsLibroBancos/reporteLibroBancos',
+		//ActSave : window.open('http://172.17.45.11/LibroBancos/Home/VerLibroBancosDeposito?'),
 		topBar : true,
 		botones : false,
 		labelSubmit : 'Imprimir',
@@ -235,18 +269,45 @@ header("content-type: text/javascript; charset=UTF-8");
 		},
 		
 		iniciarEventos:function(){        
+			this.cmpFormatoReporte = this.getComponente('formato_reporte');
+			this.cmpFechaIni = this.getComponente('fecha_ini');
+			this.cmpFechaFin = this.getComponente('fecha_fin');
+			this.cmpIdCuentaBancaria = this.getComponente('id_cuenta_bancaria');
+			this.cmpEstado = this.getComponente('estado');
+			this.cmpTipo = this.getComponente('tipo');
+			this.cmpNombreBanco = this.getComponente('nombre_banco');
+			this.cmpNroCuenta = this.getComponente('nro_cuenta');
+			
 			this.getComponente('finalidad').hide(true);
-			this.getComponente('nro_cuenta').hide(true);
+			this.cmpNroCuenta.hide(true);
 			this.getComponente('id_finalidad').on('change',function(c,r,n){
 				this.getComponente('finalidad').setValue(c.lastSelectionText);
 			},this);
 			
-			this.getComponente('id_cuenta_bancaria').on('select',function(c,r,n){
-				this.getComponente('nro_cuenta').setValue(c.lastSelectionText);
+			this.cmpIdCuentaBancaria.on('select',function(c,r,n){
+				this.cmpNombreBanco.setValue(r.data.nombre_institucion);
+				this.cmpNroCuenta.setValue(c.lastSelectionText);
 				this.getComponente('id_finalidad').reset();
 				this.getComponente('id_finalidad').store.baseParams={id_cuenta_bancaria:c.value, vista: 'reporte'};				
 				this.getComponente('id_finalidad').modificado=true;
 			},this);
+		},
+		
+		onSubmit:function(o){
+			if(this.cmpFormatoReporte.getValue()==2){
+				var data = 'FechaIni=' + this.cmpFechaIni.getValue().format('d-m-Y');
+				data = data + '&FechaFin=' + this.cmpFechaFin.getValue().format('d-m-Y');
+				data = data + '&IdCuentaBancaria=' + this.cmpIdCuentaBancaria.getValue();
+				data = data + '&Estado=' + this.cmpEstado.getValue();
+				data = data + '&Tipo=' + this.cmpTipo.getValue();
+				data = data + '&NombreBanco=' + this.cmpNombreBanco.getValue();
+				data = data + '&NumeroCuenta=' + this.cmpNroCuenta.getValue();
+				
+				window.open('http://172.17.45.11/LibroBancos/Home/VerLibroBancos?'+data);
+				//window.open('http://localhost:2309/Home/VerLibroBancos?'+data);				
+			}else{
+				Phx.vista.ReporteLibroBancos.superclass.onSubmit.call(this,o);				
+			}
 		},
 		
 		tipo : 'reporte',
