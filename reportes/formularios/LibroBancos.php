@@ -303,7 +303,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				data = data + '&NombreBanco=' + this.cmpNombreBanco.getValue();
 				data = data + '&NumeroCuenta=' + this.cmpNroCuenta.getValue();
 				
-				window.open('http://172.17.45.11/LibroBancos/Home/VerLibroBancos?'+data);
+				window.open('http://sms.obairlines.bo/LibroBancos/Home/VerLibroBancos?'+data);
 				//window.open('http://localhost:2309/Home/VerLibroBancos?'+data);				
 			}else{
 				Phx.vista.ReporteLibroBancos.superclass.onSubmit.call(this,o);				
