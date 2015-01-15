@@ -116,7 +116,7 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                     fields: ['id_concepto_ingas','tipo','desc_ingas','movimiento','desc_partida','id_grupo_ots','filtro_ot','requiere_ot'],
                     // turn on remote sorting
                     remoteSort: true,
-                    baseParams:{par_filtro:'desc_ingas#par.codigo#par.nombre_partida',movimiento:'gasto', autorizacion: 'pago_directo'}
+                    baseParams:{par_filtro:'desc_ingas#par.codigo#par.nombre_partida',movimiento:'gasto', autorizacion: 'pago_directo',autorizacion_nulos: 'no'}
                     }),
                 valueField: 'id_concepto_ingas',
                 displayField: 'desc_ingas',
@@ -586,7 +586,7 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
   preparaMenu:function(n){
          
          Phx.vista.ObligacionDet.superclass.preparaMenu.call(this,n); 
-          if(this.maestro.estado ==  'borrador'){
+          if(this.maestro.estado ==  'borrador' || this.maestro.estado ==  'vbpresupuestos'){
                this.getBoton('edit').enable();
                this.getBoton('new').enable();
                this.getBoton('del').enable();
@@ -597,13 +597,15 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
          }
          else{
              
-               this.getBoton('edit').disable();
-               this.getBoton('new').disable();
-               this.getBoton('del').disable();
-               this.getBoton('btnProrrateo').disable();
+             	this.getBoton('edit').disable();
+                this.getBoton('new').disable();
+                this.getBoton('del').disable();
+                this.getBoton('btnProrrateo').disable();
+             
+               
          }
          
-          if(this.maestro&&(this.maestro.estado ==  'borrador' && this.maestro.tipo_obligacion=='adquisiciones')){
+          if(this.maestro&&(this.maestro.estado ==  'borrador' && this.maestro.tipo_obligacion=='adquisiciones' )){
                
                this.getBoton('edit').enable();
                this.getBoton('new').disable();
