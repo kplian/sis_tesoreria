@@ -113,7 +113,8 @@ BEGIN
                                     
                                 Else 0
                             END as saldo_deposito,
-                        reg.nombre_regional		
+                        reg.nombre_regional,
+						lban.sistema_origen						
 						from tes.tts_libro_bancos lban
 						inner join segu.tusuario usu1 on usu1.id_usuario = lban.id_usuario_reg
                         left join param.tdepto depto on depto.id_depto=lban.id_depto
