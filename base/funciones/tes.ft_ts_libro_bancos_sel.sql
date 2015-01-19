@@ -48,79 +48,42 @@ BEGIN
      				
     	begin
     		--Sentencia de la consulta
-			v_consulta:='select
-						lban.id_libro_bancos,
-                        lban.num_tramite,
-						lban.id_cuenta_bancaria,
-						lban.fecha,
-						lban.a_favor,
-						lban.nro_cheque,
-						lban.importe_deposito,
-						lban.nro_liquidacion,
-						lban.detalle,
-						lban.origen,
-						lban.observaciones,
-						lban.importe_cheque,
-						lban.id_libro_bancos_fk,
-						lban.estado,
-						lban.nro_comprobante,
-						lban.indice,
-						lban.estado_reg,
-						lban.tipo,
-						lban.fecha_reg,
-						lban.id_usuario_reg,
-						lban.fecha_mod,
-						lban.id_usuario_mod,
-						usu1.cuenta as usr_reg,
-						usu2.cuenta as usr_mod,
-                        lban.id_depto,
-                        depto.nombre,
-                        lban.id_proceso_wf,
-                        lban.id_estado_wf,
-                        upper(pxp.f_fecha_literal(lban.fecha)) as fecha_cheque_literal,
-                        lban.id_finalidad,
-                        fin.nombre_finalidad,
-                        fin.color,
-                        CASE 
-                            	When lban.tipo = ''deposito'' Then 
-                            	
-	                            	lban.importe_deposito - COALESCE((Select COALESCE(sum( lb.importe_cheque), 0)
-                                                                        From tes.tts_libro_bancos lb
-                                                                        Where lb.id_libro_bancos_fk = lban.id_libro_bancos
-                                                                        and lb.tipo <> ''deposito'') , 0)
-                                                                        
-                                    						+ COALESCE((Select COALESCE(sum( lb.importe_deposito), 0)
-                                                                        From tes.tts_libro_bancos lb
-                                                                        Where lb.id_libro_bancos_fk = lban.id_libro_bancos
-                                                                        and lb.tipo = ''deposito'') , 0)
-                                                                
-                                When (lban.tipo in (''cheque'', ''debito_automatico'', ''transferencia_carta'') and lban.id_libro_bancos_fk is not null) Then
-                            
-                            		(Select COALESCE(lb.importe_deposito,0)
-                                     From tes.tts_libro_bancos lb
-                                     Where lb.id_libro_bancos = lban.id_libro_bancos_fk)
-                                     + 
-                                    (Select COALESCE(sum(lb.importe_deposito),0)
-                                     From tes.tts_libro_bancos lb
-                                     Where lb.id_libro_bancos_fk = lban.id_libro_bancos_fk
-                                     and lb.tipo = ''deposito'')
-                                     -
-                                    (Select sum(lb2.importe_cheque)
-                                     From tes.tts_libro_bancos lb2
-                                     Where lb2.id_libro_bancos <= lban.id_libro_bancos 
-                                     and lb2.id_libro_bancos_fk = lban.id_libro_bancos_fk
-                                     and lb2.tipo <> ''deposito'' )
-                                    
-                                Else 0
-                            END as saldo_deposito,
-                        reg.nombre_regional,
-						lban.sistema_origen						
-						from tes.tts_libro_bancos lban
-						inner join segu.tusuario usu1 on usu1.id_usuario = lban.id_usuario_reg
-                        left join param.tdepto depto on depto.id_depto=lban.id_depto
-						left join segu.tusuario usu2 on usu2.id_usuario = lban.id_usuario_mod
-                        inner join tes.tfinalidad fin on fin.id_finalidad = lban.id_finalidad
-                        left join param.tregional reg on reg.codigo_regional = lban.origen
+			v_consulta:='select id_libro_bancos,
+                        num_tramite,
+                        id_cuenta_bancaria,
+                        fecha,
+                        a_favor,
+                        nro_cheque,
+                        importe_deposito,
+                        nro_liquidacion,
+                        detalle,
+                        origen,
+                        observaciones,
+                        importe_cheque,
+                        id_libro_bancos_fk,
+                        estado,
+                        nro_comprobante,
+                        indice,
+                        estado_reg,
+                        tipo,
+                        fecha_reg,
+                        id_usuario_reg,
+                        fecha_mod,
+                        id_usuario_mod,
+                        usr_reg,
+                        usr_mod,
+                        id_depto,
+                        nombre_depto,
+                        id_proceso_wf,
+                        id_estado_wf,
+                        fecha_cheque_literal,
+                        id_finalidad,
+                        nombre_finalidad,
+                        color,
+                        saldo_deposito,
+                        nombre_regional,
+                        sistema_origen
+                        from tes.vlibro_bancos
 				        where  ';
 			
 			--Definicion de la respuesta
@@ -161,9 +124,7 @@ BEGIN
 		begin
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(id_libro_bancos)
-					    from tes.tts_libro_bancos lban
-					    inner join segu.tusuario usu1 on usu1.id_usuario = lban.id_usuario_reg
-						left join segu.tusuario usu2 on usu2.id_usuario = lban.id_usuario_mod
+					    from tes.vlibro_bancos
 					    where ';
 			
 			--Definicion de la respuesta		    
