@@ -110,6 +110,11 @@ BEGIN
             
               IF(v_parametros.tipo <> 'deposito' and v_parametros.id_libro_bancos_fk is not null) Then            	
                 --Obtenemos el importe del saldo del deposito
+                if((select lb.estado
+					from tes.tts_libro_bancos lb
+					where lb.id_libro_bancos = v_parametros.id_libro_bancos_fk)='borrador')then
+                raise exception 'No se puede ingresar un cheque, debito automatico o transferencia carta sobre un deposito en estado BORRADOR';
+                end if;
                 Select lb.importe_deposito - Coalesce((Select sum (ba.importe_cheque)
                                               From tes.tts_libro_bancos ba
                                               Where ba.id_libro_bancos_fk=lb.id_libro_bancos
