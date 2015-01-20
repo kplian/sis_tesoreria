@@ -64,6 +64,8 @@ DECLARE
     v_parametros_ad 		varchar;
     v_tipo_noti 			varchar;
     v_titulo 				varchar;
+    v_nro_cheque			integer;
+    v_tipo					varchar;
 BEGIN
 
     v_nombre_funcion = 'tes.ft_ts_libro_bancos_ime';
@@ -594,7 +596,9 @@ BEGIN
             lb.id_libro_bancos,
             lb.id_proceso_wf,
             lb.estado,
-            lb.sistema_origen
+            lb.sistema_origen,
+            lb.nro_cheque,
+       		lb.tipo
             --pp.fecha_tentativa,
             --op.numero,
             --pp.total_prorrateado ,
@@ -603,7 +607,9 @@ BEGIN
             v_id_libro_bancos,
             v_id_proceso_wf,
             v_codigo_estado,
-            v_origen
+            v_origen,
+            v_nro_cheque,
+            v_tipo
             --v_fecha_tentativa,
             --v_num_obliacion_pago,
             --v_total_prorrateo,
@@ -751,27 +757,32 @@ BEGIN
              a_favor = 'ANULADO'                          
           	where id_libro_bancos = v_id_libro_bancos;
           end if;
-           
-          if(v_codigo_estado_siguiente='impreso' AND v_origen='FONDOS_AVANCE')then
           
-			v_sql:='select tesoro.f_solicitud_avance_pagado_pxp('||v_id_libro_bancos||')';
-            
-            --Obtención de la cadena de conexión
-            v_cadena_cnx =  migra.f_obtener_cadena_conexion();
-            
-            --Abrir conexión
-            v_resp = dblink_connect(v_cadena_cnx);
-         
-            IF v_resp!='OK' THEN
-                raise exception 'FALLO LA CONEXION A LA BASE DE DATOS CON DBLINK';
-            END IF;
-            
-            --Ejecuta la función remotamente
-            perform * from dblink(v_sql, true) as (respuesta varchar);
-            
-            --Cierra la conexión abierta
-            perform dblink_disconnect();              	
+          if(v_codigo_estado_siguiente='impreso')then
+          	if(v_tipo='cheque' AND v_nro_cheque is null)then
+            	raise exception 'No puede pasar al siguiente estado si no esta registrado el numero de cheque';
+            end if;
           	
+            if(v_origen='FONDOS_AVANCE')then
+            
+                v_sql:='select tesoro.f_solicitud_avance_pagado_pxp('||v_id_libro_bancos||')';
+                
+                --Obtención de la cadena de conexión
+                v_cadena_cnx =  migra.f_obtener_cadena_conexion();
+                
+                --Abrir conexión
+                v_resp = dblink_connect(v_cadena_cnx);
+             
+                IF v_resp!='OK' THEN
+                    raise exception 'FALLO LA CONEXION A LA BASE DE DATOS CON DBLINK';
+                END IF;
+                
+                --Ejecuta la función remotamente
+                perform * from dblink(v_sql, true) as (respuesta varchar);
+                
+                --Cierra la conexión abierta
+                perform dblink_disconnect();              	
+          	end if;
           end if;
           -- si hay mas de un estado disponible  preguntamos al usuario
           v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado del libro bancos)'); 

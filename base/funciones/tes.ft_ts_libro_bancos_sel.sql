@@ -83,7 +83,7 @@ BEGIN
                         saldo_deposito,
                         nombre_regional,
                         sistema_origen
-                        from tes.vlibro_bancos
+                        from tes.vlibro_bancos lban
 				        where  ';
 			
 			--Definicion de la respuesta
@@ -124,7 +124,7 @@ BEGIN
 		begin
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(id_libro_bancos)
-					    from tes.vlibro_bancos
+					    from tes.vlibro_bancos lban
 					    where ';
 			
 			--Definicion de la respuesta		    
