@@ -60,7 +60,7 @@ class ACTCuentaDocumentadaEndesis extends ACTbase{
 		$this->objParam->addParametro("filtro","CUDOC.tipo_cuenta_doc like ''solicitud_avance'' AND CUDOC.estado = ''pendiente_aprobacion''");	
 		$this->objFunc = $this->create('MODCuentaDocumentadaEndesis');		
 					
-		//$this->res=$this->objFunc->aprobarFondoAvance();		
+		$this->res=$this->objFunc->aprobarFondoAvance();		
 		//para decodificar porq el 
 		$working = html_entity_decode(preg_replace('/\\\u([0-9a-z]{4})/', '&#x$1;', $this->res->generarJson()),ENT_NOQUOTES, 'UTF-8');		
 		$working_obj = json_decode($working);
