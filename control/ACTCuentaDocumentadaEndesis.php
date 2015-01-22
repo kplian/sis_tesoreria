@@ -16,7 +16,7 @@ class ACTCuentaDocumentadaEndesis extends ACTbase{
 	function listarFondoAvance(){
 		$this->objParam->defecto('ordenacion','id_cuenta_doc');
 		$this->objParam->defecto('dir_ordenacion','desc');	
-		$this->objParam->addFiltro("(CUDOC.tipo_cuenta_doc like ''solicitud_avance'' AND CUDOC.estado = ''pendiente_aprobacion'') or (CUDOC.tipo_cuenta_doc like ''solicitud_efectivo'' AND CUDOC.estado = ''pago_efectivo'')");	
+		$this->objParam->addFiltro("CUDOC.tipo_cuenta_doc like ''solicitud_avance'' AND CUDOC.estado = ''pendiente_aprobacion''");	
 		
 		$this->objFunc = $this->create('MODCuentaDocumentadaEndesis');
 				
