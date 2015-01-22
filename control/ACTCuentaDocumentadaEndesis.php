@@ -57,7 +57,9 @@ class ACTCuentaDocumentadaEndesis extends ACTbase{
 	}
 	
 	function aprobarFondoAvanceCorreo(){
-		$this->objParam->addParametro("filtro","CUDOC.tipo_cuenta_doc like ''solicitud_avance'' AND CUDOC.estado = ''pendiente_aprobacion''");	
+		//$this->objParam->addParametro("filtro","CUDOC.tipo_cuenta_doc like ''solicitud_avance'' AND CUDOC.estado = ''pendiente_aprobacion''");	
+		
+		$this->objParam->addFiltro("CUDOC.tipo_cuenta_doc like ''solicitud_avance'' AND CUDOC.estado = ''pendiente_aprobacion''");
 		$this->objFunc = $this->create('MODCuentaDocumentadaEndesis');		
 					
 		$this->res=$this->objFunc->aprobarFondoAvance();		
@@ -65,7 +67,7 @@ class ACTCuentaDocumentadaEndesis extends ACTbase{
 		$working = html_entity_decode(preg_replace('/\\\u([0-9a-z]{4})/', '&#x$1;', $this->res->generarJson()),ENT_NOQUOTES, 'UTF-8');		
 		$working_obj = json_decode($working);
 		
-		if ($this->objParam->getParametro('tipo_cuenta_doc') == 'solicitud_efectivo') {
+		/*if ($this->objParam->getParametro('tipo_cuenta_doc') == 'solicitud_efectivo') {
 			echo 'Aprobaste la solicitud de efectivo';
 			exit;
 		}
@@ -73,7 +75,7 @@ class ACTCuentaDocumentadaEndesis extends ACTbase{
 		{
 			echo 'Aprobaste el fondo en avance';
 			exit;
-		}
+		}*/
 		
 		if ($this->objParam->getParametro('accion') == 'aprobar') {
 			$accion = 'AUTORIZADO';
