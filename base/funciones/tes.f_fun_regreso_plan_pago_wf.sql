@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_fun_regreso_plan_pago_wf (
   p_id_usuario integer,
   p_id_usuario_ai integer,
@@ -23,12 +21,14 @@ DECLARE
 	v_nombre_funcion   	text;
     v_resp    			varchar;
     v_mensaje varchar;
+    v_obligacion		record;
    
 	
     
 BEGIN
 
 	v_nombre_funcion = 'tes.f_fun_regreso_plan_pago_wf';
+    
     
     -- actualiza estado en la solicitud
     update tes.tplan_pago  pp set 
@@ -39,6 +39,16 @@ BEGIN
          id_usuario_ai = p_id_usuario_ai,
          usuario_ai = p_usuario_ai
     where id_proceso_wf = p_id_proceso_wf;
+    
+    select pp.id_plan_pago,pp.estado as estado_pago,op.* into v_obligacion
+    from tes.tplan_pago pp
+    inner join tes.tobligacion_pago op 
+    	on op.id_obligacion_pago = pp.id_obligacion_pago
+    where pp.id_proceso_wf = p_id_proceso_wf;
+    if (v_obligacion.tipo_obligacion = 'rrhh' and v_obligacion.estado_pago = 'borrador') then
+    	v_resp = plani.f_anular_pago_tesoreria(p_id_usuario,p_id_usuario_ai,
+                                            p_usuario_ai,v_obligacion.id_plan_pago);
+    end if;
    
       
 

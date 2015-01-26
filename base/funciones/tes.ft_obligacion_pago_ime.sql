@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -1149,17 +1147,19 @@ BEGIN
                               --se modifica la bandera del comprometido
                               update tes.tobligacion_pago op set
                                  total_pago=NULL
-                              where id_obligacion_pago = v_parametros.id_obligacion_pago; 
+                              where id_obligacion_pago = v_parametros.id_obligacion_pago;
+                              
+                              --jrr: llamamos a la funcion que revierte de planillas en caso de que sea de recursos humanos
+                              if (v_tipo_obligacion = 'rrhh') then
+                                  IF NOT plani.f_anular_obligacion_tesoreria(p_id_usuario,v_parametros._id_usuario_ai,
+                                            v_parametros._nombre_usuario_ai,v_parametros.id_obligacion_pago,v_obs) THEN                                                         
+                                       raise exception 'Error al anular la obligacion';                          
+                                    END IF;            	
+                              end if; 
                          
                           END IF;
                           
-                          --jrr: llamamos a la funcion que revierte de planillas en caso de que sea de recursos humanos
-                          if (v_tipo_obligacion = 'rrhh') then
-                              IF NOT plani.f_anular_obligacion_tesoreria(p_id_usuario,v_parametros._id_usuario_ai,
-                                        v_parametros._nombre_usuario_ai,v_parametros.id_obligacion_pago,v_obs) THEN                                                         
-                                   raise exception 'Error al anular la obligacion';                          
-                                END IF;            	
-                          end if;
+                          
                         -- si hay mas de un estado disponible  preguntamos al usuario
                         v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado)'); 
                         v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
