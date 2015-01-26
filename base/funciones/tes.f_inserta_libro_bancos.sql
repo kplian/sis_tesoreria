@@ -120,8 +120,8 @@ BEGIN
         END IF;
         
         --obtener id del proceso macro
-
-		IF(p_hstore->'origen' != 'ENDESIS')THEN
+        
+		IF(COALESCE(p_hstore->'sistema_origen','PXP') != 'KERP')THEN
         
             select 
              pm.id_proceso_macro
