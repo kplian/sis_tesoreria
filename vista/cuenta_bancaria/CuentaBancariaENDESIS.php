@@ -18,7 +18,7 @@ header("content-type:text/javascript; charset=UTF-8");
 				params : {
 					start : 0,
 					limit : 50,
-					permiso : 'todos'
+					permiso : 'todos,libro_bancos'
 				}
 			});
 			this.addButton('btnDepositosCheques', {

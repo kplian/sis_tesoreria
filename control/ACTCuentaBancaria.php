@@ -29,7 +29,12 @@ class ACTCuentaBancaria extends ACTbase{
 		$this->objParam->defecto('dir_ordenacion','asc');
 		
 		if($this->objParam->getParametro('permiso')!=''){
-			$this->objParam->addFiltro("usrbanc.tipo_permiso= ''".$this->objParam->getParametro('permiso')."''");
+			$permisos = explode(',',$this->objParam->getParametro('permiso'));
+			
+			if(count($permisos)==2)
+				$this->objParam->addFiltro("usrbanc.tipo_permiso in (''".$permisos[0].''."'',''".''.$permisos[1]."'')");
+			else
+				$this->objParam->addFiltro("usrbanc.tipo_permiso = ''".$permisos[0]."''");
 		}
 		
 		$this->objFunc=$this->create('MODCuentaBancaria');			
