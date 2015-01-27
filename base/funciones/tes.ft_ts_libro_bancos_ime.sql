@@ -372,6 +372,52 @@ BEGIN
               End If;
               
             End If; --fin de la verifiacion de si es un cheque asociado a un deposito
+        
+        
+        else
+        	--validamos que el deposito no sea menor a la suma de los cheques y depositos adicionales
+            IF(v_parametros.id_libro_bancos_fk is null) Then
+  				          
+               Select Coalesce((Select sum (ba.importe_cheque)
+                      From tes.tts_libro_bancos ba
+                      Where ba.id_libro_bancos_fk=lb.id_libro_bancos),0) 
+                   -
+                      Coalesce((Select sum (ba.importe_deposito)
+                      From tes.tts_libro_bancos ba
+                      Where ba.id_libro_bancos_fk=lb.id_libro_bancos),0)   
+              Into g_saldo_deposito
+              From tes.tts_libro_bancos lb
+              Where lb.id_libro_bancos = v_parametros.id_libro_bancos;
+
+              if(v_parametros.importe_deposito < g_saldo_deposito)then
+              	raise exception 'El monto que intenta ingresar es menor a la suma de los cheques y depositos adicionales';
+              end if;
+            ELSE
+                  Select (
+                           Select li.importe_deposito
+                           From tes.tts_libro_bancos li
+                           Where li.id_libro_bancos = v_parametros.id_libro_bancos_fk
+                         ) - Coalesce((
+                                        Select sum(ba.importe_cheque)
+                                        From tes.tts_libro_bancos ba
+                                        Where ba.id_libro_bancos_fk = lb.id_libro_bancos_fk
+                         ), 0) + Coalesce((
+                                            Select sum(ba.importe_deposito)
+                                            From tes.tts_libro_bancos ba
+                                            Where ba.id_libro_bancos_fk = lb.id_libro_bancos_fk
+                         ), 0) -
+                         (
+                           Select li.importe_deposito
+                           From tes.tts_libro_bancos li
+                           Where li.id_libro_bancos = v_parametros.id_libro_bancos
+                         ) into g_saldo_deposito
+                 From tes.tts_libro_bancos lb
+                Where lb.id_libro_bancos = v_parametros.id_libro_bancos;
+
+                IF ((v_parametros.importe_deposito + g_saldo_deposito) < 0) THEN
+                	raise exception 'el saldo del deposito no puede ser menor a 0';
+                END IF;
+            END IF;
             
         End If; --fin de la verificacion de si es cheque, debito automatico o transferencia con carta  
         
