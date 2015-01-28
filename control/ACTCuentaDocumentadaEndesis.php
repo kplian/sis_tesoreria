@@ -128,7 +128,7 @@ En cumplimiento a politicas de la empresa, se <b>  $accion2  </b> el Fondo en Av
 		$working_obj = json_decode($working);		
 		
 		$accion = "AUTORIZADO";
-		 
+		$accion2 = 'APRUEBA'; 
 		 /*Envio de correos*/
 		$correo=new CorreoExterno();
 		$correo->addDestinatario($working_obj->datos[0]->email_tesoreria,$working_obj->datos[0]->nombre_tesoreria);
