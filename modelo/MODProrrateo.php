@@ -49,6 +49,7 @@ class MODProrrateo extends MODbase{
 		$this->captura('nombre_uo','varchar');
 		$this->captura('nombre_partida','varchar');
 		$this->captura('codigo_partida','varchar');
+		$this->captura('desc_orden','varchar');
 		
 		
 		

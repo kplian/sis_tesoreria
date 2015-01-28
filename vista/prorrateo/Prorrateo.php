@@ -80,6 +80,21 @@ Phx.vista.Prorrateo=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:false
         },
+        
+        {
+            config:{
+                name: 'desc_orden',
+                fieldLabel: 'OT',
+                allowBlank: false,
+                anchor: '80%',
+                gwidth: 120
+            },
+            type:'Field',
+            filters:{pfiltro:'ot.desc_orden',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
         {
             config:{
                 name: 'descripcion',
@@ -258,7 +273,7 @@ Phx.vista.Prorrateo=Ext.extend(Phx.gridInterfaz,{
         {name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
         {name:'id_usuario_mod', type: 'numeric'},
         {name:'usr_reg', type: 'string'},'descripcion',
-        {name:'usr_mod', type: 'string'},'codigo_cc','desc_ingas',
+        {name:'usr_mod', type: 'string'},'codigo_cc','desc_ingas','desc_orden',
         'total_prorrateado','codigo_partida','nombre_partida'
         
     ],

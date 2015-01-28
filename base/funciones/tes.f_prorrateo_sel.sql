@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_prorrateo_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -73,7 +71,8 @@ BEGIN
                         cc.nombre_regional,
                         cc.nombre_uo,
                         par.nombre_partida,
-                        par.codigo as codigo_partida
+                        par.codigo as codigo_partida,
+                        ot.desc_orden
 						from tes.tprorrateo pro
 						inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det
                         inner join pre.tpartida par on par.id_partida = od.id_partida
@@ -81,6 +80,7 @@ BEGIN
                         inner join segu.tusuario usu1 on usu1.id_usuario = pro.id_usuario_reg
                         inner join param.vcentro_costo cc on cc.id_centro_costo=od.id_centro_costo
                         left join segu.tusuario usu2 on usu2.id_usuario = pro.id_usuario_mod
+                        left join conta.torden_trabajo ot on ot.id_orden_trabajo = od.id_orden_trabajo
                         where  ';
 			
 			--Definicion de la respuesta
@@ -111,6 +111,7 @@ BEGIN
                         inner join segu.tusuario usu1 on usu1.id_usuario = pro.id_usuario_reg
                         inner join param.vcentro_costo cc on cc.id_centro_costo=od.id_centro_costo
                         left join segu.tusuario usu2 on usu2.id_usuario = pro.id_usuario_mod
+                        left join conta.torden_trabajo ot on ot.id_orden_trabajo = od.id_orden_trabajo
                         where ';
 			
 			--Definicion de la respuesta		    
