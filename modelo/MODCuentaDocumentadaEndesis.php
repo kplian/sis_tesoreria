@@ -297,6 +297,101 @@ class MODCuentaDocumentadaEndesis extends MODbase{
 		return $this->respuesta;
 	}
 
+	function correoFondoAvance() {
+		$separador = "#@@@#";
+		$id_usuario = $_SESSION["ss_id_usuario"];
+		$ip = $_SERVER['REMOTE_ADDR'];
+		$filtro = $this->aParam->getParametro('filtro');
+			
+		
+		$id_cuenta_documentada = $this->aParam->getParametro('id_cuenta_documentada');
+		
+		$query_correos = "	select 
+							(case when int.id_item_suplente is not null THEN
+								aut_sup.email2
+							else
+                            	aut.email2
+							end)as email_autorizacion,
+                            (case when int.id_item_suplente is not null THEN
+								COALESCE(aut_sup.nombre,'')||' '||COALESCE(aut_sup.apellido_paterno,'')||' '||COALESCE(aut_sup.apellido_materno,'')
+							else
+                            	COALESCE(aut.nombre,'')||' '||COALESCE(aut.apellido_paterno,'')||' '||COALESCE(aut.apellido_materno,'')
+							end) as nombre_autorizacion,
+				             
+				            
+				            coalesce (em.email2,'gvelasquez@boa.bo')::varchar as email_jefe, 
+				            COALESCE(em.nombre,'')||' '||COALESCE(em.apellido_paterno,'')||' '||COALESCE(em.apellido_materno,'') as nombre_jefe,
+				            sol.nombre_completo as nombre_solicitante,
+				            sol.email2 as email_solicitante,
+                            usu.email2 as email_tesoreria,
+                            COALESCE(usu.nombre,'')||' '||COALESCE(usu.apellido_paterno,'')||' '||COALESCE(usu.apellido_materno,'') as nombre_tesoreria,
+				            un.nombre_unidad,
+				            cd.motivo,
+				            cd.observaciones,
+				            cd.importe         
+				            from tesoro.tts_cuenta_doc cd
+				            inner join kard.vkp_empleado sol on sol.id_empleado=cd.id_empleado
+				            inner join kard.vkp_empleado aut on aut.id_empleado=cd.id_autorizacion
+                            inner join kard.tkp_historico_asignacion ha_aut on ha_aut.id_empleado = aut.id_empleado 
+                            											and ha_aut.estado_reg != 'eliminado' and ha_aut.fecha_asignacion <= now() AND
+                                                                        (ha_aut.fecha_finalizacion >= now() or ha_aut.fecha_finalizacion is null)
+                            left join kard.tkp_interinato int
+                            	on ha_aut.id_item = int.id_item_titular and int.fecha_ini<=now() and int.fecha_fin>=now()
+                            left join kard.tkp_historico_asignacion ha_sup on int.id_item_suplente = ha_sup.id_item
+                            				           					and ha_sup.estado_reg != 'eliminado' and ha_sup.fecha_asignacion <= now() AND
+                                                                        (ha_sup.fecha_finalizacion >= now() or ha_sup.fecha_finalizacion is null)
+                            left join kard.vkp_empleado aut_sup on aut_sup.id_empleado = ha_sup.id_empleado
+				            inner join presto.tpr_presupuesto pre on pre.id_presupuesto=cd.id_presupuesto
+				            inner join kard.tkp_unidad_organizacional un on un.id_unidad_organizacional=pre.id_unidad_organizacional
+				            left join kard.tkp_historico_asignacion ha on (ha.id_unidad_organizacional=un.id_unidad_organizacional and now() BETWEEN ha.fecha_asignacion and COALESCE(ha.fecha_finalizacion, now()))
+				            left join kard.vkp_empleado em on em.id_empleado=ha.id_empleado
+				            left join param.tpm_depto_usuario  dus on dus.id_depto = cd.id_depto and 
+                            	dus.cargo = 'Responsable de Tesoreria'
+                            left join sss.vss_usuario usu on usu.id_usuario = dus.id_usuario       
+				            where cd.id_cuenta_doc=$id_cuenta_documentada;";
+				            
+		$query_count = "SELECT * FROM tesoro.f_tts_cuenta_doc_sel($id_usuario,'$ip','00:19:d1:09:22:7e','TS_SOLVIA2_COUNT',NULL,
+		  0, 0, '', '', '$filtro','%','%','%','%','%','pendiente_aprobacion') AS (total bigint)";
+		 try {
+			
+			//crear conexion pdo		 
+	        $cone=new conexion();			
+			$link = $cone->conectarpdo('ENDESIS');
+			
+			$link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);	
+				
+		  	$link->beginTransaction();
+		  	$link->exec("set names 'UTF8'");
+					
+			$stmt = $link->prepare($query_correos);
+			
+			
+			//si hubo uin error lanzar una excepcion
+			$stmt->execute();
+			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+			if (count($data) == 0) {
+				throw new Exception("No se pudo obtener información para enviar los correos desde Endesis", 2);
+			}
+			
+			$stmt = $link->prepare($query_count);
+			$stmt->execute();
+			$count = $stmt->fetchColumn(0);
+							
+			$link->commit();
+						
+			$this->respuesta=new Mensaje();			
+			$this->respuesta->setMensaje('EXITO',$this->nombre_archivo,'Consulta de FA ejecutada con exito','Consulta de FA ejecutada con exito','base','tesoro.f_tts_cuenta_doc_iud(Endesis)','TS_APRSOLPAGCD_UPD','SEL','');
+			$this->respuesta->setDatos($data);
+			$this->respuesta->setTotal($count);
+			
+		} catch (Exception $e) {
+							
+		    $this->respuesta=new Mensaje();		
+		    $this->respuesta->setMensaje('ERROR',$this->nombre_archivo,$e->getMessage(),$e->getMessage(),'base','tesoro.f_tts_cuenta_doc_iud(Endesis)',$transaccion,'IME','');			
+		}
+		return $this->respuesta;
+	}
+
 	function listarFondoAvance2() {		
 		
 		$parametros_consulta = $this->aParam->getParametrosconsulta();

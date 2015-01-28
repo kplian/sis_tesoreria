@@ -118,7 +118,41 @@ En cumplimiento a politicas de la empresa, se <b>  $accion2  </b> el Fondo en Av
 		
 		}
 	//}
-	
+	function enviarFondoAvanceCorreo(){
+		$this->objParam->addParametro("filtro","CUDOC.tipo_cuenta_doc like ''solicitud_avance'' AND CUDOC.estado = ''pendiente_aprobacion''");
+		$this->objFunc = $this->create('MODCuentaDocumentadaEndesis');		
+					
+		$this->res=$this->objFunc->correoFondoAvance();		
+		//para decodificar porq el 
+		$working = html_entity_decode(preg_replace('/\\\u([0-9a-z]{4})/', '&#x$1;', $this->res->generarJson()),ENT_NOQUOTES, 'UTF-8');		
+		$working_obj = json_decode($working);		
+		
+		$accion = "AUTORIZADO";
+		 
+		 /*Envio de correos*/
+		$correo=new CorreoExterno();
+		$correo->addDestinatario($working_obj->datos[0]->email_tesoreria,$working_obj->datos[0]->nombre_tesoreria);
+		$correo->addCC($working_obj->datos[0]->email_solicitante,$working_obj->datos[0]->nombre_solicitante);
+		$correo->addCC('Jaime','jaime.rivera@boa.bo');
+		$correo->addCC('Grover','gvelasquez@boa.bo');
+		$correo->setAsunto("FONDO EN AVANCE " . $accion);
+        $correo->setMensajeHtml("<html><head><title>FONDO EN AVANCE $accion</title></head><body>
+        <div style='width:100%'>Señor(a):<br />&nbsp;&nbsp;&nbsp;&nbsp;<b>  " . strtoupper($working_obj->datos[0]->nombre_tesoreria) . "  </b><br /><br />Presente.- <br /><br />  
+<b style='margin-left:30%;' ><u>REF.: FONDO EN AVANCE $accion.  </u></b><br/><br/> 
+En cumplimiento a politicas de la empresa, se <b>  $accion2  </b> el Fondo en Avance solicitado con el siguiente detalle: <br/><br/> 
+<table style='width:100%'><tr> 
+<td style='width:30%;padding-right:15px;'>&nbsp;&nbsp;&nbsp;&nbsp;<B>SOLICITANTE &nbsp;&nbsp; :</B> </td> 
+<td style='width:65%'>  " . strtoupper($working_obj->datos[0]->nombre_solicitante) . "  </td></tr><tr> 
+<td style='width:30%;padding-right:15px;'>&nbsp;&nbsp;&nbsp;&nbsp;<B>MOTIVO &nbsp;&nbsp; :</B></td> 
+<td style='width:65%'>  " . strtoupper($working_obj->datos[0]->motivo) . "  </td></tr><tr> 
+<td style='width:30%;padding-right:15px;'>&nbsp;&nbsp;&nbsp;&nbsp;<B>Importe Solicitado &nbsp;&nbsp; :</B></td> 
+<td style='width:65%'>  " . $working_obj->datos[0]->importe . "   Bs.</td></tr></table> 
+<br><b>NOTA: <br/>   " . strtoupper($working_obj->datos[0]->observaciones) . "   </b><br/><br/>Atte.<br/><b>  " . strtoupper($working_obj->datos[0]->nombre_autorizacion) . "  </b></div></body></html>");
+		$correo->enviarCorreo();		
+		
+		$this->res->imprimirRespuesta($working);
+			
+	}	
 	
 	
 }
