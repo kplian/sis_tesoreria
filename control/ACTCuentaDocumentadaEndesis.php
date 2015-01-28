@@ -133,8 +133,8 @@ En cumplimiento a politicas de la empresa, se <b>  $accion2  </b> el Fondo en Av
 		$correo=new CorreoExterno();
 		$correo->addDestinatario($working_obj->datos[0]->email_tesoreria,$working_obj->datos[0]->nombre_tesoreria);
 		$correo->addCC($working_obj->datos[0]->email_solicitante,$working_obj->datos[0]->nombre_solicitante);
-		$correo->addCC('Jaime','jaime.rivera@boa.bo');
-		$correo->addCC('Grover','gvelasquez@boa.bo');
+		$correo->addCC('jaime.rivera@boa.bo','Jaime');
+		$correo->addCC('gvelasquez@boa.bo','Grover');
 		$correo->setAsunto("FONDO EN AVANCE " . $accion);
         $correo->setMensajeHtml("<html><head><title>FONDO EN AVANCE $accion</title></head><body>
         <div style='width:100%'>Señor(a):<br />&nbsp;&nbsp;&nbsp;&nbsp;<b>  " . strtoupper($working_obj->datos[0]->nombre_tesoreria) . "  </b><br /><br />Presente.- <br /><br />  
