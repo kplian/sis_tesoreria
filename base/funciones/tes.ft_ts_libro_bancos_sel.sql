@@ -31,7 +31,7 @@ DECLARE
 	v_resp				varchar;
     v_filtro_saldo		varchar;
     v_fecha_anterior	date;
-			    
+    v_cnx 				varchar;
 BEGIN
 
 	v_nombre_funcion = 'tes.ft_ts_libro_bancos_sel';
@@ -95,6 +95,12 @@ BEGIN
 						
 		end;
 
+	/*********************************    
+ 	#TRANSACCION:  'TES_LBANCHQ_SEL'
+ 	#DESCRIPCION:	Consulta el siguiente numero de cheque
+ 	#AUTOR:		Gonzalo Sarmiento Sejas
+	***********************************/
+
 	elsif(p_transaccion='TES_LBANCHQ_SEL')then
      				
     	begin
@@ -134,7 +140,13 @@ BEGIN
 			return v_consulta;
 
 		end;
-        
+    	
+    /*********************************    
+ 	#TRANSACCION:  'TES_LBANSAL_SEL'
+ 	#DESCRIPCION:	Consulta el los depositos con saldo
+ 	#AUTOR:		Gonzalo Sarmiento Sejas
+	***********************************/    
+    
 	ELSIF (p_transaccion='TES_LBANSAL_SEL') THEN
         BEGIN
         	
@@ -201,6 +213,12 @@ BEGIN
  			
             return v_consulta;
         END;
+
+	/*********************************    
+ 	#TRANSACCION:  'TES_LBANSAL_CONT'
+ 	#DESCRIPCION:	Conteo de los depositos con saldo
+ 	#AUTOR:		Gonzalo Sarmiento Sejas
+	***********************************/
     
     ELSIF (p_transaccion='TES_LBANSAL_CONT') THEN	
         BEGIN
@@ -240,6 +258,54 @@ BEGIN
  			
             return v_consulta;
         END;
+        
+        /*********************************    
+        #TRANSACCION:  'TES_SOLFONAVA_SEL'
+        #DESCRIPCION:	Consulta de datos de fondo en avance
+        #AUTOR:			Gonzalo Sarmiento Sejas
+        #FECHA:			03/02/2015
+        ***********************************/
+
+        ELSIF(p_transaccion='TES_SOLFONAVA_SEL')then
+         				
+            begin
+            
+                --1. Obtención de cadena de conexión a ENDESIS
+                v_cnx = migra.f_obtener_cadena_conexion();
+                
+                --1.1 Apertura de la conexión
+                v_resp = (SELECT dblink_connect(v_cnx));
+                
+                if v_resp != 'OK' then
+                    raise exception 'No se pudo conectar con el servidor: No existe ninguna ruta hasta el host';
+                end if;
+                
+                --Sentencia de la consulta
+                v_consulta:='''Select emp.email2,
+				              COALESCE(emp.nombre,'''''''') || '''' '''' || 
+                              COALESCE(emp.apellido_paterno, '''''''') || '''' ''''|| 
+             				  COALESCE( emp.apellido_materno, '''''''')
+       						  From sci.tct_comprobante_libro_bancos cl
+            				  inner join tesoro.tts_cuenta_doc cd on cd.id_comprobante = cl.id_comprobante
+				              inner join kard.vkp_empleado emp on emp.id_empleado = cd.id_empleado
+						      where cl.id_libro_bancos_cheque ='||v_parametros.id_libro_bancos||'''';
+        
+                v_consulta := 'select *
+                              from dblink('||v_consulta||',true)
+                              as (
+                              email2 varchar,
+                               nombre_completo text)';
+                               
+                return v_consulta;
+    						
+            end;
+    
+    /*********************************    
+ 	#TRANSACCION:  'TES_RELIBA_SEL'
+ 	#DESCRIPCION:	Reporte libro de bancos
+ 	#AUTOR:		Gonzalo Sarmiento Sejas
+	***********************************/
+    
     ELSEIF (p_transaccion = 'TES_RELIBA_SEL') THEN
        BEGIN  
         --to_char(now(), ''dd/mm/yyyy'') as fecha, 
