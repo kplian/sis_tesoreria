@@ -261,9 +261,9 @@ BEGIN
         
         /*********************************    
         #TRANSACCION:  'TES_SOLFONAVA_SEL'
-        #DESCRIPCION:	Consulta de datos de fondo en avance
-        #AUTOR:			Gonzalo Sarmiento Sejas
-        #FECHA:			03/02/2015
+        #DESCRIPCION:	Consulta de datos
+        #AUTOR:			RCM	
+        #FECHA:			27/12/2013
         ***********************************/
 
         ELSIF(p_transaccion='TES_SOLFONAVA_SEL')then
@@ -295,7 +295,10 @@ BEGIN
                               as (
                               email2 varchar,
                                nombre_completo text)';
-                               
+        		
+                UPDATE tes.tts_libro_bancos
+                SET notificado='si'
+                WHERE id_libro_bancos= v_parametros.id_libro_bancos;
                 return v_consulta;
     						
             end;
