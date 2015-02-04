@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_inserta_obligacion_pago (
   p_administrador integer,
   p_id_usuario integer,
@@ -87,6 +85,9 @@ BEGIN
     
     */
     
+    if ((p_hstore->'fecha')::date < '01-01-2015' and p_administrador = 0  and p_id_usuario not in (42)) then
+    	raise exception 'No se puede hacer una solicitud con gestion 2014, porfavor consulte con contabilidad';
+    end if;
 
     --determina la fecha del periodo
         
