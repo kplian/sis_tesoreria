@@ -86,7 +86,7 @@ BEGIN
             from tes.tcuenta_bancaria ctaban
             where ctaban.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria;
             
-            IF(v_parametros.id_libro_bancos_fk is null and g_centro='no' and v_parametros.tipo!='deposito')THEN 
+            IF(v_parametros.id_libro_bancos_fk is null and g_centro in ('no','esp') and v_parametros.tipo!='deposito')THEN 
                 raise exception
                   'Los datos a ingresar deben tener un deposito asociado. Ingrese los datos a traves de Depositos y Cheques.'
                   ;
@@ -115,7 +115,11 @@ BEGIN
                 if((select lb.estado
 					from tes.tts_libro_bancos lb
 					where lb.id_libro_bancos = v_parametros.id_libro_bancos_fk)='borrador')then
-                raise exception 'No se puede ingresar un cheque, debito automatico o transferencia carta sobre un deposito en estado BORRADOR';
+                	
+                    if (pxp.f_existe_parametro(p_tabla,'sistema_origen') = FALSE) then
+                		raise exception 'No se puede ingresar un cheque, debito automatico o transferencia carta sobre un deposito en estado BORRADOR';
+                    end if;
+                    
                 end if;
                 Select lb.importe_deposito - Coalesce((Select sum (ba.importe_cheque)
                                               From tes.tts_libro_bancos ba
@@ -309,7 +313,7 @@ BEGIN
         	    raise exception 'Registro no almacenado, no pertenece a la gestion de la cuenta bancaria, revise la fecha';
     		END IF;*/
             
-            IF(v_parametros.id_libro_bancos_fk is null and g_centro='no' and v_parametros.tipo!='deposito')THEN 
+            IF(v_parametros.id_libro_bancos_fk is null and g_centro in ('no','esp') and v_parametros.tipo!='deposito')THEN 
 				raise exception 'Los datos a ingresar deben tener un deposito asociado. Ingrese los datos a traves de Depositos y Cheques.';
 	        END IF;
             
