@@ -297,7 +297,13 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 name: 'estado',
                 fieldLabel: 'Estado',
                 allowBlank: true,
-                renderer:function(value,p,record){
+                renderer:function(value_ori,p,record){
+                        
+                        var value = value_ori;
+                        if(value_ori == 'pagado'){
+                        	'contabilizado '
+                        }
+                        
                         if(record.data.total_prorrateado!=record.data.monto_ejecutar_total_mo ){
                              return String.format('<b><font color="red">{0}</font></b>', value);
                          }
