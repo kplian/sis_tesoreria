@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -143,6 +141,7 @@ DECLARE
     v_nombre_conexion varchar;
     v_res			boolean;
     v_tipo_obligacion	varchar;
+    
     
     
 			    
@@ -1367,6 +1366,12 @@ BEGIN
            set conformidad = v_parametros.conformidad,
            fecha_conformidad = v_parametros.fecha_conformidad
            where id_plan_pago = v_parametros.id_plan_pago;
+           
+           select pp.id_estado_wf into v_id_estado_actual
+           from tes.tplan_pago pp
+           where pp.id_plan_pago =  v_parametros.id_plan_pago;
+           
+           v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_actual);
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se modificaron los datos de la conformidad exitosamente'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_parametros.id_plan_pago::varchar);
