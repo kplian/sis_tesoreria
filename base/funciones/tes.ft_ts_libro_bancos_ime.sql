@@ -95,7 +95,7 @@ BEGIN
                   ;
             END IF;
             
-            IF(v_parametros.tipo in ('cheque','debito_automatico','transferencia_carta'))Then
+            IF(v_parametros.tipo in ('cheque','debito_automatico','transferencia_carta','transferencia_intern'))Then
               --Comparamos el saldo de la cuenta bancaria con el importe del cheque
                 
               Select coalesce(sum(Coalesce(lbr.importe_deposito, 0)) - 
@@ -168,7 +168,7 @@ BEGIN
          --ALGORITMO DE ORDENACION DE REGISTROS
          
          --VERIFICAMOS SI ES UN DEPOSITO, transferencia o debito automatico
-         IF(v_parametros.tipo in ('deposito','debito_automatico','transferencia_carta')) Then
+         IF(v_parametros.tipo in ('deposito','debito_automatico','transferencia_carta','transferencia_intern')) Then
          
          	--Obtenemos el numero de indice que sera asignado al nuevo registro            
             Select max(lb.indice)
@@ -982,10 +982,11 @@ BEGIN
                 from tes.vlibro_bancos lbp
                 where lbp.id_libro_bancos=v_parametros.id_libro_bancos;*/
                 
-                select lb.id_cuenta_bancaria, lb.id_depto, lb.fecha, lb.a_favor, lb.nro_cheque, lb.saldo_deposito,
+                select lb.id_cuenta_bancaria, COALESCE(lb.id_depto, dp.id_depto) as id_depto, lb.fecha, lb.a_favor, lb.nro_cheque, lb.saldo_deposito,
 				lb.nro_liquidacion, lb.detalle, lb.origen, lb.observaciones, lb.nro_comprobante, lb.tipo, 
                 lb.id_finalidad into g_libro_bancos
 				from tes.vlibro_bancos lb
+                left join param.tdepto dp on ('OP - ' || lb.origen)= dp.nombre_corto 
 				where lb.id_libro_bancos=v_parametros.id_libro_bancos;
                 
                 --inserta deposito adicional
@@ -995,19 +996,20 @@ BEGIN
                 numeric, nro_liquidacion varchar, detalle text, origen varchar, observaciones
                 text, importe_cheque numeric, id_libro_bancos_fk int4, nro_comprobante varchar,
                  tipo varchar, id_finalidad int4) on commit drop;
-                 
+
                  insert into tt_parametros_libro_bancos_deposito
                  values (NULL, 'NULL', g_libro_bancos.id_cuenta_bancaria, g_libro_bancos.id_depto, g_libro_bancos.fecha,
                  g_libro_bancos.a_favor, null, g_libro_bancos.saldo_deposito,g_libro_bancos.nro_liquidacion, 
-                 g_libro_bancos.detalle,g_libro_bancos.origen, g_libro_bancos.observaciones, null, v_parametros.id_libro_bancos_fk,
+                 g_libro_bancos.detalle,g_libro_bancos.origen, g_libro_bancos.observaciones, 0, v_parametros.id_libro_bancos_fk,
                  g_libro_bancos.nro_comprobante, 'deposito',g_libro_bancos.id_finalidad);
-                
-                 select tes.ft_ts_libro_bancos_ime (
+
+                 
+                 v_resp = tes.ft_ts_libro_bancos_ime (
  				 p_administrador,
   				 p_id_usuario,
-  				 tt_parametros_libro_bancos_deposito,
+  				 'tt_parametros_libro_bancos_deposito',
   				 'TES_LBAN_INS');
-                 
+                                  
                  --insertar cheque de descuento
                 create temporary table tt_parametros_libro_bancos_cheque(
                 _id_usuario_ai int4, _nombre_usuario_ai varchar, id_cuenta_bancaria int4,
@@ -1015,17 +1017,17 @@ BEGIN
                 numeric, nro_liquidacion varchar, detalle text, origen varchar, observaciones
                 text, importe_cheque numeric, id_libro_bancos_fk int4, nro_comprobante varchar,
                  tipo varchar, id_finalidad int4) on commit drop;
-                 
+
                  insert into tt_parametros_libro_bancos_cheque
                  values (NULL, 'NULL', g_libro_bancos.id_cuenta_bancaria, g_libro_bancos.id_depto, g_libro_bancos.fecha,
-                 g_libro_bancos.a_favor, null, null ,g_libro_bancos.nro_liquidacion, g_libro_bancos.detalle,
+                 g_libro_bancos.a_favor, null, 0 ,g_libro_bancos.nro_liquidacion, g_libro_bancos.detalle,
                  g_libro_bancos.origen, g_libro_bancos.observaciones, g_libro_bancos.saldo_deposito,
-                 v_parametros.id_libro_bancos_fk, g_libro_bancos.nro_comprobante, 'cheque', g_libro_bancos.id_finalidad);
+                 v_parametros.id_libro_bancos, g_libro_bancos.nro_comprobante, 'transferencia_intern', g_libro_bancos.id_finalidad);
                 
-                 select tes.ft_ts_libro_bancos_ime (
+                 v_resp = tes.ft_ts_libro_bancos_ime (
  				 p_administrador,
   				 p_id_usuario,
-  				 tt_parametros_libro_bancos_cheque,
+  				 'tt_parametros_libro_bancos_cheque',
   				 'TES_LBAN_INS');
                  
             end if;

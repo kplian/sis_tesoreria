@@ -373,7 +373,7 @@ BEGIN
                                where lbr.fecha BETWEEN  '''||v_parametros.fecha_ini||''' and LB.fecha                              
                                and lbr.id_cuenta_bancaria = LB.id_cuenta_bancaria
                                and case when ('''||v_parametros.estado||'''=''Todos'')
-                                then   lbr.estado in (''borrador'', ''impreso'',
+                                then   lbr.estado in (''impreso'',
                                                          ''entregado'',''cobrado'',
                                                          ''anulado'',''reingresado'',
                                                          ''depositado'' ) 
@@ -406,7 +406,7 @@ BEGIN
                                where lbr.fecha BETWEEN  '''||v_parametros.fecha_ini||''' and  LB.fecha                              
                                and lbr.id_cuenta_bancaria = LB.id_cuenta_bancaria
                                and case when ('''||v_parametros.estado||'''=''Todos'')
-                                then   lbr.estado in (''borrador'', ''impreso'',
+                                then   lbr.estado in (''impreso'',
                                                          ''entregado'',''cobrado'',
                                                          ''anulado'',''reingresado'',
                                                          ''depositado'' ) 
@@ -445,7 +445,7 @@ BEGIN
               LB.fecha BETWEEN  '''||v_parametros.fecha_ini||''' and   '''||v_parametros.fecha_fin||''' and      
               
               case when ('''||v_parametros.estado||'''=''Todos'')
-              then   LB.estado in (''borrador'', ''impreso'',
+              then   LB.estado in (''impreso'',
                                        ''entregado'',''cobrado'',
                                        ''anulado'',''reingresado'',
                                        ''depositado'' ) 

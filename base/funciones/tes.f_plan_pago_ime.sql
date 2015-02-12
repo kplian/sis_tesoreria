@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -144,6 +142,7 @@ DECLARE
     v_res						boolean;
     v_tipo_obligacion			varchar;
     v_operacion 				varchar;
+    
     
     
     
