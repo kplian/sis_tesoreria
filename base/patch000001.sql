@@ -1075,3 +1075,16 @@ IS 'para inotrducir obs en el area de presupuestos';
 
 
 /***********************************F-SCP-RAC-TES-0-14/01/2015***************************************/
+
+
+
+/***********************************I-SCP-RAC-TES-0-19/02/2015***************************************/
+
+ -- object recreation
+ALTER TABLE tes.tobligacion_pago
+  DROP CONSTRAINT chk_tobligacion_pago__tipo_obligacion RESTRICT;
+
+ALTER TABLE tes.tobligacion_pago
+  ADD CONSTRAINT chk_tobligacion_pago__tipo_obligacion CHECK ((tipo_obligacion)::text = ANY (ARRAY[('adquisiciones'::character varying)::text, ('pago_unico'::character varying)::text, ('caja_chica'::character varying)::text, ('viaticos'::character varying)::text, ('fondos_en_avance'::character varying)::text, ('pago_directo'::character varying)::text, ('rrhh'::character varying)::text]));
+
+/***********************************F-SCP-RAC-TES-0-19/02/2015***************************************/

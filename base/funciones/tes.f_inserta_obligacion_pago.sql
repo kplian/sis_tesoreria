@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_inserta_obligacion_pago (
   p_administrador integer,
   p_id_usuario integer,
@@ -101,22 +103,28 @@ BEGIN
         IF   (p_hstore->'tipo_obligacion')::varchar = 'adquisiciones'    THEN
              raise exception 'Los pagos de adquisiciones tienen que ser habilitados desde el sistema de adquisiciones';   
        
-        ELSIF   (p_hstore->'tipo_obligacion')::varchar ='pago_directo'    THEN
+        ELSIF   (p_hstore->'tipo_obligacion')::varchar  in ('pago_directo','pago_unico')    THEN
               
-                v_tipo_documento = 'PGD';
-                
-                  --obtener correlativo
-                 v_num =   param.f_obtener_correlativo(
-                          'PGD', 
-                           v_id_periodo,-- par_id, 
-                           NULL, --id_uo 
-                           (p_hstore->'id_depto')::integer,    -- id_depto
-                           p_id_usuario, 
-                           'TES', 
-                           NULL);
-                           
         
-                v_codigo_proceso_macro = 'TES-PD'; 
+                
+                
+                 IF (p_hstore->'tipo_obligacion')::varchar  = 'pago_directo'   THEN
+                     v_tipo_documento = 'PGD';
+                     v_codigo_proceso_macro = 'TES-PD'; 
+                 ELSE
+                      v_tipo_documento = 'PU';
+                      v_codigo_proceso_macro = 'PU'; 
+                 END IF;
+                
+                --obtener el correlativo segun el tipo de documento
+                      v_num =   param.f_obtener_correlativo(
+                                 v_tipo_documento, 
+                                 v_id_periodo,-- par_id, 
+                                 NULL, --id_uo 
+                                 (p_hstore->'id_depto')::integer,    -- id_depto
+                                 p_id_usuario, 
+                                 'TES', 
+                                 NULL);
                 
                 --si el funcionario que solicita es un gerente .... es el mimso encargado de aprobar
                 
@@ -139,6 +147,13 @@ BEGIN
                         --NOTA el valor en la primera posicion del array es el genre de menor nivel
                     END IF;  
                 END IF;
+                
+                 --id_subsistema
+                 select
+                   s.id_subsistema
+                 into 
+                   v_id_subsistema
+                 from segu.tsubsistema s where s.codigo = 'TES';
                        
               
         ELSE
@@ -165,14 +180,8 @@ BEGIN
         
         
         If v_id_proceso_macro is NULL THEN
-        
-           raise exception 'El proceso macro  de codigo % no esta configurado en el sistema WF',v_codigo_proceso_macro;  
-        
+         raise exception 'El proceso macro  de codigo % no esta configurado en el sistema WF',v_codigo_proceso_macro;  
         END IF;
-        
-        
-        
-        
         
         
         
@@ -186,30 +195,20 @@ BEGIN
             
          
         IF v_codigo_tipo_proceso is NULL THEN
-        
            raise exception 'No existe un proceso inicial para el proceso macro indicado % (Revise la configuración)',v_codigo_proceso_macro;
-        
         END IF;
         
         
         v_anho = (date_part('year', (p_hstore->'fecha')::date))::integer;
 			
-            select 
-             ges.id_gestion
-             into v_id_gestion
-            from param.tgestion ges
-            where ges.gestion = v_anho
-            limit 1 offset 0;
+        select 
+         ges.id_gestion
+        into 
+          v_id_gestion
+        from param.tgestion ges
+        where ges.gestion = v_anho
+        limit 1 offset 0;
        
-       --id_subsistema
-       
-       select
-       s.id_subsistema
-       into 
-       v_id_subsistema
-       from segu.tsubsistema s where s.codigo = 'ADQ';
-    
-        
         -- inciar el tramite en el sistema de WF
          SELECT 
                ps_num_tramite ,
@@ -260,7 +259,7 @@ BEGIN
             numero,
             fecha,
             id_gestion,
-            tipo_cambio_conv,
+            tipo_cambio_conv,    -->  TIPO cambio convenido ....
             pago_variable,
             total_nro_cuota,
             fecha_pp_ini,
@@ -294,7 +293,7 @@ BEGIN
             v_num,
             (p_hstore->'fecha')::date,
             v_id_gestion,
-            (p_hstore->'tipo_cambio_conv')::numeric,
+            (p_hstore->'tipo_cambio_conv')::numeric,                -->  TIPO cambio convenido ....
             (p_hstore->'pago_variable')::varchar,
             (p_hstore->'total_nro_cuota')::integer,
             (p_hstore->'fecha_pp_ini')::date,
@@ -309,7 +308,7 @@ BEGIN
 			)RETURNING id_obligacion_pago into v_id_obligacion_pago;
             
             
-             -- inserta documentos en estado borrador si estan configurados
+            -- inserta documentos en estado borrador si estan configurados
             v_resp_doc =  wf.f_inserta_documento_wf(p_id_usuario, v_id_proceso_wf, v_id_estado_wf);
             -- verificar documentos
             v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_wf);
@@ -375,8 +374,13 @@ BEGIN
             
              --Definicion de la respuesta
 			 v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligaciones de Pago almacenado(a) con exito (id_obligacion_pago'||v_id_obligacion_pago||')'); 
-             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_id_obligacion_pago::varchar);
-             v_resp = pxp.f_agrega_clave(v_resp,'id_gestion',v_id_gestion::varchar);
+             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago', v_id_obligacion_pago::varchar);
+             v_resp = pxp.f_agrega_clave(v_resp,'id_proceso_wf', v_id_proceso_wf::varchar);
+             v_resp = pxp.f_agrega_clave(v_resp,'id_estado_wf', v_id_estado_wf::varchar);
+             v_resp = pxp.f_agrega_clave(v_resp,'num_tramite', v_num_tramite::varchar);
+             v_resp = pxp.f_agrega_clave(v_resp,'id_gestion', v_id_gestion::varchar);
+             
+            
 
             --Devuelve la respuesta
             return v_resp;

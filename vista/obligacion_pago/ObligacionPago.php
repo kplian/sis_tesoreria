@@ -949,21 +949,13 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 			this.ocultarComponente(cmbIt);
        }   
      },
-     fin_registro:function(a,b,forzar_fin)
+     fin_registro:function(a,b,forzar_fin, paneldoc)
         {                   
-           
             var d= this.sm.getSelected().data;
-           
-            
             if(d.estado !='en_pago'){
-	            //if(confirm('¿Está seguro de eliminar el registro?')){
-	            
-                if(d.estado =='vbpresupuestos'){
-                    
+	            if(d.estado =='vbpresupuestos'){
                     //lla funcion se encuentra en ObligacionPagoVb
                     this.showObsEstado();
-                      
-                
                 }
                 else{
                 	if(d.estado =='borrador'  && d.tipo_obligacion != 'adquisiciones'){
@@ -974,17 +966,15 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		            Ext.Ajax.request({
 	                    // form:this.form.getForm().getEl(),
 	                    url:'../../sis_tesoreria/control/ObligacionPago/finalizarRegistro',
-	                    params:{id_obligacion_pago:d.id_obligacion_pago,operacion:'fin_registro'},
-	                    success:this.successSinc,
+	                    params: { id_obligacion_pago: d.id_obligacion_pago, operacion: 'fin_registro'},
+	                    success: this.successSinc,
+	                    argument: { paneldoc: paneldoc},
 	                    failure: this.conexionFailure,
 	                    timeout:this.timeout,
 	                    scope:this
 	                });	
-                	
                 }	
-	             
-            
-            }
+	        }
             else{
                 if(d.estado =='en_pago'){
                     if(confirm('¿Está seguro de finalizar la obligacion?. \n Esta acción no  puede revertirse')){
@@ -1014,6 +1004,10 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                 if(this.wEstado){
                 	this.wEstado.hide();
                 }
+                
+                if(resp.argument && resp.argument.paneldoc){
+                 	resp.argument.paneldoc.panel.destroy();
+                 }
                 this.reload();
              }else{
                 alert('ocurrio un error durante el proceso')
