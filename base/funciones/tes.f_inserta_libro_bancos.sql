@@ -51,6 +51,7 @@ DECLARE
     v_id_estado_wf_anterior   integer; 
 	v_id_depto		integer;
     v_codigo_tipo_pro	varchar;
+    v_sistema_origen	varchar;
     		    
 BEGIN
 
@@ -120,8 +121,9 @@ BEGIN
         END IF;
         
         --obtener id del proceso macro
-        
-		IF(COALESCE(p_hstore->'sistema_origen','PXP') != 'KERP')THEN
+        v_sistema_origen = COALESCE(p_hstore->'sistema_origen','PXP')::varchar;
+
+		IF( v_sistema_origen != 'KERP' OR (v_sistema_origen = 'KERP' AND (p_hstore->'tipo')='deposito'))THEN
         
             select 
              pm.id_proceso_macro
