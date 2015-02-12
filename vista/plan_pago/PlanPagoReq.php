@@ -60,8 +60,8 @@ Phx.vista.PlanPagoReq = {
        
          
          this.iniciarEventos();
-         
-        
+         //escode boton para mandar a borrador 
+          this.getBoton('ini_estado').hide();  
         
     }, 
     

@@ -6149,9 +6149,11 @@ AS
            pp.fecha_conformidad,
            pp.conformidad;
            
+
 /***********************************F-DEP-JRR-TES-0-04/02/2015****************************************/
 
 /***********************************I-DEP-JRR-TES-0-11/02/2015****************************************/
+DROP VIEW tes.vcomp_devtesprov_plan_pago_2;
 CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
     id_plan_pago,
     id_proveedor,
@@ -6265,7 +6267,7 @@ AS
          fun.email_empresa,
          usu.desc_persona AS desc_usuario,
          COALESCE(op.id_funcionario_gerente, 0) AS id_funcionario_gerente,
-         usu.correo AS correo_usuario
+         ususol.correo AS correo_usuario
   FROM tes.tplan_pago pp
        JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
         op.id_obligacion_pago
@@ -6273,6 +6275,14 @@ AS
        LEFT JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
        LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
         op.id_categoria_compra
+       LEFT JOIN adq.tcotizacion cot ON op.id_obligacion_pago =
+        cot.id_obligacion_pago
+       LEFT JOIN adq.tproceso_compra pro ON pro.id_proceso_compra =
+        cot.id_proceso_compra
+       LEFT JOIN adq.tsolicitud sol ON sol.id_solicitud =
+        pro.id_solicitud
+       LEFT JOIN segu.vusuario ususol on ususol.id_usuario = 
+       sol.id_usuario_reg
        JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
         op.id_obligacion_pago AND od.estado_reg::text = 'activo' ::text
        JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas =
@@ -6329,6 +6339,6 @@ AS
            fun.email_empresa,
            usu.desc_persona,
            op.id_funcionario_gerente,
-           usu.correo;
+           ususol.correo;
            
 /***********************************F-DEP-JRR-TES-0-11/02/2015****************************************/

@@ -116,6 +116,7 @@ Phx.vista.PlanPagoVbConta = {
     //deshabilitas botones para informacion historica
     desBotoneshistorico:function(){
           this.getBoton('ant_estado').disable();
+          this.getBoton('ini_estado').disable();
           this.getBoton('sig_estado').disable();
           this.getBoton('SolDevPag').disable(); 
           this.getBoton('edit').disable(); 
@@ -393,6 +394,7 @@ Phx.vista.PlanPagoVbConta = {
           	  
               if (data['estado']== 'borrador' || data['estado']== 'pendiente' || data['estado']== 'devengado' || data['estado']== 'pagado'|| data['estado']== 'anticipado'|| data['estado']== 'aplicado'|| data['estado']== 'devuelto' ){
                       this.getBoton('ant_estado').disable();
+                      this.getBoton('ini_estado').disable();
                       this.getBoton('sig_estado').disable();
                       this.getBoton('SolDevPag').disable(); 
                       this.getBoton('edit').disable();
@@ -401,6 +403,7 @@ Phx.vista.PlanPagoVbConta = {
               else{
                        if (data['estado']== 'vbconta'){
                            this.getBoton('ant_estado').enable();
+                           this.getBoton('ini_estado').enable();
                            this.getBoton('sig_estado').disable();
                            this.getBoton('SolDevPag').enable();
                            this.getBoton('edit').enable();
@@ -412,6 +415,7 @@ Phx.vista.PlanPagoVbConta = {
                        }
                        else{
                            this.getBoton('ant_estado').enable();
+                           this.getBoton('ini_estado').enable();
                            this.getBoton('sig_estado').enable();
                            this.getBoton('SolDevPag').disable();
                            
@@ -448,6 +452,7 @@ Phx.vista.PlanPagoVbConta = {
         
         if(tb){
            this.getBoton('ant_estado').disable();
+           this.getBoton('ini_estado').disable();
            this.getBoton('sig_estado').disable();
            this.getBoton('SolDevPag').disable();
            this.getBoton('SolPlanPago').disable();

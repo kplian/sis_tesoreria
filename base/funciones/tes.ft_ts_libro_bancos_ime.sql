@@ -66,6 +66,9 @@ DECLARE
     v_titulo 				varchar;
     v_nro_cheque			integer;
     v_tipo					varchar;
+    g_id_libro_bancos_fk	integer;
+    g_importe_deposito		numeric;
+    g_libro_bancos			record;
 BEGIN
 
     v_nombre_funcion = 'tes.ft_ts_libro_bancos_ime';
@@ -86,7 +89,7 @@ BEGIN
             from tes.tcuenta_bancaria ctaban
             where ctaban.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria;
             
-            IF(v_parametros.id_libro_bancos_fk is null and g_centro='no' and v_parametros.tipo!='deposito')THEN 
+            IF(v_parametros.id_libro_bancos_fk is null and g_centro in ('no','esp') and v_parametros.tipo!='deposito')THEN 
                 raise exception
                   'Los datos a ingresar deben tener un deposito asociado. Ingrese los datos a traves de Depositos y Cheques.'
                   ;
@@ -115,7 +118,11 @@ BEGIN
                 if((select lb.estado
 					from tes.tts_libro_bancos lb
 					where lb.id_libro_bancos = v_parametros.id_libro_bancos_fk)='borrador')then
-                raise exception 'No se puede ingresar un cheque, debito automatico o transferencia carta sobre un deposito en estado BORRADOR';
+                	
+                    if (pxp.f_existe_parametro(p_tabla,'sistema_origen') = FALSE) then
+                		raise exception 'No se puede ingresar un cheque, debito automatico o transferencia carta sobre un deposito en estado BORRADOR';
+                    end if;
+                    
                 end if;
                 Select lb.importe_deposito - Coalesce((Select sum (ba.importe_cheque)
                                               From tes.tts_libro_bancos ba
@@ -309,7 +316,7 @@ BEGIN
         	    raise exception 'Registro no almacenado, no pertenece a la gestion de la cuenta bancaria, revise la fecha';
     		END IF;*/
             
-            IF(v_parametros.id_libro_bancos_fk is null and g_centro='no' and v_parametros.tipo!='deposito')THEN 
+            IF(v_parametros.id_libro_bancos_fk is null and g_centro in ('no','esp') and v_parametros.tipo!='deposito')THEN 
 				raise exception 'Los datos a ingresar deben tener un deposito asociado. Ingrese los datos a traves de Depositos y Cheques.';
 	        END IF;
             
@@ -919,7 +926,118 @@ BEGIN
             return v_resp;
                         
         END;
-             
+    
+    /*********************************    
+ 	#TRANSACCION:  'TES_TRALB_IME'
+ 	#DESCRIPCION:	Modificacion de registros
+ 	#AUTOR:		Gonzalo Sarmiento Sejas
+ 	#FECHA:		09-02-2015
+	***********************************/
+
+	elsif(p_transaccion='TES_TRALB_IME')then
+		BEGIN
+        	if(pxp.f_existe_parametro(p_tabla,'tipo')=FALSE) then
+            	raise exception '%', 'No se definio el tipo de transaccion';
+            end if;
+            
+            if(pxp.f_existe_parametro(p_tabla,'id_libro_bancos')=FALSE) then
+            	raise exception '%', 'No se definio el deposito origen a ser transferido';
+            end if;
+
+			if(pxp.f_existe_parametro(p_tabla,'id_libro_bancos_fk')=FALSE) then
+            	raise exception '%', 'No se definio el deposito destino de la transferencia';
+            end if;
+            
+        	if(v_parametros.tipo='total')then
+            	-- es una transferencia del total
+                select lb.id_libro_bancos_fk into g_id_libro_bancos_fk
+                from tes.tts_libro_bancos lb
+                where lb.id_libro_bancos=v_parametros.id_libro_bancos;
+                
+                if(g_id_libro_bancos_fk is null) then
+                	--todos los cheques y depositos adicionales del deposito origen pasaran el deposito destino
+                	UPDATE tes.tts_libro_bancos
+                    SET id_libro_bancos_fk = v_parametros.id_libro_bancos_fk
+                    WHERE id_libro_bancos_fk=v_parametros.id_libro_bancos;	
+                else 
+                	--es transferencia de un deposito adicional
+                    select lbp.saldo_deposito, lb.importe_deposito into g_saldo_deposito, g_importe_deposito
+                	from tes.tts_libro_bancos lb
+                	inner join tes.vlibro_bancos lbp on lbp.id_libro_bancos=lb.id_libro_bancos_fk
+                	where lb.id_libro_bancos=v_parametros.id_libro_bancos;
+                    
+                    IF(g_saldo_deposito - g_importe_deposito < 0)THEN
+                    	raise exception 'No se puede hacer la transferencia, ya que el saldo seria menor a cero';
+                	END IF;
+                
+                end if;
+                
+                UPDATE tes.tts_libro_bancos
+                SET id_libro_bancos_fk = v_parametros.id_libro_bancos_fk
+                WHERE id_libro_bancos = v_parametros.id_libro_bancos;
+                
+            else 
+            	-- es una transferencia de saldo
+                /*select lbp.saldo_deposito into g_libro_bancos
+                from tes.vlibro_bancos lbp
+                where lbp.id_libro_bancos=v_parametros.id_libro_bancos;*/
+                
+                select lb.id_cuenta_bancaria, lb.id_depto, lb.fecha, lb.a_favor, lb.nro_cheque, lb.saldo_deposito,
+				lb.nro_liquidacion, lb.detalle, lb.origen, lb.observaciones, lb.nro_comprobante, lb.tipo, 
+                lb.id_finalidad into g_libro_bancos
+				from tes.vlibro_bancos lb
+				where lb.id_libro_bancos=v_parametros.id_libro_bancos;
+                
+                --inserta deposito adicional
+                create temporary table tt_parametros_libro_bancos_deposito(
+                _id_usuario_ai int4, _nombre_usuario_ai varchar, id_cuenta_bancaria int4,
+                id_depto int4, fecha date, a_favor varchar, nro_cheque int4, importe_deposito
+                numeric, nro_liquidacion varchar, detalle text, origen varchar, observaciones
+                text, importe_cheque numeric, id_libro_bancos_fk int4, nro_comprobante varchar,
+                 tipo varchar, id_finalidad int4) on commit drop;
+                 
+                 insert into tt_parametros_libro_bancos_deposito
+                 values (NULL, 'NULL', g_libro_bancos.id_cuenta_bancaria, g_libro_bancos.id_depto, g_libro_bancos.fecha,
+                 g_libro_bancos.a_favor, null, g_libro_bancos.saldo_deposito,g_libro_bancos.nro_liquidacion, 
+                 g_libro_bancos.detalle,g_libro_bancos.origen, g_libro_bancos.observaciones, null, v_parametros.id_libro_bancos_fk,
+                 g_libro_bancos.nro_comprobante, 'deposito',g_libro_bancos.id_finalidad);
+                
+                 select tes.ft_ts_libro_bancos_ime (
+ 				 p_administrador,
+  				 p_id_usuario,
+  				 tt_parametros_libro_bancos_deposito,
+  				 'TES_LBAN_INS');
+                 
+                 --insertar cheque de descuento
+                create temporary table tt_parametros_libro_bancos_cheque(
+                _id_usuario_ai int4, _nombre_usuario_ai varchar, id_cuenta_bancaria int4,
+                id_depto int4, fecha date, a_favor varchar, nro_cheque int4, importe_deposito
+                numeric, nro_liquidacion varchar, detalle text, origen varchar, observaciones
+                text, importe_cheque numeric, id_libro_bancos_fk int4, nro_comprobante varchar,
+                 tipo varchar, id_finalidad int4) on commit drop;
+                 
+                 insert into tt_parametros_libro_bancos_cheque
+                 values (NULL, 'NULL', g_libro_bancos.id_cuenta_bancaria, g_libro_bancos.id_depto, g_libro_bancos.fecha,
+                 g_libro_bancos.a_favor, null, null ,g_libro_bancos.nro_liquidacion, g_libro_bancos.detalle,
+                 g_libro_bancos.origen, g_libro_bancos.observaciones, g_libro_bancos.saldo_deposito,
+                 v_parametros.id_libro_bancos_fk, g_libro_bancos.nro_comprobante, 'cheque', g_libro_bancos.id_finalidad);
+                
+                 select tes.ft_ts_libro_bancos_ime (
+ 				 p_administrador,
+  				 p_id_usuario,
+  				 tt_parametros_libro_bancos_cheque,
+  				 'TES_LBAN_INS');
+                 
+            end if;
+            
+            -- definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo la transferencia de deposito)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
+                
+            --Devuelve la respuesta
+            return v_resp;
+            
+        END;
 	else
      
     	raise exception 'Transaccion inexistente: %',p_transaccion;
