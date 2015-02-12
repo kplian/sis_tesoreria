@@ -1,6 +1,7 @@
 <?php
+require_once dirname(__FILE__).'/../../pxp/lib/lib_reporte/ReportePDFFormulario.php';
 // Extend the TCPDF class to create custom MultiRow
-class RConformidad extends  ReportePDF {
+class RConformidad extends  ReportePDFFormulario {
 	var $datos_titulo;
 	var $datos_detalle;
 	var $ancho_hoja;
@@ -9,12 +10,14 @@ class RConformidad extends  ReportePDF {
 	var $ancho_sin_totales;
 	var $cantidad_columnas_estaticas;
 	function Header() {
+		$this->ln(25);
+		$height = 20; 
 		//cabecera del reporte
-		$this->Image(dirname(__FILE__).'/../../lib/imagenes/logos/logo.jpg', 70, 2, 67, 37);
-		$this->SetFont('','B',12);
-		$this->Ln(30);
-		$this->Cell(175,30,'ACTA DE CONFORMIDAD',0,1,'C');
-		$this->Ln(10);
+		$this->Cell(40, $height, '', 0, 0, 'C', false, '', 0, false, 'T', 'C');
+        $this->SetFontSize(16);
+        $this->SetFont('','B');        
+        $this->Cell(105, $height, 'ACTA DE CONFORMIDAD', 0, 0, 'C', false, '', 0, false, 'T', 'C');								
+		$this->firmar();
 	}
 	
 	function generarReporte($maestro) {
@@ -25,7 +28,15 @@ class RConformidad extends  ReportePDF {
 		$conformidad = $maestro[0]['conformidad'];
 		$numero_oc = $maestro[0]['numero_oc'];	
 		$numero_op = $maestro[0]['numero_op'];	
-		$numero_cuota = $maestro[0]['numero_cuota'];	
+		$numero_cuota = $maestro[0]['numero_cuota'];
+		
+		$this->firma['datos_documento']['nombre_solicitante'] = $nombre_solicitante;
+		$this->firma['datos_documento']['proveedor'] = $proveedor;
+		$this->firma['datos_documento']['fecha_conformidad'] = $fecha_conformidad;
+		$this->firma['datos_documento']['conformidad'] = $conformidad;
+		$this->firma['datos_documento']['numero_oc'] = $numero_oc;
+		$this->firma['datos_documento']['numero_op'] = $numero_op;
+		$this->firma['datos_documento']['numero_cuota'] = $numero_cuota;
 				
 		$this->AddPage();
 		/*Se requiere obtener nombre_solicitante, fecha_conformidad,factura, proveedor,conformidad,numero_oc,numero_op, numero_cuota*/
@@ -63,6 +74,7 @@ class RConformidad extends  ReportePDF {
     	</body>
 EOF;
 		$this->writeHTMLCell (175,30,20,70,$html);		
+		return $this->firma;
 			
 	}
 	
