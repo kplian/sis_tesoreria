@@ -26,6 +26,7 @@ Phx.vista.PlanPagoRegIni = {
 		
 	    this.maestro=config.maestro;
 	    Phx.vista.PlanPagoRegIni.superclass.constructor.call(this,config);
+	    this.creaFormularioConformidad();
         ////formulario de departamentos
         //this.crearFormularioEstados();
         //si la interface es pestanha este código es para iniciar 
@@ -38,7 +39,7 @@ Phx.vista.PlanPagoRegIni = {
              this.bloquearMenus();
           }
           
-          
+          this.addButton('btnConformidad',{text:'Conformidad',iconCls: 'bok',disabled:true,handler:this.onButtonConformidad,tooltip: 'Generar conformidad para el pago (Firma acta de conformidad)'});
           this.addButton('btnVerifPresup', {
                 text : 'Disponibilidad',
                 iconCls : 'bassign',
@@ -413,6 +414,13 @@ Phx.vista.PlanPagoRegIni = {
           else{
                this.getBoton('SincPresu').disable();
           }
+          
+          if (data['fecha_conformidad'] == '' || data['fecha_conformidad'] == undefined || data['fecha_conformidad'] == null) {
+         	this.getBoton('btnConformidad').enable();
+         } else {
+         	this.getBoton('btnConformidad').disable();
+         }
+          
           this.getBoton('btnVerifPresup').enable();
           this.getBoton('btnChequeoDocumentosWf').enable();  
      },
@@ -425,6 +433,7 @@ Phx.vista.PlanPagoRegIni = {
            this.getBoton('btnVerifPresup').disable();
            this.getBoton('ant_estado').disable();
            this.getBoton('sig_estado').disable();
+           this.getBoton('btnConformidad').disable();
            this.getBoton('btnChequeoDocumentosWf').disable();   
           }
        return tb

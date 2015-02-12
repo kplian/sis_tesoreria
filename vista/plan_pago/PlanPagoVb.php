@@ -64,8 +64,9 @@ Phx.vista.PlanPagoVb = {
         
         
        Phx.vista.PlanPagoVb.superclass.constructor.call(this,config);
-       
+       this.creaFormularioConformidad();
        this.iniciarEventos();
+       this.addButton('btnConformidad',{text:'Conformidad',iconCls: 'bok',disabled:true,handler:this.onButtonConformidad,tooltip: 'Generar conformidad para el pago (Firma acta de conformidad)'});
        this.addButton('SolDevPag',{text:'Solicitar Devengado/Pago',iconCls: 'bpagar',disabled:true,handler:this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente, devengado o pago  '});
        this.addButton('ModAprop',{text:'Modificar Apropiación',iconCls: 'bengine',disabled:true,handler:this.onBtnApropiacion,tooltip: 'Modificar la apropiación (solo cuando es el primer pago de un pago directo y el estado es vbconta)'});
        this.addButton('diagrama_gantt',{text:'Gant',iconCls: 'bgantt',disabled:true,handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
@@ -425,6 +426,12 @@ Phx.vista.PlanPagoVb = {
          
          this.menuAdq.enable();
          this.getBoton('diagrama_gantt').enable();
+         
+         if (data['fecha_conformidad'] == '' || data['fecha_conformidad'] == undefined || data['fecha_conformidad'] == null) {
+         	this.getBoton('btnConformidad').enable();
+         } else {
+         	this.getBoton('btnConformidad').disable();
+         }
          this.getBoton('btnChequeoDocumentosWf').enable();
          this.getBoton('btnObs').enable();
            
@@ -443,6 +450,7 @@ Phx.vista.PlanPagoVb = {
            this.getBoton('SincPresu').disable();          
            this.getBoton('ModAprop').disable(); 
            this.getBoton('btnObs').disable();
+           this.getBoton('btnConformidad').disable();
            this.menuAdq.disable();
            
            
