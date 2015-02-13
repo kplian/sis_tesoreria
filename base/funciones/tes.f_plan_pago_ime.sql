@@ -1226,7 +1226,8 @@ BEGIN
             op.numero,
             pp.total_prorrateado ,
             pp.monto_ejecutar_total_mo,
-            pp.estado
+            pp.estado,
+            pp.id_estado_wf
         into 
             v_id_plan_pago,
             v_id_proceso_wf,
@@ -1235,7 +1236,8 @@ BEGIN
             v_num_obliacion_pago,
             v_total_prorrateo,
             v_monto_ejecutar_total_mo,
-            v_estado_aux
+            v_estado_aux,
+            v_id_estado_actual
             
         from tes.tplan_pago  pp
         inner  join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
@@ -1245,7 +1247,9 @@ BEGIN
          -- chequea fechas de costos inicio y fin
          IF(v_estado_aux in ('borrador','vbconta')) THEN
          	v_resp_doc =  tes.f_validar_periodo_costo(v_id_plan_pago);
-         END IF; 
+         END IF;
+         
+         
           
           select 
             ew.id_tipo_estado ,
@@ -1284,6 +1288,14 @@ BEGIN
                    v_obs='---';
                 
              END IF;
+             if (v_estado_aux = 'borrador') then
+                 update tes.tplan_pago
+                 set conformidad = v_obs,
+                 fecha_conformidad = now()
+                 where id_proceso_wf  = v_parametros.id_proceso_wf_act;
+                 
+                 v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_actual);
+             end if; 
                
              --configurar acceso directo para la alarma   
              v_acceso_directo = '';
