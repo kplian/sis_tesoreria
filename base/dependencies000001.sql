@@ -6347,7 +6347,7 @@ AS
  -- object recreation
 DROP VIEW tes.vcomp_devtesprov_plan_pago_2;
 
-CREATE VIEW tes.vcomp_devtesprov_plan_pago_2(
+CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
     id_plan_pago,
     id_proveedor,
     desc_proveedor,
@@ -6402,7 +6402,7 @@ CREATE VIEW tes.vcomp_devtesprov_plan_pago_2(
     desc_usuario,
     id_funcionario_gerente,
     correo_usuario,
-    conformidad)
+    sw_conformidad)
 AS
   SELECT pp.id_plan_pago,
          op.id_proveedor,
@@ -6462,7 +6462,10 @@ AS
          usu.desc_persona AS desc_usuario,
          COALESCE(op.id_funcionario_gerente, 0) AS id_funcionario_gerente,
          ususol.correo AS correo_usuario,
-         (case when pp.fecha_conformidad is null then 'no' else 'si' END) as conformidad
+         CASE
+           WHEN pp.fecha_conformidad IS NULL THEN 'no' ::text
+           ELSE 'si' ::text
+         END AS sw_conformidad
   FROM tes.tplan_pago pp
        JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
         op.id_obligacion_pago
