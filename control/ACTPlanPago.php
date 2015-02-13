@@ -226,6 +226,16 @@ class ACTPlanPago extends ACTbase{
 			$this->objParam->addFiltro("pp.id_proceso_wf = ". $this->objParam->getParametro('id_proceso_wf'));
 		}
 		
+		if ($this->objParam->getParametro('firmar') == 'si') {
+	    	$firmar = 'si';
+			$fecha_firma = $this->objParam->getParametro('fecha_firma');
+			$usuario_firma = $this->objParam->getParametro('usuario_firma');
+	    } else {
+	    	$firmar = 'no';
+			$fecha_firma = '';
+			$usuario_firma = '';
+	    }
+		
 		$this->objFunc=$this->create('MODPlanPago');	
 		
 		$this->res=$this->objFunc->listarActaMaestro($this->objParam);
@@ -239,20 +249,28 @@ class ACTPlanPago extends ACTbase{
 		
 		
 		$nombreArchivo.='.pdf';
-		$this->objParam->addParametro('orientacion',$orientacion);
-		$this->objParam->addParametro('tamano',$tamano);		
+		$this->objParam->addParametro('orientacion','P');
+		$this->objParam->addParametro('tamano','LETTER');		
 		$this->objParam->addParametro('titulo_archivo','ACTA DE CONFORMIDAD');
 		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+		$this->objParam->addParametro('firmar',$firmar); 
+		$this->objParam->addParametro('fecha_firma',$fecha_firma); 
+		$this->objParam->addParametro('usuario_firma',$usuario_firma); 
 		//Instancia la clase de pdf
 		$this->objReporteFormato=new RConformidad($this->objParam);
 				
-		$this->objReporteFormato->generarReporte($this->res->getDatos());
+		$firma = $this->objReporteFormato->generarReporte($this->res->getDatos());
 		$this->objReporteFormato->output($this->objReporteFormato->url_archivo,'F');
 		
 		$this->mensajeExito=new Mensaje();
 		$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
 										'Se generó con éxito el reporte: '.$nombreArchivo,'control');
 		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+		
+		//anade los datos de firma a la respuesta
+		if ($firmar == 'si') {
+			$this->mensajeExito->setDatos($firma);
+		}
 		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
 				
 	}

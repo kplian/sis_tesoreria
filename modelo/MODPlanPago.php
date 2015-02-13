@@ -295,7 +295,10 @@ class MODPlanPago extends MODbase{
         $this->setParametro('id_tipo_estado','id_tipo_estado','int4');
         $this->setParametro('id_estado_wf','id_estado_wf','int4');
         $this->setParametro('obs','obs','text');
-        
+		$this->setParametro('estado_destino','estado_destino','varchar');
+		
+		
+		
         //Ejecuta la instruccion
         $this->armarConsulta();
         $this->ejecutarConsulta();

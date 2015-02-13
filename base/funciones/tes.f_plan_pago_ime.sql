@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -127,22 +125,25 @@ DECLARE
     v_codigo_tipo_pro       varchar;
     
     
-    v_acceso_directo  	varchar;
-    v_clase   			varchar;
-    v_parametros_ad   	varchar;
-    v_tipo_noti  		varchar;
-    v_titulo   			varchar;
+    v_acceso_directo  		varchar;
+    v_clase   				varchar;
+    v_parametros_ad 	  	varchar;
+    v_tipo_noti  			varchar;
+    v_titulo   				varchar;
     v_codigo_proceso_llave_wf  varchar;
     v_porc_monto_retgar        numeric;
-    v_porc_ant   numeric;
+    v_porc_ant				   numeric;
     v_monto_ant_parcial_descontado  numeric;
-    v_saldo_x_descontar numeric;
-    v_saldo_x_pagar numeric;
-    v_revisado varchar;
-    v_check_ant_mixto numeric;
-    v_nombre_conexion varchar;
-    v_res			boolean;
-    v_tipo_obligacion	varchar;
+    v_saldo_x_descontar			 numeric;
+    v_saldo_x_pagar 			numeric;
+    v_revisado					 varchar;
+    v_check_ant_mixto			 numeric;
+    v_nombre_conexion			 varchar;
+    v_res						boolean;
+    v_tipo_obligacion			varchar;
+    v_operacion 				varchar;
+    
+    
     
     
 			    
@@ -1046,35 +1047,89 @@ BEGIN
 	elseif(p_transaccion='TES_ANTEPP_IME')then   
         begin
         
-        --------------------------------------------------
-        --Retrocede al estado inmediatamente anterior
-        -------------------------------------------------
-       --recuperaq estado anterior segun Log del WF
-          SELECT  
-         
-             ps_id_tipo_estado,
-             ps_id_funcionario,
-             ps_id_usuario_reg,
-             ps_id_depto,
-             ps_codigo_estado,
-             ps_id_estado_wf_ant
-          into
-             v_id_tipo_estado,
-             v_id_funcionario,
-             v_id_usuario_reg,
-             v_id_depto,
-             v_codigo_estado,
-             v_id_estado_wf_ant 
-          FROM wf.f_obtener_estado_ant_log_wf(v_parametros.id_estado_wf);
-                        
-                        
-           --
-          select 
-               ew.id_proceso_wf 
-            into 
-               v_id_proceso_wf
-          from wf.testado_wf ew
-          where ew.id_estado_wf= v_id_estado_wf_ant;
+        v_operacion = 'anterior';
+        
+        IF  pxp.f_existe_parametro(p_tabla , 'estado_destino')  THEN
+           v_operacion = v_parametros.estado_destino;
+        END IF;
+        
+        --recueprar datos del plan de pagos
+        
+        --obtenermos datos basicos
+        select
+            pp.id_plan_pago,
+            pp.id_proceso_wf,
+            pp.estado,
+            pp.fecha_tentativa,
+            pp.total_prorrateado ,
+            pp.monto_ejecutar_total_mo,
+            pp.estado,
+            pwf.id_tipo_proceso
+        into 
+            v_registros_pp
+            
+        from tes.tplan_pago  pp
+        inner  join wf.tproceso_wf pwf  on  pwf.id_proceso_wf = pp.id_proceso_wf
+        where pp.id_proceso_wf  = v_parametros.id_proceso_wf;
+        
+        v_id_proceso_wf = v_registros_pp.id_proceso_wf;
+        
+        IF  v_operacion = 'anterior' THEN
+            --------------------------------------------------
+            --Retrocede al estado inmediatamente anterior
+            -------------------------------------------------
+           --recuperaq estado anterior segun Log del WF
+              SELECT  
+             
+                 ps_id_tipo_estado,
+                 ps_id_funcionario,
+                 ps_id_usuario_reg,
+                 ps_id_depto,
+                 ps_codigo_estado,
+                 ps_id_estado_wf_ant
+              into
+                 v_id_tipo_estado,
+                 v_id_funcionario,
+                 v_id_usuario_reg,
+                 v_id_depto,
+                 v_codigo_estado,
+                 v_id_estado_wf_ant 
+              FROM wf.f_obtener_estado_ant_log_wf(v_parametros.id_estado_wf);
+              
+              
+             
+              
+              
+        ELSE
+           --recupera el estado inicial
+           -- recuperamos el estado inicial segun tipo_proceso
+             
+             SELECT  
+               ps_id_tipo_estado,
+               ps_codigo_estado
+             into
+               v_id_tipo_estado,
+               v_codigo_estado
+             FROM wf.f_obtener_tipo_estado_inicial_del_tipo_proceso(v_registros_pp.id_tipo_proceso);
+             
+             
+             
+             --busca en log e estado de wf que identificamos como el inicial
+             SELECT 
+               ps_id_funcionario,
+              ps_id_depto
+             into
+              v_id_funcionario,
+             v_id_depto
+               
+                
+             FROM wf.f_obtener_estado_segun_log_wf(v_id_estado_wf, v_id_tipo_estado);
+             
+            
+        
+        
+        END IF; 
+          
           
           
          --configurar acceso directo para la alarma   
@@ -1098,14 +1153,14 @@ BEGIN
           -- registra nuevo estado
                       
           v_id_estado_actual = wf.f_registra_estado_wf(
-              v_id_tipo_estado, 
-              v_id_funcionario, 
-              v_parametros.id_estado_wf, 
-              v_id_proceso_wf, 
-              p_id_usuario,
+              v_id_tipo_estado,                --  id_tipo_estado al que retrocede
+              v_id_funcionario,                --  funcionario del estado anterior
+              v_parametros.id_estado_wf,       --  estado actual ...
+              v_id_proceso_wf,                 --  id del proceso actual
+              p_id_usuario,                    -- usuario que registra
               v_parametros._id_usuario_ai,
               v_parametros._nombre_usuario_ai,
-              v_id_depto,
+              v_id_depto,                       --depto del estado anterior
               '[RETROCESO] '|| v_parametros.obs,
               v_acceso_directo,
               v_clase,
@@ -1367,6 +1422,12 @@ BEGIN
            set conformidad = v_parametros.conformidad,
            fecha_conformidad = v_parametros.fecha_conformidad
            where id_plan_pago = v_parametros.id_plan_pago;
+           
+           select pp.id_estado_wf into v_id_estado_actual
+           from tes.tplan_pago pp
+           where pp.id_plan_pago =  v_parametros.id_plan_pago;
+           
+           v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_actual);
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se modificaron los datos de la conformidad exitosamente'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_parametros.id_plan_pago::varchar);

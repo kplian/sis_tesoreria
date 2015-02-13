@@ -78,7 +78,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		//llama al constructor de la clase padre
 		Phx.vista.PlanPago.superclass.constructor.call(this,config);
 		this.init();
-		this.addButton('ant_estado',{argument: {estado: 'anterior'},text:'Anterior',iconCls: 'batras',disabled:true,handler:this.antEstado,tooltip: '<b>Pasar al Anterior Estado</b>'});
+		this.addButton('ini_estado',{argument: {estado: 'inicio'},text:'Dev. a borrador',iconCls: 'batras',disabled:true,handler:this.antEstado,tooltip: '<b>Retorna el plan de pagos al estado borrador</b>'});
+        this.addButton('ant_estado',{argument: {estado: 'anterior'},text:'Anterior',iconCls: 'batras',disabled:true,handler:this.antEstado,tooltip: '<b>Pasar al Anterior Estado</b>'});
         this.addButton('sig_estado',{text:'Aprobar/Sig.',iconCls: 'badelante',disabled:true,handler:this.sigEstado,tooltip: '<b>Apueba y pasar al Siguiente Estado</b>'});
         this.addButton('SolPlanPago',{text:'Sol. Plan Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnSolPlanPago,tooltip: '<b>Solicitud Plan Pago</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
 		this.addButton('btnChequeoDocumentosWf',
@@ -1193,15 +1194,15 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
   },
    
    
-   antEstado:function(){
+   antEstado:function(res){
          var rec=this.sm.getSelected();
-            Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/AntFormEstadoWf.php',
+         Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/AntFormEstadoWf.php',
             'Estado de Wf',
             {
                 modal:true,
                 width:450,
                 height:250
-            }, {data:rec.data}, this.idContenedor,'AntFormEstadoWf',
+            }, { data:rec.data, estado_destino: res.argument.estado }, this.idContenedor,'AntFormEstadoWf',
             {
                 config:[{
                           event:'beforesave',
@@ -1212,15 +1213,16 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
              })
    },
    
-   onAntEstado:function(wizard,resp){
+   onAntEstado: function(wizard,resp){
             Phx.CP.loadingShow();
             Ext.Ajax.request({
                 // form:this.form.getForm().getEl(),
                 url:'../../sis_tesoreria/control/PlanPago/anteriorEstadoPlanPago',
                 params:{
-                        id_proceso_wf:resp.id_proceso_wf,
-                        id_estado_wf:resp.id_estado_wf,  
-                        obs:resp.obs
+                        id_proceso_wf: resp.id_proceso_wf,
+                        id_estado_wf:  resp.id_estado_wf,  
+                        obs: resp.obs,
+                        estado_destino: resp.estado_destino
                  },
                 argument:{wizard:wizard},  
                 success:this.successEstadoSinc,
@@ -1892,8 +1894,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             	id_estado_wf: rec.data.id_estado_wf,
             	num_tramite: rec.data.num_tramite
             }
-            
-            console.log(rec.data)
+             
             Phx.CP.loadWindows('../../../sis_workflow/vista/obs/Obs.php',
                     'Observaciones del WF',
                     {
