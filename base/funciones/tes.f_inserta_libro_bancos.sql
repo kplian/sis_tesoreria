@@ -51,6 +51,7 @@ DECLARE
     v_id_estado_wf_anterior   integer; 
 	v_id_depto		integer;
     v_codigo_tipo_pro	varchar;
+    v_sistema_origen	varchar;
     		    
 BEGIN
 
@@ -92,7 +93,7 @@ BEGIN
                          limit 1 offset 0;
         
         
-        IF   (p_hstore->'tipo')::varchar not in ('cheque','debito_automatico','transferencia_carta','deposito') THEN
+        IF   (p_hstore->'tipo')::varchar not in ('cheque','debito_automatico','transferencia_carta','deposito','transferencia_intern') THEN
              raise exception 'Tipo de transaccion bancaria no valida';                
         ELSE              
         	
@@ -120,8 +121,9 @@ BEGIN
         END IF;
         
         --obtener id del proceso macro
-        
-		IF(COALESCE(p_hstore->'sistema_origen','PXP') != 'KERP')THEN
+        v_sistema_origen = COALESCE(p_hstore->'sistema_origen','PXP')::varchar;
+
+		IF( v_sistema_origen != 'KERP' OR (v_sistema_origen = 'KERP' AND (p_hstore->'tipo')='deposito'))THEN
         
             select 
              pm.id_proceso_macro
@@ -138,7 +140,6 @@ BEGIN
             END IF;
             
             --   obtener el codigo del tipo_proceso
-           
             select   tp.codigo 
                 into v_codigo_tipo_proceso
             from  wf.ttipo_proceso tp 

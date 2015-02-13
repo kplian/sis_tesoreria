@@ -63,7 +63,7 @@ BEGIN
           END IF;
           
         
-         IF   v_parametros.tipo_interfaz ='obligacionPagoTes' THEN
+         IF   v_parametros.tipo_interfaz in ('obligacionPagoTes','obligacionPagoUnico') THEN
            
                  IF   p_administrador != 1 THEN
                  
@@ -77,6 +77,15 @@ BEGIN
                  v_filadd='(obpg.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||')) and';
                 
                 END IF;
+                
+                
+                IF   v_parametros.tipo_interfaz  = 'obligacionPagoUnico' THEN
+                   v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_unico'' and';
+                ELSE
+                   v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_directo'' and';
+                END IF;
+              
+                
                 
          ELSIF  v_parametros.tipo_interfaz =  'ObligacionPagoVb' THEN
          
@@ -101,6 +110,9 @@ BEGIN
          ELSIF v_parametros.tipo_interfaz =  'ObligacionPagoConta' THEN
             --no hay limitaciones ...
          ELSE
+         
+         
+         
 
                 --SI LA NTERFACE VIENE DE ADQUISIONES   
           
