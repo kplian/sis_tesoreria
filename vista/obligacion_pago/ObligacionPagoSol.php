@@ -166,6 +166,17 @@ Phx.vista.ObligacionPagoSol = {
 			this.Cmp.id_contrato.store.baseParams.filter = "[{\"type\":\"numeric\",\"comparison\":\"eq\", \"value\":\""+cmb.getValue()+"\",\"field\":\"CON.id_proveedor\"}]";
 			this.Cmp.id_contrato.modificado = true;
 		}, this);
+		
+		
+	this.Cmp.id_funcionario.on('select', function(combo, record, index){ 
+        	if(!record.data.id_lugar){
+        		alert('El funcionario no tiene oficina definida');
+        	}
+        	this.Cmp.id_depto.reset();
+        	this.Cmp.id_depto.store.baseParams.id_lugar = record.data.id_lugar;
+        	this.Cmp.id_depto.modificado = true;
+        	this.Cmp.id_depto.enable();
+        }, this);
     
     },
     
@@ -216,7 +227,7 @@ Phx.vista.ObligacionPagoSol = {
        
         
         this.cmpTipoObligacion.enable();
-        this.cmpDepto.enable(); 
+        this.cmpDepto.disable(); 
         this.mostrarComponente(this.cmpProveedor);
         this.mostrarComponente(this.cmpFuncionario);
         this.ocultarComponente(this.cmpFuncionarioProveedor);
@@ -224,7 +235,6 @@ Phx.vista.ObligacionPagoSol = {
         this.cmpFecha.enable(); 
         this.cmpTipoCambioConv.enable();
         this.cmpProveedor.enable();
-        this.cmpDepto.enable(); 
         this.cmpMoneda.enable();
         
         this.cmpFuncionario.disable();

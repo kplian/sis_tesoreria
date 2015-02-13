@@ -237,19 +237,10 @@ BEGIN
           END IF;
           
           --  raise exception 'cc  %',v_parametros.tipo_interfaz  ;
-        IF   v_parametros.tipo_interfaz ='obligacionPagoSol' THEN
-        
-              IF   p_administrador != 1 THEN
-                 
-                    v_filadd = '(obpg.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or obpg.id_usuario_reg='||p_id_usuario||' ) and ';
-            
-              END IF;
-        
-        
+        IF   v_parametros.tipo_interfaz ='obligacionPagoTes' THEN
            
-         ELSIF   v_parametros.tipo_interfaz ='obligacionPagoTes' THEN
-           
-                  IF   p_administrador != 1 THEN
+                
+                IF   p_administrador != 1 THEN
                  
                    select  
                        pxp.aggarray(depu.id_depto)
@@ -260,6 +251,13 @@ BEGIN
               
                  v_filadd='(obpg.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||')) and';
                 
+                END IF;
+                
+                
+                IF   v_parametros.tipo_interfaz  = 'obligacionPagoUnico' THEN
+                   v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_unico'' and';
+                ELSE
+                   v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_directo'' and';
                 END IF;
         
         ELSIF  v_parametros.tipo_interfaz =  'ObligacionPagoVb' THEN
@@ -351,7 +349,17 @@ BEGIN
             IF   p_administrador != 1 THEN
                    v_filadd = '(obpg.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or obpg.id_usuario_reg='||p_id_usuario||' ) and ';
             END IF;
-          END IF;       
+          ELSEIF  v_parametros.tipo_interfaz in ('obligacionPagoSol', 'obligacionPagoUnico') THEN
+        
+                IF   v_parametros.tipo_interfaz  = 'obligacionPagoUnico' THEN
+                   v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_unico'' and';
+                ELSE
+                   v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_directo'' and';
+                END IF;
+        
+        
+           
+         END IF;       
                 
           
               
@@ -449,15 +457,22 @@ BEGIN
 
 		begin
         
-           v_filadd='';
-           v_inner='';
+            v_filadd='';
+            v_inner='';
           
-          IF  v_parametros.tipo_interfaz !=  'ObligacionPagoConta' THEN
-            --no hay limitaciones ...
-            IF   p_administrador != 1 THEN
-                   v_filadd = '(obpg.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or obpg.id_usuario_reg='||p_id_usuario||' ) and ';
-            END IF;
-          END IF; 
+             IF  v_parametros.tipo_interfaz !=  'ObligacionPagoConta' THEN
+                --no hay limitaciones ...
+                IF   p_administrador != 1 THEN
+                       v_filadd = '(obpg.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or obpg.id_usuario_reg='||p_id_usuario||' ) and ';
+                END IF;
+             ELSEIF  v_parametros.tipo_interfaz in ('obligacionPagoSol', 'obligacionPagoUnico') THEN
+          
+                  IF   v_parametros.tipo_interfaz  = 'obligacionPagoUnico' THEN
+                     v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_unico'' and';
+                  ELSE
+                     v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_directo'' and';
+                  END IF;
+             END IF ;
         
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(obpg.id_obligacion_pago)

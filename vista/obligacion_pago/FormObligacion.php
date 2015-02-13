@@ -53,7 +53,7 @@ Phx.vista.FormObligacion=Ext.extend(Phx.frmInterfaz,{
 							                            totalProperty: 'total',
 							                            fields: ['id_concepto_ingas','tipo','desc_ingas','movimiento','desc_partida','id_grupo_ots','filtro_ot','requiere_ot'],
 							                            remoteSort: true,
-							                            baseParams:{par_filtro:'desc_ingas#par.codigo#par.nombre_partida',movimiento:'gasto', autorizacion: 'pago_unico'}
+							                            baseParams:{par_filtro:'desc_ingas#par.codigo#par.nombre_partida',movimiento:'gasto', autorizacion: 'pago_unico',autorizacion_nulos: 'no'}
 							                }),
 							               valueField: 'id_concepto_ingas',
 							               displayField: 'desc_ingas',
@@ -844,12 +844,20 @@ Phx.vista.FormObligacion=Ext.extend(Phx.frmInterfaz,{
     		arra[i].precio_sg = 0.0; 
 		}
    	    me.argumentExtraSubmit = { 'json_new_records': Ext.encode(arra) };
-   	    if( i > 0){
-   	    	 Phx.vista.FormObligacion.superclass.onSubmit.call(this,o);
+   	    if(this.evaluaRequistos()){
+	   	    if( i > 0){
+	   	    	 Phx.vista.FormObligacion.superclass.onSubmit.call(this,o);
+	   	    }
+	   	    else{
+	   	    	if(confirm("No tiene ningun concepto  para comprar. ¿Desea continuar?")){
+	   	    		
+	   	    		Phx.vista.FormObligacion.superclass.onSubmit.call(this,o);
+	   	    	}
+	   	    	
+	   	    }	
    	    }
-   	    else{
-   	    	alert('no tiene ningun concepto  para comprar')
-   	    }
+   	    
+   	    
    	},
    
    successSave: function(resp){

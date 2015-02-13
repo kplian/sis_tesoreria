@@ -275,24 +275,6 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
         },
         {
             config:{
-                name: 'id_depto',
-                fieldLabel: 'Depto',
-                allowBlank: false,
-                anchor: '80%',
-                origen: 'DEPTO',
-                tinit: false,
-                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES'},//parametros adicionales que se le pasan al store
-                gdisplayField:'nombre_depto',
-                gwidth: 100
-            },
-            type:'ComboRec',
-            filters:{pfiltro:'dep.nombre',type:'string'},
-            id_grupo:1,
-            grid:true,
-            form:true
-        },
-         {
-            config:{
                 name:'id_funcionario',
                 hiddenName: 'id_funcionario',
                 origen:'FUNCIONARIOCAR',
@@ -310,6 +292,24 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:true
          },
+        {
+            config:{
+                name: 'id_depto',
+                fieldLabel: 'Depto',
+                allowBlank: false,
+                anchor: '80%',
+                origen: 'DEPTO',
+                tinit: false,
+                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES'},//parametros adicionales que se le pasan al store
+                gdisplayField:'nombre_depto',
+                gwidth: 100
+            },
+            type:'ComboRec',
+            filters:{pfiltro:'dep.nombre',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
         {
             config:{
                 name: 'total_pago',
@@ -417,7 +417,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Contrato',
 				typeAhead: false,
 				forceSelection: false,
-				allowBlank: true,
+				allowBlank: false,
 				disabled: true,
 				emptyText: 'Contratos...',
 				store: new Ext.data.JsonStore({

@@ -20,6 +20,7 @@ Phx.vista.ObligacionPagoUnico = {
 	requireclase: 'Phx.vista.ObligacionPago',
 	title: 'Pago Únicos Excepcionales (Sin Proceso)',
 	nombreVista: 'obligacionPagoUnico',
+	ActList:'../../sis_tesoreria/control/ObligacionPago/listarObligacionPagoSol',
 	/*
 	 *  Interface heredada para el sistema de adquisiciones para que el reposnable 
 	 *  de adqusiciones registro los planes de pago , y ase por los pasos configurados en el WF
