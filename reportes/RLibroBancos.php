@@ -114,8 +114,8 @@ Class RLibroBancos extends Report {
 		if($this->getDataSource()->getParameter('estado') == 'impreso y entregado' )
 		{	
 			$pdf->Cell($width1, $height, 'Fecha', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$pdf->Cell($width2+8, $height, 'A Favor', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$pdf->Cell($width3+8, $height, 'Detalle', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$pdf->Cell($width2+4, $height, 'A Favor', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$pdf->Cell($width3+4, $height, 'Detalle', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$pdf->Cell($width4, $height, 'Nº Liq/Cite', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$pdf->Cell($width1, $height, 'Nº Com.', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$pdf->Cell($width4, $height, 'Nº Cheque', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');								
@@ -140,7 +140,7 @@ Class RLibroBancos extends Report {
 		if($this->getDataSource()->getParameter('estado') == 'impreso y entregado' )
 		{	
 			$pdf->SetFillColor(255,255,255, true);
-			$pdf->tablewidths=array($width1,$width2+8,$width3+8,$width4,$width1,$width4,$width1,$width1);
+			$pdf->tablewidths=array($width1,$width2+4,$width3+4,$width4,$width1,$width4,$width1,$width1);
 			$pdf->tablealigns=array('L','L','L','C','C','C','R','R');
 			$pdf->tablenumbers=array(0,0,0,0,0,0,0,0);
 		}else{
