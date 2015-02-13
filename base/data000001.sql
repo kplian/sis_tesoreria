@@ -1167,3 +1167,14 @@ SELECT * FROM param.f_inserta_documento('TES', 'PU', 'Pago Único', 'periodo', N
 
 /***********************************F-DAT-RAC-TES-0-19/02/2015*****************************************/
 
+
+/***********************************I-DAT-RAC-TES-0-25/02/2015*****************************************/
+
+select pxp.f_insert_tgui ('Solicitud de Obligacion de Pago  (Con Contrato)', 'Solicitud de Pago Directos', 'SOLPD', 'si', 1, 'sis_tesoreria/vista/obligacion_pago/ObligacionPagoSol.php', 2, '', 'ObligacionPagoSol', 'TES');
+
+select pxp.f_insert_tgui ('Solicitud de Pago Único  (Sin contrato)', 'Solicitud de Pago Único  (Sin contrato)', 'OPUNI', 'si', 1, 'sis_tesoreria/vista/obligacion_pago/ObligacionPagoUnico.php', 2, '', 'ObligacionPagoUnico', 'TES');
+
+select pxp.f_insert_testructura_gui ('OPUNI', 'TES');
+
+/***********************************F-DAT-RAC-TES-0-25/02/2015*****************************************/
+

@@ -33,6 +33,8 @@ Phx.vista.ObligacionPagoConta = {
        this.Atributos[this.getIndAtributo('id_funcionario')].form= true;
        
        
+       
+       
        Phx.vista.ObligacionPagoConta.superclass.constructor.call(this,config);
     },
     
