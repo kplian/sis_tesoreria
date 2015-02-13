@@ -121,9 +121,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 	
                 	'INICIAL':[
                 	            ['devengado_pagado','Devengar y pagar (2 comprobantes)'],
-                	            ['devengado_pagado_1c','Devengar y pagar (1 comprobante)'],
+                	            //['devengado_pagado_1c','Devengar y pagar (1 comprobante)'],
                                 ['devengado','Devengar'],
-                                ['devengado_rrhh','Devengar RH'],
+                                //['devengado_rrhh','Devengar RH'],
                                 ['dev_garantia','Devolucion de Garantia'], //es similr a un devengar y pagar pero no genera prorrateo directamente
                                 ['anticipo','Anticipo Fact/Rec (No ejecuta presupuesto, necesita Documento)'],
                                 ['ant_parcial','Anticipo Parcial(No ejecuta presupuesto, Con retenciones parciales en cada pago)']
@@ -1948,5 +1948,3 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 	
 })
 </script>
-		
-		
