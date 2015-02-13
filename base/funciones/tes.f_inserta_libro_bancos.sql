@@ -69,6 +69,7 @@ BEGIN
             (p_hstore->'importe_cheque')::numeric
             (p_hstore->'importe_deposito')::numeric
             (p_hstore->'nro_comprobante')::varchar
+            (p_hstore->'comprobante_sigma')::varchar
             (p_hstore->'nro_liquidacion')::varchar
             (p_hstore->'id_cuenta_bancaria')::integer
             (p_hstore->'id_libro_bancos_fk')::integer
@@ -274,7 +275,8 @@ BEGIN
                 num_tramite,
                 id_depto,
                 id_finalidad,
-                sistema_origen
+                sistema_origen,
+                comprobante_sigma
                 ) values(            
                 (p_hstore->'id_cuenta_bancaria')::integer,
                 (p_hstore->'fecha')::date,
@@ -300,7 +302,8 @@ BEGIN
                 v_num_tramite,
                 (p_hstore->'id_depto')::integer,				
                 (p_hstore->'id_finalidad')::integer,
-                (p_hstore->'sistema_origen')::varchar				
+                (p_hstore->'sistema_origen')::varchar,
+                (p_hstore->'comprobante_sigma')::varchar				
                 )RETURNING id_libro_bancos into v_id_libro_bancos;
     			
                  -- inserta documentos en estado borrador si estan configurados

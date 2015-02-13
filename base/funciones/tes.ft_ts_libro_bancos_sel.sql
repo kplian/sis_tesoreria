@@ -63,6 +63,7 @@ BEGIN
                         id_libro_bancos_fk,
                         estado,
                         nro_comprobante,
+                        comprobante_sigma,
                         indice,
                         estado_reg,
                         tipo,
@@ -82,7 +83,8 @@ BEGIN
                         color,
                         saldo_deposito,
                         nombre_regional,
-                        sistema_origen
+                        sistema_origen,
+                        notificado
                         from tes.vlibro_bancos lban
 				        where  ';
 			
@@ -299,6 +301,7 @@ BEGIN
                 UPDATE tes.tts_libro_bancos
                 SET notificado='si'
                 WHERE id_libro_bancos= v_parametros.id_libro_bancos;
+                
                 return v_consulta;
     						
             end;

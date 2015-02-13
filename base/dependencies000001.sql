@@ -5705,7 +5705,9 @@ CREATE VIEW tes.vlibro_bancos (
     color,
     saldo_deposito,
     nombre_regional,
-    sistema_origen)
+    sistema_origen,
+    comprobante_sigma,
+    notificado)
 AS
 SELECT lban.id_libro_bancos,
     lban.num_tramite,
@@ -5745,12 +5747,12 @@ SELECT lban.id_libro_bancos,
     SELECT COALESCE(sum(lb.importe_cheque), 0::numeric) AS "coalesce"
     FROM tes.tts_libro_bancos lb
     WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos AND (lb.tipo::text <>
-        ALL (ARRAY['deposito'::character varying, 'transf_interna_haber'::character varying]::text[]))
+        ALL (ARRAY['deposito'::character varying::text, 'transf_interna_haber'::character varying::text]))
     ), 0::numeric) + COALESCE((
     SELECT COALESCE(sum(lb.importe_deposito), 0::numeric) AS "coalesce"
     FROM tes.tts_libro_bancos lb
     WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos AND (lb.tipo::text = ANY
-        (ARRAY['deposito'::character varying, 'transf_interna_haber'::character varying]::text[]))
+        (ARRAY['deposito'::character varying::text, 'transf_interna_haber'::character varying::text]))
     ), 0::numeric)
             WHEN (lban.tipo::text = ANY (ARRAY['cheque'::character
                 varying::text, 'debito_automatico'::character varying::text, 'transferencia_carta'::character varying::text])) AND lban.id_libro_bancos_fk IS NOT NULL THEN ((
@@ -5761,24 +5763,26 @@ SELECT lban.id_libro_bancos,
     SELECT COALESCE(sum(lb.importe_deposito), 0::numeric) AS "coalesce"
     FROM tes.tts_libro_bancos lb
     WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos_fk AND (lb.tipo::text =
-        ANY (ARRAY['deposito'::character varying, 'transf_interna_haber'::character varying]::text[]))
+        ANY (ARRAY['deposito'::character varying::text, 'transf_interna_haber'::character varying::text]))
     )) - ((
     SELECT sum(lb2.importe_cheque) AS sum
     FROM tes.tts_libro_bancos lb2
     WHERE lb2.id_libro_bancos <= lban.id_libro_bancos AND
-        lb2.id_libro_bancos_fk = lban.id_libro_bancos_fk AND (lb2.tipo::text <> ALL (ARRAY['deposito'::character varying, 'transf_interna_haber'::character varying]::text[]))
+        lb2.id_libro_bancos_fk = lban.id_libro_bancos_fk AND (lb2.tipo::text <> ALL (ARRAY['deposito'::character varying::text, 'transf_interna_haber'::character varying::text]))
     ))
             ELSE 0::numeric
         END AS saldo_deposito,
     reg.nombre_regional,
-    lban.sistema_origen
+    lban.sistema_origen,
+    lban.comprobante_sigma,
+    lban.notificado
 FROM tes.tts_libro_bancos lban
    JOIN segu.tusuario usu1 ON usu1.id_usuario = lban.id_usuario_reg
    LEFT JOIN param.tdepto depto ON depto.id_depto = lban.id_depto
    LEFT JOIN segu.tusuario usu2 ON usu2.id_usuario = lban.id_usuario_mod
    JOIN tes.tfinalidad fin ON fin.id_finalidad = lban.id_finalidad
    LEFT JOIN param.tregional reg ON reg.codigo_regional::text = lban.origen::text;
-  
+   
 /***********************************F-DEP-GSS-TES-0-19/01/2015****************************************/
 
 /***********************************I-DEP-JRR-TES-0-23/01/2015****************************************/
