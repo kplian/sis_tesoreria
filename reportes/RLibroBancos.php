@@ -32,15 +32,47 @@ require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
         $this->Ln();
 		$this->SetFontSize(6);
 		$this->Cell(185, $height/5, 'Cuenta Corriente Nº '.$this->getDataSource()->getParameter('nro_cuenta'), 0, 0, 'C', false, '', 1, false, 'T', 'C');
-		$this->Ln();
+		$this->Ln(3.5);
 		$this->Cell(185, $height/5, 'Del '.$this->getDataSource()->getParameter('fecha_ini'). ' al '.$this->getDataSource()->getParameter('fecha_fin'), 0, 0, 'C', false, '', 1, false, 'T', 'C');
-		$this->Ln();
+		$this->Ln(3.5);
 		$this->Cell(185, $height/5, 'Finalidad: '.$this->getDataSource()->getParameter('finalidad'), 0, 0, 'C', false, '', 1, false, 'T', 'C');
-		$this->Ln();
+		$this->Ln(3.5);
 		$this->Cell(185, $height/5, 'Tipo: '.$this->getDataSource()->getParameter('tipo'), 0, 0, 'C', false, '', 1, false, 'T', 'C');
-		$this->Ln();
+		$this->Ln(3.5);
 		$this->Cell(185, $height/5, 'Estado: '.$this->getDataSource()->getParameter('estado'), 0, 0, 'C', false, '', 1, false, 'T', 'C');
 		$this->Ln();
+		
+		$width1 = 15;
+		$width2 = 40;
+        $width3 = 60;
+		$width4 = 11;
+		$width5 = 16;
+		$height = 5;
+		$blackAll = array('LTRB' =>array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0, 0, 0)));
+		$this->SetFillColor(224,224,224, true);
+        $this->setTextColor(0,0,0);
+		
+		if($this->getDataSource()->getParameter('estado') == 'impreso y entregado' )
+		{	
+			$this->Cell($width1, $height, 'Fecha', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width2+4, $height, 'A Favor', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width3+4, $height, 'Detalle', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width4, $height, 'Nº Liq/Cite', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width1, $height, 'Nº Com.', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width4, $height, 'Nº Cheque', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');								
+			$this->Cell($width1, $height, 'Debe', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width1, $height, 'Haber', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+		}else{
+			$this->Cell($width1, $height, 'Fecha', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width2-4, $height, 'A Favor', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width3-4, $height, 'Detalle', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width4, $height, 'Nº Liq/Cite', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width1, $height, 'Nº Com.', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width4, $height, 'Nº Cheque', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');								
+			$this->Cell($width1, $height, 'Debe', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width1, $height, 'Haber', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width5, $height, 'Saldos', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');			
+		}
     }
     
     public function Footer() {
@@ -111,29 +143,7 @@ Class RLibroBancos extends Report {
         $pdf->SetFillColor(224,224,224, true);
         $pdf->setTextColor(0,0,0);
 		
-		if($this->getDataSource()->getParameter('estado') == 'impreso y entregado' )
-		{	
-			$pdf->Cell($width1, $height, 'Fecha', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$pdf->Cell($width2+4, $height, 'A Favor', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$pdf->Cell($width3+4, $height, 'Detalle', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$pdf->Cell($width4, $height, 'Nº Liq/Cite', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$pdf->Cell($width1, $height, 'Nº Com.', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$pdf->Cell($width4, $height, 'Nº Cheque', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');								
-			$pdf->Cell($width1, $height, 'Debe', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$pdf->Cell($width1, $height, 'Haber', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-		}else{
-			$pdf->Cell($width1, $height, 'Fecha', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$pdf->Cell($width2, $height, 'A Favor', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$pdf->Cell($width3, $height, 'Detalle', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$pdf->Cell($width4, $height, 'Nº Liq/Cite', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$pdf->Cell($width1, $height, 'Nº Com.', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$pdf->Cell($width4, $height, 'Nº Cheque', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');								
-			$pdf->Cell($width1, $height, 'Debe', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$pdf->Cell($width1, $height, 'Haber', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$pdf->Cell($width5, $height, 'Saldos', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');			
-		} 
-		
-        $pdf->Ln();        
+        $pdf->Ln();
 		$pdf->SetFontSize(6);
 		$pdf->SetFont('','');
 		
@@ -145,7 +155,7 @@ Class RLibroBancos extends Report {
 			$pdf->tablenumbers=array(0,0,0,0,0,0,0,0);
 		}else{
 			$pdf->SetFillColor(255,255,255, true);
-			$pdf->tablewidths=array($width1,$width2,$width3,$width4,$width1,$width4,$width1,$width1,$width5);
+			$pdf->tablewidths=array($width1,$width2-4,$width3-4,$width4,$width1,$width4,$width1,$width1,$width5);
 			$pdf->tablealigns=array('L','L','L','C','C','C','R','R','R');
 			$pdf->tablenumbers=array(0,0,0,0,0,0,0,0,0);
 		}
@@ -189,14 +199,14 @@ Class RLibroBancos extends Report {
 		$pdf->SetFont('','B');
 		if($this->getDataSource()->getParameter('estado') == 'impreso y entregado' )
 		{	
-			$pdf->Cell(181,7,'SALDO CHEQUES EN TRANSITO AL '.$this->getDataSource()->getParameter('fecha_fin').'  ' ,0,0,'R'); 
-			$pdf->Cell(18, 7, $total_haber, 0, 1, 'R'); 
+			$pdf->Cell(171,7,'SALDO CHEQUES EN TRANSITO AL '.$this->getDataSource()->getParameter('fecha_fin').'  ' ,0,0,'R'); 
+			$pdf->Cell(28, 7, $total_haber, 0, 1, 'L'); 
 			
 		}
 		else
 		{
-			$pdf->Cell(181,7,'SALDO AL '.$this->getDataSource()->getParameter('fecha_fin').'  ' ,0,0,'R'); 
-			$pdf->Cell(18, 7, $saldo_final, 0, 1, 'R'); 
+			$pdf->Cell(171,7,'SALDO AL '.$this->getDataSource()->getParameter('fecha_fin').'  ' ,0,0,'R'); 
+			$pdf->Cell(28, 7, $saldo_final, 0, 1, 'L'); 
 						
 			$pdf->Cell(15, 6, 'SALDO DEBE: ', 0, 0, 'L'); 
 			$pdf->Cell(25, 6, $total_debe, 0, 1, 'R'); 
