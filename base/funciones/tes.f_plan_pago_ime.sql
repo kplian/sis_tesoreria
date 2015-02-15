@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -142,6 +144,7 @@ DECLARE
     v_res						boolean;
     v_tipo_obligacion			varchar;
     v_operacion 				varchar;
+    v_id_depto_lb				integer;
     
     
     
@@ -247,6 +250,10 @@ BEGIN
            
              IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria') THEN
                v_id_cuenta_bancaria =  v_parametros.id_cuenta_bancaria;
+             END IF;
+             
+             IF  pxp.f_existe_parametro(p_tabla,'id_depto_lb') THEN
+               v_id_depto_lb =  v_parametros.id_depto_lb;
              END IF;
              
              IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria_mov') THEN
@@ -612,6 +619,7 @@ BEGIN
 			monto = v_parametros.monto,
 			nombre_pago = v_parametros.nombre_pago,
 			id_cuenta_bancaria = v_id_cuenta_bancaria,
+            id_depto_lb = v_id_depto_lb,
 			forma_pago = v_forma_pago,
 			monto_no_pagado = v_parametros.monto_no_pagado,
             liquido_pagable=v_liquido_pagable,
@@ -1249,7 +1257,12 @@ BEGIN
          	v_resp_doc =  tes.f_validar_periodo_costo(v_id_plan_pago);
          END IF;
          
-         
+         --validamos que el pago no sea menor a la fecha tentaiva
+         if (v_estado_aux = 'borrador') then
+            IF  v_fecha_tentativa::date > (now()::date + CAST('2 days' AS INTERVAL))::date THEN
+               raise exception 'No puede adelantar el pago,  la fecha tentativa esta marcada para el %', to_char(v_fecha_tentativa,'DD/MM/YYYY/');
+            END IF;
+         end if;
           
           select 
             ew.id_tipo_estado ,
@@ -1288,13 +1301,25 @@ BEGIN
                    v_obs='---';
                 
              END IF;
+             
              if (v_estado_aux = 'borrador') then
+             
+             
+             
+             
                  update tes.tplan_pago
                  set conformidad = v_obs,
                  fecha_conformidad = now()
                  where id_proceso_wf  = v_parametros.id_proceso_wf_act;
                  
                  v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_actual);
+             end if;
+             
+             --si viene del estado vobo finanzas actualizamos el depto de libro de bancos
+             if (v_estado_aux = 'vbfin') then
+                 update tes.tplan_pago set 
+                 id_depto_lb = v_parametros.id_depto_lb
+                 where id_proceso_wf  = v_parametros.id_proceso_wf_act;
              end if; 
                
              --configurar acceso directo para la alarma   
@@ -1494,6 +1519,33 @@ BEGIN
             --Devuelve la respuesta
             return v_resp;        
         end;
+    
+    
+    /*********************************    
+ 	#TRANSACCION:  'TES_CBFRM500_IME'
+ 	#DESCRIPCION:	CAmbio el estado de requiere fromr 500 para no generar mas alarmas de correo
+ 	#AUTOR:		RAC KPLIAN
+ 	#FECHA:		02-03-2015
+	***********************************/
+
+	elsif(p_transaccion='TES_CBFRM500_IME')then
+
+		begin
+         
+           update tes.tplan_pago  set 
+            tiene_form500 = 'si'
+           where id_plan_pago = v_parametros.id_plan_pago;
+           
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se cambio el estado de tiene formulario 500 '); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_parametros.id_plan_pago::varchar);
+            
+            --Devuelve la respuesta
+            return v_resp;        
+        end;
+            
+        
+        
     else
      
     	raise exception 'Transaccion inexistente: %',p_transaccion;

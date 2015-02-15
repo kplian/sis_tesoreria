@@ -52,6 +52,7 @@ DECLARE
 	v_id_depto		integer;
     v_codigo_tipo_pro	varchar;
     v_sistema_origen	varchar;
+    g_fecha			date;
     		    
 BEGIN
 
@@ -86,11 +87,16 @@ BEGIN
     */
     
     --determina la fecha del periodo
-        
+         IF(p_hstore ? 'fecha' = false)THEN
+         	g_fecha = now();
+         ELSE 
+         	g_fecha = p_hstore->'fecha';
+         END IF;
+         
          select id_periodo into v_id_periodo from
                         param.tperiodo per 
-                       where per.fecha_ini <= (p_hstore->'fecha')::date 
-                         and per.fecha_fin >= (p_hstore->'fecha')::date
+                       where per.fecha_ini <= g_fecha::date 
+                         and per.fecha_fin >= g_fecha::date
                          limit 1 offset 0;
         
         
@@ -154,7 +160,7 @@ BEGIN
             END IF;
       
             
-            v_anho = (date_part('year', (p_hstore->'fecha')::date))::integer;
+            v_anho = (date_part('year', g_fecha::date))::integer;
     			
                 select 
                  ges.id_gestion
@@ -249,10 +255,11 @@ BEGIN
                          v_codigo_tipo_pro);                         
                 
             END IF;    
+			
+            IF(p_hstore ? 'fecha' = false)THEN
             
-            insert into tes.tts_libro_bancos(
+            	insert into tes.tts_libro_bancos(
                 id_cuenta_bancaria,
-                fecha,
                 a_favor,
                 nro_cheque,
                 importe_deposito,
@@ -279,7 +286,6 @@ BEGIN
                 comprobante_sigma
                 ) values(            
                 (p_hstore->'id_cuenta_bancaria')::integer,
-                (p_hstore->'fecha')::date,
                 upper(translate ((p_hstore->'a_favor')::varchar, 'áéíóúÁÉÍÓÚäëïöüÄËÏÖÜñ', 'aeiouAEIOUaeiouAEIOUÑ')),
                 (p_hstore->'nro_cheque')::integer,
                 (p_hstore->'importe_deposito')::numeric,
@@ -304,8 +310,68 @@ BEGIN
                 (p_hstore->'id_finalidad')::integer,
                 (p_hstore->'sistema_origen')::varchar,
                 (p_hstore->'comprobante_sigma')::varchar				
-                )RETURNING id_libro_bancos into v_id_libro_bancos;
-    			
+                )RETURNING id_libro_bancos into v_id_libro_bancos;    		
+            
+            ELSE
+            
+              insert into tes.tts_libro_bancos(
+                  id_cuenta_bancaria,
+                  fecha,
+                  a_favor,
+                  nro_cheque,
+                  importe_deposito,
+                  nro_liquidacion,
+                  detalle,
+                  origen,
+                  observaciones,
+                  importe_cheque,
+                  id_libro_bancos_fk,
+                  estado,
+                  nro_comprobante,
+                  estado_reg,
+                  tipo,
+                  fecha_reg,
+                  id_usuario_reg,
+                  fecha_mod,
+                  id_usuario_mod,
+                  id_estado_wf,
+                  id_proceso_wf,
+                  num_tramite,
+                  id_depto,
+                  id_finalidad,
+                  sistema_origen,
+                  comprobante_sigma
+                  ) values(            
+                  (p_hstore->'id_cuenta_bancaria')::integer,
+                  (p_hstore->'fecha')::date,
+                  upper(translate ((p_hstore->'a_favor')::varchar, 'áéíóúÁÉÍÓÚäëïöüÄËÏÖÜñ', 'aeiouAEIOUaeiouAEIOUÑ')),
+                  (p_hstore->'nro_cheque')::integer,
+                  (p_hstore->'importe_deposito')::numeric,
+                  upper(translate ((p_hstore->'nro_liquidacion')::varchar, 'áéíóúÁÉÍÓÚäëïöüÄËÏÖÜñ', 'aeiouAEIOUaeiouAEIOUÑ')),
+                  upper(translate ((p_hstore->'detalle')::varchar, 'áéíóúÁÉÍÓÚäëïöüÄËÏÖÜñ', 'aeiouAEIOUaeiouAEIOUÑ')),
+                  (p_hstore->'origen')::varchar,
+                  upper(translate ((p_hstore->'observaciones')::varchar, 'áéíóúÁÉÍÓÚäëïöüÄËÏÖÜñ', 'aeiouAEIOUaeiouAEIOUÑ')),
+                  (p_hstore->'importe_cheque')::numeric,
+                  (p_hstore->'id_libro_bancos_fk')::integer,
+                  v_codigo_estado,
+                  (p_hstore->'nro_comprobante')::varchar,
+                  'activo',
+                  (p_hstore->'tipo')::varchar,
+                  now(),
+                  p_id_usuario,
+                  null,
+                  null,
+                  v_id_estado_wf,
+                  v_id_proceso_wf,
+                  v_num_tramite,
+                  (p_hstore->'id_depto')::integer,				
+                  (p_hstore->'id_finalidad')::integer,
+                  (p_hstore->'sistema_origen')::varchar,
+                  (p_hstore->'comprobante_sigma')::varchar				
+                  )RETURNING id_libro_bancos into v_id_libro_bancos;
+    		
+            END IF;
+            	
                  -- inserta documentos en estado borrador si estan configurados
                 v_resp_doc =  wf.f_inserta_documento_wf(p_id_usuario, v_id_proceso_wf, v_id_estado_wf);
                 -- verificar documentos

@@ -33,6 +33,7 @@ Phx.vista.PlanPagoVb = {
        this.Atributos[this.getIndAtributo('nro_cheque')].form=true; 
        this.Atributos[this.getIndAtributo('nro_cheque')].valorInicial=0;
        this.Atributos[this.getIndAtributo('nro_cuenta_bancaria')].form=true; 
+       this.Atributos[this.getIndAtributo('id_depto_lb')].form=true; 
        this.Atributos[this.getIndAtributo('id_cuenta_bancaria')].form=true; 
        this.Atributos[this.getIndAtributo('id_cuenta_bancaria_mov')].form=true; 
        
@@ -210,6 +211,10 @@ Phx.vista.PlanPagoVb = {
          var data = this.getSelectedData();
          Phx.vista.PlanPagoVb.superclass.onButtonEdit.call(this);
          
+         if(this.Cmp.id_depto_lb.getValue() > 0){
+             this.Cmp.id_cuenta_bancaria.store.baseParams={ id_depto_lb:this.Cmp.id_depto_lb.getValue()};
+             this.Cmp.id_cuenta_bancaria.modificado = true;
+         }
                 
          //RCM, resetea store del deposito para no mostrar datos al hacer nuevo
          if(this.Cmp.id_cuenta_bancaria.getValue() > 0){
@@ -230,6 +235,7 @@ Phx.vista.PlanPagoVb = {
                this.Cmp.nro_cuenta_bancaria.disable();
                this.Cmp.monto_retgar_mo.disable();
                this.Cmp.monto_no_pagado.disable();
+               this.Cmp.id_depto_lb.disable();
                this.Cmp.id_cuenta_bancaria.disable();
                this.Cmp.id_cuenta_bancaria_mov.disable();
                this.Cmp.obs_monto_no_pagado.disable();
@@ -352,6 +358,13 @@ Phx.vista.PlanPagoVb = {
             this.Cmp.id_cuenta_bancaria_mov.modificado=true;
         },this); 
          
+        
+        
+       this.Cmp.id_depto_lb.on('select',function(a,b,c){
+            this.Cmp.id_cuenta_bancaria.setValue('');
+            this.Cmp.id_cuenta_bancaria.store.baseParams.id_depto = this.Cmp.id_depto_lb.getValue();
+            this.Cmp.id_cuenta_bancaria.modificado=true;
+        },this);
         
        //Evento para filtrar los depósitos a partir de la cuenta bancaria
         this.Cmp.id_cuenta_bancaria.on('select',function(data,rec,ind){

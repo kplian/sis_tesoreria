@@ -68,6 +68,8 @@ DECLARE
     v_parametros_ad_reg varchar;
     v_titulo_reg  varchar;
     v_sw_acceso_directo boolean;
+    v_id_depto	integer;
+    v_id_usuario_depto  integer;
     
     
     
@@ -502,6 +504,133 @@ BEGIN
             --Devuelve la respuesta
             return v_resp;        
         end;
+    
+    /*********************************    
+ 	#TRANSACCION:  'TES_FORM500_INS'
+ 	#DESCRIPCION:	  Registra alertas apra formulario 500 en procesos de adquisiciones
+ 	#AUTOR:		RAC KPLIAN	
+ 	#FECHA:		02-03-2015 15:43:23
+	***********************************/
+
+	ELSEIF (p_transaccion='TES_FORM500_INS')then
+					
+       begin
+       
+        -- seleccionar los ulitmos registros de planes de pagos de adquisiciones que reuqieren alerta
+         FOR v_registros in (select
+                                op.num_tramite,
+                                op.id_obligacion_pago,
+                                max(pp.id_plan_pago) as id_plan_pago,
+                                max(pp.nro_cuota) as ultima_cuota,
+                                op.id_proveedor,
+                                pro.desc_proveedor,
+                                op.total_pago,
+                                mon.codigo as codigo_moneda,
+                                op.id_usuario_reg
+         					from tes.tplan_pago pp
+
+                                inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago 
+                                           and op.tipo_obligacion = 'adquisiciones' and ( op.total_pago * op.tipo_cambio_conv ) >= 20000 
+                                inner join param.vproveedor pro on pro.id_proveedor = op.id_proveedor
+                                inner join param.tmoneda mon on mon.id_moneda = op.id_moneda
+                                where pp.tipo in ('devengado_pagado','devengado_pagado_1c') 
+                                and pp.estado_reg ='activo' 
+                                and pp.estado not in  ('devengado', 'anulado','pagado')
+                                and pp.fecha_tentativa::date <= now()::date
+                                and pp.tiene_form500 in ('no','requiere')
+                                group by 
+                                op.id_obligacion_pago,
+                                op.num_tramite ,
+                                op.id_proveedor,
+                                pro.desc_proveedor,
+                                op.total_pago,
+                                mon.codigo,
+                                op.id_usuario_reg)  LOOP
+                        
+                -- identifica a que usarios se mandan las alertas             
+                select  
+                    du.id_usuario
+                into
+                    v_id_usuario_depto
+                from adq.tcotizacion cot 
+                inner join adq.tproceso_compra pro on pro.id_proceso_compra = cot.id_proceso_compra
+                inner join param.tdepto_usuario du on du.id_depto = pro.id_depto and du.cargo = 'responsable'
+                where cot.id_obligacion_pago = v_registros.id_obligacion_pago
+                limit 1 offset 0;
+            
+               
+               
+           
+           
+           
+                ----------------------------
+                -- arma template de correo
+                -----------------------------
+                
+                
+                v_asunto = 'Formulario 500 :  '||v_registros.desc_proveedor;
+                v_destinatorio = '<br>Estimad@';
+                v_template = '<br>
+                			  <br>A la fecha se cumple el plazo previsto para iniciar el  pago Nº '||v_registros.ultima_cuota::varchar||'
+                              <br>del proveedor '||v_registros.desc_proveedor||' con el tramite <b>'||v_registros.num_tramite||'</b>
+                              <br>por el monto de '||v_registros.total_pago::varchar||' '||v_registros.codigo_moneda::varchar||'
+                              <br>
+                              <br>Es necesario registrar el formulario 500 correspondiente.
+                              <br>
+                              <br> Atentamente  
+                              <br> &nbsp;&nbsp;&nbsp;&nbsp;Control de pagos del sistema ERP';
+           
+           
+                -- inserta registros de alarmas par ael usario que creo la obligacion
+                v_id_alarma[1]:=param.f_inserta_alarma(NULL,
+                                                    v_destinatorio||v_template ,    --descripcion alarmce
+                                                    COALESCE(v_acceso_directo,''),--acceso directo
+                                                    now()::date,
+                                                    'notificacion',
+                                                    '',   -->
+                                                    p_id_usuario,
+                                                    v_clase,
+                                                    v_titulo,--titulo
+                                                    COALESCE(v_parametros_ad,''),
+                                                    v_registros.id_usuario_reg::integer,  --destino de la alarma
+                                                    v_asunto);
+                
+                
+                --inserta la alrma para le usario responsable del depto de adquisiciones
+                
+                IF v_id_usuario_depto is not NULL and v_id_usuario_depto != v_registros.id_usuario_reg THEN
+                  v_id_alarma[1]:=param.f_inserta_alarma(NULL,
+                                                      v_destinatorio||v_template ,    --descripcion alarmce
+                                                      COALESCE(v_acceso_directo,''),--acceso directo
+                                                      now()::date,
+                                                      'notificacion',
+                                                      '',   -->
+                                                      p_id_usuario,
+                                                      v_clase,
+                                                      v_titulo,--titulo
+                                                      COALESCE(v_parametros_ad,''),
+                                                      v_id_usuario_depto::integer,  --destino de la alarma
+                                                      v_asunto);
+                
+                END IF;
+               -- actualiza la  marca del plan de pagos para que ya no reciba nuevas alertas
+               update  tes.tplan_pago set
+               tiene_form500 = 'requiere'
+               where id_plan_pago = v_registros.id_plan_pago;
+      
+       END LOOP;
+        
+        
+        
+       
+        
+        
+       
+        --Devuelve la respuesta
+        return v_resp;  
+       
+       end;
+	    
     else
      
     	raise exception 'Transaccion inexistente: %',p_transaccion;

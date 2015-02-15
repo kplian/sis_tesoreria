@@ -252,6 +252,25 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             grid:false,
             form:false
         } ,
+        
+        {
+            config:{
+                name: 'tiene_form500',
+                fieldLabel: 'Form 500',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 70,
+                maxLength:4
+            },
+            type:'NumberField',
+            filters:{pfiltro:'op.numero',type:'string'},
+            id_grupo:1,
+            grid:false,
+            form:false
+        },
+        
+        
+        
         {
             config:{
                 name: 'nro_cuota',
@@ -302,7 +321,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                         
                         var value = value_ori;
                         if(value_ori == 'pagado'){
-                        	'contabilizado '
+                        	value = 'contabilizado '
                         }
                         
                         if(record.data.total_prorrateado!=record.data.monto_ejecutar_total_mo ){
@@ -715,6 +734,27 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:true
         },
+        {
+	   			config:{
+				    name:'id_depto_lb',
+				    hiddenName: 'id_depto_lb',
+				    url: '../../sis_parametros/control/Depto/listarDepto',
+	   				origen: 'DEPTO',
+	   				allowBlank: false,
+	   				fieldLabel: 'Libro de bancos destino',
+	   				disabled: false,
+	   				width: '80%',
+			        baseParams: { estado:'activo', codigo_subsistema: 'TES',modulo:'LB' },
+			        gdisplayField:'desc_depto_lb',
+                    gwidth: 120
+	   			},
+	   			//type:'TrigguerCombo',
+	   			filters:{pfiltro:'depto.nombre',type:'string'},
+	   			type:'ComboRec',
+	   			id_grupo: 1,
+	   			form: false,
+	   			grid: true
+		},
         {
             config:{
                 name: 'id_cuenta_bancaria',
@@ -1172,7 +1212,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'monto_ajuste_ag',
 		'monto_ajuste_siguiente_pag','pago_variable','monto_anticipo',
 		{name:'fecha_costo_ini', type: 'date',dateFormat:'Y-m-d'},
-		{name:'fecha_costo_fin', type: 'date',dateFormat:'Y-m-d'},'funcionario_wf'
+		{name:'fecha_costo_fin', type: 'date',dateFormat:'Y-m-d'},
+		'funcionario_wf','tiene_form500','id_depto_lb','desc_depto_lb'
 		
 	],
 	
@@ -1249,7 +1290,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 			   scope: this,
 			   fn: function(id, value, opt) {			   		
 			   		if (id == 'yes') {
-			   			this.mostrarWizard();
+			   			this.mostrarWizard(rec);
 			   		} else {
 			   			opt.hide;
 			   		}
@@ -1265,7 +1306,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 			   buttons: Ext.Msg.YESNO,
 			   fn: function(id, value, opt) {			   		
 			   		if (id == 'yes') {
-			   			this.mostrarWizard();
+			   			this.mostrarWizard(rec);
 			   		} else {
 			   			opt.hide;
 			   		}
@@ -1274,20 +1315,44 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 			   icon: Ext.MessageBox.WARNING
 			}, this);
       	} else {
-      		this.mostrarWizard();
+      		this.mostrarWizard(rec);
       	}
                
      },
      
-     mostrarWizard : function() {
-     	var rec=this.sm.getSelected();
+     mostrarWizard : function(rec) {
+     	var configExtra = [];
+     	//si el estado es vbfinanzas agregamos la opcion para selecionar el depto de Libro bancos
+     	if(rec.data.estado == 'vbfin'){
+     		 configExtra = [{
+					   			config:{
+								    name:'id_depto_lb',
+								    hiddenName: 'id_depto_lb',
+								    url: '../../sis_parametros/control/Depto/listarDepto',
+					   				origen: 'DEPTO',
+					   				allowBlank: false,
+					   				fieldLabel: 'Libro de bancos destino',
+					   				disabled: false,
+					   				width: '80%',
+							        baseParams: { estado:'activo', codigo_subsistema: 'TES',modulo:'LB' },
+					   			},
+					   			//type:'TrigguerCombo',
+					   			type:'ComboRec',
+					   			id_grupo: 1,
+					   			form:true
+					       	}];
+     	 }
+     	
+     	
       	this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
                                 'Estado de Wf',
                                 {
                                     modal:true,
                                     width:700,
                                     height:450
-                                }, {data:{
+                                }, {
+                                	configExtra: configExtra,
+                                	data:{
                                        id_estado_wf:rec.data.id_estado_wf,
                                        id_proceso_wf:rec.data.id_proceso_wf,
                                        fecha_ini:rec.data.fecha_tentativa,
@@ -1310,7 +1375,6 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
     
      onSaveWizard:function(wizard,resp){
         Phx.CP.loadingShow();
-        
         Ext.Ajax.request({
             url:'../../sis_tesoreria/control/PlanPago/siguienteEstadoPlanPago',
             params:{
@@ -1321,6 +1385,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 id_funcionario_wf:  resp.id_funcionario_wf,
                 id_depto_wf:        resp.id_depto_wf,
                 obs:                resp.obs,
+                id_depto_lb:		resp.id_depto_lb,
                 json_procesos:      Ext.util.JSON.encode(resp.procesos)
                 },
             success:this.successWizard,
@@ -1445,6 +1510,13 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
      loadCheckDocumentosSolWf:function() {
             var rec=this.sm.getSelected();
             rec.data.nombreVista = this.nombreVista;
+            
+            if(this.nombreEstadoVista == 'vbconta'){
+            	 rec.data.check_fisico = 'si';
+            }
+            
+             
+             
             Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
                     'Chequear documento del WF',
                     {
@@ -1813,6 +1885,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
     mostrarComponentesPago:function(me){
         me.mostrarComponente(me.Cmp.nombre_pago);
         if(me.Cmp.id_cuenta_bancaria){
+        	
+           me.mostrarComponente(me.Cmp.id_depto_lb);
            me.mostrarComponente(me.Cmp.id_cuenta_bancaria); 
            me.mostrarComponente(me.Cmp.id_cuenta_bancaria_mov);
         }
@@ -1831,6 +1905,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
          me.ocultarComponente(me.Cmp.nombre_pago);
          
         if(me.Cmp.id_cuenta_bancaria){
+           me.ocultarComponente(me.Cmp.id_depto_lb);
            me.ocultarComponente(me.Cmp.id_cuenta_bancaria);
            me.ocultarComponente(me.Cmp.id_cuenta_bancaria_mov);
         }

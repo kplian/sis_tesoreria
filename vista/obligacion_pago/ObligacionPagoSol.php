@@ -27,7 +27,7 @@ Phx.vista.ObligacionPagoSol = {
 	   
 	  
 	   this.Atributos[this.getIndAtributo('id_depto')].config.url = '../../sis_parametros/control/Depto/listarDeptoFiltradoXUsuario';
-       this.Atributos[this.getIndAtributo('id_depto')].config.baseParams = {estado:'activo',codigo_subsistema:'TES'},
+       this.Atributos[this.getIndAtributo('id_depto')].config.baseParams = {estado:'activo',codigo_subsistema:'TES',modulo:'OP'},
        this.Atributos[this.getIndAtributo('id_funcionario')].grid = true;
        this.Atributos[this.getIndAtributo('id_funcionario')].form = true;
        
@@ -219,6 +219,9 @@ Phx.vista.ObligacionPagoSol = {
            this.mostrarComponente(this.cmpProveedor);
            this.cmpMoneda.enable();
        }
+       
+       this.Cmp.id_contrato.store.baseParams.filter = "[{\"type\":\"numeric\",\"comparison\":\"eq\", \"value\":\""+ this.Cmp.id_proveedor.getValue()+"\",\"field\":\"CON.id_proveedor\"}]";
+	   this.Cmp.id_contrato.modificado = true;
            
     },
     

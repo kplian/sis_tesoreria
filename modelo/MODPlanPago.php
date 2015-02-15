@@ -104,6 +104,11 @@ class MODPlanPago extends MODbase{
 		$this->captura('fecha_costo_ini','date');
 		$this->captura('fecha_costo_fin','date');
 		$this->captura('funcionario_wf','text');
+		$this->captura('tiene_form500','varchar');
+		$this->captura('id_depto_lb','integer');
+		$this->captura('desc_depto_lb','varchar');
+		
+		
 		
 		
 		
@@ -165,6 +170,7 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('obs_otros_descuentos','obs_otros_descuentos','text');
 		$this->setParametro('monto','monto','numeric');
 		$this->setParametro('nombre_pago','nombre_pago','varchar');
+		$this->setParametro('id_depto_lb','id_depto_lb','int4');
 		$this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
 		$this->setParametro('forma_pago','forma_pago','varchar');
 		$this->setParametro('monto_no_pagado','monto_no_pagado','numeric');
@@ -176,6 +182,7 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('porc_descuento_ley','porc_descuento_ley','numeric');
 		$this->setParametro('nro_cheque','nro_cheque','integer');
 		$this->setParametro('nro_cuenta_bancaria','nro_cuenta_bancaria','varchar');
+		$this->setParametro('id_depto_lb','id_depto_lb','integer');
 		$this->setParametro('id_cuenta_bancaria_mov','id_cuenta_bancaria_mov','integer');
         $this->setParametro('porc_monto_excento_var','porc_monto_excento_var','numeric');
 		$this->setParametro('monto_excento','monto_excento','numeric');
@@ -243,6 +250,7 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('monto_anticipo','monto_anticipo','numeric');
 		$this->setParametro('fecha_costo_ini','fecha_costo_ini','date');
 		$this->setParametro('fecha_costo_fin','fecha_costo_fin','date');
+		$this->setParametro('id_depto_lb','id_depto_lb','int4');
 		
 		
 
@@ -268,6 +276,7 @@ class MODPlanPago extends MODbase{
         $this->setParametro('id_tipo_estado','id_tipo_estado','int4');
         $this->setParametro('id_funcionario_wf','id_funcionario_wf','int4');
         $this->setParametro('id_depto_wf','id_depto_wf','int4');
+		$this->setParametro('id_depto_lb','id_depto_lb','int4');
         $this->setParametro('obs','obs','text');
         $this->setParametro('json_procesos','json_procesos','text');
 
@@ -412,6 +421,44 @@ class MODPlanPago extends MODbase{
         //Devuelve la respuesta
         return $this->respuesta;
     }
+	/*
+	 * 
+	 * Author: RAC - KPLIAN
+	 * DATE:   2/3/2015
+	 * DESCR:  inserta alarmas para pagos que necesitan el form500
+	 * */
+	
+	function alertarPagosForm500(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.f_pagos_pendientes_ime';
+        $this->transaccion='TES_FORM500_INS';
+        $this->tipo_procedimiento='IME';
+        //definicion de variables
+		$this->tipo_conexion='seguridad';        
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+	
+	function cambioFomrulario500(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.f_plan_pago_ime';
+		$this->transaccion='TES_CBFRM500_IME';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_plan_pago','id_plan_pago','int4');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
 	
 	
 	
@@ -605,10 +652,6 @@ class MODPlanPago extends MODbase{
 		$this->captura('codigo_moneda','varchar');
 		
 		
-		
-		
-		
-
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
@@ -616,6 +659,8 @@ class MODPlanPago extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+
+
 
 	function listarPagosXConcepto(){
 		//Definicion de variables para ejecucion del procedimientp
@@ -686,6 +731,9 @@ class MODPlanPago extends MODbase{
 		  $this->captura('monto_ajuste_siguiente_pago', 'NUMERIC');
 		  $this->captura('liquido_pagable', 'NUMERIC');
 		  $this->captura('monto_presupuestado', 'NUMERIC');
+		  $this->captura('desc_contrato', 'text');
+		  
+		  
 				
 		
 		//Ejecuta la instruccion

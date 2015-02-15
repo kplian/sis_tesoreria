@@ -6543,3 +6543,101 @@ AS
 
            
 /***********************************F-DEP-JRR-TES-0-13/02/2015****************************************/
+
+
+
+
+
+
+
+           
+/***********************************I-DEP-RAC-TES-0-27/02/2015****************************************/
+--------------- SQL ---------------
+
+CREATE OR REPLACE VIEW tes.vpago_x_proveedor(
+    id_plan_pago,
+    id_gestion,
+    gestion,
+    id_obligacion_pago,
+    num_tramite,
+    orden_compra,
+    tipo_obligacion,
+    pago_variable,
+    desc_proveedor,
+    estado,
+    usuario_reg,
+    fecha,
+    fecha_reg,
+    ob_obligacion_pago,
+    fecha_tentativa_de_pago,
+    nro_cuota,
+    tipo_plan_pago,
+    estado_plan_pago,
+    obs_descuento_inter_serv,
+    obs_descuentos_anticipo,
+    obs_descuentos_ley,
+    obs_monto_no_pagado,
+    obs_otros_descuentos,
+    codigo,
+    monto_cuota,
+    monto_anticipo,
+    monto_excento,
+    monto_retgar_mo,
+    monto_ajuste_ag,
+    monto_ajuste_siguiente_pago,
+    liquido_pagable,
+    monto_presupuestado)
+AS
+  SELECT ppp.id_plan_pago,
+         op.id_gestion,
+         ges.gestion,
+         op.id_obligacion_pago,
+         op.num_tramite,
+         cot.numero_oc AS orden_compra,
+         op.tipo_obligacion,
+         op.pago_variable,
+         pro.desc_proveedor,
+         op.estado,
+         usu.cuenta AS usuario_reg,
+         op.fecha,
+         op.fecha_reg,
+         op.obs AS ob_obligacion_pago,
+         ppp.fecha_tentativa AS fecha_tentativa_de_pago,
+         ppp.nro_cuota,
+         ppp.tipo AS tipo_plan_pago,
+         ppp.estado AS estado_plan_pago,
+         ppp.obs_descuento_inter_serv,
+         ppp.obs_descuentos_anticipo,
+         ppp.obs_descuentos_ley,
+         ppp.obs_monto_no_pagado,
+         ppp.obs_otros_descuentos,
+         mon.codigo,
+         ppp.monto AS monto_cuota,
+         ppp.monto_anticipo,
+         ppp.monto_excento,
+         ppp.monto_retgar_mo,
+         ppp.monto_ajuste_ag,
+         ppp.monto_ajuste_siguiente_pago,
+         ppp.liquido_pagable,
+         (
+           SELECT sum(od.monto_pago_mo) AS monto_presupuestado
+           FROM tes.tobligacion_det od
+           WHERE od.id_obligacion_pago = op.id_obligacion_pago AND
+                 od.estado_reg = 'activo'
+         ) AS monto_presupuestado,
+         con.id_contrato,
+          '(id:'||con.id_contrato||') Nro: '||con.numero as desc_contrato
+  FROM tes.tobligacion_pago op
+       JOIN param.tgestion ges ON ges.id_gestion = op.id_gestion
+    
+       JOIN param.vproveedor pro ON pro.id_proveedor = op.id_proveedor
+       JOIN segu.tusuario usu ON usu.id_usuario = op.id_usuario_reg
+       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
+       JOIN tes.tplan_pago ppp ON ppp.id_obligacion_pago = op.id_obligacion_pago
+         AND ppp.estado_reg= 'activo'
+       LEFT JOIN adq.tcotizacion cot ON cot.id_obligacion_pago =
+         op.id_obligacion_pago
+       LEFT JOIN  leg.tcontrato con ON con.id_contrato = op.id_contrato;
+       
+/***********************************F-DEP-RAC-TES-0-27/02/2015****************************************/
+

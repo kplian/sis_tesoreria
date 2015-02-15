@@ -300,7 +300,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                 anchor: '80%',
                 origen: 'DEPTO',
                 tinit: false,
-                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES'},//parametros adicionales que se le pasan al store
+                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'OP'},//parametros adicionales que se le pasan al store
                 gdisplayField:'nombre_depto',
                 gwidth: 100
             },
@@ -767,7 +767,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		'tipo_anticipo',
 		'ajuste_anticipo',
 		'ajuste_aplicado',
-		'monto_estimado_sg','id_obligacion_pago_extendida', 'obs_presupuestos'
+		'monto_estimado_sg','id_obligacion_pago_extendida', 'obs_presupuestos','id_contrato','desc_contrato'
 		
 	],
 	
@@ -1154,8 +1154,16 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
               
               
               
-              if(this.getBoton('edit'))
-              	this.getBoton('edit').disable();
+              if(this.getBoton('edit')){
+              	
+              	if(data['tipo_obligacion'] == 'adquisiciones' && data.estado != 'finalizado'){
+              		this.getBoton('edit').enable();
+              	}
+              	else{
+              		this.getBoton('edit').disable();
+              	}
+              	
+              }
               if(this.getBoton('del'))
               	this.getBoton('del').disable();
               this.getBoton('reporte_com_ejec_pag').enable();

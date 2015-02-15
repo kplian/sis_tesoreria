@@ -29,6 +29,7 @@ Phx.vista.PlanPagoReq = {
         this.Atributos[this.getIndAtributo('forma_pago')].form=true; 
         this.Atributos[this.getIndAtributo('nro_cheque')].form=true; 
         this.Atributos[this.getIndAtributo('nro_cuenta_bancaria')].form=true; 
+        this.Atributos[this.getIndAtributo('id_depto_lb')].form=true; 
         this.Atributos[this.getIndAtributo('id_cuenta_bancaria')].form=true; 
         this.Atributos[this.getIndAtributo('id_cuenta_bancaria_mov')].form=true; 
         this.maestro=config.maestro;
@@ -93,6 +94,12 @@ Phx.vista.PlanPagoReq = {
         
              
         //Eventos
+        this.Cmp.id_depto_lb.on('select',function(a,b,c){
+            this.Cmp.id_cuenta_bancaria.setValue('');
+            this.Cmp.id_cuenta_bancaria.store.baseParams.id_depto = this.Cmp.id_depto_lb.getValue();
+            this.Cmp.id_cuenta_bancaria.modificado=true;
+        },this);
+        
         this.Cmp.id_cuenta_bancaria.on('select',function(a,b,c){
             this.Cmp.id_cuenta_bancaria_mov.setValue('');
             this.Cmp.id_cuenta_bancaria_mov.store.baseParams.id_cuenta_bancaria = this.Cmp.id_cuenta_bancaria.getValue();

@@ -324,6 +324,7 @@ BEGIN
               NULL as detalle, 
               NULL as nro_liquidacion,
               NULL as nro_comprobante,
+              NULL as comprobante_sigma,
               NULL as nro_cheque,            
               NULL as debe,            
               NULL as haber,
@@ -349,6 +350,7 @@ BEGIN
               LB.detalle, 
               LB.nro_liquidacion,
               LB.nro_comprobante,
+              LB.comprobante_sigma,
               LB.nro_cheque,
               case when LB.importe_deposito = 0 then 
                   NULL

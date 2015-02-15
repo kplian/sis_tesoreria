@@ -14,13 +14,76 @@ Phx.vista.ReportePagos=Ext.extend(Phx.gridInterfaz,{
 
 	constructor:function(config){
 		this.maestro=config.maestro;
+		this.initButtons=[this.cmbGestion];
     	//llama al constructor de la clase padre
 		Phx.vista.ReportePagos.superclass.constructor.call(this,config);
 		this.init();
-		this.load({params:{start:0, limit:this.tam_pag}})
+		this.bloquearOrdenamientoGrid();
+		this.cmbGestion.on('select', function(){
+		    
+		    if(this.validarFiltros()){
+                  this.capturaFiltros();
+           }
+		    
+		    
+		},this);
 	},
+	validarFiltros:function(){
+        if(this.cmbGestion.isValid()){
+            return true;
+        }
+        else{
+            return false;
+        }
+        
+    },
+    
+     capturaFiltros:function(combo, record, index){
+        this.desbloquearOrdenamientoGrid();
+        this.store.baseParams.id_gestion=this.cmbGestion.getValue();
+        this.load(); 
+            
+        
+    },
+    onButtonAct:function(){
+        if(!this.validarFiltros()){
+            alert('Especifique los filtros antes')
+         }
+        else{
+            this.store.baseParams.id_gestion=this.cmbGestion.getValue();
+            Phx.vista.ReportePagos.superclass.onButtonAct.call(this);
+        }
+    },
 	tam_pag:50,
-			
+	cmbGestion:new Ext.form.ComboBox({
+				fieldLabel: 'Gestion',
+				allowBlank: true,
+				emptyText:'Gestion...',
+				store:new Ext.data.JsonStore(
+				{
+					url: '../../sis_parametros/control/Gestion/listarGestion',
+					id: 'id_gestion',
+					root: 'datos',
+					sortInfo:{
+						field: 'gestion',
+						direction: 'DESC'
+					},
+					totalProperty: 'total',
+					fields: ['id_gestion','gestion'],
+					// turn on remote sorting
+					remoteSort: true,
+					baseParams:{par_filtro:'gestion'}
+				}),
+				valueField: 'id_gestion',
+				triggerAction: 'all',
+				displayField: 'gestion',
+			    hiddenName: 'id_gestion',
+    			mode:'remote',
+				pageSize:50,
+				queryDelay:500,
+				listWidth:'280',
+				width:80
+			}),		
 	Atributos:[
 		{
 			//configuracion del componente
@@ -66,7 +129,7 @@ Phx.vista.ReportePagos=Ext.extend(Phx.gridInterfaz,{
 			filters:{	
 	       		       type: 'list',
 	       		       pfiltro:'tipo_obligacion',
-	       			   options: ['adquisiciones', 'pago_directo', 'rrhh' ]	
+	       			   options: ['adquisiciones', 'pago_directo', 'pago_unico','rrhh' ]	
 	       		 	},
 			id_grupo:1,
 			grid:true,
@@ -96,6 +159,19 @@ Phx.vista.ReportePagos=Ext.extend(Phx.gridInterfaz,{
 			grid:true,
 			form:false
 		},
+		{
+			config:{
+				name: 'desc_contrato',
+				fieldLabel: 'Contrato Nro',
+				gwidth: 150
+			},
+			type:'Field',
+			filters:{pfiltro:'desc_contrato',type:'string'},
+			grid:true,
+			form:false
+		},
+		
+		
 		{
 			config:{
 				name: 'pago_variable',
@@ -292,7 +368,7 @@ Phx.vista.ReportePagos=Ext.extend(Phx.gridInterfaz,{
                 'monto_retgar_mo',
                 'monto_ajuste_ag',
                 'monto_ajuste_siguiente_pago','liquido_pagable',
-                'monto_presupuestado' ],
+                'monto_presupuestado','desc_contrato' ],
 	sortInfo:{
 		field: 'id_gestion',
 		direction: 'desc'
