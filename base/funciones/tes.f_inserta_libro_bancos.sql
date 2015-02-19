@@ -93,7 +93,7 @@ BEGIN
                          limit 1 offset 0;
         
         
-        IF   (p_hstore->'tipo')::varchar not in ('cheque','debito_automatico','transferencia_carta','deposito') THEN
+        IF   (p_hstore->'tipo')::varchar not in ('cheque','debito_automatico','transferencia_carta','deposito','transferencia_intern') THEN
              raise exception 'Tipo de transaccion bancaria no valida';                
         ELSE              
         	
@@ -140,7 +140,6 @@ BEGIN
             END IF;
             
             --   obtener el codigo del tipo_proceso
-           
             select   tp.codigo 
                 into v_codigo_tipo_proceso
             from  wf.ttipo_proceso tp 

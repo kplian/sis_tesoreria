@@ -95,7 +95,7 @@ BEGIN
                   ;
             END IF;
             
-            IF(v_parametros.tipo in ('cheque','debito_automatico','transferencia_carta'))Then
+            IF(v_parametros.tipo in ('cheque','debito_automatico','transferencia_carta','transferencia_intern'))Then
               --Comparamos el saldo de la cuenta bancaria con el importe del cheque
                 
               Select coalesce(sum(Coalesce(lbr.importe_deposito, 0)) - 
@@ -168,7 +168,7 @@ BEGIN
          --ALGORITMO DE ORDENACION DE REGISTROS
          
          --VERIFICAMOS SI ES UN DEPOSITO, transferencia o debito automatico
-         IF(v_parametros.tipo in ('deposito','debito_automatico','transferencia_carta')) Then
+         IF(v_parametros.tipo in ('deposito','debito_automatico','transferencia_carta','transferencia_intern')) Then
          
          	--Obtenemos el numero de indice que sera asignado al nuevo registro            
             Select max(lb.indice)
@@ -1021,7 +1021,7 @@ BEGIN
                  values (NULL, 'NULL', g_libro_bancos.id_cuenta_bancaria, g_libro_bancos.id_depto, g_libro_bancos.fecha,
                  g_libro_bancos.a_favor, null, 0 ,g_libro_bancos.nro_liquidacion, g_libro_bancos.detalle,
                  g_libro_bancos.origen, g_libro_bancos.observaciones, g_libro_bancos.saldo_deposito,
-                 v_parametros.id_libro_bancos, g_libro_bancos.nro_comprobante, 'cheque', g_libro_bancos.id_finalidad);
+                 v_parametros.id_libro_bancos, g_libro_bancos.nro_comprobante, 'transferencia_intern', g_libro_bancos.id_finalidad);
                 
                  v_resp = tes.ft_ts_libro_bancos_ime (
  				 p_administrador,
