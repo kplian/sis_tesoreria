@@ -982,10 +982,11 @@ BEGIN
                 from tes.vlibro_bancos lbp
                 where lbp.id_libro_bancos=v_parametros.id_libro_bancos;*/
                 
-                select lb.id_cuenta_bancaria, lb.id_depto, lb.fecha, lb.a_favor, lb.nro_cheque, lb.saldo_deposito,
+                select lb.id_cuenta_bancaria, COALESCE(lb.id_depto, dp.id_depto) as id_depto, lb.fecha, lb.a_favor, lb.nro_cheque, lb.saldo_deposito,
 				lb.nro_liquidacion, lb.detalle, lb.origen, lb.observaciones, lb.nro_comprobante, lb.tipo, 
                 lb.id_finalidad into g_libro_bancos
 				from tes.vlibro_bancos lb
+                left join param.tdepto dp on ('OP - ' || lb.origen)= dp.nombre_corto 
 				where lb.id_libro_bancos=v_parametros.id_libro_bancos;
                 
                 --inserta deposito adicional
