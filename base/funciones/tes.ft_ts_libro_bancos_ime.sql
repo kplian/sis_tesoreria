@@ -631,7 +631,7 @@ BEGIN
  	#FECHA:		18-11-2014
 	***********************************/
 
-	elseif(p_transaccion='TES_SIGELB_IME')then   
+	elsif(p_transaccion='TES_SIGELB_IME')then   
         begin
         
          /*   PARAMETROS
@@ -854,7 +854,7 @@ BEGIN
  	#FECHA:		13-01-2015
 	***********************************/
 
-	elseif(p_transaccion='TES_ANTELB_IME')then   
+	elsif(p_transaccion='TES_ANTELB_IME')then   
         BEGIN
         	--------------------------------------------------
         	--Retrocede al estado inmediatamente anterior
@@ -998,7 +998,7 @@ BEGIN
                  tipo varchar, id_finalidad int4) on commit drop;
 
                  insert into tt_parametros_libro_bancos_deposito
-                 values (NULL, 'NULL', g_libro_bancos.id_cuenta_bancaria, g_libro_bancos.id_depto, g_libro_bancos.fecha,
+                 values (NULL, 'NULL', g_libro_bancos.id_cuenta_bancaria, g_libro_bancos.id_depto, now()::date,
                  g_libro_bancos.a_favor, null, g_libro_bancos.saldo_deposito,g_libro_bancos.nro_liquidacion, 
                  g_libro_bancos.detalle,g_libro_bancos.origen, g_libro_bancos.observaciones, 0, v_parametros.id_libro_bancos_fk,
                  g_libro_bancos.nro_comprobante, 'deposito',g_libro_bancos.id_finalidad);
@@ -1019,7 +1019,7 @@ BEGIN
                  tipo varchar, id_finalidad int4) on commit drop;
 
                  insert into tt_parametros_libro_bancos_cheque
-                 values (NULL, 'NULL', g_libro_bancos.id_cuenta_bancaria, g_libro_bancos.id_depto, g_libro_bancos.fecha,
+                 values (NULL, 'NULL', g_libro_bancos.id_cuenta_bancaria, g_libro_bancos.id_depto, now()::date,
                  g_libro_bancos.a_favor, null, 0 ,g_libro_bancos.nro_liquidacion, g_libro_bancos.detalle,
                  g_libro_bancos.origen, g_libro_bancos.observaciones, g_libro_bancos.saldo_deposito,
                  v_parametros.id_libro_bancos, g_libro_bancos.nro_comprobante, 'transferencia_intern', g_libro_bancos.id_finalidad);

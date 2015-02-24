@@ -330,7 +330,7 @@ BEGIN
                                From tes.tts_libro_bancos lbr
                                Where lbr.fecha < '''||v_parametros.fecha_ini||'''                              
                                and lbr.id_cuenta_bancaria = '||v_parametros.id_cuenta_bancaria||'
-                               and lbr.estado <> ''anulado'' and lbr.estado <> ''borrador'' ),0.00),''999G999G999G999D99'') as saldo,
+                               and lbr.estado not in (''anulado'', ''borrador'') ),0.00),''999G999G999G999D99'') as saldo,
               NULL as total_debe,            
               NULL as total_haber,                  
               0::numeric as indice,
@@ -362,7 +362,7 @@ BEGIN
                                From tes.tts_libro_bancos lbr
                                where                   
                                lbr.id_cuenta_bancaria = LB.id_cuenta_bancaria
-                               and lbr.estado <> ''anulado'' and lbr.estado <> ''borrador''
+                               and lbr.estado not in (''anulado'',''borrador'')
                                and ((lbr.fecha < LB.fecha) or (lbr.fecha = LB.fecha and lbr.indice <= LB.indice)) 
                                                             
                                 ),''999G999G999G999D99'') as saldo,
