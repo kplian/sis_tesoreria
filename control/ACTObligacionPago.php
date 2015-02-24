@@ -70,7 +70,21 @@ class ACTObligacionPago extends ACTbase{
         $this->res->imprimirRespuesta($this->res->generarJson());
     }
 				
+	/*
+	 * Author:  		 RAC - KPLIAN
+	 * Date:   			 19/02/2015
+	 * Description		 insertar obligaciones de pago unicas  
+	 * */
 	
+	function insertarObligacionCompleta(){
+		$this->objFunc=$this->create('MODObligacionPago');	
+		if($this->objParam->insertar('id_obligacion_pago')){
+			$this->res=$this->objFunc->insertarObligacionCompleta($this->objParam);			
+		} else{			
+			//TODO .. trabajar en la edicion
+		}
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
 	
 	function insertarObligacionPago(){
 		$this->objFunc=$this->create('MODObligacionPago');	
