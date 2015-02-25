@@ -1240,8 +1240,48 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
      },  
     
    sigEstado:function(){                   
-      var rec=this.sm.getSelected();
-      this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+      	var rec=this.sm.getSelected();      	
+      	if (rec.data.estado == 'borrador') {
+      		Ext.Msg.show({
+			   title:'Confirmación',
+			   msg: 'Al solicitar el pago se generará una conformidad implícita. Desea continuar?',
+			   buttons: Ext.Msg.YESNO,
+			   scope: this,
+			   fn: function(id, value, opt) {			   		
+			   		if (id == 'yes') {
+			   			this.mostrarWizard();
+			   		} else {
+			   			opt.hide;
+			   		}
+			   },			   
+			   animEl: 'elId',
+			   icon: Ext.MessageBox.WARNING
+			});
+      	} else if (rec.data.estado == 'vbsolicitante' && (rec.data['fecha_conformidad'] == '' || rec.data['fecha_conformidad'] == undefined || rec.data['fecha_conformidad'] == null)) {
+      		Ext.Msg.show({
+			   title:'Confirmación',
+			   scope: this,
+			   msg: 'Esta segur@ de solicitar el pago sin generar la conformidad? Para generarla presione el botón "Conformidad"',
+			   buttons: Ext.Msg.YESNO,
+			   fn: function(id, value, opt) {			   		
+			   		if (id == 'yes') {
+			   			this.mostrarWizard();
+			   		} else {
+			   			opt.hide;
+			   		}
+			   },	
+			   animEl: 'elId',
+			   icon: Ext.MessageBox.WARNING
+			}, this);
+      	} else {
+      		this.mostrarWizard();
+      	}
+               
+     },
+     
+     mostrarWizard : function() {
+     	var rec=this.sm.getSelected();
+      	this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
                                 'Estado de Wf',
                                 {
                                     modal:true,
@@ -1265,7 +1305,6 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                                     
                                     scope:this
                                  });        
-               
      },
      
     
