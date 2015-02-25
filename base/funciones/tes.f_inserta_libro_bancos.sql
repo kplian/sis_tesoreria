@@ -93,7 +93,7 @@ BEGIN
                          limit 1 offset 0;
         
         
-        IF   (p_hstore->'tipo')::varchar not in ('cheque','debito_automatico','transferencia_carta','deposito','transferencia_intern') THEN
+        IF   (p_hstore->'tipo')::varchar not in ('cheque','debito_automatico','transferencia_carta','deposito','transf_interna_debe','transf_interna_haber') THEN
              raise exception 'Tipo de transaccion bancaria no valida';                
         ELSE              
         	

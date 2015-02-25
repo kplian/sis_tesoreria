@@ -5744,29 +5744,29 @@ SELECT lban.id_libro_bancos,
                 - COALESCE((
     SELECT COALESCE(sum(lb.importe_cheque), 0::numeric) AS "coalesce"
     FROM tes.tts_libro_bancos lb
-    WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos AND lb.tipo::text <>
-        'deposito'::text
+    WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos AND (lb.tipo::text <>
+        ALL (ARRAY['deposito'::character varying, 'transf_interna_haber'::character varying]::text[]))
     ), 0::numeric) + COALESCE((
     SELECT COALESCE(sum(lb.importe_deposito), 0::numeric) AS "coalesce"
     FROM tes.tts_libro_bancos lb
-    WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos AND lb.tipo::text =
-        'deposito'::text
+    WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos AND (lb.tipo::text = ANY
+        (ARRAY['deposito'::character varying, 'transf_interna_haber'::character varying]::text[]))
     ), 0::numeric)
-            WHEN (lban.tipo::text = ANY (ARRAY['cheque'::character varying,
-                'debito_automatico'::character varying, 'transferencia_carta'::character varying]::text[])) AND lban.id_libro_bancos_fk IS NOT NULL THEN ((
+            WHEN (lban.tipo::text = ANY (ARRAY['cheque'::character
+                varying::text, 'debito_automatico'::character varying::text, 'transferencia_carta'::character varying::text])) AND lban.id_libro_bancos_fk IS NOT NULL THEN ((
     SELECT COALESCE(lb.importe_deposito, 0::numeric) AS "coalesce"
     FROM tes.tts_libro_bancos lb
     WHERE lb.id_libro_bancos = lban.id_libro_bancos_fk
     )) + ((
     SELECT COALESCE(sum(lb.importe_deposito), 0::numeric) AS "coalesce"
     FROM tes.tts_libro_bancos lb
-    WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos_fk AND lb.tipo::text =
-        'deposito'::text
+    WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos_fk AND (lb.tipo::text =
+        ANY (ARRAY['deposito'::character varying, 'transf_interna_haber'::character varying]::text[]))
     )) - ((
     SELECT sum(lb2.importe_cheque) AS sum
     FROM tes.tts_libro_bancos lb2
     WHERE lb2.id_libro_bancos <= lban.id_libro_bancos AND
-        lb2.id_libro_bancos_fk = lban.id_libro_bancos_fk AND lb2.tipo::text <> 'deposito'::text
+        lb2.id_libro_bancos_fk = lban.id_libro_bancos_fk AND (lb2.tipo::text <> ALL (ARRAY['deposito'::character varying, 'transf_interna_haber'::character varying]::text[]))
     ))
             ELSE 0::numeric
         END AS saldo_deposito,

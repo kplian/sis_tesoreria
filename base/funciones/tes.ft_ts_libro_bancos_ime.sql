@@ -70,7 +70,6 @@ DECLARE
     g_importe_deposito		numeric;
     g_libro_bancos			record;
 BEGIN
-
     v_nombre_funcion = 'tes.ft_ts_libro_bancos_ime';
     v_parametros = pxp.f_get_record(p_tabla);
 
@@ -80,11 +79,10 @@ BEGIN
  	#AUTOR:		admin	
  	#FECHA:		01-12-2013 09:10:17
 	***********************************/
-
+	
 	if(p_transaccion='TES_LBAN_INS')then
 					
         begin
-        
         	select ctaban.centro into g_centro
             from tes.tcuenta_bancaria ctaban
             where ctaban.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria;
@@ -95,7 +93,7 @@ BEGIN
                   ;
             END IF;
             
-            IF(v_parametros.tipo in ('cheque','debito_automatico','transferencia_carta','transferencia_intern'))Then
+            IF(v_parametros.tipo in ('cheque','debito_automatico','transferencia_carta','transf_interna_debe','transf_interna_haber'))Then
               --Comparamos el saldo de la cuenta bancaria con el importe del cheque
                 
               Select coalesce(sum(Coalesce(lbr.importe_deposito, 0)) - 
@@ -127,12 +125,12 @@ BEGIN
                 Select lb.importe_deposito - Coalesce((Select sum (ba.importe_cheque)
                                               From tes.tts_libro_bancos ba
                                               Where ba.id_libro_bancos_fk=lb.id_libro_bancos
-                                              and ba.tipo <> 'deposito'),0)
+                                              and ba.tipo not in ('deposito','transf_interna_haber')),0)
                                                 
                                            + Coalesce((Select sum (ba.importe_deposito)
                                               From tes.tts_libro_bancos ba
                                               Where ba.id_libro_bancos_fk=lb.id_libro_bancos
-                                              and ba.tipo = 'deposito'),0)
+                                              and ba.tipo in ('deposito','transf_interna_haber')),0)
                 Into g_saldo_deposito
                 From tes.tts_libro_bancos lb
                 Where lb.id_libro_bancos = v_parametros.id_libro_bancos_fk;
@@ -168,7 +166,7 @@ BEGIN
          --ALGORITMO DE ORDENACION DE REGISTROS
          
          --VERIFICAMOS SI ES UN DEPOSITO, transferencia o debito automatico
-         IF(v_parametros.tipo in ('deposito','debito_automatico','transferencia_carta','transferencia_intern')) Then
+         IF(v_parametros.tipo in ('deposito','debito_automatico','transferencia_carta','transf_interna_debe','transf_interna_haber')) Then
          
          	--Obtenemos el numero de indice que sera asignado al nuevo registro            
             Select max(lb.indice)
@@ -186,7 +184,6 @@ BEGIN
         	WHERE tes.tts_libro_bancos.id_libro_bancos= v_id_libro_bancos;
          
          ELSE  --si es CHEQUE
-         
          	--Obtenemos el numero de indice que sera asignado al nuevo registro            
             Select max(lb.nro_cheque)
             Into g_max_nro_cheque
@@ -286,7 +283,7 @@ BEGIN
             return v_resp;
 
 		end;
-
+    
 	/*********************************    
  	#TRANSACCION:  'TES_LBAN_MOD'
  	#DESCRIPCION:	Modificacion de registros
@@ -630,7 +627,7 @@ BEGIN
  	#AUTOR:		Gonzalo Sarmiento Sejas
  	#FECHA:		18-11-2014
 	***********************************/
-
+    
 	elsif(p_transaccion='TES_SIGELB_IME')then   
         begin
         
@@ -846,10 +843,11 @@ BEGIN
           return v_resp;
         
      end;
-     /*********************************    
+     
+     
+    /*********************************    
  	#TRANSACCION:  'TES_ANTELB_IME'
- 	#DESCRIPCION:	Transaccion utilizada  pasar a  estados anterior en el libro bancos
-                    segun la operacion definida
+ 	#DESCRIPCION:	Transaccion utilizada  pasar a  estados anterior en el libro bancos segun la operacion definida
  	#AUTOR:		GSS
  	#FECHA:		13-01-2015
 	***********************************/
@@ -868,7 +866,7 @@ BEGIN
              ps_id_depto,
              ps_codigo_estado,
              ps_id_estado_wf_ant
-          into
+          INTO
              v_id_tipo_estado,
              v_id_funcionario,
              v_id_usuario_reg,
@@ -907,7 +905,7 @@ BEGIN
               v_tipo_noti,
               v_titulo);
            
-           IF  not tes.f_fun_regreso_libro_bancos_wf(p_id_usuario, 
+           IF  NOT tes.f_fun_regreso_libro_bancos_wf(p_id_usuario, 
                                                    v_parametros._id_usuario_ai, 
                                                    v_parametros._nombre_usuario_ai, 
                                                    v_id_estado_actual, 
@@ -935,6 +933,7 @@ BEGIN
 	***********************************/
 
 	elsif(p_transaccion='TES_TRALB_IME')then
+
 		BEGIN
         	if(pxp.f_existe_parametro(p_tabla,'tipo')=FALSE) then
             	raise exception '%', 'No se definio el tipo de transaccion';
@@ -1001,7 +1000,7 @@ BEGIN
                  values (NULL, 'NULL', g_libro_bancos.id_cuenta_bancaria, g_libro_bancos.id_depto, now()::date,
                  g_libro_bancos.a_favor, null, g_libro_bancos.saldo_deposito,g_libro_bancos.nro_liquidacion, 
                  g_libro_bancos.detalle,g_libro_bancos.origen, g_libro_bancos.observaciones, 0, v_parametros.id_libro_bancos_fk,
-                 g_libro_bancos.nro_comprobante, 'deposito',g_libro_bancos.id_finalidad);
+                 g_libro_bancos.nro_comprobante, 'transf_interna_haber',g_libro_bancos.id_finalidad);
 
                  
                  v_resp = tes.ft_ts_libro_bancos_ime (
@@ -1022,7 +1021,7 @@ BEGIN
                  values (NULL, 'NULL', g_libro_bancos.id_cuenta_bancaria, g_libro_bancos.id_depto, now()::date,
                  g_libro_bancos.a_favor, null, 0 ,g_libro_bancos.nro_liquidacion, g_libro_bancos.detalle,
                  g_libro_bancos.origen, g_libro_bancos.observaciones, g_libro_bancos.saldo_deposito,
-                 v_parametros.id_libro_bancos, g_libro_bancos.nro_comprobante, 'transferencia_intern', g_libro_bancos.id_finalidad);
+                 v_parametros.id_libro_bancos, g_libro_bancos.nro_comprobante, 'transf_interna_debe', g_libro_bancos.id_finalidad);
                 
                  v_resp = tes.ft_ts_libro_bancos_ime (
  				 p_administrador,
