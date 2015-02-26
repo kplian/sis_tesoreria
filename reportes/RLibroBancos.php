@@ -52,7 +52,7 @@ require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
 		$this->SetFillColor(224,224,224, true);
         $this->setTextColor(0,0,0);
 		
-		if($this->getDataSource()->getParameter('estado') == 'impreso y entregado' )
+		if($this->getDataSource()->getParameter('estado') != 'Todos' )
 		{	
 			$this->Cell($width1, $height, 'Fecha', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width2+4, $height, 'A Favor', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
@@ -147,7 +147,7 @@ Class RLibroBancos extends Report {
 		$pdf->SetFontSize(6);
 		$pdf->SetFont('','');
 		
-		if($this->getDataSource()->getParameter('estado') == 'impreso y entregado' )
+		if($this->getDataSource()->getParameter('estado') != 'Todos' )
 		{	
 			$pdf->SetFillColor(255,255,255, true);
 			$pdf->tablewidths=array($width1,$width2+4,$width3+4,$width4,$width1,$width4,$width1,$width1);
@@ -165,7 +165,7 @@ Class RLibroBancos extends Report {
 		$RowArray;
 		foreach($dataSource->getDataset() as $row) {
             
-			if($this->getDataSource()->getParameter('estado') == 'impreso y entregado' )
+			if($this->getDataSource()->getParameter('estado') != 'Todos' )
 			{
 				$RowArray = array(
 							'fecha_reporte'  =>  $row['fecha_reporte'],
@@ -198,16 +198,17 @@ Class RLibroBancos extends Report {
         }
 		$pdf->SetFont('','B');
 		if($this->getDataSource()->getParameter('estado') == 'impreso y entregado' )
-		{	
+		{			
 			$pdf->Cell(171,7,'SALDO CHEQUES EN TRANSITO AL '.$this->getDataSource()->getParameter('fecha_fin').'  ' ,0,0,'R'); 
-			$pdf->Cell(28, 7, $total_haber, 0, 1, 'L'); 
-			
+			$pdf->Cell(28, 7, $total_haber, 0, 1, 'L'); 			
 		}
 		else
 		{
-			$pdf->Cell(171,7,'SALDO AL '.$this->getDataSource()->getParameter('fecha_fin').'  ' ,0,0,'R'); 
-			$pdf->Cell(28, 7, $saldo_final, 0, 1, 'L'); 
-						
+			if($this->getDataSource()->getParameter('estado') == 'Todos' )
+			{
+				$pdf->Cell(171,7,'SALDO AL '.$this->getDataSource()->getParameter('fecha_fin').'  ' ,0,0,'R'); 
+				$pdf->Cell(28, 7, $saldo_final, 0, 1, 'L'); 
+			}				
 			$pdf->Cell(15, 6, 'SALDO DEBE: ', 0, 0, 'L'); 
 			$pdf->Cell(25, 6, $total_debe, 0, 1, 'R'); 
 			$pdf->Cell(15, 6, 'SALDO HABER: ', 0, 0, 'L'); 

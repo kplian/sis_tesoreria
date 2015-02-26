@@ -447,7 +447,7 @@ BEGIN
         else
         	g_nro_cheque=null;
         end if;
-
+        
 		UPDATE tes.tts_libro_bancos SET 
 		id_cuenta_bancaria=v_parametros.id_cuenta_bancaria,
 		fecha=v_parametros.fecha,
@@ -464,7 +464,8 @@ BEGIN
         tipo=v_parametros.tipo,
 		fecha_mod=now(),
 		id_usuario_mod = p_id_usuario,
-        id_finalidad = v_parametros.id_finalidad
+        id_finalidad = v_parametros.id_finalidad,
+        comprobante_sigma = v_parametros.comprobante_sigma
 		WHERE tes.tts_libro_bancos.id_libro_bancos = v_parametros.id_libro_bancos;
         
             
