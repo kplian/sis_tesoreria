@@ -36,6 +36,10 @@ Phx.vista.PlanPagoVb = {
        this.Atributos[this.getIndAtributo('id_cuenta_bancaria')].form=true; 
        this.Atributos[this.getIndAtributo('id_cuenta_bancaria_mov')].form=true; 
        
+       this.Atributos[this.getIndAtributo('num_tramite')].bottom_filter=true;
+       this.Atributos[this.getIndAtributo('nombre_pago')].bottom_filter=true;
+      
+       
        
         
        //funcionalidad para listado de historicos
