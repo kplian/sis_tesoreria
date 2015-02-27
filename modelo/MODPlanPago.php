@@ -686,6 +686,9 @@ class MODPlanPago extends MODbase{
 		  $this->captura('monto_ajuste_siguiente_pago', 'NUMERIC');
 		  $this->captura('liquido_pagable', 'NUMERIC');
 		  $this->captura('monto_presupuestado', 'NUMERIC');
+		  $this->captura('desc_contrato', 'text');
+		  
+		  
 				
 		
 		//Ejecuta la instruccion
