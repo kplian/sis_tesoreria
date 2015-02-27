@@ -219,6 +219,9 @@ Phx.vista.ObligacionPagoSol = {
            this.mostrarComponente(this.cmpProveedor);
            this.cmpMoneda.enable();
        }
+       
+       this.Cmp.id_contrato.store.baseParams.filter = "[{\"type\":\"numeric\",\"comparison\":\"eq\", \"value\":\""+ this.Cmp.id_proveedor.getValue()+"\",\"field\":\"CON.id_proveedor\"}]";
+	   this.Cmp.id_contrato.modificado = true;
            
     },
     

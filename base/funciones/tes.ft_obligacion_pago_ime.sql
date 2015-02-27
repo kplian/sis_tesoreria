@@ -35,45 +35,45 @@ DECLARE
 	v_mensaje_error         text;
 	v_id_obligacion_pago	integer;
     
-    v_tipo_documento   varchar;
-    v_num varchar;
-    v_id_periodo integer;
+    v_tipo_documento   		varchar;
+    v_num 					varchar;
+    v_id_periodo 			integer;
     v_codigo_proceso_macro  varchar;
-    v_id_proceso_macro integer;
-    v_codigo_tipo_proceso varchar;
+    v_id_proceso_macro 		integer;
+    v_codigo_tipo_proceso	varchar;
     
-     v_num_tramite  varchar;
-     v_id_proceso_wf integer;
-     v_id_estado_wf integer;
-     v_codigo_estado varchar;
-     v_codigo_estado_ant varchar;
-     v_anho integer;
-     v_id_gestion integer;
-     v_id_subsistema integer;
+     v_num_tramite 			varchar;
+     v_id_proceso_wf 		integer;
+     v_id_estado_wf 		integer;
+     v_codigo_estado 		varchar;
+     v_codigo_estado_ant 	varchar;
+     v_anho 				integer;
+     v_id_gestion 			integer;
+     v_id_subsistema 		integer;
      
-    va_id_tipo_estado integer[];
-    va_codigo_estado varchar[];
-    va_disparador varchar[];
-    va_regla varchar[];
-    va_prioridad  integer[];
+    va_id_tipo_estado 		integer[];
+    va_codigo_estado 		varchar[];
+    va_disparador 			varchar[];
+    va_regla 				varchar[];
+    va_prioridad  			integer[];
     
-    v_id_proceso_compra integer;
-    v_id_depto integer;
-    v_total_detalle numeric;
-    v_id_estado_actual  integer;
-    v_tipo_obligacion varchar;
-    v_id_tipo_estado integer;
-    v_id_funcionario integer;
-    v_id_usuario_reg integer;
-    v_id_estado_wf_ant  integer;
-    v_comprometido varchar;
-    v_monto_total numeric;
-    v_id_obligacion_det integer;
-    v_factor numeric;
+    v_id_proceso_compra 	integer;
+    v_id_depto 				integer;
+    v_total_detalle 		numeric;
+    v_id_estado_actual  	integer;
+    v_tipo_obligacion 		varchar;
+    v_id_tipo_estado 		integer;
+    v_id_funcionario 		integer;
+    v_id_usuario_reg 		integer;
+    v_id_estado_wf_ant  	integer;
+    v_comprometido 			varchar;
+    v_monto_total 			numeric;
+    v_id_obligacion_det 	integer;
+    v_factor 				numeric;
     
-    v_registros    record;
-    v_cad_ep varchar;
-    v_cad_uo varchar;
+    v_registros    			record;
+    v_cad_ep 				varchar;
+    v_cad_uo 				varchar;
     
     
      v_total_nro_cuota  integer;
@@ -137,12 +137,13 @@ DECLARE
      va_revertir  				numeric[];
      v_tam        				integer;
      v_indice 					integer;
-     va_resp_ges              numeric[];
+     va_resp_ges              	numeric[];
      v_id_contrato				integer;
      v_registros_documento		record;
      v_registros_con			record;
      v_id_documento_wf_op		integer;
      v_id_usuario_reg_op        integer;
+     v_habilitar_copia_contrato	boolean;
    
      
 			    
@@ -184,7 +185,9 @@ BEGIN
                op.id_funcionario,
                op.fecha,
                op.tipo_obligacion,
-               op.id_proceso_wf
+               op.id_proceso_wf,
+               op.tipo_obligacion,
+               op.num_tramite
             into
                v_registros
             from tes.tobligacion_pago op
@@ -255,64 +258,77 @@ BEGIN
 			where id_obligacion_pago = v_parametros.id_obligacion_pago;
             
             
-             -------------------------------------
-            -- COPIA CONTRATOS
+            -------------------------------------
+            -- COPIA CONTRATOS,  si es un pago recurrente
+            -- si viene de adquiscioens y elnumero de de tramite del troato es el mismo que la obligacion no es encesario copiar
             -------------------------------------
             
-            --  Si el la referencia al contrato esta presente ..  copiar el documento de contrato
-            IF v_id_contrato  is not  NULL THEN
-                 --con el ide de contrato obtenet el id_proceso_wf
-                 SELECT
-                   con.id_proceso_wf,
-                   con.numero,
-                   con.estado,
-                   pwf.nro_tramite
-                 INTO
-                  v_registros_con
-                 FROM leg.tcontrato con
-                 INNER JOIN wf.tproceso_wf pwf on pwf.id_proceso_wf = con.id_proceso_wf
-                 WHERE con.id_contrato = v_id_contrato;
+            --  Si  la referencia al contrato esta presente ..  copiar el documento de contrato
+            IF v_id_contrato  is not  NULL    THEN
                 
-                  -- con el proceso del contrato buscar el documento con codigo CONTRATO 
-               
-                  SELECT
-                    d.*
-                  into
-                   v_registros_documento
-                  FROM wf.tdocumento_wf d
-                  INNER JOIN wf.ttipo_documento td on td.id_tipo_documento = d.id_tipo_documento
-                  WHERE td.codigo = 'CONTRATO' and 
-                        d.id_proceso_wf = v_registros_con.id_proceso_wf;
+                 v_habilitar_copia_contrato = TRUE;
                  
-                    -- copiamos el link de referencia del contrato
-                    select
-                     dwf.id_documento_wf
-                    into
-                     v_id_documento_wf_op
-                    from wf.tdocumento_wf dwf
-                    inner  join  wf.ttipo_documento td on td.id_tipo_documento = dwf.id_tipo_documento
-                    where td.codigo = 'CONTRATO'  and dwf.id_proceso_wf = v_registros.id_proceso_wf;
+                  --con el ide de contrato obtenet el id_proceso_wf
+                   SELECT
+                     con.id_proceso_wf,
+                     con.numero,
+                     con.estado,
+                     pwf.nro_tramite
+                   INTO
+                    v_registros_con
+                   FROM leg.tcontrato con
+                   INNER JOIN wf.tproceso_wf pwf on pwf.id_proceso_wf = con.id_proceso_wf
+                   WHERE con.id_contrato = v_id_contrato;
                  
-                  
+                 IF  v_registros.tipo_obligacion = 'adquisiciones'  THEN
                  
-                    UPDATE 
-                      wf.tdocumento_wf  
-                    SET 
-                       id_usuario_mod = p_id_usuario,
-                       fecha_mod = now(),
-                       chequeado = v_registros_documento.chequeado,
-                       url = v_registros_documento.url,
-                       extension = v_registros_documento.extension,
-                       obs = v_registros_documento.obs,
-                       chequeado_fisico = v_registros_documento.chequeado_fisico,
-                       id_usuario_upload = v_registros_documento.id_usuario_upload,
-                       fecha_upload = v_registros_documento.fecha_upload,
-                       id_proceso_wf_ori = v_registros_documento.id_proceso_wf,
-                       id_documento_wf_ori = v_registros_documento.id_documento_wf,
-                       nro_tramite_ori = v_registros_con.nro_tramite
-                    WHERE 
-                      id_documento_wf = v_id_documento_wf_op;    
-                
+                       IF v_registros_con.nro_tramite = v_registros.num_tramite THEN
+                         v_habilitar_copia_contrato = FALSE;
+                       ELSE
+                         v_habilitar_copia_contrato = TRUE;
+                       END IF;
+                 
+                 END IF;
+                 
+                IF v_habilitar_copia_contrato THEN
+                      -- con el proceso del contrato buscar el documento con codigo CONTRATO 
+                   
+                      SELECT
+                        d.*
+                      into
+                       v_registros_documento
+                      FROM wf.tdocumento_wf d
+                      INNER JOIN wf.ttipo_documento td on td.id_tipo_documento = d.id_tipo_documento
+                      WHERE td.codigo = 'CONTRATO' and 
+                            d.id_proceso_wf = v_registros_con.id_proceso_wf;
+                     
+                        -- copiamos el link de referencia del contrato
+                        select
+                         dwf.id_documento_wf
+                        into
+                         v_id_documento_wf_op
+                        from wf.tdocumento_wf dwf
+                        inner  join  wf.ttipo_documento td on td.id_tipo_documento = dwf.id_tipo_documento
+                        where td.codigo = 'CONTRATO'  and dwf.id_proceso_wf = v_registros.id_proceso_wf;
+                     
+                        UPDATE 
+                          wf.tdocumento_wf  
+                        SET 
+                           id_usuario_mod = p_id_usuario,
+                           fecha_mod = now(),
+                           chequeado = v_registros_documento.chequeado,
+                           url = v_registros_documento.url,
+                           extension = v_registros_documento.extension,
+                           obs = v_registros_documento.obs,
+                           chequeado_fisico = v_registros_documento.chequeado_fisico,
+                           id_usuario_upload = v_registros_documento.id_usuario_upload,
+                           fecha_upload = v_registros_documento.fecha_upload,
+                           id_proceso_wf_ori = v_registros_documento.id_proceso_wf,
+                           id_documento_wf_ori = v_registros_documento.id_documento_wf,
+                           nro_tramite_ori = v_registros_con.nro_tramite
+                        WHERE 
+                          id_documento_wf = v_id_documento_wf_op;    
+                  END IF;
             
             END IF;
             

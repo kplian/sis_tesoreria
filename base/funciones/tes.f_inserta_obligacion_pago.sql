@@ -318,7 +318,7 @@ BEGIN
             -------------------------------------
             
             --  Si el la referencia al contrato esta presente ..  copiar el documento de contrato
-            IF (p_hstore->'id_contrato')::integer  is not  NULL THEN
+            IF (p_hstore->'id_contrato')::integer  is not  NULL   and (p_hstore->'tipo_obligacion')::varchar != 'adquisiciones'  THEN
                  --con el ide de contrato obtenet el id_proceso_wf
                  SELECT
                    con.id_proceso_wf,

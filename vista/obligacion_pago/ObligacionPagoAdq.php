@@ -27,9 +27,8 @@ Phx.vista.ObligacionPagoAdq = {
 	 * */
 	
 	constructor: function(config) {
-	    
 	   Phx.vista.ObligacionPagoAdq.superclass.constructor.call(this,config);
-       
+       this.Cmp.id_contrato.allowBlank = true; 
         
     },
     
@@ -58,6 +57,7 @@ Phx.vista.ObligacionPagoAdq = {
        this.cmpDepto.disable(); 
        this.cmpFecha.disable(); 
        this.cmpTipoCambioConv.disable();
+       this.Cmp.id_contrato.enable();
        
        Phx.vista.ObligacionPagoAdq.superclass.onButtonEdit.call(this);
        
@@ -70,12 +70,8 @@ Phx.vista.ObligacionPagoAdq = {
             this.cmpMoneda.disable();
        }
        
-       if(data.tipo_obligacion=='pago_directo'){
-           
-           this.cmpProveedor.enable();
-           this.mostrarComponente(this.cmpProveedor);
-           this.cmpMoneda.enable();
-       }
+       this.cmpProveedor.disable();
+       this.cmpMoneda.disable();
        
        //segun el total nro cuota cero, ocultamos los componentes
        if(data.total_nro_cuota=='0'){
@@ -84,10 +80,23 @@ Phx.vista.ObligacionPagoAdq = {
            this.ocultarComponente(this.Cmp.rotacion);
        }
        else{
-           this.cmpProveedor.enable();
-           this.mostrarComponente(this.cmpProveedor);
-           this.cmpMoneda.enable();
+           this.mostrarComponente(this.Cmp.id_plantilla);
+           this.mostrarComponente(this.Cmp.fecha_pp_ini);
+           this.mostrarComponente(this.Cmp.rotacion);
        }
+       
+       if(data.estado != 'borrador'){
+       	  this.Cmp.tipo_anticipo.disable();
+       	  this.Cmp.total_nro_cuota.disable();
+       }
+       else{
+       	   this.Cmp.tipo_anticipo.disable();
+       	   this.Cmp.total_nro_cuota.disable();
+       	   
+       }
+       
+       this.Cmp.id_contrato.store.baseParams.filter = "[{\"type\":\"numeric\",\"comparison\":\"eq\", \"value\":\""+ this.Cmp.id_proveedor.getValue()+"\",\"field\":\"CON.id_proveedor\"}]";
+	   this.Cmp.id_contrato.modificado = true;
            
     },
     
