@@ -47,6 +47,7 @@ require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
         $width3 = 60;
 		$width4 = 11;
 		$width5 = 16;
+		
 		$height = 5;
 		$blackAll = array('LTRB' =>array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0, 0, 0)));
 		$this->SetFillColor(224,224,224, true);
@@ -55,19 +56,21 @@ require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
 		if($this->getDataSource()->getParameter('estado') != 'Todos' )
 		{	
 			$this->Cell($width1, $height, 'Fecha', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$this->Cell($width2+4, $height, 'A Favor', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$this->Cell($width3+4, $height, 'Detalle', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width2, $height, 'A Favor', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width3, $height, 'Detalle', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');			
 			$this->Cell($width4, $height, 'Nº Liq/Cite', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$this->Cell($width1, $height, 'Nº Com.', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width1-3, $height, 'Nº Com.', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width4, $height, 'Com. Sigma', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width4, $height, 'Nº Cheque', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');								
 			$this->Cell($width1, $height, 'Debe', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width1, $height, 'Haber', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 		}else{
 			$this->Cell($width1, $height, 'Fecha', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$this->Cell($width2-4, $height, 'A Favor', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$this->Cell($width3-4, $height, 'Detalle', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width2-8, $height, 'A Favor', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width3-8, $height, 'Detalle', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width4, $height, 'Nº Liq/Cite', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$this->Cell($width1, $height, 'Nº Com.', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width1-3, $height, 'Nº Com.', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width4, $height, 'Com. Sigma', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width4, $height, 'Nº Cheque', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');								
 			$this->Cell($width1, $height, 'Debe', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width1, $height, 'Haber', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
@@ -87,11 +90,11 @@ require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
     			$this->Ln(2);
     			$cur_y = $this->GetY();
     			//$this->Cell($ancho, 0, 'Generado por XPHS', 'T', 0, 'L');
-    			$this->Cell($ancho, 0, 'Usuario: '.$_SESSION['_LOGIN'], '', 1, 'L');
+    			$this->Cell($ancho, 0, 'Usuario: '.$_SESSION['_LOGIN'], '', 0, 'L');
     			$pagenumtxt = 'Página'.' '.$this->getAliasNumPage().' de '.$this->getAliasNbPages();
-    			//$this->Cell($ancho, 0, '', '', 0, 'C');
+    			$this->Cell($ancho, 0, $pagenumtxt, '', 0, 'C');
     			$fecha_rep = date("d-m-Y H:i:s");
-    			$this->Cell($ancho, 0, "Fecha impresión: ".$fecha_rep, '', 0, 'L');
+    			$this->Cell($ancho, 0, "Fecha impresión: ".$fecha_rep, '', 0, 'R');
     			$this->Ln($line_width);
 			 }
 }
@@ -136,6 +139,7 @@ Class RLibroBancos extends Report {
         $width3 = 60;
 		$width4 = 11;
 		$width5 = 16;
+		
         $pdf->Ln();
         $pdf->SetFontSize(7.5);
         $pdf->SetFont('', 'B');
@@ -150,14 +154,14 @@ Class RLibroBancos extends Report {
 		if($this->getDataSource()->getParameter('estado') != 'Todos' )
 		{	
 			$pdf->SetFillColor(255,255,255, true);
-			$pdf->tablewidths=array($width1,$width2+4,$width3+4,$width4,$width1,$width4,$width1,$width1);
-			$pdf->tablealigns=array('L','L','L','C','C','C','R','R');
-			$pdf->tablenumbers=array(0,0,0,0,0,0,0,0);
+			$pdf->tablewidths=array($width1,$width2,$width3,$width4,$width1-3,$width4,$width4,$width1,$width1);
+			$pdf->tablealigns=array('L','L','L','C','C','C','C','R','R');
+			$pdf->tablenumbers=array(0,0,0,0,0,0,0,0,0);
 		}else{
 			$pdf->SetFillColor(255,255,255, true);
-			$pdf->tablewidths=array($width1,$width2-4,$width3-4,$width4,$width1,$width4,$width1,$width1,$width5);
-			$pdf->tablealigns=array('L','L','L','C','C','C','R','R','R');
-			$pdf->tablenumbers=array(0,0,0,0,0,0,0,0,0);
+			$pdf->tablewidths=array($width1,$width2-8,$width3-8,$width4,$width1-3,$width4,$width4,$width1,$width1,$width5);
+			$pdf->tablealigns=array('L','L','L','C','C','C','C','R','R','R');
+			$pdf->tablenumbers=array(0,0,0,0,0,0,0,0,0,0);
 		}
         $saldo_final=0;
 		$total_debe=0;
@@ -173,6 +177,7 @@ Class RLibroBancos extends Report {
 							'detalle'    => $row['detalle'],
 							'nro_liquidacion' => $row['nro_liquidacion'],
 							'nro_comprobante' => $row['nro_comprobante'],
+							'comprobante_sigma' => $row['comprobante_sigma'],
 							'nro_cheque' => $row['nro_cheque'],
 							'importe_deposito' => $row['importe_deposito'],
 							'importe_cheque' => $row['importe_cheque']
@@ -184,6 +189,7 @@ Class RLibroBancos extends Report {
 							'detalle'    => $row['detalle'],
 							'nro_liquidacion' => $row['nro_liquidacion'],
 							'nro_comprobante' => $row['nro_comprobante'],
+							'comprobante_sigma' => $row['comprobante_sigma'],
 							'nro_cheque' => $row['nro_cheque'],
 							'importe_deposito' => $row['importe_deposito'],
 							'importe_cheque' => $row['importe_cheque'],
