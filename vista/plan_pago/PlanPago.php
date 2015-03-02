@@ -302,7 +302,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                         
                         var value = value_ori;
                         if(value_ori == 'pagado'){
-                        	'contabilizado '
+                        	value = 'contabilizado '
                         }
                         
                         if(record.data.total_prorrateado!=record.data.monto_ejecutar_total_mo ){

@@ -412,6 +412,27 @@ class MODPlanPago extends MODbase{
         //Devuelve la respuesta
         return $this->respuesta;
     }
+	/*
+	 * 
+	 * Author: RAC - KPLIAN
+	 * DATE:   2/3/2015
+	 * DESCR:  inserta alarmas para pagos que necesitan el form500
+	 * */
+	
+	function alertarPagosForm500(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.f_pagos_pendientes_ime';
+        $this->transaccion='TES_FORM500_INS';
+        $this->tipo_procedimiento='IME';
+        //definicion de variables
+		$this->tipo_conexion='seguridad';        
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
 	
 	
 	
@@ -605,10 +626,6 @@ class MODPlanPago extends MODbase{
 		$this->captura('codigo_moneda','varchar');
 		
 		
-		
-		
-		
-
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
@@ -616,6 +633,8 @@ class MODPlanPago extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+
+
 
 	function listarPagosXConcepto(){
 		//Definicion de variables para ejecucion del procedimientp
