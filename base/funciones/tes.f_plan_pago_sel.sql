@@ -218,8 +218,8 @@ BEGIN
                         plapa.monto_anticipo,
                         plapa.fecha_costo_ini,
                         plapa.fecha_costo_fin,
-                        funwf.desc_funcionario1::text as funcionario_wf
-                                  
+                        funwf.desc_funcionario1::text as funcionario_wf,
+                        plapa.tiene_form500         
 						from tes.tplan_pago plapa
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
                         inner join param.tmoneda mon on mon.id_moneda = op.id_moneda

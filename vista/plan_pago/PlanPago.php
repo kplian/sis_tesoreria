@@ -252,6 +252,25 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             grid:false,
             form:false
         } ,
+        
+        {
+            config:{
+                name: 'tiene_form500',
+                fieldLabel: 'Form 500',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 70,
+                maxLength:4
+            },
+            type:'NumberField',
+            filters:{pfiltro:'op.numero',type:'string'},
+            id_grupo:1,
+            grid:false,
+            form:false
+        },
+        
+        
+        
         {
             config:{
                 name: 'nro_cuota',
@@ -1172,7 +1191,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'monto_ajuste_ag',
 		'monto_ajuste_siguiente_pag','pago_variable','monto_anticipo',
 		{name:'fecha_costo_ini', type: 'date',dateFormat:'Y-m-d'},
-		{name:'fecha_costo_fin', type: 'date',dateFormat:'Y-m-d'},'funcionario_wf'
+		{name:'fecha_costo_fin', type: 'date',dateFormat:'Y-m-d'},
+		'funcionario_wf','tiene_form500'
 		
 	],
 	

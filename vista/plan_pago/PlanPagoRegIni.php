@@ -24,7 +24,15 @@ Phx.vista.PlanPagoRegIni = {
 	
 	constructor: function(config) {
 		
+		
 	    this.maestro=config.maestro;
+	    var showButtonF500 = true;
+	    if(Phx.CP.getPagina(config.idContenedorPadre)&&Phx.CP.getPagina(config.idContenedorPadre).nombreVista == 'obligacionPagoAdq'){
+	    	this.Atributos[this.getIndAtributo('tiene_form500')].grid=true;
+	    	showButtonF500 = false;
+	    }
+	    
+	  
 	    Phx.vista.PlanPagoRegIni.superclass.constructor.call(this,config);
 	    //this.creaFormularioConformidad();
         ////formulario de departamentos
@@ -40,13 +48,23 @@ Phx.vista.PlanPagoRegIni = {
           }
           
           //this.addButton('btnConformidad',{text:'Conformidad',iconCls: 'bok',disabled:true,handler:this.onButtonConformidad,tooltip: 'Generar conformidad para el pago (Firma acta de conformidad)'});
-          this.addButton('btnVerifPresup', {
+          /*this.addButton('btnVerifPresup', {
                 text : 'Disponibilidad',
                 iconCls : 'bassign',
+                
                 disabled : true,
                 handler : this.onBtnVerifPresup,
                 tooltip : '<b>Verificación de la disponibilidad presupuestaria</b>'
-            });       
+            });*/
+            
+         this.addButton('btnForm500', {
+                text : 'Form500',
+                iconCls : 'bassign',
+                disabled : true,
+                hidden: showButtonF500,
+                handler : this.onBtnForm500,
+                tooltip : '<b>Tiene de Form500</b>Evita que le lleguen mas alertas solicitando el formulario 500'
+            });           
          
          this.iniciarEventos();
          //escode boton para mandar a borrador 
@@ -417,13 +435,16 @@ Phx.vista.PlanPagoRegIni = {
                this.getBoton('SincPresu').disable();
           }
           
+          if(data['tiene_form500']=='requiere'){
+            this.getBoton('btnForm500').enable();
+          }
           //if (data['fecha_conformidad'] == '' || data['fecha_conformidad'] == undefined || data['fecha_conformidad'] == null) {
          	//this.getBoton('btnConformidad').enable();
          //} else {
          	//this.getBoton('btnConformidad').disable();
          //}
           
-          this.getBoton('btnVerifPresup').enable();
+         // this.getBoton('btnVerifPresup').enable();
           this.getBoton('btnChequeoDocumentosWf').enable();  
      },
      
@@ -432,9 +453,10 @@ Phx.vista.PlanPagoRegIni = {
         if(tb){          
            this.getBoton('SincPresu').disable();
            this.getBoton('SolPlanPago').disable();
-           this.getBoton('btnVerifPresup').disable();
+           //this.getBoton('btnVerifPresup').disable();
            this.getBoton('ant_estado').disable();
            this.getBoton('sig_estado').disable();
+           this.getBoton('btnForm500').disable();
            //this.getBoton('btnConformidad').disable();
            this.getBoton('btnChequeoDocumentosWf').disable();   
           }
@@ -470,44 +492,40 @@ Phx.vista.PlanPagoRegIni = {
             height : '50%',
         }, rec.data, this.idContenedor, 'VerificacionPresup');
     },
-    /*sigEstado:function(){   
-    	              
-      	Phx.vista.PlanPagoRegIni.superclass.sigEstado.call(this);
-      	console.log(this.objWizard);
-        this.objWizard.addTarjetaItems([
-        	{
-	           xtype:'checkbox',
-	           fieldLabel: 'Generar Conformidad',
-	           name:'conformidad_check',
-	           itemId: this.idContenedor+'-conformidad_check',
-	           checked :true,
-	           disabled : true 
-	        }, {
-           		xtype: 'textarea',
-           		name: 'obs_conformidad',
-           		itemId: this.idContenedor+'-obs_conformidad',
-           		fieldLabel: 'Observaciones a la Conformidad',
-           		allowBlank: false,
-                anchor: '80%',
-                maxLength:500        	
-        	}
-        ]);
-        //define contador maximo para habilitar o habilitar boton next y submit
-        this.objWizard.maxCount = this.objWizard.maxCount +1
-               
-     },*/
     
+    
+    
+    onBtnForm500: function(){
+    	   var data = this.getSelectedData();
+           Phx.CP.loadingShow();
+           
+           if(data.tiene_form500 == 'requiere'){
+	           	Ext.Ajax.request({
+	                // form:this.form.getForm().getEl(),
+	                url:'../../sis_tesoreria/control/PlanPago/cambioFomrulario500',
+	                params:{id_plan_pago: data.id_plan_pago},
+	                success: this.successSinc,
+	                failure: this.conexionFailure,
+	                timeout:this.timeout,
+	                scope:this
+	            });
+           }
+           else{
+           	alert('EL plan de pago no esta marcado para requerir formulario 500')
+           }
+           
+           
+    	
+    	
+    },
+   
     east:{
           url:'../../../sis_tesoreria/vista/prorrateo/Prorrateo.php',
           title:'Prorrateo', 
           width:400,
           cls:'Prorrateo'
-     },
-    
+     },    
 	tabla_id: 'id_plan_pago',
 	tabla: 'tes.tplan_pago' 
-    
-    
-    
 };
 </script>

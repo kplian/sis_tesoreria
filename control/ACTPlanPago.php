@@ -174,7 +174,7 @@ class ACTPlanPago extends ACTbase{
         }     																	
 	}
 
-     function siguienteEstadoPlanPago(){
+    function siguienteEstadoPlanPago(){
         $this->objFunc=$this->create('MODPlanPago');  
         
         $this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]); 
@@ -183,25 +183,32 @@ class ACTPlanPago extends ACTbase{
         $this->res->imprimirRespuesta($this->res->generarJson());
     }
     
-     function anteriorEstadoPlanPago(){
+    function anteriorEstadoPlanPago(){
         $this->objFunc=$this->create('MODPlanPago');  
         $this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]); 
         $this->res=$this->objFunc->anteriorEstadoPlanPago($this->objParam);
         $this->res->imprimirRespuesta($this->res->generarJson());
     }
 	 
-	 function marcarRevisadoPlanPago(){
+	function marcarRevisadoPlanPago(){
         $this->objFunc=$this->create('MODPlanPago');  
         $this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]); 
         $this->res=$this->objFunc->marcarRevisadoPlanPago($this->objParam);
         $this->res->imprimirRespuesta($this->res->generarJson());
     }
 	 
-	 function generarConformidad(){
+	function generarConformidad(){
         $this->objFunc=$this->create('MODPlanPago');  
         $this->res=$this->objFunc->generarConformidad($this->objParam);
         $this->res->imprimirRespuesta($this->res->generarJson());
     }
+	 
+	function cambioFomrulario500(){
+        $this->objFunc=$this->create('MODPlanPago');  
+        $this->res=$this->objFunc->cambioFomrulario500($this->objParam);
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
+	 
 	 
 	 
     

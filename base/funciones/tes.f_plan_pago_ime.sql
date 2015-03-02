@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -1249,7 +1251,12 @@ BEGIN
          	v_resp_doc =  tes.f_validar_periodo_costo(v_id_plan_pago);
          END IF;
          
-         
+         --validamos que el pago no sea menor a la fecha tentaiva
+         if (v_estado_aux = 'borrador') then
+            IF  v_fecha_tentativa::date > (now()::date + CAST('2 days' AS INTERVAL))::date THEN
+               raise exception 'No puede adelantar el pago,  la fecha tentativa esta marcada para el %', to_char(v_fecha_tentativa,'DD/MM/YYYY/');
+            END IF;
+         end if;
           
           select 
             ew.id_tipo_estado ,
@@ -1288,7 +1295,12 @@ BEGIN
                    v_obs='---';
                 
              END IF;
+             
              if (v_estado_aux = 'borrador') then
+             
+             
+             
+             
                  update tes.tplan_pago
                  set conformidad = v_obs,
                  fecha_conformidad = now()
@@ -1494,6 +1506,33 @@ BEGIN
             --Devuelve la respuesta
             return v_resp;        
         end;
+    
+    
+    /*********************************    
+ 	#TRANSACCION:  'TES_CBFRM500_IME'
+ 	#DESCRIPCION:	CAmbio el estado de requiere fromr 500 para no generar mas alarmas de correo
+ 	#AUTOR:		RAC KPLIAN
+ 	#FECHA:		02-03-2015
+	***********************************/
+
+	elsif(p_transaccion='TES_CBFRM500_IME')then
+
+		begin
+         
+           update tes.tplan_pago  set 
+            tiene_form500 = 'si'
+           where id_plan_pago = v_parametros.id_plan_pago;
+           
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se cambio el estado de tiene formulario 500 '); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_parametros.id_plan_pago::varchar);
+            
+            --Devuelve la respuesta
+            return v_resp;        
+        end;
+            
+        
+        
     else
      
     	raise exception 'Transaccion inexistente: %',p_transaccion;
