@@ -300,7 +300,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                 anchor: '80%',
                 origen: 'DEPTO',
                 tinit: false,
-                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES'},//parametros adicionales que se le pasan al store
+                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'OP'},//parametros adicionales que se le pasan al store
                 gdisplayField:'nombre_depto',
                 gwidth: 100
             },

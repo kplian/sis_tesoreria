@@ -521,7 +521,7 @@ Phx.vista.FormObligacion=Ext.extend(Phx.frmInterfaz,{
                 anchor: '80%',
                 origen: 'DEPTO',
                 tinit: false,
-                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES'}//parametros adicionales que se le pasan al store
+                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'OP'}//parametros adicionales que se le pasan al store
                 
             },
             type:'ComboRec',
