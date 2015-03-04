@@ -242,7 +242,7 @@ BEGIN
                     FOR g_registros in EXECUTE('Select lb.nro_cheque, lb.indice
                                                 From tes.tts_libro_bancos lb
                                                 Where lb.id_cuenta_bancaria = '||v_parametros.id_cuenta_bancaria||'
-                                                and lb.fecha ='''||g_fecha|'''
+                                                and lb.fecha ='''||g_fecha||'''
                                                 and lb.indice is not null
                                                 order by lb.indice asc') LOOP
                     	  g_indice = null;       
