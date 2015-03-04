@@ -1102,3 +1102,17 @@ IS 'esta bander indica que el formulario 500 ya ue registrado';
 
 /***********************************F-SCP-RAC-TES-0-02/03/2015***************************************/
 
+
+
+/***********************************I-SCP-RAC-TES-0-03/03/2015***************************************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN id_depto_lb INTEGER;
+
+COMMENT ON COLUMN tes.tplan_pago.id_depto_lb
+IS 'identifica el libro de pango con el que se paga el cheque, sirve apra filtrar las cuentas bancarias que se peudne seleccionar';
+
+
+/***********************************F-SCP-RAC-TES-0-03/03/2015***************************************/
