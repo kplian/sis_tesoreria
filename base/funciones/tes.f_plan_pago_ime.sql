@@ -144,6 +144,7 @@ DECLARE
     v_res						boolean;
     v_tipo_obligacion			varchar;
     v_operacion 				varchar;
+    v_id_depto_lb				integer;
     
     
     
@@ -249,6 +250,10 @@ BEGIN
            
              IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria') THEN
                v_id_cuenta_bancaria =  v_parametros.id_cuenta_bancaria;
+             END IF;
+             
+             IF  pxp.f_existe_parametro(p_tabla,'id_depto_lb') THEN
+               v_id_depto_lb =  v_parametros.id_depto_lb;
              END IF;
              
              IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria_mov') THEN
@@ -614,6 +619,7 @@ BEGIN
 			monto = v_parametros.monto,
 			nombre_pago = v_parametros.nombre_pago,
 			id_cuenta_bancaria = v_id_cuenta_bancaria,
+            id_depto_lb = v_id_depto_lb,
 			forma_pago = v_forma_pago,
 			monto_no_pagado = v_parametros.monto_no_pagado,
             liquido_pagable=v_liquido_pagable,
@@ -1307,6 +1313,13 @@ BEGIN
                  where id_proceso_wf  = v_parametros.id_proceso_wf_act;
                  
                  v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_actual);
+             end if;
+             
+             --si viene del estado vobo finanzas actualizamos el depto de libro de bancos
+             if (v_estado_aux = 'vbfin') then
+                 update tes.tplan_pago set 
+                 id_depto_lb = v_parametros.id_depto_lb
+                 where id_proceso_wf  = v_parametros.id_proceso_wf_act;
              end if; 
                
              --configurar acceso directo para la alarma   

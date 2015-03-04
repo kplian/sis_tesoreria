@@ -20,6 +20,7 @@ Phx.vista.PlanPagoVbConta = {
     requireclase:'Phx.vista.PlanPago',
     title:'Plan de Pagos',
     nombreVista: 'planpagoVb',
+    nombreEstadoVista: 'vbconta',
     
     constructor: function(config) {
         
@@ -32,7 +33,8 @@ Phx.vista.PlanPagoVbConta = {
        this.Atributos[this.getIndAtributo('forma_pago')].form=true; 
        this.Atributos[this.getIndAtributo('nro_cheque')].form=true; 
        this.Atributos[this.getIndAtributo('nro_cheque')].valorInicial=0;
-       this.Atributos[this.getIndAtributo('nro_cuenta_bancaria')].form=true; 
+       this.Atributos[this.getIndAtributo('nro_cuenta_bancaria')].form=true;
+       this.Atributos[this.getIndAtributo('id_depto_lb')].form=true;  
        this.Atributos[this.getIndAtributo('id_cuenta_bancaria')].form=true; 
        this.Atributos[this.getIndAtributo('id_cuenta_bancaria_mov')].form=true; 
        
@@ -218,7 +220,10 @@ Phx.vista.PlanPagoVbConta = {
          var data = this.getSelectedData();
          Phx.vista.PlanPagoVbConta.superclass.onButtonEdit.call(this);
          
-                
+         if(this.Cmp.id_depto_lb.getValue() > 0){
+             this.Cmp.id_cuenta_bancaria.store.baseParams={ id_depto_lb:this.Cmp.id_depto_lb.getValue()};
+             this.Cmp.id_cuenta_bancaria.modificado = true;
+         }       
          //RCM, resetea store del deposito para no mostrar datos al hacer nuevo
          if(this.Cmp.id_cuenta_bancaria.getValue() > 0){
              this.Cmp.id_cuenta_bancaria_mov.store.baseParams={ id_cuenta_bancaria:-1,
@@ -238,6 +243,7 @@ Phx.vista.PlanPagoVbConta = {
                this.Cmp.nro_cuenta_bancaria.disable();
                this.Cmp.monto_retgar_mo.disable();
                this.Cmp.monto_no_pagado.disable();
+               this.Cmp.id_depto_lb.disable();
                this.Cmp.id_cuenta_bancaria.disable();
                this.Cmp.id_cuenta_bancaria_mov.disable();
                this.Cmp.obs_monto_no_pagado.disable();
@@ -345,14 +351,7 @@ Phx.vista.PlanPagoVbConta = {
                             },this); 
                             
                             
-        //Eventos
-       /* this.Cmp.id_cuenta_bancaria.on('select',function(a,b,c){
-            this.Cmp.id_cuenta_bancaria_mov.setValue('');
-            this.Cmp.id_cuenta_bancaria_mov.store.baseParams.id_cuenta_bancaria = this.Cmp.id_cuenta_bancaria.getValue();
-            Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: this.Cmp.id_cuenta_bancaria.getValue()})
-            this.Cmp.id_cuenta_bancaria_mov.modificado=true;
-        },this);
-       */
+        
             
         this.Cmp.fecha_tentativa.on('blur',function(a){
             this.Cmp.id_cuenta_bancaria_mov.setValue('');
@@ -360,6 +359,11 @@ Phx.vista.PlanPagoVbConta = {
             this.Cmp.id_cuenta_bancaria_mov.modificado=true;
         },this); 
          
+        this.Cmp.id_depto_lb.on('select',function(a,b,c){
+            this.Cmp.id_cuenta_bancaria.setValue('');
+            this.Cmp.id_cuenta_bancaria.store.baseParams.id_depto = this.Cmp.id_depto_lb.getValue();
+            this.Cmp.id_cuenta_bancaria.modificado=true;
+        },this);
         
        //Evento para filtrar los depósitos a partir de la cuenta bancaria
         this.Cmp.id_cuenta_bancaria.on('select',function(data,rec,ind){

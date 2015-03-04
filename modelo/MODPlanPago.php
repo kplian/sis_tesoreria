@@ -105,6 +105,8 @@ class MODPlanPago extends MODbase{
 		$this->captura('fecha_costo_fin','date');
 		$this->captura('funcionario_wf','text');
 		$this->captura('tiene_form500','varchar');
+		$this->captura('id_depto_lb','integer');
+		$this->captura('desc_depto_lb','varchar');
 		
 		
 		
@@ -168,6 +170,7 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('obs_otros_descuentos','obs_otros_descuentos','text');
 		$this->setParametro('monto','monto','numeric');
 		$this->setParametro('nombre_pago','nombre_pago','varchar');
+		$this->setParametro('id_depto_lb','id_depto_lb','int4');
 		$this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
 		$this->setParametro('forma_pago','forma_pago','varchar');
 		$this->setParametro('monto_no_pagado','monto_no_pagado','numeric');
@@ -179,6 +182,7 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('porc_descuento_ley','porc_descuento_ley','numeric');
 		$this->setParametro('nro_cheque','nro_cheque','integer');
 		$this->setParametro('nro_cuenta_bancaria','nro_cuenta_bancaria','varchar');
+		$this->setParametro('id_depto_lb','id_depto_lb','integer');
 		$this->setParametro('id_cuenta_bancaria_mov','id_cuenta_bancaria_mov','integer');
         $this->setParametro('porc_monto_excento_var','porc_monto_excento_var','numeric');
 		$this->setParametro('monto_excento','monto_excento','numeric');
@@ -246,6 +250,7 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('monto_anticipo','monto_anticipo','numeric');
 		$this->setParametro('fecha_costo_ini','fecha_costo_ini','date');
 		$this->setParametro('fecha_costo_fin','fecha_costo_fin','date');
+		$this->setParametro('id_depto_lb','id_depto_lb','int4');
 		
 		
 
@@ -271,6 +276,7 @@ class MODPlanPago extends MODbase{
         $this->setParametro('id_tipo_estado','id_tipo_estado','int4');
         $this->setParametro('id_funcionario_wf','id_funcionario_wf','int4');
         $this->setParametro('id_depto_wf','id_depto_wf','int4');
+		$this->setParametro('id_depto_lb','id_depto_lb','int4');
         $this->setParametro('obs','obs','text');
         $this->setParametro('json_procesos','json_procesos','text');
 

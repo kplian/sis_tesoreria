@@ -219,7 +219,9 @@ BEGIN
                         plapa.fecha_costo_ini,
                         plapa.fecha_costo_fin,
                         funwf.desc_funcionario1::text as funcionario_wf,
-                        plapa.tiene_form500         
+                        plapa.tiene_form500,
+                        plapa.id_depto_lb,
+                        depto.nombre as desc_depto_lb         
 						from tes.tplan_pago plapa
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
                         inner join param.tmoneda mon on mon.id_moneda = op.id_moneda
@@ -232,6 +234,7 @@ BEGIN
                         left join param.vproveedor pro on pro.id_proveedor = op.id_proveedor
                         left join orga.vfuncionario fun on fun.id_funcionario = op.id_funcionario
                         left join orga.vfuncionario funwf on funwf.id_funcionario = ew.id_funcionario
+                        left join param.tdepto depto on depto.id_depto = plapa.id_depto_lb
                        where  plapa.estado_reg=''activo''  and '||v_filtro;
 			
 			--Definicion de la respuesta
@@ -318,6 +321,7 @@ BEGIN
                         left join tes.tcuenta_bancaria_mov cbanmo on cbanmo.id_cuenta_bancaria_mov = plapa.id_cuenta_bancaria_mov
                         left join param.vproveedor pro on pro.id_proveedor = op.id_proveedor
                         left join orga.vfuncionario funwf on funwf.id_funcionario = ew.id_funcionario
+                        left join param.tdepto depto on depto.id_depto = plapa.id_depto_lb
                       where  plapa.estado_reg=''activo''   and '||v_filtro;
 			
 			--Definicion de la respuesta		    
