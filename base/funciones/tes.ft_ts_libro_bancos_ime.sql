@@ -69,10 +69,17 @@ DECLARE
     g_id_libro_bancos_fk	integer;
     g_importe_deposito		numeric;
     g_libro_bancos			record;
+    g_fecha					date;
 BEGIN
     v_nombre_funcion = 'tes.ft_ts_libro_bancos_ime';
     v_parametros = pxp.f_get_record(p_tabla);
-
+    
+	IF pxp.f_existe_parametro(p_tabla,'fecha')THEN
+    	g_fecha = v_parametros.fecha;
+    ELSE
+    	g_fecha = now();
+    END IF;
+    
 	/*********************************    
  	#TRANSACCION:  'TES_LBAN_INS'
  	#DESCRIPCION:	Insercion de registros
@@ -95,18 +102,17 @@ BEGIN
             
             IF(v_parametros.tipo in ('cheque','debito_automatico','transferencia_carta','transf_interna_debe','transf_interna_haber'))Then
               --Comparamos el saldo de la cuenta bancaria con el importe del cheque
-                
               Select coalesce(sum(Coalesce(lbr.importe_deposito, 0)) - 
                       sum(coalesce(lbr.importe_cheque, 0)), 0)
                       into g_saldo_cuenta_bancaria
               From tes.tts_libro_bancos lbr
-              where lbr.fecha <= v_parametros.fecha and 
+              where lbr.fecha <= g_fecha and 
               lbr.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria;
                 
               IF(v_parametros.importe_cheque > g_saldo_cuenta_bancaria) Then
-                raise exception               
-                 'El importe que intenta registrar excede el saldo general de la cuenta bancaria al %. Por favor revise el saldo de la cuenta al %. id cuenta bancaria %',
-                 v_parametros.fecha,v_parametros.fecha, v_parametros.id_cuenta_bancaria;
+                    raise exception               
+                     'El importe que intenta registrar excede el saldo general de la cuenta bancaria al %. Por favor revise el saldo de la cuenta al %. id cuenta bancaria %',
+                     g_fecha,g_fecha, v_parametros.id_cuenta_bancaria;                
               End If;
             
               --Comparamos el saldo del deposito con el importe del cheque
@@ -168,12 +174,12 @@ BEGIN
          --VERIFICAMOS SI ES UN DEPOSITO, transferencia o debito automatico
          IF(v_parametros.tipo in ('deposito','debito_automatico','transferencia_carta','transf_interna_debe','transf_interna_haber')) Then
          
-         	--Obtenemos el numero de indice que sera asignado al nuevo registro            
+         	--Obtenemos el numero de indice que sera asignado al nuevo registro        
             Select max(lb.indice)
             Into g_indice
             From tes.tts_libro_bancos lb
             Where lb.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria
-            and lb.fecha = v_parametros.fecha;
+            and lb.fecha = g_fecha;
             
             If(g_indice is null )Then
             	g_indice = 0;
@@ -189,7 +195,7 @@ BEGIN
             Into g_max_nro_cheque
             From tes.tts_libro_bancos lb
             Where lb.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria
-            and lb.fecha = v_parametros.fecha
+            and lb.fecha = g_fecha
             and lb.tipo = 'cheque'
             and lb.id_libro_bancos <> v_id_libro_bancos;
             
@@ -200,7 +206,7 @@ BEGIN
                 Into g_indice
                 From tes.tts_libro_bancos lb
                 Where lb.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria
-                and lb.fecha = v_parametros.fecha;
+                and lb.fecha = g_fecha;
                 
                 If(g_indice is null )Then
                     g_indice = 0;
@@ -220,7 +226,7 @@ BEGIN
                     Into g_indice
                     From tes.tts_libro_bancos lb
                     Where lb.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria
-                    and lb.fecha = v_parametros.fecha;
+                    and lb.fecha = g_fecha;
                     
                     If(g_indice is null )Then
                         g_indice = 0;
@@ -236,7 +242,7 @@ BEGIN
                     FOR g_registros in EXECUTE('Select lb.nro_cheque, lb.indice
                                                 From tes.tts_libro_bancos lb
                                                 Where lb.id_cuenta_bancaria = '||v_parametros.id_cuenta_bancaria||'
-                                                and lb.fecha ='''||v_parametros.fecha||'''
+                                                and lb.fecha ='''||g_fecha|'''
                                                 and lb.indice is not null
                                                 order by lb.indice asc') LOOP
                     	  g_indice = null;       
@@ -257,7 +263,7 @@ BEGIN
                               UPDATE tes.tts_libro_bancos SET 
                                   indice = indice + 1
                               Where tes.tts_libro_bancos.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria
-                              and tes.tts_libro_bancos.fecha = v_parametros.fecha
+                              and tes.tts_libro_bancos.fecha = g_fecha
                               and tes.tts_libro_bancos.indice >= g_registros.indice;
                               
                               --asignamos el valor del indice del ciclo al registro nuevo
