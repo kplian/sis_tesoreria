@@ -125,9 +125,7 @@ Phx.vista.ObligacionPagoUnico = {
     	
     },
      onCloseDocuments: function(paneldoc, data){
-     	alert('al cerrar')
-    	var newrec = this.store.getById(data.id_obligacion_pago);
-    	console.log('newrec', newrec,data)
+     	var newrec = this.store.getById(data.id_obligacion_pago);
     	if(newrec){
 	    	this.sm.selectRecords([newrec]);
 	    	this.fin_registro( undefined, undefined, undefined,  paneldoc);

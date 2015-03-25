@@ -26,13 +26,6 @@ Phx.vista.PlanPagoRegIni = {
 		
 		
 	    this.maestro=config.maestro;
-	    var showButtonF500 = true;
-	    if(Phx.CP.getPagina(config.idContenedorPadre)&&Phx.CP.getPagina(config.idContenedorPadre).nombreVista == 'obligacionPagoAdq'){
-	    	this.Atributos[this.getIndAtributo('tiene_form500')].grid=true;
-	    	showButtonF500 = false;
-	    }
-	    
-	  
 	    Phx.vista.PlanPagoRegIni.superclass.constructor.call(this,config);
 	    //this.creaFormularioConformidad();
         ////formulario de departamentos
@@ -57,14 +50,7 @@ Phx.vista.PlanPagoRegIni = {
                 tooltip : '<b>Verificación de la disponibilidad presupuestaria</b>'
             });*/
             
-         this.addButton('btnForm500', {
-                text : 'Form500',
-                iconCls : 'bassign',
-                disabled : true,
-                hidden: showButtonF500,
-                handler : this.onBtnForm500,
-                tooltip : '<b>Tiene de Form500</b>Evita que le lleguen mas alertas solicitando el formulario 500'
-            });           
+                    
          
          this.iniciarEventos();
          //escode boton para mandar a borrador 
@@ -435,9 +421,7 @@ Phx.vista.PlanPagoRegIni = {
                this.getBoton('SincPresu').disable();
           }
           
-          if(data['tiene_form500']=='requiere'){
-            this.getBoton('btnForm500').enable();
-          }
+         
           //if (data['fecha_conformidad'] == '' || data['fecha_conformidad'] == undefined || data['fecha_conformidad'] == null) {
          	//this.getBoton('btnConformidad').enable();
          //} else {
@@ -456,7 +440,7 @@ Phx.vista.PlanPagoRegIni = {
            //this.getBoton('btnVerifPresup').disable();
            this.getBoton('ant_estado').disable();
            this.getBoton('sig_estado').disable();
-           this.getBoton('btnForm500').disable();
+         
            //this.getBoton('btnConformidad').disable();
            this.getBoton('btnChequeoDocumentosWf').disable();   
           }
@@ -495,29 +479,7 @@ Phx.vista.PlanPagoRegIni = {
     
     
     
-    onBtnForm500: function(){
-    	   var data = this.getSelectedData();
-           Phx.CP.loadingShow();
-           
-           if(data.tiene_form500 == 'requiere'){
-	           	Ext.Ajax.request({
-	                // form:this.form.getForm().getEl(),
-	                url:'../../sis_tesoreria/control/PlanPago/cambioFomrulario500',
-	                params:{id_plan_pago: data.id_plan_pago},
-	                success: this.successSinc,
-	                failure: this.conexionFailure,
-	                timeout:this.timeout,
-	                scope:this
-	            });
-           }
-           else{
-           	alert('EL plan de pago no esta marcado para requerir formulario 500')
-           }
-           
-           
-    	
-    	
-    },
+    
    
     east:{
           url:'../../../sis_tesoreria/vista/prorrateo/Prorrateo.php',

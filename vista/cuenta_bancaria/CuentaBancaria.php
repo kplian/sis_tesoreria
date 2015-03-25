@@ -17,8 +17,10 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
     	//llama al constructor de la clase padre
 		Phx.vista.CuentaBancaria.superclass.constructor.call(this,config);
 		this.init();
-		this.load({params:{start:0, limit:this.tam_pag}})
+		
+		//this.load({params:{start:0, limit:this.tam_pag}})
 	},
+		
 	tam_pag:50,
 			
 	Atributos:[
@@ -73,7 +75,7 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Denominación',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 150,
+				gwidth: 250,
 				maxLength:100
 			},
 			type:'TextField',
@@ -255,6 +257,7 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 		{name:'usr_mod', type: 'string'},'id_moneda','codigo_moneda'
 		
 	],
+				
 	sortInfo:{
 		field: 'id_cuenta_bancaria',
 		direction: 'ASC'
@@ -267,7 +270,7 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
         height : '50%',
         cls:'Chequera'
    },
-
+	
 	onButtonEdit: function(){
 		Phx.vista.CuentaBancaria.superclass.onButtonEdit.call(this);
 		this.Cmp.nro_cuenta.disable();

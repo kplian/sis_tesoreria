@@ -149,6 +149,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             type: 'TextField',
             filters: { pfiltro: 'obpg.num_tramite', type: 'string' },
             id_grupo: 1,
+            bottom_filter: true,
             grid: true,
             form: false
         },
@@ -289,9 +290,80 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             type:'ComboRec',//ComboRec
             id_grupo:1,
             filters:{pfiltro:'fun.desc_funcionario1',type:'string'},
+            bottom_filter: true,
             grid:true,
             form:true
          },
+		{
+			config: {
+				name: 'id_proveedor',
+				fieldLabel: 'Proveedor',
+				anchor: '80%',
+				tinit: false,
+				allowBlank: false,
+				origen: 'PROVEEDOR',
+				gdisplayField: 'desc_proveedor',
+				gwidth: 100,
+				listWidth: '280',
+				resizable: true
+			},
+			type: 'ComboRec',
+			id_grupo: 1,
+			filters:{pfiltro:'pv.desc_proveedor',type:'string'},
+			 bottom_filter: true,
+			grid: true,
+			form: true
+		},
+		{
+			config: {
+				name: 'id_contrato',
+				hiddenName: 'id_contrato',
+				fieldLabel: 'Contrato',
+				typeAhead: false,
+				forceSelection: false,
+				allowBlank: false,
+				disabled: true,
+				emptyText: 'Contratos...',
+				store: new Ext.data.JsonStore({
+					url: '../../sis_workflow/control/Tabla/listarTablaCombo',
+					id: 'id_contrato',
+					root: 'datos',
+					sortInfo: {
+						field: 'id_contrato',
+						direction: 'ASC'
+					},
+					totalProperty: 'total',
+					fields: ['id_contrato', 'numero', 'tipo', 'objeto', 'estado', 'desc_proveedor','monto','moneda','fecha_inicio','fecha_fin'],
+					// turn on remote sorting
+					remoteSort: true,
+					baseParams: {par_filtro:'con.numero#con.tipo#con.monto#prov.desc_proveedor#con.objeto#con.monto', tipo_proceso:"CON",tipo_estado:"finalizado"}
+				}),
+				valueField: 'id_contrato',
+				displayField: 'numero',
+				gdisplayField: 'desc_contrato',
+				triggerAction: 'all',
+				lazyRender: true,
+				mode: 'remote',
+				pageSize: 20,
+				queryDelay: 200,
+				listWidth:280,
+				minChars: 2,
+				gwidth: 100,
+				anchor: '80%',
+				renderer: function(value, p, record) {
+					return String.format('{0}', record.data['desc_contrato']);
+				},
+				tpl: '<tpl for="."><div class="x-combo-list-item"><p>Nro: {numero} ({tipo})</p><p>Obj: <strong>{objeto}</strong></p><p>Prov : {desc_proveedor}</p> <p>Monto: {monto} {moneda}</p><p>Rango: {fecha_inicio} al {fecha_fin}</p></div></tpl>'
+			},
+			type: 'ComboBox',
+			id_grupo: 0,
+			filters: {
+				pfiltro: 'con.numero',
+				type: 'numeric'
+			},
+			grid: true,
+			form: true
+		},
         {
             config:{
                 name: 'id_depto',
@@ -391,75 +463,6 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
        grid:false,
        form:true
       },
-		{
-			config: {
-				name: 'id_proveedor',
-				fieldLabel: 'Proveedor',
-				anchor: '80%',
-				tinit: false,
-				allowBlank: false,
-				origen: 'PROVEEDOR',
-				gdisplayField: 'desc_proveedor',
-				gwidth: 100,
-				listWidth: '280',
-				resizable: true
-			},
-			type: 'ComboRec',
-			id_grupo: 1,
-			filters:{pfiltro:'pv.desc_proveedor',type:'string'},
-			grid: true,
-			form: true
-		},
-		{
-			config: {
-				name: 'id_contrato',
-				hiddenName: 'id_contrato',
-				fieldLabel: 'Contrato',
-				typeAhead: false,
-				forceSelection: false,
-				allowBlank: false,
-				disabled: true,
-				emptyText: 'Contratos...',
-				store: new Ext.data.JsonStore({
-					url: '../../sis_workflow/control/Tabla/listarTablaCombo',
-					id: 'id_contrato',
-					root: 'datos',
-					sortInfo: {
-						field: 'id_contrato',
-						direction: 'ASC'
-					},
-					totalProperty: 'total',
-					fields: ['id_contrato', 'numero', 'tipo', 'objeto', 'estado', 'desc_proveedor','monto','moneda','fecha_inicio','fecha_fin'],
-					// turn on remote sorting
-					remoteSort: true,
-					baseParams: {par_filtro:'con.numero#con.tipo#con.monto#prov.desc_proveedor#con.objeto#con.monto', tipo_proceso:"CON",tipo_estado:"finalizado"}
-				}),
-				valueField: 'id_contrato',
-				displayField: 'numero',
-				gdisplayField: 'desc_contrato',
-				triggerAction: 'all',
-				lazyRender: true,
-				mode: 'remote',
-				pageSize: 20,
-				queryDelay: 200,
-				listWidth:280,
-				minChars: 2,
-				gwidth: 100,
-				anchor: '80%',
-				renderer: function(value, p, record) {
-					return String.format('{0}', record.data['desc_contrato']);
-				},
-				tpl: '<tpl for="."><div class="x-combo-list-item"><p>Nro: {numero} ({tipo})</p><p>Obj: <strong>{objeto}</strong></p><p>Prov : {desc_proveedor}</p> <p>Monto: {monto} {moneda}</p><p>Rango: {fecha_inicio} al {fecha_fin}</p></div></tpl>'
-			},
-			type: 'ComboBox',
-			id_grupo: 0,
-			filters: {
-				pfiltro: 'con.numero',
-				type: 'numeric'
-			},
-			grid: true,
-			form: true
-		},
 		
 		{
             config:{

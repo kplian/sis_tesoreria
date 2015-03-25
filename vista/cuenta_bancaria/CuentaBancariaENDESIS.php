@@ -12,15 +12,17 @@ header("content-type:text/javascript; charset=UTF-8");
 	Phx.vista.CuentaBancariaENDESIS = Ext.extend(Phx.gridInterfaz, {
 		constructor : function(config) {
 			this.maestro = config.maestro;
+			this.initButtons=[this.cmbDepto];
 			Phx.vista.CuentaBancariaENDESIS.superclass.constructor.call(this, config);
 			this.init();
-			this.load({
+			this.cmbDepto.on('select',this.capturaFiltros,this);
+			/*this.load({
 				params : {
 					start : 0,
 					limit : 50,
 					permiso : 'todos,libro_bancos'
 				}
-			});
+			});*/
 			this.addButton('btnDepositosCheques', {
 				text : 'Depositos y Cheques',
 				iconCls : 'bmoney',
@@ -29,6 +31,42 @@ header("content-type:text/javascript; charset=UTF-8");
 				tooltip : '<b>Despositos y cheques</b>'
 			});
 		},
+		
+		capturaFiltros:function(combo, record, index){
+			this.store.baseParams.id_depto_lb=this.cmbDepto.getValue();
+			this.store.load({params:{start:0, limit:50, permiso : 'libro_bancos'}});	
+		},
+		
+		cmbDepto:new Ext.form.ComboBox({
+			fieldLabel: 'Departamento',
+			allowBlank: true,
+			emptyText:'Departamento...',
+			store:new Ext.data.JsonStore(
+			{
+				url: '../../sis_parametros/control/Depto/listarDeptoFiltradoDeptoUsuario',
+				id: 'id_depto',
+				root: 'datos',
+				sortInfo:{
+					field: 'deppto.nombre',
+					direction: 'ASC'
+				},
+				totalProperty: 'total',
+				fields: ['id_depto','nombre'],
+				// turn on remote sorting
+				remoteSort: true,
+				baseParams:{par_filtro:'nombre',tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'LB'}
+			}),
+			valueField: 'id_depto',
+			triggerAction: 'all',
+			displayField: 'nombre',
+			hiddenName: 'id_depto',
+			mode:'remote',
+			pageSize:50,
+			queryDelay:500,
+			listWidth:'280',
+			width:250
+		}),
+		
 		onBtnDepositosCheques : function() {
 			var rec = this.sm.getSelected();
 			Phx.CP.loadWindows('../../../sis_migracion/vista/ts_libro_bancos_depositos/TsLibroBancosDeposito.php', 'Depositos', {
@@ -88,7 +126,7 @@ header("content-type:text/javascript; charset=UTF-8");
 				fieldLabel: 'Denominación',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 150,
+				gwidth: 250,
 				maxLength:100
 			},
 			type:'TextField',

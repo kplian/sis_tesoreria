@@ -21,8 +21,17 @@ Phx.vista.CuentaBancariaESIS = {
 	
 	constructor: function(config) {
 	    this.maestro=config.maestro;
+		
+		this.initButtons=[this.cmbDepto];
     	Phx.vista.CuentaBancariaESIS.superclass.constructor.call(this,config);
-	    this.load({params:{start:0, limit:this.tam_pag, permiso : 'todos,libro_bancos'}});
+		
+		this.cmbDepto.on('select',this.capturaFiltros,this);
+	    //this.load({params:{start:0, limit:this.tam_pag, permiso : 'todos,libro_bancos'}});
+	},
+	
+	capturaFiltros:function(combo, record, index){
+		this.store.baseParams.id_depto_lb=this.cmbDepto.getValue();
+		this.store.load({params:{start:0, limit:this.tam_pag, permiso : 'libro_bancos'}});	
 	},
       
 	preparaMenu:function(n){
@@ -37,6 +46,37 @@ Phx.vista.CuentaBancariaESIS = {
         return tb
     },
     
+	
+	cmbDepto:new Ext.form.ComboBox({
+		fieldLabel: 'Departamento',
+		allowBlank: true,
+		emptyText:'Departamento...',
+		store:new Ext.data.JsonStore(
+		{
+			url: '../../sis_parametros/control/Depto/listarDeptoFiltradoDeptoUsuario',
+			id: 'id_depto',
+			root: 'datos',
+			sortInfo:{
+				field: 'deppto.nombre',
+				direction: 'ASC'
+			},
+			totalProperty: 'total',
+			fields: ['id_depto','nombre'],
+			// turn on remote sorting
+			remoteSort: true,
+			baseParams:{par_filtro:'nombre',tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'LB'}
+		}),
+		valueField: 'id_depto',
+		triggerAction: 'all',
+		displayField: 'nombre',
+		hiddenName: 'id_depto',
+		mode:'remote',
+		pageSize:50,
+		queryDelay:500,
+		listWidth:'280',
+		width:250
+	}),
+	
     south:
           { 
           url:'../../../sis_migracion/vista/ts_libro_bancos/TsLibroBancos.php',

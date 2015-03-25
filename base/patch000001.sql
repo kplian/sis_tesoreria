@@ -1116,3 +1116,17 @@ IS 'identifica el libro de pango con el que se paga el cheque, sirve apra filtra
 
 
 /***********************************F-SCP-RAC-TES-0-03/03/2015***************************************/
+
+
+/***********************************I-SCP-RAC-TES-0-25/03/2015***************************************/
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN ultima_cuota_dev NUMERIC;
+
+COMMENT ON COLUMN tes.tobligacion_pago.ultima_cuota_dev
+IS 'identifica la ultima cuota  del tipo devengado para alertar sobre ultimo pago, sellena atravez de un triguer en la tabla de plan de pagos';
+
+/***********************************F-SCP-RAC-TES-0-25/03/2015***************************************/
