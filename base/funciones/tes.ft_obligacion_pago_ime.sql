@@ -144,7 +144,9 @@ DECLARE
      v_id_documento_wf_op		integer;
      v_id_usuario_reg_op        integer;
      v_habilitar_copia_contrato	boolean;
-   
+     v_ano_1 integer;
+     v_ano_2 integer;
+
      
 			    
 BEGIN
@@ -1614,7 +1616,8 @@ BEGIN
             select 
                op.id_obligacion_pago,
                op.id_moneda,
-               op.estado
+               op.estado,
+               op.fecha
             into
                v_registros_op
             from tes.tobligacion_pago op
@@ -1633,7 +1636,22 @@ BEGIN
             
              END IF;
         
-            v_fecha = now();
+            
+            
+            -- la fecha de solictud es la fecha de compromiso 
+            IF  now()  < v_registros_op.fecha THEN
+                v_fecha = v_registros_op.fecha::date;
+            ELSE
+                 -- la fecha de reversion como maximo puede ser el 31 de diciembre   
+                 v_fecha = now()::date;
+                 v_ano_1 =  EXTRACT(YEAR FROM  now()::date);
+                 v_ano_2 =  EXTRACT(YEAR FROM  v_registros_op.fecha::date);
+                       
+                 IF  v_ano_1  >  v_ano_2 THEN
+                   v_fecha = ('31-12-'|| v_ano_2::varchar)::date;
+                 END IF;
+            END IF;  
+            
             va_id_obligacion_det_tmp =  string_to_array(v_parametros.id_ob_dets::text,',')::integer[];
             va_revertir = string_to_array(v_parametros.revertir::text,',')::numeric[];
             v_tam = array_length(va_id_obligacion_det_tmp, 1);
@@ -1676,7 +1694,9 @@ BEGIN
                 v_i = v_i + 1;
                 
           END LOOP;
-             
+           
+          
+           
            
           va_resp_ges =  pre.f_gestionar_presupuesto(  va_id_presupuesto, 
                                                        va_id_partida, 

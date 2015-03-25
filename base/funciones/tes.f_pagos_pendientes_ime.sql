@@ -27,7 +27,8 @@ DECLARE
 
 	v_nro_requerimiento    	integer;
 	v_parametros           	record;
-    v_registros  	    record;
+    v_registros  	    	record;
+    v_registros_cot			record;
 	v_id_requerimiento     	integer;
 	v_resp		            varchar;
 	v_nombre_funcion        text;
@@ -475,7 +476,10 @@ BEGIN
                                                     NULL::integer,
                                                     v_asunto);
                 
-                IF  v_registros.id_funcionario_registro is not null AND v_registros.id_funcionario_registro != v_registros.id_funcionario_solicitante THEN
+                
+                -- validacion para no madar alerta a los usarios de adquisiciones, yno mandar doble si el usario que registras es el mismo que solicita
+                
+                IF  v_registros.id_funcionario_registro is not null AND v_registros.id_funcionario_registro != v_registros.id_funcionario_solicitante  and  v_registros.tipo_obligacion  != 'adquisiciones' THEN
                     
                     v_destinatorio = '<br>Estimad@: '||COALESCE(v_registros.desc_funcionario_usu_reg,'NAN');
                     v_id_alarma[2]:=param.f_inserta_alarma(v_registros.id_funcionario_registro,
@@ -517,7 +521,8 @@ BEGIN
        begin
        
         -- seleccionar los ulitmos registros de planes de pagos de adquisiciones que reuqieren alerta
-         FOR v_registros in (select
+         FOR v_registros in (
+                           select
                                 op.num_tramite,
                                 op.id_obligacion_pago,
                                 max(pp.id_plan_pago) as id_plan_pago,
@@ -526,42 +531,47 @@ BEGIN
                                 pro.desc_proveedor,
                                 op.total_pago,
                                 mon.codigo as codigo_moneda,
-                                op.id_usuario_reg
+                                cot.tiene_form500,
+                                cot.id_cotizacion
          					from tes.tplan_pago pp
 
                                 inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago 
                                            and op.tipo_obligacion = 'adquisiciones' and ( op.total_pago * op.tipo_cambio_conv ) >= 20000 
+                                inner join adq.tcotizacion cot on cot.id_obligacion_pago = op.id_obligacion_pago
                                 inner join param.vproveedor pro on pro.id_proveedor = op.id_proveedor
                                 inner join param.tmoneda mon on mon.id_moneda = op.id_moneda
-                                where pp.tipo in ('devengado_pagado','devengado_pagado_1c') 
+                            where pp.tipo in ('devengado_pagado','devengado_pagado_1c') 
                                 and pp.estado_reg ='activo' 
                                 and pp.estado not in  ('devengado', 'anulado','pagado')
                                 and pp.fecha_tentativa::date <= now()::date
-                                and pp.tiene_form500 in ('no','requiere')
-                                group by 
+                                and cot.tiene_form500 in ('no','requiere')
+                            group by 
                                 op.id_obligacion_pago,
                                 op.num_tramite ,
                                 op.id_proveedor,
                                 pro.desc_proveedor,
                                 op.total_pago,
                                 mon.codigo,
-                                op.id_usuario_reg)  LOOP
+                                cot.tiene_form500,
+                                cot.id_cotizacion)  LOOP
                         
                 -- identifica a que usarios se mandan las alertas             
                 select  
-                    du.id_usuario
+                    du.id_usuario as id_usuario_depto,
+                    op.id_usuario_reg,
+                    op.ultima_cuota_dev
                 into
-                    v_id_usuario_depto
+                    v_registros_cot 
                 from adq.tcotizacion cot 
+                inner join tes.tobligacion_pago op  on  op.id_obligacion_pago = cot.id_obligacion_pago
                 inner join adq.tproceso_compra pro on pro.id_proceso_compra = cot.id_proceso_compra
+                
                 inner join param.tdepto_usuario du on du.id_depto = pro.id_depto and du.cargo = 'responsable'
                 where cot.id_obligacion_pago = v_registros.id_obligacion_pago
                 limit 1 offset 0;
             
                
                
-           
-           
            
                 ----------------------------
                 -- arma template de correo
@@ -592,13 +602,13 @@ BEGIN
                                                     v_clase,
                                                     v_titulo,--titulo
                                                     COALESCE(v_parametros_ad,''),
-                                                    v_registros.id_usuario_reg::integer,  --destino de la alarma
+                                                    v_registros_cot.id_usuario_reg::integer,  --destino de la alarma
                                                     v_asunto);
                 
                 
                 --inserta la alrma para le usario responsable del depto de adquisiciones
                 
-                IF v_id_usuario_depto is not NULL and v_id_usuario_depto != v_registros.id_usuario_reg THEN
+                IF v_registros_cot.id_usuario_depto is not NULL and v_registros_cot.id_usuario_depto != v_registros_cot.id_usuario_reg THEN
                   v_id_alarma[1]:=param.f_inserta_alarma(NULL,
                                                       v_destinatorio||v_template ,    --descripcion alarmce
                                                       COALESCE(v_acceso_directo,''),--acceso directo
@@ -609,14 +619,19 @@ BEGIN
                                                       v_clase,
                                                       v_titulo,--titulo
                                                       COALESCE(v_parametros_ad,''),
-                                                      v_id_usuario_depto::integer,  --destino de la alarma
+                                                      v_registros_cot.id_usuario_depto::integer,  --destino de la alarma
                                                       v_asunto);
                 
                 END IF;
-               -- actualiza la  marca del plan de pagos para que ya no reciba nuevas alertas
+               -- actualiza la  marca del plan de pagos
                update  tes.tplan_pago set
                tiene_form500 = 'requiere'
                where id_plan_pago = v_registros.id_plan_pago;
+               
+               -- actualiza la  marca del de cotizacion para que ya no lelguen alertas
+               update  adq.tcotizacion set
+               tiene_form500 = 'requiere'
+               where id_cotizacion = v_registros.id_cotizacion;
       
        END LOOP;
         

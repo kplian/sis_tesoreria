@@ -6641,3 +6641,158 @@ AS
        
 /***********************************F-DEP-RAC-TES-0-27/02/2015****************************************/
 
+
+
+/***********************************I-DEP-RAC-TES-0-25/03/2015****************************************/
+
+
+--------------- SQL ---------------
+
+ -- object recreation
+DROP VIEW tes.vcomp_devtesprov_plan_pago_2;
+
+CREATE VIEW tes.vcomp_devtesprov_plan_pago_2
+AS
+  SELECT pp.id_plan_pago,
+         op.id_proveedor,
+         COALESCE(p.desc_proveedor, ''::character varying) AS desc_proveedor,
+         op.id_moneda,
+         op.id_depto_conta,
+         op.numero,
+         now() AS fecha_actual,
+         pp.estado,
+         pp.monto_ejecutar_total_mb,
+         pp.monto_ejecutar_total_mo,
+         pp.monto,
+         pp.monto_mb,
+         pp.monto_retgar_mb,
+         pp.monto_retgar_mo,
+         pp.monto_no_pagado,
+         pp.monto_no_pagado_mb,
+         pp.otros_descuentos,
+         pp.otros_descuentos_mb,
+         pp.id_plantilla,
+         pp.id_cuenta_bancaria,
+         pp.id_cuenta_bancaria_mov,
+         pp.nro_cheque,
+         pp.nro_cuenta_bancaria,
+         op.num_tramite,
+         pp.tipo,
+         op.id_gestion AS id_gestion_cuentas,
+         pp.id_int_comprobante,
+         pp.liquido_pagable,
+         pp.liquido_pagable_mb,
+         pp.nombre_pago,
+         pp.porc_monto_excento_var,
+         ((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
+           COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS
+           obs_pp,
+         pp.descuento_anticipo,
+         pp.descuento_inter_serv,
+         op.tipo_obligacion,
+         op.id_categoria_compra,
+         COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
+         COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
+         pp.id_proceso_wf,
+         ('<table>'::text || pxp.html_rows((((('<td>'::text || ci.desc_ingas::
+           text) || '<br/>'::text) || od.descripcion) || '</td>'::text)::
+           character varying)::text) || '</table>'::text AS detalle,
+         mon.codigo AS codigo_moneda,
+         pp.nro_cuota,
+         pp.tipo_pago,
+         op.tipo_solicitud,
+         op.tipo_concepto_solicitud,
+         COALESCE(sum(od.monto_pago_mb), 0::numeric) AS total_monto_op_mb,
+         COALESCE(sum(od.monto_pago_mo), 0::numeric) AS total_monto_op_mo,
+         op.total_pago,
+         pp.fecha_tentativa,
+         fun.desc_funcionario1 AS desc_funcionario,
+         fun.email_empresa,
+         usu.desc_persona AS desc_usuario,
+         COALESCE(op.id_funcionario_gerente, 0) AS id_funcionario_gerente,
+         ususol.correo AS correo_usuario,
+         CASE
+           WHEN pp.fecha_conformidad IS NULL THEN 'no'::text
+           ELSE 'si'::text
+         END AS sw_conformidad,
+         op.ultima_cuota_pp,
+         op.ultima_cuota_dev,
+         pp.tiene_form500
+  FROM tes.tplan_pago pp
+       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
+         op.id_obligacion_pago
+       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
+       LEFT JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
+       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
+         op.id_categoria_compra
+       LEFT JOIN adq.tcotizacion cot ON op.id_obligacion_pago =
+         cot.id_obligacion_pago
+       LEFT JOIN adq.tproceso_compra pro ON pro.id_proceso_compra =
+         cot.id_proceso_compra
+       LEFT JOIN adq.tsolicitud sol ON sol.id_solicitud = pro.id_solicitud
+       LEFT JOIN segu.vusuario ususol ON ususol.id_usuario = sol.id_usuario_reg
+       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
+         op.id_obligacion_pago AND od.estado_reg::text = 'activo'::text
+       JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas =
+         od.id_concepto_ingas
+       JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario =
+         op.id_funcionario AND fun.estado_reg_asi::text = 'activo'::text
+       JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
+  GROUP BY pp.id_plan_pago,
+           op.id_proveedor,
+           p.desc_proveedor,
+           op.id_moneda,
+           op.id_depto_conta,
+           op.numero,
+           pp.estado,
+           pp.monto_ejecutar_total_mb,
+           pp.monto_ejecutar_total_mo,
+           pp.monto,
+           pp.monto_mb,
+           pp.monto_retgar_mb,
+           pp.monto_retgar_mo,
+           pp.monto_no_pagado,
+           pp.monto_no_pagado_mb,
+           pp.otros_descuentos,
+           pp.otros_descuentos_mb,
+           pp.id_plantilla,
+           pp.id_cuenta_bancaria,
+           pp.id_cuenta_bancaria_mov,
+           pp.nro_cheque,
+           pp.nro_cuenta_bancaria,
+           op.num_tramite,
+           pp.tipo,
+           op.id_gestion,
+           pp.id_int_comprobante,
+           pp.liquido_pagable,
+           pp.liquido_pagable_mb,
+           pp.nombre_pago,
+           pp.porc_monto_excento_var,
+           pp.obs_monto_no_pagado,
+           pp.descuento_anticipo,
+           pp.descuento_inter_serv,
+           op.tipo_obligacion,
+           op.id_categoria_compra,
+           cac.codigo,
+           cac.nombre,
+           pp.id_proceso_wf,
+           mon.codigo,
+           pp.nro_cuota,
+           pp.tipo_pago,
+           op.total_pago,
+           op.tipo_solicitud,
+           op.tipo_concepto_solicitud,
+           pp.fecha_tentativa,
+           fun.desc_funcionario1,
+           fun.email_empresa,
+           usu.desc_persona,
+           op.id_funcionario_gerente,
+           ususol.correo,
+           op.ultima_cuota_pp,
+         op.ultima_cuota_dev,
+         pp.tiene_form500;
+
+ALTER TABLE tes.vcomp_devtesprov_plan_pago_2
+  OWNER TO postgres;
+  
+/***********************************F-DEP-RAC-TES-0-25/03/2015****************************************/

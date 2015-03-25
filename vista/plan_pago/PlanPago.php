@@ -11,7 +11,7 @@ header("content-type: text/javascript; charset=UTF-8");
 <script>
 Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
     fheight: '80%',
-    fwidth: '80%',
+    fwidth: '95%',
     accionFormulario:undefined, //define la accion que se ejcuta en formulario new o edit
     porc_ret_gar:0,//valor por defecto de retencion de garantia
 	constructor:function(config){
@@ -763,7 +763,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 emptyText:'Elija una Cuenta...',
                 store:new Ext.data.JsonStore(
                 {
-                    url: '../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancaria',
+                    url: '../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancariaUsuario',
                     id: 'id_cuenta_bancaria',
                     root:'datos',
                     sortInfo:{

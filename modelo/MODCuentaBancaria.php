@@ -54,6 +54,7 @@ class MODCuentaBancaria extends MODbase{
 		$this->transaccion='TES_USRCTABAN_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
 		
+		$this->setParametro('permiso','permiso','varchar');
 		//Definicion de la lista del resultado del query
 		$this->captura('id_cuenta_bancaria','int4');
 		$this->captura('estado_reg','varchar');

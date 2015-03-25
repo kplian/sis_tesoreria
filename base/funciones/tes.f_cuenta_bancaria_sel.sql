@@ -27,18 +27,19 @@ DECLARE
 	v_parametros  		record;
 	v_nombre_funcion   	text;
 	v_resp				varchar;
-    v_id_usuario		integer;
+    --v_id_usuario		integer;
+    v_filtro 			varchar;
 			    
 BEGIN
 
 	v_nombre_funcion = 'tes.f_cuenta_bancaria_sel';
     v_parametros = pxp.f_get_record(p_tabla);
     
-    if(pxp.f_existe_parametro('p_tabla','id_usuario')='true')then
+    /*if(pxp.f_existe_parametro('p_tabla','id_usuario')='true')then
         v_id_usuario = v_parametros.id_usuario;
     else
         v_id_usuario = p_id_usuario;
-    end if;
+    end if;*/
     
 	/*********************************    
  	#TRANSACCION:  'TES_CTABAN_SEL'
@@ -98,7 +99,7 @@ BEGIN
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(id_cuenta_bancaria)
 					    from tes.tcuenta_bancaria ctaban
-                        inner join param.tinstitucion inst on inst.id_institucion = ctaban.id_institucion
+                        inner join param.tinstitucion inst on inst.id_institucion = ctaban.id_institucion                        
                         left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda
                         inner join segu.tusuario usu1 on usu1.id_usuario = ctaban.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = ctaban.id_usuario_mod
@@ -122,9 +123,15 @@ BEGIN
 	elsif(p_transaccion='TES_USRCTABAN_SEL')then
      				
     	begin
-            	raise notice 'id_usuario_otro %', v_id_usuario;
+            raise notice 'id_usuario_otro %', v_parametros.permiso;
     		--Sentencia de la consulta
-            if(v_id_usuario!=1)then
+
+            v_filtro = '';
+            IF p_administrador !=1 THEN
+               v_filtro = 'usrbanc.id_usuario='||p_id_usuario||' and ' ;
+            END IF;
+                           
+            --if(v_id_usuario!=1)then
 				v_consulta:='select
 						ctaban.id_cuenta_bancaria,
 						ctaban.estado_reg,
@@ -145,15 +152,25 @@ BEGIN
                         ctaban.centro
 						from tes.tcuenta_bancaria ctaban
                         inner join param.tinstitucion inst on inst.id_institucion = ctaban.id_institucion
-                        left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda
-                        inner join tes.tusuario_cuenta_banc usrbanc on usrbanc.id_cuenta_bancaria=ctaban.id_cuenta_bancaria
-						inner join segu.tusuario usu1 on usu1.id_usuario = ctaban.id_usuario_reg
+                        inner join tes.tdepto_cuenta_bancaria deptctab on deptctab.id_cuenta_bancaria=ctaban.id_cuenta_bancaria
+                        left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda ';
+                IF p_administrador !=1 THEN
+               		v_consulta = v_consulta || 'inner join tes.tusuario_cuenta_banc usrbanc on usrbanc.id_cuenta_bancaria=ctaban.id_cuenta_bancaria ';
+            	END IF;                        
+                    v_consulta = v_consulta || 'inner join segu.tusuario usu1 on usu1.id_usuario = ctaban.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = ctaban.id_usuario_mod
-				        where usrbanc.id_usuario='||v_id_usuario|| ' and ';
-			
+				        where ' ||v_filtro||'';
+                        
+                IF p_administrador !=1 THEN
+                	IF (v_parametros.permiso = 'libro_bancos')THEN
+               			v_consulta = v_consulta || ' usrbanc.tipo_permiso in (''todos'',''libro_bancos'') and ';
+                    END IF;
+            	END IF;                                
+                        
+				raise notice 'sarmiento %', v_parametros.filtro;
 				--Definicion de la respuesta
 				v_consulta:=v_consulta||v_parametros.filtro;
-            else
+            /*else
             	v_consulta:='select
 						ctaban.id_cuenta_bancaria,
 						ctaban.estado_reg,
@@ -174,10 +191,11 @@ BEGIN
                         ctaban.centro
 						from tes.tcuenta_bancaria ctaban
                         inner join param.tinstitucion inst on inst.id_institucion = ctaban.id_institucion
+                        inner join tes.tdepto_cuenta_bancaria deptctab on deptctab.id_cuenta_bancaria=ctaban.id_cuenta_bancaria
                         left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda
 						inner join segu.tusuario usu1 on usu1.id_usuario = ctaban.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = ctaban.id_usuario_mod';
-            end if;
+            end if;*/
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 			raise notice 'consulta %', v_consulta;
 			--Devuelve la respuesta
@@ -195,19 +213,34 @@ BEGIN
 	elsif(p_transaccion='TES_USRCTABAN_CONT')then
 
 		begin
+        	v_filtro = '';
+            IF p_administrador !=1 THEN
+               v_filtro = 'usrbanc.id_usuario='||p_id_usuario|| ' and ' ;
+            END IF;
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(ctaban.id_cuenta_bancaria)
 					    from tes.tcuenta_bancaria ctaban
                         inner join param.tinstitucion inst on inst.id_institucion = ctaban.id_institucion
-                        left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda
-                        inner join tes.tusuario_cuenta_banc usrbanc on usrbanc.id_cuenta_bancaria=ctaban.id_cuenta_bancaria
-                        inner join segu.tusuario usu1 on usu1.id_usuario = ctaban.id_usuario_reg
+                        inner join tes.tdepto_cuenta_bancaria deptctab on deptctab.id_cuenta_bancaria=ctaban.id_cuenta_bancaria
+                        left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda ';
+            
+            IF p_administrador !=1 THEN
+        	v_consulta = v_consulta || 'inner join tes.tusuario_cuenta_banc usrbanc on usrbanc.id_cuenta_bancaria=ctaban.id_cuenta_bancaria ';
+            END IF; 
+            
+            v_consulta = v_consulta || 'inner join segu.tusuario usu1 on usu1.id_usuario = ctaban.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = ctaban.id_usuario_mod
-					    where usrbanc.id_usuario='||v_id_usuario|| ' and ';
+					    where '||v_filtro||'';
 			
+            IF p_administrador !=1 THEN
+                IF (v_parametros.permiso = 'libro_bancos')THEN
+                    v_consulta = v_consulta || ' usrbanc.tipo_permiso in (''todos'',''libro_bancos'') and ';
+                END IF;
+            END IF; 
+                
 			--Definicion de la respuesta		    
 			v_consulta:=v_consulta||v_parametros.filtro;
-
+			raise notice '%', v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 

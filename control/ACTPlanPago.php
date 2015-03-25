@@ -203,11 +203,7 @@ class ACTPlanPago extends ACTbase{
         $this->res->imprimirRespuesta($this->res->generarJson());
     }
 	 
-	function cambioFomrulario500(){
-        $this->objFunc=$this->create('MODPlanPago');  
-        $this->res=$this->objFunc->cambioFomrulario500($this->objParam);
-        $this->res->imprimirRespuesta($this->res->generarJson());
-    }
+	
 	 
 	 
 	 

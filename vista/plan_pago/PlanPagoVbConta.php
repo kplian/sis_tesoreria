@@ -221,7 +221,7 @@ Phx.vista.PlanPagoVbConta = {
          Phx.vista.PlanPagoVbConta.superclass.onButtonEdit.call(this);
          
          if(this.Cmp.id_depto_lb.getValue() > 0){
-             this.Cmp.id_cuenta_bancaria.store.baseParams={ id_depto_lb:this.Cmp.id_depto_lb.getValue()};
+             this.Cmp.id_cuenta_bancaria.store.baseParams={ id_depto_lb:this.Cmp.id_depto_lb.getValue(), permiso: 'todos'};
              this.Cmp.id_cuenta_bancaria.modificado = true;
          }       
          //RCM, resetea store del deposito para no mostrar datos al hacer nuevo
@@ -361,7 +361,8 @@ Phx.vista.PlanPagoVbConta = {
          
         this.Cmp.id_depto_lb.on('select',function(a,b,c){
             this.Cmp.id_cuenta_bancaria.setValue('');
-            this.Cmp.id_cuenta_bancaria.store.baseParams.id_depto = this.Cmp.id_depto_lb.getValue();
+            this.Cmp.id_cuenta_bancaria.store.baseParams.id_depto_lb = this.Cmp.id_depto_lb.getValue();
+			this.Cmp.id_cuenta_bancaria.store.baseParams.permiso = 'todos';
             this.Cmp.id_cuenta_bancaria.modificado=true;
         },this);
         
