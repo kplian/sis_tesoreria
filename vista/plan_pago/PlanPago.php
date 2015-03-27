@@ -198,7 +198,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 fieldLabel: 'Rev',
                 allowBlank: true,
                 anchor: '80%',
-                gwidth: 65,
+                gwidth: 50,
                 renderer:function (value, p, record){  
                             if(record.data['revisado_asistente'] == 'si')
                                 return  String.format('{0}',"<div style='text-align:center'><img src = '../../../lib/imagenes/ball_green.png' align='center' width='24' height='24'/></div>");
@@ -276,7 +276,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 name: 'nro_cuota',
                 fieldLabel: 'Cuo. N#',
                 allowBlank: true,
-                gwidth: 100,
+                gwidth: 50,
                 renderer:function(value,p,record){
                        if(record.data.total_pagado==record.data.monto_ejecutar_total_mo ){
                              return String.format('<b><font color="green">{0}</font></b>', value);
@@ -378,7 +378,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 resizable:true,
                 listWidth:'500',
                 mode: 'local',
-                wisth: 380
+                wisth: 420,
+                gwidth: 150,
                 },
             type:'ComboBox',
             filters:{pfiltro:'tipo',type:'string'},
@@ -429,7 +430,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 name: 'fecha_tentativa',
                 fieldLabel: 'Fecha Tent.',
                 allowBlank: false,
-                gwidth: 100,
+                gwidth: 80,
                         format: 'd/m/Y', 
                         renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
             },
@@ -554,7 +555,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             config:{
                 name:'desc_moneda',
                 fieldLabel:'Mon.',
-                gwidth: 30,
+                gwidth: 40,
             },
             type:'Field',
             id_grupo:1,
@@ -821,7 +822,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                }),
                valueField: 'id_libro_bancos',
                displayField: 'importe_deposito',
-               gdisplayField: 'observaciones',
+               gdisplayField: 'desc_deposito',
                hiddenName: 'id_cuenta_bancaria_mov',
                forceSelection:true,
                typeAhead: false,
@@ -1217,9 +1218,37 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		
 	],
 	
-   
+   arrayDefaultColumHidden:['id_fecha_reg','id_fecha_mod',
+'fecha_mod','usr_reg','usr_mod','estado_reg','fecha_reg','numero_op','id_plantilla','monto_excento','forma_pago','nro_cheque','nro_cuenta_bancaria',
+'descuento_anticipo','monto_retgar_mo','monto_no_pagado','otros_descuentos','descuento_inter_serv','descuento_ley','id_depto_lb',
+'id_depto_lb','id_cuenta_bancaria','id_cuenta_bancaria_mov','obs_wf','fecha_dev','fecha_pag','obs_descuentos_anticipo','obs_monto_no_pagado',
+'obs_otros_descuentos','obs_descuentos_ley','obs_descuento_inter_serv','monto_ajuste_ag','monto_ajuste_siguiente_pag','fecha_costo_ini',
+'fecha_costo_fin','funcionario_wf','monto_anticipo','monto','monto_ejecutar_total_mo'],
     
    
+   rowExpander: new Ext.ux.grid.RowExpander({
+	        tpl : new Ext.Template(
+	            '<br>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Obligación de pago:&nbsp;&nbsp;</b> {numero_op}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Documento:&nbsp;&nbsp;</b> {desc_plantilla}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Monto:&nbsp;&nbsp;</b> {monto}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Monto Excento:&nbsp;&nbsp;</b> {monto_excento}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Anticipo:&nbsp;&nbsp;</b> {monto_anticipo}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Descuento Anticipo:&nbsp;&nbsp;</b> {descuento_anticipo}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Retención de garantia:&nbsp;&nbsp;</b> {monto_retgar_mo}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Monto que no se pagara:&nbsp;&nbsp;</b> {monto_no_pagado}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Multas:&nbsp;&nbsp;</b> {otros_descuentos}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Descuento por intercambio de servicios:&nbsp;&nbsp;</b> {descuento_inter_serv}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Descuentos de Ley:&nbsp;&nbsp;</b> {descuento_ley}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Total a ejecutar presupeustariamente:&nbsp;&nbsp;</b> {monto_ejecutar_total_mo}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Liquido pagable:&nbsp;&nbsp;</b> {liquido_pagable}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Libro de Bancos:&nbsp;&nbsp;</b> {desc_depto_lb}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Cuenta bancaria:&nbsp;&nbsp;</b> {desc_cuenta_bancaria}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deposito:&nbsp;&nbsp;</b> {desc_deposito}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Intrucciones:&nbsp;&nbsp;</b> {obs_wf}</p><br>'
+	            
+	        )
+    }),
    onBtnSincPresu:function() {                  
             var d= this.sm.getSelected().data;
             Phx.CP.loadingShow();

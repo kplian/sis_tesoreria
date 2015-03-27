@@ -316,7 +316,7 @@ BEGIN
                         left join leg.tcontrato con on con.id_contrato = obpg.id_contrato
                         left join param.tplantilla pla on pla.id_plantilla = obpg.id_plantilla
                         '|| v_inner ||'  
-                       -- left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
+                        left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
                         where  '||v_filadd;
 			
 			--Definicion de la respuesta		    

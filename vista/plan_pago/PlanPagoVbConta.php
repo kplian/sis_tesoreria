@@ -37,7 +37,9 @@ Phx.vista.PlanPagoVbConta = {
        this.Atributos[this.getIndAtributo('id_depto_lb')].form=true;  
        this.Atributos[this.getIndAtributo('id_cuenta_bancaria')].form=true; 
        this.Atributos[this.getIndAtributo('id_cuenta_bancaria_mov')].form=true; 
-       
+       this.Atributos[this.getIndAtributo('num_tramite')].bottom_filter=true;
+       this.Atributos[this.getIndAtributo('nombre_pago')].bottom_filter=true;
+       this.Atributos[this.getIndAtributo('desc_funcionario1')].bottom_filter=true;
        
         
        //funcionalidad para listado de historicos
@@ -73,7 +75,7 @@ Phx.vista.PlanPagoVbConta = {
        this.iniciarEventos();
        this.addButton('SolDevPag',{text:'Solicitar Devengado/Pago',iconCls: 'bpagar',disabled:true,handler:this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente, devengado o pago  '});
        this.addButton('ModAprop',{text:'Modificar Apropiación',iconCls: 'bengine',disabled:true,handler:this.onBtnApropiacion,tooltip: 'Modificar la apropiación (solo cuando es el primer pago de un pago directo y el estado es vbconta)'});
-       this.addButton('diagrama_gantt',{text:'Gant',iconCls: 'bgantt',disabled:true,handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
+       this.addButton('diagrama_gantt',{text:'Gantt',iconCls: 'bgantt',disabled:true,handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
   
        function diagramGantt(){            
             var data=this.sm.getSelected().data.id_proceso_wf;
