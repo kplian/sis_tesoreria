@@ -197,7 +197,7 @@ BEGIN
                  and pp.estado_reg = 'activo';  
            
            --IF (p_hstore->'tipo')::varchar in('pagado_rrhh') THEN 
-           		v_nro_cuota =   ((floor(COALESCE(v_registros.nro_cuota,0))::integer)::varchar ||'.'||TRIM(to_char((COALESCE(v_count,0)+1 ),'000'))::varchar)::numeric  ;
+           		v_nro_cuota =   ((floor(COALESCE(v_registros.nro_cuota,0))::integer)::varchar ||'.'||TRIM(to_char((COALESCE(v_count,0)+1 ),'00'))::varchar)::numeric  ;
            --else
            --		v_nro_cuota =   ((floor(COALESCE(v_registros.nro_cuota,0))::integer)::varchar ||'.'||TRIM(to_char((COALESCE(v_count,0)+1 ),'00'))::varchar)::numeric  ;
            --end if;

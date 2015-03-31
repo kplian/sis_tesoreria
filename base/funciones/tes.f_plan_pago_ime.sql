@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -127,26 +125,22 @@ DECLARE
     v_codigo_tipo_pro       varchar;
     
     
-    v_acceso_directo  		varchar;
-    v_clase   				varchar;
-    v_parametros_ad 	  	varchar;
-    v_tipo_noti  			varchar;
-    v_titulo   				varchar;
+    v_acceso_directo  	varchar;
+    v_clase   			varchar;
+    v_parametros_ad   	varchar;
+    v_tipo_noti  		varchar;
+    v_titulo   			varchar;
     v_codigo_proceso_llave_wf  varchar;
     v_porc_monto_retgar        numeric;
-    v_porc_ant				   numeric;
+    v_porc_ant   numeric;
     v_monto_ant_parcial_descontado  numeric;
-    v_saldo_x_descontar			 numeric;
-    v_saldo_x_pagar 			numeric;
-    v_revisado					 varchar;
-    v_check_ant_mixto			 numeric;
-    v_nombre_conexion			 varchar;
-    v_res						boolean;
-    v_tipo_obligacion			varchar;
-    v_operacion 				varchar;
-    v_id_depto_lb				integer;
-    
-    
+    v_saldo_x_descontar numeric;
+    v_saldo_x_pagar numeric;
+    v_revisado varchar;
+    v_check_ant_mixto numeric;
+    v_nombre_conexion varchar;
+    v_res			boolean;
+    v_tipo_obligacion	varchar;
     
     
 			    
@@ -250,10 +244,6 @@ BEGIN
            
              IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria') THEN
                v_id_cuenta_bancaria =  v_parametros.id_cuenta_bancaria;
-             END IF;
-             
-             IF  pxp.f_existe_parametro(p_tabla,'id_depto_lb') THEN
-               v_id_depto_lb =  v_parametros.id_depto_lb;
              END IF;
              
              IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria_mov') THEN
@@ -619,7 +609,6 @@ BEGIN
 			monto = v_parametros.monto,
 			nombre_pago = v_parametros.nombre_pago,
 			id_cuenta_bancaria = v_id_cuenta_bancaria,
-            id_depto_lb = v_id_depto_lb,
 			forma_pago = v_forma_pago,
 			monto_no_pagado = v_parametros.monto_no_pagado,
             liquido_pagable=v_liquido_pagable,
@@ -951,7 +940,7 @@ BEGIN
                 where id_obligacion_pago = v_registros.id_obligacion_pago; 
                 
           end if;
-            IF  v_registros.tipo  in ('pagado' ,'devengado_pagado','devengado_pagado_1c','anticipo','ant_parcial') THEN
+            IF  v_registros.tipo  in ('pagado' ,'devengado_pagado','devengado_pagado_1c','anticipo','ant_parcial','pagado_rrhh') THEN
                 
                   IF v_registros.forma_pago = 'cheque' THEN
                 
@@ -1055,89 +1044,35 @@ BEGIN
 	elseif(p_transaccion='TES_ANTEPP_IME')then   
         begin
         
-        v_operacion = 'anterior';
-        
-        IF  pxp.f_existe_parametro(p_tabla , 'estado_destino')  THEN
-           v_operacion = v_parametros.estado_destino;
-        END IF;
-        
-        --recueprar datos del plan de pagos
-        
-        --obtenermos datos basicos
-        select
-            pp.id_plan_pago,
-            pp.id_proceso_wf,
-            pp.estado,
-            pp.fecha_tentativa,
-            pp.total_prorrateado ,
-            pp.monto_ejecutar_total_mo,
-            pp.estado,
-            pwf.id_tipo_proceso
-        into 
-            v_registros_pp
-            
-        from tes.tplan_pago  pp
-        inner  join wf.tproceso_wf pwf  on  pwf.id_proceso_wf = pp.id_proceso_wf
-        where pp.id_proceso_wf  = v_parametros.id_proceso_wf;
-        
-        v_id_proceso_wf = v_registros_pp.id_proceso_wf;
-        
-        IF  v_operacion = 'anterior' THEN
-            --------------------------------------------------
-            --Retrocede al estado inmediatamente anterior
-            -------------------------------------------------
-           --recuperaq estado anterior segun Log del WF
-              SELECT  
-             
-                 ps_id_tipo_estado,
-                 ps_id_funcionario,
-                 ps_id_usuario_reg,
-                 ps_id_depto,
-                 ps_codigo_estado,
-                 ps_id_estado_wf_ant
-              into
-                 v_id_tipo_estado,
-                 v_id_funcionario,
-                 v_id_usuario_reg,
-                 v_id_depto,
-                 v_codigo_estado,
-                 v_id_estado_wf_ant 
-              FROM wf.f_obtener_estado_ant_log_wf(v_parametros.id_estado_wf);
-              
-              
-             
-              
-              
-        ELSE
-           --recupera el estado inicial
-           -- recuperamos el estado inicial segun tipo_proceso
-             
-             SELECT  
-               ps_id_tipo_estado,
-               ps_codigo_estado
-             into
-               v_id_tipo_estado,
-               v_codigo_estado
-             FROM wf.f_obtener_tipo_estado_inicial_del_tipo_proceso(v_registros_pp.id_tipo_proceso);
-             
-             
-             
-             --busca en log e estado de wf que identificamos como el inicial
-             SELECT 
-               ps_id_funcionario,
-              ps_id_depto
-             into
-              v_id_funcionario,
-             v_id_depto
-               
-                
-             FROM wf.f_obtener_estado_segun_log_wf(v_id_estado_wf, v_id_tipo_estado);
-             
-            
-        
-        
-        END IF; 
-          
+        --------------------------------------------------
+        --Retrocede al estado inmediatamente anterior
+        -------------------------------------------------
+       --recuperaq estado anterior segun Log del WF
+          SELECT  
+         
+             ps_id_tipo_estado,
+             ps_id_funcionario,
+             ps_id_usuario_reg,
+             ps_id_depto,
+             ps_codigo_estado,
+             ps_id_estado_wf_ant
+          into
+             v_id_tipo_estado,
+             v_id_funcionario,
+             v_id_usuario_reg,
+             v_id_depto,
+             v_codigo_estado,
+             v_id_estado_wf_ant 
+          FROM wf.f_obtener_estado_ant_log_wf(v_parametros.id_estado_wf);
+                        
+                        
+           --
+          select 
+               ew.id_proceso_wf 
+            into 
+               v_id_proceso_wf
+          from wf.testado_wf ew
+          where ew.id_estado_wf= v_id_estado_wf_ant;
           
           
          --configurar acceso directo para la alarma   
@@ -1161,14 +1096,14 @@ BEGIN
           -- registra nuevo estado
                       
           v_id_estado_actual = wf.f_registra_estado_wf(
-              v_id_tipo_estado,                --  id_tipo_estado al que retrocede
-              v_id_funcionario,                --  funcionario del estado anterior
-              v_parametros.id_estado_wf,       --  estado actual ...
-              v_id_proceso_wf,                 --  id del proceso actual
-              p_id_usuario,                    -- usuario que registra
+              v_id_tipo_estado, 
+              v_id_funcionario, 
+              v_parametros.id_estado_wf, 
+              v_id_proceso_wf, 
+              p_id_usuario,
               v_parametros._id_usuario_ai,
               v_parametros._nombre_usuario_ai,
-              v_id_depto,                       --depto del estado anterior
+              v_id_depto,
               '[RETROCESO] '|| v_parametros.obs,
               v_acceso_directo,
               v_clase,
@@ -1234,8 +1169,7 @@ BEGIN
             op.numero,
             pp.total_prorrateado ,
             pp.monto_ejecutar_total_mo,
-            pp.estado,
-            pp.id_estado_wf
+            pp.estado
         into 
             v_id_plan_pago,
             v_id_proceso_wf,
@@ -1244,8 +1178,7 @@ BEGIN
             v_num_obliacion_pago,
             v_total_prorrateo,
             v_monto_ejecutar_total_mo,
-            v_estado_aux,
-            v_id_estado_actual
+            v_estado_aux
             
         from tes.tplan_pago  pp
         inner  join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
@@ -1255,14 +1188,7 @@ BEGIN
          -- chequea fechas de costos inicio y fin
          IF(v_estado_aux in ('borrador','vbconta')) THEN
          	v_resp_doc =  tes.f_validar_periodo_costo(v_id_plan_pago);
-         END IF;
-         
-         --validamos que el pago no sea menor a la fecha tentaiva
-         if (v_estado_aux = 'borrador') then
-            IF  v_fecha_tentativa::date > (now()::date + CAST('2 days' AS INTERVAL))::date THEN
-               raise exception 'No puede adelantar el pago,  la fecha tentativa esta marcada para el %', to_char(v_fecha_tentativa,'DD/MM/YYYY/');
-            END IF;
-         end if;
+         END IF; 
           
           select 
             ew.id_tipo_estado ,
@@ -1301,26 +1227,6 @@ BEGIN
                    v_obs='---';
                 
              END IF;
-             
-             if (v_estado_aux = 'borrador') then
-             
-             
-             
-             
-                 update tes.tplan_pago
-                 set conformidad = v_obs,
-                 fecha_conformidad = now()
-                 where id_proceso_wf  = v_parametros.id_proceso_wf_act;
-                 
-                 v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_actual);
-             end if;
-             
-             --si viene del estado vobo finanzas actualizamos el depto de libro de bancos
-             if (v_estado_aux = 'vbfin') then
-                 update tes.tplan_pago set 
-                 id_depto_lb = v_parametros.id_depto_lb
-                 where id_proceso_wf  = v_parametros.id_proceso_wf_act;
-             end if; 
                
              --configurar acceso directo para la alarma   
              v_acceso_directo = '';
@@ -1459,12 +1365,6 @@ BEGIN
            set conformidad = v_parametros.conformidad,
            fecha_conformidad = v_parametros.fecha_conformidad
            where id_plan_pago = v_parametros.id_plan_pago;
-           
-           select pp.id_estado_wf into v_id_estado_actual
-           from tes.tplan_pago pp
-           where pp.id_plan_pago =  v_parametros.id_plan_pago;
-           
-           v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_actual);
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se modificaron los datos de la conformidad exitosamente'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_parametros.id_plan_pago::varchar);
@@ -1519,33 +1419,6 @@ BEGIN
             --Devuelve la respuesta
             return v_resp;        
         end;
-    
-    
-    /*********************************    
- 	#TRANSACCION:  'TES_CBFRM500_IME'
- 	#DESCRIPCION:	CAmbio el estado de requiere fromr 500 para no generar mas alarmas de correo
- 	#AUTOR:		RAC KPLIAN
- 	#FECHA:		02-03-2015
-	***********************************/
-
-	elsif(p_transaccion='TES_CBFRM500_IME')then
-
-		begin
-         
-           update tes.tplan_pago  set 
-            tiene_form500 = 'si'
-           where id_plan_pago = v_parametros.id_plan_pago;
-           
-            --Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se cambio el estado de tiene formulario 500 '); 
-            v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_parametros.id_plan_pago::varchar);
-            
-            --Devuelve la respuesta
-            return v_resp;        
-        end;
-            
-        
-        
     else
      
     	raise exception 'Transaccion inexistente: %',p_transaccion;

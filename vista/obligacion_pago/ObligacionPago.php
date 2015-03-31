@@ -351,7 +351,11 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 				gwidth: 100,
 				anchor: '80%',
 				renderer: function(value, p, record) {
-					return String.format('{0}', record.data['desc_contrato']);
+					if(record.data['desc_contrato']){
+						return String.format('{0}', record.data['desc_contrato']);
+					}
+					return '';
+					
 				},
 				tpl: '<tpl for="."><div class="x-combo-list-item"><p>Nro: {numero} ({tipo})</p><p>Obj: <strong>{objeto}</strong></p><p>Prov : {desc_proveedor}</p> <p>Monto: {monto} {moneda}</p><p>Rango: {fecha_inicio} al {fecha_fin}</p></div></tpl>'
 			},
@@ -773,6 +777,23 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		'monto_estimado_sg','id_obligacion_pago_extendida', 'obs_presupuestos','id_contrato','desc_contrato'
 		
 	],
+	
+	arrayDefaultColumHidden:['id_fecha_reg','id_fecha_mod','fecha_mod','usr_reg','estado_reg','fecha_reg','usr_mod',
+	'numero','tipo_obligacion','id_depto','id_contrato','tipo_cambio_conv','tipo_anticipo','obs','total_nro_cuota','id_plantilla','fecha_pp_ini',
+	'rotacion','porc_anticipo','obs_presupuestos'],
+	
+	
+	
+	
+	rowExpander: new Ext.ux.grid.RowExpander({
+		        tpl : new Ext.Template('<br>',
+		            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Obligación de pago:&nbsp;&nbsp;</b> {numero}</p>',
+		            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Contrato:&nbsp;&nbsp;</b> {desc_contrato}</p>',
+		            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Depto:&nbsp;&nbsp;</b> {nombre_depto}</p>',
+		            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Justificación:&nbsp;&nbsp;</b> {obs}</p>',
+		            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Obs del área de presupeustos:&nbsp;&nbsp;</b> {obs_presupuestos}</p><br>'
+		       )
+	    }),
 	
 	sortInfo:{
 		field: 'obpg.fecha_reg',

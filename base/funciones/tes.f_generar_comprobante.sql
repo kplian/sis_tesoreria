@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_generar_comprobante (
   p_id_usuario integer,
   p_id_usuario_ai integer,
@@ -126,9 +124,9 @@ BEGIN
                       and pp.estado_reg = 'activo'
                       and  pp.nro_cuota < v_registros.nro_cuota ) THEN
                       
-                      
-                    raise exception 'Antes de Continuar,  la cuotas anteriores tienes que estar finalizadas';
-                 
+                     if (v_registros.tipo != 'pagado_rrhh') then  
+                    	raise exception 'Antes de Continuar,  la cuotas anteriores tienes que estar finalizadas%',v_registros.tipo;
+                 	end if;
                  
                  END IF;
                  
@@ -290,7 +288,7 @@ BEGIN
             ---------------------------------------
            ----  Generacion del Comprobante  -----
            ---------------------------------------
-        
+        	
             v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,v_registros.codigo_plantilla_comprobante,p_id_usuario,p_id_usuario_ai,p_usuario_ai);
            
              --  actualiza el id_comprobante en el registro del plan de pago
