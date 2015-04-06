@@ -72,6 +72,7 @@ DECLARE
     g_fecha					date;
     v_estado				varchar;
     v_periodo				integer;
+    g_importe_transferencia	numeric;
 BEGIN
     v_nombre_funcion = 'tes.ft_ts_libro_bancos_ime';
     v_parametros = pxp.f_get_record(p_tabla);
@@ -380,7 +381,6 @@ BEGIN
             End If;
             
             
-            
              --validamos que no se inserte un cheque que exceda el saldo del deposito asociado
              IF(v_parametros.id_libro_bancos_fk is not null) Then
               	
@@ -497,11 +497,10 @@ BEGIN
         id_finalidad = v_parametros.id_finalidad,
         comprobante_sigma = v_parametros.comprobante_sigma
 		WHERE tes.tts_libro_bancos.id_libro_bancos = v_parametros.id_libro_bancos;
-        
-            
-        If (v_parametros.fecha<> g_fecha_ant) Then
+		                 
+        If (v_parametros.fecha<> g_fecha_ant or g_fecha_ant is null) Then
         	--ALGORITMO DE ORDENACION DE REGISTROS
-         
+                
            --VERIFICAMOS SI ES UN DEPOSITO, transferencia o debito automatico
            IF(v_parametros.tipo in ('deposito','debito_automatico','transferencia_carta')) Then
            
@@ -521,7 +520,7 @@ BEGIN
               WHERE tes.tts_libro_bancos.id_libro_bancos= v_parametros.id_libro_bancos;
            
            ELSE  --si es CHEQUE
-           
+
               --Obtenemos el numero de indice que sera asignado al nuevo registro            
               Select max(lb.nro_cheque)
               Into g_max_nro_cheque
@@ -562,7 +561,7 @@ BEGIN
                       If(g_indice is null )Then
                           g_indice = 0;
                       end if;
-                      
+                       
                       --Asignamos el indice
                       UPDATE tes.tts_libro_bancos SET 
                           indice = g_indice + 1
@@ -582,9 +581,9 @@ BEGIN
                             Into g_indice
                             From tes.tts_libro_bancos lib
                             Where lib.id_libro_bancos = v_parametros.id_libro_bancos;
-                                                              
+                                                           
                             --Comparamos si el numero de cheque nuevo es menor al numero de cheque del ciclo
-                            If (v_parametros.nro_cheque < g_registros.nro_cheque and g_indice is null) Then        	
+                            If (v_parametros.nro_cheque < g_registros.nro_cheque) then-- and g_indice is null) Then        	
                                                               
                                 --actualizamos los indices de los registros superiores
                                 UPDATE tes.tts_libro_bancos SET 
@@ -607,7 +606,7 @@ BEGIN
               End if; --Fin comparacion del null en el maximo numero de cheque
              	
            END IF; --fin comparacion tipo
-        End If;
+        End If; -- fin fecha
 
 			--Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Depósitos modificado(a)'); 
@@ -1043,6 +1042,11 @@ BEGIN
                 /*select lbp.saldo_deposito into g_libro_bancos
                 from tes.vlibro_bancos lbp
                 where lbp.id_libro_bancos=v_parametros.id_libro_bancos;*/
+                if(v_parametros.tipo='parcial')then
+            		g_importe_transferencia = v_parametros.importe_transferencia;
+                else 
+                	g_importe_transferencia = g_libro_bancos.saldo_deposito;                
+                end if;
                 
                 select lb.id_cuenta_bancaria, COALESCE(lb.id_depto, dp.id_depto) as id_depto, lb.fecha, lb.a_favor, lb.nro_cheque, lb.saldo_deposito,
 				lb.nro_liquidacion, lb.detalle, lb.origen, lb.observaciones, lb.nro_comprobante, lb.tipo, 
@@ -1061,7 +1065,7 @@ BEGIN
 
                  insert into tt_parametros_libro_bancos_deposito
                  values (NULL, 'NULL', g_libro_bancos.id_cuenta_bancaria, g_libro_bancos.id_depto, now()::date,
-                 g_libro_bancos.a_favor, null, g_libro_bancos.saldo_deposito,g_libro_bancos.nro_liquidacion, 
+                 g_libro_bancos.a_favor, null, g_importe_transferencia,g_libro_bancos.nro_liquidacion, 
                  g_libro_bancos.detalle,g_libro_bancos.origen, g_libro_bancos.observaciones, 0, v_parametros.id_libro_bancos_fk,
                  g_libro_bancos.nro_comprobante, 'transf_interna_haber',g_libro_bancos.id_finalidad);
 
@@ -1083,7 +1087,7 @@ BEGIN
                  insert into tt_parametros_libro_bancos_cheque
                  values (NULL, 'NULL', g_libro_bancos.id_cuenta_bancaria, g_libro_bancos.id_depto, now()::date,
                  g_libro_bancos.a_favor, null, 0 ,g_libro_bancos.nro_liquidacion, g_libro_bancos.detalle,
-                 g_libro_bancos.origen, g_libro_bancos.observaciones, g_libro_bancos.saldo_deposito,
+                 g_libro_bancos.origen, g_libro_bancos.observaciones, g_importe_transferencia,
                  v_parametros.id_libro_bancos, g_libro_bancos.nro_comprobante, 'transf_interna_debe', g_libro_bancos.id_finalidad);
                 
                  v_resp = tes.ft_ts_libro_bancos_ime (
