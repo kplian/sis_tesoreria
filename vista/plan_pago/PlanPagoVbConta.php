@@ -73,9 +73,9 @@ Phx.vista.PlanPagoVbConta = {
        Phx.vista.PlanPagoVbConta.superclass.constructor.call(this,config);
        
        this.iniciarEventos();
-       this.addButton('SolDevPag',{text:'Solicitar Devengado/Pago',iconCls: 'bpagar',disabled:true,handler:this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente, devengado o pago  '});
-       this.addButton('ModAprop',{text:'Modificar Apropiación',iconCls: 'bengine',disabled:true,handler:this.onBtnApropiacion,tooltip: 'Modificar la apropiación (solo cuando es el primer pago de un pago directo y el estado es vbconta)'});
-       this.addButton('diagrama_gantt',{text:'Gantt',iconCls: 'bgantt',disabled:true,handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
+       this.addButton('SolDevPag',{text:'Solicitar Devengado/Pago', iconCls: 'bpagar',disabled: true, handler: this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente, devengado o pago  '});
+       this.addButton('ModAprop',{text:'Modificar Apropiación', iconCls: 'bengine',disabled: true, handler: this.onBtnApropiacion,tooltip: 'Modificar la apropiación (solo cuando es el primer pago de un pago directo y el estado es vbconta)'});
+       this.addButton('diagrama_gantt',{text:'Gantt', iconCls: 'bgantt', disabled: true, handler: diagramGantt, tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
   
        function diagramGantt(){            
             var data=this.sm.getSelected().data.id_proceso_wf;
@@ -223,7 +223,7 @@ Phx.vista.PlanPagoVbConta = {
          Phx.vista.PlanPagoVbConta.superclass.onButtonEdit.call(this);
          
          if(this.Cmp.id_depto_lb.getValue() > 0){
-             this.Cmp.id_cuenta_bancaria.store.baseParams={ id_depto_lb:this.Cmp.id_depto_lb.getValue(), permiso: 'todos'};
+             this.Cmp.id_cuenta_bancaria.store.baseParams = Ext.apply(this.Cmp.id_cuenta_bancaria.store.baseParams,{ id_depto_lb:this.Cmp.id_depto_lb.getValue(), permiso: 'todos'});
              this.Cmp.id_cuenta_bancaria.modificado = true;
          }       
          //RCM, resetea store del deposito para no mostrar datos al hacer nuevo
@@ -380,7 +380,7 @@ Phx.vista.PlanPagoVbConta = {
             }
             this.Cmp.id_cuenta_bancaria_mov.setValue('');
             this.Cmp.id_cuenta_bancaria_mov.modificado=true;
-            Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: rec.id});
+            this.Cmp.id_cuenta_bancaria_mov.store.baseParams = Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: rec.id});
         },this);
         
         //Evento para ocultar/motrar componentes por cheque o transferencia

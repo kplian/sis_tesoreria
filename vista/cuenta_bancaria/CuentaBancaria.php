@@ -14,12 +14,48 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 
 	constructor:function(config){
 		this.maestro=config.maestro;
+		this.initButtons=[this.cmbDepto];
     	//llama al constructor de la clase padre
 		Phx.vista.CuentaBancaria.superclass.constructor.call(this,config);
 		this.init();
-		
+		this.cmbDepto.on('select',this.capturaFiltros,this);
 		//this.load({params:{start:0, limit:this.tam_pag}})
 	},
+	
+	capturaFiltros:function(combo, record, index){
+		this.store.baseParams.id_depto_lb=this.cmbDepto.getValue();
+		this.store.load({params:{start:0, limit:50, permiso : 'libro_bancos'}});	
+	},
+	
+	cmbDepto:new Ext.form.ComboBox({
+		fieldLabel: 'Departamento',
+		allowBlank: true,
+		emptyText:'Departamento...',
+		store:new Ext.data.JsonStore(
+		{
+			url: '../../sis_parametros/control/Depto/listarDeptoFiltradoDeptoUsuario',
+			id: 'id_depto',
+			root: 'datos',
+			sortInfo:{
+				field: 'deppto.nombre',
+				direction: 'ASC'
+			},
+			totalProperty: 'total',
+			fields: ['id_depto','nombre'],
+			// turn on remote sorting
+			remoteSort: true,
+			baseParams:{par_filtro:'nombre',tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'LB'}
+		}),
+		valueField: 'id_depto',
+		triggerAction: 'all',
+		displayField: 'nombre',
+		hiddenName: 'id_depto',
+		mode:'remote',
+		pageSize:50,
+		queryDelay:500,
+		listWidth:'280',
+		width:250
+	}),
 		
 	tam_pag:50,
 			
@@ -264,13 +300,20 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 	},
 	bdel:true,
 	bsave:true,	
-	south:{	   
+	/*south:{	   
         url:'../../../sis_tesoreria/vista/chequera/Chequera.php',
         title:'Chequeras', 
         height : '50%',
         cls:'Chequera'
-   },
+   },*/
 	
+	south:{	   
+        url:'../../../sis_tesoreria/vista/cuenta_bancaria_periodo/CuentaBancariaPeriodo.php',
+        title:'Periodos por Cuenta Bancaria', 
+        height : '50%',
+        cls:'CuentaBancariaPeriodo'
+	},
+   
 	onButtonEdit: function(){
 		Phx.vista.CuentaBancaria.superclass.onButtonEdit.call(this);
 		this.Cmp.nro_cuenta.disable();

@@ -128,7 +128,8 @@ header("content-type: text/javascript; charset=UTF-8");
 						['cheque','Cheque'],
 						['deposito','Depósito'],
 						['debito_automatico','Débito Automático'],
-	        			['transferencia_carta','Transferencia con carta']]	        				
+	        			['transferencia_carta','Transferencia con carta'],
+						['transferencia_interna','Transferencias internas'],]	        				
 	    		}),
 				valueField:'ID',
 				displayField:'valor',

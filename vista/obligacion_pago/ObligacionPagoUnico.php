@@ -53,14 +53,38 @@ Phx.vista.ObligacionPagoUnico = {
     
        ], 
     onButtonEdit:function(){
-       
+      
        var data= this.sm.getSelected().data;
        this.cmpTipoObligacion.disable();
        this.cmpDepto.disable(); 
        this.cmpFecha.disable(); 
        this.cmpTipoCambioConv.disable();
+       this.Cmp.id_moneda.disable();
+       
+       
+       this.mostrarComponente(this.Cmp.id_funcionario);
+       this.Cmp.id_funcionario.disable();
+       
        
        Phx.vista.ObligacionPagoUnico.superclass.onButtonEdit.call(this);
+       
+       this.Cmp.id_contrato.store.baseParams.filter = "[{\"type\":\"numeric\",\"comparison\":\"eq\", \"value\":\""+ this.Cmp.id_proveedor.getValue()+"\",\"field\":\"CON.id_proveedor\"}]";
+	   this.Cmp.id_contrato.modificado = true;
+	   
+       this.cmpFuncionario.store.baseParams.fecha = this.Cmp.fecha.getValue().dateFormat(this.Cmp.fecha.format);
+       
+       
+       	if(data.estado != 'borrador'){
+       	  this.Cmp.tipo_anticipo.disable();
+       	 
+       	  this.Cmp.id_proveedor.disable();
+       	  
+       }
+       else{
+       
+       	this.Cmp.id_proveedor.enable();
+       	this.mostrarComponente(this.Cmp.id_proveedor);
+       }
        
            
     },

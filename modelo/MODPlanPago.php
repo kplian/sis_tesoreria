@@ -107,6 +107,7 @@ class MODPlanPago extends MODbase{
 		$this->captura('tiene_form500','varchar');
 		$this->captura('id_depto_lb','integer');
 		$this->captura('desc_depto_lb','varchar');
+		$this->captura('ultima_cuota_dev','numeric');
 		
 		
 		

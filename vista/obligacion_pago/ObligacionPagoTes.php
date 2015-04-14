@@ -52,6 +52,7 @@ Phx.vista.ObligacionPagoTes = {
        this.cmpDepto.disable(); 
        this.cmpFecha.disable(); 
        this.cmpTipoCambioConv.disable();
+       this.cmpMoneda.enable();
        
        Phx.vista.ObligacionPagoTes.superclass.onButtonEdit.call(this);
        
@@ -61,14 +62,21 @@ Phx.vista.ObligacionPagoTes = {
             this.ocultarComponente(this.cmpFuncionarioProveedor);
             this.cmpFuncionario.reset();
             this.cmpProveedor.disable();
-            this.cmpMoneda.disable();
+            
        }
        
+       if(data.tipo_obligacion=='pago_unico'  ){
+           
+           this.cmpProveedor.enable();
+           this.mostrarComponente(this.cmpProveedor);
+           
+       }
        if(data.tipo_obligacion=='pago_directo'){
            
            this.cmpProveedor.enable();
            this.mostrarComponente(this.cmpProveedor);
-           this.cmpMoneda.enable();
+           this.cmpFuncionario.store.baseParams.fecha = this.cmpFecha.getValue().dateFormat(this.cmpFecha.format);
+                 
        }
        
        //segun el total nro cuota cero, ocultamos los componentes
@@ -81,6 +89,15 @@ Phx.vista.ObligacionPagoTes = {
            this.cmpProveedor.enable();
            this.mostrarComponente(this.cmpProveedor);
            this.cmpMoneda.enable();
+       }
+       if(data.estado != 'borrador'){
+       	  this.Cmp.tipo_anticipo.disable();
+       	  this.Cmp.total_nro_cuota.disable();
+       	  this.Cmp.id_funcionario.disable();
+       	  
+       }
+       else{
+       	this.Cmp.total_nro_cuota.enable();
        }
            
     },

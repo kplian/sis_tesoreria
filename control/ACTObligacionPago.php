@@ -51,6 +51,21 @@ class ACTObligacionPago extends ACTbase{
         
         $this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]); 
         
+        
+		if($this->objParam->getParametro('tipo_interfaz')=='obligacionPagoUnico'){
+            $this->objParam->addFiltro("obpg.tipo_obligacion = ''pago_unico''");
+        }
+		
+		if($this->objParam->getParametro('tipo_interfaz')=='obligacionPagoSol'){
+            $this->objParam->addFiltro("obpg.tipo_obligacion in (''pago_directo'',''rrhh'')");
+        }
+		
+		if($this->objParam->getParametro('tipo_interfaz')=='obligacionPagoAdq'){
+            $this->objParam->addFiltro("obpg.tipo_obligacion = ''adquisiciones''");
+        }
+        
+		
+        
         if($this->objParam->getParametro('id_obligacion_pago')!=''){
             $this->objParam->addFiltro("obpg.id_obligacion_pago = ".$this->objParam->getParametro('id_obligacion_pago'));
         }

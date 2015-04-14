@@ -90,8 +90,8 @@ Phx.vista.ObligacionPagoAdq = {
        	  this.Cmp.total_nro_cuota.disable();
        }
        else{
-       	   this.Cmp.tipo_anticipo.disable();
-       	   this.Cmp.total_nro_cuota.disable();
+       	   this.Cmp.tipo_anticipo.enable();
+       	   this.Cmp.total_nro_cuota.enable();
        	   
        }
        

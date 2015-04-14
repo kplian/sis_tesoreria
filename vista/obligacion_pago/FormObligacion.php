@@ -516,12 +516,13 @@ Phx.vista.FormObligacion=Ext.extend(Phx.frmInterfaz,{
         {
             config:{
                 name: 'id_depto',
+                url: '../../sis_parametros/control/Depto/listarDeptoFiltradoXUsuario',
                 fieldLabel: 'Depto',
                 allowBlank: false,
                 anchor: '80%',
                 origen: 'DEPTO',
                 tinit: false,
-                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'OP'}//parametros adicionales que se le pasan al store
+                baseParams:{estado:'activo',codigo_subsistema:'TES',modulo:'OP'}//parametros adicionales que se le pasan al store
                 
             },
             type:'ComboRec',

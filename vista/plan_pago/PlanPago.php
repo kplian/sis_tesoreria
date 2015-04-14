@@ -775,7 +775,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                     fields: ['id_cuenta_bancaria','nro_cuenta','nombre_institucion','codigo_moneda','centro','denominacion'],
                     remoteSort: true,
                     baseParams : {
-						par_filtro : 'ctaban.nro_cuenta#inst.nombre#ctaban.denominacion'
+						par_filtro :'nro_cuenta'
 					}
                 }),
                 tpl:'<tpl for="."><div class="x-combo-list-item"><p><b>{nro_cuenta}</b></p><p>Moneda: {codigo_moneda}, {nombre_institucion}</p><p>{denominacion}, Centro: {centro}</p></div></tpl>',
@@ -1214,7 +1214,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'monto_ajuste_siguiente_pag','pago_variable','monto_anticipo',
 		{name:'fecha_costo_ini', type: 'date',dateFormat:'Y-m-d'},
 		{name:'fecha_costo_fin', type: 'date',dateFormat:'Y-m-d'},
-		'funcionario_wf','tiene_form500','id_depto_lb','desc_depto_lb'
+		'funcionario_wf','tiene_form500','id_depto_lb','desc_depto_lb',{name:'ultima_cuota_dev',type:'numeric'}
 		
 	],
 	
@@ -1310,8 +1310,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
      },  
     
    sigEstado:function(){                   
-      	var rec=this.sm.getSelected();      	
-      	if (rec.data.estado == 'borrador') {
+      	var rec=this.sm.getSelected();
+      	
+      	if (((rec.data.estado == 'borrador' && rec.data.tipo_obligacion == 'pago_directo') || (rec.data.estado == 'vbsolicitante' && rec.data.tipo_obligacion == 'adquisiciones')) && 
+      		(rec.data.ultima_cuota_dev*1) > 1) {
       		Ext.Msg.show({
 			   title:'Confirmación',
 			   msg: 'Al solicitar el pago se generará una conformidad implícita. Desea continuar?',
@@ -1327,7 +1329,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 			   animEl: 'elId',
 			   icon: Ext.MessageBox.WARNING
 			});
-      	} else if (rec.data.estado == 'vbsolicitante' && (rec.data['fecha_conformidad'] == '' || rec.data['fecha_conformidad'] == undefined || rec.data['fecha_conformidad'] == null)) {
+      	} else if ((rec.data.estado == 'vbsolicitante' || rec.data.estado == 'borrador') && 
+      				(rec.data['fecha_conformidad'] == '' || rec.data['fecha_conformidad'] == undefined || rec.data['fecha_conformidad'] == null)
+      				&& (rec.data.ultima_cuota_dev*1) == 1) {
       		Ext.Msg.show({
 			   title:'Confirmación',
 			   scope: this,

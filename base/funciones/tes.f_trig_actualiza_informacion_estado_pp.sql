@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_trig_actualiza_informacion_estado_pp (
 )
 RETURNS trigger AS
@@ -15,10 +13,9 @@ BEGIN
     v_nro_cuota_dev
   from tes.tplan_pago pp
   where pp.id_obligacion_pago = NEW.id_obligacion_pago 
-  and pp.tipo in ('anticipo','devengado','devengado_pagago','devengado_pagado_1c') 
+  and pp.tipo in ('anticipo','devengado','devengado_pagado','devengado_pagado_1c') 
   and pp.estado_reg = 'activo';
   
- 
   
   --actualiza ultimo registro del pp
   update tes.tobligacion_pago  op set 

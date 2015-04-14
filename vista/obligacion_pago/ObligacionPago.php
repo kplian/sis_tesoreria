@@ -10,6 +10,8 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
+	fheight:'90%',
+    fwidth: '70%',
 
     nombreVista: 'obligacionPago',
 	constructor: function(config){
@@ -294,6 +296,24 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:true
          },
+        {
+            config:{
+                name: 'id_depto',
+                fieldLabel: 'Depto',
+                allowBlank: false,
+                anchor: '80%',
+                origen: 'DEPTO',
+                tinit: false,
+                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'OP'},//parametros adicionales que se le pasan al store
+                gdisplayField:'nombre_depto',
+                gwidth: 100
+            },
+            type:'ComboRec',
+            filters:{pfiltro:'dep.nombre',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
 		{
 			config: {
 				name: 'id_proveedor',
@@ -368,24 +388,6 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 			grid: true,
 			form: true
 		},
-        {
-            config:{
-                name: 'id_depto',
-                fieldLabel: 'Depto',
-                allowBlank: false,
-                anchor: '80%',
-                origen: 'DEPTO',
-                tinit: false,
-                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'OP'},//parametros adicionales que se le pasan al store
-                gdisplayField:'nombre_depto',
-                gwidth: 100
-            },
-            type:'ComboRec',
-            filters:{pfiltro:'dep.nombre',type:'string'},
-            id_grupo:1,
-            grid:true,
-            form:true
-        },
         {
             config:{
                 name: 'total_pago',
@@ -1179,8 +1181,14 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
               
               
               if(this.getBoton('edit')){
-              	
+              	/*
               	if(data['tipo_obligacion'] == 'adquisiciones' && data.estado != 'finalizado'){
+              		this.getBoton('edit').enable();
+              	}
+              	else{
+              		this.getBoton('edit').disable();
+              	}*/
+              	if( data.estado != 'finalizado'){
               		this.getBoton('edit').enable();
               	}
               	else{

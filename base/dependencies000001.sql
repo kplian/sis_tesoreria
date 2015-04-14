@@ -6904,3 +6904,61 @@ FROM tes.tplan_pago pp
        
 /***********************************F-DEP-RAC-TES-0-31/03/2015****************************************/
 
+
+
+
+
+/***********************************I-DEP-RAC-TES-0-09/04/2015****************************************/
+CREATE OR REPLACE VIEW tes.vobligaciones_contrato_20000(
+    fecha,
+    num_tramite,
+    desc_proveedor,
+    estado,
+    ultimo_estado_pp,
+    total,
+    codigo,
+    total_bs,
+    codigo_mb,
+    obs,
+    numero,
+    objeto,
+    gestion)
+AS
+  SELECT op.fecha,
+         op.num_tramite,
+         pr.desc_proveedor,
+         op.estado,
+         op.ultimo_estado_pp,
+         sum(od.monto_pago_mo) AS total,
+         mo.codigo,
+         sum(od.monto_pago_mb) AS total_bs,
+         'BS'         AS codigo_mb,
+         op.obs,
+         con.numero,
+         con.objeto,
+         ges.gestion
+  FROM tes.tobligacion_pago op
+       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
+         op.id_obligacion_pago AND od.estado_reg::text = 'activo'::text
+       JOIN param.vproveedor pr ON pr.id_proveedor = op.id_proveedor
+       JOIN param.tmoneda mo ON mo.id_moneda = op.id_moneda
+       JOIN param.tgestion ges ON ges.id_gestion = op.id_gestion
+       LEFT JOIN leg.tcontrato con ON con.id_contrato = op.id_contrato
+  WHERE op.tipo_obligacion::text <> ALL (ARRAY [ 'adquisiciones'::character
+    varying, 'rrhh'::character varying ]::text [ ])
+  GROUP BY op.fecha,
+           op.num_tramite,
+           pr.desc_proveedor,
+           mo.codigo,
+           op.obs,
+           con.numero,
+           con.objeto,
+           op.total_pago,
+           op.estado,
+           op.ultimo_estado_pp,
+           ges.gestion
+  HAVING sum(od.monto_pago_mb) >= 20000::numeric
+  ORDER BY op.fecha DESC;
+
+/***********************************F-DEP-RAC-TES-0-09/04/2015****************************************/
+

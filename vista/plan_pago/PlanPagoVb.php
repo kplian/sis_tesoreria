@@ -213,18 +213,18 @@ Phx.vista.PlanPagoVb = {
          Phx.vista.PlanPagoVb.superclass.onButtonEdit.call(this);
          
          if(this.Cmp.id_depto_lb.getValue() > 0){
-             this.Cmp.id_cuenta_bancaria.store.baseParams={ id_depto_lb:this.Cmp.id_depto_lb.getValue(), permiso: 'todos'};
+             this.Cmp.id_cuenta_bancaria.store.baseParams = Ext.apply(this.Cmp.id_cuenta_bancaria.store.baseParams,{ id_depto_lb:this.Cmp.id_depto_lb.getValue(), permiso: 'todos'});
              this.Cmp.id_cuenta_bancaria.modificado = true;
          }
                 
          //RCM, resetea store del deposito para no mostrar datos al hacer nuevo
          if(this.Cmp.id_cuenta_bancaria.getValue() > 0){
-             this.Cmp.id_cuenta_bancaria_mov.store.baseParams={ id_cuenta_bancaria:-1,
-                                                                fecha:this.Cmp.fecha_tentativa.getValue()}
+             this.Cmp.id_cuenta_bancaria_mov.store.baseParams= Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{ id_cuenta_bancaria:-1,
+                                                                fecha:this.Cmp.fecha_tentativa.getValue()});
          }
          else{
             //RCM, resetea store del deposito para no mostrar datos al hacer nuevo
-            this.Cmp.id_cuenta_bancaria_mov.store.baseParams={id_cuenta_bancaria:-1,fecha:this.Cmp.fecha_tentativa.getValue()}
+            this.Cmp.id_cuenta_bancaria_mov.store.baseParams=Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams, {id_cuenta_bancaria:-1,fecha:this.Cmp.fecha_tentativa.getValue()});
          }
            
          if(data.estado == 'vbsolicitante'){

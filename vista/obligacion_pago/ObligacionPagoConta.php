@@ -173,23 +173,26 @@ Phx.vista.ObligacionPagoConta = {
        this.cmpDepto.disable(); 
        this.cmpFecha.disable(); 
        this.cmpTipoCambioConv.disable();
+       this.cmpMoneda.disable();
+       
+       this.mostrarComponente(this.cmpProveedor);
        
        Phx.vista.ObligacionPagoConta.superclass.onButtonEdit.call(this);
        
-       if(data.tipo_obligacion=='adquisiciones'){
-            this.mostrarComponente(this.cmpProveedor);
+       if(data.tipo_obligacion == 'adquisiciones'){
+            
             this.mostrarComponente(this.cmpFuncionario);
+            this.cmpFuncionario.store.baseParams.fecha = this.cmpFecha.getValue().dateFormat(this.cmpFecha.format);
             this.ocultarComponente(this.cmpFuncionarioProveedor);
-            this.cmpFuncionario.reset();
             this.cmpProveedor.disable();
-            this.cmpMoneda.disable();
+           
        }
-       
+       this.Cmp.id_funcionario.disable();
+
        if(data.tipo_obligacion=='pago_directo'){
            
            this.cmpProveedor.enable();
            this.mostrarComponente(this.cmpProveedor);
-           this.cmpMoneda.enable();
            this.cmpFuncionario.store.baseParams.fecha = this.cmpFecha.getValue().dateFormat(this.cmpFecha.format);
                  
        }
@@ -200,10 +203,20 @@ Phx.vista.ObligacionPagoConta = {
            this.ocultarComponente(this.Cmp.fecha_pp_ini);
            this.ocultarComponente(this.Cmp.rotacion);
        }
+       
+       
+       this.Cmp.id_contrato.store.baseParams.filter = "[{\"type\":\"numeric\",\"comparison\":\"eq\", \"value\":\""+ this.Cmp.id_proveedor.getValue()+"\",\"field\":\"CON.id_proveedor\"}]";
+	   this.Cmp.id_contrato.modificado = true;
+	   
+	   if(data.estado != 'borrador'){
+       	  this.Cmp.tipo_anticipo.disable();
+       	  this.Cmp.total_nro_cuota.disable();
+       	         	  this.cmpProveedor.disable();
+       	  
+       
+       }
        else{
-           this.cmpProveedor.enable();
-           this.mostrarComponente(this.cmpProveedor);
-           this.cmpMoneda.enable();
+       	this.Cmp.total_nro_cuota.enable();
        }
            
     }
