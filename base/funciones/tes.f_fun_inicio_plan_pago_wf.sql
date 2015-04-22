@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_fun_inicio_plan_pago_wf (
   p_id_usuario integer,
   p_id_usuario_ai integer,
@@ -20,9 +22,10 @@ DECLARE
 
 	v_nombre_funcion   	text;
     v_resp    			varchar;
-    v_mensaje varchar;
+    v_mensaje 			varchar;
     
-    v_registros record;
+    v_registros 		record;
+    v_regitros_ewf		record;
     v_monto_ejecutar_mo  numeric;
    
 	
@@ -50,6 +53,16 @@ BEGIN
      from tes.tplan_pago  pp
      inner  join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
      where pp.id_proceso_wf  =  p_id_proceso_wf;
+     
+     
+     select
+       ewf.id_funcionario,
+       ewf.id_depto,
+       ewf.id_usuario_reg
+     into
+       v_regitros_ewf
+     from wf.testado_wf ewf
+     where  ewf.id_estado_wf = p_id_estado_wf; 
           
     -----------------------------------------------------------------------------------
     -- validacion del prorrateo--  (con el codigo actual de estado antes de cambiarlo)   
@@ -69,6 +82,31 @@ BEGIN
                 raise exception 'El total prorrateado no iguala con el monto total a ejecutar';
             END IF;
      END IF;
+     
+     --si el estado siguiente es visto supconta guarda el depto selecionado com oel depto de conta
+     IF p_codigo_estado = 'supconta' THEN
+         update tes.tplan_pago  t set 
+           id_depto_conta = v_regitros_ewf.id_depto
+         where id_proceso_wf = p_id_proceso_wf;
+     END IF;
+     
+     
+     IF p_codigo_estado  in ('vbsolicitante')  THEN
+              
+             select
+                sum(pro.monto_ejecutar_mo)
+             into
+                v_monto_ejecutar_mo
+             from tes.tprorrateo pro
+             where pro.estado_reg = 'activo' and  
+                pro.id_plan_pago  = v_registros.id_plan_pago;
+                    
+            IF v_registros.total_prorrateado != v_registros.monto_ejecutar_total_mo  or  v_registros.monto_ejecutar_total_mo != v_monto_ejecutar_mo THEN
+                raise exception 'El total prorrateado no iguala con el monto total a ejecutar';
+            END IF;
+     END IF;
+     
+     
      /*jrr(10/10/2014): El monto no puede ser menor o igual a 0*/ 
      IF p_codigo_estado  in ('vbgerente','vbfin','vbsolicitante')  THEN
      	/*if (v_registros.fecha_conformidad is null or v_registros.conformidad is null) then

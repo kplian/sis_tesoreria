@@ -339,6 +339,8 @@ Phx.vista.PlanPagoReq = {
      },
      
       preparaMenu:function(n){
+      	
+      	
           var data = this.getSelectedData();
           var tb =this.tbar;
           this.getBoton('ant_estado').disable();

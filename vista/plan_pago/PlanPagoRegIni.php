@@ -384,12 +384,19 @@ Phx.vista.PlanPagoRegIni = {
     },
      
     preparaMenu:function(n){
+    	
+    	
           var data = this.getSelectedData();
           var tb =this.tbar;          
           this.getBoton('ant_estado').disable();
           this.getBoton('sig_estado').disable();
           Phx.vista.PlanPagoRegIni.superclass.preparaMenu.call(this,n); 
-          if (data['estado']== 'borrador'){
+          
+          //alert('pasa el constructor ....')
+          
+          //alert(data['estado'])
+          
+          if (data['estado'] == 'borrador'){
               this.getBoton('edit').enable();
               
               this.getBoton('del').enable(); 
@@ -398,6 +405,10 @@ Phx.vista.PlanPagoRegIni = {
               this.getBoton('sig_estado').enable();   
           }
           else{
+          	
+          	//alert('lega ......')
+          	
+          	
             if ((data['tipo'] == 'devengado'||data['tipo']== 'devengado_pagado') && data['estado']== 'devengado'&& (data.monto*1)  > (data.total_pagado*1) ){ 
                 this.getBoton('new').enable();
             }

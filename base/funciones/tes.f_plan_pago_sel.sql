@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -220,8 +222,10 @@ BEGIN
                         plapa.tiene_form500,
                         plapa.id_depto_lb,
                         depto.nombre as desc_depto_lb,
-                        op.ultima_cuota_dev         
-						from tes.tplan_pago plapa
+                        op.ultima_cuota_dev,
+                        plapa.id_depto_conta as id_depto_conta_pp,
+                        depc.nombre_corto as desc_depto_conta_pp                   
+                        from tes.tplan_pago plapa
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
                         inner join param.tmoneda mon on mon.id_moneda = op.id_moneda
                         '||v_inner||'  
@@ -234,120 +238,13 @@ BEGIN
                         left join orga.vfuncionario fun on fun.id_funcionario = op.id_funcionario
                         left join orga.vfuncionario funwf on funwf.id_funcionario = ew.id_funcionario
                         left join param.tdepto depto on depto.id_depto = plapa.id_depto_lb
+                        left join tes.tts_libro_bancos lb on lb.id_int_comprobante=plapa.id_int_comprobante
+                        left join param.tdepto depc on depc.id_depto = plapa.id_depto_conta
                        where  plapa.estado_reg=''activo''  and '||v_filtro;
 			
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
-                        
-            IF  lower(v_parametros.tipo_interfaz) = 'planpagovb' THEN
-            
-            IF p_administrador !=1 THEN
-               v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))    ) and  lb.estado=''vbpagosindocumento'' ';
-             ELSE
-                 v_filtro = ' lb.estado=''vbpagosindocumento'' ';
-            END IF;
-            
-            v_consulta:=v_consulta||'UNION select
-						'||v_strg_pp||', 
-						plapa.estado_reg,
-						plapa.nro_cuota,
-						plapa.monto_ejecutar_total_mb,
-						plapa.nro_sol_pago,
-						plapa.tipo_cambio,
-						plapa.fecha_pag,
-						lb.id_proceso_wf,
-						plapa.fecha_dev,
-						lb.estado,
-						plapa.tipo_pago,
-						plapa.monto_ejecutar_total_mo,
-						plapa.descuento_anticipo_mb,
-						plapa.obs_descuentos_anticipo,
-						plapa.id_plan_pago_fk,
-						plapa.id_obligacion_pago,
-						plapa.id_plantilla,
-						plapa.descuento_anticipo,
-						plapa.otros_descuentos,
-						plapa.tipo,
-						plapa.obs_monto_no_pagado,
-						plapa.obs_otros_descuentos,
-						plapa.monto,
-						plapa.id_int_comprobante,
-						plapa.nombre_pago,
-						plapa.monto_no_pagado_mb,
-						plapa.monto_mb,
-						lb.id_estado_wf,
-						plapa.id_cuenta_bancaria,
-						plapa.otros_descuentos_mb,
-						plapa.forma_pago,
-						plapa.monto_no_pagado,
-						plapa.fecha_reg,
-						plapa.id_usuario_reg,
-						plapa.fecha_mod,
-						plapa.id_usuario_mod,
-						usu1.cuenta as usr_reg,
-						usu2.cuenta as usr_mod,
-                        plapa.fecha_tentativa,
-                        pla.desc_plantilla,
-                        plapa.liquido_pagable,
-                        plapa.total_prorrateado,
-                        plapa.total_pagado ,                       
-						coalesce(cb.nombre_institucion,''S/N'') ||'' (''||coalesce(cb.nro_cuenta,''S/C'')||'')'' as desc_cuenta_bancaria ,
-                        plapa.sinc_presupuesto ,
-                        plapa.monto_retgar_mb,
-                        plapa.monto_retgar_mo,
-                        descuento_ley, 
-                        obs_descuentos_ley , 
-                        descuento_ley_mb, 
-                        porc_descuento_ley, 
-                        plapa.nro_cheque,
-                        cb.nro_cuenta,
-                        plapa.id_cuenta_bancaria_mov,
-                        dpst.detalle as desc_deposito,
-                        op.numero  as numero_op ,
-                        op.id_depto_conta,
-                        op.id_moneda ,
-                        mon.tipo_moneda ,
-                        mon.codigo as desc_moneda,
-                        op.num_tramite,
-                        plapa.porc_monto_excento_var,
-                        plapa.monto_excento,
-                        '||v_strg_obs||' ,
-                        plapa.obs_descuento_inter_serv,
-                        plapa.descuento_inter_serv,
-                        plapa.porc_monto_retgar,
-                        fun.desc_funcionario1::text,
-                        plapa.revisado_asistente,
-                        plapa.conformidad,
-                        plapa.fecha_conformidad,
-                        op.tipo_obligacion,
-                        plapa.monto_ajuste_ag,
-                        plapa.monto_ajuste_siguiente_pago,
-                        op.pago_variable,
-                        plapa.monto_anticipo,
-                        plapa.fecha_costo_ini,
-                        plapa.fecha_costo_fin,
-                        funwf.desc_funcionario1::text as funcionario_wf,
-                        plapa.tiene_form500,
-                        lb.id_depto,
-                        depto.nombre as desc_depto_lb,
-                        op.ultima_cuota_dev                  
-						from tes.tplan_pago plapa
-                        inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
-                        inner join param.tmoneda mon on mon.id_moneda = op.id_moneda                          
-                        left join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
-                        inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
-                        left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
-                        left join param.vproveedor pro on pro.id_proveedor = op.id_proveedor
-                        left join orga.vfuncionario fun on fun.id_funcionario = op.id_funcionario                        
-                        inner join tes.tts_libro_bancos lb on lb.id_int_comprobante=plapa.id_int_comprobante
-                        left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = lb.id_cuenta_bancaria
-     					left join param.tdepto depto on depto.id_depto = lb.id_depto
-	 					inner join tes.tts_libro_bancos dpst on dpst.id_libro_bancos=lb.id_libro_bancos_fk
-                        inner join wf.testado_wf ew on ew.id_estado_wf = lb.id_estado_wf
-                        left join orga.vfuncionario funwf on funwf.id_funcionario = ew.id_funcionario
-                       where '||v_filtro;
-            END IF;
-                        
+                
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ', nro_cuota ASC limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 
              raise notice '%',v_consulta;
@@ -431,6 +328,7 @@ BEGIN
                         left join param.vproveedor pro on pro.id_proveedor = op.id_proveedor
                         left join orga.vfuncionario funwf on funwf.id_funcionario = ew.id_funcionario
                         left join param.tdepto depto on depto.id_depto = plapa.id_depto_lb
+                        left join tes.tts_libro_bancos lb on lb.id_int_comprobante=plapa.id_int_comprobante
                       where  plapa.estado_reg=''activo''   and '||v_filtro;
 			
 			--Definicion de la respuesta		    

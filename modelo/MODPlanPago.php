@@ -109,6 +109,13 @@ class MODPlanPago extends MODbase{
 		$this->captura('desc_depto_lb','varchar');
 		$this->captura('ultima_cuota_dev','numeric');
 		
+		$this->captura('id_depto_conta_pp','integer');
+		$this->captura('desc_depto_conta_pp','varchar');
+		
+		
+		
+		
+		
 		
 		
 		

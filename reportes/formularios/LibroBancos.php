@@ -129,7 +129,7 @@ header("content-type: text/javascript; charset=UTF-8");
 						['deposito','Depósito'],
 						['debito_automatico','Débito Automático'],
 	        			['transferencia_carta','Transferencia con carta'],
-						['transferencia_interna','Transferencias internas'],]	        				
+						['transferencia_interna','Transferencias internas']]	        				
 	    		}),
 				valueField:'ID',
 				displayField:'valor',
@@ -161,7 +161,8 @@ header("content-type: text/javascript; charset=UTF-8");
 						['cobrado','Cobrado'],
 						['anulado','Anulado'],
 						['reingresado','Reingresado'],
-						['depositado','Depositado']]	        				
+						['depositado','Depositado'],
+						['transferido','Transferido']]	        				
 	    		}),
 				valueField:'ID',
 				displayField:'valor',
@@ -303,8 +304,9 @@ header("content-type: text/javascript; charset=UTF-8");
 				data = data + '&Tipo=' + this.cmpTipo.getValue();
 				data = data + '&NombreBanco=' + this.cmpNombreBanco.getValue();
 				data = data + '&NumeroCuenta=' + this.cmpNroCuenta.getValue();
-				
-				window.open('http://sms.obairlines.bo/LibroBancos/Home/VerLibroBancos?'+data);
+				alert(data);
+				console.log(data);
+				//window.open('http://sms.obairlines.bo/LibroBancos/Home/VerLibroBancos?'+data);
 				//window.open('http://localhost:2309/Home/VerLibroBancos?'+data);				
 			}else{
 				Phx.vista.ReporteLibroBancos.superclass.onSubmit.call(this,o);				

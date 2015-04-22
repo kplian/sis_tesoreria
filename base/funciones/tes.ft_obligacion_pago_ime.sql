@@ -183,6 +183,8 @@ BEGIN
 
 		begin
         
+         
+        
             select 
                op.id_funcionario,
                op.fecha,
@@ -202,7 +204,9 @@ BEGIN
                v_id_funcionario_sol = v_parametros.id_funcionario;
             END IF;
             
-            IF   v_registros.tipo_obligacion = 'pago_directo'  and v_id_funcionario_sol is not NULL  THEN
+            
+            
+            IF  v_id_funcionario_sol is not NULL  THEN
               
                  --OJO  si el funcionario que solicita es un gerente .... es el mimso encargado de aprobar
                  IF exists(select 1 from orga.tuo_funcionario uof 
@@ -222,6 +226,8 @@ BEGIN
                         --NOTA el valor en la primera posicion del array es el genre de menor nivel
                    
                 END IF;
+                
+                 
             END IF;
             
              
@@ -230,7 +236,7 @@ BEGIN
             END IF;
             
            
-            
+            --raise exception 'sss %',va_id_funcionario_gerente[1];
             
 			--Sentencia de la modificacion
 			update tes.tobligacion_pago set
@@ -884,7 +890,7 @@ BEGIN
                      if (v_pago_variable = 'si') then
                       	v_monto_cuota = 0;
                      else
-                     	v_monto_cuota =  floor( v_total_detalle/v_total_nro_cuota);
+                     	v_monto_cuota =  (v_total_detalle::numeric/v_total_nro_cuota::numeric)::numeric(19,1);
                      end if;
                      
                       FOR v_i  IN 1..v_total_nro_cuota LOOP

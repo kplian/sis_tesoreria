@@ -128,82 +128,7 @@ Phx.vista.PlanPagoVbConta = {
           
      }, 
     
-    crearFomularioDepto:function(){
-      
-                this.cmpDeptoConta = new Ext.form.ComboBox({
-                            xtype: 'combo',
-                            name: 'id_depto_conta',
-                            hiddenName: 'id_depto_conta',
-                            fieldLabel: 'Depto. Conta.',
-                            allowBlank: false,
-                            emptyText:'Elija un Depto',
-                            store:new Ext.data.JsonStore(
-                            {
-                                url: '../../sis_tesoreria/control/ObligacionPago/listarDeptoFiltradoObligacionPago',
-                                id: 'id_depto',
-                                root: 'datos',
-                                sortInfo:{
-                                    field: 'deppto.nombre',
-                                    direction: 'ASC'
-                                },
-                                totalProperty: 'total',
-                                fields: ['id_depto','nombre'],
-                                // turn on remote sorting
-                                remoteSort: true,
-                                baseParams:{par_filtro:'deppto.nombre#deppto.codigo',estado:'activo',codigo_subsistema:'CONTA',tipo_filtro:'DEP_EP-DEP_EP'}
-                            }),
-                            valueField: 'id_depto',
-                            displayField: 'nombre',
-                            tpl:'<tpl for="."><div class="x-combo-list-item"><p>{nombre}</p></div></tpl>',
-                            hiddenName: 'id_depto_tes',
-                            forceSelection:true,
-                            typeAhead: true,
-                            triggerAction: 'all',
-                            lazyRender:true,
-                            mode:'remote',
-                            pageSize:10,
-                            queryDelay:1000,
-                            width:250,
-                            listWidth:'280',
-                            minChars:2
-                        });
-                
-                this.formDEPTO = new Ext.form.FormPanel({
-                    baseCls: 'x-plain',
-                    autoDestroy: true,
-                    layout: 'form',
-                    items: [this.cmpDeptoConta]
-                });
-                
-               
-                
-                this.wDEPTO= new Ext.Window({
-                    title: 'Depto Tesoreria',
-                    collapsible: true,
-                    maximizable: true,
-                     autoDestroy: true,
-                    width: 400,
-                    height: 200,
-                    layout: 'fit',
-                    plain: true,
-                    bodyStyle: 'padding:5px;',
-                    buttonAlign: 'center',
-                    items: this.formDEPTO,
-                    modal:true,
-                     closeAction: 'hide',
-                    buttons: [{
-                        text: 'Guardar',
-                         handler:this.onSubmitDepto,
-                        scope:this
-                        
-                    },{
-                        text: 'Cancelar',
-                        handler:function(){this.wDEPTO.hide()},
-                        scope:this
-                    }]
-                });   
-        
-    },
+    
     
    onBtnApropiacion : function() {
     	var rec = {maestro: this.sm.getSelected().data};
@@ -256,23 +181,7 @@ Phx.vista.PlanPagoVbConta = {
     
     
     
-    onBtnDevPag:function()
-        {                   
-            var data = this.getSelectedData();
-            if(data.id_depto_conta > 0){
-           
-                this.onSubmitDepto(undefined,undefined,data.id_depto_conta);  
-            }
-            else{
-              
-                this.wDEPTO.show();
-                this.cmpDeptoConta.reset();
-                this.cmpDeptoConta.store.baseParams.id_plan_pago = data.id_plan_pago;
-                this.cmpDeptoConta.store.baseParams.id_obligacion_pago = data.id_obligacion_pago;
-                this.cmpDeptoConta.modificado = true;
-              
-            }  
-      },
+
       
     
     

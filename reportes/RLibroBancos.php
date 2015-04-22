@@ -167,6 +167,7 @@ Class RLibroBancos extends Report {
 		$total_debe=0;
 		$total_haber=0;
 		$RowArray;
+		
 		foreach($dataSource->getDataset() as $row) {
             
 			if($this->getDataSource()->getParameter('estado') != 'Todos' )

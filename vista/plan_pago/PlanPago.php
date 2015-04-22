@@ -106,7 +106,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 	arrayStore :{
                 	'TODOS':[
                 	            ['devengado_pagado','Devengar y pagar (2 comprobantes)'],
-                                ['devengado_pagado_1c','Devengar y pagar (1 comprobante)'],
+                                ['devengado_pagado_1c','Caso especial'],
                                 ['devengado','Devengar'],
                                 ['devengado_rrhh','Devengar RH'],
                                 ['rendicion','Agrupar Dev y Pagar (Agrupa varios documentos)'], //es similr a un devengar y pagar pero no genera prorrateo directamente
@@ -121,7 +121,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 	
                 	'INICIAL':[
                 	            ['devengado_pagado','Devengar y pagar (2 comprobantes)'],
-                	            //['devengado_pagado_1c','Devengar y pagar (1 comprobante)'],
+                	            ['devengado_pagado_1c','Devengar y pagar (1 comprobante)'],
                                 ['devengado','Devengar'],
                                 //['devengado_rrhh','Devengar RH'],
                                 ['dev_garantia','Devolucion de Garantia'], //es similr a un devengar y pagar pero no genera prorrateo directamente
@@ -739,13 +739,13 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 	   			config:{
 				    name:'id_depto_lb',
 				    hiddenName: 'id_depto_lb',
-				    url: '../../sis_parametros/control/Depto/listarDepto',
+				    //url: '../../sis_parametros/control/Depto/listarDepto',
 	   				origen: 'DEPTO',
 	   				allowBlank: false,
 	   				fieldLabel: 'Libro de bancos destino',
 	   				disabled: false,
 	   				width: '80%',
-			        baseParams: { estado:'activo', codigo_subsistema: 'TES',modulo:'LB' },
+			        baseParams: { estado:'activo', codigo_subsistema: 'TES',modulo:'LB',tipo_filtro:'DEPTO_UO' },
 			        gdisplayField:'desc_depto_lb',
                     gwidth: 120
 	   			},
@@ -1214,7 +1214,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'monto_ajuste_siguiente_pag','pago_variable','monto_anticipo',
 		{name:'fecha_costo_ini', type: 'date',dateFormat:'Y-m-d'},
 		{name:'fecha_costo_fin', type: 'date',dateFormat:'Y-m-d'},
-		'funcionario_wf','tiene_form500','id_depto_lb','desc_depto_lb',{name:'ultima_cuota_dev',type:'numeric'}
+		'id_depto_conta_pp','desc_depto_conta_pp','funcionario_wf','tiene_form500','id_depto_lb','desc_depto_lb',{name:'ultima_cuota_dev',type:'numeric'}
 		
 	],
 	
@@ -1399,7 +1399,16 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                                               event:'beforesave',
                                               delegate: this.onSaveWizard,
                                               
-                                            }],
+                                            },
+					                        {
+					                          event:'requirefields',
+					                          delegate: function () {
+						                          	this.onButtonEdit();
+										        	this.window.setTitle('Registre los campos antes de pasar al siguiente estado');
+										        	this.formulario_wizard = 'si';
+					                          }
+					                          
+					                        }],
                                     
                                     scope:this
                                  });        
@@ -1428,6 +1437,16 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             scope:this
         });
     },
+    
+    successSave : function(resp){
+	    	Phx.vista.PlanPago.superclass.successSave.call(this,resp);
+	    	var rec=this.sm.getSelected();
+	    	if (this.formulario_wizard == 'si') {
+	    		this.mostrarWizard(rec);	    		
+	    		this.formulario_wizard = 'no';	    		
+	    	}
+	    	console.log('llega, formulario_wizard', this.formulario_wizard)
+	},
      
     successWizard:function(resp){
         Phx.CP.loadingHide();
@@ -2002,7 +2021,94 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 alert(reg.ROOT.mensaje)
             }
      },
-    
+     
+     crearFomularioDepto:function(){
+      
+                this.cmpDeptoConta = new Ext.form.ComboBox({
+                            xtype: 'combo',
+                            name: 'id_depto_conta',
+                            hiddenName: 'id_depto_conta',
+                            fieldLabel: 'Depto. Conta.',
+                            allowBlank: false,
+                            emptyText:'Elija un Depto',
+                            store:new Ext.data.JsonStore(
+                            {
+                                //url: '../../sis_tesoreria/control/ObligacionPago/listarDeptoFiltradoObligacionPago',
+                                url: '../../sis_parametros/control/Depto/listarDepto',
+                                id: 'id_depto',
+                                root: 'datos',
+                                sortInfo:{
+                                    field: 'deppto.nombre',
+                                    direction: 'ASC'
+                                },
+                                totalProperty: 'total',
+                                fields: ['id_depto','nombre'],
+                                // turn on remote sorting
+                                remoteSort: true,
+                                baseParams:{par_filtro:'deppto.nombre#deppto.codigo',estado:'activo',codigo_subsistema:'CONTA'}
+                            }),
+                            valueField: 'id_depto',
+                            displayField: 'nombre',
+                            tpl:'<tpl for="."><div class="x-combo-list-item"><p>{nombre}</p></div></tpl>',
+                            hiddenName: 'id_depto_tes',
+                            forceSelection:true,
+                            typeAhead: true,
+                            triggerAction: 'all',
+                            lazyRender:true,
+                            mode:'remote',
+                            pageSize:10,
+                            queryDelay:1000,
+                            width:250,
+                            listWidth:'280',
+                            minChars:2
+                        });
+                
+                this.formDEPTO = new Ext.form.FormPanel({
+                    baseCls: 'x-plain',
+                    autoDestroy: true,
+                    layout: 'form',
+                    items: [this.cmpDeptoConta]
+                });
+                
+               
+                
+                this.wDEPTO= new Ext.Window({
+                    title: 'Depto Tesoreria',
+                    collapsible: true,
+                    maximizable: true,
+                     autoDestroy: true,
+                    width: 400,
+                    height: 200,
+                    layout: 'fit',
+                    plain: true,
+                    bodyStyle: 'padding:5px;',
+                    buttonAlign: 'center',
+                    items: this.formDEPTO,
+                    modal:true,
+                     closeAction: 'hide',
+                    buttons: [{
+                        text: 'Guardar',
+                         handler:this.onSubmitDepto,
+                        scope:this
+                        
+                    },{
+                        text: 'Cancelar',
+                        handler:function(){this.wDEPTO.hide()},
+                        scope:this
+                    }]
+                });   
+        
+    },
+     onBtnDevPag:function(){
+    	    var data = this.getSelectedData();
+            
+            this.wDEPTO.show();
+            this.cmpDeptoConta.reset();
+            Phx.CP.setValueCombo(this.cmpDeptoConta,data.id_depto_conta_pp,data.desc_depto_conta_pp )
+            this.cmpDeptoConta.modificado = true;
+             
+             
+     },
     
     onButtonEdit:function(){
          this.accionFormulario = 'EDIT';
