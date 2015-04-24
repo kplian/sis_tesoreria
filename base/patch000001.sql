@@ -1130,3 +1130,22 @@ COMMENT ON COLUMN tes.tobligacion_pago.ultima_cuota_dev
 IS 'identifica la ultima cuota  del tipo devengado para alertar sobre ultimo pago, sellena atravez de un triguer en la tabla de plan de pagos';
 
 /***********************************F-SCP-RAC-TES-0-25/03/2015***************************************/
+
+/***********************************I-SCP-GSS-TES-0-23/04/2015***************************************/
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN id_int_comprobante INTEGER;
+
+COMMENT ON COLUMN tes.tts_libro_bancos.id_int_comprobante
+IS 'comprobante de pago que corresponde al cheque';
+
+CREATE TABLE tes.tdepto_cuenta_bancaria (
+  id_depto_cuenta_bancaria SERIAL, 
+  id_depto INTEGER NOT NULL, 
+  id_cuenta_bancaria INTEGER NOT NULL, 
+  CONSTRAINT pk_tdepto_cuenta_bancaria PRIMARY KEY(id_depto_cuenta_bancaria)
+) INHERITS (pxp.tbase)
+
+WITH (oids = false);
+
+/***********************************F-SCP-GSS-TES-0-23/04/2015***************************************/
