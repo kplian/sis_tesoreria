@@ -1,7 +1,11 @@
-CREATE OR REPLACE FUNCTION "tes"."ft_depto_cuenta_bancaria_sel"(	
-				p_administrador integer, p_id_usuario integer, p_tabla character varying, p_transaccion character varying)
-RETURNS character varying AS
-$BODY$
+CREATE OR REPLACE FUNCTION tes.ft_depto_cuenta_bancaria_sel (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Sistema de Obligaciones de Pago
  FUNCION: 		tes.ft_depto_cuenta_bancaria_sel
@@ -44,6 +48,7 @@ BEGIN
 						dcb.id_depto_cuenta_bancaria,
 						dcb.estado_reg,
 						dcb.id_cuenta_bancaria,
+                        cb.denominacion,
 						dcb.id_depto,
 						dcb.fecha_reg,
 						dcb.usuario_ai,
@@ -54,6 +59,7 @@ BEGIN
 						usu1.cuenta as usr_reg,
 						usu2.cuenta as usr_mod	
 						from tes.tdepto_cuenta_bancaria dcb
+                        inner join tes.tcuenta_bancaria cb on cb.id_cuenta_bancaria=dcb.id_cuenta_bancaria
 						inner join segu.tusuario usu1 on usu1.id_usuario = dcb.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = dcb.id_usuario_mod
 				        where  ';
@@ -61,7 +67,7 @@ BEGIN
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
-
+			raise notice '%', v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 						
@@ -80,6 +86,7 @@ BEGIN
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(id_depto_cuenta_bancaria)
 					    from tes.tdepto_cuenta_bancaria dcb
+                        inner join tes.tcuenta_bancaria cb on cb.id_cuenta_bancaria=dcb.id_cuenta_bancaria
 					    inner join segu.tusuario usu1 on usu1.id_usuario = dcb.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = dcb.id_usuario_mod
 					    where ';
@@ -107,7 +114,9 @@ EXCEPTION
 			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
 			raise exception '%',v_resp;
 END;
-$BODY$
-LANGUAGE 'plpgsql' VOLATILE
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
 COST 100;
-ALTER FUNCTION "tes"."ft_depto_cuenta_bancaria_sel"(integer, integer, character varying, character varying) OWNER TO postgres;
