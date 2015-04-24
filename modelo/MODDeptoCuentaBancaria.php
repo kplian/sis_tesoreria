@@ -19,7 +19,7 @@ class MODDeptoCuentaBancaria extends MODbase{
 		$this->transaccion='TES_DCB_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
 		
-		$this->setParametro('id_depto','id_depto','integer');	
+		//$this->setParametro('id_depto','id_depto','integer');	
 		//Definicion de la lista del resultado del query
 		$this->captura('id_depto_cuenta_bancaria','int4');
 		$this->captura('estado_reg','varchar');
