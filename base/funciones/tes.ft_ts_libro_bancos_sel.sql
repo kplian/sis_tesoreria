@@ -51,7 +51,7 @@ BEGIN
 			v_consulta:='select id_libro_bancos,
                         num_tramite,
                         id_cuenta_bancaria,
-                        fecha,
+                        fecha as fecha,
                         a_favor,
                         nro_cheque,
                         importe_deposito,
@@ -312,7 +312,7 @@ BEGIN
  	#AUTOR:		Gonzalo Sarmiento Sejas
 	***********************************/
     
-    ELSEIF (p_transaccion = 'TES_RELIBA_SEL') THEN
+       ELSEIF (p_transaccion = 'TES_RELIBA_SEL') THEN
        BEGIN  
         --to_char(now(), ''dd/mm/yyyy'') as fecha, 
         raise notice 'fecha unio %', v_parametros.fecha_ini;
@@ -347,7 +347,13 @@ BEGIN
               to_char(LB.fecha, ''dd/mm/yyyy'') as fecha_reporte,
               
               LB.a_favor,
-              LB.detalle, 
+			  case when LB.tipo=''transf_interna_debe'' then
+              LB.detalle ||''  -  Cbte destino: ''||COALESCE(lbp.nro_comprobante,'''')
+              when LB.tipo=''transf_interna_haber'' then
+              LB.detalle ||''  -  Cbte origen: ''||COALESCE(lbp.nro_comprobante,'''')
+              else
+              LB.detalle
+              end,              
               LB.nro_liquidacion,
               LB.nro_comprobante,
               LB.comprobante_sigma,
@@ -381,7 +387,7 @@ BEGIN
                                 then   lbr.estado in (''impreso'',
                                                          ''entregado'',''cobrado'',
                                                          ''anulado'',''reingresado'',
-                                                         ''depositado'' ) 
+                                                         ''depositado'',''transferido'' ) 
                                                          
                                 when ('''||v_parametros.estado||'''=''impreso y entregado'')
                                 then   lbr.estado in (''impreso'', ''entregado'' )
@@ -396,6 +402,10 @@ BEGIN
                                                       ''deposito'',
                                                       ''debito_automatico'',
                                                       ''transferencia_carta'') 
+                                
+                                when ('''||v_parametros.tipo||'''=''transferencia_interna'')
+                               	then   lbr.tipo in (''transf_interna_debe'')
+                                
                                 else lbr.tipo in ('''||v_parametros.tipo||''') 
                                 end
                                 
@@ -414,10 +424,10 @@ BEGIN
                                 then   lbr.estado in (''impreso'',
                                                          ''entregado'',''cobrado'',
                                                          ''anulado'',''reingresado'',
-                                                         ''depositado'' ) 
+                                                         ''depositado'',''transferido'' ) 
                                                          
                                 when ('''||v_parametros.estado||'''=''impreso y entregado'')
-                                then   lbr.estado in (''impreso'', ''entregado'' )
+                                then   lbr.estado in (''impreso'', ''entregado'' )                                
                                 
                                 else lbr.estado in ('''||v_parametros.estado||''')            
                                 end 
@@ -429,6 +439,10 @@ BEGIN
                                                                 ''deposito'',
                                                                 ''debito_automatico'',
                                                                 ''transferencia_carta'') 
+                                
+                                when ('''||v_parametros.tipo||'''=''transferencia_interna'')
+                               	then   lbr.tipo in (''transf_interna_haber'')
+                                
                                 else lbr.tipo in ('''||v_parametros.tipo||''') 
                                 end 
                                 and
@@ -444,7 +458,7 @@ BEGIN
       		
 
               FROM tes.tts_libro_bancos LB
-      		
+      		  LEFT JOIN tes.tts_libro_bancos lbp on lbp.id_libro_bancos=LB.id_libro_bancos_fk
               WHERE
               LB.id_cuenta_bancaria = '||v_parametros.id_cuenta_bancaria||' and
               LB.fecha BETWEEN  '''||v_parametros.fecha_ini||''' and   '''||v_parametros.fecha_fin||''' and      
@@ -453,7 +467,7 @@ BEGIN
               then   LB.estado in (''impreso'',
                                        ''entregado'',''cobrado'',
                                        ''anulado'',''reingresado'',
-                                       ''depositado'' ) 
+                                       ''depositado'',''transferido'' ) 
                                        
               when ('''||v_parametros.estado||'''=''impreso y entregado'')
               then   LB.estado in (''impreso'', ''entregado'' )
@@ -468,6 +482,9 @@ BEGIN
                                               ''deposito'',
                                               ''debito_automatico'',
                                               ''transferencia_carta'') 
+              
+              when ('''||v_parametros.tipo||'''=''transferencia_interna'')
+              then   lb.tipo in (''transf_interna_debe'',''transf_interna_haber'')
               else LB.tipo in ('''||v_parametros.tipo||''') 
               end  
               

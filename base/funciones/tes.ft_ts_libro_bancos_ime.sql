@@ -25,12 +25,9 @@ $body$
 
 DECLARE
 
-	v_nro_requerimiento    	integer;
-	v_parametros           	record;
-	v_id_requerimiento     	integer;
+	v_parametros           	record;	
 	v_resp		            varchar;
 	v_nombre_funcion        text;
-	v_mensaje_error         text;
 	v_id_libro_bancos		integer;
     g_centro				varchar;
     g_saldo_cuenta_bancaria	numeric;
@@ -73,6 +70,9 @@ DECLARE
     v_estado				varchar;
     v_periodo				integer;
     g_importe_transferencia	numeric;
+    g_id_periodo			integer;
+    g_id_cuenta_bancaria_periodo	integer;
+    v_id_cuenta_bancaria	integer;
 BEGIN
     v_nombre_funcion = 'tes.ft_ts_libro_bancos_ime';
     v_parametros = pxp.f_get_record(p_tabla);
@@ -103,18 +103,39 @@ BEGIN
                   ;
             END IF;
             
-            if(v_parametros.tipo not in ('transf_interna_debe','transf_interna_haber')) then
-                select ps.estado, per.periodo into v_estado, v_periodo
-                from param.tperiodo_subsistema ps
-                inner join param.tperiodo per on per.id_periodo=ps.id_periodo
-                inner join segu.tsubsistema sub on sub.id_subsistema=ps.id_subsistema
-                where sub.codigo='TES' and g_fecha between per.fecha_ini and per.fecha_fin;
+            --validamos que no se registren datos con fecha de la gestion 2015       
+            IF( g_fecha < '01-01-2015') then
+                raise exception 'No se puede registrar transacciones anteriores a la gestion 2015, use el sistema endesis en este caso';
+            END IF;
+ 			
+            select per.id_periodo, per.periodo
+            into g_id_periodo, v_periodo
+			from param.tperiodo per
+			where g_fecha between per.fecha_ini and per.fecha_fin;
+                  
+            select ctaper.id_cuenta_bancaria_periodo, ctaper.estado
+            into g_id_cuenta_bancaria_periodo, v_estado
+			from tes.tcuenta_bancaria_periodo ctaper 
+			where ctaper.id_periodo=g_id_periodo 
+            and ctaper.id_cuenta_bancaria=v_parametros.id_cuenta_bancaria;
             
-                if(v_estado!='abierto')then
-                    raise exception 'El periodo % en el subsistema de Tesoreria no se encuentra abierto',  pxp.f_obtener_literal_periodo(v_periodo,null);
-                end if;
-            end if;
-            
+            IF (g_id_cuenta_bancaria_periodo IS NULL) THEN
+                  
+                INSERT INTO tes.tcuenta_bancaria_periodo(
+                id_cuenta_bancaria,
+                id_periodo,
+                estado
+                )VALUES(
+                v_parametros.id_cuenta_bancaria,
+                g_id_periodo,
+                'abierto'
+                );
+            ELSE
+                IF(v_estado='cerrado')THEN
+                    raise exception 'El periodo % se encuentra cerrado', pxp.f_obtener_literal_periodo(v_periodo,0); 
+                END IF;
+            END IF;
+                        
             IF(v_parametros.tipo in ('cheque','debito_automatico','transferencia_carta','transf_interna_debe','transf_interna_haber'))Then
               --Comparamos el saldo de la cuenta bancaria con el importe del cheque
               Select coalesce(sum(Coalesce(lbr.importe_deposito, 0)) - 
@@ -337,32 +358,35 @@ BEGIN
             IF(v_parametros.id_libro_bancos_fk is null and g_centro in ('no','esp') and v_parametros.tipo!='deposito')THEN 
 				raise exception 'Los datos a ingresar deben tener un deposito asociado. Ingrese los datos a traves de Depositos y Cheques.';
 	        END IF;
-                    	
-            select ps.estado, per.periodo into v_estado, v_periodo
-            from param.tperiodo_subsistema ps
-            inner join param.tperiodo per on per.id_periodo=ps.id_periodo
-            inner join segu.tsubsistema sub on sub.id_subsistema=ps.id_subsistema
-            where sub.codigo='TES' and g_fecha between per.fecha_ini and per.fecha_fin;
-            
+                    
+        	--destino                               
+            select ctaper.estado, per.periodo
+            into v_estado, v_periodo
+			from tes.tcuenta_bancaria_periodo ctaper 
+            inner join param.tperiodo per on per.id_periodo=ctaper.id_periodo
+			where g_fecha between per.fecha_ini and per.fecha_fin
+            and ctaper.id_cuenta_bancaria=v_parametros.id_cuenta_bancaria;
+
             if(v_estado!='abierto')then
-            	raise exception 'El periodo % en el subsistema de Tesoreria no se encuentra abierto',  pxp.f_obtener_literal_periodo(v_periodo,null);
+            	raise exception 'El periodo % no se encuentra abierto',  pxp.f_obtener_literal_periodo(v_periodo,null);
             end if;
-        	            
+            
             SELECT LBRBAN.fecha into g_fecha
             FROM tes.tts_libro_bancos LBRBAN
             WHERE LBRBAN.id_libro_bancos=v_parametros.id_libro_bancos;
-            
-            select ps.estado, per.periodo into v_estado, v_periodo
-            from param.tperiodo_subsistema ps
-            inner join param.tperiodo per on per.id_periodo=ps.id_periodo
-            inner join segu.tsubsistema sub on sub.id_subsistema=ps.id_subsistema
-            where sub.codigo='TES' and g_fecha between per.fecha_ini and per.fecha_fin;
+
+            --origen
+            select ctaper.estado, per.periodo
+            into v_estado, v_periodo
+			from tes.tcuenta_bancaria_periodo ctaper 
+            inner join param.tperiodo per on per.id_periodo=ctaper.id_periodo
+			where g_fecha between per.fecha_ini and per.fecha_fin
+            and ctaper.id_cuenta_bancaria=v_parametros.id_cuenta_bancaria;
             
             if(v_estado!='abierto')then
-            	raise exception 'El periodo % en el subsistema de Tesoreria no se encuentra abierto',  pxp.f_obtener_literal_periodo(v_periodo,null);
+            	raise exception 'El periodo % no se encuentra abierto',  pxp.f_obtener_literal_periodo(v_periodo,null);
             end if;
-        	
-        
+            
         IF(v_parametros.tipo in ('cheque','debito_automatico','transferencia_carta'))Then        
             
         	--Validamos que no se exceda el saldo general de la cuenta
@@ -734,24 +758,24 @@ BEGIN
                    v_obs='---';
                 
              END IF;
-             /*  
+               
              --configurar acceso directo para la alarma   
              v_acceso_directo = '';
              v_clase = '';
              v_parametros_ad = '';
-             v_tipo_noti = 'notificacion';
-             v_titulo  = 'Visto Bueno';
+             v_tipo_noti = '';
+             v_titulo  = '';
              
            
-             IF   v_codigo_estado_siguiente not in('borrador','pendiente','pagado','devengado','anulado')   THEN
-                  v_acceso_directo = '../../../sis_tesoreria/vista/plan_pago/PlanPagoVb.php';
-                  v_clase = 'PlanPagoVb';
-                  v_parametros_ad = '{filtro_directo:{campo:"plapa.id_proceso_wf",valor:"'||v_id_proceso_wf::varchar||'"}}';
+             IF   v_codigo_estado_siguiente in('vbpagosindocumento')   THEN
+                  v_acceso_directo = '../../../sis_workflow/vista/proceso_wf/VoBoProceso.php';
+                  v_clase = 'VoBoProceso';
+                  v_parametros_ad = '{filtro_directo:{campo:"lb.id_proceso_wf",valor:"'||v_id_proceso_wf::varchar||'"}}';
                   v_tipo_noti = 'notificacion';
                   v_titulo  = 'Visto Bueno';
              
              END IF;
-            */ 
+            
              
              -- hay que recuperar el supervidor que seria el estado inmediato,...
              v_id_estado_actual =  wf.f_registra_estado_wf(v_parametros.id_tipo_estado, 
@@ -763,11 +787,16 @@ BEGIN
                                                              v_parametros._nombre_usuario_ai,
                                                              v_id_depto,
                                                              ' Obs:'||v_obs,
-                                                             NULL,	--v_acceso_directo ,
-                                                             NULL, 	--v_clase,
-                                                             NULL, 	--v_parametros_ad,
-                                                             NULL,	--v_tipo_noti,
-                                                             NULL);	--v_titulo);
+                                                             --NULL,	
+                                                             v_acceso_directo,
+                                                             --NULL, 	
+                                                             v_clase,
+                                                             --NULL, 	
+                                                             v_parametros_ad,
+                                                             --NULL,	
+                                                             v_tipo_noti,
+                                                             --NULL);	
+                                                             v_titulo);
 
           --------------------------------------
           -- registra los procesos disparados
@@ -831,20 +860,21 @@ BEGIN
           
           if((v_codigo_estado_siguiente in ('impreso', 'anulado','depositado')) or (v_tipo in('debito_automatico','transferencia_carta') and v_codigo_estado_siguiente='cobrado'))then
           	
-            SELECT LBRBAN.fecha into g_fecha
+            SELECT LBRBAN.fecha,LBRBAN.id_cuenta_bancaria into g_fecha, v_id_cuenta_bancaria
             FROM tes.tts_libro_bancos LBRBAN
             WHERE LBRBAN.id_libro_bancos=v_id_libro_bancos;
-            
-            select ps.estado, per.periodo into v_estado, v_periodo
-            from param.tperiodo_subsistema ps
-            inner join param.tperiodo per on per.id_periodo=ps.id_periodo
-            inner join segu.tsubsistema sub on sub.id_subsistema=ps.id_subsistema
-            where sub.codigo='TES' and g_fecha between per.fecha_ini and per.fecha_fin;
+
+            select ctaper.estado, per.periodo
+            into v_estado, v_periodo
+			from tes.tcuenta_bancaria_periodo ctaper 
+            inner join param.tperiodo per on per.id_periodo=ctaper.id_periodo
+			where g_fecha between per.fecha_ini and per.fecha_fin
+            and ctaper.id_cuenta_bancaria=v_id_cuenta_bancaria;
             
             if(v_estado!='abierto')then
-            	raise exception 'El periodo % en el subsistema de Tesoreria no se encuentra abierto',  pxp.f_obtener_literal_periodo(v_periodo,null);
+            	raise exception 'El periodo % no se encuentra abierto',  pxp.f_obtener_literal_periodo(v_periodo,null);
             end if;
-            
+                        
           end if;
           
           if(v_codigo_estado_siguiente='anulado')then
@@ -907,19 +937,20 @@ BEGIN
        		--recuperaq estado anterior segun Log del WF
           
         
-          SELECT LBRBAN.fecha into g_fecha
+          SELECT LBRBAN.fecha, LBRBAN.id_cuenta_bancaria into g_fecha, v_id_cuenta_bancaria
           FROM tes.tts_libro_bancos LBRBAN
           WHERE LBRBAN.id_estado_wf = v_parametros.id_estado_wf;
                     
-          select ps.estado, per.periodo into v_estado, v_periodo
-          from param.tperiodo_subsistema ps
-          inner join param.tperiodo per on per.id_periodo=ps.id_periodo
-          inner join segu.tsubsistema sub on sub.id_subsistema=ps.id_subsistema
-          where sub.codigo='TES' and g_fecha between per.fecha_ini and per.fecha_fin;
+          select ctaper.estado, per.periodo
+          into v_estado, v_periodo
+          from tes.tcuenta_bancaria_periodo ctaper 
+          inner join param.tperiodo per on per.id_periodo=ctaper.id_periodo
+          where g_fecha between per.fecha_ini and per.fecha_fin
+          and ctaper.id_cuenta_bancaria=v_id_cuenta_bancaria;
             
           if(v_estado!='abierto')then
-              raise exception 'El periodo % en el subsistema de Tesoreria no se encuentra abierto',  pxp.f_obtener_literal_periodo(v_periodo,null);
-          end if;
+              raise exception 'El periodo % no se encuentra abierto',  pxp.f_obtener_literal_periodo(v_periodo,null);
+          end if; 
             
           SELECT           
              ps_id_tipo_estado,
@@ -1039,13 +1070,14 @@ BEGIN
                 
             else 
             	-- es una transferencia de saldo
-                /*select lbp.saldo_deposito into g_libro_bancos
+                select lbp.saldo_deposito into g_saldo_deposito
                 from tes.vlibro_bancos lbp
-                where lbp.id_libro_bancos=v_parametros.id_libro_bancos;*/
+                where lbp.id_libro_bancos=v_parametros.id_libro_bancos;
+                
                 if(v_parametros.tipo='parcial')then
             		g_importe_transferencia = v_parametros.importe_transferencia;
                 else 
-                	g_importe_transferencia = g_libro_bancos.saldo_deposito;                
+                	g_importe_transferencia = g_saldo_deposito;                
                 end if;
                 
                 select lb.id_cuenta_bancaria, COALESCE(lb.id_depto, dp.id_depto) as id_depto, lb.fecha, lb.a_favor, lb.nro_cheque, lb.saldo_deposito,
