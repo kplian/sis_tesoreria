@@ -203,7 +203,7 @@ BEGIN
                v_monto_total= tes.f_determinar_total_faltante((p_hstore->'id_obligacion_pago')::integer, 'ant_parcial');
                v_porc_ant = pxp.f_get_variable_global('politica_porcentaje_anticipo')::numeric;
                
-               IF v_monto_total <  (p_hstore->'monto')::numeric  THEN
+               IF v_monto_total <  (p_hstore->'monto')::numeric  AND v_registros.pago_variable = 'no' THEN
                   raise exception 'No puede exceder el total a pagar segun politica de anticipos % porc', v_porc_ant*100;
                END IF;
            

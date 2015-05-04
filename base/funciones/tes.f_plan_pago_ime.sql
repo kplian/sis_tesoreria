@@ -302,7 +302,6 @@ BEGIN
             op.id_estado_wf,
             op.estado,
             op.id_depto,
-            op.pago_variable,
             op.pago_variable
           into v_registros  
            from tes.tobligacion_pago op
@@ -422,7 +421,7 @@ BEGIN
                          v_porc_ant = pxp.f_get_variable_global('politica_porcentaje_anticipo')::numeric;
                          
                          
-                         IF (v_monto_total + v_registros_pp.monto) <  COALESCE(v_parametros.monto,0)  THEN
+                         IF (v_monto_total + v_registros_pp.monto) <  COALESCE(v_parametros.monto,0) AND v_registros.pago_variable = 'no'  THEN
                             raise exception 'No puede exceder el total a pagar segun politica de anticipos % porc', v_porc_ant*100;
                          END IF;
                   

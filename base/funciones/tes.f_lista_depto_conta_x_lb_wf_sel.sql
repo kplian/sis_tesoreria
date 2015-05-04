@@ -110,7 +110,7 @@ BEGIN
     ELSE
     --si no tenemos libro de bancos mostramos todos los deptos
     	select
-         list(dep.id_depto)
+         pxp.list(dep.id_depto::varchar)
        into
          v_id_deptos_conta
        from param.tdepto dep

@@ -42,7 +42,7 @@ require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
 		$this->Cell(185, $height/5, 'Estado: '.$this->getDataSource()->getParameter('estado'), 0, 0, 'C', false, '', 1, false, 'T', 'C');
 		$this->Ln();
 		
-		$width1 = 15;
+		$width1 = 14;
 		$width2 = 40;
         $width3 = 60;
 		$width4 = 11;
@@ -60,20 +60,20 @@ require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
 			$this->Cell($width3, $height, 'Detalle', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');			
 			$this->Cell($width4, $height, 'Nº Liq/Cite', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width1-3, $height, 'Nº Com.', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$this->Cell($width4, $height, 'Com. Sigma', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width4+2, $height, 'Com. Sigma', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width4, $height, 'Nº Cheque', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');								
-			$this->Cell($width1, $height, 'Debe', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$this->Cell($width1, $height, 'Haber', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width5, $height, 'Debe', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width5, $height, 'Haber', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 		}else{
 			$this->Cell($width1, $height, 'Fecha', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width2-8, $height, 'A Favor', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width3-8, $height, 'Detalle', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width4, $height, 'Nº Liq/Cite', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width1-3, $height, 'Nº Com.', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$this->Cell($width4, $height, 'Com. Sigma', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width4+2, $height, 'Com. Sigma', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width4, $height, 'Nº Cheque', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');								
-			$this->Cell($width1, $height, 'Debe', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$this->Cell($width1, $height, 'Haber', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width5, $height, 'Debe', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width5, $height, 'Haber', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width5, $height, 'Saldos', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');			
 		}
     }
@@ -94,6 +94,8 @@ require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
     			$pagenumtxt = 'Página'.' '.$this->getAliasNumPage().' de '.$this->getAliasNbPages();
     			$this->Cell($ancho, 0, $pagenumtxt, '', 0, 'C');
     			$fecha_rep = date("d-m-Y H:i:s");
+				//$nuevafecha = strtotime ( '-10 days' , strtotime ($fecha_rep) ) ;
+				//$fecha_rep = date("d-m-Y H:i:s", $nuevafecha);
     			$this->Cell($ancho, 0, "Fecha impresión: ".$fecha_rep, '', 0, 'R');
     			$this->Ln($line_width);
 			 }
@@ -134,7 +136,7 @@ Class RLibroBancos extends Report {
     function writeDetalles (DataSource $dataSource, TCPDF $pdf,$tipo) {
     	$blackAll = array('LTRB' =>array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0, 0, 0)));
         $widthMarginLeft = 1;
-        $width1 = 15;
+        $width1 = 14;
 		$width2 = 40;
         $width3 = 60;
 		$width4 = 11;
@@ -154,12 +156,12 @@ Class RLibroBancos extends Report {
 		if($this->getDataSource()->getParameter('estado') != 'Todos' )
 		{	
 			$pdf->SetFillColor(255,255,255, true);
-			$pdf->tablewidths=array($width1,$width2,$width3,$width4,$width1-3,$width4,$width4,$width1,$width1);
+			$pdf->tablewidths=array($width1,$width2,$width3,$width4,$width1-3,$width4+2,$width4,$width5,$width5);
 			$pdf->tablealigns=array('L','L','L','C','C','C','C','R','R');
 			$pdf->tablenumbers=array(0,0,0,0,0,0,0,0,0);
 		}else{
 			$pdf->SetFillColor(255,255,255, true);
-			$pdf->tablewidths=array($width1,$width2-8,$width3-8,$width4,$width1-3,$width4,$width4,$width1,$width1,$width5);
+			$pdf->tablewidths=array($width1,$width2-8,$width3-8,$width4,$width1-3,$width4+2,$width4,$width5,$width5,$width5);
 			$pdf->tablealigns=array('L','L','L','C','C','C','C','R','R','R');
 			$pdf->tablenumbers=array(0,0,0,0,0,0,0,0,0,0);
 		}
@@ -167,7 +169,6 @@ Class RLibroBancos extends Report {
 		$total_debe=0;
 		$total_haber=0;
 		$RowArray;
-		
 		foreach($dataSource->getDataset() as $row) {
             
 			if($this->getDataSource()->getParameter('estado') != 'Todos' )
