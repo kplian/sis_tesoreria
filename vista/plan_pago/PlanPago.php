@@ -1314,7 +1314,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
       	
       	if (((rec.data.estado == 'borrador' && rec.data.tipo_obligacion == 'pago_directo') || (rec.data.estado == 'vbsolicitante' && rec.data.tipo_obligacion == 'adquisiciones')) && 
       				(rec.data['fecha_conformidad'] == '' || rec.data['fecha_conformidad'] == undefined || rec.data['fecha_conformidad'] == null)
-      				&& (record.data.tipo=='devengado'  || record.data.tipo=='devengado_pagado' || record.data.tipo=='devengado_pagado_1c')) {
+      				&& (rec.data.tipo=='devengado'  || rec.data.tipo=='devengado_pagado' || rec.data.tipo=='devengado_pagado_1c')) {
       		Ext.Msg.show({
 			   title:'Confirmación',
 			   scope: this,
