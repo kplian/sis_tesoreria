@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -1299,6 +1297,7 @@ BEGIN
                 
              END IF;
              
+             /*Se comenta la conformidad implicita
              if (v_estado_aux = 'borrador') then
              
              
@@ -1317,7 +1316,7 @@ BEGIN
                   where pp.id_plan_pago = v_id_plan_pago;
                  
                  v_resp_doc = wf.f_verifica_documento(v_id_usuario_firma, v_id_estado_actual);
-             end if;
+             end if;*/
              
              --si viene del estado vobo finanzas actualizamos el depto de libro de bancos
              if (v_estado_aux = 'vbfin') then
@@ -1465,13 +1464,13 @@ BEGIN
             where usu.id_usuario = p_id_usuario;
             
             
-            if( (select (case when v_id_persona = fun.id_persona or v_id_persona = usu.id_persona or p_administrador = 1 THEN
-            		'si' else 'no' end)::varchar as puede_firmar
+            if(not exists (select 1
                 from tes.tplan_pago pp
                 inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
-                inner join orga.vfuncionario fun on op.id_funcionario = op.id_funcionario
+                inner join orga.tfuncionario fun on op.id_funcionario = op.id_funcionario
                 inner join segu.vusuario usu on usu.id_usuario = op.id_usuario_reg 
-                where pp.id_plan_pago = v_parametros.id_plan_pago) == 'no') then
+                where pp.id_plan_pago = v_parametros.id_plan_pago and 
+                (v_id_persona = fun.id_persona or v_id_persona = usu.id_persona or p_administrador = 1))) then
             	raise exception 'Solo el solicitante y el usuario que registro la obligacion pueden generar la conformidad';
             end if; 
             

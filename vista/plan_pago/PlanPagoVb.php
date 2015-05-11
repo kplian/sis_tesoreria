@@ -358,7 +358,8 @@ Phx.vista.PlanPagoVb = {
          this.menuAdq.enable();
          this.getBoton('diagrama_gantt').enable();
          
-         if (data['fecha_conformidad'] == '' || data['fecha_conformidad'] == undefined || data['fecha_conformidad'] == null) {
+         if ((data['fecha_conformidad'] == '' || data['fecha_conformidad'] == undefined || data['fecha_conformidad'] == null) && 
+           (data.tipo=='devengado'  || data.tipo=='devengado_pagado' || data.tipo=='devengado_pagado_1c')) {
          	this.getBoton('btnConformidad').enable();
          } else {
          	this.getBoton('btnConformidad').disable();
