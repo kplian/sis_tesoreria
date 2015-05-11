@@ -262,7 +262,7 @@ class ACTPlanPago extends ACTbase{
 		//Instancia la clase de pdf
 		$this->objReporteFormato=new RConformidad($this->objParam);
 				
-		$firma = $this->objReporteFormato->generarReporte($this->res->getDatos());
+		$firma = $this->objReporteFormato->generarActa($this->res->getDatos());
 		$this->objReporteFormato->output($this->objReporteFormato->url_archivo,'F');
 		
 		$this->mensajeExito=new Mensaje();

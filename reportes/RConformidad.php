@@ -20,7 +20,7 @@ class RConformidad extends  ReportePDFFormulario {
 		$this->firmar();
 	}
 	
-	function generarReporte($maestro) {
+	function generarActa($maestro) {
 		
 		$nombre_solicitante = $maestro[0]['nombre_solicitante'];	
 		$proveedor = $maestro[0]['proveedor'];
