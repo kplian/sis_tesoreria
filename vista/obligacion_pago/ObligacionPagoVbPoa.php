@@ -11,15 +11,15 @@
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
-Phx.vista.ObligacionPagoVb = {
+Phx.vista.ObligacionPagoVbPoa = {
     bedit:false,
     bnew:false,
     bsave:false,
     bdel:true,
 	require:'../../../sis_tesoreria/vista/obligacion_pago/ObligacionPago.php',
 	requireclase:'Phx.vista.ObligacionPago',
-	title:'Obligacion de Pago (Vistos buenos)',
-	nombreVista: 'ObligacionPagoVb',
+	title:'Obligacion de Pago (POA)',
+	nombreVista: 'ObligacionPagoVbPoa',
 	/*
 	 *  Interface heredada para el sistema de adquisiciones para que el reposnable 
 	 *  de adqusiciones registro los planes de pago , y ase por los pasos configurados en el WF
@@ -52,8 +52,8 @@ Phx.vista.ObligacionPagoVb = {
            }];
            
            
-	   Phx.vista.ObligacionPagoVb.superclass.constructor.call(this,config);
-       this.addButton('obs_presu',{text:'Obs. Presupuestos', disabled:true, handler: this.initObs, tooltip: '<b>Observacioens del área de presupuesto</b>'});
+	   Phx.vista.ObligacionPagoVbPoa.superclass.constructor.call(this,config);
+       this.addButton('obs_poa',{text:'Datos. POA', disabled:true, handler: this.initObs, tooltip: '<b>Registro de datos del área de POA</b>'});
        this.crearFormObs();
         
         
@@ -220,12 +220,24 @@ Phx.vista.ObligacionPagoVb = {
             autoHeight: true,
             items: [
                  {
-                    name: 'obs',
-                    xtype: 'textarea',
-                    fieldLabel: 'Obs',
+                    name: 'codigo_poa',
+                    xtype: 'textfield',
+                    fieldLabel: 'Código POA',
+                    allowBlank: false,
                     grow: true,
                     growMin : '80%',
+                    value:'',
+                    anchor: '80%',
+                    maxLength:500
+                },
+                 
+                 {
+                    name: 'obs_poa',
+                    xtype: 'textarea',
+                    fieldLabel: 'Obs POA',
                     allowBlank: true,
+                    grow: true,
+                    growMin : '80%',
                     value:'',
                     anchor: '80%',
                     maxLength:500
@@ -249,7 +261,7 @@ Phx.vista.ObligacionPagoVb = {
             closeAction: 'hide',
             buttons: [{
                     text: 'Guardar',
-                    handler: this.submitObsPresupuestos,
+                    handler: this.submitObsPoa,
                     scope: this
                     
              },
@@ -260,23 +272,26 @@ Phx.vista.ObligacionPagoVb = {
             }]
         });
         
-        this.cmbObsPres = this.formObs.getForm().findField('obs');
+        this.cmbObsPoa = this.formObs.getForm().findField('obs_poa');
+        this.cmbCodigoPoa = this.formObs.getForm().findField('codigo_poa');
 	},
 	
 	initObs:function(){
 		var d= this.sm.getSelected().data;
-        this.cmbObsPres.setValue(d.obs_presupuestos);
+        this.cmbCodigoPoa.setValue(d.codigo_poa);
+        this.cmbObsPoa.setValue(d.obs_poa);
 		this.wObs.show()
 	},
 	
-	submitObsPresupuestos:function(){
+	submitObsPoa:function(){
 		    Phx.CP.loadingShow();
 		    var d= this.sm.getSelected().data;
             Ext.Ajax.request({
-                url: '../../sis_tesoreria/control/ObligacionPago/modificarObsPresupuestos',
+                url: '../../sis_tesoreria/control/ObligacionPago/modificarObsPoa',
                 params: {
                     id_obligacion_pago: d.id_obligacion_pago,
-                    obs: this.cmbObsPres.getValue()
+                    obs_poa: this.cmbObsPoa.getValue(),
+                    codigo_poa: this.cmbCodigoPoa.getValue()
                     },
                 success: function(resp){
                            Phx.CP.loadingHide();
@@ -302,21 +317,18 @@ Phx.vista.ObligacionPagoVb = {
    preparaMenu:function(n){
           var data = this.getSelectedData();
           var tb =this.tbar;
-          Phx.vista.ObligacionPagoVb.superclass.preparaMenu.call(this,n); 
-          
-          if(this.historico == 'no'){
-          	this.getBoton('obs_presu').enable();
+          Phx.vista.ObligacionPagoVbPoa.superclass.preparaMenu.call(this,n); 
+          this.getBoton('obs_poa').enable();
+          if(this.historico != 'no'){
+          	this.desBotoneshistorico();
           }
-	      else{
-	    	this.desBotoneshistorico()
-	      }	
 	
   },
   liberaMenu:function(){
 	  	
-        var tb = Phx.vista.ObligacionPagoVb.superclass.liberaMenu.call(this);
+        var tb = Phx.vista.ObligacionPagoVbPoa.superclass.liberaMenu.call(this);
         if(tb){
-            this.getBoton('obs_presu').enable();
+            this.getBoton('obs_poa').enable();
         }
 	    
        return tb

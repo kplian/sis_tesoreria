@@ -78,6 +78,8 @@ class MODObligacionPago extends MODbase{
 		$this->captura('desc_contrato','text');
 		$this->captura('id_contrato','integer');
 		$this->captura('obs_presupuestos','varchar');
+		$this->captura('obs_poa','varchar');
+		$this->captura('codigo_poa','varchar');
 		
 		
 		
@@ -299,6 +301,27 @@ class MODObligacionPago extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+	
+	function modificarObsPoa(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_obligacion_pago_ime';
+		$this->transaccion='TES_OBSPOA_MOD';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
+		$this->setParametro('obs_poa','obs_poa','varchar');
+		$this->setParametro('codigo_poa','codigo_poa','varchar');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
+	
 	
 	
 	

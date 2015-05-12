@@ -775,7 +775,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		'ultimo_estado_pp',
 		'tipo_anticipo',
 		'ajuste_anticipo',
-		'ajuste_aplicado',
+		'ajuste_aplicado', 'codigo_poa','obs_poa',
 		'monto_estimado_sg','id_obligacion_pago_extendida', 'obs_presupuestos','id_contrato','desc_contrato'
 		
 	],
@@ -793,7 +793,9 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Contrato:&nbsp;&nbsp;</b> {desc_contrato}</p>',
 		            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Depto:&nbsp;&nbsp;</b> {nombre_depto}</p>',
 		            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Justificación:&nbsp;&nbsp;</b> {obs}</p>',
-		            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Obs del área de presupeustos:&nbsp;&nbsp;</b> {obs_presupuestos}</p><br>'
+		            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Obs del área de presupeustos:&nbsp;&nbsp;</b> {obs_presupuestos}</p>',
+		            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Obs del área de POA:&nbsp;&nbsp;</b> {codigo_poa} - {obs_poa}</p><br>'
+		       
 		       )
 	    }),
 	
@@ -985,7 +987,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                 }
                 else{
                 	if(d.estado =='borrador'  && d.tipo_obligacion != 'adquisiciones'){
-                        alert('La solicitud pasara al área de presupuestos para verificación')
+                        alert('La solicitud pasara a las áreaa de poa y presupuestos para verificación')
                     }
                 
 	                Phx.CP.loadingShow();
@@ -1152,9 +1154,9 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                	 this.getBoton('extenderop').disable();
                }
                
-               if (data['estado'] == 'vbpresupuestos'){
+               if (data['estado'] == 'vbpresupuestos' || data['estado'] == 'vbpoa'){
                     
-                    if (this.nombreVista == 'ObligacionPagoVb'){
+                    if (this.nombreVista == 'ObligacionPagoVb' || this.nombreVista == 'ObligacionPagoVbPoa'){
                     	this.getBoton('fin_registro').enable();
                     	this.getBoton('ant_estado').enable();
                     }

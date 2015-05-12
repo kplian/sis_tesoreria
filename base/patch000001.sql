@@ -1162,3 +1162,39 @@ IS 'define el depto de conta que contabiliza el pago, ...  no consideramos ep, c
 
 
 /*****************************F-SCP-RCM-TES-0-17/04/2015*************/
+
+
+
+
+
+/*****************************I-SCP-RAC-TES-0-12/05/2015*************/
+
+
+--------------- SQL ---------------
+
+-- object recreation
+ALTER TABLE tes.tobligacion_pago
+  DROP CONSTRAINT chk_tobligacion_pago__estado RESTRICT;
+
+ALTER TABLE tes.tobligacion_pago
+  ADD CONSTRAINT chk_tobligacion_pago__estado CHECK ((estado)::text = ANY (ARRAY[('borrador'::character varying)::text, ('registrado'::character varying)::text, ('en_pago'::character varying)::text, ('finalizado'::character varying)::text, ('vbpoa'::character varying)::text, ('vbpresupuestos'::character varying)::text, ('anulado'::character varying)::text]));
+ 
+ 
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN codigo_poa VARCHAR;
+
+COMMENT ON COLUMN tes.tobligacion_pago.codigo_poa
+IS 'Codigo de actividad POA';
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN obs_poa VARCHAR;
+
+COMMENT ON COLUMN tes.tobligacion_pago.obs_poa
+IS 'par ainsertar al guna observacion de POA';
+
+/*****************************F-SCP-RAC-TES-0-12/05/2015*************/
+

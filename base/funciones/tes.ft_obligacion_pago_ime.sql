@@ -183,7 +183,7 @@ BEGIN
 
 		begin
         
-         
+           --raise exception 'sss';
         
             select 
                op.id_funcionario,
@@ -236,6 +236,7 @@ BEGIN
             END IF;
             
            
+           
             --raise exception 'sss %',va_id_funcionario_gerente[1];
             
 			--Sentencia de la modificacion
@@ -265,7 +266,7 @@ BEGIN
             
 			where id_obligacion_pago = v_parametros.id_obligacion_pago;
             
-            
+           
             -------------------------------------
             -- COPIA CONTRATOS,  si es un pago recurrente
             -- si viene de adquiscioens y elnumero de de tramite del troato es el mismo que la obligacion no es encesario copiar
@@ -582,12 +583,12 @@ BEGIN
              
              --VALIDACIONES
              
-             IF  v_codigo_estado NOT in  ('borrador','vbpresupuestos','en_pago') THEN
+             IF  v_codigo_estado NOT in  ('borrador','vbpresupuestos','en_pago','vbpoa') THEN
                raise exception 'Solo se admiten obligaciones  en borrador o en pago o visto vbpresupuestos';
              END IF;
 			
             
-            IF  v_codigo_estado in ('borrador', 'vbpresupuestos' ) THEN
+            IF  v_codigo_estado in ('borrador','vbpoa','vbpresupuestos' ) THEN
         
              --validamos que el detalle tenga por lo menos un item con valor
              
@@ -1753,7 +1754,33 @@ BEGIN
             return v_resp;
 
 		end; 
-        
+     /*********************************    
+ 	#TRANSACCION:  'TES_OBSPOA_MOD'
+ 	#DESCRIPCION:	Modificar las observaciones del área de POA
+                    
+ 	#AUTOR:	        Rensi Arteaga Copari
+ 	#FECHA:		    1-4-2015 14:48:35
+	***********************************/
+
+	elsif(p_transaccion='TES_OBSPOA_MOD')then
+
+		begin
+			
+         
+             update tes.tobligacion_pago set  
+              obs_poa = v_parametros.obs_poa,
+              codigo_poa = v_parametros.codigo_poa
+             where id_obligacion_pago = v_parametros.id_obligacion_pago;
+           
+             --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obs poa en obligaciones de pago'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_parametros.id_obligacion_pago::varchar);
+            
+              
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;     
           
     
     else

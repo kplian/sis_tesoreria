@@ -1178,3 +1178,11 @@ select pxp.f_insert_testructura_gui ('OPUNI', 'TES');
 
 /***********************************F-DAT-RAC-TES-0-25/02/2015*****************************************/
 
+
+
+/***********************************I-DAT-RAC-TES-0-12/05/2015*****************************************/
+
+select pxp.f_insert_tgui ('VoBo Obligaciones de Pago (POA)', '', 'VBOPOA', 'si', 2, 'sis_tesoreria/vista/obligacion_pago/ObligacionPagoVbPoa.php', 3, '', 'ObligacionPagoVbPoa', 'TES');
+select pxp.f_insert_testructura_gui ('VBOPOA', 'TES');
+
+/***********************************F-DAT-RAC-TES-0-12/05/2015*****************************************/

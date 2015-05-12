@@ -102,6 +102,21 @@ BEGIN
               ELSE
                  v_filadd=' (obpg.estado not in  (''borrador'')) and';
               END IF;
+         ELSIF  v_parametros.tipo_interfaz =  'ObligacionPagoVbPoa' THEN
+         
+         
+                    select  
+                       pxp.aggarray(depu.id_depto)
+                    into 
+                       va_id_depto
+                   from param.tdepto_usuario depu 
+                   where depu.id_usuario =  p_id_usuario; 
+              
+              IF v_historico = 'no' THEN
+                 v_filadd=' (obpg.estado = ''vbpoa'') and';
+              ELSE
+                 v_filadd=' (obpg.estado not in  (''borrador'')) and';
+              END IF;
         
          ELSIF v_parametros.tipo_interfaz =  'ObligacionPagoConsulta' THEN
             --no hay limitaciones ...     
@@ -188,7 +203,9 @@ BEGIN
                               obpg.id_obligacion_pago_extendida,
                               con.tipo||'' - ''||con.numero::varchar as desc_contrato,
                               con.id_contrato,
-                              obpg.obs_presupuestos
+                              obpg.obs_presupuestos,
+                              obpg.codigo_poa,
+                              obpg.obs_poa
                               
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
