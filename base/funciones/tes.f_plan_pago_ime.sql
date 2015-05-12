@@ -930,7 +930,8 @@ BEGIN
            /*jrr:29/10/2014
            1) si el presupuesto no esta comprometido*/
            if (v_registros.comprometido = 'no') then
-           		/*1.1)Validar que la suma de los detalles igualen al total de la obligacion*/
+          
+         		/*1.1)Validar que la suma de los detalles igualen al total de la obligacion*/
                if ((select sum(od.monto_pago_mo) 
                     from tes.tobligacion_det od 
                     where id_obligacion_pago = v_registros.id_obligacion_pago and estado_reg = 'activo') != v_registros.total_pago) THEN
