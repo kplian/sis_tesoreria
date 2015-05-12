@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -1230,7 +1232,8 @@ BEGIN
             pp.total_prorrateado ,
             pp.monto_ejecutar_total_mo,
             pp.estado,
-            pp.id_estado_wf
+            pp.id_estado_wf,
+            op.tipo_obligacion
         into 
             v_id_plan_pago,
             v_id_proceso_wf,
@@ -1240,7 +1243,8 @@ BEGIN
             v_total_prorrateo,
             v_monto_ejecutar_total_mo,
             v_estado_aux,
-            v_id_estado_actual
+            v_id_estado_actual,
+            v_tipo_obligacion
             
         from tes.tplan_pago  pp
         inner  join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
@@ -1248,12 +1252,12 @@ BEGIN
         
          --si esta saliendo de borrador vadamos el rango de gasto
          -- chequea fechas de costos inicio y fin
-         IF(v_estado_aux in ('borrador','vbconta')) THEN
+         IF(v_estado_aux in ('borrador','vbconta', 'vbsolicitante')) THEN
          	v_resp_doc =  tes.f_validar_periodo_costo(v_id_plan_pago);
          END IF;
          
          --validamos que el pago no sea menor a la fecha tentaiva
-         if (v_estado_aux = 'borrador') then
+         if ( (v_estado_aux = 'borrador' and v_tipo_obligacion != 'adquisiciones'    and v_tipo_obligacion != 'rrhh' ) or v_estado_aux = 'vbsolicitante' ) then
             IF  v_fecha_tentativa::date > (now()::date + CAST('2 days' AS INTERVAL))::date THEN
                raise exception 'No puede adelantar el pago,  la fecha tentativa esta marcada para el %', to_char(v_fecha_tentativa,'DD/MM/YYYY/');
             END IF;
