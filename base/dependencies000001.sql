@@ -5975,8 +5975,6 @@ AS
 /***********************************F-DEP-JRR-TES-0-11/02/2015****************************************/
 
 /***********************************I-DEP-JRR-TES-0-13/02/2015****************************************/
- -- object recreation
-DROP VIEW tes.vcomp_devtesprov_plan_pago_2;
 
 CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
     id_plan_pago,
@@ -6275,10 +6273,8 @@ AS
 
 --------------- SQL ---------------
 
- -- object recreation
-DROP VIEW tes.vcomp_devtesprov_plan_pago_2;
 
-CREATE VIEW tes.vcomp_devtesprov_plan_pago_2
+CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2
 AS
   SELECT pp.id_plan_pago,
          op.id_proveedor,
@@ -6430,9 +6426,8 @@ ALTER TABLE tes.vcomp_devtesprov_plan_pago_2
 
 --------------- SQL ---------------
 
-DROP VIEW tes.vcomp_devtesprov_plan_pago;
 
-CREATE VIEW tes.vcomp_devtesprov_plan_pago (
+CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago (
     id_plan_pago,
     id_proveedor,
     desc_proveedor,
@@ -6747,7 +6742,7 @@ AS
 
 --------------- SQL ---------------
 
-CREATE VIEW tes.vcomp_devtesprov_plan_pago_2 (
+CREATE or REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2 (
     id_plan_pago,
     id_proveedor,
     desc_proveedor,
