@@ -221,7 +221,7 @@ BEGIN
                 
                 select id_depto into v_id_depto
                 from param.tdepto
-                where codigo='OP';
+                where codigo='OP-CBB';
                 
                 IF v_id_depto IS NULL THEN
                 	raise exception 'No existe un departamento con el codigo Obligaciones de Pago';
