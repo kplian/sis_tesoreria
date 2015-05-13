@@ -144,8 +144,9 @@ DECLARE
      v_id_documento_wf_op		integer;
      v_id_usuario_reg_op        integer;
      v_habilitar_copia_contrato	boolean;
-     v_ano_1 integer;
-     v_ano_2 integer;
+     v_ano_1 					integer;
+     v_ano_2 					integer;
+     v_sw_saltar 				boolean;
 
      
 			    
@@ -877,6 +878,8 @@ BEGIN
             --  TODO considerar el saldo de anticipo, menos  el total a pagar para determinar el monto, considerar numero de cuota
             
             --  si llegando al estado registrado,  verifica el total de cuotas y las inserta
+            
+            
             --  con la plantilla por defecto 
             IF  va_codigo_estado[1] = 'registrado'  and v_total_nro_cuota > 0 THEN 
             
@@ -939,9 +942,17 @@ BEGIN
                             
                           
                             --TODO,  bloquear en formulario de OP  facturas con monto excento
-                           
+                            
+                            
+                            -- si es un proceso de pago unico,  la primera cuota pasa de borrador al siguiente estado de manera automatica 
+                            IF  v_tipo_obligacion = 'pago_unico' and   v_i = 1   THEN
+                               v_sw_saltar = TRUE;
+                            else
+                               v_sw_saltar = FALSE;
+                            END IF;
+                             
                             -- llamada para insertar plan de pagos
-                            v_resp = tes.f_inserta_plan_pago_dev(p_administrador, v_id_usuario_reg_op,v_hstore_pp);
+                            v_resp = tes.f_inserta_plan_pago_dev(p_administrador, v_id_usuario_reg_op,v_hstore_pp, v_sw_saltar);
                             
                             -- calcula la fecha para la siguiente insercion
                             v_fecha_pp_ini =  v_fecha_pp_ini + interval  '1 month'*v_rotacion;

@@ -3,7 +3,8 @@
 CREATE OR REPLACE FUNCTION tes.f_inserta_plan_pago_dev (
   p_administrador integer,
   p_id_usuario integer,
-  p_hstore public.hstore
+  p_hstore public.hstore,
+  p_salta boolean = false
 )
 RETURNS varchar AS
 $body$
@@ -609,6 +610,14 @@ BEGIN
               raise exception 'Error al prorratear';
                      
 			END IF;
+            
+            --si el salto esta habilitado cambiamos la cuota al siguiente estado 
+            IF p_salta  and v_registros.pago_variable = 'no' THEN
+                  IF not tes.f_cambio_estado_plan_pago(p_id_usuario, v_id_plan_pago) THEN
+                    raise exception 'error al cambiar de estado';
+                  END IF;
+            END IF;
+            
 			--Definicion de la respuesta
 			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Plan Pago almacenado(a) con exito (id_plan_pago'||v_id_plan_pago::varchar||')'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_plan_pago',v_id_plan_pago::varchar);
