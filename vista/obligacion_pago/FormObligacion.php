@@ -724,9 +724,10 @@ Phx.vista.FormObligacion=Ext.extend(Phx.frmInterfaz,{
                  
                  this.cmpFuncionario.store.load({params:{start:0,limit:this.tam_pag}, 
                        callback : function (r) {
-                            Phx.CP.loadingHide();                        
+                            Phx.CP.loadingHide();  
                             if (r.length == 1 ) {                        
                                 this.cmpFuncionario.setValue(r[0].data.id_funcionario);
+                                this.cmpFuncionario.fireEvent('select',  this.cmpFuncionario, r[0]);
                             }     
                                             
                         }, scope : this
@@ -763,12 +764,22 @@ Phx.vista.FormObligacion=Ext.extend(Phx.frmInterfaz,{
             	
             	if(!record.data.id_lugar){
             		alert('El funcionario no tiene oficina definida');
+            		return
             	}
             	
             	this.Cmp.id_depto.reset();
             	this.Cmp.id_depto.store.baseParams.id_lugar = record.data.id_lugar;
             	this.Cmp.id_depto.modificado = true;
             	this.Cmp.id_depto.enable();
+            	
+            	this.Cmp.id_depto.store.load({params:{start:0,limit:this.tam_pag}, 
+		           callback : function (r) {
+		                if (r.length == 1 ) {                       
+		                    this.Cmp.id_depto.setValue(r[0].data.id_depto);
+		                }    
+		                                
+		            }, scope : this
+		        });
             	
             	
             }, this);

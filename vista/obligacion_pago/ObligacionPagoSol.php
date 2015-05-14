@@ -75,6 +75,7 @@ Phx.vista.ObligacionPagoSol = {
                             Phx.CP.loadingHide();                        
                             if (r.length == 1 ) {                        
                                 this.cmpFuncionario.setValue(r[0].data.id_funcionario);
+                                this.cmpFuncionario.fireEvent('select',  this.cmpFuncionario, r[0]);
                             }     
                                             
                         }, scope : this
@@ -83,7 +84,30 @@ Phx.vista.ObligacionPagoSol = {
                  
              },this);
              
-            
+             
+           this.Cmp.id_funcionario.on('select', function(combo, record, index){ 
+            	
+            	if(!record.data.id_lugar){
+            		alert('El funcionario no tiene oficina definida');
+            		return
+            	}
+            	
+            	this.Cmp.id_depto.reset();
+            	this.Cmp.id_depto.store.baseParams.id_lugar = record.data.id_lugar;
+            	this.Cmp.id_depto.modificado = true;
+            	this.Cmp.id_depto.enable();
+            	
+            	this.Cmp.id_depto.store.load({params:{start:0,limit:this.tam_pag}, 
+		           callback : function (r) {
+		                if (r.length == 1 ) {                       
+		                    this.Cmp.id_depto.setValue(r[0].data.id_depto);
+		                }    
+		                                
+		            }, scope : this
+		        });
+            	
+            	
+            }, this);
             
             this.ocultarComponente(this.cmpProveedor);
             this.mostrarComponente(this.cmpFuncionario);
@@ -108,14 +132,14 @@ Phx.vista.ObligacionPagoSol = {
                     
                     n=rec.data.variable;
                     
-                    if(n=='adquisiciones' ||n == 'pago_directo'){
+                    if(n == 'adquisiciones' || n == 'pago_directo'){
                         this.cmpProveedor.enable();
                         this.mostrarComponente(this.cmpProveedor);
                         this.mostrarComponente(this.cmpFuncionario);
                         this.ocultarComponente(this.cmpFuncionarioProveedor);
                         this.cmpFuncionario.reset();
                     }else{
-                        if(n=='viatico' || n == 'fondo_en_avance'){
+                        if(n =='viatico' || n == 'fondo_en_avance'){
                                 this.cmpFuncionario.enable();
                                 this.mostrarComponente(this.cmpFuncionario);
                                 this.ocultarComponente(this.cmpProveedor);
