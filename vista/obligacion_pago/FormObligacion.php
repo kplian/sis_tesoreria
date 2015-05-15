@@ -857,7 +857,7 @@ Phx.vista.FormObligacion=Ext.extend(Phx.frmInterfaz,{
 		}
    	    me.argumentExtraSubmit = { 'json_new_records': Ext.encode(arra) };
    	    if(this.evaluaRequistos()){
-	   	    if( i > 0){
+	   	    if( i > 0 &&  !this.editorDetail.isVisible()){
 	   	    	 Phx.vista.FormObligacion.superclass.onSubmit.call(this,o);
 	   	    }
 	   	    else{
