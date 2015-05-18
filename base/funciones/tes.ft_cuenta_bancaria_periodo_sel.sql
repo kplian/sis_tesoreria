@@ -1,7 +1,11 @@
-CREATE OR REPLACE FUNCTION "tes"."ft_cuenta_bancaria_periodo_sel"(	
-				p_administrador integer, p_id_usuario integer, p_tabla character varying, p_transaccion character varying)
-RETURNS character varying AS
-$BODY$
+CREATE OR REPLACE FUNCTION tes.ft_cuenta_bancaria_periodo_sel (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Sistema de Obligaciones de Pago
  FUNCION: 		tes.ft_cuenta_bancaria_periodo_sel
@@ -44,7 +48,10 @@ BEGIN
 						perctab.id_cuenta_bancaria_periodo,
 						perctab.id_cuenta_bancaria,
 						perctab.estado,
+                        ges.gestion,
 						perctab.id_periodo,
+                        per.periodo,
+                        pxp.f_obtener_literal_periodo(per.periodo,10) as nombre_periodo,
 						perctab.estado_reg,
 						perctab.id_usuario_ai,
 						perctab.fecha_reg,
@@ -55,6 +62,8 @@ BEGIN
 						usu1.cuenta as usr_reg,
 						usu2.cuenta as usr_mod	
 						from tes.tcuenta_bancaria_periodo perctab
+                        inner join param.tperiodo per on per.id_periodo=perctab.id_periodo
+                        inner join param.tgestion ges on ges.id_gestion=per.id_gestion
 						inner join segu.tusuario usu1 on usu1.id_usuario = perctab.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = perctab.id_usuario_mod
 				        where  ';
@@ -81,6 +90,8 @@ BEGIN
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(id_cuenta_bancaria_periodo)
 					    from tes.tcuenta_bancaria_periodo perctab
+                        inner join param.tperiodo per on per.id_periodo=perctab.id_periodo
+                        inner join param.tgestion ges on ges.id_gestion=per.id_gestion
 					    inner join segu.tusuario usu1 on usu1.id_usuario = perctab.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = perctab.id_usuario_mod
 					    where ';
@@ -108,7 +119,9 @@ EXCEPTION
 			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
 			raise exception '%',v_resp;
 END;
-$BODY$
-LANGUAGE 'plpgsql' VOLATILE
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
 COST 100;
-ALTER FUNCTION "tes"."ft_cuenta_bancaria_periodo_sel"(integer, integer, character varying, character varying) OWNER TO postgres;

@@ -122,10 +122,12 @@ BEGIN
             IF (g_id_cuenta_bancaria_periodo IS NULL) THEN
                   
                 INSERT INTO tes.tcuenta_bancaria_periodo(
+				id_usuario_reg,
                 id_cuenta_bancaria,
                 id_periodo,
                 estado
                 )VALUES(
+				1,
                 v_parametros.id_cuenta_bancaria,
                 g_id_periodo,
                 'abierto'
