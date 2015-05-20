@@ -287,7 +287,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                 valueField: 'id_funcionario',
                 gdisplayField: 'desc_funcionario',
                 baseParams: { es_combo_solicitud : 'si' },
-                renderer:function(value, p, record){return String.format('{0}', record.data['desc_funcionario']);}
+                renderer:function(value, p, record){return String.format('{0}', record.data['desc_funcionario1']);}
              },
             type:'ComboRec',//ComboRec
             id_grupo:1,
@@ -774,7 +774,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
 		'ultima_cuota_pp',
 		'ultimo_estado_pp',
 		'tipo_anticipo',
-		'ajuste_anticipo',
+		'ajuste_anticipo','desc_funcionario1',
 		'ajuste_aplicado', 'codigo_poa','obs_poa',
 		'monto_estimado_sg','id_obligacion_pago_extendida', 'obs_presupuestos','id_contrato','desc_contrato'
 		

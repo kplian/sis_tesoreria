@@ -244,20 +244,19 @@ BEGIN
 
 		begin
         
-          v_filadd='';
+         v_filadd='';
           v_inner='';
-           
+          
           IF  pxp.f_existe_parametro(p_tabla,'historico') THEN
              v_historico =  v_parametros.historico;
           ELSE
             v_historico = 'no';
           END IF;
           
-          --  raise exception 'cc  %',v_parametros.tipo_interfaz  ;
-        IF   v_parametros.tipo_interfaz ='obligacionPagoTes' THEN
+        
+         IF   v_parametros.tipo_interfaz in ('obligacionPagoTes','obligacionPagoUnico') THEN
            
-                
-                IF   p_administrador != 1 THEN
+                 IF   p_administrador != 1 THEN
                  
                    select  
                        pxp.aggarray(depu.id_depto)
@@ -276,11 +275,13 @@ BEGIN
                 ELSE
                    v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_directo'' and';
                 END IF;
-        
-        ELSIF  v_parametros.tipo_interfaz =  'ObligacionPagoVb' THEN
+              
+                
+                
+         ELSIF  v_parametros.tipo_interfaz =  'ObligacionPagoVb' THEN
          
          
-                select  
+                    select  
                        pxp.aggarray(depu.id_depto)
                     into 
                        va_id_depto
@@ -291,15 +292,33 @@ BEGIN
                  v_filadd=' (obpg.estado = ''vbpresupuestos'') and';
               ELSE
                  v_filadd=' (obpg.estado not in  (''borrador'')) and';
-              END IF;        
+              END IF;
+         ELSIF  v_parametros.tipo_interfaz =  'ObligacionPagoVbPoa' THEN
+         
+         
+                    select  
+                       pxp.aggarray(depu.id_depto)
+                    into 
+                       va_id_depto
+                   from param.tdepto_usuario depu 
+                   where depu.id_usuario =  p_id_usuario; 
+              
+              IF v_historico = 'no' THEN
+                 v_filadd=' (obpg.estado = ''vbpoa'') and';
+              ELSE
+                 v_filadd=' (obpg.estado not in  (''borrador'')) and';
+              END IF;
         
          ELSIF v_parametros.tipo_interfaz =  'ObligacionPagoConsulta' THEN
-           --no se colocan retricciones
+            --no hay limitaciones ...     
          ELSIF v_parametros.tipo_interfaz =  'ObligacionPagoApropiacion' THEN
-           --no hay limitaciones ...
+            --no hay limitaciones ... 
          ELSIF v_parametros.tipo_interfaz =  'ObligacionPagoConta' THEN
-           --no hay limitaciones ... 
+            --no hay limitaciones ...
          ELSE
+         
+         
+         
 
                 --SI LA NTERFACE VIENE DE ADQUISIONES   
           
@@ -318,8 +337,8 @@ BEGIN
                 
                 v_inner = '
                               inner join adq.tcotizacion cot on cot.id_obligacion_pago = obpg.id_obligacion_pago
-                              inner join adq.tproceso_compra pc on pc.id_proceso_compra = cot.id_proceso_compra';      
-        END IF;    
+                              inner join adq.tproceso_compra pc on pc.id_proceso_compra = cot.id_proceso_compra  ';      
+        END IF;  
         
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(obpg.id_obligacion_pago)
