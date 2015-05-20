@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -146,7 +144,10 @@ DECLARE
     v_operacion 				varchar;
     v_id_depto_lb				integer;
     v_id_usuario_firma			integer;
-    v_id_persona				integer;   
+    v_id_persona				integer;
+    v_exception_detail			varchar;
+    v_exception_context			varchar;
+       
 			    
 BEGIN
 
@@ -163,7 +164,7 @@ BEGIN
 	if(p_transaccion='TES_PLAPA_INS')then
 					
         begin
-        
+        	
         	select tipo_obligacion into v_tipo_obligacion
             from tes.tobligacion_pago
             where id_obligacion_pago = v_parametros.id_obligacion_pago;
@@ -238,7 +239,7 @@ BEGIN
 	elsif(p_transaccion='TES_PLAPA_MOD')then
 
 		begin
-        
+        	raise exception 'prueba';
            --determinar exixtencia de parametros dinamicos para registro  
            -- (Interface de obligacions de adquisocines o interface de obligaciones tesoeria)
            -- la adquisiciones tiene menos parametros presentes
@@ -1487,6 +1488,10 @@ BEGIN
             inner join segu.tusuario usu on fun.id_persona = usu.id_persona
             where pp.id_plan_pago = v_parametros.id_plan_pago;
             
+            if v_id_usuario_firma is null then
+            	raise exception 'El funcionario del proceso no tiene usuario en el sistema para firmar el acta de conformidad';
+            end if;
+            
            update tes.tplan_pago
            set conformidad = v_parametros.conformidad,
            fecha_conformidad = v_parametros.fecha_conformidad
@@ -1588,8 +1593,9 @@ EXCEPTION
 				
 	WHEN OTHERS THEN
     	select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'error'); 
-		v_resp='';
-		v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+		v_resp=''; 
+           
+		v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);        
 		v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
 		v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
 		raise exception '%',v_resp;

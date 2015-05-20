@@ -601,10 +601,14 @@ class MODPlanPago extends MODbase{
 		$this->captura('numero_oc','varchar');
 		$this->captura('numero_op','varchar');
 		$this->captura('numero_cuota','numeric');
+		$this->captura('numero_tramite','varchar');	
+		$this->captura('detalle','text');
+		$this->captura('tipo','varchar');		
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
+		
 		
 		//Devuelve la respuesta
 		return $this->respuesta;
