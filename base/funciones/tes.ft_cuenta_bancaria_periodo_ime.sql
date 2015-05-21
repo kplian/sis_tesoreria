@@ -1,8 +1,11 @@
-CREATE OR REPLACE FUNCTION "tes"."ft_cuenta_bancaria_periodo_ime" (	
-				p_administrador integer, p_id_usuario integer, p_tabla character varying, p_transaccion character varying)
-RETURNS character varying AS
-$BODY$
-
+CREATE OR REPLACE FUNCTION tes.ft_cuenta_bancaria_periodo_ime (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Sistema de Obligaciones de Pago
  FUNCION: 		tes.ft_cuenta_bancaria_periodo_ime
@@ -111,6 +114,37 @@ BEGIN
 		end;
 
 	/*********************************    
+ 	#TRANSACCION:  'TES_PERCTABRCER_MOD'
+ 	#DESCRIPCION:	Abrir y cerrar periodo
+ 	#AUTOR:		gsarmiento	
+ 	#FECHA:		10-04-2015 18:40:04
+	***********************************/
+
+	elsif(p_transaccion='TES_PERCTABRCER_MOD')then
+
+		begin
+			--Sentencia de la modificacion
+            if(v_parametros.estado='abierto')then
+                update tes.tcuenta_bancaria_periodo set
+              	estado='cerrado',
+                id_usuario_mod=p_id_usuario
+              	where id_cuenta_bancaria_periodo=v_parametros.id_cuenta_bancaria_periodo;
+            else
+            	update tes.tcuenta_bancaria_periodo set
+	            estado='abierto',
+                id_usuario_mod=p_id_usuario
+              	where id_cuenta_bancaria_periodo=v_parametros.id_cuenta_bancaria_periodo;
+            end if;   
+			--Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Periodos por Cuenta Bancaria modificado(a)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_cuenta_bancaria_periodo',v_parametros.id_cuenta_bancaria_periodo::varchar);
+               
+            --Devuelve la respuesta
+            return v_resp;
+            
+		end;
+    
+    /*********************************    
  	#TRANSACCION:  'TES_PERCTAB_ELI'
  	#DESCRIPCION:	Eliminacion de registros
  	#AUTOR:		gsarmiento	
@@ -149,7 +183,9 @@ EXCEPTION
 		raise exception '%',v_resp;
 				        
 END;
-$BODY$
-LANGUAGE 'plpgsql' VOLATILE
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
 COST 100;
-ALTER FUNCTION "tes"."ft_cuenta_bancaria_periodo_ime"(integer, integer, character varying, character varying) OWNER TO postgres;
