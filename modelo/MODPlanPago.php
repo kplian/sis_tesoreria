@@ -111,6 +111,9 @@ class MODPlanPago extends MODbase{
 		
 		$this->captura('id_depto_conta_pp','integer');
 		$this->captura('desc_depto_conta_pp','varchar');
+		$this->captura('contador_estados','bigint');
+		
+		
 		
 		
 		

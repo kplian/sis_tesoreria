@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -222,8 +224,13 @@ BEGIN
                         depto.nombre as desc_depto_lb,
                         op.ultima_cuota_dev,
                         plapa.id_depto_conta as id_depto_conta_pp,
-                        depc.nombre_corto as desc_depto_conta_pp                   
+                        depc.nombre_corto as desc_depto_conta_pp,
+                        (select count(*)
+                             from unnest(pwf.id_tipo_estado_wfs) elemento
+                             where elemento = ew.id_tipo_estado) as contador_estados
+                                                
                         from tes.tplan_pago plapa
+                        inner join wf.tproceso_wf pwf on pwf.id_proceso_wf = plapa.id_proceso_wf 
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
                         inner join param.tmoneda mon on mon.id_moneda = op.id_moneda
                         '||v_inner||'  

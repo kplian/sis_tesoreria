@@ -315,7 +315,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         {
             config:{
                 name: 'estado',
-                fieldLabel: 'Estado',
+                fieldLabel: 'Estado - (Rev)',
                 allowBlank: true,
                 renderer:function(value_ori,p,record){
                         
@@ -324,11 +324,11 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                         	value = 'contabilizado '
                         }
                         
-                        if(record.data.total_prorrateado!=record.data.monto_ejecutar_total_mo ){
-                             return String.format('<b><font color="red">{0}</font></b>', value);
+                        if(record.data.total_prorrateado!=record.data.monto_ejecutar_total_mo || record.data.contador_estados > 1){
+                             return String.format('<div title="Número de revisiones: {1}"><b><font color="red">{0} - ({1})</font></b></div>', value, record.data.contador_estados);
                          }
                           else{
-                            return String.format('{0}', value);
+                            return String.format('<div title="Número de revisiones: {1}">{0} - ({1})</div>', value, record.data.contador_estados);
                         }},
                 anchor: '80%',
                 gwidth: 100,
@@ -1211,7 +1211,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'conformidad',
 		'tipo_obligacion',
 		'monto_ajuste_ag',
-		'monto_ajuste_siguiente_pag','pago_variable','monto_anticipo',
+		'monto_ajuste_siguiente_pag','pago_variable','monto_anticipo','contador_estados',
 		{name:'fecha_costo_ini', type: 'date',dateFormat:'Y-m-d'},
 		{name:'fecha_costo_fin', type: 'date',dateFormat:'Y-m-d'},
 		'id_depto_conta_pp','desc_depto_conta_pp','funcionario_wf','tiene_form500','id_depto_lb','desc_depto_lb',{name:'ultima_cuota_dev',type:'numeric'}
