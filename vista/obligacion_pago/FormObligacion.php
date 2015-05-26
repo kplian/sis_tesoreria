@@ -855,7 +855,14 @@ Phx.vista.FormObligacion=Ext.extend(Phx.frmInterfaz,{
     		arra[i].precio_ga = record.data.precio_total;
     		arra[i].precio_sg = 0.0; 
 		}
-   	    me.argumentExtraSubmit = { 'json_new_records': Ext.encode(arra) };
+   	    me.argumentExtraSubmit = { 'json_new_records': JSON.stringify(arra, function replacer(key, value) {
+   	    	
+							    if (typeof value === 'string') {
+							        //return Ext.util.Format.htmlEncode(value);
+							        return String(value).replace(/&/g, "%26")
+							    }
+							    return value;
+							}) };
    	    if(this.evaluaRequistos()){
 	   	    if( i > 0 &&  !this.editorDetail.isVisible()){
 	   	    	 Phx.vista.FormObligacion.superclass.onSubmit.call(this,o);
