@@ -102,7 +102,7 @@ En cumplimiento a politicas de la empresa, se <b>  $accion2  </b> el Fondo en Av
 <td style='width:65%'>  " . strtoupper($working_obj->datos[0]->motivo) . "  </td></tr><tr> 
 <td style='width:30%;padding-right:15px;'>&nbsp;&nbsp;&nbsp;&nbsp;<B>Importe Solicitado &nbsp;&nbsp; :</B></td> 
 <td style='width:65%'>  " . $working_obj->datos[0]->importe . "   Bs.</td></tr></table> 
-<br><b>NOTA: <br/>   " . strtoupper($this->objParam->getParametro('mensaje')) . "   </b><br/><br/>Atte.<br/><b>  " . strtoupper($working_obj->datos[0]->nombre_autorizacion) . "  </b></div></body></html>");
+<br><b>NOTA: <br/>   " . strtoupper($this->objParam->getParametro('mensaje')) . "(" . $this->objParam->getParametro('id_cuenta_documentada') . ")   </b><br/><br/>Atte.<br/><b>  " . strtoupper($working_obj->datos[0]->nombre_autorizacion) . "  </b></div></body></html>");
 		$correo->enviarCorreo();
 		
 		/*Jefe de Unidad y unidad solicitante
