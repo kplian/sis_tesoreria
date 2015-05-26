@@ -4,7 +4,8 @@ CREATE OR REPLACE FUNCTION tes.f_gestionar_cuota_plan_pago_eliminacion (
   p_id_usuario integer,
   p_id_usuario_ai integer,
   p_usuario_ai varchar,
-  p_id_int_comprobante integer
+  p_id_int_comprobante integer,
+  p_conexion varchar = NULL::character varying
 )
 RETURNS boolean AS
 $body$

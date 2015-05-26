@@ -5,7 +5,8 @@ CREATE OR REPLACE FUNCTION tes.f_generar_comprobante (
   p_id_usuario_ai integer,
   p_usuario_ai varchar,
   p_id_plan_pago integer,
-  p_id_depto_conta integer
+  p_id_depto_conta integer,
+  p_conexion varchar = NULL::character varying
 )
 RETURNS varchar [] AS
 $body$
@@ -169,7 +170,7 @@ BEGIN
                            into 
                                v_comprometido,
                                v_ejecutado
-                        FROM pre.f_verificar_com_eje_pag(v_registros_pro.id_partida_ejecucion_com, v_registros.id_moneda);
+                        FROM pre.f_verificar_com_eje_pag(v_registros_pro.id_partida_ejecucion_com, v_registros.id_moneda,p_conexion);
                 
                    
                       --verifica si el presupuesto comprometido sobrante alcanza para devengar
@@ -291,7 +292,7 @@ BEGIN
            ----  Generacion del Comprobante  -----
            ---------------------------------------
         
-            v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,v_registros.codigo_plantilla_comprobante,p_id_usuario,p_id_usuario_ai,p_usuario_ai);
+            v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,v_registros.codigo_plantilla_comprobante,p_id_usuario,p_id_usuario_ai,p_usuario_ai, p_conexion);
            
              --  actualiza el id_comprobante en el registro del plan de pago
             

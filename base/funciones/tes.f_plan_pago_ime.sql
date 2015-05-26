@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -239,7 +241,7 @@ BEGIN
 	elsif(p_transaccion='TES_PLAPA_MOD')then
 
 		begin
-        	raise exception 'prueba';
+        	
            --determinar exixtencia de parametros dinamicos para registro  
            -- (Interface de obligacions de adquisocines o interface de obligaciones tesoeria)
            -- la adquisiciones tiene menos parametros presentes

@@ -4,7 +4,8 @@ CREATE OR REPLACE FUNCTION tes.f_gestionar_cuota_plan_pago (
   p_id_usuario integer,
   p_id_usuario_ai integer,
   p_usuario_ai varchar,
-  p_id_int_comprobante integer
+  p_id_int_comprobante integer,
+  p_conexion varchar = NULL::character varying
 )
 RETURNS boolean AS
 $body$
@@ -441,7 +442,8 @@ BEGIN
                                                        p_id_usuario_ai,
                                                        p_usuario_ai,
                                                        v_id_plan_pago,
-                                                       v_registros.id_depto_conta);
+                                                       v_registros.id_depto_conta,
+                                                       p_conexion);
                          
                           IF v_verficacion2[1]='FALSE'  THEN
                           
