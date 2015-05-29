@@ -16,13 +16,22 @@ class ACTObligacionPago extends ACTbase{
 			
 	function listarObligacionPago(){
 		$this->objParam->defecto('ordenacion','id_obligacion_pago');
-		$this->objParam->defecto('dir_ordenacion','asc');
-		
+		$this->objParam->defecto('dir_ordenacion','asc');		
 		$this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]); 
 		
 		if($this->objParam->getParametro('id_obligacion_pago')!=''){
 			$this->objParam->addFiltro("obpg.id_obligacion_pago = ".$this->objParam->getParametro('id_obligacion_pago'));
 		}
+		
+		if($this->objParam->getParametro('pes_estado')=='otros'){
+             $this->objParam->addFiltro("obpg.tipo_obligacion not  in (''pago_unico'',''pago_directo'')");
+        }
+		if($this->objParam->getParametro('pes_estado')=='pago_directo'){
+             $this->objParam->addFiltro("obpg.tipo_obligacion  in (''pago_directo'')");
+        }
+		if($this->objParam->getParametro('pes_estado')=='pago_unico'){
+             $this->objParam->addFiltro("obpg.tipo_obligacion  in (''pago_unico'')");
+        }
 		
 		if($this->objParam->getParametro('filtro_campo')!=''){
             $this->objParam->addFiltro($this->objParam->getParametro('filtro_campo')." = ".$this->objParam->getParametro('filtro_valor'));  

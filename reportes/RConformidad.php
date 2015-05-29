@@ -19,7 +19,7 @@ class RConformidad extends  ReportePDFFormulario {
         $this->Cell(105, $height, 'ACTA DE CONFORMIDAD', 0, 0, 'C', false, '', 0, false, 'T', 'C');								
 		$x=$this->getX();
 		$y=$this->getY();
-		$this->Image(dirname(__FILE__).$_SESSION['_DIR_LOGO'], $x, $y, 36);
+		$this->Image(dirname(__FILE__).'/../../pxp/lib'.$_SESSION['_DIR_LOGO'], $x, $y, 36);
 		//$this->firmar();
 	}
 	

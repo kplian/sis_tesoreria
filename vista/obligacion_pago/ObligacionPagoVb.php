@@ -20,6 +20,23 @@ Phx.vista.ObligacionPagoVb = {
 	requireclase:'Phx.vista.ObligacionPago',
 	title:'Obligacion de Pago (Vistos buenos)',
 	nombreVista: 'ObligacionPagoVb',
+	
+	gruposBarraTareas:[{name:'pago_unico',title:'<H1 align="center"><i class="fa fa-paper-plane"></i> Pago excepcional</h1>',grupo:0,height:0},
+                       {name:'pago_directo',title:'<H1 align="center"><i class="fa fa-paper-plane-o"></i> Pago Recurrentes</h1>',grupo:1,height:0},
+                       {name:'otros',title:'<H1 align="center"><i class="fa fa-plus-circle"></i> Otros</h1>',grupo:2,height:0}],
+	
+	
+	actualizarSegunTab: function(name, indice){
+    	if(this.finCons){
+    		 this.store.baseParams.pes_estado = name;
+    	     this.load({params:{start:0, limit:this.tam_pag}});
+    	   }
+    },
+	beditGroups: [0,1,2],
+    bdelGroups:   [0,1,2],
+    bactGroups:  [0,1,2],
+    btestGroups:  [0,1,2],
+    bexcelGroups: [0,1,2],
 	/*
 	 *  Interface heredada para el sistema de adquisiciones para que el reposnable 
 	 *  de adqusiciones registro los planes de pago , y ase por los pasos configurados en el WF
@@ -126,7 +143,10 @@ Phx.vista.ObligacionPagoVb = {
         });
         
         this.cmpObs=this.formEstado.getForm().findField('obs');
-         
+        this.store.baseParams.pes_estado = 'pago_unico';
+        this.load({params:{start:0, limit:this.tam_pag}});
+        this.finCons = true;
+		 
     },
     
     submitSigEstado:function(){

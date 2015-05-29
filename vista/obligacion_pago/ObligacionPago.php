@@ -28,13 +28,16 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
            this.store.baseParams.filtro_campo = config.filtro_directo.campo;
         }
 		//carga de grilla
-		this.load({params:{start:0, 
-		           limit:this.tam_pag}});
+		if(this.nombreVista != 'ObligacionPagoVb'){
+			this.load({params:{start:0, limit: this.tam_pag}});
+		}
+		
 		//crear venta de ajuste para pagos variable           
 		this.crearFormAjustes();  
 		this.iniciarEventos();
 	    
          this.addButton('ant_estado',{
+         	  grupo:[0,1,2],
               argument: {estado: 'anterior'},
               text: 'Retroceder',
               iconCls: 'batras',
@@ -43,9 +46,9 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
               tooltip: '<b>Pasar al Anterior Estado</b>'
           });
           
-        this.addButton('fin_registro',{text:'Siguiente',iconCls: 'badelante',disabled:true,handler:this.fin_registro,tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado, si esta en borrador comprometera presupuesto</p>'});
-        this.addButton('reporte_com_ejec_pag',{text:'Rep.',iconCls: 'bpdf32',disabled:true,handler:this.repComEjePag,tooltip: '<b>Reporte</b><p>Reporte Obligacion de Pago</p>'});
-        this.addButton('reporte_plan_pago',{text:'Planes de Pago',iconCls: 'bpdf32',disabled:true,handler:this.repPlanPago,tooltip: '<b>Reporte Plan Pago</b><p>Reporte Planes de Pago</p>'});
+        this.addButton('fin_registro',{grupo:[0,1,2],text:'Siguiente',iconCls: 'badelante',disabled:true,handler:this.fin_registro,tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado, si esta en borrador comprometera presupuesto</p>'});
+        this.addButton('reporte_com_ejec_pag',{grupo:[0,1,2],text:'Rep.',iconCls: 'bpdf32',disabled:true,handler:this.repComEjePag,tooltip: '<b>Reporte</b><p>Reporte Obligacion de Pago</p>'});
+        this.addButton('reporte_plan_pago',{grupo:[0,1,2],text:'Planes de Pago',iconCls: 'bpdf32',disabled:true,handler:this.repPlanPago,tooltip: '<b>Reporte Plan Pago</b><p>Reporte Planes de Pago</p>'});
         
         this.disableTabPagos();
       
@@ -54,6 +57,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
         this.addButton('btnChequeoDocumentosWf',
             {
                 text: 'Documentos',
+                grupo:[0,1,2],
                 iconCls: 'bchecklist',
                 disabled: true,
                 handler: this.loadCheckDocumentosSolWf,
@@ -68,6 +72,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
         //RCM: reporte de verificacion presupeustaria
         this.addButton('btnVerifPresup', {
                 text : 'Disponibilidad',
+                grupo:[0,1,2],
                 iconCls : 'bassign',
                 disabled : true,
                 handler : this.onBtnVerifPresup,
@@ -77,17 +82,18 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
         //RCM: reporte de verificacion presupeustaria
         this.addButton('btnCheckPresupeusto', {
                 text : 'Rev. Pres.',
+                grupo:[0,1,2],
                 iconCls : 'bassign',
                 disabled : false,
                 handler : this.onBtnCheckPresup,
                 tooltip : '<b>Revertir  presupuestos,  permite ver la evolucón presupuestaria y revertir parcialmente</b>'
             });
         
-        this.addButton('diagrama_gantt',{text:'Gant', iconCls: 'bgantt', disabled:true, handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
+        this.addButton('diagrama_gantt',{grupo:[0,1,2],text:'Gant', iconCls: 'bgantt', disabled:true, handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
   
-        this.addButton('ajustes',{text:'Ajus.', iconCls: 'blist', disabled: true, handler: this.showAjustes,tooltip: '<b>Ajustes a los anticipos totales para pagos variables</b>'});
-        this.addButton('est_anticipo',{text:'Ampli.', iconCls: 'blist', disabled: true, handler: this.showAnticipo,tooltip: '<b>Define el monto de ampliación util cuando necesitamos hacer pagos anticipados para la siguiente gestión</b>'});
-        this.addButton('extenderop',{text:'Ext.', iconCls: 'blist', disabled: true, handler: this.extenederOp,tooltip: '<b>Extender la obligación de pago para la siguiente gestión</b>'});
+        this.addButton('ajustes',{grupo:[0,1,2],text:'Ajus.', iconCls: 'blist', disabled: true, handler: this.showAjustes,tooltip: '<b>Ajustes a los anticipos totales para pagos variables</b>'});
+        this.addButton('est_anticipo',{grupo:[0,1,2],text:'Ampli.', iconCls: 'blist', disabled: true, handler: this.showAnticipo,tooltip: '<b>Define el monto de ampliación util cuando necesitamos hacer pagos anticipados para la siguiente gestión</b>'});
+        this.addButton('extenderop',{grupo:[0,1,2],text:'Ext.', iconCls: 'blist', disabled: true, handler: this.extenederOp,tooltip: '<b>Extender la obligación de pago para la siguiente gestión</b>'});
   
   
         function diagramGantt(){            
@@ -1477,6 +1483,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
         this.menuAdq = new Ext.Toolbar.SplitButton({
             id: 'btn-adq-' + this.idContenedor,
             text: 'Orden de Compra',
+            grupo:[0,1,2],
             handler: this.onBtnAdq,
             disabled: true,
             scope: this,
