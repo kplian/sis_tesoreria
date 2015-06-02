@@ -291,7 +291,7 @@ Phx.vista.ObligacionPago=Ext.extend(Phx.gridInterfaz,{
                 allowBlank:false,
                 gwidth:200,
                 valueField: 'id_funcionario',
-                gdisplayField: 'desc_funcionario',
+                gdisplayField: 'desc_funcionario1',
                 baseParams: { es_combo_solicitud : 'si' },
                 renderer:function(value, p, record){return String.format('{0}', record.data['desc_funcionario1']);}
              },
