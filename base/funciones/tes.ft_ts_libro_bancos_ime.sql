@@ -73,6 +73,7 @@ DECLARE
     g_id_periodo			integer;
     g_id_cuenta_bancaria_periodo	integer;
     v_id_cuenta_bancaria	integer;
+    v_estado_padre			varchar;
 BEGIN
     v_nombre_funcion = 'tes.ft_ts_libro_bancos_ime';
     v_parametros = pxp.f_get_record(p_tabla);
@@ -373,10 +374,15 @@ BEGIN
             	raise exception 'El periodo % no se encuentra abierto',  pxp.f_obtener_literal_periodo(v_periodo,null);
             end if;
             
-            SELECT LBRBAN.fecha into g_fecha
+            SELECT LBRBAN.fecha, lbrpad.estado into g_fecha, v_estado_padre
             FROM tes.tts_libro_bancos LBRBAN
+            LEFT JOIN tes.tts_libro_bancos LBRPAD on lbrpad.id_libro_bancos=lbrban.id_libro_bancos_fk
             WHERE LBRBAN.id_libro_bancos=v_parametros.id_libro_bancos;
-
+			            
+            if(v_estado_padre = 'borrador')then
+            	raise exception '%', 'El deposito se encuentra en estado borrador';
+            end if;
+            
             --origen
             select ctaper.estado, per.periodo
             into v_estado, v_periodo
@@ -875,7 +881,7 @@ BEGIN
             
             if(v_estado!='abierto')then
             	raise exception 'El periodo % no se encuentra abierto',  pxp.f_obtener_literal_periodo(v_periodo,null);
-            end if;
+            end if;        
                         
           end if;
           
