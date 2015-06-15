@@ -1198,3 +1198,31 @@ IS 'par ainsertar al guna observacion de POA';
 
 /*****************************F-SCP-RAC-TES-0-12/05/2015*************/
 
+
+/*****************************I-SCP-RAC-TES-0-12/06/2015*************/
+
+--------------- SQL ---------------
+
+CREATE TABLE tes.tconcepto_excepcion (
+  id_concepto_excepcion SERIAL,
+  id_concepto_ingas INTEGER NOT NULL,
+  id_uo INTEGER NOT NULL,
+  PRIMARY KEY(id_concepto_excepcion)
+) INHERITS (pxp.tbase)
+;
+
+ALTER TABLE tes.tconcepto_excepcion
+  OWNER TO postgres;
+
+ALTER TABLE tes.tconcepto_excepcion
+  ALTER COLUMN id_uo SET STATISTICS 0;
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN uo_ex VARCHAR(4) DEFAULT 'no' NOT NULL;
+
+COMMENT ON COLUMN tes.tobligacion_pago.uo_ex
+IS 'cuando la uo que aprueba se selecciona de la tabla de excepcion queda marcado como si';
+/*****************************F-SCP-RAC-TES-0-12/06/2015*************/

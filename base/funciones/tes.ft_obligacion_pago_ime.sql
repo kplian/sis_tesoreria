@@ -12,7 +12,7 @@ $body$
  SISTEMA:		Sistema de Tesoreria
  FUNCION: 		tes.ft_obligacion_pago_ime
  DESCRIPCION:   Funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'tes.tobligacion_pago'
- AUTOR: 		Gonzalo Sarmiento Sejas
+ AUTOR: 		Gonzalo Sarmiento Sejas (KPLIAN)
  FECHA:	        02-04-2013 16:01:32
  COMENTARIOS:	
 ***************************************************************************
@@ -147,6 +147,9 @@ DECLARE
      v_ano_1 					integer;
      v_ano_2 					integer;
      v_sw_saltar 				boolean;
+     v_fecha_op					date;
+     va_id_funcionarios			integer[];
+     v_id_uo					integer;
 
      
 			    
@@ -204,6 +207,13 @@ BEGIN
             ELSE
                v_id_funcionario_sol = v_parametros.id_funcionario;
             END IF;
+            
+            --   TODO
+            --   revisa tabla de expcecion por concepto de gasto
+            --  algunos concepto de gasto solo los pueden aprobar ciertas gerencias ....
+            
+            
+            
             
             
             
@@ -556,7 +566,8 @@ BEGIN
               pr.desc_proveedor,
               op.pago_variable,
               op.comprometido,
-              op.id_usuario_reg
+              op.id_usuario_reg,
+              op.fecha
               
              into
               v_id_proceso_wf,
@@ -572,7 +583,8 @@ BEGIN
               v_desc_proveedor,
               v_pago_variable,
               v_comprometido,
-              v_id_usuario_reg_op
+              v_id_usuario_reg_op,
+              v_fecha_op
               
               
              from tes.tobligacion_pago op
@@ -616,6 +628,43 @@ BEGIN
                   
               END IF;
              
+             
+             ----------------------------------------------------------------------------------------------------------
+             --  valida si tiene algun conceto en la tabla de excepciones, si es asi camb i la gerencia de aprobación
+             ----------------------------------------------------------------------------------------------------------
+              IF  v_codigo_estado = 'borrador'  THEN
+                    SELECT  
+                      ce.id_uo
+                    into
+                      v_id_uo
+                    FROM tes.tconcepto_excepcion ce 
+                    where   ce.estado_reg = 'activo'  and
+                             ce.id_concepto_ingas in (select 
+                                                    id_concepto_ingas
+                                                   from tes.tobligacion_det od
+                                                   where od.id_obligacion_pago = v_parametros.id_obligacion_pago
+                                                   and od.estado_reg = 'activo' ) 
+                    limit 1 OFFSET 0;
+                     
+                    --si existe una excepcion cambiar el funcionar aprobador
+                    IF v_id_uo is NOT NULL THEN
+                         --recuperamos el aprobador
+                        
+                         va_id_funcionarios =  orga.f_get_funcionarios_x_uo(v_id_uo, v_fecha_op);
+                        
+                        IF va_id_funcionarios[1] is NULL THEN
+                           raise exception 'La UO configurada por excpeción no tiene un funcionario asignado para le fecha de la OP';
+                        END IF;
+                        
+                        update tes.tobligacion_pago o set
+                          id_funcionario_gerente = va_id_funcionarios[1],
+                          uo_ex = 'si'
+                        where o.id_obligacion_pago = v_parametros.id_obligacion_pago; 
+                    
+                     END IF ; 
+              
+              
+              END IF;
              
               
              -- obtiene el siguiente estado del flujo 
