@@ -5755,7 +5755,7 @@ SELECT lban.id_libro_bancos,
         (ARRAY['deposito'::character varying::text, 'transf_interna_haber'::character varying::text]))
     ), 0::numeric)
             WHEN (lban.tipo::text = ANY (ARRAY['cheque'::character
-                varying::text, 'debito_automatico'::character varying::text, 'transferencia_carta'::character varying::text])) AND lban.id_libro_bancos_fk IS NOT NULL THEN ((
+                varying::text, 'debito_automatico'::character varying::text, 'transferencia_carta'::character varying::text, 'transf_interna_debe'::character varying::text])) AND lban.id_libro_bancos_fk IS NOT NULL THEN ((
     SELECT COALESCE(lb.importe_deposito, 0::numeric) AS "coalesce"
     FROM tes.tts_libro_bancos lb
     WHERE lb.id_libro_bancos = lban.id_libro_bancos_fk
