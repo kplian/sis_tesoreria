@@ -585,7 +585,9 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
   preparaMenu:function(n){
          
          Phx.vista.ObligacionDet.superclass.preparaMenu.call(this,n); 
-          if(this.maestro.estado ==  'borrador' || this.maestro.estado ==  'vbpresupuestos'){
+         var padre = Phx.CP.getPagina(this.idContenedorPadre).nombreVista;
+        
+         if(this.maestro.estado ==  'borrador' || (padre == 'ObligacionPagoVb' && this.maestro.estado ==  'vbpresupuestos')){
                this.getBoton('edit').enable();
                this.getBoton('new').enable();
                this.getBoton('del').enable();

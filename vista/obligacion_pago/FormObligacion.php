@@ -848,12 +848,12 @@ Phx.vista.FormObligacion=Ext.extend(Phx.frmInterfaz,{
    
     onSubmit: function(o) {
     	//  validar formularios
-        var arra = [], i, me = this;
-        for (i = 0; i < me.megrid.store.getCount(); i++) {
-    		record = me.megrid.store.getAt(i);
-    		arra[i] = record.data;
-    		arra[i].precio_ga = record.data.precio_total;
-    		arra[i].precio_sg = 0.0; 
+        var arra = [], k, me = this;
+        for (k = 0; k < me.megrid.store.getCount(); k++) {
+    		record = me.megrid.store.getAt(k);
+    		arra[k] = record.data;
+    		arra[k].precio_ga = record.data.precio_total;
+    		arra[k].precio_sg = 0.0; 
 		}
    	    me.argumentExtraSubmit = { 'json_new_records': JSON.stringify(arra, function replacer(key, value) {
    	    	
@@ -864,8 +864,9 @@ Phx.vista.FormObligacion=Ext.extend(Phx.frmInterfaz,{
 							    return value;
 							}) };
    	    if(this.evaluaRequistos()){
-	   	    if( i > 0 &&  !this.editorDetail.isVisible()){
-	   	    	 Phx.vista.FormObligacion.superclass.onSubmit.call(this,o);
+   	    	
+   	    	if( k > 0 &&  !this.editorDetail.isVisible()){
+	   	    	 Phx.vista.FormObligacion.superclass.onSubmit.call(this,o, true);
 	   	    }
 	   	    else{
 	   	    	if(confirm("No tiene ningun concepto  para comprar. ¿Desea continuar?")){
