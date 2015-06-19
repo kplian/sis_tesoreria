@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -645,9 +643,11 @@ BEGIN
             fecha_costo_fin = v_parametros.fecha_costo_fin	
             where id_plan_pago = v_parametros.id_plan_pago;
            
+           
+         
             -- chequea fechas de costos inicio y fin
             v_resp_doc =  tes.f_validar_periodo_costo(v_parametros.id_plan_pago);
-            
+           
             IF v_registros_pp.tipo not in ('ant_parcial','anticipo','dev_garantia') THEN
             
                    ----------------------------------------------------------------------
@@ -1499,9 +1499,19 @@ BEGIN
            fecha_conformidad = v_parametros.fecha_conformidad
            where id_plan_pago = v_parametros.id_plan_pago;
            
-           select pp.id_estado_wf into v_id_estado_actual
+           select pp.id_estado_wf,pp.id_proceso_wf into 
+           v_id_estado_actual,v_id_proceso_wf
            from tes.tplan_pago pp
            where pp.id_plan_pago =  v_parametros.id_plan_pago;
+           
+           --para eliminar la firma si existiera
+           update wf.tdocumento_wf 
+           set fecha_firma = NULL
+           from wf.ttipo_documento td
+           where td.id_tipo_documento = wf.tdocumento_wf.id_tipo_documento and td.codigo = 'ACTCONF' and
+           wf.tdocumento_wf .estado_reg = 'activo' and td.estado_reg = 'activo' and
+           wf.tdocumento_wf .id_proceso_wf = v_id_proceso_wf;
+           
            
            v_resp_doc = wf.f_verifica_documento(v_id_usuario_firma, v_id_estado_actual);
             --Definicion de la respuesta

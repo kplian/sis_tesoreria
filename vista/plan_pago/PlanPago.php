@@ -1624,10 +1624,28 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
      }, 
      
      onButtonConformidad : function () {
-     	var d= this.sm.getSelected().data;
-     	this.formConformidad.getForm().findField('conformidad').setValue(d.conformidad);
-     	this.formConformidad.getForm().findField('fecha_conformidad').setValue(d.fecha_conformidad);
-     	this.windowConformidad.show();
+     	var data= this.sm.getSelected().data;
+     	if (data['fecha_conformidad'] == '' || data['fecha_conformidad'] == undefined || data['fecha_conformidad'] == null) {
+     		this.formConformidad.getForm().findField('conformidad').setValue(data.conformidad);
+	     	this.formConformidad.getForm().findField('fecha_conformidad').setValue(data.fecha_conformidad);
+	     	this.windowConformidad.show();
+     	} else {
+     		Ext.Msg.show({
+			   title:'Alerta',
+			   scope: this,
+			   msg: 'El acta de conformidad ya se encuentra firmada. Esta seguro de volver a firmarla?',
+			   buttons: Ext.Msg.YESNO,
+			   fn: function(id, value, opt) {			   		
+			   		if (id == 'yes') {
+			   			this.formConformidad.getForm().findField('conformidad').setValue(data.conformidad);
+	     				this.formConformidad.getForm().findField('fecha_conformidad').setValue(data.fecha_conformidad);
+	     				this.windowConformidad.show();
+			   		}			   },	
+			   animEl: 'elId',
+			   icon: Ext.MessageBox.WARNING
+			}, this);
+     	}
+     	
      },
      
      onSubmitConformidad : function () {
