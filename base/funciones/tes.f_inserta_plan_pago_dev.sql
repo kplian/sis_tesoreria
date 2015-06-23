@@ -587,7 +587,9 @@ BEGIN
             
             
             -- chequea fechas de costos inicio y fin
-             v_resp_doc =  tes.f_validar_periodo_costo(v_id_plan_pago);
+            
+            --RAC 19/06/2015, se comenta la linea por que no permite la cracion automatica del plan de pagos
+            -- v_resp_doc =  tes.f_validar_periodo_costo(v_id_plan_pago);
            
            
             -- inserta documentos en estado borrador si estan configurados

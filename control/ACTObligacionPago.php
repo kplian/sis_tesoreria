@@ -33,6 +33,7 @@ class ACTObligacionPago extends ACTbase{
              $this->objParam->addFiltro("obpg.tipo_obligacion  in (''pago_unico'')");
         }
 		
+		
 		if($this->objParam->getParametro('filtro_campo')!=''){
             $this->objParam->addFiltro($this->objParam->getParametro('filtro_campo')." = ".$this->objParam->getParametro('filtro_valor'));  
         }

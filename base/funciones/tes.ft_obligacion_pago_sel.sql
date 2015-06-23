@@ -385,19 +385,24 @@ BEGIN
             IF   p_administrador != 1 THEN
                    v_filadd = '(obpg.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or obpg.id_usuario_reg='||p_id_usuario||' ) and ';
             END IF;
-          ELSEIF  v_parametros.tipo_interfaz in ('obligacionPagoSol', 'obligacionPagoUnico') THEN
+          END IF;
+          
+         IF  v_parametros.tipo_interfaz in ('obligacionPagoSol', 'obligacionPagoUnico','obligacionPagoEspecial') THEN
         
                 IF   v_parametros.tipo_interfaz  = 'obligacionPagoUnico' THEN
-                   v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_unico'' and';
+                   v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_unico'' and ';
+                
+                ELSIF   v_parametros.tipo_interfaz  = 'obligacionPagoEspecial' THEN
+                   v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_especial'' and ';
                 ELSE
-                   v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_directo'' and';
+                   v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_directo'' and ';
                 END IF;
         
         
            
          END IF;       
                 
-          
+         -- raise exception '(%),... %', v_parametros.tipo_interfaz, v_filadd;
               
                   --Sentencia de la consulta
                   v_consulta:='select
@@ -473,10 +478,10 @@ BEGIN
 
 
 
+ 
 
 
-
-  -- raise notice '%',v_consulta;
+              raise notice '%',v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 						
@@ -501,12 +506,16 @@ BEGIN
                 IF   p_administrador != 1 THEN
                        v_filadd = '(obpg.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or obpg.id_usuario_reg='||p_id_usuario||' ) and ';
                 END IF;
-             ELSEIF  v_parametros.tipo_interfaz in ('obligacionPagoSol', 'obligacionPagoUnico') THEN
+             END IF;
+             
+             IF  v_parametros.tipo_interfaz in ('obligacionPagoSol', 'obligacionPagoUnico','obligacionPagoEspecial') THEN
           
                   IF   v_parametros.tipo_interfaz  = 'obligacionPagoUnico' THEN
-                     v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_unico'' and';
+                     v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_unico'' and ';
+                  ELSIF   v_parametros.tipo_interfaz  = 'obligacionPagoEspecial' THEN
+                   v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_especial'' and ';
                   ELSE
-                     v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_directo'' and';
+                     v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_directo'' and ';
                   END IF;
              END IF ;
         
