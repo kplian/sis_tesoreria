@@ -942,7 +942,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 	},
 	
 	
-    obtenerTipoCambio: function(){
+    obtenerTipoCambio:function(){
          
          var fecha = this.cmpFecha.getValue().dateFormat(this.cmpFecha.format);
          var id_moneda = this.cmpMoneda.getValue();
@@ -957,7 +957,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                     scope:this
              });
         }, 
-    successTC: function(resp){
+    successTC:function(resp){
        Phx.CP.loadingHide();
             var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
             if(!reg.ROOT.error){
@@ -984,11 +984,31 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 			this.ocultarComponente(cmbIt);
        }   
      },
-     
-     fin_registro: function(a,b,forzar_fin, paneldoc){                   
-            var d = this.sm.getSelected().data;
+     fin_registro:function(a,b,forzar_fin, paneldoc)
+        {                   
+            var d= this.sm.getSelected().data;
             if(d.estado !='en_pago'){
-	               this.mostrarWizard(this.sm.getSelected());
+	            if(d.estado =='vbpresupuestos'){
+                    //lla funcion se encuentra en ObligacionPagoVb
+                    this.showObsEstado();
+                }
+                else{
+                	if(d.estado =='borrador'  && d.tipo_obligacion != 'adquisiciones'){
+                        alert('La solicitud pasara a las áreaa de poa y presupuestos para verificación')
+                    }
+                
+	                Phx.CP.loadingShow();
+		            Ext.Ajax.request({
+	                    // form:this.form.getForm().getEl(),
+	                    url:'../../sis_tesoreria/control/ObligacionPago/finalizarRegistro',
+	                    params: { id_obligacion_pago: d.id_obligacion_pago, operacion: 'fin_registro'},
+	                    success: this.successSinc,
+	                    argument: { paneldoc: paneldoc},
+	                    failure: this.conexionFailure,
+	                    timeout:this.timeout,
+	                    scope:this
+	                });	
+                }	
 	        }
             else{
                 if(d.estado =='en_pago'){
@@ -997,15 +1017,16 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                             
                             Phx.CP.loadingShow();
                             Ext.Ajax.request({
+                            // form:this.form.getForm().getEl(),
                             url:'../../sis_tesoreria/control/ObligacionPago/finalizarRegistro',
                             params:{ 'id_obligacion_pago': d.id_obligacion_pago,
                             	     'operacion':'fin_registro',
                             	     'forzar_fin': forzar_fin?'si':'no' 
                             	    },
-                            success: this.successSinc,
+                            success:this.successSinc,
                             failure: this.conexionFailureFin,
-                            timeout: this.timeout,
-                            scope: this
+                            timeout:this.timeout,
+                            scope:this
                         }); 
                      }
                 } 
@@ -1149,14 +1170,12 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                     else{
                     	this.getBoton('fin_registro').disable();
                     	this.getBoton('ant_estado').disable();
+                    
                     }
-              }
-              
-              if(this.nombreVista == 'ObligacionPagoVb'){
-               	   this.getBoton('fin_registro').enable();
-                   this.getBoton('ant_estado').enable();
-              }
-              
+                    
+                  
+                    
+               }
               if(data['pago_variable'] == 'si' &&  data['estado'] == 'en_pago'){
               	this.getBoton('ajustes').enable();
               }
@@ -1684,79 +1703,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 	id_solicitud: 0,
 	auxFuncion:'onBtnAdq',
 	tabla_id: 'id_obligacion_pago',
-	tabla:'tes.tobligacion_pago',
-	
-	
-    mostrarWizard : function(rec) {
-     	var configExtra = [],
-     		obsValorInicial;
-     	 if(this.nombreVista == 'solicitudvbpresupuestos') {
-     	 	obsValorInicial = rec.data.obs_presupuestos;
-     	 }
-     	
-     	this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
-                                'Estado de Wf',
-                                {
-                                    modal: true,
-                                    width: 700,
-                                    height: 450
-                                }, {
-                                	configExtra: configExtra,
-                                	data:{
-                                       id_estado_wf: rec.data.id_estado_wf,
-                                       id_proceso_wf: rec.data.id_proceso_wf, 
-                                       id_obligacion_pago: rec.data.id_obligacion_pago,
-                                       fecha_ini: rec.data.fecha_tentativa
-                                      
-                                   },
-                                   obsValorInicial : obsValorInicial,
-                                }, this.idContenedor, 'FormEstadoWf',
-                                {
-                                    config:[{
-                                              event:'beforesave',
-                                              delegate: this.onSaveWizard,
-                                              
-                                            },
-					                        {
-					                          event:'requirefields',
-					                          delegate: function () {
-						                          	this.onButtonEdit();
-										        	this.window.setTitle('Registre los campos antes de pasar al siguiente estado');
-										        	this.formulario_wizard = 'si';
-					                          }
-					                          
-					                        }],
-                                    
-                                    scope:this
-                                 });        
-     },
-    onSaveWizard:function(wizard,resp){
-        Phx.CP.loadingShow();
-        Ext.Ajax.request({
-            url: '../../sis_tesoreria/control/ObligacionPago/siguienteEstadoObligacion',
-            params:{
-            	    
-            	    id_obligacion_pago: wizard.data.id_obligacion_pago,
-            	    id_proceso_wf_act:  resp.id_proceso_wf_act,
-	                id_estado_wf_act:   resp.id_estado_wf_act,
-	                id_tipo_estado:     resp.id_tipo_estado,
-	                id_funcionario_wf:  resp.id_funcionario_wf,
-	                id_depto_wf:        resp.id_depto_wf,
-	                obs:                resp.obs,
-	                json_procesos:      Ext.util.JSON.encode(resp.procesos)
-                },
-            success: this.successWizard,
-            failure: this.conexionFailure, //chequea si esta en verificacion presupeusto para enviar correo de transferencia
-            argument: { wizard: wizard },
-            timeout: this.timeout,
-            scope: this
-        });
-    },
-    successWizard:function(resp){
-        Phx.CP.loadingHide();
-        resp.argument.wizard.panel.destroy()
-        this.reload();
-    },
+	tabla:'tes.tobligacion_pago'
 	
 })
 </script>

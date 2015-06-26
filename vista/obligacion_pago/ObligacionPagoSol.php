@@ -13,7 +13,7 @@ header("content-type: text/javascript; charset=UTF-8");
 <script>
 Phx.vista.ObligacionPagoSol = {
     require:'../../../sis_tesoreria/vista/obligacion_pago/ObligacionPago.php',
-	requireclase:'Phx.vista.ObligacionPago',
+	requireclase: 'Phx.vista.ObligacionPago',
 	title:'Obligacion de Pago (Solicitudes individuales)',
 	nombreVista: 'obligacionPagoSol',
 	ActList:'../../sis_tesoreria/control/ObligacionPago/listarObligacionPagoSol',

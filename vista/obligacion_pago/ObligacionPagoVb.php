@@ -149,7 +149,7 @@ Phx.vista.ObligacionPagoVb = {
 		 
     },
     
-    submitSigEstado:function(){
+    submitSigEstado: function(){
     	var d= this.sm.getSelected().data;
         Phx.CP.loadingShow();
         Ext.Ajax.request({
@@ -170,7 +170,7 @@ Phx.vista.ObligacionPagoVb = {
     	
     },
     
-    showObsEstado:function(){
+    showObsEstado: function(){
     	this.wEstado.buttons[0].hide();
         this.wEstado.buttons[1].show();
        
@@ -336,7 +336,7 @@ Phx.vista.ObligacionPagoVb = {
 	  	
         var tb = Phx.vista.ObligacionPagoVb.superclass.liberaMenu.call(this);
         if(tb){
-            this.getBoton('obs_presu').enable();
+            this.getBoton('obs_presu').disable();
         }
 	    
        return tb
@@ -347,7 +347,7 @@ Phx.vista.ObligacionPagoVb = {
         this.getBoton('ant_estado').disable();
         this.getBoton('reporte_com_ejec_pag').enable();
 		this.getBoton('reporte_plan_pago').enable();
-		this.getBoton('diagrama_gantt').disable();
+		this.getBoton('diagrama_gantt').enable();
 		this.getBoton('btnChequeoDocumentosWf').enable();
 		this.getBoton('ajustes').disable();
 		this.getBoton('est_anticipo').disable();

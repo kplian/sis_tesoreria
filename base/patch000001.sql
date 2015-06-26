@@ -1226,3 +1226,13 @@ ALTER TABLE tes.tobligacion_pago
 COMMENT ON COLUMN tes.tobligacion_pago.uo_ex
 IS 'cuando la uo que aprueba se selecciona de la tabla de excepcion queda marcado como si';
 /*****************************F-SCP-RAC-TES-0-12/06/2015*************/
+
+
+/*****************************I-SCP-RAC-TES-0-24/06/2015*************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  DROP CONSTRAINT chk_tobligacion_pago__estado RESTRICT;
+  
+/*****************************F-SCP-RAC-TES-0-24/06/2015*************/

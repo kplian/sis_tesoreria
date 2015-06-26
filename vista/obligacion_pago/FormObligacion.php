@@ -866,7 +866,7 @@ Phx.vista.FormObligacion=Ext.extend(Phx.frmInterfaz,{
    	    if(this.evaluaRequistos()){
    	    	
    	    	if( k > 0 &&  !this.editorDetail.isVisible()){
-	   	    	 Phx.vista.FormObligacion.superclass.onSubmit.call(this,o, true);
+	   	    	 Phx.vista.FormObligacion.superclass.onSubmit.call(this,o,undefined, true);
 	   	    }
 	   	    else{
 	   	    	if(confirm("No tiene ningun concepto  para comprar. ¿Desea continuar?")){

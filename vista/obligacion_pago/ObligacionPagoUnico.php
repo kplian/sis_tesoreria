@@ -152,6 +152,7 @@ Phx.vista.ObligacionPagoUnico = {
      	var newrec = this.store.getById(data.id_obligacion_pago);
     	if(newrec){
 	    	this.sm.selectRecords([newrec]);
+	    	paneldoc.panel.destroy();
 	    	this.fin_registro( undefined, undefined, undefined,  paneldoc);
 	    	
 	    }

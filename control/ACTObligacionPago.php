@@ -160,6 +160,12 @@ class ACTObligacionPago extends ACTbase{
         $this->res=$this->objFunc->finalizarRegistro($this->objParam);
         $this->res->imprimirRespuesta($this->res->generarJson());
     }
+	
+	function siguienteEstadoObligacion(){
+        $this->objFunc=$this->create('MODObligacionPago');  
+        $this->res=$this->objFunc->siguienteEstadoObligacion($this->objParam);
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
     
     function anteriorEstadoObligacion(){
         $this->objFunc=$this->create('MODObligacionPago');  
