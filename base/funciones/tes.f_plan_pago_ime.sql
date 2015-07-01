@@ -147,6 +147,7 @@ DECLARE
     v_id_persona				integer;
     v_exception_detail			varchar;
     v_exception_context			varchar;
+    v_id_uo						integer;
        
 			    
 BEGIN
@@ -1471,6 +1472,19 @@ BEGIN
             from segu.vusuario usu
             where usu.id_usuario = p_id_usuario;
             
+            
+            
+            select ce.id_uo into v_id_uo
+            from tes.tconcepto_excepcion ce
+            inner join tes.tobligacion_det od on ce.id_concepto_ingas = od.id_concepto_ingas
+            inner join tes.tobligacion_pago op on od.id_obligacion_pago = op.id_obligacion_pago
+            inner join tes.tplan_pago pp  on pp.id_obligacion_pago = op.id_obligacion_pago                       
+            where pp.id_plan_pago = v_parametros.id_plan_pago
+            limit 1 offset 0;
+            
+            if (v_id_uo is not null) then 
+            	raise exception 'Este pago tiene definida una excepción y solo el gerente aprobador de la obligacion firmara el acta de conformidad';
+            end if;
             
             if(not exists (select 1
                 from tes.tplan_pago pp

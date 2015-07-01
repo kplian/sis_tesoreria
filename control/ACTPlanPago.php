@@ -233,10 +233,12 @@ class ACTPlanPago extends ACTbase{
 	    	$firmar = 'si';
 			$fecha_firma = $this->objParam->getParametro('fecha_firma');
 			$usuario_firma = $this->objParam->getParametro('usuario_firma');
+			$nombre_usuario_firma = $this->objParam->getParametro('nombre_usuario_firma');
 	    } else {
 	    	$firmar = 'no';
 			$fecha_firma = '';
 			$usuario_firma = '';
+			$nombre_usuario_firma = '';
 	    }
 		
 		$this->objFunc=$this->create('MODPlanPago');	
@@ -258,7 +260,8 @@ class ACTPlanPago extends ACTbase{
 		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
 		$this->objParam->addParametro('firmar',$firmar); 
 		$this->objParam->addParametro('fecha_firma',$fecha_firma); 
-		$this->objParam->addParametro('usuario_firma',$usuario_firma); 
+		$this->objParam->addParametro('usuario_firma',$usuario_firma);
+		$this->objParam->addParametro('nombre_usuario_firma',$nombre_usuario_firma);  
 		//Instancia la clase de pdf
 		$this->objReporteFormato=new RConformidad($this->objParam);
 				

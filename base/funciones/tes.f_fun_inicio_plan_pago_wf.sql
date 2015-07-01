@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_fun_inicio_plan_pago_wf (
   p_id_usuario integer,
   p_id_usuario_ai integer,
@@ -27,6 +25,9 @@ DECLARE
     v_registros 		record;
     v_regitros_ewf		record;
     v_monto_ejecutar_mo  numeric;
+    v_id_uo	integer;
+    v_id_usuario_excepcion	integer;
+    v_resp_doc   boolean;
    
 	
     
@@ -46,7 +47,8 @@ BEGIN
             pp.monto_ejecutar_total_mo,
             pp.fecha_conformidad,
             pp.conformidad,
-            pp.monto
+            pp.monto,
+            pp.id_obligacion_pago
      into 
             v_registros
             
@@ -114,6 +116,51 @@ BEGIN
         end if;*/
         if (v_registros.monto <= 0 ) then
         	raise exception 'El monto del pago no puede ser 0 ni menor a 0';
+        end if;
+        IF p_codigo_estado  in ('vbfin')  THEN
+        	select ce.id_uo into v_id_uo
+            from tes.tconcepto_excepcion ce
+            inner join tes.tobligacion_det od on ce.id_concepto_ingas = od.id_concepto_ingas                       
+            where od.id_obligacion_pago = v_registros.id_obligacion_pago
+            limit 1 offset 0;
+            
+            if (v_id_uo is not null) then
+            	
+                --obtener funcionario
+            	select (orga.f_get_funcionarios_x_uo(v_id_uo, now()::date))[1] into v_id_usuario_excepcion;
+                
+                if (v_id_usuario_excepcion is null) then
+                	raise exception 'No existe un funcionario asignado en la uo de la excepcion definida para el concepto de gasto';
+                end if;
+                
+                --obtener usuario
+                select u.id_usuario into v_id_usuario_excepcion
+                from orga.tfuncionario f
+                inner join segu.tusuario u on f.id_persona = u.id_persona
+                where f.id_funcionario = v_id_usuario_excepcion;
+                
+                if v_id_usuario_excepcion is null then
+            		raise exception 'El funcionario aprobador no tiene usuario en el sistema para firmar el acta de conformidad';
+            	end if;
+                
+                update tes.tplan_pago
+               set conformidad = 'SIN OBSERVACIONES',
+               fecha_conformidad = now()
+               where id_plan_pago = v_registros.id_plan_pago;
+               
+                              
+               --para eliminar la firma si existiera
+               update wf.tdocumento_wf 
+               set fecha_firma = NULL
+               from wf.ttipo_documento td
+               where td.id_tipo_documento = wf.tdocumento_wf.id_tipo_documento and td.codigo = 'ACTCONF' and
+               wf.tdocumento_wf .estado_reg = 'activo' and td.estado_reg = 'activo' and
+               wf.tdocumento_wf .id_proceso_wf = p_id_proceso_wf;
+               
+               
+               v_resp_doc = wf.f_verifica_documento(v_id_usuario_excepcion, p_id_estado_wf);
+                
+            end if;
         end if;
      END IF; 
      
