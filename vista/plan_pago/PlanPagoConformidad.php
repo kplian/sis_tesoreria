@@ -25,8 +25,8 @@ Phx.vista.PlanPagoConformidad = {
     requireclase:'Phx.vista.PlanPago',
     title:'Plan de Pagos',
     nombreVista: 'PlanPagoConformidad',
-    gruposBarraTareas:[{name:'pendiente',title:'<H1 align="center"><i class="fa fa-thumbs-o-down"></i>Sin Acta</h1>',grupo:0,height:0},
-                       {name:'realizada',title:'<H1 align="center"><i class="fa fa-eye"></i>Con Acta</h1>',grupo:1,height:0}],
+    gruposBarraTareas:[{name:'pendiente',title:'<H1 align="center"><i class="fa fa-thumbs-o-down"></i>Actas sin firma</h1>',grupo:0,height:0},
+                       {name:'realizada',title:'<H1 align="center"><i class="fa fa-eye"></i>Actas con firma</h1>',grupo:1,height:0}],
 	
 	actualizarSegunTab: function(name, indice){
     	if(this.finCons){
