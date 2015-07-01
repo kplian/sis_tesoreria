@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -97,6 +95,20 @@ BEGIN
             IF  lower(v_parametros.tipo_interfaz) = 'planpagovbasistente' and v_historico != 'si'  THEN
               	v_filtro = ' (ew.id_funcionario  IN (select * FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date,'||p_id_usuario||') AS (id_funcionario INTEGER))) and ';
             	v_filtro = v_filtro || ' (lower(plapa.estado)=''vbgerente'') and ';
+            END IF;
+            
+            IF  lower(v_parametros.tipo_interfaz) = 'planpagoconformidadpendiente'  THEN
+            	IF p_administrador !=1 THEN
+              		v_filtro = ' (op.id_funcionario  = ' || v_parametros.id_funcionario_usu::varchar || ' or op.id_usuario_reg = ' || p_id_usuario||' ) and ';
+                END IF;
+            	v_filtro = v_filtro || ' lower(plapa.tipo) in (''devengado'',''devengado_pagado'',''devengado_pagado_1c'') and plapa.fecha_conformidad is null and  ';
+            END IF;
+            
+            IF  lower(v_parametros.tipo_interfaz) = 'planpagoconformidadrealizada'  THEN
+              	IF p_administrador !=1 THEN
+              		v_filtro = ' (op.id_funcionario  = ' || v_parametros.id_funcionario_usu::varchar || ' or op.id_usuario_reg = ' || p_id_usuario||' ) and ';
+                END IF;
+            	v_filtro = v_filtro || ' lower(plapa.tipo) in (''devengado'',''devengado_pagado'',''devengado_pagado_1c'') and plapa.fecha_conformidad is not null and  ';
             END IF;
             
             

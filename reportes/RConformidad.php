@@ -35,7 +35,7 @@ class RConformidad extends  ReportePDFFormulario {
 		$numero_tramite = $maestro[0]['numero_tramite'];
 		$detalle = $maestro[0]['detalle'];
 		$tipo = str_replace(',', '/', $maestro[0]['tipo']);
-		
+		$nombre_usuario_firma = $this->nombre_usuario_firma;
 		$this->firma['datos_documento']['numero_tramite'] = $numero_tramite;
 		$this->firma['datos_documento']['solicitante'] = $nombre_solicitante;
 		$this->firma['datos_documento']['proveedor'] = $proveedor;
@@ -81,7 +81,7 @@ class RConformidad extends  ReportePDFFormulario {
         	<tr>
             	<td align="center"  colspan="2">   <br><br>
             	<img  style="width: 150px;" src="$url_firma" alt="Logo">
-            	<br><br>$nombre_solicitante</td>
+            	<br><br>$nombre_usuario_firma</td>
         	</tr>
     	</table>
     	</body>
