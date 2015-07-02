@@ -1440,8 +1440,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 	    	if (this.formulario_wizard == 'si') {
 	    		this.mostrarWizard(rec);	    		
 	    		this.formulario_wizard = 'no';
-	    		this.Cmp.fecha_costo_ini.allowBlank = false;
-				this.Cmp.fecha_costo_fin.allowBlank = false;	    		
+	    		this.Cmp.fecha_costo_ini.allowBlank = true;
+				this.Cmp.fecha_costo_fin.allowBlank = true;	    		
 	    	}
 	    	console.log('llega, formulario_wizard', this.formulario_wizard)
 	},
