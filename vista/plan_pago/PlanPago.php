@@ -116,7 +116,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                                 ['pagado_rrh','Pagar RH'],
                                 ['ant_aplicado','Aplicacion de Anticipo'],
                                 ['dev_garantia','Devolucion de Garantia'],
-                                ['det_rendicion','Rendicion Ant']
+                                ['det_rendicion','Rendicion Ant'],
+                                ['especial','Pago simple (sin efecto presupuestario)']
                      ],
                 	
                 	'INICIAL':[
@@ -139,7 +140,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                     
                     'ANTICIPO':[['ant_aplicado','Aplicacion de Anticipo']],
                     
-                    'RENDICION':[['det_rendicion','Rendicion Ant']]
+                    'RENDICION':[['det_rendicion','Rendicion Ant']],
+                    
+                    'ESPECIAL':[['especial','Pago simple (sin efecto presupuestario)']]
                                           
 	},
 	
@@ -363,6 +366,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                         dato = (dato==''&&value=='ant_aplicado')?'Aplicacion de Anticipo':dato;
                         dato = (dato==''&&value=='rendicion')?'Rendicion Ant.':dato;
                         dato = (dato==''&&value=='ret_rendicion')?'Detalle de Rendicion':dato;
+                        dato = (dato==''&&value=='especial')?'Pago simple (s/p)':dato;
                         return String.format('{0}', dato);
                     },
                 
@@ -1385,8 +1389,17 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                                             },
 					                        {
 					                          event:'requirefields',
-					                          delegate: function () {
+					                          delegate: function (wizard,mensaje) {
 						                          	this.onButtonEdit();
+						                          	
+						                          	if (mensaje.indexOf("Fecha Inicio,Fecha Fin") != -1) {						                          		
+						                          		this.Cmp.fecha_costo_ini.allowBlank = false;
+						                          		this.Cmp.fecha_costo_fin.allowBlank = false;
+						                          		this.form.getForm().isValid();						                          		
+						                          	} else {
+						                          		alert(mensaje);
+						                          	}
+						                          	
 										        	this.window.setTitle('Registre los campos antes de pasar al siguiente estado');
 										        	this.formulario_wizard = 'si';
 					                          }
@@ -1426,7 +1439,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 	    	var rec=this.sm.getSelected();
 	    	if (this.formulario_wizard == 'si') {
 	    		this.mostrarWizard(rec);	    		
-	    		this.formulario_wizard = 'no';	    		
+	    		this.formulario_wizard = 'no';
+	    		this.Cmp.fecha_costo_ini.allowBlank = false;
+				this.Cmp.fecha_costo_fin.allowBlank = false;	    		
 	    	}
 	    	console.log('llega, formulario_wizard', this.formulario_wizard)
 	},
@@ -1844,8 +1859,25 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
              
               
            },
+          
+          'especial': function(me){
+              me.ocultarComponente(me.Cmp.id_plantilla);
+              me.mostrarComponente(me.Cmp.liquido_pagable);
+              me.mostrarComponentesPago(me);
+              me.deshabilitarDescuentos(me);
+              me.ocultarComponente(me.Cmp.descuento_ley);
+              me.ocultarComponente(me.Cmp.obs_descuentos_ley);
+              me.ocultarComponente(me.Cmp.monto_ejecutar_total_mo);
+              me.ocultarComponente(me.Cmp.monto_no_pagado);
+              me.ocultarComponente(me.Cmp.monto_retgar_mo);
+              me.ocultarComponente(me.Cmp.monto_anticipo);
+              me.ocultarGrupo(2); //ocultar el grupo de ajustes
+              me.ocultarGrupo(3); //ocultar el grupo de periodo del costo
+             
+              
+          },
            
-           'pagado':function(me){
+         'pagado':function(me){
                me.Cmp.id_plantilla.disable();
                me.habilitarDescuentos(me);
                me.mostrarComponentesPago(me);
