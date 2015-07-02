@@ -107,7 +107,9 @@ BEGIN
       pp.obs_descuento_inter_serv,
       pp.porc_monto_retgar,
       pp.descuento_anticipo,
-      pp.monto_anticipo
+      pp.monto_anticipo,
+	  pp.id_depto_lb,
+      pp.id_depto_conta
       into
       v_registros
       from  tes.tplan_pago pp
@@ -317,7 +319,9 @@ BEGIN
                                     descuento_anticipo,
                                     id_plantilla,
                                     porc_monto_retgar,
-                                    monto_anticipo
+                                    monto_anticipo,
+									id_depto_lb,
+                                    id_depto_conta
                                    
                                   ) 
                                   VALUES (
@@ -362,7 +366,9 @@ BEGIN
                                     v_registros.descuento_anticipo,
                                     v_registros.id_plantilla,
                                     v_registros.porc_monto_retgar,
-                                    v_registros.monto_anticipo
+                                    v_registros.monto_anticipo,
+									v_registros.id_depto_lb,
+                                    v_registros.id_depto_conta
                                    
                                   )RETURNING id_plan_pago into v_id_plan_pago;
                                 
