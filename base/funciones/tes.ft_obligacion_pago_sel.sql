@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_pago_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -84,7 +82,7 @@ BEGIN
                 IF   v_parametros.tipo_interfaz  = 'obligacionPagoUnico' THEN
                    v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_unico'' and';
                 ELSE
-                   v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_directo'' and';
+                   v_filadd=v_filadd ||' obpg.tipo_obligacion in (''pago_directo'',''rrhh'') and';
                 END IF;
               
                 
@@ -270,7 +268,7 @@ BEGIN
                     IF   v_parametros.tipo_interfaz  = 'obligacionPagoUnico' THEN
                        v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_unico'' and';
                     ELSE
-                       v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_directo'' and';
+                       v_filadd=v_filadd ||' obpg.tipo_obligacion in (''pago_directo'',''rrhh'') and';
                     END IF;
                   
                     
@@ -386,7 +384,7 @@ BEGIN
                 ELSIF   v_parametros.tipo_interfaz  = 'obligacionPagoEspecial' THEN
                    v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_especial'' and ';
                 ELSE
-                   v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_directo'' and ';
+                   v_filadd=v_filadd ||' obpg.tipo_obligacion in (''pago_directo'',''rrhh'') and';
                 END IF;
         
         
@@ -506,7 +504,7 @@ BEGIN
                   ELSIF   v_parametros.tipo_interfaz  = 'obligacionPagoEspecial' THEN
                    v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_especial'' and ';
                   ELSE
-                     v_filadd=v_filadd ||' obpg.tipo_obligacion = ''pago_directo'' and ';
+                     v_filadd=v_filadd ||' obpg.tipo_obligacion in (''pago_directo'',''rrhh'') and';
                   END IF;
              END IF ;
         
