@@ -1186,3 +1186,12 @@ select pxp.f_insert_tgui ('VoBo Obligaciones de Pago (POA)', '', 'VBOPOA', 'si',
 select pxp.f_insert_testructura_gui ('VBOPOA', 'TES');
 
 /***********************************F-DAT-RAC-TES-0-12/05/2015*****************************************/
+
+/***********************************I-DAT-RAC-TES-0-30/06/2015*****************************************/
+
+
+select pxp.f_insert_tgui ('Excepciones de conceptos', 'Ecepciones de concepto de gasto', 'CONEX', 'si', 2, 'sis_tesoreria/vista/concepto_excepcion/ConceptoExcepcion.php', 3, '', 'ConceptoExcepcion', 'TES');
+select pxp.f_insert_testructura_gui ('CONEX', 'DG');
+
+/***********************************F-DAT-RAC-TES-0-30/06/2015*****************************************/
+

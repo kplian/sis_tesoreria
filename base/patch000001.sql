@@ -1236,3 +1236,19 @@ ALTER TABLE tes.tobligacion_pago
   DROP CONSTRAINT chk_tobligacion_pago__estado RESTRICT;
   
 /*****************************F-SCP-RAC-TES-0-24/06/2015*************/
+
+
+*****************************I-SCP-RAC-TES-0-1/07/2015*************/
+
+--------------- SQL ---------------
+
+ -- object recreation
+ALTER TABLE tes.tobligacion_pago
+  DROP CONSTRAINT chk_tobligacion_pago__tipo_obligacion RESTRICT;
+
+ALTER TABLE tes.tobligacion_pago
+  ADD CONSTRAINT chk_tobligacion_pago__tipo_obligacion CHECK ((tipo_obligacion)::text = ANY (ARRAY[('adquisiciones'::character varying)::text, ('pago_unico'::character varying)::text, ('pago_especial'::character varying)::text,('caja_chica'::character varying)::text, ('viaticos'::character varying)::text, ('fondos_en_avance'::character varying)::text, ('pago_directo'::character varying)::text, ('rrhh'::character varying)::text]));
+  
+*****************************F-SCP-RAC-TES-0-1/07/2015*************/
+
+

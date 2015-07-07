@@ -111,6 +111,10 @@ Phx.vista.PlanPagoRegIni = {
                  if(rec.data.variable == 'dev_garantia'){
                      this.obtenerFaltante('dev_garantia');
                  }
+                 
+                 if(rec.data.variable == 'especial'){
+                     this.obtenerFaltante('especial');
+                 }
               }
               if (this.accionFormulario == 'NEW_PAGO' || this.accionFormulario == 'NEW' || this.accionFormulario ==  'NEW_ANT_APLI'){
               	if(rec.data.variable == 'pagado'){
@@ -292,17 +296,24 @@ Phx.vista.PlanPagoRegIni = {
                    this.blockGroup(1)//bloqueaos el grupo , detalle de pago
                    //tipo pago (OPERACION)
                    
-                   if(this.maestro.nro_cuota_vigente == 0 && this.maestro.tipo_anticipo == 'si'){
-                       //prepara pagos de enticipo
-                       this.Cmp.tipo.store.loadData(this.arrayStore.ANT_PARCIAL)
-                       
+                   if(this.maestro.tipo_obligacion === 'pago_especial'){
+                   	  //prepara pagos de enticipo
+	                  this.Cmp.tipo.store.loadData(this.arrayStore.ESPECIAL)
                    }
                    else{
-                       
-                       //prepara pagos iniciales
-                       this.Cmp.tipo.store.loadData(this.arrayStore.INICIAL)
-                       
+	                   	if(this.maestro.nro_cuota_vigente == 0 && this.maestro.tipo_anticipo == 'si'){
+	                       //prepara pagos de enticipo
+	                       this.Cmp.tipo.store.loadData(this.arrayStore.ANT_PARCIAL)
+	                       
+	                   }
+	                   else{
+	                       
+	                       //prepara pagos iniciales
+	                       this.Cmp.tipo.store.loadData(this.arrayStore.INICIAL)
+	                       
+	                   }
                    }
+                   
                    
                    this.inicioValores()
            }     

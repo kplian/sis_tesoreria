@@ -136,7 +136,7 @@ class MODPlanPago extends MODbase{
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.f_plan_pago_ime';
 		
-		if (in_array($this->objParam->getParametro('tipo'), array("devengado_pagado","devengado","devengado_pagado_1c"))){
+		if (in_array($this->objParam->getParametro('tipo'), array("devengado_pagado","devengado","devengado_pagado_1c","especial"))){
 		   /////////////////////////////
 		   // Cuotas de primer nivel que tienen prorateo 
 		   //////////////////////////////       

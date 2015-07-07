@@ -70,7 +70,7 @@ Phx.vista.ObligacionPagoVb = {
            
            
 	   Phx.vista.ObligacionPagoVb.superclass.constructor.call(this,config);
-       this.addButton('obs_presu',{text:'Obs. Presupuestos', disabled:true, handler: this.initObs, tooltip: '<b>Observacioens del área de presupuesto</b>'});
+       this.addButton('obs_presu',{grupo:[0,1,2],text:'Obs. Presupuestos', disabled:true, handler: this.initObs, tooltip: '<b>Observacioens del área de presupuesto</b>'});
        this.crearFormObs();
         
         

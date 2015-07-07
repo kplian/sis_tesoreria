@@ -22,10 +22,7 @@ Phx.vista.ObligacionPagoEspecial = {
 	nombreVista: 'obligacionPagoEspecial',
 	ActList:'../../sis_tesoreria/control/ObligacionPago/listarObligacionPagoSol',
 	/*
-	 *  Interface heredada para el sistema de adquisiciones para que el reposnable 
-	 *  de adqusiciones registro los planes de pago , y ase por los pasos configurados en el WF
-	 *  de validacion, aprobacion y registro contable
-	 * */
+	 *  Interface heredada para de ObligacionPago 	 * */
 	
 	constructor: function(config) {
 	    
@@ -98,13 +95,13 @@ Phx.vista.ObligacionPagoEspecial = {
 	                                    modal:true,
 	                                    width:'90%',
 	                                    height:'90%'
-	                                }, {data:{objPadre: me}
+	                                }, { data: { objPadre: me }
 	                                }, 
 	                                this.idContenedor,
-	                                'FormObligacion',
+	                                'FormObligacionEspecial',
 	                                {
 	                                    config:[{
-	                                              event:'successsave',
+	                                              event: 'successsave',
 	                                              delegate: this.onSaveForm,
 	                                              
 	                                            }],

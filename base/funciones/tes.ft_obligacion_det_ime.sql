@@ -49,6 +49,7 @@ DECLARE
     v_monto_total_obligacion	numeric;
     v_registros				record;
     v_registros_cig         record;
+    v_relacion				varchar;
     
       
     
@@ -71,26 +72,22 @@ BEGIN
            --calculo monto en moneda base
            
            select
-           op.tipo_cambio_conv,
-           op.tipo_obligacion,
-           op.id_gestion
-           into
-           v_tipo_cambio_conv,
-           v_tipo_obligacion,
-           v_id_gestion
+             op.tipo_cambio_conv,
+             op.tipo_obligacion,
+             op.id_gestion
+             into
+             v_tipo_cambio_conv,
+             v_tipo_obligacion,
+             v_id_gestion
            from tes.tobligacion_pago op 
            where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
            
           
           --no se admiten incersiones para pago tipo obligacion
-          IF v_tipo_obligacion='adquisiciones' THEN
-          
-              raise exception 'no se permiten inserciones en pagos de adquisiciones';
-          
+          IF v_tipo_obligacion='adquisiciones' THEN          
+              raise exception 'no se permiten inserciones en pagos de adquisiciones';          
           END IF;
           
-        
-        
           --calcula monto en moneda base
            v_monto_mb = v_parametros.monto_pago_mo * v_tipo_cambio_conv;
         
@@ -103,31 +100,37 @@ BEGIN
          
           --recupera el nombre del concepto de gasto
            
-            select
+          select
             cig.desc_ingas
-            into
+          into
             v_registros_cig
-            from param.tconcepto_ingas cig
-            where cig.id_concepto_ingas =  v_parametros.id_concepto_ingas;
+          from param.tconcepto_ingas cig
+          where cig.id_concepto_ingas =  v_parametros.id_concepto_ingas;
           
+          
+          IF v_tipo_obligacion = 'pago_especial' THEN
+              v_relacion = 'PAGOES';
+          ELSE
+              v_relacion = 'CUECOMP';
+          END IF; 
+          
+          --raise exception 'sssssss  %', v_tipo_obligacion;
+             
           SELECT 
-              ps_id_partida 
-            into 
-              v_id_partida 
-          FROM conta.f_get_config_relacion_contable('CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo, 'No se encontro relación contable para el conceto de gasto: '||v_registros_cig.desc_ingas||'. <br> Mensaje: ');
-          
+            ps_id_partida 
+          into 
+            v_id_partida 
+          FROM conta.f_get_config_relacion_contable(v_relacion, v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo, 'No se encontro relación contable para el conceto de gasto: '||v_registros_cig.desc_ingas||'. <br> Mensaje: ');
         
            
         
-           IF v_id_partida is NULL THEN
-          
-            raise exception 'no se tiene una parametrizacion de partida  para este concepto de gasto en la relacion contable de código CUECOMP  (%,%,%,%)','CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo;
-            
-           END IF;
+          IF v_id_partida is NULL THEN
+              raise exception 'no se tiene una parametrizacion de partida  para este concepto de gasto en la relacion contable de código  (%,%,%,%)','CUECOMP', v_relacion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo;
+          END IF;
          
         
         	--Sentencia de la insercion
-        	insert into tes.tobligacion_det(
+          insert into tes.tobligacion_det(
 			estado_reg,
 			--id_cuenta,
 			id_partida,
@@ -143,7 +146,8 @@ BEGIN
 			fecha_mod,
 			id_usuario_mod,
             id_orden_trabajo
-          	) values(
+          )
+          values(
 			'activo',
 			--v_parametros.id_cuenta,
 			v_id_partida,

@@ -107,7 +107,8 @@ BEGIN
           
               IF v_registros.id_depto_conta != p_id_depto_conta THEN
               
-                 raise exception 'El departamento de contabilidad no coincide con el registrado para  las anteriores cuotas del plan de pago';
+                 --RAC, yano es necesaria esta validacion pueden mesclar los comprobantes ....
+                 --raise exception 'El departamento de contabilidad no coincide con el registrado para  las anteriores cuotas del plan de pago';
                         
               END IF;
           

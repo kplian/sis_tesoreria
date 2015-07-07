@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -148,6 +150,7 @@ DECLARE
     v_exception_detail			varchar;
     v_exception_context			varchar;
     v_id_uo						integer;
+    v_especial					numeric;
        
 			    
 BEGIN
@@ -413,7 +416,7 @@ BEGIN
            -- EDICION DE CUOTAS DEL ANTICIPO   (ant_parcial,anticipo)
            --------------------------------------------------------------           
            
-           ELSIF v_registros_pp.tipo in  ('ant_parcial','anticipo','dev_garantia') THEN
+           ELSIF v_registros_pp.tipo in  ('ant_parcial', 'anticipo', 'dev_garantia', 'especial') THEN
            
            
            
@@ -459,12 +462,26 @@ BEGIN
                   
                   ELSIF v_registros_pp.tipo in  ('dev_garantia') THEN    
                       
-                         v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'dev_garantia');
-                         IF v_monto_total + v_registros_pp.monto <  v_parametros.monto  THEN
-                            raise exception 'No puede exceder el total de retencion de garantia devuelto: %', v_monto_total;
-                         END IF;
-                         
+                        IF v_registros.pago_variable='no' THEN
+                           v_monto_total= tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'dev_garantia');
+                           IF v_monto_total + v_registros_pp.monto <  v_parametros.monto  THEN
+                              raise exception 'No puede exceder el total de retencion de garantia devuelto: %', v_monto_total;
+                           END IF;
+                        END IF; 
                          --raise exception '% , %',v_monto_total,v_parametros.monto;
+                  
+                  ELSIF v_registros_pp.tipo in  ('especial') THEN    
+                      
+                       IF v_registros.pago_variable = 'no' THEN
+                           v_monto_total = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'especial_total');
+                           v_especial = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'especial');
+                           IF v_especial + v_registros_pp.monto <  v_parametros.monto  THEN
+                              raise exception 'No puede exceder el total determinado: %', v_monto_total;
+                           END IF;
+                       END IF; 
+                         
+                         --raise exception '% , %',v_monto_total,v_parametros.monto
+                  
                        
                   END IF;
                  
@@ -589,7 +606,7 @@ BEGIN
               raise exception  'Este documento necesita especificar un monto excento no negativo';
            END IF;
            
-           IF COALESCE(v_monto_excento,0) >= COALESCE(v_monto_ejecutar_total_mo,0) and v_registros_pp.tipo not in ('ant_parcial','anticipo','dev_garantia') THEN
+           IF COALESCE(v_monto_excento,0) >= COALESCE(v_monto_ejecutar_total_mo,0) and v_registros_pp.tipo not in ('ant_parcial','anticipo','dev_garantia','especial') THEN
              raise exception 'El monto excento (%) debe ser menor que el total a ejecutar(%)',v_monto_excento, v_monto_ejecutar_total_mo  ;
            END IF;
            
@@ -743,7 +760,7 @@ BEGIN
            -------------------------------------------------
            --  Eliminacion de cuentas de primer nivel
            ------------------------------------------------
-           IF  v_registros.tipo in  ('devengado_pagado','devengado','devengado_pagado_1c','ant_parcial','anticipo','dev_garantia')   THEN
+           IF  v_registros.tipo in  ('devengado_pagado','devengado','devengado_pagado_1c','ant_parcial','anticipo','dev_garantia','especial')   THEN
                      select 
                       max(pp.nro_cuota)
                      into

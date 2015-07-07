@@ -50,7 +50,7 @@ BEGIN
 	v_nombre_funcion = 'tes.f_determinar_total_faltante';
    
  
-            IF p_filtro not in ('registrado','registrado_pagado','registrado_monto_ejecutar','anticipo_sin_aplicar','total_registrado_pagado','devengado','pagado','ant_parcial','ant_parcial_descontado','ant_aplicado_descontado','dev_garantia','ant_aplicado_descontado_op_variable') THEN
+            IF p_filtro not in ('registrado','registrado_pagado','registrado_monto_ejecutar','especial_total','anticipo_sin_aplicar','total_registrado_pagado','devengado','pagado','ant_parcial','ant_parcial_descontado','ant_aplicado_descontado','dev_garantia','ant_aplicado_descontado_op_variable','especial') THEN
               
               		raise exception 'filtro no reconocido (%) para determinar el total faltante ', p_filtro;
             
@@ -460,6 +460,62 @@ BEGIN
                        
                       
                        return COALESCE(v_monto_total_registrado,0) + COALESCE(v_monto_ajuste,0) - COALESCE(v_monto_ant_descontado,0);
+            
+            
+             -------------------------------
+             --  Pagos especiales
+             -------------------------------
+            
+             ELSEIF  p_filtro = 'especial' THEN
+            
+                       --recupera los montos retenidos por garantia en las trasacciones de devengado unicamente
+                       
+                       select 
+                        sum(op.monto_pago_mo)
+                       into
+                         v_monto_ajuste
+                       from tes.tobligacion_det op
+                       where op.id_obligacion_pago = p_id_obligacion_pago 
+                          and op.estado_reg = 'activo';
+                       
+                       
+                       
+                        select 
+                         sum(pp.monto)
+                        into
+                         v_monto_total_registrado
+                        from tes.tplan_pago pp
+                        where  pp.estado_reg='activo'  
+                              and pp.tipo in('especial')
+                              and pp.id_obligacion_pago = p_id_obligacion_pago;
+                       
+                      
+                       
+                      
+                       return COALESCE(v_monto_ajuste,0) - COALESCE(v_monto_total_registrado,0);
+            
+            -------------------------------
+             --  Pagos especiales  en edicion
+             -------------------------------
+            
+             ELSEIF  p_filtro = 'especial_total' THEN
+            
+                       --recupera los montos retenidos por garantia en las trasacciones de devengado unicamente
+                       
+                       select 
+                        sum(op.monto_pago_mo)
+                       into
+                         v_monto_ajuste
+                       from tes.tobligacion_det op
+                       where op.id_obligacion_pago = p_id_obligacion_pago 
+                          and op.estado_reg = 'activo';
+                       
+                       
+                                         
+                      
+                       
+                      
+                       return COALESCE(v_monto_ajuste,0);
             
             
              ---------------------------

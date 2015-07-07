@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -74,6 +72,7 @@ DECLARE
     v_registros    			record;
     v_cad_ep 				varchar;
     v_cad_uo 				varchar;
+    v_tipo_plan_pago		varchar;
     
     
      v_total_nro_cuota  integer;
@@ -522,10 +521,10 @@ BEGIN
                                id_obligacion_pago = NULL
                              where id_cotizacion = v_registros.id_cotizacion;    
                     
-                    --romper relacion con obligacion det
+                           --romper relacion con obligacion det
                            update adq.tcotizacion_det  s set 
                                    id_obligacion_det = NULL
-                             where id_cotizacion = v_registros.id_cotizacion; 
+                           where id_cotizacion = v_registros.id_cotizacion; 
                 
                   v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligaciones de Pago eliminado(a), y cotizacion retrocedida'); 
                 
@@ -1106,10 +1105,18 @@ BEGIN
                          
                          v_descuentos_ley = v_monto_cuota * v_registros_plan.ps_descuento_porc;
                          
+                         IF v_tipo_obligacion in  ('pago_especial') THEN
+                            v_tipo_plan_pago = 'especial';
+                         ELSE
+                           v_tipo_plan_pago = 'devengado_pagado';
+                         END IF;
+                         
                          --armar hstore 
                          v_hstore_pp =   hstore(ARRAY[
-                                                        'tipo_pago', 'normal',
-                                                        'tipo',   'devengado_pagado',
+                                                        'tipo_pago', 
+                                                        'normal',
+                                                        'tipo',   
+                                                        v_tipo_plan_pago,
                                                         'tipo_cambio',v_tipo_cambio_conv::varchar,
                                                         'id_plantilla',v_id_plantilla::varchar,
                                                         'id_obligacion_pago',v_parametros.id_obligacion_pago::varchar,
@@ -1152,7 +1159,7 @@ BEGIN
           -- COMPROMISO PRESUPUESTARIO
           -- cuando pasa al estado registrado y el presupeusto no esta comprometido
           ------------------------------------------------------------------------------
-          IF  v_codigo_estado_siguiente = 'registrado'  and  v_comprometido = 'no' and v_tipo_obligacion != 'adquisiciones' THEN
+          IF  v_codigo_estado_siguiente = 'registrado'  and  v_comprometido = 'no' and v_tipo_obligacion != 'adquisiciones' and v_tipo_obligacion != 'pago_especial' THEN
                
                --TODO aumentar capacidad de rollback
                -- verficar presupuesto y comprometer
@@ -1165,12 +1172,20 @@ BEGIN
                update tes.tobligacion_pago  set 
                  comprometido = v_comprometido
                where id_obligacion_pago  = v_parametros.id_obligacion_pago;
+               
+               --jrr: llamamos a la funcion que revierte de planillas en caso de que sea de recursos humanos
+                if (v_tipo_obligacion = 'rrhh') then
+                    IF NOT plani.f_generar_pago_tesoreria(p_administrador,p_id_usuario,v_parametros._id_usuario_ai,
+                              v_parametros._nombre_usuario_ai,v_parametros.id_obligacion_pago,v_obs) THEN                                                         
+                         raise exception 'Error al generar el pago de devengado';                          
+                      END IF;            	
+                end if;
            
            END IF;
            
            -- cuando viene de adquisiciones no es necesario comprometer pero dejamos la bancera de compromiso barcada
            --  ya que los montos se comprometiron en la solicitud de compra
-           IF v_codigo_estado_siguiente = 'registrado'  and  v_comprometido = 'no' and v_tipo_obligacion = 'adquisiciones' THEN
+           IF v_codigo_estado_siguiente = 'registrado'  and  v_comprometido = 'no' and v_tipo_obligacion in  ('adquisiciones','pago_especial') THEN
                v_comprometido = 'si';
                --cambia la bandera del comprometido
                update tes.tobligacion_pago  set 
@@ -1309,7 +1324,7 @@ BEGIN
                          
                         
                         -- cuando el estado al que regresa es  borrador o presupeustos esta comprometido y no viene de adquisiciones se revierte el repsupuesto
-                         IF (v_codigo_estado = 'borrador' or v_codigo_estado = 'vbpresupuestos') and v_comprometido = 'si' and   v_tipo_obligacion !='adquisiciones' THEN
+                         IF (v_codigo_estado = 'borrador' or v_codigo_estado = 'vbpresupuestos') and v_comprometido = 'si' and   v_tipo_obligacion !='adquisiciones' and   v_tipo_obligacion !='pago_especial' THEN
                          
                              --se revierte el presupeusto
                              IF not tes.f_gestionar_presupuesto_tesoreria(v_parametros.id_obligacion_pago, p_id_usuario, 'revertir')  THEN

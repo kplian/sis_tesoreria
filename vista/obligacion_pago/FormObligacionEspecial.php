@@ -19,7 +19,7 @@ Phx.vista.FormObligacionEspecial=Ext.extend(Phx.frmInterfaz,{
     constructor:function(config)
     {   
     	
-    	//declaracion de eventos
+    	// declaracion de eventos
         this.addEvents('beforesave');
         this.addEvents('successsave');
     	
@@ -53,7 +53,7 @@ Phx.vista.FormObligacionEspecial=Ext.extend(Phx.frmInterfaz,{
 							                            totalProperty: 'total',
 							                            fields: ['id_concepto_ingas','tipo','desc_ingas','movimiento','desc_partida','id_grupo_ots','filtro_ot','requiere_ot'],
 							                            remoteSort: true,
-							                            baseParams:{par_filtro:'desc_ingas#par.codigo#par.nombre_partida',movimiento:'gasto', autorizacion: 'pago_unico',autorizacion_nulos: 'no'}
+							                            baseParams:{par_filtro:'desc_ingas#par.codigo#par.nombre_partida',movimiento:'gasto', autorizacion: 'especial',autorizacion_nulos: 'no'}
 							                }),
 							               valueField: 'id_concepto_ingas',
 							               displayField: 'desc_ingas',
@@ -76,7 +76,7 @@ Phx.vista.FormObligacionEspecial=Ext.extend(Phx.frmInterfaz,{
 						                    msgTarget: 'title',
 						                    origen:'CENTROCOSTO',
 						                    fieldLabel: 'Centro de Costos',
-						                    url: '../../sis_parametros/control/CentroCosto/listarCentroCostoFiltradoXDepto',
+						                    url: '../../sis_parametros/control/CentroCosto/listarCentroCostoCombo',
 						                    emptyText : 'Centro Costo...',
 						                    allowBlank: false,
 						                    baseParams:{filtrar:'grupo_ep'}
@@ -444,7 +444,7 @@ Phx.vista.FormObligacionEspecial=Ext.extend(Phx.frmInterfaz,{
 			                            frame: true,
 			                            layout: 'form',
 			                            title: ' Datos del Pago ',
-			                            width: '33%',
+			                            width: '50%',
 			                            border: false,
 			                            //margins: '0 0 0 5',
 			                            padding: '0 0 0 10',
@@ -649,7 +649,7 @@ Phx.vista.FormObligacionEspecial=Ext.extend(Phx.frmInterfaz,{
 			},
 			type:'Field',
 			valorInicial: 'pago_especial',
-			form:true 
+			form: true 
 		},
 		{
 			//configuracion del componente
@@ -794,7 +794,7 @@ Phx.vista.FormObligacionEspecial=Ext.extend(Phx.frmInterfaz,{
         this.cmpFuncionario.disable();
         this.cmpFecha.setValue(new Date());
         this.cmpFecha.fireEvent('change')
-        this.cmpTipoObligacion.setValue('pago_unico');
+        this.cmpTipoObligacion.setValue('pago_especial');
         
         this.Cmp.tipo_anticipo.setValue('no');
         this.Cmp.pago_variable.setValue('no');

@@ -103,17 +103,18 @@ BEGIN
         IF   (p_hstore->'tipo_obligacion')::varchar = 'adquisiciones'    THEN
              raise exception 'Los pagos de adquisiciones tienen que ser habilitados desde el sistema de adquisiciones';   
        
-        ELSIF   (p_hstore->'tipo_obligacion')::varchar  in ('pago_directo','pago_unico')    THEN
+        ELSIF   (p_hstore->'tipo_obligacion')::varchar  in ('pago_directo','pago_unico','pago_especial')    THEN
               
         
-                
-                
                  IF (p_hstore->'tipo_obligacion')::varchar  = 'pago_directo'   THEN
-                     v_tipo_documento = 'PGD';
-                     v_codigo_proceso_macro = 'TES-PD'; 
-                 ELSE
+                      v_tipo_documento = 'PGD';
+                      v_codigo_proceso_macro = 'TES-PD'; 
+                 ELSEIF(p_hstore->'tipo_obligacion')::varchar  = 'pago_directo'   THEN
                       v_tipo_documento = 'PU';
                       v_codigo_proceso_macro = 'PU'; 
+                 ELSE
+                      v_tipo_documento = 'PE';
+                      v_codigo_proceso_macro = 'TES-PD'; 
                  END IF;
                 
                 --obtener el correlativo segun el tipo de documento
