@@ -130,7 +130,7 @@ BEGIN
         --obtener id del proceso macro
         v_sistema_origen = COALESCE(p_hstore->'sistema_origen','PXP')::varchar;
 
-		IF( v_sistema_origen != 'KERP' OR (v_sistema_origen = 'KERP' AND (p_hstore->'tipo')='deposito'))THEN
+		IF( v_sistema_origen != 'KERP' OR (v_sistema_origen = 'KERP' AND (p_hstore->'tipo') in ('deposito','transferencia_carta')))THEN
         
             select 
              pm.id_proceso_macro
@@ -202,14 +202,13 @@ BEGIN
                    (p_hstore->'id_depto')::integer,
                    'Transaccion bancaria ('||v_num||')'::varchar,
                    v_num );
-                     raise notice 'num_tramite %, id_proceso_wf %, id_estado_wf %, codigo_estado %', v_num_tramite,
-                     --para depositos, transferencias, debito no genera numero de tramite por q no es proceso de inicio                     
+                   --para depositos, transferencias, debito no genera numero de tramite por q no es proceso de inicio                     
+                   raise notice 'num_tramite %, id_proceso_wf %, id_estado_wf %, codigo_estado %', v_num_tramite,
                    v_id_proceso_wf,
                    v_id_estado_wf,
                    v_codigo_estado; 
               	
             ELSE 
-         		
                 select pp.id_estado_wf, op.num_tramite into v_id_estado_wf_anterior, v_num_tramite
                 from tes.tplan_pago pp
                 inner join tes.tobligacion_pago op on op.id_obligacion_pago=pp.id_obligacion_pago
@@ -283,7 +282,8 @@ BEGIN
                 id_depto,
                 id_finalidad,
                 sistema_origen,
-                comprobante_sigma
+                comprobante_sigma,
+                id_int_comprobante
                 ) values(            
                 (p_hstore->'id_cuenta_bancaria')::integer,
                 upper(translate ((p_hstore->'a_favor')::varchar, 'áéíóúÁÉÍÓÚäëïöüÄËÏÖÜñ', 'aeiouAEIOUaeiouAEIOUÑ')),
@@ -309,7 +309,8 @@ BEGIN
                 (p_hstore->'id_depto')::integer,				
                 (p_hstore->'id_finalidad')::integer,
                 (p_hstore->'sistema_origen')::varchar,
-                (p_hstore->'comprobante_sigma')::varchar				
+                (p_hstore->'comprobante_sigma')::varchar,
+                (p_hstore->'id_int_comprobante')::integer				
                 )RETURNING id_libro_bancos into v_id_libro_bancos;    		
             
             ELSE
@@ -340,7 +341,8 @@ BEGIN
                   id_depto,
                   id_finalidad,
                   sistema_origen,
-                  comprobante_sigma
+                  comprobante_sigma,
+                  id_int_comprobante
                   ) values(            
                   (p_hstore->'id_cuenta_bancaria')::integer,
                   (p_hstore->'fecha')::date,
@@ -367,7 +369,8 @@ BEGIN
                   (p_hstore->'id_depto')::integer,				
                   (p_hstore->'id_finalidad')::integer,
                   (p_hstore->'sistema_origen')::varchar,
-                  (p_hstore->'comprobante_sigma')::varchar				
+                  (p_hstore->'comprobante_sigma')::varchar,
+                  (p_hstore->'id_int_comprobante')::integer				
                   )RETURNING id_libro_bancos into v_id_libro_bancos;
     		
             END IF;
