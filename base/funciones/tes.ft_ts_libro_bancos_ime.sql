@@ -74,6 +74,7 @@ DECLARE
     g_id_cuenta_bancaria_periodo	integer;
     v_id_cuenta_bancaria	integer;
     v_estado_padre			varchar;
+	v_resp_doc				boolean;
 BEGIN
     v_nombre_funcion = 'tes.ft_ts_libro_bancos_ime';
     v_parametros = pxp.f_get_record(p_tabla);
@@ -526,6 +527,8 @@ BEGIN
         id_finalidad = v_parametros.id_finalidad,
         comprobante_sigma = v_parametros.comprobante_sigma
 		WHERE tes.tts_libro_bancos.id_libro_bancos = v_parametros.id_libro_bancos;
+		
+		v_resp_doc = wf.f_verifica_documento(p_id_usuario,v_id_estado_wf);
 		                 
         If (v_parametros.fecha<> g_fecha_ant or g_fecha_ant is null) Then
         	--ALGORITMO DE ORDENACION DE REGISTROS
