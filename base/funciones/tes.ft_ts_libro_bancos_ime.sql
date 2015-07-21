@@ -75,6 +75,7 @@ DECLARE
     v_id_cuenta_bancaria	integer;
     v_estado_padre			varchar;
 	v_resp_doc				boolean;
+	g_verifica_documento	varchar;
 BEGIN
     v_nombre_funcion = 'tes.ft_ts_libro_bancos_ime';
     v_parametros = pxp.f_get_record(p_tabla);
@@ -372,7 +373,7 @@ BEGIN
             	raise exception 'El periodo % no se encuentra abierto',  pxp.f_obtener_literal_periodo(v_periodo,null);
             end if;
             
-            SELECT LBRBAN.fecha , lbrpad.estado into g_fecha, v_estado_padre
+			SELECT LBRBAN.fecha, LBRBAN.id_estado_wf , lbrpad.estado into g_fecha, v_id_estado_wf, v_estado_padre
             FROM tes.tts_libro_bancos LBRBAN
             LEFT JOIN tes.tts_libro_bancos LBRPAD on lbrpad.id_libro_bancos=lbrban.id_libro_bancos_fk
             WHERE LBRBAN.id_libro_bancos=v_parametros.id_libro_bancos;
@@ -486,9 +487,10 @@ BEGIN
         End If; --fin de la verificacion de si es cheque, debito automatico o transferencia con carta  
         
         --obtenemos la fecha antes de actualizarla
-        Select lb.fecha
-        Into g_fecha_ant
+		Select lb.fecha, ew.verifica_documento
+        Into g_fecha_ant, g_verifica_documento
         From tes.tts_libro_bancos lb
+		inner join wf.testado_wf ew on ew.id_estado_wf=lb.id_estado_wf
         Where lb.id_libro_bancos = v_parametros.id_libro_bancos;
         
         /*IF(v_parametros.tipo='cheque' AND v_parametros.nro_cheque is not null)THEN
@@ -528,7 +530,9 @@ BEGIN
         comprobante_sigma = v_parametros.comprobante_sigma
 		WHERE tes.tts_libro_bancos.id_libro_bancos = v_parametros.id_libro_bancos;
 		
-		v_resp_doc = wf.f_verifica_documento(p_id_usuario,v_id_estado_wf);
+		if(g_verifica_documento = 'si')then
+	        v_resp_doc = wf.f_verifica_documento(p_id_usuario,v_id_estado_wf);
+    	end if;
 		                 
         If (v_parametros.fecha<> g_fecha_ant or g_fecha_ant is null) Then
         	--ALGORITMO DE ORDENACION DE REGISTROS
