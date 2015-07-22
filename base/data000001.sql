@@ -1195,3 +1195,15 @@ select pxp.f_insert_testructura_gui ('CONEX', 'DG');
 
 /***********************************F-DAT-RAC-TES-0-30/06/2015*****************************************/
 
+
+
+
+
+/***********************************I-DAT-RAC-TES-0-22/07/2015*****************************************/
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES (E'tes_prioridad_lb_internacional', E'3', E'configura la prioridad para reconocer la prioridad delibro de bancos internacional\r\n');
+
+
+/***********************************F-DAT-RAC-TES-0-22/07/2015*****************************************/
+

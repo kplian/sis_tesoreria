@@ -1218,7 +1218,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		'monto_ajuste_siguiente_pag','pago_variable','monto_anticipo','contador_estados',
 		{name:'fecha_costo_ini', type: 'date',dateFormat:'Y-m-d'},
 		{name:'fecha_costo_fin', type: 'date',dateFormat:'Y-m-d'},
-		'id_depto_conta_pp','desc_depto_conta_pp','funcionario_wf','tiene_form500','id_depto_lb','desc_depto_lb',{name:'ultima_cuota_dev',type:'numeric'}
+		'id_depto_conta_pp','desc_depto_conta_pp','funcionario_wf','tiene_form500',
+		'id_depto_lb','desc_depto_lb','prioridad_lp',{name:'ultima_cuota_dev',type:'numeric'}
 		
 	],
 	
@@ -1343,6 +1344,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
      mostrarWizard : function(rec) {
      	var configExtra = [];
      	//si el estado es vbfinanzas agregamos la opcion para selecionar el depto de Libro bancos
+     	/*
      	if(rec.data.estado == 'vbfin'){
      		 configExtra = [{
 					   			config:{
@@ -1361,7 +1363,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 					   			id_grupo: 1,
 					   			form:true
 					       	}];
-     	 }
+     	 }*/
      	
      	
       	this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',

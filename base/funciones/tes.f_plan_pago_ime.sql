@@ -349,8 +349,25 @@ BEGIN
            -- EDICION DE CUOTAS QUE TIENEN DEVENGADO   ('devengado_pagado','devengado','devengado_pagado_1c')
            -------------------------------------------------------------------------------------------------- 
            
-           IF v_registros_pp.tipo in ('devengado_pagado','devengado','devengado_pagado_1c') THEN
+           IF v_registros_pp.tipo in ('devengado_pagado','devengado','devengado_pagado_1c','especial') THEN
             
+                     
+                 IF v_registros_pp.tipo in  ('especial') THEN    
+                      
+                       IF v_registros.pago_variable = 'no' THEN
+                           v_monto_total = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'especial_total');
+                           v_especial = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'especial');
+                           IF v_especial + v_registros_pp.monto <  v_parametros.monto  THEN
+                              raise exception 'No puede exceder el total determinado: %', v_monto_total;
+                           END IF;
+                       END IF; 
+                       
+                        v_monto_ejecutar_total_mo   = COALESCE(v_parametros.monto,0);
+                        v_liquido_pagable  = COALESCE(v_parametros.monto,0);
+                         
+                         --raise exception '% , %',v_monto_total,v_parametros.monto
+                 ELSE    
+                     
                      -- si no es un proceso variable, verifica que el registro no sobrepase el total a pagar
                      IF v_registros.pago_variable='no' THEN
                         v_monto_total = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'registrado');
@@ -408,7 +425,7 @@ BEGIN
                      END IF;
                   
                      
-                    
+               END IF;     
                     
                      
                      
@@ -416,7 +433,7 @@ BEGIN
            -- EDICION DE CUOTAS DEL ANTICIPO   (ant_parcial,anticipo)
            --------------------------------------------------------------           
            
-           ELSIF v_registros_pp.tipo in  ('ant_parcial', 'anticipo', 'dev_garantia', 'especial') THEN
+           ELSIF v_registros_pp.tipo in  ('ant_parcial', 'anticipo', 'dev_garantia') THEN
            
            
            
@@ -470,17 +487,7 @@ BEGIN
                         END IF; 
                          --raise exception '% , %',v_monto_total,v_parametros.monto;
                   
-                  ELSIF v_registros_pp.tipo in  ('especial') THEN    
-                      
-                       IF v_registros.pago_variable = 'no' THEN
-                           v_monto_total = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'especial_total');
-                           v_especial = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'especial');
-                           IF v_especial + v_registros_pp.monto <  v_parametros.monto  THEN
-                              raise exception 'No puede exceder el total determinado: %', v_monto_total;
-                           END IF;
-                       END IF; 
-                         
-                         --raise exception '% , %',v_monto_total,v_parametros.monto
+                  
                   
                        
                   END IF;
@@ -666,6 +673,8 @@ BEGIN
             -- chequea fechas de costos inicio y fin
             v_resp_doc =  tes.f_validar_periodo_costo(v_parametros.id_plan_pago);
            
+         
+           
             IF v_registros_pp.tipo not in ('ant_parcial','anticipo','dev_garantia') THEN
             
                    ----------------------------------------------------------------------
@@ -682,6 +691,8 @@ BEGIN
                     inner join tes.tobligacion_det od on od.id_obligacion_det = pr.id_obligacion_det
                     where pr.id_plan_pago = v_parametros.id_plan_pago 
                     and pr.estado_reg = 'activo' and od.estado_reg = 'activo';
+                   
+                   
                    
                    
                    IF v_total_prorrateo != v_monto_ejecutar_total_mo THEN 
@@ -1323,7 +1334,7 @@ BEGIN
                 
              END IF;
              
-             /*Se comenta la conformidad implicita
+             /*JRR (28) Se comenta la conformidad implicita
              if (v_estado_aux = 'borrador') then
              
              
@@ -1345,11 +1356,13 @@ BEGIN
              end if;*/
              
              --si viene del estado vobo finanzas actualizamos el depto de libro de bancos
+             --22/07/2015 RAC --  se comenta el siguiente if ya que el estado vbfin en el wizard ya nose manda el libro de bancos
+             /*
              if (v_estado_aux = 'vbfin') then
                  update tes.tplan_pago set 
                  id_depto_lb = v_parametros.id_depto_lb
                  where id_proceso_wf  = v_parametros.id_proceso_wf_act;
-             end if; 
+             end if; */ 
                
              --configurar acceso directo para la alarma   
              v_acceso_directo = '';

@@ -150,7 +150,7 @@ Phx.vista.PlanPagoVb = {
             //RCM, resetea store del deposito para no mostrar datos al hacer nuevo
             this.Cmp.id_cuenta_bancaria_mov.store.baseParams=Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams, {id_cuenta_bancaria:-1,fecha:this.Cmp.fecha_tentativa.getValue()});
          }
-           
+          /* 
          if(data.estado == 'vbsolicitante'){
                this.Cmp.fecha_tentativa.disable();
                this.Cmp.id_plantilla.disable();
@@ -165,7 +165,7 @@ Phx.vista.PlanPagoVb = {
                this.Cmp.id_cuenta_bancaria_mov.disable();
                this.Cmp.obs_monto_no_pagado.disable();
                this.Cmp.obs_descuentos_ley.disable();
-          }
+          }*/
          
      },
     
@@ -329,17 +329,44 @@ Phx.vista.PlanPagoVb = {
                            }
                        }
                        else{
-                           this.getBoton('ant_estado').enable();
-                           this.getBoton('ini_estado').enable();
-                           this.getBoton('sig_estado').enable();
-                           this.getBoton('SolDevPag').disable();
+                       	
+                       	   if(data['estado']== 'vbcostos'){
+                       	   	  
+	                       	   this.getBoton('ant_estado').enable();
+	                           this.getBoton('ini_estado').enable();
+	                           //si la prioridad de lb es internacional ...  3 interancional, 2 nacional 0 central
+	                           if(data['prioridad_lp']== 3){
+	                               this.getBoton('sig_estado').disable();
+		                           this.getBoton('SolDevPag').enable();
+	                           }
+	                           else{
+	                           	   this.getBoton('sig_estado').enable();
+		                           this.getBoton('SolDevPag').disable();
+	                           }
+	                           this.getBoton('edit').enable();
+	                           if (data['nro_cuota']== 1.00 && data['tipo_obligacion']== 'pago_directo') {
+	                           		this.getBoton('ModAprop').enable();                           		
+	                           } else {
+	                           		this.getBoton('ModAprop').disable(); 
+	                           }
+                       	   
+                       	   }
+                       	   else{
+                       	   	this.getBoton('ant_estado').enable();
+                            this.getBoton('ini_estado').enable();
+                            this.getBoton('sig_estado').enable();
+                            this.getBoton('SolDevPag').disable();
                            
-                           if (data['estado']== 'vbsolicitante' || data['estado'] == 'vbdeposito'){
-                              this.getBoton('edit').enable();
-                           }
-                           else{
-                              this.getBoton('edit').disable();  
-                           }
+	                           if (data['estado']== 'vbsolicitante' || data['estado'] == 'vbdeposito' || data['estado'] == 'vbfin'){
+	                              this.getBoton('edit').enable();
+	                           }
+	                           else{
+	                              this.getBoton('edit').disable();  
+	                           }
+                       	   }
+                       	
+                       	
+                           
                        }
                }
                this.getBoton('SolPlanPago').enable(); 
