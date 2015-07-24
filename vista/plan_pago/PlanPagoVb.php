@@ -134,6 +134,12 @@ Phx.vista.PlanPagoVb = {
     },
    onButtonEdit:function(){
          var data = this.getSelectedData();
+         if (this.data.estado = 'vbfin') {
+         	this.Cmp.id_cuenta_bancaria.allowBlank = true;
+         } else {
+         	this.Cmp.id_cuenta_bancaria.allowBlank = false;
+         }
+         
          Phx.vista.PlanPagoVb.superclass.onButtonEdit.call(this);
          
          if(this.Cmp.id_depto_lb.getValue() > 0){
