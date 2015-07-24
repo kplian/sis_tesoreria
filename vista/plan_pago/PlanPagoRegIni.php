@@ -53,7 +53,7 @@ Phx.vista.PlanPagoRegIni = {
                     
          this.creaFormularioConformidad();
          this.iniciarEventos();
-         this.addButton('btnConformidad',{text:'Conformidad',iconCls: 'bok',disabled:true,handler:this.onButtonConformidad,tooltip: 'Generar conformidad para el pago (Firma acta de conformidad)'});
+         //this.addButton('btnConformidad',{text:'Conformidad',iconCls: 'bok',disabled:true,handler:this.onButtonConformidad,tooltip: 'Generar conformidad para el pago (Firma acta de conformidad)'});
          //escode boton para mandar a borrador 
           this.getBoton('ini_estado').hide();  
         
@@ -445,11 +445,11 @@ Phx.vista.PlanPagoRegIni = {
           }
           
          
-          if (data.tipo=='devengado'  || data.tipo=='devengado_pagado' || data.tipo=='devengado_pagado_1c') {
+          /*if (data.tipo=='devengado'  || data.tipo=='devengado_pagado' || data.tipo=='devengado_pagado_1c') {
             this.getBoton('btnConformidad').enable();
          } else {
             this.getBoton('btnConformidad').disable();
-         }
+         }*/
           
          // this.getBoton('btnVerifPresup').enable();
           this.getBoton('btnChequeoDocumentosWf').enable();  
@@ -463,7 +463,7 @@ Phx.vista.PlanPagoRegIni = {
            //this.getBoton('btnVerifPresup').disable();
            this.getBoton('ant_estado').disable();
            this.getBoton('sig_estado').disable();
-           this.getBoton('btnConformidad').disable();
+          
          
            //this.getBoton('btnConformidad').disable();
            this.getBoton('btnChequeoDocumentosWf').disable();   

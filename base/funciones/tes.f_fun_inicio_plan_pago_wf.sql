@@ -28,6 +28,7 @@ DECLARE
     v_id_uo	integer;
     v_id_usuario_excepcion	integer;
     v_resp_doc   boolean;
+    v_id_usuario_firma	integer;
    
 	
     
@@ -48,7 +49,9 @@ BEGIN
             pp.fecha_conformidad,
             pp.conformidad,
             pp.monto,
-            pp.id_obligacion_pago
+            pp.id_obligacion_pago,
+            op.tipo_obligacion,
+            op.uo_ex
      into 
             v_registros
             
@@ -60,7 +63,8 @@ BEGIN
      select
        ewf.id_funcionario,
        ewf.id_depto,
-       ewf.id_usuario_reg
+       ewf.id_usuario_reg,
+       ewf.obs
      into
        v_regitros_ewf
      from wf.testado_wf ewf
@@ -107,6 +111,25 @@ BEGIN
                 raise exception 'El total prorrateado no iguala con el monto total a ejecutar';
             END IF;
      END IF;
+     
+      --JRR  Se comenta la conformidad implicita
+     if (v_registros.estado = 'borrador' and v_registros.tipo_obligacion in ('pago_unico','pago_directo') and v_registros.uo_ex = 'no' ) then         
+             
+             
+         update tes.tplan_pago
+         set conformidad = split_part(v_regitros_ewf.obs,'Obs:',2),
+         fecha_conformidad = now()
+         where id_proceso_wf  = p_id_proceso_wf;
+                 
+         select usu.id_usuario into v_id_usuario_firma
+          from tes.tplan_pago pp
+          inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
+          inner join orga.tfuncionario fun on op.id_funcionario = fun.id_funcionario
+          inner join segu.tusuario usu on fun.id_persona = usu.id_persona
+          where pp.id_plan_pago = v_registros.id_plan_pago;
+                 
+         v_resp_doc = wf.f_verifica_documento(v_id_usuario_firma, p_id_estado_wf);
+     end if;
      
      
      /*jrr(10/10/2014): El monto no puede ser menor o igual a 0*/ 

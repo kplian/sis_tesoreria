@@ -1317,7 +1317,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
    sigEstado:function(){                   
       	var rec=this.sm.getSelected();
       	
-      	if (((rec.data.estado == 'borrador' && rec.data.tipo_obligacion == 'pago_directo') || (rec.data.estado == 'vbsolicitante' && rec.data.tipo_obligacion == 'adquisiciones')) && 
+      	if ((rec.data.estado == 'vbsolicitante' && rec.data.tipo_obligacion == 'adquisiciones') && 
       				(rec.data['fecha_conformidad'] == '' || rec.data['fecha_conformidad'] == undefined || rec.data['fecha_conformidad'] == null)
       				&& (rec.data.tipo=='devengado'  || rec.data.tipo=='devengado_pagado' || rec.data.tipo=='devengado_pagado_1c')) {
       		Ext.Msg.show({
@@ -1335,6 +1335,26 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 			   animEl: 'elId',
 			   icon: Ext.MessageBox.WARNING
 			}, this);
+      	} else if ((rec.data.estado == 'borrador' && rec.data.tipo_obligacion != 'adquisiciones') && 
+      				(rec.data['fecha_conformidad'] == '' || rec.data['fecha_conformidad'] == undefined || rec.data['fecha_conformidad'] == null)
+      				&& (rec.data.tipo=='devengado'  || rec.data.tipo=='devengado_pagado' || rec.data.tipo=='devengado_pagado_1c')
+      				&& this.maestro.uo_ex == 'no') {
+      		Ext.Msg.show({
+			   title:'Confirmación',
+			   scope: this,
+			   msg: 'Al solicitar el pago se generará una conformidad implícita bajo responsabilidad del funcionario solicitante. Desea Continuar?',
+			   buttons: Ext.Msg.YESNO,
+			   fn: function(id, value, opt) {			   		
+			   		if (id == 'yes') {
+			   			this.mostrarWizard(rec);
+			   		} else {
+			   			opt.hide;
+			   		}
+			   },	
+			   animEl: 'elId',
+			   icon: Ext.MessageBox.WARNING
+			}, this);
+      	
       	} else {
       		this.mostrarWizard(rec);
       	}

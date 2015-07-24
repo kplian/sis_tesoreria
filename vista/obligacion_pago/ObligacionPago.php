@@ -762,6 +762,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 		{name:'id_estado_wf', type: 'numeric'},
 		{name:'id_depto', type: 'numeric'},
 		{name:'nombre_depto', type: 'string'},
+		{name:'uo_ex', type: 'string'},
 		{name:'num_tramite', type: 'string'},
 		{name:'id_proceso_wf', type: 'numeric'},
 		{name:'fecha_reg', type: 'date',dateFormat:'Y-m-d H:i:s.u'},

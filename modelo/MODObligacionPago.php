@@ -80,6 +80,7 @@ class MODObligacionPago extends MODbase{
 		$this->captura('obs_presupuestos','varchar');
 		$this->captura('obs_poa','varchar');
 		$this->captura('codigo_poa','varchar');
+		$this->captura('uo_ex','varchar');
 		
 		
 		
@@ -161,6 +162,7 @@ class MODObligacionPago extends MODbase{
 		$this->captura('desc_contrato','text');
 		$this->captura('id_contrato','integer');
 		$this->captura('obs_presupuestos','varchar');
+		$this->captura('uo_ex','varchar');
         
         
         //Ejecuta la instruccion

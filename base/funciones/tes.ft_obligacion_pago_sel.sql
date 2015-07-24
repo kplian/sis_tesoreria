@@ -199,7 +199,9 @@ BEGIN
                               con.id_contrato,
                               obpg.obs_presupuestos,
                               obpg.codigo_poa,
-                              obpg.obs_poa
+                              obpg.obs_poa,
+                              obpg.uo_ex
+                              
                               
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
@@ -446,7 +448,8 @@ BEGIN
                               obpg.id_obligacion_pago_extendida,
                               con.tipo||'' - ''||con.numero::varchar as desc_contrato,
                               con.id_contrato,
-                              obpg.obs_presupuestos
+                              obpg.obs_presupuestos,
+                              obpg.uo_ex
                               
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg

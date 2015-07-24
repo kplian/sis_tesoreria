@@ -39,6 +39,7 @@ DECLARE
     v_obs 					varchar;
     v_resp_fin 				varchar[];
     v_preguntar				varchar;
+    v_id_funcionario_estado	integer;
 BEGIN
 	v_nombre_funcion = 'tes.f_finalizar_obligacion_total';
        --recupera parametros
@@ -78,7 +79,7 @@ BEGIN
                 v_fecha_op
              from tes.tobligacion_pago op
              left join param.vproveedor pr  on pr.id_proveedor = op.id_proveedor
-             where op.id_obligacion_pago = p_id_obligacion_pago; 
+             where op.id_obligacion_pago = p_id_obligacion; 
              
              -- VALIDACIONES que se finalicen solo boligaciones en pago
              
@@ -113,8 +114,8 @@ BEGIN
                                                            v_id_estado_wf, 
                                                            v_id_proceso_wf,
                                                            p_id_usuario,
-                                                           v_parametros._id_usuario_ai,
-                                                           v_parametros._nombre_usuario_ai,
+                                                           p_id_usuario_ai,
+                                                           p_nombre_usuario_ai,
                                                            v_id_depto,
                                                            v_obs);
             
@@ -129,9 +130,9 @@ BEGIN
                estado = va_codigo_estado[1],
                id_usuario_mod = p_id_usuario,               
                fecha_mod = now(),
-               id_usuario_ai = v_parametros._id_usuario_ai,
-               usuario_ai = v_parametros._nombre_usuario_ai
-             where id_obligacion_pago  = v_parametros.id_obligacion_pago;
+               id_usuario_ai = p_id_usuario_ai,
+               usuario_ai = p_nombre_usuario_ai
+             where id_obligacion_pago  = p_id_obligacion;
         
           
             ----------------------------------------------------------------------------------------
@@ -147,7 +148,7 @@ BEGIN
               
                --llamar a la funcion de finalizacion de obligacion
                  
-                 v_resp_fin = tes.f_finalizar_obligacion(p_id_obligacion_pago, 
+                 v_resp_fin = tes.f_finalizar_obligacion(p_id_obligacion, 
                   										 p_id_usuario,
                                                          p_id_usuario_ai,
                                                          p_nombre_usuario_ai,
@@ -167,7 +168,7 @@ BEGIN
             
             END IF;
             
-            v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',p_id_obligacion_pago::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',p_id_obligacion::varchar);
             
               
             --Devuelve la respuesta
