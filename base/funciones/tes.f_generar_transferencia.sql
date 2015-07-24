@@ -1,4 +1,4 @@
---------------- SQL ---------------
+ï»¿--------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION tes.f_generar_transferencia (
   p_id_usuario integer,
@@ -13,7 +13,7 @@ $body$
 /*
 	Autor: GSS
     Fecha: 08-06-2015
-    Descripción: Función que se encarga de generar transferencia carta a la cuenta en dolares.
+    DescripciÃ³n: FunciÃ³n que se encarga de generar transferencia carta a la cuenta en dolares.
 */
 DECLARE
 

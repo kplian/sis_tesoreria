@@ -1,4 +1,4 @@
---------------- SQL ---------------
+ï»¿--------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION tes.f_generar_deposito_cheque (
   p_id_usuario integer,
@@ -13,7 +13,7 @@ $body$
 /*
 	Autor: GSS
     Fecha: 11-06-2015
-    Descripción: Función que se encarga de generar cheque.
+    DescripciÃ³n: FunciÃ³n que se encarga de generar cheque.
 */
 DECLARE
 
