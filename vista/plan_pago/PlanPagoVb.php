@@ -156,22 +156,32 @@ Phx.vista.PlanPagoVb = {
             //RCM, resetea store del deposito para no mostrar datos al hacer nuevo
             this.Cmp.id_cuenta_bancaria_mov.store.baseParams=Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams, {id_cuenta_bancaria:-1,fecha:this.Cmp.fecha_tentativa.getValue()});
          }
-          /* 
-         if(data.estado == 'vbsolicitante'){
-               this.Cmp.fecha_tentativa.disable();
-               this.Cmp.id_plantilla.disable();
+          
+         if(data.estado == 'vbsolicitante' || data.estado == 'vbfin' ||data.estado == 'vbdeposito'){
+               this.Cmp.fecha_tentativa.disable();               
                this.Cmp.forma_pago.disable();
                this.Cmp.nombre_pago.disable();
                this.Cmp.nro_cheque.disable();
-               this.Cmp.nro_cuenta_bancaria.disable();
-               this.Cmp.monto_retgar_mo.disable();
+               this.Cmp.nro_cuenta_bancaria.disable();               
                this.Cmp.monto_no_pagado.disable();
-               this.Cmp.id_depto_lb.disable();
+               
+                if(data.estado == 'vbfin' ||data.estado == 'vbdeposito'){
+                	this.Cmp.id_depto_lb.enable();
+                	this.Cmp.monto_retgar_mo.disable();
+                	this.Cmp.id_plantilla.disable();
+                }
+                else{
+                	this.Cmp.id_depto_lb.disable();
+                	this.Cmp.monto_retgar_mo.enable();
+                	this.Cmp.id_plantilla.enable();
+                }
+                
+               
                this.Cmp.id_cuenta_bancaria.disable();
                this.Cmp.id_cuenta_bancaria_mov.disable();
                this.Cmp.obs_monto_no_pagado.disable();
                this.Cmp.obs_descuentos_ley.disable();
-          }*/
+          }
          
      },
     

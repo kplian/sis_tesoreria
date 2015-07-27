@@ -35,7 +35,8 @@ BEGIN
      --si el proceso esta en borrador y viene de adquisciones no entra a la validacion
      IF  v_registros_pp.tipo_obligacion = 'adquisiciones' and v_registros_pp.estado = 'borrador'  THEN
        return True;
-      
+     ELSIF   v_registros_pp.estado = 'vbdeposito'   or  v_registros_pp.estado = 'vbfin' THEN
+       return True;  
      ELSE
      
             -- verificamos que sea un tipo de plan pago de devengado exluimos recusos humanos
