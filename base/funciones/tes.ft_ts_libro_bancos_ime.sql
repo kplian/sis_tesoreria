@@ -74,8 +74,8 @@ DECLARE
     g_id_cuenta_bancaria_periodo	integer;
     v_id_cuenta_bancaria	integer;
     v_estado_padre			varchar;
-	v_resp_doc				boolean;
-	g_verifica_documento	varchar;
+    v_resp_doc				boolean;
+    g_verifica_documento	varchar;
 BEGIN
     v_nombre_funcion = 'tes.ft_ts_libro_bancos_ime';
     v_parametros = pxp.f_get_record(p_tabla);
@@ -213,8 +213,9 @@ BEGIN
          --ALGORITMO DE ORDENACION DE REGISTROS
          
          --VERIFICAMOS SI ES UN DEPOSITO, transferencia o debito automatico
-         --IF(v_parametros.tipo in ('transf_interna_debe','transf_interna_haber')) Then
-           IF(v_parametros.tipo in ('deposito','debito_automatico','transferencia_carta','transf_interna_debe','transf_interna_haber')) Then
+         IF(v_parametros.tipo in ('transf_interna_debe','transf_interna_haber')) Then
+         
+         --IF(v_parametros.tipo in ('deposito','debito_automatico','transferencia_carta','transf_interna_debe','transf_interna_haber')) Then
          	--Obtenemos el numero de indice que sera asignado al nuevo registro        
             Select max(lb.indice)
             Into g_indice
@@ -373,7 +374,7 @@ BEGIN
             	raise exception 'El periodo % no se encuentra abierto',  pxp.f_obtener_literal_periodo(v_periodo,null);
             end if;
             
-			SELECT LBRBAN.fecha, LBRBAN.id_estado_wf , lbrpad.estado into g_fecha, v_id_estado_wf, v_estado_padre
+            SELECT LBRBAN.fecha, LBRBAN.id_estado_wf , lbrpad.estado into g_fecha, v_id_estado_wf, v_estado_padre
             FROM tes.tts_libro_bancos LBRBAN
             LEFT JOIN tes.tts_libro_bancos LBRPAD on lbrpad.id_libro_bancos=lbrban.id_libro_bancos_fk
             WHERE LBRBAN.id_libro_bancos=v_parametros.id_libro_bancos;
@@ -487,10 +488,10 @@ BEGIN
         End If; --fin de la verificacion de si es cheque, debito automatico o transferencia con carta  
         
         --obtenemos la fecha antes de actualizarla
-		Select lb.fecha, ew.verifica_documento
+        Select lb.fecha, ew.verifica_documento
         Into g_fecha_ant, g_verifica_documento
         From tes.tts_libro_bancos lb
-		inner join wf.testado_wf ew on ew.id_estado_wf=lb.id_estado_wf
+        inner join wf.testado_wf ew on ew.id_estado_wf=lb.id_estado_wf
         Where lb.id_libro_bancos = v_parametros.id_libro_bancos;
         
         /*IF(v_parametros.tipo='cheque' AND v_parametros.nro_cheque is not null)THEN
@@ -530,10 +531,10 @@ BEGIN
         comprobante_sigma = v_parametros.comprobante_sigma
 		WHERE tes.tts_libro_bancos.id_libro_bancos = v_parametros.id_libro_bancos;
 		
-		if(g_verifica_documento = 'si')then
+        if(g_verifica_documento = 'si')then
 	        v_resp_doc = wf.f_verifica_documento(p_id_usuario,v_id_estado_wf);
     	end if;
-		                 
+            
         If (v_parametros.fecha<> g_fecha_ant or g_fecha_ant is null) Then
         	--ALGORITMO DE ORDENACION DE REGISTROS
            /*     
@@ -785,7 +786,6 @@ BEGIN
              
              END IF;
             
-             
              -- hay que recuperar el supervidor que seria el estado inmediato,...
              v_id_estado_actual =  wf.f_registra_estado_wf(v_parametros.id_tipo_estado, 
                                                              v_parametros.id_funcionario_wf, 
@@ -810,7 +810,6 @@ BEGIN
           --------------------------------------
           -- registra los procesos disparados
           --------------------------------------
-         
           FOR v_registros_proc in ( select * from json_populate_recordset(null::wf.proceso_disparado_wf, v_parametros.json_procesos::json)) LOOP
     
                --get cdigo tipo proceso
@@ -845,7 +844,6 @@ BEGIN
                        
                        
            END LOOP; 
-           
            -- actualiza estado en la solicitud
            -- funcion para cambio de estado     
            /*
@@ -866,7 +864,6 @@ BEGIN
              fecha_mod=now()
                            
           where id_proceso_wf = v_parametros.id_proceso_wf_act;
-          
           if((v_codigo_estado_siguiente in ('impreso', 'anulado','depositado')) or (v_tipo in('debito_automatico','transferencia_carta') and v_codigo_estado_siguiente='cobrado'))then
           	
             SELECT LBRBAN.fecha,LBRBAN.id_cuenta_bancaria into g_fecha, v_id_cuenta_bancaria
@@ -883,9 +880,7 @@ BEGIN
             if(v_estado!='abierto')then
             	raise exception 'El periodo % no se encuentra abierto',  pxp.f_obtener_literal_periodo(v_periodo,null);
             end if;
-                        
           end if;
-          
           if(v_codigo_estado_siguiente='anulado')then
           	update tes.tts_libro_bancos  t set 
              importe_cheque = 0, 
@@ -896,35 +891,8 @@ BEGIN
           
           --VERIFICAMOS SI ES UN DEPOSITO, transferencia o debito automatico
          	IF(v_tipo in ('deposito','debito_automatico','transferencia_carta')) Then
-         
-         		--Obtenemos el numero de indice que sera asignado al nuevo registro        
-                Select max(lb.indice)
-                Into g_indice
-                From tes.tts_libro_bancos lb
-                Where lb.id_cuenta_bancaria = v_id_cuenta_bancaria
-                and lb.fecha = g_fecha;
-                
-                If(g_indice is null )Then
-                    g_indice = 0;
-                end if;
-                
-                UPDATE tes.tts_libro_bancos SET 
-                    indice = g_indice + 1
-                WHERE tes.tts_libro_bancos.id_libro_bancos= v_id_libro_bancos;
-         
-         	ELSE  --si es CHEQUE
-                --Obtenemos el numero de indice que sera asignado al nuevo registro            
-                Select max(lb.nro_cheque)
-                Into g_max_nro_cheque
-                From tes.tts_libro_bancos lb
-                Where lb.id_cuenta_bancaria = v_id_cuenta_bancaria
-                and lb.fecha = g_fecha
-                and lb.tipo = 'cheque'
-                and lb.id_libro_bancos <> v_id_libro_bancos;
-                
-            	If(g_max_nro_cheque is null)Then
-            
-                    --Obtenemos el numero de indice que sera asignado al nuevo registro            
+				if(v_codigo_estado_siguiente in ('depositado','cobrado'))then         
+                    --Obtenemos el numero de indice que sera asignado al nuevo registro        
                     Select max(lb.indice)
                     Into g_indice
                     From tes.tts_libro_bancos lb
@@ -938,75 +906,106 @@ BEGIN
                     UPDATE tes.tts_libro_bancos SET 
                         indice = g_indice + 1
                     WHERE tes.tts_libro_bancos.id_libro_bancos= v_id_libro_bancos;
+                end if;
+         
+         	ELSE  --si es CHEQUE
             	
-            	else --hay cheques registrados ese dia
-            
-                    --comparamos el numero de cheque actual con el maximo de la fecha
-                    IF(v_nro_cheque > g_max_nro_cheque) Then
-                    
-                        --Obtenemos el numero de indice que sera asignado al nuevo registro            
-                        Select max(lb.indice)
-                        Into g_indice
-                        From tes.tts_libro_bancos lb
-                        Where lb.id_cuenta_bancaria = v_id_cuenta_bancaria
-                        and lb.fecha = g_fecha;
-                        
-                        If(g_indice is null )Then
-                            g_indice = 0;
-                        end if;
-                        
-                        --Asignamos el indice
-                        UPDATE tes.tts_libro_bancos SET 
-                            indice = g_indice + 1
-                        WHERE tes.tts_libro_bancos.id_libro_bancos = v_id_libro_bancos;
-                        
-                	ELSE
-                	
-                        FOR g_registros in EXECUTE('Select lb.nro_cheque, lb.indice
-                                                    From tes.tts_libro_bancos lb
-                                                    Where lb.id_cuenta_bancaria = '||v_id_cuenta_bancaria||'
-                                                    and lb.fecha ='''||g_fecha||'''
-                                                    and lb.indice is not null
-                                                    order by lb.indice asc') LOOP
-                              g_indice = null;       
-                             
-                              Select lib.indice
-                              Into g_indice
-                              From tes.tts_libro_bancos lib
-                              Where lib.id_libro_bancos = v_id_libro_bancos;
-                              
-                              /*If(g_indice is null )Then
-                                  g_indice = 0;
-                              end if;*/
-                                    
-                              --Comparamos si el numero de cheque nuevo es menor al numero de cheque del ciclo
-                              If (v_nro_cheque < g_registros.nro_cheque) Then
-                                                                
-                                  --actualizamos los indices de los registros superiores
-                                  UPDATE tes.tts_libro_bancos SET 
-                                      indice = indice + 1
-                                  Where tes.tts_libro_bancos.id_cuenta_bancaria = v_id_cuenta_bancaria
-                                  and tes.tts_libro_bancos.fecha = g_fecha
-                                  and tes.tts_libro_bancos.indice >= g_registros.indice;
-                                  
-                                  --asignamos el valor del indice del ciclo al registro nuevo
-                                  UPDATE tes.tts_libro_bancos SET 
-                                      indice = g_registros.indice
-                                  WHERE tes.tts_libro_bancos.id_libro_bancos= v_id_libro_bancos;
-                                  
-                              End IF;                    
-                                    
-                        END LOOP;
-                  
-                	END IF; --fin comparacion numero de cheque
+            	if(v_codigo_estado_siguiente ='impreso')then --solo pone indice cuando cambia de estado a impreso           
+                  --Obtenemos el numero de indice que sera asignado al nuevo registro            
+                  Select max(lb.nro_cheque)
+                  Into g_max_nro_cheque
+                  From tes.tts_libro_bancos lb
+                  Where lb.id_cuenta_bancaria = v_id_cuenta_bancaria
+                  and lb.fecha = g_fecha
+                  and lb.tipo = 'cheque'
+                  and lb.estado != 'borrador'
+                  and lb.id_libro_bancos <> v_id_libro_bancos;
 
-            	End if; --Fin comparacion del null en el maximo numero de cheque
-           	
+                  If(g_max_nro_cheque is null)Then
+                
+                      --Obtenemos el numero de indice que sera asignado al nuevo registro            
+                      Select max(lb.indice)
+                      Into g_indice
+                      From tes.tts_libro_bancos lb
+                      Where lb.id_cuenta_bancaria = v_id_cuenta_bancaria
+                      and lb.fecha = g_fecha;
+                        
+                      If(g_indice is null )Then
+                          g_indice = 0;
+                      end if;
+                        
+                      UPDATE tes.tts_libro_bancos SET 
+                          indice = g_indice + 1
+                      WHERE tes.tts_libro_bancos.id_libro_bancos= v_id_libro_bancos;
+                	
+                  else --hay cheques registrados ese dia
+                      --comparamos el numero de cheque actual con el maximo de la fecha
+                      IF(v_nro_cheque > g_max_nro_cheque) Then
+                            
+                            --Obtenemos el numero de indice que sera asignado al nuevo registro            
+                            Select max(lb.indice)
+                            Into g_indice
+                            From tes.tts_libro_bancos lb
+                            Where lb.id_cuenta_bancaria = v_id_cuenta_bancaria
+                            and lb.fecha = g_fecha;
+                                
+                            If(g_indice is null )Then
+                                g_indice = 0;
+                            end if;
+                              
+                            --Asignamos el indice
+                            UPDATE tes.tts_libro_bancos SET 
+                                indice = g_indice + 1
+                            WHERE tes.tts_libro_bancos.id_libro_bancos = v_id_libro_bancos;
+                              
+                        ELSE
+                        
+                            FOR g_registros in EXECUTE('Select lb.nro_cheque, lb.indice
+                                                        From tes.tts_libro_bancos lb
+                                                        Where lb.id_cuenta_bancaria = '||v_id_cuenta_bancaria||'
+                                                        and lb.fecha ='''||g_fecha||''' and lb.tipo=''cheque''
+                                                        and lb.indice is not null and lb.estado!=''borrador''
+                                                        order by lb.indice asc') LOOP
+                                  /*g_indice = null;       
+                                   
+                                  Select lib.indice
+                                  Into g_indice
+                                  From tes.tts_libro_bancos lib
+                                  Where lib.id_libro_bancos = v_id_libro_bancos;
+                                  */  
+                                  /*If(g_indice is null )Then
+                                      g_indice = 0;
+                                  end if;*/
+                                           
+                                  --Comparamos si el numero de cheque nuevo es menor al numero de cheque del ciclo
+                                  If (v_nro_cheque < g_registros.nro_cheque) Then
+                                      --actualizamos los indices de los registros superiores
+                                      UPDATE tes.tts_libro_bancos SET 
+                                          indice = indice + 1
+                                      Where tes.tts_libro_bancos.id_cuenta_bancaria = v_id_cuenta_bancaria
+                                      and tes.tts_libro_bancos.fecha = g_fecha
+                                      and tes.tts_libro_bancos.estado!='borrador'
+                                      and tes.tts_libro_bancos.indice >= g_registros.indice;
+
+                                      --asignamos el valor del indice del ciclo al registro nuevo
+                                      UPDATE tes.tts_libro_bancos SET 
+                                          indice = g_registros.indice
+                                      WHERE tes.tts_libro_bancos.id_libro_bancos= v_id_libro_bancos;
+                                      exit;
+                                  End IF;                    
+                                          
+                            END LOOP;
+                        
+                        END IF; --fin comparacion numero de cheque
+
+                    End if; --Fin comparacion del null en el maximo numero de cheque
+             	end if; --fin siguiente estado impreso
         	END IF; --fin comparacion tipo
+            
           if(v_codigo_estado_siguiente='cobrado' and v_tipo='transferencia_carta' and g_fecha is null)then
           	raise exception 'No se puede pasar al siguiente estado, registre fecha de la transferencia';
           end if;
-          
+			
           if(v_codigo_estado_siguiente='impreso')then
           	if(v_tipo='cheque' AND v_nro_cheque is null)then
             	raise exception 'No puede pasar al siguiente estado si no esta registrado el numero de cheque';
