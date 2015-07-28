@@ -106,7 +106,7 @@ Phx.vista.PlanPagoConformidad = {
          } else {
          	this.getBoton('btnConformidad').disable();
          }
-         
+         this.getBoton('btnChequeoDocumentosWf').enable();  
            
      },
     

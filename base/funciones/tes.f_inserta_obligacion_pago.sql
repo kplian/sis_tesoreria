@@ -109,7 +109,7 @@ BEGIN
                  IF (p_hstore->'tipo_obligacion')::varchar  = 'pago_directo'   THEN
                       v_tipo_documento = 'PGD';
                       v_codigo_proceso_macro = 'TES-PD'; 
-                 ELSEIF(p_hstore->'tipo_obligacion')::varchar  = 'pago_directo'   THEN
+                 ELSEIF(p_hstore->'tipo_obligacion')::varchar  = 'pago_unico'   THEN
                       v_tipo_documento = 'PU';
                       v_codigo_proceso_macro = 'PU'; 
                  ELSE
