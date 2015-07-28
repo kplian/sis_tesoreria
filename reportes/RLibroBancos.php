@@ -96,7 +96,7 @@ require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
     			$fecha_rep = date("d-m-Y H:i:s");
 				//$nuevafecha = strtotime ( '-10 days' , strtotime ($fecha_rep) ) ;
 				//$fecha_rep = date("d-m-Y H:i:s", $nuevafecha);
-    			$this->Cell($ancho, 0, "Fecha impresión: ".$fecha_rep, '', 0, 'R');
+    			//$this->Cell($ancho, 0, "Fecha impresión: ".$fecha_rep, '', 0, 'R');
     			$this->Ln($line_width);
 			 }
 }
