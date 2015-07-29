@@ -1252,3 +1252,10 @@ ALTER TABLE tes.tobligacion_pago
 *****************************F-SCP-RAC-TES-0-1/07/2015*************/
 
 
+
+*****************************I-SCP-RAC-TES-0-29/07/2015*************/
+
+select pxp.f_insert_tgui ('Victo bueno de Pagos (Costos)', 'Visto bueno de pagos costos', 'VBPCOS', 'si', 5, 'sis_tesoreria/vista/plan_pago/PlanPagoVbCostos.php', 2, '', 'PlanPagoVbCostos', 'TES');
+select pxp.f_insert_testructura_gui ('VBPCOS', 'TES');
+
+*****************************F-SCP-RAC-TES-0-29/07/2015*************/

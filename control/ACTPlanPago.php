@@ -25,6 +25,13 @@ class ACTPlanPago extends ACTbase{
            $this->objParam->defecto('dir_ordenacion','asc');	
 		}
 		
+		if($this->objParam->getParametro('pes_estado')=='internacional'){
+             $this->objParam->addFiltro("depto.prioridad = 3");
+        }
+		if($this->objParam->getParametro('pes_estado')=='nacional'){
+             $this->objParam->addFiltro("depto.prioridad  != 3");
+        }
+		
 		
 		if($this->objParam->getParametro('id_gestion')!=''){
             $this->objParam->addFiltro("op.id_gestion = ".$this->objParam->getParametro('id_gestion'));  

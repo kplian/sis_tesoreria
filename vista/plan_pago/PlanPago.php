@@ -78,13 +78,14 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		//llama al constructor de la clase padre
 		Phx.vista.PlanPago.superclass.constructor.call(this,config);
 		this.init();
-		this.addButton('ini_estado',{argument: {estado: 'inicio'},text:'Dev. a borrador',iconCls: 'batras',disabled:true,handler:this.antEstado,tooltip: '<b>Retorna el plan de pagos al estado borrador</b>'});
-        this.addButton('ant_estado',{argument: {estado: 'anterior'},text:'Anterior',iconCls: 'batras',disabled:true,handler:this.antEstado,tooltip: '<b>Pasar al Anterior Estado</b>'});
-        this.addButton('sig_estado',{text:'Aprobar/Sig.',iconCls: 'badelante',disabled:true,handler:this.sigEstado,tooltip: '<b>Apueba y pasar al Siguiente Estado</b>'});
-        this.addButton('SolPlanPago',{text:'Sol. Plan Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnSolPlanPago,tooltip: '<b>Solicitud Plan Pago</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
+		this.addButton('ini_estado',{ grupo:[0,1], argument: {estado: 'inicio'},text:'Dev. a borrador',iconCls: 'batras',disabled:true,handler:this.antEstado,tooltip: '<b>Retorna el plan de pagos al estado borrador</b>'});
+        this.addButton('ant_estado',{ grupo:[0,1], argument: {estado: 'anterior'},text:'Anterior',iconCls: 'batras',disabled:true,handler:this.antEstado,tooltip: '<b>Pasar al Anterior Estado</b>'});
+        this.addButton('sig_estado',{ grupo:[0,1], text:'Aprobar/Sig.',iconCls: 'badelante',disabled:true,handler:this.sigEstado,tooltip: '<b>Apueba y pasar al Siguiente Estado</b>'});
+        this.addButton('SolPlanPago',{ grupo:[0,1], text:'Sol. Plan Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnSolPlanPago,tooltip: '<b>Solicitud Plan Pago</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
 		this.addButton('btnChequeoDocumentosWf',
             {
                 text: 'Documentos',
+                grupo:[0,1], 
                 iconCls: 'bchecklist',
                 disabled: true,
                 handler: this.loadCheckDocumentosSolWf,
@@ -92,6 +93,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             }
         );
         this.addButton('btnObs',{
+        	 		grupo:[0,1], 
                     text :'Obs Wf',
                     iconCls : 'bchecklist',
                     disabled: true,

@@ -11,7 +11,7 @@
 header("content-type: text/javascript; charset=UTF-8"); 
 ?>
 <script>
-Phx.vista.PlanPagoVb = {
+Phx.vista.PlanPagoVbCostos = {
     bedit:true,
     bnew:false,
     bsave:false,
@@ -21,6 +21,22 @@ Phx.vista.PlanPagoVb = {
     title:'Plan de Pagos',
     nombreVista: 'planpagoVb',
     
+    gruposBarraTareas:[{name:'nacional',title:'<H1 align="center"><i class="fa fa-paper-plane"></i> Nacionales</h1>',grupo:0,height:0},
+                       {name:'internacional',title:'<H1 align="center"><i class="fa fa-paper-plane-o"></i> Internacionales</h1>',grupo:1,height:0}],
+	
+	
+    
+    actualizarSegunTab: function(name, indice){
+    	if(this.finCons){
+    		 this.store.baseParams.pes_estado = name;
+    	     this.load({params:{start:0, limit:this.tam_pag}});
+    	   }
+    },
+    beditGroups: [0,1],
+    bdelGroups:   [0,1],
+    bactGroups:  [0,1],
+    btestGroups:  [0,1],
+    bexcelGroups: [0,1],
     constructor: function(config) {
         
        this.Atributos[this.getIndAtributo('num_tramite')].grid=true;
@@ -69,13 +85,13 @@ Phx.vista.PlanPagoVb = {
         
         
         
-       Phx.vista.PlanPagoVb.superclass.constructor.call(this,config);
+       Phx.vista.PlanPagoVbCostos.superclass.constructor.call(this,config);
        this.creaFormularioConformidad();
        this.iniciarEventos();
-       this.addButton('btnConformidad',{text:'Conformidad',iconCls: 'bok',disabled:true,handler:this.onButtonConformidad,tooltip: 'Generar conformidad para el pago (Firma acta de conformidad)'});
-       this.addButton('SolDevPag',{text:'Generar Cbte',iconCls: 'bpagar',disabled:true,handler:this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente'});
-       this.addButton('ModAprop',{text:'Modificar Apropiación',iconCls: 'bengine',disabled:true,handler:this.onBtnApropiacion,tooltip: 'Modificar la apropiación (solo cuando es el primer pago de un pago directo y el estado es vbconta)'});
-       this.addButton('diagrama_gantt',{text:'Gantt',iconCls: 'bgantt',disabled:true,handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
+       this.addButton('btnConformidad',{ grupo:[0,1], text:'Conformidad',iconCls: 'bok',disabled:true,handler:this.onButtonConformidad,tooltip: 'Generar conformidad para el pago (Firma acta de conformidad)'});
+       this.addButton('SolDevPag',{ grupo:[0,1], text:'Generar Cbte',iconCls: 'bpagar',disabled:true,handler:this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente'});
+       this.addButton('ModAprop',{ grupo:[0,1], text:'Modificar Apropiación',iconCls: 'bengine',disabled:true,handler:this.onBtnApropiacion,tooltip: 'Modificar la apropiación (solo cuando es el primer pago de un pago directo y el estado es vbconta)'});
+       this.addButton('diagrama_gantt',{ grupo:[0,1], text:'Gantt',iconCls: 'bgantt',disabled:true,handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
   
        function diagramGantt(){            
             var data=this.sm.getSelected().data.id_proceso_wf;
@@ -100,11 +116,13 @@ Phx.vista.PlanPagoVb = {
            this.store.baseParams.filtro_valor = config.filtro_directo.valor;
            this.store.baseParams.filtro_campo = config.filtro_directo.campo;
        }
-       
+       this.store.baseParams.pes_estado = 'nacional';
        this.load({params:{
            start:0, 
            limit:this.tam_pag
         }});
+        
+        this.finCons = true;
        
     },
     //deshabilitas botones para informacion historica
@@ -140,7 +158,7 @@ Phx.vista.PlanPagoVb = {
          	this.Cmp.id_cuenta_bancaria.allowBlank = false;
          }
          
-         Phx.vista.PlanPagoVb.superclass.onButtonEdit.call(this);
+         Phx.vista.PlanPagoVbCostos.superclass.onButtonEdit.call(this);
          
          if(this.Cmp.id_depto_lb.getValue() > 0){
              this.Cmp.id_cuenta_bancaria.store.baseParams = Ext.apply(this.Cmp.id_cuenta_bancaria.store.baseParams,{ id_depto_lb:this.Cmp.id_depto_lb.getValue(), permiso: 'todos'});
@@ -319,7 +337,7 @@ Phx.vista.PlanPagoVb = {
     preparaMenu:function(n){
          var data = this.getSelectedData();
          var tb =this.tbar;
-         Phx.vista.PlanPagoVb.superclass.preparaMenu.call(this,n); 
+         Phx.vista.PlanPagoVbCostos.superclass.preparaMenu.call(this,n); 
          if(this.historico == 'no'){    
           	  
               if (data['estado']== 'borrador' || data['estado']== 'pendiente' || data['estado']== 'devengado' || data['estado']== 'pagado'|| data['estado']== 'anticipado'|| data['estado']== 'aplicado'|| data['estado']== 'devuelto' ){
@@ -411,7 +429,7 @@ Phx.vista.PlanPagoVb = {
      },
     
     liberaMenu:function(){
-        var tb = Phx.vista.PlanPagoVb.superclass.liberaMenu.call(this);
+        var tb = Phx.vista.PlanPagoVbCostos.superclass.liberaMenu.call(this);
         
         if(tb){
            this.getBoton('ant_estado').disable();
