@@ -832,7 +832,7 @@ IS 'este campo sirve para marcar los pagos revisados por las asistente';
 
 --------------- SQL ---------------
 
-DROP VIEW tes.vcomp_devtesprov_plan_pago;
+--DROP VIEW tes.vcomp_devtesprov_plan_pago;
 
 --------------- SQL ---------------
 
@@ -1132,6 +1132,35 @@ IS 'identifica la ultima cuota  del tipo devengado para alertar sobre ultimo pag
 /***********************************F-SCP-RAC-TES-0-25/03/2015***************************************/
 
 /***********************************I-SCP-GSS-TES-0-23/04/2015***************************************/
+
+CREATE TABLE tes.tts_libro_bancos (
+  id_libro_bancos SERIAL, 
+  id_cuenta_bancaria INTEGER NOT NULL, 
+  fecha DATE, 
+  a_favor VARCHAR(200) NOT NULL, 
+  detalle TEXT NOT NULL, 
+  observaciones TEXT, 
+  nro_liquidacion VARCHAR(20), 
+  nro_comprobante VARCHAR(20), 
+  nro_cheque INTEGER, 
+  tipo VARCHAR(20) NOT NULL, 
+  importe_deposito NUMERIC(20,2) NOT NULL, 
+  importe_cheque NUMERIC(20,2) NOT NULL, 
+  origen VARCHAR(20), 
+  estado VARCHAR(20) DEFAULT 'borrador'::character varying NOT NULL, 
+  id_libro_bancos_fk INTEGER, 
+  indice NUMERIC(20,2), 
+  notificado VARCHAR(2) DEFAULT 'no'::character varying, 
+  id_finalidad INTEGER, 
+  id_estado_wf INTEGER, 
+  id_proceso_wf INTEGER, 
+  num_tramite VARCHAR(200), 
+  id_depto INTEGER, 
+  sistema_origen VARCHAR(30), 
+  comprobante_sigma VARCHAR(50), 
+  CONSTRAINT tts_libro_bancos_pkey PRIMARY KEY(id_libro_bancos)
+) INHERITS (pxp.tbase)
+WITH (oids = false);
 
 ALTER TABLE tes.tts_libro_bancos
   ADD COLUMN id_int_comprobante INTEGER;
