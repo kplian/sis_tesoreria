@@ -150,6 +150,19 @@ Phx.vista.ReportePagos=Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
+				name: 'desc_funcionario1',
+				fieldLabel: 'Funcionario Solicitante',
+				gwidth: 250
+			},
+			type:'Field',
+			filters:{ pfiltro:'desc_funcionario1',type:'string' },
+			
+			id_grupo:1,
+			grid:true,
+			form:false
+		},
+		{
+			config:{
 				name: 'orden_compra',
 				fieldLabel: 'OC',
 				gwidth: 150
@@ -368,7 +381,7 @@ Phx.vista.ReportePagos=Ext.extend(Phx.gridInterfaz,{
                 'monto_retgar_mo',
                 'monto_ajuste_ag',
                 'monto_ajuste_siguiente_pago','liquido_pagable',
-                'monto_presupuestado','desc_contrato' ],
+                'monto_presupuestado','desc_contrato', 'desc_funcionario1' ],
 	sortInfo:{
 		field: 'id_gestion',
 		direction: 'desc'

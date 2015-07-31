@@ -735,7 +735,7 @@ class MODPlanPago extends MODbase{
 		  $this->captura('liquido_pagable', 'NUMERIC');
 		  $this->captura('monto_presupuestado', 'NUMERIC');
 		  $this->captura('desc_contrato', 'text');
-		  
+		  $this->captura('desc_funcionario1', 'text');
 		  
 				
 		

@@ -729,7 +729,8 @@ BEGIN
                             monto_ajuste_siguiente_pago,
                             liquido_pagable,
                             monto_presupuestado,
-                            desc_contrato
+                            desc_contrato,
+							desc_funcionario1
                           FROM 
                             tes.vpago_x_proveedor 
 							WHERE  ';
