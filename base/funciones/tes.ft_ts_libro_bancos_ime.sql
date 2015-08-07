@@ -1203,7 +1203,7 @@ BEGIN
                 
                 select lb.id_cuenta_bancaria, COALESCE(lb.id_depto, dp.id_depto) as id_depto, lb.fecha, lb.a_favor, lb.nro_cheque, lb.saldo_deposito,
 				lb.nro_liquidacion, lb.detalle, lb.origen, lb.observaciones, lb.nro_comprobante, lb.tipo, 
-                lb.id_finalidad into g_libro_bancos
+                lb.id_finalidad, lb.comprobante_sigma into g_libro_bancos
 				from tes.vlibro_bancos lb
                 left join param.tdepto dp on ('OP - ' || lb.origen)= dp.nombre_corto 
 				where lb.id_libro_bancos=v_parametros.id_libro_bancos;
@@ -1214,13 +1214,13 @@ BEGIN
                 id_depto int4, fecha date, a_favor varchar, nro_cheque int4, importe_deposito
                 numeric, nro_liquidacion varchar, detalle text, origen varchar, observaciones
                 text, importe_cheque numeric, id_libro_bancos_fk int4, nro_comprobante varchar,
-                 tipo varchar, id_finalidad int4) on commit drop;
+                 tipo varchar, id_finalidad int4, comprobante_sigma varchar) on commit drop;
 
                  insert into tt_parametros_libro_bancos_deposito
                  values (NULL, 'NULL', g_libro_bancos.id_cuenta_bancaria, g_libro_bancos.id_depto, now()::date,
                  g_libro_bancos.a_favor, null, g_importe_transferencia,g_libro_bancos.nro_liquidacion, 
                  g_libro_bancos.detalle,g_libro_bancos.origen, g_libro_bancos.observaciones, 0, v_parametros.id_libro_bancos_fk,
-                 g_libro_bancos.nro_comprobante, 'transf_interna_haber',g_libro_bancos.id_finalidad);
+                 g_libro_bancos.nro_comprobante, 'transf_interna_haber',g_libro_bancos.id_finalidad,g_libro_bancos.comprobante_sigma);
 
                  
                  v_resp = tes.ft_ts_libro_bancos_ime (
@@ -1235,13 +1235,14 @@ BEGIN
                 id_depto int4, fecha date, a_favor varchar, nro_cheque int4, importe_deposito
                 numeric, nro_liquidacion varchar, detalle text, origen varchar, observaciones
                 text, importe_cheque numeric, id_libro_bancos_fk int4, nro_comprobante varchar,
-                 tipo varchar, id_finalidad int4) on commit drop;
+                 tipo varchar, id_finalidad int4, comprobante_sigma varchar) on commit drop;
 
                  insert into tt_parametros_libro_bancos_cheque
                  values (NULL, 'NULL', g_libro_bancos.id_cuenta_bancaria, g_libro_bancos.id_depto, now()::date,
                  g_libro_bancos.a_favor, null, 0 ,g_libro_bancos.nro_liquidacion, g_libro_bancos.detalle,
                  g_libro_bancos.origen, g_libro_bancos.observaciones, g_importe_transferencia,
-                 v_parametros.id_libro_bancos, g_libro_bancos.nro_comprobante, 'transf_interna_debe', g_libro_bancos.id_finalidad);
+                 v_parametros.id_libro_bancos, g_libro_bancos.nro_comprobante, 'transf_interna_debe', 
+                 g_libro_bancos.id_finalidad, g_libro_bancos.comprobante_sigma);
                 
                  v_resp = tes.ft_ts_libro_bancos_ime (
  				 p_administrador,
