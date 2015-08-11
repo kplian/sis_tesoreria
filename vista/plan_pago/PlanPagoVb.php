@@ -134,7 +134,7 @@ Phx.vista.PlanPagoVb = {
     },
    onButtonEdit:function(){
          var data = this.getSelectedData();
-         if (data.estado == 'vbfin') {
+         if (data.estado == 'vbfin' || data.estado == 'vbcostos') {
          	this.Cmp.id_cuenta_bancaria.allowBlank = true;
          } else {
          	this.Cmp.id_cuenta_bancaria.allowBlank = false;
