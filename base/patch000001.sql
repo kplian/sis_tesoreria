@@ -1267,7 +1267,7 @@ ALTER TABLE tes.tobligacion_pago
 /*****************************F-SCP-RAC-TES-0-24/06/2015*************/
 
 
-*****************************I-SCP-RAC-TES-0-1/07/2015*************/
+/*****************************I-SCP-RAC-TES-0-1/07/2015*************/
 
 --------------- SQL ---------------
 
@@ -1278,13 +1278,88 @@ ALTER TABLE tes.tobligacion_pago
 ALTER TABLE tes.tobligacion_pago
   ADD CONSTRAINT chk_tobligacion_pago__tipo_obligacion CHECK ((tipo_obligacion)::text = ANY (ARRAY[('adquisiciones'::character varying)::text, ('pago_unico'::character varying)::text, ('pago_especial'::character varying)::text,('caja_chica'::character varying)::text, ('viaticos'::character varying)::text, ('fondos_en_avance'::character varying)::text, ('pago_directo'::character varying)::text, ('rrhh'::character varying)::text]));
   
-*****************************F-SCP-RAC-TES-0-1/07/2015*************/
+/*****************************F-SCP-RAC-TES-0-1/07/2015*************/
 
 
 
-*****************************I-SCP-RAC-TES-0-29/07/2015*************/
+/*****************************I-SCP-RAC-TES-0-29/07/2015*************/
 
 select pxp.f_insert_tgui ('Victo bueno de Pagos (Costos)', 'Visto bueno de pagos costos', 'VBPCOS', 'si', 5, 'sis_tesoreria/vista/plan_pago/PlanPagoVbCostos.php', 2, '', 'PlanPagoVbCostos', 'TES');
 select pxp.f_insert_testructura_gui ('VBPCOS', 'TES');
 
-*****************************F-SCP-RAC-TES-0-29/07/2015*************/
+/*****************************F-SCP-RAC-TES-0-29/07/2015*************/
+
+/*****************************I-SCP-JRR-TES-0-10/08/2015*************/
+
+ALTER TABLE tes.tcajero
+  ADD COLUMN fecha_inicio DATE NOT NULL;
+
+ALTER TABLE tes.tcajero
+  ADD COLUMN fecha_fin DATE;
+ 
+ALTER TABLE tes.tcaja
+  DROP COLUMN importe_maximo;
+  
+ALTER TABLE tes.tcaja
+  DROP COLUMN porcentaje_compra;
+  
+ALTER TABLE tes.tcaja
+  DROP COLUMN codigo;
+  
+ALTER TABLE tes.tcaja
+  ADD COLUMN nombre VARCHAR(255) NOT NULL;
+  
+ALTER TABLE tes.tcaja
+  ADD COLUMN monto_fondo NUMERIC(18,2) NOT NULL;
+  
+ALTER TABLE tes.tcaja
+  ADD COLUMN monto_maximo_compra NUMERIC(18,2) NOT NULL;
+
+ALTER TABLE tes.tcaja
+  ADD COLUMN tipo_ejecucion VARCHAR(40) NOT NULL;
+
+CREATE TABLE tes.tsolicitud_efectivo (
+  id_solicitud_efectivo SERIAL, 
+  id_funcionario INTEGER NOT NULL,
+  id_proceso_wf INTEGER NOT NULL,
+  id_estado_wf INTEGER NOT NULL,
+  id_caja INTEGER NOT NULL, 
+  estado VARCHAR(50) NOT NULL, 
+  motivo TEXT,
+  nro_tramite VARCHAR(50) NOT NULL, 
+  fecha DATE NOT NULL,
+  monto NUMERIC(18,2), 
+  CONSTRAINT pk_tsolicitud_efectivo__id_solicitud_efectivo PRIMARY KEY(id_solicitud_efectivo)
+) INHERITS (pxp.tbase)
+WITHOUT OIDS;
+
+CREATE TABLE tes.tsolicitud_efectivo_det (
+  id_solicitud_efectivo_det SERIAL, 
+  id_solicitud_efectivo INTEGER,
+  id_solicitud_rendicion_det INTEGER,
+  id_concepto_ingas INTEGER NOT NULL,
+  id_cc INTEGER NOT NULL,
+  id_partida_ejecucion INTEGER NOT NULL,   
+  monto NUMERIC(18,2) NOT NULL, 
+  CONSTRAINT pk_tsolicitud_efectivo_det__id_solicitud_efectivo_det PRIMARY KEY(id_solicitud_efectivo_det)
+) INHERITS (pxp.tbase)
+WITHOUT OIDS;
+
+CREATE TABLE tes.tproceso_caja (
+  id_proceso_caja SERIAL, 
+  id_comprobante_diario INTEGER,
+  id_comprobante_pago INTEGER,
+  id_proceso_wf INTEGER NOT NULL,
+  id_estado_wf INTEGER NOT NULL,
+  id_caja INTEGER NOT NULL, 
+  estado VARCHAR(50) NOT NULL, 
+  motivo TEXT NOT NULL,
+  nro_tramite VARCHAR(50) NOT NULL, 
+  fecha DATE NOT NULL,
+  monto_reposicion NUMERIC(18,2), 
+  tipo VARCHAR(50) NOT NULL, 
+  CONSTRAINT pk_tproceso_caja__id_proceso_caja PRIMARY KEY(id_proceso_caja)
+) INHERITS (pxp.tbase)
+WITHOUT OIDS;
+  
+/*****************************F-SCP-JRR-TES-0-10/08/2015*************/

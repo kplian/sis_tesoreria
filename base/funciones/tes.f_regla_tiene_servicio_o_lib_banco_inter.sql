@@ -1,12 +1,12 @@
 --------------- SQL ---------------
 
-CREATE OR REPLACE FUNCTION tes.f_regla_tiene_servicio_o_lib_banco_inter (
+CREATE FUNCTION tes.f_regla_tiene_servicio_o_lib_banco_inter (
   p_id_usuario integer,
   p_id_proceso_wf integer,
   p_id_estado_anterior integer,
   p_id_tipo_estado_actual integer
 )
-RETURNS varchar AS
+RETURNS boolean AS
 $body$
 /**************************************************************************
  SISTEMA ENDESIS - SISTEMA DE ...
@@ -65,7 +65,8 @@ BEGIN
        END IF;
        
        IF  v_registros.id_depto_lb is NULL  THEN
-         raise exception 'El departamento de libro de bancos no fue especificado';
+         --raise exception 'El departamento de libro de bancos no fue especificado';
+         return FALSE;
        END IF;
        -- vemos si el libro de bancos es internacional...
        IF  v_registros.prioridad  = v_cfg_pri_lb::integer THEN
