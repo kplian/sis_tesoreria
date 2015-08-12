@@ -623,8 +623,8 @@ BEGIN
 						        pp.fecha_tentativa else
 						        com.fecha
 						        end) as fecha
-						        ,mon.moneda,pp.monto,pro.monto_ejecutar_mo
-						    
+						        ,mon.moneda,pp.monto,pro.monto_ejecutar_mo,
+								od.id_centro_costo, pp.fecha_costo_ini, pp.fecha_costo_fin
 						FROM tes.tobligacion_pago op
 						inner join obligacion_pago_concepto opc on op.id_obligacion_pago = opc.id_obligacion_pago
 						inner join tes.tplan_pago pp on op.id_obligacion_pago = pp.id_obligacion_pago and pp.estado_reg = ''activo''

@@ -92,7 +92,21 @@ header("content-type:text/javascript; charset=UTF-8");
 			},
 			grid : true,
 			form : false
-		}, 
+		},
+		{
+			config : {
+				name : 'id_centro_costo',
+				fieldLabel : 'Centro Costo',				
+				gwidth : 150
+			},
+			type : 'Field',
+			filters : {
+			    pfiltro : 'od.id_centro_costo',
+				type : 'string'
+			},
+			grid : true,
+			form : false
+		}, 		
 		{
 			config : {
 				name : 'estado',
@@ -117,8 +131,41 @@ header("content-type:text/javascript; charset=UTF-8");
 			},
 			grid : true,
 			form : false
-		}, 
-		
+		}, 		
+		{
+			config : {
+				name : 'fecha_costo_ini',
+				fieldLabel : 'Fecha Inicio',				
+				gwidth : 80,
+				renderer : function(value, p, record) {
+					return value ? value.dateFormat('d/m/Y') : ''
+				}
+			},
+			type : 'Field',
+			filters : {
+			    pfiltro : 'pp.fecha_costo_ini',
+				type : 'date'
+			},
+			grid : true,
+			form : false
+		},
+		{
+			config : {
+				name : 'fecha_costo_fin',
+				fieldLabel : 'Fecha Fin',				
+				gwidth : 80,
+				renderer : function(value, p, record) {
+					return value ? value.dateFormat('d/m/Y') : ''
+				}
+			},
+			type : 'Field',
+			filters : {
+			    pfiltro : 'pp.fecha_costo_fin',
+				type : 'date'
+			},
+			grid : true,
+			form : false
+		},		
 		{
 			config : {
 				name : 'fecha',
@@ -231,8 +278,19 @@ header("content-type:text/javascript; charset=UTF-8");
 			name : 'monto',
 			type : 'numeric'
 		},{
+			name : 'id_centro_costo',
+			type : 'numeric'
+		},{
 			name : 'monto_ejecutar_mo',
 			type : 'numeric'
+		}, {
+			name : 'fecha_costo_ini',
+			type : 'date',
+			dateFormat : 'Y-m-d'
+		}, {
+			name : 'fecha_costo_fin',
+			type : 'date',
+			dateFormat : 'Y-m-d'
 		}, {
 			name : 'fecha',
 			type : 'date',

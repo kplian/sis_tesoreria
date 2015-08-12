@@ -685,6 +685,9 @@ class MODPlanPago extends MODbase{
 		$this->captura('moneda','varchar');
 		$this->captura('monto','numeric');
 		$this->captura('monto_ejecutar_mo','numeric');
+		$this->captura('id_centro_costo','int4');
+		$this->captura('fecha_costo_ini','date');
+		$this->captura('fecha_costo_fin','date');
 		
 		
 		//Ejecuta la instruccion
