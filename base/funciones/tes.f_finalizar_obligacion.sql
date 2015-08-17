@@ -48,12 +48,14 @@ DECLARE
     v_saldo_x_pagar   numeric;
     v_mensaje_cuotas varchar;
     v_mensaje_error  varchar;
+    v_pre_integrar_presupuestos		varchar;
 	
     
 BEGIN
 
 	v_nombre_funcion = 'tes.f_finalizar_obligacion';
     v_id_moneda_base =  param.f_get_moneda_base();
+    v_pre_integrar_presupuestos = pxp.f_get_variable_global('pre_integrar_presupuestos');
       
     
       --obtiene datos de la obligacion
@@ -273,10 +275,12 @@ BEGIN
          ELSE
                --si no es de adquisiciones
                --se revierte el presupeusto  sobrante si existe
-               IF not tes.f_gestionar_presupuesto_tesoreria(p_id_obligacion_pago, p_id_usuario, 'revertir')  THEN
-                                       
-                   raise exception 'Error al revertir el presupuesto';
-                                       
+                IF v_pre_integrar_presupuestos = 'true' THEN 
+                   IF not tes.f_gestionar_presupuesto_tesoreria(p_id_obligacion_pago, p_id_usuario, 'revertir')  THEN
+                                           
+                       raise exception 'Error al revertir el presupuesto';
+                                           
+                   END IF;
                END IF;
        END IF;
       

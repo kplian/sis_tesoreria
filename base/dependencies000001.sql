@@ -7754,3 +7754,49 @@ FROM tes.tobligacion_pago op
    JOIN orga.vfuncionario fun ON fun.id_funcionario = op.id_funcionario;
  
 /***********************************F-DEP-RAC-GSS-0-31/07/2015****************************************/
+
+/***********************************I-DEP-JRR-10/08/2015****************************************/
+
+ALTER TABLE tes.tcaja
+  ADD CONSTRAINT tcaja__id_depto FOREIGN KEY (id_depto)
+    REFERENCES param.tdepto(id_depto)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tcaja
+  ADD CONSTRAINT tcaja__id_moneda FOREIGN KEY (id_moneda)
+    REFERENCES param.tmoneda(id_moneda)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tcajero
+  ADD CONSTRAINT tcaja__id_caja FOREIGN KEY (id_caja)
+    REFERENCES tes.tcaja(id_caja)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+    
+ALTER TABLE tes.tcajero
+  ADD CONSTRAINT tcaja__id_funcionario FOREIGN KEY (id_funcionario)
+    REFERENCES orga.tfuncionario(id_funcionario)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+    
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD CONSTRAINT tcaja__id_moneda FOREIGN KEY (id_moneda)
+    REFERENCES param.tmoneda(id_moneda)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+    
+ALTER TABLE tes.tcaja
+  ADD CONSTRAINT tcaja__id_moneda FOREIGN KEY (id_moneda)
+    REFERENCES param.tmoneda(id_moneda)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+    
+/***********************************F-DEP-JRR-10/08/2015****************************************/  

@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -152,12 +154,14 @@ DECLARE
      v_codigo_estado_siguiente	varchar;
      v_registros_proc 			record;
      v_codigo_tipo_pro   		varchar;
+     v_pre_integrar_presupuestos	varchar;
 
      
 			    
 BEGIN
 
     v_nombre_funcion = 'tes.ft_obligacion_pago_ime';
+    v_pre_integrar_presupuestos = pxp.f_get_variable_global('pre_integrar_presupuestos');
     v_parametros = pxp.f_get_record(p_tabla);
     v_preguntar = 'no';
 
@@ -552,145 +556,8 @@ BEGIN
 
 		begin
         
-             --recupera parametros
-			
-             select 
-                op.id_proceso_wf,
-                op.id_estado_wf,
-                op.estado,
-                op.id_depto,
-                op.tipo_obligacion,
-                op.total_nro_cuota,
-                op.fecha_pp_ini,
-                op.rotacion,
-                op.id_plantilla,
-                op.tipo_cambio_conv,
-                pr.desc_proveedor,
-                op.pago_variable,
-                op.comprometido,
-                op.id_usuario_reg,
-                op.fecha
-              
-             into
-                v_id_proceso_wf,
-                v_id_estado_wf,
-                v_codigo_estado,
-                v_id_depto,
-                v_tipo_obligacion,
-                v_total_nro_cuota,
-                v_fecha_pp_ini,
-                v_rotacion,
-                v_id_plantilla,
-                v_tipo_cambio_conv,
-                v_desc_proveedor,
-                v_pago_variable,
-                v_comprometido,
-                v_id_usuario_reg_op,
-                v_fecha_op
-             from tes.tobligacion_pago op
-             left join param.vproveedor pr  on pr.id_proveedor = op.id_proveedor
-             where op.id_obligacion_pago = v_parametros.id_obligacion_pago; 
-             
-             -- VALIDACIONES que se finalicen solo boligaciones en pago
-             
-             IF  v_codigo_estado NOT in  ('en_pago') THEN
-               raise exception 'Solo se admiten obligaciones  en pago';
-             END IF;
-			
-            
-             -- obtiene el siguiente estado del flujo 
-             SELECT 
-                 *
-              into
-                va_id_tipo_estado,
-                va_codigo_estado,
-                va_disparador,
-                va_regla,
-                va_prioridad
-            
-            FROM wf.f_obtener_estado_wf(v_id_proceso_wf, v_id_estado_wf,NULL,'siguiente');
-            
-            
-            
-            v_num_estados= array_length(va_id_tipo_estado, 1);
-            v_obs = '';
-           
-           
-            ---------------------------------------
-            -- REGISTRA EL SIGUIENTE ESTADO DEL WF.
-            ---------------------------------------
-             v_id_estado_actual =  wf.f_registra_estado_wf(va_id_tipo_estado[1], 
-                                                           v_id_funcionario_estado, 
-                                                           v_id_estado_wf, 
-                                                           v_id_proceso_wf,
-                                                           p_id_usuario,
-                                                           v_parametros._id_usuario_ai,
-                                                           v_parametros._nombre_usuario_ai,
-                                                           v_id_depto,
-                                                           v_obs);
-            
-            
-            --------------------------------------
-            -- actualiza estado en la solicitud
-            -------------------------------------
-             
-             
-             update tes.tobligacion_pago  set 
-               id_estado_wf =  v_id_estado_actual,
-               estado = va_codigo_estado[1],
-               id_usuario_mod = p_id_usuario,
-               total_pago = v_total_detalle,
-               fecha_mod = now(),
-               id_usuario_ai = v_parametros._id_usuario_ai,
-               usuario_ai = v_parametros._nombre_usuario_ai
-             where id_obligacion_pago  = v_parametros.id_obligacion_pago;
-        
-          
-            ----------------------------------------------------------------------------------------
-            -- FINALIZACION DE OBLIGACION DE PAGO (pasa del estado "en pago" al estado "finalizado")
-            ----------------------------------------------------------------------------------------
-            
-            
-            -- esta verificacion se hace al final por que es necesario
-            -- que la llamada de integracion con endesis quede por ulitmo en caso de acontecer algun error
-            -- el rollback sea efectivo y no afecte la integridad de endesis
-            
-            IF  v_codigo_estado = 'en_pago' THEN
-              
-               --llamar a la funcion de finalizacion de obligacion
-                 
-                 v_resp_fin = tes.f_finalizar_obligacion(v_parametros.id_obligacion_pago, 
-                  										 p_id_usuario,
-                                                         v_parametros._id_usuario_ai,
-                                                         v_parametros._nombre_usuario_ai,
-                                                         v_parametros.forzar_fin);
-            
-                 IF v_resp_fin[1] = 'false'  THEN
-                    
-                    v_preguntar = 'si';
-                    raise exception '%',v_resp_fin[2];
-                 
-                 ELSE
-                     v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligacion fue finzalida, y el presupuesto sobrante revertido');
-                     v_resp = pxp.f_agrega_clave(v_resp,'preguntar','no');
-                 END IF;
-            ELSE
-                v_resp = pxp.f_agrega_clave(v_resp,'mensaje','La obligacion paso al siguiente estado');
-            
-            END IF;
-            
-            --jrr: llamamos a la funcion que revierte de planillas en caso de que sea de recursos humanos
-            if (v_tipo_obligacion = 'rrhh') then
-                IF NOT plani.f_generar_pago_tesoreria(p_administrador,p_id_usuario,v_parametros._id_usuario_ai,
-                          v_parametros._nombre_usuario_ai,v_parametros.id_obligacion_pago,v_obs) THEN                                                         
-                     raise exception 'Error al generar el pago de devengado';                          
-                  END IF;            	
-            end if;
-               
-               
-            v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_parametros.id_obligacion_pago::varchar);
-            
-              
+            v_resp = tes.f_finalizar_obligacion_total(v_parametros.id_obligacion,p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_parametros.forzar_fin);
+                         
             --Devuelve la respuesta
             return v_resp;
 
@@ -1159,7 +1026,7 @@ BEGIN
           -- COMPROMISO PRESUPUESTARIO
           -- cuando pasa al estado registrado y el presupeusto no esta comprometido
           ------------------------------------------------------------------------------
-          IF  v_codigo_estado_siguiente = 'registrado'  and  v_comprometido = 'no' and v_tipo_obligacion != 'adquisiciones' and v_tipo_obligacion != 'pago_especial' THEN
+          IF  v_codigo_estado_siguiente = 'registrado'  and  v_comprometido = 'no' and v_tipo_obligacion != 'adquisiciones' and v_tipo_obligacion != 'pago_especial' and   v_pre_integrar_presupuestos = 'true'  THEN
                
                --TODO aumentar capacidad de rollback
                -- verficar presupuesto y comprometer
@@ -1324,7 +1191,7 @@ BEGIN
                          
                         
                         -- cuando el estado al que regresa es  borrador o presupeustos esta comprometido y no viene de adquisiciones se revierte el repsupuesto
-                         IF (v_codigo_estado = 'borrador' or v_codigo_estado = 'vbpresupuestos') and v_comprometido = 'si' and   v_tipo_obligacion !='adquisiciones' and   v_tipo_obligacion !='pago_especial' THEN
+                         IF (v_codigo_estado = 'borrador' or v_codigo_estado = 'vbpresupuestos') and v_comprometido = 'si' and   v_tipo_obligacion !='adquisiciones' and   v_tipo_obligacion !='pago_especial' and   v_pre_integrar_presupuestos = 'true'  THEN
                          
                              --se revierte el presupeusto
                              IF not tes.f_gestionar_presupuesto_tesoreria(v_parametros.id_obligacion_pago, p_id_usuario, 'revertir')  THEN
@@ -1791,6 +1658,8 @@ BEGIN
 	elsif(p_transaccion='TES_REVPARPRE_IME')then
 
 		begin
+        
+           v_pre_integrar_presupuestos = pxp.f_get_variable_global('pre_integrar_presupuestos');
 		    
             select 
                op.id_obligacion_pago,
@@ -1875,21 +1744,23 @@ BEGIN
           END LOOP;
            
           
-           
-           
-          va_resp_ges =  pre.f_gestionar_presupuesto(  va_id_presupuesto, 
-                                                       va_id_partida, 
-                                                       va_id_moneda, 
-                                                       va_monto, 
-                                                       va_fecha, --p_fecha
-                                                       va_momento, 
-                                                       va_id_partida_ejecucion,--  p_id_partida_ejecucion 
-                                                       va_columna_relacion, 
-                                                       va_fk_llave,
-                                                       NULL
-                                                       );	
-            
           
+          --si se integra con presupuestos
+          IF v_pre_integrar_presupuestos = 'true' THEN  
+           
+            va_resp_ges =  pre.f_gestionar_presupuesto(  va_id_presupuesto, 
+                                                         va_id_partida, 
+                                                         va_id_moneda, 
+                                                         va_monto, 
+                                                         va_fecha, --p_fecha
+                                                         va_momento, 
+                                                         va_id_partida_ejecucion,--  p_id_partida_ejecucion 
+                                                         va_columna_relacion, 
+                                                         va_fk_llave,
+                                                         NULL
+                                                         );	
+            
+          END IF;
             -- Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se extendio la obligacion de pago a la siguiente gestion'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_parametros.id_obligacion_pago::varchar);

@@ -137,7 +137,7 @@ Phx.vista.PlanPagoReq = {
         
         //Evento para ocultar/motrar componentes por cheque o transferencia
         this.Cmp.forma_pago.on('change',function(groupRadio,radio){
-            this.ocultarCheCue(radio.inputValue);
+            this.ocultarCheque(radio.inputValue);
         },this);           
     
     },
@@ -411,7 +411,7 @@ Phx.vista.PlanPagoReq = {
      },
 
   
-    ocultarCheCue: function(pFormaPago){
+    ocultarCheque: function(pFormaPago){
         if(pFormaPago=='transferencia'){
             //Deshabilita campo cheque
             this.Cmp.nro_cheque.allowBlank=true;
