@@ -60,7 +60,7 @@ class RConformidad extends  ReportePDFFormulario {
 		<body>
 		<table border="1">
         	<tr>
-            	<td><b>Responsable del  Proceso :</b><br><br>$nombre_solicitante</td> 
+            	<td><b>Verificado Por :</b><br><br>$nombre_solicitante</td> 
             	<td><b>Número de Trámite : </b><br><br>$numero_tramite</td> 
         	</tr>
         	
