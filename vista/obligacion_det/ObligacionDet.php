@@ -574,7 +574,18 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
         
        /* this.cmpCuenta.store.baseParams.id_gestion=this.maestro.id_gestion
         this.cmpCuenta.modificado=true;*/
-        
+        if(this.maestro.tipo_obligacion=='adquisiciones'){
+        	this.Cmp.id_concepto_ingas.store.baseParams.autorizacion = 'adquisiciones';
+        }
+        if(this.maestro.tipo_obligacion=='pago_directo'){
+        	this.Cmp.id_concepto_ingas.store.baseParams.autorizacion = 'pago_directo';
+        }
+        if(this.maestro.tipo_obligacion=='pago_unico'){
+        	this.Cmp.id_concepto_ingas.store.baseParams.autorizacion = 'pago_unico';
+        }
+        if(this.maestro.tipo_obligacion=='especial'){
+        	this.Cmp.id_concepto_ingas.store.baseParams.autorizacion = 'pago_especial';
+        }
         
         this.store.baseParams={id_obligacion_pago:this.maestro.id_obligacion_pago};
         this.load({params:{start:0, limit:50}})
