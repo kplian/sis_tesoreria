@@ -337,7 +337,7 @@ Phx.vista.PlanPagoVb = {
                            this.getBoton('sig_estado').disable();
                            this.getBoton('SolDevPag').enable();
                            this.getBoton('edit').enable();
-                           if (data['nro_cuota']== 1.00 && data['tipo_obligacion']== 'pago_directo') {
+                           if (data['nro_cuota']== 1.00 && (data['tipo_obligacion']== 'pago_directo' || data['tipo_obligacion']== 'pago_unico')) {
                            		this.getBoton('ModAprop').enable();                           		
                            } else {
                            		this.getBoton('ModAprop').disable(); 
@@ -359,7 +359,7 @@ Phx.vista.PlanPagoVb = {
 		                           this.getBoton('SolDevPag').disable();
 	                           }
 	                           this.getBoton('edit').enable();
-	                           if (data['nro_cuota']== 1.00 && data['tipo_obligacion']== 'pago_directo') {
+	                           if (data['nro_cuota']== 1.00 && (data['tipo_obligacion']== 'pago_directo' || data['tipo_obligacion']== 'pago_unico')) {
 	                           		this.getBoton('ModAprop').enable();                           		
 	                           } else {
 	                           		this.getBoton('ModAprop').disable(); 
