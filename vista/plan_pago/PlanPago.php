@@ -814,7 +814,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 allowBlank: true,
                 emptyText : 'Depósito...',
                 store: new Ext.data.JsonStore({
-                    url:'../../sis_migracion/control/TsLibroBancos/listarTsLibroBancosDepositosConSaldo',
+                    url:'../../sis_tesoreria/control/TsLibroBancos/listarTsLibroBancosDepositosConSaldo',
                     id : 'id_cuenta_bancaria_mov',
                     root: 'datos',
                     sortInfo:{
