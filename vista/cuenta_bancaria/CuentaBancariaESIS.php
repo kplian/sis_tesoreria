@@ -79,7 +79,7 @@ Phx.vista.CuentaBancariaESIS = {
 	
     south:
           { 
-          url:'../../../sis_migracion/vista/ts_libro_bancos/TsLibroBancos.php',
+          url:'../../../sis_tesoreria/vista/ts_libro_bancos/TsLibroBancos.php',
           title:'Detalle', 
           height:'50%',
           cls:'TsLibroBancos'

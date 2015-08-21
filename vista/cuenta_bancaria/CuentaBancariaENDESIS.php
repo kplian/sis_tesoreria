@@ -69,7 +69,7 @@ header("content-type:text/javascript; charset=UTF-8");
 		
 		onBtnDepositosCheques : function() {
 			var rec = this.sm.getSelected();
-			Phx.CP.loadWindows('../../../sis_migracion/vista/ts_libro_bancos_depositos/TsLibroBancosDeposito.php', 'Depositos', {
+			Phx.CP.loadWindows('../../../sis_tesoreria/vista/ts_libro_bancos_depositos/TsLibroBancosDeposito.php', 'Depositos', {
 				modal : true,
 				width : '95%',
 				height : '95%',
