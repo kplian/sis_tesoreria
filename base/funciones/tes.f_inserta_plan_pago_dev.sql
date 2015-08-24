@@ -209,7 +209,7 @@ BEGIN
           --  VALIDACION DE MONTO FALTANTE, SEGUN TIPO DE CUOTA
           ------------------------------------------------------------
           
-          IF (p_hstore->'tipo') in('devengado_rrhh','devengado','devengado_pagado','devengado_pagado_1c') THEN 
+          IF (p_hstore->'tipo') in('devengado_rrhh','devengado','devengado_pagado','devengado_pagado_1c','especial') THEN 
            
                 --si es un proceso variable, verifica que el registro no sobrepase el total a pagar
                 IF v_registros.pago_variable='no' THEN                
