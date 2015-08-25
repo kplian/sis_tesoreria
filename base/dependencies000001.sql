@@ -7922,8 +7922,32 @@ AS
        JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
        LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
          op.id_categoria_compra;
+/***********************************F-DEP-RAC-18/08/2015****************************************/ 
+
+/***********************************I-DEP-JRR-TES-0-25/08/2015****************************************/
+
+ALTER TABLE tes.testacion
+  ADD CONSTRAINT testacion__id_depto_lb FOREIGN KEY (id_depto_lb)
+    REFERENCES param.tdepto(id_depto)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.testacion_tipo_pago
+  ADD CONSTRAINT testacion_tipo_pago__id_estacion FOREIGN KEY (id_estacion)
+    REFERENCES tes.testacion(id_estacion)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+    
+ALTER TABLE tes.testacion_tipo_pago
+  ADD CONSTRAINT testacion_tipo_pago__id_tipo_plan_pago FOREIGN KEY (id_tipo_plan_pago)
+    REFERENCES tes.ttipo_plan_pago(id_tipo_plan_pago)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
 
 
-/***********************************F-DEP-RAC-18/08/2015****************************************/  
+/***********************************F-DEP-JRR-TES-0-25/08/2015****************************************/ 
 
 

@@ -47,12 +47,14 @@ DECLARE
     v_id_int_comprobante integer;
     
     v_id_tipo_estado integer;
+    v_pre_integrar_presupuestos varchar;
 	
     
 BEGIN
 
 	v_nombre_funcion = 'tes.f_generar_comprobante';
     v_id_moneda_base =  param.f_get_moneda_base();
+    v_pre_integrar_presupuestos = pxp.f_get_variable_global('pre_integrar_presupuestos');
     
   
     --  obtinen datos del plan de pagos
@@ -144,7 +146,7 @@ BEGIN
           v_cont =1;
           
           
-          IF v_registros.tipo in ('devengado_pagado','devengado_pagado_1c','devengado_pagado_1c','ant_aplicado','rendicion') THEN
+          IF v_registros.tipo in ('devengado_pagado','devengado','devengado_pagado_1c','ant_aplicado','rendicion') and  v_pre_integrar_presupuestos = 'true'  THEN
                  
            
            		--verifica si el presupuesto comprometido sobrante alcanza para pagar el monto de la cuota prorrateada correspondiente al pago
@@ -208,10 +210,6 @@ BEGIN
                      v_respuesta[1]='FALSE'; 
                      v_respuesta[2]='Falta Presupuesto según el siguiente detalle :\n '||v_mensaje_verificacion;
                      RETURN v_respuesta;
-                  ELSE
-                  
-                  
-                  
                   END IF;
            
            

@@ -1363,3 +1363,30 @@ CREATE TABLE tes.tproceso_caja (
 WITHOUT OIDS;
   
 /*****************************F-SCP-JRR-TES-0-10/08/2015*************/
+
+
+/*****************************I-SCP-JRR-TES-0-25/08/2015*************/
+
+CREATE TABLE tes.testacion (
+  id_estacion SERIAL,
+  codigo VARCHAR,
+  host VARCHAR,
+  puerto VARCHAR,
+  dbname VARCHAR,
+  usuario VARCHAR,
+  password VARCHAR,  
+  id_depto_lb INTEGER,
+  CONSTRAINT testacion_pkey PRIMARY KEY(id_estacion)
+) INHERITS (pxp.tbase)
+WITHOUT OIDS;
+
+CREATE TABLE tes.testacion_tipo_pago (
+  id_estacion_tipo_pago SERIAL,
+  id_estacion INTEGER,
+  id_tipo_plan_pago INTEGER,
+  codigo_plantilla_comprobante VARCHAR(50),
+  CONSTRAINT testacion_tipo_pago_pkey PRIMARY KEY(id_estacion_tipo_pago)
+) INHERITS (pxp.tbase)
+WITHOUT OIDS;
+
+/*****************************F-SCP-JRR-TES-0-25/08/2015*************/
