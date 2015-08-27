@@ -53,6 +53,9 @@ DECLARE
      
      v_id_tipo_estado  integer;
      v_codigo_proceso_llave_wf   varchar;
+	 --gonzalo
+     v_id_finalidad		integer;
+     v_respuesta_libro_bancos varchar;
     
 BEGIN
 
@@ -109,12 +112,16 @@ BEGIN
       pp.descuento_anticipo,
       pp.monto_anticipo,
 	  pp.id_depto_lb,
-      pp.id_depto_conta
+      pp.id_depto_conta,
+	  dpc.prioridad as prioridad_conta,
+      dpl.prioridad as prioridad_libro
       into
       v_registros
       from  tes.tplan_pago pp
       inner join tes.tobligacion_pago  op on op.id_obligacion_pago = pp.id_obligacion_pago and op.estado_reg = 'activo'
       inner join tes.ttipo_plan_pago tpp on tpp.codigo = pp.tipo and tpp.estado_reg = 'activo'
+	  left join param.tdepto dpc on dpc.id_depto=pp.id_depto_conta
+	  inner join param.tdepto dpl on dpl.id_depto=pp.id_depto_lb
       where  pp.id_int_comprobante = p_id_int_comprobante; 
     
     
@@ -459,7 +466,20 @@ BEGIN
            
     
             END IF;
-    
+			
+			--gonzalo insercion de cheque en libro bancos
+            IF v_registros.tipo = 'pagado' THEN
+                select fin.id_finalidad into v_id_finalidad
+                from tes.tfinalidad fin
+                where fin.nombre_finalidad ilike 'proveedores';
+                
+                if(v_registros.prioridad_conta =0 and v_registros.prioridad_libro != 0)then                        		
+                    v_respuesta_libro_bancos = tes.f_generar_deposito_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','endesis');	
+                elseif(v_registros.prioridad_conta!=0 and v_registros.prioridad_libro!=0)then	
+                    v_respuesta_libro_bancos = tes.f_generar_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','endesis');
+                end if;
+                       
+            END IF;
 
 
   
