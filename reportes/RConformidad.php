@@ -9,6 +9,7 @@ class RConformidad extends  ReportePDFFormulario {
 	var $numeracion;
 	var $ancho_sin_totales;
 	var $cantidad_columnas_estaticas;
+	var	$customy;
 	function Header() {
 		$this->ln(25);
 		$height = 20; 
@@ -20,6 +21,9 @@ class RConformidad extends  ReportePDFFormulario {
 		$x=$this->getX();
 		$y=$this->getY();
 		$this->Image(dirname(__FILE__).'/../../pxp/lib'.$_SESSION['_DIR_LOGO'], $x, $y, 36);
+		$this->ln(20);
+		$this->customy = $this->getY();
+		
 		//$this->firmar();
 	}
 	
@@ -86,7 +90,9 @@ class RConformidad extends  ReportePDFFormulario {
     	</table>
     	</body>
 EOF;
-		$this->writeHTMLCell (175,30,20,70,$html);		
+		//$this->writeHTMLCell (175,30,20,70,$html);
+		$this->setY($this->customy);
+		$this->writeHTML ($html);		
 		return $this->firma;
 			
 	}
