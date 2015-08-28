@@ -1207,3 +1207,15 @@ VALUES (E'tes_prioridad_lb_internacional', E'3', E'configura la prioridad para r
 
 /***********************************F-DAT-RAC-TES-0-22/07/2015*****************************************/
 
+
+
+/***********************************I-DAT-RAC-TES-0-29/8/2015*****************************************/
+
+select pxp.f_insert_tgui ('Reporte de Pagos', 'Reporte de pagos', 'REPPP', 'si', 4, 'sis_tesoreria/vista/plan_pago/RepFilPlanPago.php', 3, '', 'RepFilPlanPago', 'TES');
+select pxp.f_insert_testructura_gui ('REPPP', 'REPOP');
+
+/***********************************F-DAT-RAC-TES-0-29/8/2015*****************************************/
+
+
+
+

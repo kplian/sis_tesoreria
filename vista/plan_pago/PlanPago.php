@@ -100,7 +100,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 iconCls: 'binfo',
                 disabled: true,
                 handler: this.loadPagosRelacionados,
-                tooltip: '<b>Pagos Relacioandos</b><br/>Abre una venta con pagos similares o relacionados.'
+                tooltip: '<b>Pagos Relacionados</b><br/>Abre una venta con pagos similares o relacionados.'
             }
         );
         
@@ -1601,10 +1601,14 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             if(this.nombreEstadoVista == 'vbconta'){
             	 rec.data.check_fisico = 'si';
             }
-            
+            var tmp = {};
+            tmp = Ext.apply(tmp, rec.data);
             rec.data.lblDocProcCf = 'Solo doc de Pago';
      		rec.data.lblDocProcSf = 'Todo del Trámite';
      		rec.data.todos_documentos ='no'; 
+     		rec.data.tmp = tmp;
+     		
+     		rec.data.tipo = 'plan_pago'; 
              
             Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
                     'Chequear documento del WF',
