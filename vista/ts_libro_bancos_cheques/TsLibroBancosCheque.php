@@ -859,8 +859,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			{		
 				var data='id='+ data.id_libro_bancos;  
 				console.log(data);
-				window.open('http://172.17.45.11/ReportesPXP/Home/MemorandumFondosEnAvance?'+data);
-				//window.open('http://172.17.45.11/Home/MemorandumFondosEnAvance?'+data);	
+				window.open('http://sms.obairlines.bo/ReportesPXP/Home/MemorandumFondosEnAvance?'+data);
 			}
 			else
 			{
