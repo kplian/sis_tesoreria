@@ -276,6 +276,12 @@ Phx.vista.Estacion=Ext.extend(Phx.gridInterfaz,{
 		field: 'id_estacion',
 		direction: 'ASC'
 	},
+	south:{
+		  url:'../../../sis_tesoreria/vista/estacion_tipo_pago/EstacionTipoPago.php',
+		  title:'Tipo de Pago por Estacion', 
+		  height:'50%',
+		  cls:'EstacionTipoPago'
+	}, 
 	bdel:true,
 	bsave:true
 	}

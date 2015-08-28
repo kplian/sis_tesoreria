@@ -106,7 +106,8 @@ Phx.vista.PlanPagoConformidad = {
          } else {
          	this.getBoton('btnConformidad').disable();
          }
-         this.getBoton('btnChequeoDocumentosWf').enable();  
+         this.getBoton('btnChequeoDocumentosWf').enable();
+         this.getBoton('btnPagoRel').enable(); 
            
      },
     
@@ -118,7 +119,8 @@ Phx.vista.PlanPagoConformidad = {
            this.getBoton('ini_estado').disable();
            this.getBoton('sig_estado').disable();           
            this.getBoton('diagrama_gantt').disable();
-           this.getBoton('btnChequeoDocumentosWf').disable();           
+           this.getBoton('btnChequeoDocumentosWf').disable(); 
+           this.getBoton('btnPagoRel').disable();          
            this.getBoton('btnConformidad').disable();
         }
        return tb

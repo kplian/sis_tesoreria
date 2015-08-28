@@ -121,7 +121,7 @@ BEGIN
       inner join tes.tobligacion_pago  op on op.id_obligacion_pago = pp.id_obligacion_pago and op.estado_reg = 'activo'
       inner join tes.ttipo_plan_pago tpp on tpp.codigo = pp.tipo and tpp.estado_reg = 'activo'
 	  left join param.tdepto dpc on dpc.id_depto=pp.id_depto_conta
-	  inner join param.tdepto dpl on dpl.id_depto=pp.id_depto_lb
+	  left join param.tdepto dpl on dpl.id_depto=pp.id_depto_lb
       where  pp.id_int_comprobante = p_id_int_comprobante; 
     
     

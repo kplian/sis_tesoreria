@@ -258,7 +258,7 @@ BEGIN
                         left join orga.vfuncionario fun on fun.id_funcionario = op.id_funcionario
                         left join orga.vfuncionario funwf on funwf.id_funcionario = ew.id_funcionario
                         left join param.tdepto depto on depto.id_depto = plapa.id_depto_lb
-                        left join tes.tts_libro_bancos lb on lb.id_int_comprobante=plapa.id_int_comprobante
+                        left join tes.tts_libro_bancos lb on plapa.id_int_comprobante = any(lb.id_int_comprobante)
                         left join param.tdepto depc on depc.id_depto = plapa.id_depto_conta
                        where  plapa.estado_reg=''activo''  and '||v_filtro;
 			
@@ -348,7 +348,7 @@ BEGIN
                         left join param.vproveedor pro on pro.id_proveedor = op.id_proveedor
                         left join orga.vfuncionario funwf on funwf.id_funcionario = ew.id_funcionario
                         left join param.tdepto depto on depto.id_depto = plapa.id_depto_lb
-                        left join tes.tts_libro_bancos lb on lb.id_int_comprobante=plapa.id_int_comprobante
+                        left join tes.tts_libro_bancos lb on plapa.id_int_comprobante = any(lb.id_int_comprobante)
                       where  plapa.estado_reg=''activo''   and '||v_filtro;
 			
 			--Definicion de la respuesta		    
@@ -608,7 +608,7 @@ BEGIN
 						        od.id_obligacion_pago,
 						        pxp.list(ot.desc_orden) as desc_orden      
 						    FROM tes.tobligacion_det od
-						    inner join conta.torden_trabajo ot on ot.id_orden_trabajo = od.id_orden_trabajo
+						    left join conta.torden_trabajo ot on ot.id_orden_trabajo = od.id_orden_trabajo
 						    where od.id_concepto_ingas = ' || v_parametros.id_concepto || ' and od.estado_reg = ''activo''
 						    group by od.id_obligacion_pago
 						)
@@ -624,7 +624,8 @@ BEGIN
 						        com.fecha
 						        end) as fecha
 						        ,mon.moneda,pp.monto,pro.monto_ejecutar_mo,
-								od.id_centro_costo, pp.fecha_costo_ini, pp.fecha_costo_fin
+                                od.id_centro_costo, pp.fecha_costo_ini, pp.fecha_costo_fin
+						    
 						FROM tes.tobligacion_pago op
 						inner join obligacion_pago_concepto opc on op.id_obligacion_pago = opc.id_obligacion_pago
 						inner join tes.tplan_pago pp on op.id_obligacion_pago = pp.id_obligacion_pago and pp.estado_reg = ''activo''
@@ -730,7 +731,7 @@ BEGIN
                             liquido_pagable,
                             monto_presupuestado,
                             desc_contrato,
-							desc_funcionario1
+                            desc_funcionario1
                           FROM 
                             tes.vpago_x_proveedor 
 							WHERE  ';
@@ -787,7 +788,127 @@ BEGIN
 			return v_consulta;
 
 		end;				
-	else
+	
+    /*********************************    
+ 	#TRANSACCION:  'TES_REPPAGOS_SEL'
+ 	#DESCRIPCION:	Reporte de pagos relacionados
+ 	#AUTOR:		rac	
+ 	#FECHA:		22-12-2014 15:43:23
+	***********************************/
+
+	ELSIF(p_transaccion='TES_REPPAGOS_SEL')then
+     				
+    	begin
+        
+           v_filtro = ' ';
+           
+            --filtro de proveedores
+           IF  pxp.f_existe_parametro(p_tabla,'id_proveedors')  THEN
+             IF v_parametros.id_proveedors is not null and v_parametros.id_proveedors != '' THEN
+                v_filtro = ' id_proveedor in ('||v_parametros.id_proveedors||') and ';
+             END IF;
+           END IF;
+           
+            --filtro de conceptos
+           IF  pxp.f_existe_parametro(p_tabla,'id_concepto_ingas')  THEN
+             IF v_parametros.id_concepto_ingas is not null and v_parametros.id_concepto_ingas != '' THEN
+                v_filtro = v_filtro||' id_concepto_ingas &&  string_to_array('''||v_parametros.id_concepto_ingas||''','','') and ';
+             END IF;
+           END IF;
+           
+            --filtro de ordenes de trabajo
+           IF  pxp.f_existe_parametro(p_tabla,'id_orden_trabajos')  THEN
+             IF v_parametros.id_orden_trabajos is not null and v_parametros.id_orden_trabajos != '' THEN
+                v_filtro = v_filtro||' id_orden_trabajos && string_to_array('''||v_parametros.id_orden_trabajos||''','','') and ';
+             END IF;
+           END IF;
+        
+        
+       
+            --Sentencia de la consulta
+			v_consulta:='SELECT 
+                          id_plan_pago,
+                          desc_proveedor,
+                          num_tramite,
+                          estado,
+                          fecha_tentativa,
+                          nro_cuota,
+                          monto,
+                          codigo,
+                          conceptos,
+                          ordenes,
+                          id_proceso_wf,
+                          id_estado_wf,
+                          id_proveedor,
+                          obs,
+                          tipo
+                        FROM 
+                          tes.vpagos_relacionados 
+                        WHERE '||v_filtro;
+			
+			--Definicion de la respuesta
+			v_consulta:=v_consulta||v_parametros.filtro;
+			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+
+             --raise exception '%',v_consulta;
+
+			--Devuelve la respuesta
+			return v_consulta;
+						
+		end;
+        
+   /*********************************    
+ 	#TRANSACCION:  'TES_REPPAGOS_CONT'
+ 	#DESCRIPCION:	Conteo de registros para el reporte de  pagos
+ 	#AUTOR:		rac	
+ 	#FECHA:		22-12-2014 15:43:23
+	***********************************/
+
+	elsif(p_transaccion='TES_REPPAGOS_CONT')then
+
+		begin
+        
+        
+           v_filtro = ' ';
+           
+            --filtro de proveedores
+           IF  pxp.f_existe_parametro(p_tabla,'id_proveedors')  THEN
+             IF v_parametros.id_proveedors is not null and v_parametros.id_proveedors != '' THEN
+                v_filtro = ' id_proveedor in ('||v_parametros.id_proveedors||') and ';
+             END IF;
+           END IF;
+           
+            --filtro de conceptos
+           IF  pxp.f_existe_parametro(p_tabla,'id_concepto_ingas')  THEN
+             IF v_parametros.id_concepto_ingas is not null and v_parametros.id_concepto_ingas != '' THEN
+                v_filtro = v_filtro||' id_concepto_ingas &&  string_to_array('''||v_parametros.id_concepto_ingas||''','','') and ';
+             END IF;
+           END IF;
+           
+            --filtro de ordenes de trabajo
+           IF  pxp.f_existe_parametro(p_tabla,'id_orden_trabajos')  THEN
+             IF v_parametros.id_orden_trabajos is not null and v_parametros.id_orden_trabajos != '' THEN
+                v_filtro = v_filtro||' id_orden_trabajos && string_to_array('''||v_parametros.id_orden_trabajos||''','','') and ';
+             END IF;
+           END IF;
+            
+			
+            
+            v_consulta:='SELECT count(id_plan_pago)
+						 FROM 
+                          tes.vpagos_relacionados 
+                        WHERE '||v_filtro;
+            
+			--Definicion de la respuesta		    
+			v_consulta:=v_consulta||v_parametros.filtro;
+         
+            --raise notice '% .',v_consulta;
+			--Devuelve la respuesta
+			return v_consulta;
+
+		end;
+    
+    else
 					     
 		raise exception 'Transaccion inexistente';
 					         

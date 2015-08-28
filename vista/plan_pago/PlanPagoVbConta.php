@@ -359,6 +359,7 @@ Phx.vista.PlanPagoVbConta = {
          this.menuAdq.enable();
          this.getBoton('diagrama_gantt').enable();
          this.getBoton('btnChequeoDocumentosWf').enable();
+         this.getBoton('btnPagoRel').enable(); 
          this.getBoton('btnObs').enable();
            
      },
@@ -374,6 +375,7 @@ Phx.vista.PlanPagoVbConta = {
            this.getBoton('SolPlanPago').disable();
            this.getBoton('diagrama_gantt').disable();
            this.getBoton('btnChequeoDocumentosWf').disable();
+           this.getBoton('btnPagoRel').disable(); 
            this.getBoton('SincPresu').disable();          
            this.getBoton('ModAprop').disable(); 
            this.getBoton('btnObs').disable();

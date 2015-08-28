@@ -60,7 +60,8 @@ Phx.vista.PlanPagoConsulta = {
 	       this.getBoton('ant_estado').disable();
 	       this.getBoton('sig_estado').disable();
 	       this.getBoton('btnChequeoDocumentosWf').enable();
-	         this.getBoton('btnObs').enable(); 
+	       this.getBoton('btnPagoRel').enable(); 
+	       this.getBoton('btnObs').enable(); 
      },
      
     liberaMenu:function(){
@@ -72,6 +73,7 @@ Phx.vista.PlanPagoConsulta = {
            this.getBoton('ant_estado').disable();
            this.getBoton('sig_estado').disable();
            this.getBoton('btnChequeoDocumentosWf').disable();
+           this.getBoton('btnPagoRel').disable(); 
            this.getBoton('btnObs').disable();   
           }
        return tb

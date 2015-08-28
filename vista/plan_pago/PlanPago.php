@@ -92,6 +92,19 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 tooltip: '<b>Documentos de la Solicitud</b><br/>Subir los documetos requeridos en la solicitud seleccionada.'
             }
         );
+        
+        this.addButton('btnPagoRel',
+            {
+                text: 'Pagos Rel.',
+                grupo:[0,1], 
+                iconCls: 'binfo',
+                disabled: true,
+                handler: this.loadPagosRelacionados,
+                tooltip: '<b>Pagos Relacioandos</b><br/>Abre una venta con pagos similares o relacionados.'
+            }
+        );
+        
+        
         this.addButton('btnObs',{
         	 		grupo:[0,1], 
                     text :'Obs Wf',
@@ -206,9 +219,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 gwidth: 50,
                 renderer:function (value, p, record){  
                             if(record.data['revisado_asistente'] == 'si')
-                                return  String.format('{0}',"<div style='text-align:center'><img src = '../../../lib/imagenes/ball_green.png' align='center' width='24' height='24'/></div>");
+                                return  String.format('{0}',"<div style='text-align:center'><img title='Revisado / Permite ver pagos relacionados'  src = '../../../lib/imagenes/ball_green.png' align='center' width='24' height='24'/></div>");
                             else
-                                return  String.format('{0}',"<div style='text-align:center'><img src = '../../../lib/imagenes/ball_white.png' align='center' width='24' height='24'/></div>");
+                                return  String.format('{0}',"<div style='text-align:center'><img title='No revisado / Permite ver pagos relacionados'  src = '../../../lib/imagenes/ball_white.png' align='center' width='24' height='24'/></div>");
                         },
             },
             type:'Checkbox',
@@ -1589,7 +1602,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             	 rec.data.check_fisico = 'si';
             }
             
-             
+            rec.data.lblDocProcCf = 'Solo doc de Pago';
+     		rec.data.lblDocProcSf = 'Todo del Trámite';
+     		rec.data.todos_documentos ='no'; 
              
             Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
                     'Chequear documento del WF',
@@ -1600,6 +1615,23 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                     rec.data,
                     this.idContenedor,
                     'DocumentoWf'
+        )
+    },
+    
+    loadPagosRelacionados:  function() {
+            var rec=this.sm.getSelected();
+            rec.data.nombreVista = this.nombreVista;
+            
+            
+            Phx.CP.loadWindows('../../../sis_tesoreria/vista/plan_pago/RepFilPlanPago.php',
+                    'Pagos similares',
+                    {
+                        width:'90%',
+                        height:'90%'
+                    },
+                    rec.data,
+                    this.idContenedor,
+                    'RepFilPlanPago'
         )
     },
     

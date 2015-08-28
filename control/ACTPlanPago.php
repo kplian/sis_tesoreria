@@ -211,10 +211,6 @@ class ACTPlanPago extends ACTbase{
     }
 	 
 	
-	 
-	 
-	 
-    
 	
 	function verificarDisponibilidad(){
 		$this->objParam->defecto('ordenacion','desc_partida');
@@ -252,8 +248,6 @@ class ACTPlanPago extends ACTbase{
 		
 		$this->res=$this->objFunc->listarActaMaestro($this->objParam);
 		
-		//$this->objFunc=$this->create('MODPlanPago');
-		//$this->res2=$this->objFunc->listarActaDetalle($this->objParam);
 		//obtener titulo del reporte
 		
 		//Genera el nombre del archivo (aleatorio + titulo)
@@ -332,6 +326,32 @@ class ACTPlanPago extends ACTbase{
 			$this->objFunc=$this->create('MODPlanPago');
 			
 			$this->res=$this->objFunc->listarPagosXProveedor($this->objParam);
+		}
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+   
+   function listadosPagosRelacionados() {
+		
+		$this->objParam->defecto('ordenacion','id_plan_pago');
+
+		$this->objParam->defecto('dir_ordenacion','asc');
+		
+		if($this->objParam->getParametro('id_plan_pago')!=''){
+            $this->objParam->addFiltro("id_plan_pago != ".$this->objParam->getParametro('id_plan_pago'));  
+        }
+		
+		if($this->objParam->getParametro('nro_tramite')!=''){
+            $this->objParam->addFiltro("num_tramite like ''%".$this->objParam->getParametro('nro_tramite')."%''");  
+        }
+		
+		
+        
+        if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+			$this->objReporte = new Reporte($this->objParam,$this);
+			$this->res = $this->objReporte->generarReporteListado('MODPlanPago','listadosPagosRelacionados');
+		} else{
+			$this->objFunc=$this->create('MODPlanPago');
+			$this->res=$this->objFunc->listadosPagosRelacionados($this->objParam);
 		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}

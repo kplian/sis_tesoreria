@@ -452,7 +452,8 @@ Phx.vista.PlanPagoRegIni = {
          }*/
           
          // this.getBoton('btnVerifPresup').enable();
-          this.getBoton('btnChequeoDocumentosWf').enable();  
+          this.getBoton('btnChequeoDocumentosWf').enable(); 
+          this.getBoton('btnPagoRel').enable();  
      },
      
     liberaMenu:function(){
@@ -466,7 +467,8 @@ Phx.vista.PlanPagoRegIni = {
           
          
            //this.getBoton('btnConformidad').disable();
-           this.getBoton('btnChequeoDocumentosWf').disable();   
+           this.getBoton('btnChequeoDocumentosWf').disable(); 
+           this.getBoton('btnPagoRel').disable();   
           }
        return tb
     }, 

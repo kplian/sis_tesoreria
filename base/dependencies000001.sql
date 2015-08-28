@@ -7951,3 +7951,170 @@ ALTER TABLE tes.testacion_tipo_pago
 /***********************************F-DEP-JRR-TES-0-25/08/2015****************************************/ 
 
 
+
+/***********************************I-DEP-RAC-TES-0-27/08/2015****************************************/ 
+
+
+--------------- SQL ---------------
+
+CREATE VIEW tes.vplan_pago 
+AS 
+SELECT   ppp.id_plan_pago,
+         op.id_gestion,
+         ges.gestion,
+         op.id_obligacion_pago,
+         op.num_tramite,
+         cot.numero_oc AS orden_compra,
+         op.tipo_obligacion,
+         op.pago_variable,
+         pro.desc_proveedor,
+         op.estado,
+         usu.cuenta AS usuario_reg,
+         op.fecha,
+         op.fecha_reg,
+         op.obs AS ob_obligacion_pago,
+         ppp.fecha_tentativa AS fecha_tentativa_de_pago,
+         ppp.nro_cuota,
+         ppp.tipo AS tipo_plan_pago,
+         ppp.estado AS estado_plan_pago,
+         ppp.obs_descuento_inter_serv,
+         ppp.obs_descuentos_anticipo,
+         ppp.obs_descuentos_ley,
+         ppp.obs_monto_no_pagado,
+         ppp.obs_otros_descuentos,
+         mon.codigo,
+         ppp.monto AS monto_cuota,
+         ppp.monto_anticipo,
+         ppp.monto_excento,
+         ppp.monto_retgar_mo,
+         ppp.monto_ajuste_ag,
+         ppp.monto_ajuste_siguiente_pago,
+         ppp.liquido_pagable,
+         con.id_contrato,
+         (('(id:'::text || con.id_contrato) || ') Nro: '::text) || con.numero::
+           text AS desc_contrato,
+         fun.desc_funcionario1,
+         op.obs,
+         op.id_proveedor,
+         pxp.aggarray(od.id_concepto_ingas) as ids_conceptos_ingas,
+         pxp.aggarray(od.id_orden_trabajo) as ids_ordene_trabajo
+  FROM tes.tobligacion_pago op
+       JOIN tes.tobligacion_det od on od.id_obligacion_pago = op.id_obligacion_pago and od.estado_reg = 'activo'
+       JOIN param.tgestion ges ON ges.id_gestion = op.id_gestion
+       JOIN param.vproveedor pro ON pro.id_proveedor = op.id_proveedor
+       JOIN segu.tusuario usu ON usu.id_usuario = op.id_usuario_reg
+       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
+       JOIN tes.tplan_pago ppp ON ppp.id_obligacion_pago = op.id_obligacion_pago
+         AND ppp.estado_reg::text = 'activo'::text
+       LEFT JOIN adq.tcotizacion cot ON cot.id_obligacion_pago =
+         op.id_obligacion_pago
+       LEFT JOIN leg.tcontrato con ON con.id_contrato = op.id_contrato
+       JOIN orga.vfuncionario fun ON fun.id_funcionario = op.id_funcionario
+
+group by 
+         ppp.id_plan_pago,
+         op.id_gestion,
+         ges.gestion,
+         op.id_obligacion_pago,
+         op.num_tramite,
+         cot.numero_oc,
+         op.tipo_obligacion,
+         op.pago_variable,
+         pro.desc_proveedor,
+         op.estado,
+         usu.cuenta,
+         op.fecha,
+         op.fecha_reg,
+         op.obs,
+         ppp.fecha_tentativa,
+         ppp.nro_cuota,
+         ppp.tipo,
+         ppp.estado,
+         ppp.obs_descuento_inter_serv,
+         ppp.obs_descuentos_anticipo,
+         ppp.obs_descuentos_ley,
+         ppp.obs_monto_no_pagado,
+         ppp.obs_otros_descuentos,
+         mon.codigo,
+         ppp.monto,
+         ppp.monto_anticipo,
+         ppp.monto_excento,
+         ppp.monto_retgar_mo,
+         ppp.monto_ajuste_ag,
+         ppp.monto_ajuste_siguiente_pago,
+         ppp.liquido_pagable,
+         con.id_contrato,
+         con.numero,
+         fun.desc_funcionario1,
+         op.obs,
+         con.id_contrato ;
+
+--------------- SQL ---------------
+
+
+CREATE OR REPLACE VIEW tes.vpagos_relacionados(
+    desc_proveedor,
+    num_tramite,
+    estado,
+    fecha_tentativa,
+    nro_cuota,
+    monto,
+    codigo,
+    conceptos,
+    ordenes,
+    id_orden_trabajos,
+    id_concepto_ingas,
+    id_plan_pago,
+    id_proceso_wf,
+    id_estado_wf,
+    id_proveedor,
+    obs,
+    tipo)
+AS
+WITH detalle AS(
+  SELECT op_1.id_obligacion_pago,
+         pxp.list(cig.desc_ingas::text) AS conceptos,
+         pxp.list(ot.desc_orden::text) AS ordenes,
+         pxp.aggarray(od.id_orden_trabajo::text) AS id_orden_trabajos,
+         pxp.aggarray(od.id_concepto_ingas::text) AS id_concepto_ingas
+  FROM tes.tobligacion_pago op_1
+       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
+         op_1.id_obligacion_pago
+       JOIN param.tconcepto_ingas cig ON cig.id_concepto_ingas =
+         od.id_concepto_ingas
+       LEFT JOIN conta.torden_trabajo ot ON ot.id_orden_trabajo =
+         od.id_orden_trabajo
+  GROUP BY op_1.id_obligacion_pago)
+    SELECT prov.desc_proveedor,
+           op.num_tramite,
+           pp.estado,
+           pp.fecha_tentativa,
+           pp.nro_cuota,
+           pp.monto,
+           mon.codigo,
+           det.conceptos,
+           det.ordenes,
+           det.id_orden_trabajos,
+           det.id_concepto_ingas,
+           pp.id_plan_pago,
+           pp.id_proceso_wf,
+           pp.id_estado_wf,
+           op.id_proveedor,
+           op.obs,
+           pp.tipo
+    FROM tes.tobligacion_pago op
+         JOIN param.vproveedor prov ON prov.id_proveedor = op.id_proveedor
+         JOIN tes.tplan_pago pp ON pp.id_obligacion_pago = op.id_obligacion_pago
+         JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
+         JOIN detalle det ON det.id_obligacion_pago = op.id_obligacion_pago
+    WHERE (pp.tipo::text = ANY (ARRAY [ 'devengado'::character varying::text,
+      'devengado_pagado'::character varying::text, 'devengado_pagado_1c'::
+      character varying::text, 'ant_parcial'::character varying::text,
+      'anticipo'::character varying::text, 'especial'::character varying::text ]
+      )) AND
+          (pp.estado::text <> ALL (ARRAY [ 'borrador'::character varying::text,
+            'anulado'::character varying::text, 'vbsolicitante'::character
+            varying::text ]));
+/***********************************F-DEP-RAC-TES-0-27/08/2015****************************************/ 
+
+

@@ -122,6 +122,7 @@ Phx.vista.PlanPagoVbAsistente = {
    	  this.getBoton('edit').disable(); 
    	  this.getBoton('diagrama_gantt').enable();
       this.getBoton('btnChequeoDocumentosWf').enable();
+      this.getBoton('btnPagoRel').enable(); 
       
       var data = this.getSelectedData();
         if(data['revisado_asistente']== 'si'){
@@ -138,6 +139,7 @@ Phx.vista.PlanPagoVbAsistente = {
         var tb = Phx.vista.PlanPagoVbAsistente.superclass.liberaMenu.call(this);
         this.getBoton('diagrama_gantt').disable();
         this.getBoton('btnChequeoDocumentosWf').disable();
+        this.getBoton('btnPagoRel').disable(); 
         this.getBoton('btnRev').disable();
         this.getBoton('btnObs').disable();   
         

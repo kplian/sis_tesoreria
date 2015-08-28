@@ -375,6 +375,13 @@ class ACTObligacionPago extends ACTbase{
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 	
+	function recuperarDatosFiltro(){
+		$this->objFunc=$this->create('MODObligacionPago');	
+		$this->res=$this->objFunc->recuperarDatosFiltro($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	
+	
 	
 
 }

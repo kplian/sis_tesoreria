@@ -454,6 +454,24 @@ class MODObligacionPago extends MODbase{
         //Devuelve la respuesta
         return $this->respuesta;
     }
+	 
+	 
+	
+	function recuperarDatosFiltro(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.ft_obligacion_pago_ime';
+        $this->transaccion='TES_GETFILOP_IME';
+        $this->tipo_procedimiento='IME';
+                
+        //Define los parametros para la funcion
+        $this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
 			
 	function estadosPago(){
 					$this->procedimiento = 'tes.ft_obligacion_pago_sel';

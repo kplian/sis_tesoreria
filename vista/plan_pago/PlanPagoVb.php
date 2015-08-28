@@ -72,6 +72,7 @@ Phx.vista.PlanPagoVb = {
        Phx.vista.PlanPagoVb.superclass.constructor.call(this,config);
        this.creaFormularioConformidad();
        this.iniciarEventos();
+       this.grid.addListener('cellclick', this.oncellclick,this);
        this.addButton('btnConformidad',{text:'Conformidad',iconCls: 'bok',disabled:true,handler:this.onButtonConformidad,tooltip: 'Generar conformidad para el pago (Firma acta de conformidad)'});
        this.addButton('SolDevPag',{text:'Generar Cbte',iconCls: 'bpagar',disabled:true,handler:this.onBtnDevPag,tooltip: '<b>Solicitar Devengado/Pago</b><br/>Genera en cotabilidad el comprobante Correspondiente'});
        this.addButton('ModAprop',{text:'Modificar Apropiación',iconCls: 'bengine',disabled:true,handler:this.onBtnApropiacion,tooltip: 'Modificar la apropiación (solo cuando es el primer pago de un pago directo y el estado es vbconta)'});
@@ -406,6 +407,8 @@ Phx.vista.PlanPagoVb = {
          	this.getBoton('btnConformidad').disable();
          }
          this.getBoton('btnChequeoDocumentosWf').enable();
+         this.getBoton('btnPagoRel').enable();
+         
          this.getBoton('btnObs').enable();
            
      },
@@ -421,6 +424,8 @@ Phx.vista.PlanPagoVb = {
            this.getBoton('SolPlanPago').disable();
            this.getBoton('diagrama_gantt').disable();
            this.getBoton('btnChequeoDocumentosWf').disable();
+           this.getBoton('btnPagoRel').disable();
+           
            this.getBoton('SincPresu').disable();          
            this.getBoton('ModAprop').disable(); 
            this.getBoton('btnObs').disable();
@@ -644,6 +649,18 @@ Phx.vista.PlanPagoVb = {
         }
 
     },
+    
+    oncellclick : function(grid, rowIndex, columnIndex, e) {
+		
+	    var record = this.store.getAt(rowIndex),
+	        fieldName = grid.getColumnModel().getDataIndex(columnIndex); // Get field name
+
+	    if (fieldName == 'revisado_asistente' ) {
+	    	this.loadPagosRelacionados()
+	    		
+	    } 
+		
+	},
     
     sistema: 'ADQ',
     id_cotizacion: 0,

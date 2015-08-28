@@ -750,14 +750,14 @@ class MODPlanPago extends MODbase{
 		return $this->respuesta;
 	}
 
-function resumenPagosXProveedor(){
+    function resumenPagosXProveedor(){
 		//Definicion de variables para ejecucion del procedimientp
 		$this->procedimiento='tes.f_plan_pago_sel';
 		$this->transaccion='TES_PAGOS_CONT';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
 		//$this->setCount(false);
 		
-		$this->captura('taotal', 'BIGINT');
+		$this->captura('total', 'BIGINT');
 		$this->captura('monto_cuota', 'NUMERIC');
 		$this->captura('monto_anticipo', 'NUMERIC');
 		$this->captura('monto_excento', 'NUMERIC');
@@ -774,6 +774,48 @@ function resumenPagosXProveedor(){
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+	
+	function listadosPagosRelacionados(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.f_plan_pago_sel';
+		$this->transaccion='TES_REPPAGOS_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		
+		  $this->setParametro('id_proveedors','id_proveedors','VARCHAR');
+		  $this->setParametro('id_orden_trabajos','id_orden_trabajos','VARCHAR');
+		  $this->setParametro('id_concepto_ingas','id_concepto_ingas','VARCHAR');
+		
+		  $this->captura('id_plan_pago', 'INTEGER');
+		  $this->captura('desc_proveedor', 'VARCHAR');
+		  $this->captura('num_tramite', 'VARCHAR');
+		  $this->captura('estado', 'VARCHAR');
+		  $this->captura('fecha_tentativa', 'DATE');
+		  $this->captura('nro_cuota', 'NUMERIC');
+		  $this->captura('monto ','NUMERIC');
+		  $this->captura('codigo', 'VARCHAR');
+		  $this->captura('conceptos', 'TEXT');
+		  $this->captura('ordenes', 'TEXT');
+		  $this->captura('id_proceso_wf', 'INTEGER');
+		  $this->captura('id_estado_wf', 'INTEGER');
+		  $this->captura('id_proveedor', 'INTEGER');
+		  $this->captura('obs', 'VARCHAR');
+		  $this->captura('tipo', 'VARCHAR');
+		  
+	
+		  
+		 
+                    
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
+
 
 }
 ?>
