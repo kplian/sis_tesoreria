@@ -1824,11 +1824,63 @@ BEGIN
             return v_resp;
 
 		end;     
+    
+     /*********************************    
+ 	#TRANSACCION:  'TES_GETFILOP_IME'
+ 	#DESCRIPCION:	Recupera datos delproveedor, OT , tramite y conceptos de gasto  de la obligacion
+    #AUTOR:	        Rensi Arteaga Copari
+ 	#FECHA:		    29-08-2015 14:48:35
+	***********************************/
+
+	elsif(p_transaccion='TES_GETFILOP_IME')then
+
+		begin
+			
+        
+           --recupera datos de la OP y proveedor
+           select
+             op.id_proveedor,
+              pr.desc_proveedor,
+              op.num_tramite
+           into
+             v_registros_op  
+           from tes.tobligacion_pago op
+           inner join param.vproveedor pr on pr.id_proveedor = op.id_proveedor
+           where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
+           
+                      
+           --recupera datos del detalle ots y conceptos
+           select
+              pxp.list(od.id_orden_trabajo::varchar) as id_orden_trabajos,
+              pxp.list(od.id_concepto_ingas::varchar) as id_concepto_ingas
+           into
+             v_registros
+           from tes.tobligacion_det od 
+           where od.id_obligacion_pago = v_parametros.id_obligacion_pago and od.estado_reg = 'activo';
+           
+           
+             
+             --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','recupera datos de la obligacion'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',v_parametros.id_obligacion_pago::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'id_proveedor',v_registros_op.id_proveedor::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'num_tramite',v_registros_op.num_tramite::varchar);
+            
+            
+            v_resp = pxp.f_agrega_clave(v_resp,'desc_proveedor',v_registros_op.desc_proveedor::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'id_orden_trabajos',v_registros.id_orden_trabajos::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'id_concepto_ingas',v_registros.id_concepto_ingas::varchar);
+            
+              
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;     
           
     
-    else
-     
-    	raise exception 'Transaccion inexistente: %',p_transaccion;
+    else      
+    
+    raise exception 'Transaccion inexistente: %',p_transaccion;
 
 	end if;
 
