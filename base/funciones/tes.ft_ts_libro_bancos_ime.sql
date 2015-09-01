@@ -76,6 +76,7 @@ DECLARE
     v_estado_padre			varchar;
     v_resp_doc				boolean;
     g_verifica_documento	varchar;
+	g_origen				varchar;
 BEGIN
     v_nombre_funcion = 'tes.ft_ts_libro_bancos_ime';
     v_parametros = pxp.f_get_record(p_tabla);
@@ -488,8 +489,8 @@ BEGIN
         End If; --fin de la verificacion de si es cheque, debito automatico o transferencia con carta  
         
         --obtenemos la fecha antes de actualizarla
-        Select lb.fecha, ew.verifica_documento
-        Into g_fecha_ant, g_verifica_documento
+        Select lb.fecha, ew.verifica_documento, lb.sistema_origen
+        Into g_fecha_ant, g_verifica_documento, g_origen
         From tes.tts_libro_bancos lb
         inner join wf.testado_wf ew on ew.id_estado_wf=lb.id_estado_wf
         Where lb.id_libro_bancos = v_parametros.id_libro_bancos;
@@ -534,7 +535,14 @@ BEGIN
         if(g_verifica_documento = 'si')then
 	        v_resp_doc = wf.f_verifica_documento(p_id_usuario,v_id_estado_wf);
     	end if;
-            
+        
+		IF(v_parametros.tipo = 'deposito' and g_origen='KERP')THEN
+        	UPDATE tes.tts_libro_bancos SET
+            detalle = v_parametros.detalle,
+            observaciones = v_parametros.observaciones
+            WHERE id_libro_bancos_fk=v_parametros.id_libro_bancos;
+        END IF;
+		
         If (v_parametros.fecha<> g_fecha_ant or g_fecha_ant is null) Then
         	--ALGORITMO DE ORDENACION DE REGISTROS
            /*     
