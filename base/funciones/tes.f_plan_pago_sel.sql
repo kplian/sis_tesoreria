@@ -258,7 +258,7 @@ BEGIN
                         left join orga.vfuncionario fun on fun.id_funcionario = op.id_funcionario
                         left join orga.vfuncionario funwf on funwf.id_funcionario = ew.id_funcionario
                         left join param.tdepto depto on depto.id_depto = plapa.id_depto_lb
-                        left join tes.tts_libro_bancos lb on plapa.id_int_comprobante = any(lb.id_int_comprobante)
+                        left join tes.tts_libro_bancos lb on plapa.id_int_comprobante = lb.id_int_comprobante
                         left join param.tdepto depc on depc.id_depto = plapa.id_depto_conta
                        where  plapa.estado_reg=''activo''  and '||v_filtro;
 			
@@ -348,7 +348,7 @@ BEGIN
                         left join param.vproveedor pro on pro.id_proveedor = op.id_proveedor
                         left join orga.vfuncionario funwf on funwf.id_funcionario = ew.id_funcionario
                         left join param.tdepto depto on depto.id_depto = plapa.id_depto_lb
-                        left join tes.tts_libro_bancos lb on plapa.id_int_comprobante = any(lb.id_int_comprobante)
+                        left join tes.tts_libro_bancos lb on plapa.id_int_comprobante = lb.id_int_comprobante
                       where  plapa.estado_reg=''activo''   and '||v_filtro;
 			
 			--Definicion de la respuesta		    
