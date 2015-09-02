@@ -60,7 +60,30 @@ Phx.vista.ObligacionDetApropiacion = {
        
     },
     onButtonEdit:function(){	    
-	  Phx.vista.ObligacionDet.superclass.onButtonEdit.call(this);	
+	  Phx.vista.ObligacionDetApropiacion.superclass.onButtonEdit.call(this);
+	  this.Cmp.id_concepto_ingas.store.load({params:{start:0,limit:this.tam_pag,id_concepto_ingas:this.Cmp.id_concepto_ingas.getValue()}, 
+           callback : function (r) {
+                if (r.length == 1 ) {                       
+                    this.Cmp.id_concepto_ingas.setValue(r[0].data.id_concepto_ingas);
+                    this.Cmp.id_orden_trabajo.store.baseParams = Ext.apply(this.Cmp.id_orden_trabajo.store.baseParams, {
+			        		                                           filtro_ot:r[0].data.filtro_ot,
+			        		 										   requiere_ot:r[0].data.requiere_ot,
+			        		 										   id_grupo_ots:r[0].data.id_grupo_ots
+			        		 										});
+			        
+			        this.Cmp.id_orden_trabajo.modificado = true;
+			        this.Cmp.id_orden_trabajo.enable();
+			        if(r[0].data.requiere_ot =='obligatorio'){
+			        	this.Cmp.id_orden_trabajo.allowBlank = false;
+			        }
+			        else{
+			        	this.Cmp.id_orden_trabajo.allowBlank = true;
+			        }
+                } 
+                   
+                                
+            }, scope : this
+        });	
 	}
      
     
