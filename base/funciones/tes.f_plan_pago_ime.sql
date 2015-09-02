@@ -969,9 +969,12 @@ BEGIN
                     where id_obligacion_pago = v_registros.id_obligacion_pago and estado_reg = 'activo') != v_registros.total_pago) THEN
            			raise exception 'La suma de todos los detalles no iguala con el total de la obligacion. La diferencia se genero al modificar la apropiacion';
                 end if;
+                
                 /*1.2 Comprometer*/
                 select * into v_nombre_conexion from migra.f_crear_conexion();
+                
                 select tes.f_gestionar_presupuesto_tesoreria(v_registros.id_obligacion_pago, p_id_usuario, 'comprometer',NULL,v_nombre_conexion) into v_res;
+                
                 if v_res = false then
                     raise exception 'Error al comprometer el presupuesto';
                 end if;
@@ -981,7 +984,9 @@ BEGIN
                 where id_obligacion_pago = v_registros.id_obligacion_pago; 
                 
           end if;
-            IF  v_registros.tipo  in ('pagado' ,'devengado_pagado','devengado_pagado_1c','anticipo','ant_parcial') THEN
+          
+          
+          IF  v_registros.tipo  in ('pagado' ,'devengado_pagado','devengado_pagado_1c','anticipo','ant_parcial') THEN
                 
                   IF v_registros.forma_pago = 'cheque' THEN
                 
@@ -1037,16 +1042,19 @@ BEGIN
             
            END IF;
            
-         
            
            v_verficacion = tes.f_generar_comprobante(
                                                       p_id_usuario,
                                                       v_parametros._id_usuario_ai,
                                                       v_parametros._nombre_usuario_ai,
                                                       v_parametros.id_plan_pago, 
-                                                      v_parametros.id_depto_conta);
+                                                      v_parametros.id_depto_conta,
+                                                      v_nombre_conexion);
+          
           select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'exito'); 
+          
           v_resp = '';
+          
           IF  v_verficacion[1]= 'TRUE'   THEN
                  
                   --Definicion de la respuesta

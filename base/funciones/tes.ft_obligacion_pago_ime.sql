@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -1028,6 +1026,13 @@ BEGIN
           ------------------------------------------------------------------------------
           IF  v_codigo_estado_siguiente = 'registrado'  and  v_comprometido = 'no' and v_tipo_obligacion != 'adquisiciones' and v_tipo_obligacion != 'pago_especial' and   v_pre_integrar_presupuestos = 'true'  THEN
                
+          		--jrr: llamamos a la funcion que revierte de planillas en caso de que sea de recursos humanos
+                if (v_tipo_obligacion = 'rrhh') then
+                    IF NOT plani.f_generar_pago_tesoreria(p_administrador,p_id_usuario,v_parametros._id_usuario_ai,
+                              v_parametros._nombre_usuario_ai,v_parametros.id_obligacion_pago,v_obs) THEN                                                         
+                         raise exception 'Error al generar el pago de devengado';                          
+                      END IF;            	
+                end if;
                --TODO aumentar capacidad de rollback
                -- verficar presupuesto y comprometer
                IF not tes.f_gestionar_presupuesto_tesoreria(v_parametros.id_obligacion_pago, p_id_usuario, 'comprometer')  THEN
@@ -1040,13 +1045,7 @@ BEGIN
                  comprometido = v_comprometido
                where id_obligacion_pago  = v_parametros.id_obligacion_pago;
                
-               --jrr: llamamos a la funcion que revierte de planillas en caso de que sea de recursos humanos
-                if (v_tipo_obligacion = 'rrhh') then
-                    IF NOT plani.f_generar_pago_tesoreria(p_administrador,p_id_usuario,v_parametros._id_usuario_ai,
-                              v_parametros._nombre_usuario_ai,v_parametros.id_obligacion_pago,v_obs) THEN                                                         
-                         raise exception 'Error al generar el pago de devengado';                          
-                      END IF;            	
-                end if;
+               
            
            END IF;
            

@@ -403,7 +403,8 @@ Phx.vista.PlanPagoVbCostos = {
                        }
                }
                this.getBoton('SolPlanPago').enable(); 
-               if(data['sinc_presupuesto']=='si' && data['estado']== 'vbconta'){
+              
+               if(data['sinc_presupuesto']=='si' && (data['estado'] == 'vbconta' || data['estado'] == 'vbcostos')){
                     this.getBoton('SincPresu').enable();
                }
                else{

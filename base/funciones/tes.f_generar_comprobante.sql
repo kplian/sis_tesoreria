@@ -36,18 +36,22 @@ DECLARE
     va_regla            varchar[];
     va_prioridad        integer[];
     
-    v_id_estado_actual	integer;
-    v_id_moneda_base   integer;
+    v_id_estado_actual				integer;
+    v_id_moneda_base   				integer;
     
-    v_sw_verificacion  boolean;
-    v_mensaje_verificacion varchar;
-    v_desc_ingas varchar;
-    v_cont integer;
-    v_respuesta varchar[];
-    v_id_int_comprobante integer;
+    v_sw_verificacion  				boolean;
+    v_mensaje_verificacion 			varchar;
+    v_desc_ingas 					varchar;
+    v_cont 							integer;
+    v_respuesta 					varchar[];
+    v_id_int_comprobante 			integer;
     
-    v_id_tipo_estado integer;
-    v_pre_integrar_presupuestos varchar;
+    v_id_tipo_estado 				integer;
+    v_pre_integrar_presupuestos 	varchar;
+    v_prioridad_depto_conta_inter 	varchar;
+    v_sincronizar_internacional   	varchar;
+    v_prioridad_depto_conta		  	integer;
+    v_codigo_plt_cbte				varchar;
 	
     
 BEGIN
@@ -60,25 +64,26 @@ BEGIN
     --  obtinen datos del plan de pagos
            
            SELECT
-           pp.id_plan_pago,
-           pp.id_plan_pago_fk,
-           pp.id_plantilla,
-           pp.id_estado_wf,
-           pp.estado,
-           pp.id_proceso_wf,
-           op.id_depto,
-           pp.tipo_pago,
-           pp.monto_ejecutar_total_mo,
-           pp.total_prorrateado,
-           pp.nro_cuota,
-           pp.id_obligacion_pago,
-           op.id_depto_conta,
-           op.id_obligacion_pago,
-           op.id_moneda,
-           pp.tipo,
-           tpp.codigo_plantilla_comprobante
+             pp.id_plan_pago,
+             pp.id_plan_pago_fk,
+             pp.id_plantilla,
+             pp.id_estado_wf,
+             pp.estado,
+             pp.id_proceso_wf,
+             op.id_depto,
+             pp.tipo_pago,
+             pp.monto_ejecutar_total_mo,
+             pp.total_prorrateado,
+             pp.nro_cuota,
+             pp.id_obligacion_pago,
+             op.id_depto_conta,
+             op.id_obligacion_pago,
+             op.id_moneda,
+             pp.tipo,
+             tpp.codigo_plantilla_comprobante,
+             pp.id_depto_lb
            into
-           v_registros
+              v_registros
            FROM tes.tplan_pago pp
            inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago and op.estado_reg = 'activo'
            inner join tes.ttipo_plan_pago tpp on tpp.codigo = pp.tipo and tpp.estado_reg = 'activo'
@@ -109,7 +114,7 @@ BEGIN
           
               IF v_registros.id_depto_conta != p_id_depto_conta THEN
               
-                 --RAC, yano es necesaria esta validacion pueden mesclar los comprobantes ....
+                 --RAC, ya no es necesaria esta validacion pueden mesclar los comprobantes ....
                  --raise exception 'El departamento de contabilidad no coincide con el registrado para  las anteriores cuotas del plan de pago';
                         
               END IF;
@@ -288,16 +293,54 @@ BEGIN
             
             
             ---------------------------------------
-           ----  Generacion del Comprobante  -----
-           ---------------------------------------
-        
-            v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,v_registros.codigo_plantilla_comprobante,p_id_usuario,p_id_usuario_ai,p_usuario_ai, p_conexion);
+            ----  Generacion del Comprobante  -----
+            ---------------------------------------
+            
+            
+            --  obtiene prioridad del libro de bancos ...
+            select 
+              d.prioridad
+            into
+             v_prioridad_depto_conta
+            from param.tdepto d
+            where d.id_depto =  v_registros.id_depto_conta; 
+            
+            --si esta habilita la sincronizacion internacional y depto de conta es internacional
+            v_sincronizar_internacional = pxp.f_get_variable_global('sincronizar');
+            v_prioridad_depto_conta_inter = pxp.f_get_variable_global('conta_prioridad_depto_internacional');
+            
+          
+            IF v_sincronizar_internacional = 'true' and (v_prioridad_depto_conta::varchar = v_prioridad_depto_conta_inter::varchar) THEN
+             -- recupera la estacion destino
+             -- utiliza la plantilla segun estacion destino, para generar el comprobante 
+                
+             select 
+              etp.codigo_plantilla_comprobante
+             into
+              v_codigo_plt_cbte
+             from tes.testacion e 
+             inner join tes.testacion_tipo_pago etp on e.id_estacion = etp.id_estacion and etp.estado_reg = 'activo'
+             inner join tes.ttipo_plan_pago tpp on tpp.id_tipo_plan_pago = etp.id_tipo_plan_pago 
+             where     e.id_depto_lb = v_registros.id_depto_lb 
+                  and  e.estado_reg = 'activo'
+                  and tpp.codigo =  v_registros.tipo;
+             
+            
+             -- si es  internacional, 
+                v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago, v_codigo_plt_cbte, p_id_usuario, p_id_usuario_ai,p_usuario_ai, p_conexion, true);
+           
+            
+            ELSE
+               --  Si NO  se contabiliza nacionalmente
+               v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,v_registros.codigo_plantilla_comprobante,p_id_usuario,p_id_usuario_ai,p_usuario_ai, p_conexion);
+            END IF;
+           
            
              --  actualiza el id_comprobante en el registro del plan de pago
             
-            update tes.tplan_pago set
-              id_int_comprobante = v_id_int_comprobante
-            where id_plan_pago = v_registros.id_plan_pago;
+              update tes.tplan_pago set
+                id_int_comprobante = v_id_int_comprobante
+              where id_plan_pago = v_registros.id_plan_pago;
              
              
              -- actualiza estado en la solicitud
