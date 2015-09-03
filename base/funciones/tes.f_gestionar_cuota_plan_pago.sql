@@ -473,9 +473,9 @@ BEGIN
                 from tes.tfinalidad fin
                 where fin.nombre_finalidad ilike 'proveedores';
                 
-                if(v_registros.prioridad_conta =0 and v_registros.prioridad_libro != 0)then                        		
+                if(v_registros.prioridad_conta in (0,1) and v_registros.prioridad_libro not in (0,1))then                        		
                     v_respuesta_libro_bancos = tes.f_generar_deposito_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','endesis');	
-                elseif(v_registros.prioridad_conta!=0 and v_registros.prioridad_libro!=0)then	
+                elseif(v_registros.prioridad_conta not in (0,1) and v_registros.prioridad_libro not in (0,1))then	
                     v_respuesta_libro_bancos = tes.f_generar_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','endesis');
                 end if;
                        
