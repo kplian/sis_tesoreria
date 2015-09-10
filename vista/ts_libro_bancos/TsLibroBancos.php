@@ -1089,7 +1089,25 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		this.ocultarComponente(this.cmpNroCheque);
 		this.ocultarComponente(this.cmpImporteDeposito);
 		this.ocultarComponente(this.cmpImporteCheque);
-		this.ocultarComponente(this.cmpIdLibroBancosFk);					
+		this.ocultarComponente(this.cmpIdLibroBancosFk);	
+
+		this.cmpNroCheque.on('focus',function(componente){
+
+				var cta_bancaria = this.cmpIdCuentaBancaria.getValue();
+
+				Ext.Ajax.request({
+					url:'../../sis_tesoreria/control/TsLibroBancos/listarTsLibroBancos',
+					params:{start:0, limit:this.tam_pag, m_id_cuenta_bancaria:cta_bancaria,m_nro_cheque:'si'},
+					success: function (resp){
+						var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+						this.cmpNroCheque.setValue(parseInt(reg.datos[0].nro_cheque)+1);
+					},
+					failure: this.conexionFailure,
+					timeout:this.timeout,
+					scope:this
+				});
+				
+			},this);
 		
 		this.cmpTipo.on('select',function(com,dat){
 		

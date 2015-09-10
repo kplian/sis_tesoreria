@@ -1219,3 +1219,27 @@ select pxp.f_insert_testructura_gui ('REPPP', 'REPOP');
 
 
 
+/***********************************I-DAT-RAC-TES-0-08/09/2015*****************************************/
+
+/* Data for the 'pxp.variable_global' table  (Records 1 - 6) */
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES (E'tes_tipo_documento_especial', E'PE', E'codigo de documento para pagos especial');
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES (E'tes_codigo_macro_especial', E'TES-PD', E'codigo de proceso macro en WF para pagos especiales');
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES (E'tes_tipo_documento_pago_unico', E'PU', E'codigo de documento para pagos unicos');
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES (E'tes_codigo_macro_pago_unico', E'PU', E'codigo de proceso macro en WF para pagos unicos\r\ncodigo de proceso macro en WF para pagos unicos');
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES (E'tes_tipo_documento_pago_directo', E'PGD', E'codigo de documento para pagos directos');
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES (E'tes_codigo_macro_pago_directo', E'TES-PD', E'codigo de proceso macro en WF para pagos directos');
+
+
+/***********************************F-DAT-RAC-TES-0-08/09/2015*****************************************/

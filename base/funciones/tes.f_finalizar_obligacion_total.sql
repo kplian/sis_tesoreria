@@ -1,5 +1,7 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_finalizar_obligacion_total (
-  p_id_obligacion integer,
+  p_id_obligacion_pago integer,
   p_id_usuario integer,
   p_id_usuario_ai integer,
   p_nombre_usuario_ai varchar,
@@ -39,7 +41,7 @@ DECLARE
     v_obs 					varchar;
     v_resp_fin 				varchar[];
     v_preguntar				varchar;
-    v_id_funcionario_estado	integer;
+    v_id_funcionario_estado integer;
 BEGIN
 	v_nombre_funcion = 'tes.f_finalizar_obligacion_total';
        --recupera parametros
@@ -79,7 +81,7 @@ BEGIN
                 v_fecha_op
              from tes.tobligacion_pago op
              left join param.vproveedor pr  on pr.id_proveedor = op.id_proveedor
-             where op.id_obligacion_pago = p_id_obligacion; 
+             where op.id_obligacion_pago = p_id_obligacion_pago; 
              
              -- VALIDACIONES que se finalicen solo boligaciones en pago
              
@@ -132,7 +134,7 @@ BEGIN
                fecha_mod = now(),
                id_usuario_ai = p_id_usuario_ai,
                usuario_ai = p_nombre_usuario_ai
-             where id_obligacion_pago  = p_id_obligacion;
+             where id_obligacion_pago  = p_id_obligacion_pago;
         
           
             ----------------------------------------------------------------------------------------
@@ -148,7 +150,7 @@ BEGIN
               
                --llamar a la funcion de finalizacion de obligacion
                  
-                 v_resp_fin = tes.f_finalizar_obligacion(p_id_obligacion, 
+                 v_resp_fin = tes.f_finalizar_obligacion(p_id_obligacion_pago, 
                   										 p_id_usuario,
                                                          p_id_usuario_ai,
                                                          p_nombre_usuario_ai,
@@ -168,7 +170,7 @@ BEGIN
             
             END IF;
             
-            v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',p_id_obligacion::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',p_id_obligacion_pago::varchar);
             
               
             --Devuelve la respuesta

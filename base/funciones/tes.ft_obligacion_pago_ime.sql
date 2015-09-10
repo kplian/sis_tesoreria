@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -554,6 +556,8 @@ BEGIN
 
 		begin
         
+        
+             --raise exception 'test %,%',v_parametros.id_obligacion,v_parametros.forzar_fin;
             v_resp = tes.f_finalizar_obligacion_total(v_parametros.id_obligacion,p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_parametros.forzar_fin);
                          
             --Devuelve la respuesta
