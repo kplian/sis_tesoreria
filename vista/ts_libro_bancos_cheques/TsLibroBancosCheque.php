@@ -218,7 +218,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-				maxLength:200
+				maxLength:500
 			},
 				type:'TextArea',
 				filters:{pfiltro:'lban.observaciones',type:'string'},
