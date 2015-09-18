@@ -1601,14 +1601,22 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             if(this.nombreEstadoVista == 'vbconta'){
             	 rec.data.check_fisico = 'si';
             }
+            
+            
             var tmp = {};
             tmp = Ext.apply(tmp, rec.data);
             rec.data.lblDocProcCf = 'Solo doc de Pago';
      		rec.data.lblDocProcSf = 'Todo del Trámite';
-     		rec.data.todos_documentos ='no'; 
+     		rec.data.todos_documentos ='si'; 
+     		if(rec.data.estado == 'vbgerente'){
+            	 rec.data.esconder_toogle = 'si';
+            }
+            rec.data.tipo = 'plan_pago'; 
      		rec.data.tmp = tmp;
      		
-     		rec.data.tipo = 'plan_pago'; 
+     		
+     		
+     		
              
             Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
                     'Chequear documento del WF',
@@ -1619,7 +1627,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                     rec.data,
                     this.idContenedor,
                     'DocumentoWf'
-        )
+          );
     },
     
     loadPagosRelacionados:  function() {
@@ -2197,7 +2205,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             
             this.wDEPTO.show();
             this.cmpDeptoConta.reset();
-            Phx.CP.setValueCombo(this.cmpDeptoConta,data.id_depto_conta_pp,data.desc_depto_conta_pp )
+            //Phx.CP.setValueCombo(this.cmpDeptoConta, data.id_depto_conta_pp, data.desc_depto_conta_pp );
+            this.cmpDeptoConta.store.baseParams = Ext.apply(this.cmpDeptoConta.store.baseParams,{id_depto_origen: data.id_depto_lb} )
             this.cmpDeptoConta.modificado = true;
              
              
