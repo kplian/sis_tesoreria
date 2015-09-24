@@ -1594,6 +1594,35 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         this.Cmp.monto_ejecutar_total_mo.setValue(eje>0?eje:0);
      }, 
     
+     onButtonEdit:function(){
+         this.accionFormulario = 'EDIT';
+         var data = this.getSelectedData();
+         //deshabilita el cambio del tipo de pago
+         this.Cmp.tipo.disable();
+         this.Cmp.fecha_tentativa.enable();
+         this.Cmp.tipo.store.loadData(this.arrayStore.TODOS) ;
+         this.ocultarGrupo(2); //ocultar el grupo de ajustes
+         //segun el tipo define los campo visibles y no visibles
+         console.log('tipo....', data.tipo)
+         this.setTipoPago[data.tipo](this, data);
+         
+         this.tmp_porc_monto_excento_var = undefined;
+         
+         if(data.tipo == 'pagado'){
+             this.accionFormulario = 'EDIT_PAGO';
+             this.porc_ret_gar = data.porc_monto_retgar;
+         }
+         
+         if(data.tipo == 'ant_aplicado' || data.tipo == 'pagado'){
+         	this.tmp_porc_monto_excento_var = data.porc_monto_excento_var;
+         }
+         else{
+         	this.tmp_porc_monto_excento_var = undefined;
+         }
+        
+        Phx.vista.PlanPago.superclass.onButtonEdit.call(this); 
+    },
+    
      loadCheckDocumentosSolWf:function() {
             var rec=this.sm.getSelected();
             rec.data.nombreVista = this.nombreVista;
@@ -1605,26 +1634,24 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             
             var tmp = {};
             tmp = Ext.apply(tmp, rec.data);
-            rec.data.lblDocProcCf = 'Solo doc de Pago';
-     		rec.data.lblDocProcSf = 'Todo del Trámite';
-     		rec.data.todos_documentos ='si'; 
+           
      		if(rec.data.estado == 'vbgerente'){
             	 rec.data.esconder_toogle = 'si';
             }
-            rec.data.tipo = 'plan_pago'; 
-     		rec.data.tmp = tmp;
-     		
-     		
-     		
-     		
-             
-            Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
+            
+     		Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
                     'Chequear documento del WF',
                     {
                         width:'90%',
                         height:500
                     },
-                    rec.data,
+                    Ext.apply(tmp,{
+                    	 tipo: 'plan_pago',
+                    	 lblDocProcCf: 'Solo doc de Pago',
+                    	 lblDocProcSf: 'Todo del Trámite',
+                    	 todos_documentos: 'si'
+                    	 
+                    	 }),
                     this.idContenedor,
                     'DocumentoWf'
           );
@@ -2212,33 +2239,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
              
      },
     
-    onButtonEdit:function(){
-         this.accionFormulario = 'EDIT';
-         var data = this.getSelectedData();
-         //deshabilita el cambio del tipo de pago
-         this.Cmp.tipo.disable();
-         this.Cmp.fecha_tentativa.enable();
-         this.Cmp.tipo.store.loadData(this.arrayStore.TODOS) ;
-         this.ocultarGrupo(2); //ocultar el grupo de ajustes
-         //segun el tipo define los campo visibles y no visibles
-         this.setTipoPago[data.tipo](this, data);
-         
-         this.tmp_porc_monto_excento_var = undefined;
-         
-         if(data.tipo == 'pagado'){
-             this.accionFormulario = 'EDIT_PAGO';
-             this.porc_ret_gar = data.porc_monto_retgar;
-         }
-         
-         if(data.tipo == 'ant_aplicado' || data.tipo == 'pagado'){
-         	this.tmp_porc_monto_excento_var = data.porc_monto_excento_var;
-         }
-         else{
-         	this.tmp_porc_monto_excento_var = undefined;
-         }
-        
-        Phx.vista.PlanPago.superclass.onButtonEdit.call(this); 
-    },
+    
       
     
 	 onOpenObs:function() {
