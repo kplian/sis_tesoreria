@@ -107,14 +107,16 @@ BEGIN
               
         
                  IF (p_hstore->'tipo_obligacion')::varchar  = 'pago_directo'   THEN
-                      v_tipo_documento = 'PGD';
-                      v_codigo_proceso_macro = 'TES-PD'; 
+                      v_tipo_documento = pxp.f_get_variable_global('tes_tipo_documento_pago_directo'); --'PGD';
+                      v_codigo_proceso_macro = pxp.f_get_variable_global('tes_codigo_macro_pago_directo');--'TES-PD'; 
+                      
+                      
                  ELSEIF(p_hstore->'tipo_obligacion')::varchar  = 'pago_unico'   THEN
-                      v_tipo_documento = 'PU';
-                      v_codigo_proceso_macro = 'PU'; 
+                      v_tipo_documento = pxp.f_get_variable_global('tes_tipo_documento_pago_unico');--'PU';
+                      v_codigo_proceso_macro = pxp.f_get_variable_global('tes_codigo_macro_pago_unico');--'PU'; 
                  ELSE
-                      v_tipo_documento = 'PE';
-                      v_codigo_proceso_macro = 'TES-PD'; 
+                      v_tipo_documento =  pxp.f_get_variable_global('tes_tipo_documento_especial'); --'PE';
+                      v_codigo_proceso_macro = pxp.f_get_variable_global('tes_codigo_macro_especial');--'TES-PD'; 
                  END IF;
                 
                 --obtener el correlativo segun el tipo de documento

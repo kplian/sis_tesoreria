@@ -89,7 +89,7 @@ BEGIN
            inner join tes.ttipo_plan_pago tpp on tpp.codigo = pp.tipo and tpp.estado_reg = 'activo'
            where pp.id_plan_pago = p_id_plan_pago;
         
-        
+      
                     
           -- verifica el depto de conta, si no tiene lo modifica
           
@@ -109,6 +109,8 @@ BEGIN
              raise exception 'no eligio un depto de contabilidad';
              
              END IF;
+             
+             v_registros.id_depto_conta =  p_id_depto_conta;
           
           ELSE
           
@@ -305,10 +307,14 @@ BEGIN
             from param.tdepto d
             where d.id_depto =  v_registros.id_depto_conta; 
             
+           
+            
             --si esta habilita la sincronizacion internacional y depto de conta es internacional
             v_sincronizar_internacional = pxp.f_get_variable_global('sincronizar');
             v_prioridad_depto_conta_inter = pxp.f_get_variable_global('conta_prioridad_depto_internacional');
             
+            
+           
           
             IF v_sincronizar_internacional = 'true' and (v_prioridad_depto_conta::varchar = v_prioridad_depto_conta_inter::varchar) THEN
              -- recupera la estacion destino
