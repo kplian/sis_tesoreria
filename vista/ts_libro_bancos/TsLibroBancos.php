@@ -110,6 +110,16 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Vista Previa Cheque</b><br/>Vista Previa Cheque'
 			}
 		);
+		
+		this.addButton('btnChequesAsociados',
+		{
+			text: 'Cheques Asociados',
+			iconCls: 'bmoney',
+			disabled: true,
+			handler: this.onChequesAsociados,
+			tooltip: '<b>Cheques Asociados</b><br/>Cheques Asociados'
+		}
+		);
 	},
 			
 	Atributos:[
@@ -1033,6 +1043,21 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		}
 	},
 	
+	onChequesAsociados:function() {
+			var rec=this.sm.getSelected();
+			rec.data.nombreVista = 'ChequesAsociados';
+			Phx.CP.loadWindows('../../../sis_tesoreria/vista/ts_libro_bancos_cheques_asociados/TsLibroBancosChequesAsociados.php',
+					'Cheques Asociados',
+					{
+						width:'90%',
+						height:500
+					},
+					rec.data,
+					this.idContenedor,
+					'TsLibroBancosCheque'
+		)
+	},
+		
 	vistaPrevia : function(){
 		var NumSelect=this.sm.getCount();
 		
@@ -1164,8 +1189,8 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 	
 	onReloadPage:function(m){
 		this.maestro=m;			
-		this.cmpIdFinalidad.store.baseParams.id_cuenta_bancaria =this.maestro.id_cuenta_bancaria;		
-		this.store.baseParams={id_cuenta_bancaria:this.maestro.id_cuenta_bancaria};
+		this.cmpIdFinalidad.store.baseParams.id_cuenta_bancaria =this.maestro.id_cuenta_bancaria;console.log(this.cls);		
+		this.store.baseParams={id_cuenta_bancaria:this.maestro.id_cuenta_bancaria, mycls:this.cls};
 		this.load({params:{start:0, limit:this.tam_pag}});			
 	}
 })

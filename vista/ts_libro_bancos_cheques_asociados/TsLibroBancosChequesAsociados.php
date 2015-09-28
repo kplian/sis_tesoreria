@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  *@package pXP
  *@file TsLibroBancosCheque.php
@@ -18,75 +18,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.iniciarEventos();
             this.grid.getTopToolbar().disable();
             this.grid.getBottomToolbar().disable();            
-			
-			this.addButton('btnClonar',
-				{
-					text: 'Clonar',
-					iconCls: 'bdocuments',
-					disabled: false,
-					handler: this.clonar,
-					tooltip: '<b>Clonar</b><br/>Clonar Registro'
-				}
-			);
-			
-			this.addButton('btnCheque',
-				{
-					text: 'Cheque 1',
-					iconCls: 'bprintcheck',
-					disabled: false,
-					handler: this.imprimirCheque,
-					tooltip: '<b>Cheque</b><br/>Imprimmir cheque en tamaño antiguo'
-				}
-			);
 						
-			this.addButton('btnCheque2',
-				{
-					text: 'Cheque 2',
-					iconCls: 'bprintcheck',
-					disabled: false,
-					handler: this.imprimirCheque2,
-					tooltip: '<b>Cheque</b><br/>Imprimmir cheque en tamaño nuevo'
-				}
-			);
-			
-			this.addButton('btnMemoramdum',
-				{
-					text: 'Memo',
-					iconCls: 'bword',
-					disabled: false,
-					handler: this.memoramdum,
-					tooltip: '<b>Memo</b><br/>Imprimir memoramdum de asignacion de fondo'
-				}
-			);
-			
-			this.addButton('btnNotificacion',
-				{
-					text: 'Notificacion',
-					iconCls: 'bsendmail',
-					disabled: false,
-					handler: this.enviarNotificacion,
-					tooltip: '<b>Notificacion</b><br/>Envia email de notificacion al solicitante'
-				}
-			);
-			
-			this.addButton('ant_estado',{
-              argument: {estado: 'anterior'},
-              text:'Anterior',
-              iconCls: 'batras',
-              disabled:true,
-              handler:this.antEstado,
-              tooltip: '<b>Pasar al Anterior Estado</b>'
-			  }
-			);
-			
-			this.addButton('fin_registro',
-				{	text:'Siguiente',
-					iconCls: 'badelante',
-					disabled:true,
-					handler:this.sigEstado,
-					tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
-				}
-			);
 			this.addButton('btnChequeoDocumentosWf',
 				{
 					text: 'Documentos',
@@ -98,27 +30,22 @@ header("content-type: text/javascript; charset=UTF-8");
 			);
 			
 			this.addButton('diagrama_gantt',{text:'',iconCls: 'bgantt',disabled:true,handler:this.diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
+						
+			//this.Cmp.tipo.on('select', this.onTipoSelect, this);
 			
-			this.addButton('btnVistaPrevia',
-			{
-				text: 'Cheque Vista Previa',
-				iconCls: 'bprintcheck',
-				disabled: true,
-				handler: this.vistaPrevia,
-				tooltip: '<b>Vista Previa Cheque</b><br/>Vista Previa Cheque'
+			if(this.nombreVista=='ChequesAsociados'){
+				this.store.baseParams={
+						id_cuenta_bancaria : this.id_cuenta_bancaria,
+						id_libro_bancos:this.id_libro_bancos,
+						mycls:this.mycls};
+				this.load({
+					params : {
+						start : 0,
+						limit : 50
+					}
+				});   
 			}
-			);
 			
-			this.addButton('btnChequesAsociados',
-			{
-				text: 'Cheques Asociados',
-				iconCls: 'bmoney',
-				disabled: true,
-				handler: this.onChequesAsociados,
-				tooltip: '<b>Cheques Asociados</b><br/>Cheques Asociados'
-			}
-			);
-			//this.Cmp.tipo.on('select', this.onTipoSelect, this);						
         },
         Atributos:[
 		{
@@ -187,7 +114,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				type:'DateField',
 				filters:{pfiltro:'lban.fecha',type:'date'},
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:true
 		},
 		{
@@ -196,7 +123,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				fieldLabel: 'A Favor',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 125,
+				gwidth: 145,
 				maxLength:100
 			},
 				type:'TextField',
@@ -212,7 +139,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				fieldLabel: 'Detalle',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 125,
+				gwidth: 145,
 				maxLength:400
 			},
 				type:'TextArea',
@@ -227,7 +154,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				fieldLabel: 'Observaciones',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 170,
 				maxLength:500
 			},
 				type:'TextArea',
@@ -248,7 +175,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				type:'TextField',
 				filters:{pfiltro:'lban.nro_liquidacion',type:'string'},
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:true
 		},
 		{
@@ -327,7 +254,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				filters:{pfiltro:'lban.nro_cheque',type:'numeric'},
 				bottom_filter: true,
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:true
 		},
 		{
@@ -358,7 +285,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				filters:{pfiltro:'lban.importe_cheque',type:'numeric'},
 				bottom_filter: true,
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:true
 		},
 		{
@@ -372,7 +299,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			},
 				type:'NumberField',
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:false
 		},
 		{
@@ -396,7 +323,7 @@ header("content-type: text/javascript; charset=UTF-8");
 					  pfiltro:'lban.origen',
 					 options: ['CBB','SRZ','TJA','SRE','CIJ','TDD','UYU','ENDESIS']
 				},
-			grid:true,
+			grid:false,
 			form:true
 		},
 		{
@@ -411,7 +338,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				type:'TextField',
 				filters:{pfiltro:'lban.estado',type:'string'},
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:false
 		},	
 		{
@@ -475,7 +402,7 @@ header("content-type: text/javascript; charset=UTF-8");
                         pfiltro:'nombre_finalidad',
                         type:'string'
                     },*/
-            grid:true,
+            grid:false,
             form:true
         },	
 		{
@@ -548,7 +475,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				type:'TextField',
 				filters:{pfiltro:'lban.estado_reg',type:'string'},
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:false
 		},
 		{
@@ -662,7 +589,10 @@ header("content-type: text/javascript; charset=UTF-8");
             field : 'fecha DESC , nro_cheque',
             direction : 'DESC'
         },
-        bdel : true,
+		bnew : false,
+		bedit : false,
+		bacr : false,
+        bdel : false,
         bsave : false,
 		fheight:'80%',
 		
@@ -763,225 +693,25 @@ header("content-type: text/javascript; charset=UTF-8");
 			  
 			  if(data['id_proceso_wf'] !== null){
 			
-			  if(data['tipo'] == 'cheque'){				  
-				  this.getBoton('btnChequeoDocumentosWf').enable();
-				  this.getBoton('diagrama_gantt').enable();
-				  if(data['estado']=='borrador'){
-					this.getBoton('btnMemoramdum').disable();
-					this.getBoton('btnNotificacion').disable();				  
-					this.getBoton('btnCheque').disable();
-					this.getBoton('btnCheque2').disable();				
-					this.getBoton('btnVistaPrevia').disable();
-					this.getBoton('edit').enable();
-					this.getBoton('del').enable();
-					this.getBoton('ant_estado').disable();
-					this.getBoton('fin_registro').enable();					
-				  }else{
-					this.getBoton('del').disable();
-					this.getBoton('btnVistaPrevia').enable();
-					if(data['estado']=='cobrado'||data['estado']=='reingresado'||data['estado']=='anulado'||data['estado']=='vbpagosindocumento'){
-						this.getBoton('edit').disable();							
-						this.getBoton('btnCheque').disable();
-						this.getBoton('btnCheque2').disable();						
-						this.getBoton('ant_estado').enable();
-						this.getBoton('fin_registro').disable();
-					}else{
-						this.getBoton('edit').enable();						
-						this.getBoton('btnCheque').enable();
-						this.getBoton('btnCheque2').enable();						
-						this.getBoton('ant_estado').enable();
-						this.getBoton('fin_registro').enable();
-					}  
-					if(data['sistema_origen']=='FONDOS_AVANCE'){						
-						this.getBoton('btnMemoramdum').enable();
-						if(data['notificado']=='no')
-							this.getBoton('btnNotificacion').enable();
-						else
-							this.getBoton('btnNotificacion').disable();
-					}else{
-						this.getBoton('btnMemoramdum').disable();
-						this.getBoton('btnNotificacion').disable();
-					}
+				  if(data['tipo'] == 'cheque'){				  
+					  this.getBoton('btnChequeoDocumentosWf').enable();
+					  this.getBoton('diagrama_gantt').enable();
+									  
+				  }else{;
+					  this.getBoton('btnChequeoDocumentosWf').disable();				  
 				  }
-				  
+			  
 			  }else{
-				  this.getBoton('btnMemoramdum').disable();
-				  this.getBoton('btnNotificacion').disable();				  
-				  this.getBoton('btnCheque').disable();
-				  this.getBoton('btnCheque2').disable();				
-				  this.getBoton('btnVistaPrevia').disable();
-				  this.getBoton('btnChequeoDocumentosWf').disable();
-				  if(data['estado']=='borrador'){
-					this.getBoton('edit').enable();
-					this.getBoton('del').enable();
-					this.getBoton('ant_estado').disable();
-					this.getBoton('fin_registro').enable();
-				  }else{
-					this.getBoton('del').disable();
-					this.getBoton('fin_registro').disable();
-					if(data['estado']=='transferido'){
-						this.getBoton('edit').disable();
-						this.getBoton('ant_estado').disable();
-					}else{
-						this.getBoton('edit').enable();
-						this.getBoton('ant_estado').enable();
-					}
-				  }
+					this.getBoton('btnChequeoDocumentosWf').disable();
+					this.getBoton('diagrama_gantt').disable();
 			  }
 			  
-		  }else{
-				this.getBoton('btnChequeoDocumentosWf').disable();
-				this.getBoton('fin_registro').disable();
-				this.getBoton('btnMemoramdum').disable();
-				this.getBoton('btnNotificacion').disable();
-				this.getBoton('ant_estado').disable();
-				this.getBoton('btnCheque').disable();
-				this.getBoton('btnCheque2').disable();				
-				this.getBoton('btnVistaPrevia').disable();
-				this.getBoton('edit').disable();
-				this.getBoton('del').disable();
+		  if(this.nombreVista=='ChequesAsociados'){
+			this.getBoton('btnChequeoDocumentosWf').enable();
+			this.getBoton('diagrama_gantt').enable();			
 		  }
 		 },
-		
-		clonar:function(){
-			var data = this.getSelectedData();
-			this.onButtonNew();
-			
-			this.cmpTipo.setValue(data.tipo);
-			this.cmpAFavor.setValue(data.a_favor);
-			this.cmpObservaciones.setValue(data.observaciones);
-			this.cmpDetalle.setValue(data.detalle);
-			this.cmpNroLiquidacion.setValue(data.nro_liquidacion);
-			this.cmpIdLibroBancosFk.setValue(data.id_libro_bancos_fk);
-			this.cmpIdFinalidad.setValue(data.id_finalidad);
-			
-			var record = this.cmpTipo.getStore();
-			record.data.variable = data.tipo;			
-			this.cmpTipo.fireEvent('select',this,record);
-			
-		},
-		
-		memoramdum : function(){
-			var data = this.getSelectedData();
-			var NumSelect=this.sm.getCount();
-			
-			if(NumSelect != 0)
-			{		
-				var data='id='+ data.id_libro_bancos;  
-				console.log(data);
-				window.open('http://sms.obairlines.bo/ReportesPXP/Home/MemorandumFondosEnAvance?'+data);
-			}
-			else
-			{
-				Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
-			}
-		},	
-			
-		imprimirCheque : function(){
-		
-			var data=this.sm.getSelected().data;
-			Phx.CP.loadingShow();
-			Ext.Ajax.request({
-				url:'../../sis_tesoreria/control/TsLibroBancos/imprimirCheque',
-				params:{
-					'a_favor':data.a_favor , 
-					'importe_cheque' : data.importe_cheque ,
-					'fecha_cheque_literal' : data.fecha_cheque_literal,
-					'nombre_regional' : data.nombre_regional
-				},
-				success:this.successExport,
-				failure: this.conexionFailure,
-				timeout:this.timeout,
-				scope:this
-			});	
-		},
-		
-		imprimirCheque2 : function(){
-		
-			var data=this.sm.getSelected().data;
-			Phx.CP.loadingShow();
-			Ext.Ajax.request({
-				url:'../../sis_tesoreria/control/TsLibroBancos/imprimirCheque2',
-				params:{
-					'a_favor':data.a_favor , 
-					'importe_cheque' : data.importe_cheque ,
-					'fecha_cheque_literal' : data.fecha_cheque_literal,
-					'nombre_regional' : data.nombre_regional
-				},
-				success:this.successExport,
-				failure: this.conexionFailure,
-				timeout:this.timeout,
-				scope:this
-			});	
-		},
-		
-		vistaPrevia : function(){
-			var NumSelect=this.sm.getCount();
-			
-			if(NumSelect!=0)
-			{
-				var data=this.sm.getSelected().data;
-				Phx.CP.loadingShow();
-				Ext.Ajax.request({
-				url:'../../sis_tesoreria/control/TsLibroBancos/vistaPrevia',
-				params:{
-					'a_favor':data.a_favor , 
-					'importe_cheque' : data.importe_cheque ,
-					'fecha_cheque_literal' : data.fecha_cheque_literal,
-					'nombre_regional' : data.nombre_regional
-				},
-				success:this.successExport,
-				failure: this.conexionFailure,
-				timeout:this.timeout,
-				scope:this
-				});
-			}
-			else
-			{
-				Ext.MessageBox.alert('Estado', 'Antes debe seleccionar un item.');
-			}
-		},
-		
-		antEstado:function(res,eve)
-		{                   
-			var d= this.sm.getSelected().data;
-			Phx.CP.loadingShow();
-			var operacion = 'cambiar';
-			operacion=  res.argument.estado == 'inicio'?'inicio':operacion; 
-			
-			Ext.Ajax.request({
-				url:'../../sis_tesoreria/control/TsLibroBancos/anteriorEstadoLibroBancos',
-				params:{id_libro_bancos:d.id_libro_bancos,
-                        id_proceso_wf:d.id_proceso_wf,
-                        id_estado_wf:d.id_estado_wf, 				
-						operacion: operacion},
-				success:this.successSinc,
-				failure: this.conexionFailure,
-				timeout:this.timeout,
-				scope:this
-			});     
-		},
-		
-		enviarNotificacion:function(res,eve)
-		{                   
-			var d= this.sm.getSelected().data;
-			Phx.CP.loadingShow();
-			
-			Ext.Ajax.request({
-				url:'../../sis_tesoreria/control/TsLibroBancos/enviarNotificacion',
-				params:{id_libro_bancos:d.id_libro_bancos,
-						nro_cheque: d.nro_cheque,
-						a_favor: d.a_favor,
-						detalle: d.detalle,
-						importe_cheque: d.importe_cheque,
-						operacion: 'notificar'},
-				success:this.successSinc,
-				failure: this.conexionFailure,
-				timeout:this.timeout,
-				scope:this
-			});     
-		},
-		
+					
 		successSinc:function(resp){
             Phx.CP.loadingHide();
             var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
@@ -991,55 +721,8 @@ header("content-type: text/javascript; charset=UTF-8");
              }else{
                 alert(reg.ROOT.datos.mensaje)
             }
-		},
-		  
-		sigEstado:function(){                   
-		  var rec=this.sm.getSelected();
-		  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
-									'Estado de Wf',
-									{
-										modal:true,
-										width:700,
-										height:450
-									}, {data:{
-										   id_estado_wf:rec.data.id_estado_wf,
-										   id_proceso_wf:rec.data.id_proceso_wf,
-										   fecha_ini:rec.data.fecha_tentativa
-										  
-										}}, this.idContenedor,'FormEstadoWf',
-									{
-										config:[{
-												  event:'beforesave',
-												  delegate: this.onSaveWizard												  
-												}],
-										
-										scope:this
-									 });        
-				   
-		 },	   
-		
-		onSaveWizard:function(wizard,resp){
-			Phx.CP.loadingShow();
+		},   
 			
-			Ext.Ajax.request({
-				url:'../../sis_tesoreria/control/TsLibroBancos/siguienteEstadoLibroBancos',
-				params:{
-						
-					id_proceso_wf_act:  resp.id_proceso_wf_act,
-					id_estado_wf_act:   resp.id_estado_wf_act,
-					id_tipo_estado:     resp.id_tipo_estado,
-					id_funcionario_wf:  resp.id_funcionario_wf,
-					id_depto_wf:        resp.id_depto_wf,
-					obs:                resp.obs,
-					json_procesos:      Ext.util.JSON.encode(resp.procesos)
-					},
-				success:this.successWizard,
-				failure: this.conexionFailure,
-				argument:{wizard:wizard},
-				timeout:this.timeout,
-				scope:this
-			});
-		},
 		
 		successWizard:function(resp){
 			Phx.CP.loadingHide();
@@ -1061,22 +744,7 @@ header("content-type: text/javascript; charset=UTF-8");
 						this.idContenedor,
 						'DocumentoWf'
 			)
-		},
-		
-		onChequesAsociados:function() {
-				var rec=this.sm.getSelected();
-				rec.data.nombreVista = 'ChequesAsociados';
-				Phx.CP.loadWindows('../../../sis_tesoreria/vista/ts_libro_bancos_cheques_asociados/TsLibroBancosChequesAsociados.php',
-						'Cheques Asociados',
-						{
-							width:'90%',
-							height:500
-						},
-						rec.data,
-						this.idContenedor,
-						'TsLibroBancosCheque'
-			)
-		},
+		},	
 		
 		diagramGantt:function (){         
             var data=this.sm.getSelected().data.id_proceso_wf;
@@ -1094,52 +762,13 @@ header("content-type: text/javascript; charset=UTF-8");
 		loadValoresIniciales:function(){
 			Phx.vista.TsLibroBancosCheque.superclass.loadValoresIniciales.call(this);
 			this.Cmp.id_cuenta_bancaria.setValue(this.maestro.id_cuenta_bancaria);		
-		},
-		
-		onButtonNew:function(){
-			Phx.vista.TsLibroBancosCheque.superclass.onButtonNew.call(this); 	    
-			this.cmpIdLibroBancosFk.setValue(this.maestro.id_libro_bancos);
-			this.cmpIdFinalidad.setValue(this.maestro.id_finalidad);
-			this.cmpDetalle.setValue(this.maestro.detalle);
-			this.cmpObservaciones.setValue(this.maestro.observaciones);
-			this.cmpNroLiquidacion.setValue(this.maestro.nro_liquidacion);
-			this.cmpNroComprobante.setValue(this.maestro.nro_comprobante);
-			this.cmpDepto.enable();
-			this.cmpFecha.enable();
-			this.cmpTipo.enable();
-				
-			var record = this.cmpTipo.getStore();
-			record.data.variable = 'cheque';			
-			this.cmpTipo.fireEvent('select',this,record);
-		},		
+		},	
 		
 		successSave: function(resp) {		   
 		   Phx.vista.TsLibroBancosCheque.superclass.successSave.call(this,resp);        
 		   Phx.CP.getPagina(this.idContenedorPadre).reload();  
 		},
-		
-		onButtonEdit:function(){
-			Phx.vista.TsLibroBancosCheque.superclass.onButtonEdit.call(this);
-			this.cmpTipo.disable();			
-			var data = this.getSelectedData();
-			
-			if(data.tipo=='cheque')
-				this.mostrarComponente(this.cmpNroCheque);
-			else
-				this.ocultarComponente(this.cmpNroCheque);
-			if(data.estado=='impreso' || data.estado=='entregado' || data.estado=='cobrado'){
-				this.cmpDepto.disable();
-				this.cmpFecha.disable();
-				this.cmpImporteCheque.disable();
-				this.cmpNroCheque.disable();
-			}else{
-				this.cmpDepto.enable();
-				this.cmpFecha.enable();
-				this.cmpImporteCheque.enable();
-				this.cmpNroCheque.enable();
-			}
-		},
-		
+				
         onReloadPage : function(m) {
             this.maestro = m;
 			this.store.baseParams={id_libro_bancos:this.maestro.id_libro_bancos, mycls:this.cls};

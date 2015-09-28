@@ -60,6 +60,7 @@ BEGIN
 						ctaban.fecha_alta,
 						ctaban.id_institucion,
                         inst.nombre as nombre_institucion,
+                        inst.doc_id,
 						ctaban.fecha_reg,
 						ctaban.id_usuario_reg,
 						ctaban.fecha_mod,

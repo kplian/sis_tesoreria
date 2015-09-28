@@ -38,6 +38,10 @@ class ACTTsLibroBancos extends ACTbase{
 			$this->objParam->addFiltro("tipo in (''deposito'',''transf_interna_haber'')");
 		}
 		
+		if($this->objParam->getParametro('mycls')=='TsLibroBancos'){
+			$this->objParam->addFiltro("id_libro_bancos_fk is null");
+		}
+		
 		if($this->objParam->getParametro('m_nro_cheque')!=''){
 			$this->objParam->addFiltro("nro_cheque= (Select max (lb.nro_cheque)
 													From tes.tts_libro_bancos lb 
