@@ -7785,20 +7785,6 @@ ALTER TABLE tes.tcajero
     ON UPDATE NO ACTION
     NOT DEFERRABLE;
     
-ALTER TABLE tes.tsolicitud_efectivo
-  ADD CONSTRAINT tcaja__id_moneda FOREIGN KEY (id_moneda)
-    REFERENCES param.tmoneda(id_moneda)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-    
-ALTER TABLE tes.tcaja
-  ADD CONSTRAINT tcaja__id_moneda FOREIGN KEY (id_moneda)
-    REFERENCES param.tmoneda(id_moneda)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-    
 /***********************************F-DEP-JRR-10/08/2015****************************************/  
 
 

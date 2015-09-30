@@ -353,7 +353,7 @@ CREATE TABLE tes.tcaja (
 WITHOUT OIDS;
 /***********************************F-SCP-ECR-TES-0-20/12/2013***************************************/
 
-/***********************************I-SCP-ECR-TES-0-20/12/2013***************************************/
+/***********************************I-SCP-ECR-TES-2-20/12/2013***************************************/
 CREATE TABLE tes.tcajero (
   id_cajero SERIAL, 
   id_funcionario INTEGER NOT NULL, 
@@ -363,7 +363,7 @@ CREATE TABLE tes.tcajero (
   CONSTRAINT pk_tcajero__id_cajero PRIMARY KEY(id_cajero)
 ) INHERITS (pxp.tbase)
 WITHOUT OIDS;
-/***********************************F-SCP-ECR-TES-0-20/12/2013***************************************/
+/***********************************F-SCP-ECR-TES-2-20/12/2013***************************************/
 
 
 
@@ -1255,17 +1255,6 @@ ALTER TABLE tes.tobligacion_pago
 COMMENT ON COLUMN tes.tobligacion_pago.uo_ex
 IS 'cuando la uo que aprueba se selecciona de la tabla de excepcion queda marcado como si';
 /*****************************F-SCP-RAC-TES-0-12/06/2015*************/
-
-
-/*****************************I-SCP-RAC-TES-0-24/06/2015*************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  DROP CONSTRAINT chk_tobligacion_pago__estado RESTRICT;
-  
-/*****************************F-SCP-RAC-TES-0-24/06/2015*************/
-
 
 /*****************************I-SCP-RAC-TES-0-1/07/2015*************/
 
