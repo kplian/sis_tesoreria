@@ -59,6 +59,7 @@ DECLARE
 	 --gonzalo
      v_id_finalidad		integer;
      v_respuesta_libro_bancos varchar;
+     v_reg_cbte			record;
     
 BEGIN
 
@@ -68,6 +69,18 @@ BEGIN
 	v_nombre_funcion = 'tes.f_gestionar_cuota_pp_inter';
     
     
+    
+    
+    
+    select 
+     c.vbregional
+    into
+     v_reg_cbte
+    from conta.tint_comprobante c
+    where c.id_int_comprobante = p_id_int_comprobante;
+    
+    
+    IF v_reg_cbte.vbregional = 'no' THEN
     
     -- 1) con el id_comprobante identificar el plan de pago
    
@@ -221,17 +234,20 @@ BEGIN
      
                --todo
           
-			  --------------------------------------
-              --  Migra el comprobante a ENDESIS
-              -------------------------------------
-              --Si la sincronizacion esta habilitada
-              v_sincronizar = pxp.f_get_variable_global('sincronizar');
-              IF(v_sincronizar='true')THEN
-            	   -- si sincroniza locamente con endesis
-                   v_resp_int_endesis =  migra.f_migrar_cbte_endesis(p_id_int_comprobante, p_conexion);
-              END IF;
-              
-
+		/*	  
+    ELSE
+        --------------------------------------
+        --  Migra el comprobante a ENDESIS
+        -------------------------------------
+        --Si la sincronizacion esta habilitada
+        v_sincronizar = pxp.f_get_variable_global('sincronizar');
+        IF(v_sincronizar='true')THEN
+             -- si sincroniza locamente con endesis, marcando la bandera que proviene de regional internacional
+             v_resp_int_endesis =  migra.f_migrar_cbte_endesis(p_id_int_comprobante, p_conexion, 'si');
+        END IF;      
+    
+    */
+    END IF;
   
 RETURN  TRUE;
 

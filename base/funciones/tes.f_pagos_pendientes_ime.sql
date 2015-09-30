@@ -536,7 +536,7 @@ BEGIN
          					from tes.tplan_pago pp
 
                                 inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago 
-                                           and op.tipo_obligacion = 'adquisiciones' and ( op.total_pago * op.tipo_cambio_conv ) >= 20000 
+                                           and op.tipo_obligacion = 'adquisiciones' and ( op.total_pago * op.tipo_cambio_conv ) > 20000 
                                 inner join adq.tcotizacion cot on cot.id_obligacion_pago = op.id_obligacion_pago
                                 inner join param.vproveedor pro on pro.id_proveedor = op.id_proveedor
                                 inner join param.tmoneda mon on mon.id_moneda = op.id_moneda
