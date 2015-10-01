@@ -66,34 +66,37 @@ BEGIN
     -- 1) con el id_comprobante identificar el plan de pago
    
       select 
-      pp.id_plan_pago,
-      pp.id_estado_wf,
-      pp.id_proceso_wf,
-      pp.tipo,
-      pp.estado,
-      pp.id_plan_pago_fk,
-      pp.id_obligacion_pago,
-      pp.nro_cuota,
-      pp.id_plantilla,
-      pp.monto_ejecutar_total_mo,
-      pp.monto_no_pagado,
-      pp.liquido_pagable,
-     
-      op.id_depto ,
-      op.pago_variable,
-      pp.id_cuenta_bancaria ,
-      pp.nombre_pago,
-      pp.forma_pago,
-      pp.tipo_cambio,
-      pp.tipo_pago,
-      pp.fecha_tentativa,
-      pp.otros_descuentos,
-      pp.monto_retgar_mo,
-      op.numero
+          pp.id_plan_pago,
+          pp.id_estado_wf,
+          pp.id_proceso_wf,
+          pp.tipo,
+          pp.estado,
+          pp.id_plan_pago_fk,
+          pp.id_obligacion_pago,
+          pp.nro_cuota,
+          pp.id_plantilla,
+          pp.monto_ejecutar_total_mo,
+          pp.monto_no_pagado,
+          pp.liquido_pagable,
+         
+          op.id_depto ,
+          op.pago_variable,
+          pp.id_cuenta_bancaria ,
+          pp.nombre_pago,
+          pp.forma_pago,
+          pp.tipo_cambio,
+          pp.tipo_pago,
+          pp.fecha_tentativa,
+          pp.otros_descuentos,
+          pp.monto_retgar_mo,
+          op.numero,
+          c.temporal,
+          c.estado_reg as estadato_cbte
       into
-      v_registros
+          v_registros
       from  tes.tplan_pago pp
       inner join tes.tobligacion_pago  op on op.id_obligacion_pago = pp.id_obligacion_pago 
+      inner join conta.tint_comprobante  c on c.id_int_comprobante = pp.id_int_comprobante 
       where  pp.id_int_comprobante = p_id_int_comprobante; 
     
     
@@ -163,19 +166,22 @@ BEGIN
                usuario_ai = p_usuario_ai
              where pp.id_plan_pago = v_registros.id_plan_pago;
      
-     
-     
-             --cheque si tiene prorrateo en tesoria (modulo de obligacion de pagos)
-            for v_rec_cbte_trans in (select * 
-                                     from conta.tint_transaccion
-                                      where id_int_comprobante = p_id_int_comprobante) LOOP
-            
-                  update tes.tprorrateo p set
-                       id_int_transaccion = NULL
-                  where p.id_int_transaccion = v_rec_cbte_trans.id_int_transaccion;
+           -- solo si el estado del cbte es borrador y no es un comprobante temporal
+           -- desasociamos las transacciones del comprobante
            
-            END LOOP;
-     
+           
+            IF v_registros.estadato_cbte = 'borrador' and v_registros.temporal = 'no' then
+               --cheque si tiene prorrateo en tesoria (modulo de obligacion de pagos)
+              for v_rec_cbte_trans in (select * 
+                                       from conta.tint_transaccion
+                                        where id_int_comprobante = p_id_int_comprobante) LOOP
+              
+                    update tes.tprorrateo p set
+                         id_int_transaccion = NULL
+                    where p.id_int_transaccion = v_rec_cbte_trans.id_int_transaccion;
+             
+              END LOOP;
+            END IF;
      
     
      -- 3.1)  si es tipo es devengado_pago

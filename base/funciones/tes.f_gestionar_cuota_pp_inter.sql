@@ -69,7 +69,7 @@ BEGIN
 	v_nombre_funcion = 'tes.f_gestionar_cuota_pp_inter';
     
     
-    
+   
     
     
     select 
@@ -221,7 +221,7 @@ BEGIN
               
               UPDATE  conta.tint_comprobante a  SET 
                     vbregional = 'si',
-                    id_int_comprobante_origen_central = p_id_cbte_regional,
+                    id_int_comprobante_origen_regional = p_id_cbte_regional,
                     codigo_estacion_origen =  p_codigo_estacion_origen  
               WHERE  id_int_comprobante = p_id_int_comprobante ;
               
