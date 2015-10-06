@@ -7,7 +7,8 @@ CREATE OR REPLACE FUNCTION tes.f_gestionar_cuota_pp_inter (
   p_id_int_comprobante integer,
   p_conexion varchar = NULL::character varying,
   p_id_cbte_regional integer = NULL::integer,
-  p_codigo_estacion_origen varchar = NULL::character varying
+  p_codigo_estacion_origen varchar = NULL::character varying,
+  p_nro_cbte_regional varchar = NULL::character varying
 )
 RETURNS boolean AS
 $body$
@@ -222,7 +223,8 @@ BEGIN
               UPDATE  conta.tint_comprobante a  SET 
                     vbregional = 'si',
                     id_int_comprobante_origen_regional = p_id_cbte_regional,
-                    codigo_estacion_origen =  p_codigo_estacion_origen  
+                    codigo_estacion_origen =  p_codigo_estacion_origen  ,
+                    nro_cbte = p_nro_cbte_regional
               WHERE  id_int_comprobante = p_id_int_comprobante ;
               
               
@@ -231,22 +233,6 @@ BEGIN
               --  TODO, valida cambios en el cbte
               ------------------------------------
          
-     
-               --todo
-          
-		/*	  
-    ELSE
-        --------------------------------------
-        --  Migra el comprobante a ENDESIS
-        -------------------------------------
-        --Si la sincronizacion esta habilitada
-        v_sincronizar = pxp.f_get_variable_global('sincronizar');
-        IF(v_sincronizar='true')THEN
-             -- si sincroniza locamente con endesis, marcando la bandera que proviene de regional internacional
-             v_resp_int_endesis =  migra.f_migrar_cbte_endesis(p_id_int_comprobante, p_conexion, 'si');
-        END IF;      
-    
-    */
     END IF;
   
 RETURN  TRUE;

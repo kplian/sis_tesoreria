@@ -72,7 +72,7 @@ Phx.vista.FormObligacion=Ext.extend(Phx.frmInterfaz,{
 							               tpl: '<tpl for="."><div class="x-combo-list-item"><p><b>{desc_ingas}</b></p><strong>{tipo}</strong><p>PARTIDA: {desc_partida}</p></div></tpl>',
 							             }),
 	              'id_centro_costo': new Ext.form.ComboRec({
-						                    name:'id_c	entro_costo',
+						                    name:'id_centro_costo',
 						                    msgTarget: 'title',
 						                    origen:'CENTROCOSTO',
 						                    fieldLabel: 'Centro de Costos',
