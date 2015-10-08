@@ -1,6 +1,6 @@
 --------------- SQL ---------------
 
-CREATE FUNCTION tes.f_regla_tiene_servicio_o_lib_banco_inter (
+CREATE OR REPLACE FUNCTION tes.f_regla_tiene_servicio_o_lib_banco_inter (
   p_id_usuario integer,
   p_id_proceso_wf integer,
   p_id_estado_anterior integer,
