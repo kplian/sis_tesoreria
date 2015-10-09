@@ -1156,6 +1156,15 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 			id_grupo: 1,
 			grid: true,
 			form: false
+		},
+		{
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'desc_depto_conta_pp'
+			},
+			type:'Field',
+			form:true 
 		}
 	],
 	

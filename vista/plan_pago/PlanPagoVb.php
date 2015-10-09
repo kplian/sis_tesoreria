@@ -294,10 +294,12 @@ Phx.vista.PlanPagoVb = {
         
        //Evento para filtrar los depósitos a partir de la cuenta bancaria
         this.Cmp.id_cuenta_bancaria.on('select',function(data,rec,ind){
-            
+            			
             if(rec.data.centro=='no'){
-                this.Cmp.id_cuenta_bancaria_mov.allowBlank= false;
-                
+                this.Cmp.id_cuenta_bancaria_mov.allowBlank= false;                
+				if(this.Cmp.desc_depto_conta_pp.value=='CON-CBB'){
+					this.Cmp.id_cuenta_bancaria_mov.allowBlank= true;
+				}
             }
             else{
                this.Cmp.id_cuenta_bancaria_mov.allowBlank = true;
