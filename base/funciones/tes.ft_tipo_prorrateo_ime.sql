@@ -183,9 +183,9 @@ BEGIN
             	v_res = orga.f_prorratear_x_empleado(v_parametros.id_periodo,v_parametros.monto,v_tipo_prorrateo.codigo,NULL,NULL);
             end if;
             for v_registros in (
-                        select id_centro_costo,descripcion, sum(monto) as monto
+                        select id_centro_costo,id_orden_compra,descripcion, sum(monto) as monto
                         from tes_temp_prorrateo
-                        group by id_centro_costo,descripcion) loop
+                        group by id_centro_costo,id_orden_compra,descripcion) loop
                 if (v_parametros.tiene_tipo_cambio = 'si') then
                 	v_fin_campos = ',' || v_parametros.nombre_monto_mb;
                     v_fin_valores = ',' || (v_registros.monto * v_parametros.tipo_cambio);
@@ -207,6 +207,7 @@ BEGIN
                     ' || v_parametros.nombre_id || ',
                     id_concepto_ingas,
                     id_centro_costo,
+                    id_orden_compra,
                     id_partida,
                     id_cuenta,
                     id_auxiliar,                    
@@ -219,6 +220,7 @@ BEGIN
                     ' || v_parametros.id_valor || ',
                     ' || v_parametros.id_concepto_ingas || ',
                     ' || v_registros.id_centro_costo || ',
+                    ' || v_registros.id_orden_compra || ',
                     ' || v_parametrizacion.ps_id_partida || ',
                     ' || v_parametrizacion.ps_id_cuenta || ',
                     ' || v_parametrizacion.ps_id_auxiliar || ',
