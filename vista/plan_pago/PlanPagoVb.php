@@ -179,7 +179,7 @@ Phx.vista.PlanPagoVb = {
               
                this.Cmp.id_cuenta_bancaria.disable();
                this.Cmp.id_cuenta_bancaria_mov.disable();
-               this.Cmp.obs_monto_no_pagado.disable();
+               this.Cmp.obs_monto_no_pagado.enable();
                this.Cmp.obs_descuentos_ley.disable();
           }
          
