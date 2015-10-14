@@ -105,7 +105,15 @@ BEGIN
             v_parametros.centro
 							
 			)RETURNING id_cuenta_bancaria into v_id_cuenta_bancaria;
-			
+
+            insert into tes.tdepto_cuenta_bancaria
+            (id_depto,
+            id_cuenta_bancaria
+            )VALUES(
+            v_parametros.id_depto_lb,
+            v_id_cuenta_bancaria
+            );
+            
 			--Definicion de la respuesta
 			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Cuenta Bancaria almacenado(a) con exito (id_cuenta_bancaria'||v_id_cuenta_bancaria||')'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_cuenta_bancaria',v_id_cuenta_bancaria::varchar);

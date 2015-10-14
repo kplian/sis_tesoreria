@@ -71,6 +71,15 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 			form:true 
 		},
 		{
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_depto_lb'
+			},
+			type:'Field',
+			form:true 
+		},
+		{
 			config: {
 				name: 'id_institucion',
 				fieldLabel: 'Institucion',
@@ -88,7 +97,6 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 			grid: true,
 			form: true
 		},
-		
 		{
 			config:{
 				name: 'nro_cuenta',
@@ -320,6 +328,7 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 	},
 	onButtonNew: function(){
 		Phx.vista.CuentaBancaria.superclass.onButtonNew.call(this);
+		this.Cmp.id_depto_lb.setValue(this.cmbDepto.getValue());
 		this.Cmp.nro_cuenta.enable();
 	}
 })	

@@ -98,6 +98,7 @@ class MODCuentaBancaria extends MODbase{
 		$this->setParametro('id_moneda','id_moneda','int4');
 		$this->setParametro('denominacion','denominacion','varchar');
 		$this->setParametro('centro','centro','varchar');
+		$this->setParametro('id_depto_lb','id_depto_lb','int4');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
