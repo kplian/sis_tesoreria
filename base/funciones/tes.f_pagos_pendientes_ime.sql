@@ -339,7 +339,7 @@ BEGIN
                               '||(pxp.f_iif( v_registros.obs != '', '<br>Observaciones:<br><p>'||COALESCE(v_registros.obs,'---')||'</p>',''))||'
                               <br>
                               <br> Atentamente  
-                              <br> &nbsp;&nbsp;&nbsp;&nbsp;Control de pagos del sistema ERP';
+                              <br> &nbsp;&nbsp;&nbsp;&nbsp;Control de pagos del Sistema ERP BOA';
                              
                IF  v_sw_siguiente_estado  THEN
                         v_ps = '<br><br> PS: El pago paso al estado '||COALESCE(v_codigo_estado_siguiente,'NAN');
@@ -522,38 +522,41 @@ BEGIN
        
         -- seleccionar los ulitmos registros de planes de pagos de adquisiciones que reuqieren alerta
          FOR v_registros in (
-                           select
-                                op.num_tramite,
-                                op.id_obligacion_pago,
-                                max(pp.id_plan_pago) as id_plan_pago,
-                                max(pp.nro_cuota) as ultima_cuota,
-                                op.id_proveedor,
-                                pro.desc_proveedor,
-                                op.total_pago,
-                                mon.codigo as codigo_moneda,
-                                cot.tiene_form500,
-                                cot.id_cotizacion
-         					from tes.tplan_pago pp
-
-                                inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago 
-                                           and op.tipo_obligacion = 'adquisiciones' and ( op.total_pago * op.tipo_cambio_conv ) > 20000 
-                                inner join adq.tcotizacion cot on cot.id_obligacion_pago = op.id_obligacion_pago
-                                inner join param.vproveedor pro on pro.id_proveedor = op.id_proveedor
-                                inner join param.tmoneda mon on mon.id_moneda = op.id_moneda
-                            where pp.tipo in ('devengado_pagado','devengado_pagado_1c') 
-                                and pp.estado_reg ='activo' 
-                                and pp.estado not in  ('devengado', 'anulado','pagado')
-                                and pp.fecha_tentativa::date <= now()::date
-                                and cot.tiene_form500 in ('no','requiere')
-                            group by 
-                                op.id_obligacion_pago,
-                                op.num_tramite ,
-                                op.id_proveedor,
-                                pro.desc_proveedor,
-                                op.total_pago,
-                                mon.codigo,
-                                cot.tiene_form500,
-                                cot.id_cotizacion)  LOOP
+         			with pagos as(
+                            select op.num_tramite,
+                                   op.id_obligacion_pago,
+                                   max(pp.id_plan_pago) as id_plan_pago,
+                                   max(pp.nro_cuota) as ultima_cuota,
+                                   op.id_proveedor,
+                                   pro.desc_proveedor,
+                                   op.total_pago,
+                                   mon.codigo as codigo_moneda,
+                                   cot.tiene_form500,
+                                   cot.id_cotizacion,
+                                   max(pp.fecha_tentativa) as fecha_tentativa
+                            from tes.tplan_pago pp
+                                 inner join tes.tobligacion_pago op on op.id_obligacion_pago =
+                                   pp.id_obligacion_pago and op.tipo_obligacion = 'adquisiciones' and (
+                                   op.total_pago * op.tipo_cambio_conv) > 20000
+                                 inner join adq.tcotizacion cot on cot.id_obligacion_pago =
+                                   op.id_obligacion_pago
+                                 inner join param.vproveedor pro on pro.id_proveedor = op.id_proveedor
+                                 inner join param.tmoneda mon on mon.id_moneda = op.id_moneda
+                            where pp.tipo in ('devengado_pagado', 'devengado_pagado_1c') and
+                                  pp.estado_reg = 'activo' and
+                                  pp.estado not in ('devengado', 'anulado', 'pagado') and
+                                  cot.tiene_form500 in ('no', 'requiere')
+                            group by op.id_obligacion_pago,
+                                     op.num_tramite,
+                                     op.id_proveedor,
+                                     pro.desc_proveedor,
+                                     op.total_pago,
+                                     mon.codigo,
+                                     cot.tiene_form500,
+                                     cot.id_cotizacion)
+                            select *
+                            from pagos
+                            where fecha_tentativa::date <= now() ::date)  LOOP
                         
                 -- identifica a que usarios se mandan las alertas             
                 select  
@@ -588,7 +591,7 @@ BEGIN
                               <br>Es necesario registrar el formulario 500 correspondiente.
                               <br>
                               <br> Atentamente  
-                              <br> &nbsp;&nbsp;&nbsp;&nbsp;Control de pagos del sistema ERP';
+                              <br> &nbsp;&nbsp;&nbsp;&nbsp;Control de pagos del Sistema ERP BOA';
            
            
                 -- inserta registros de alarmas par ael usario que creo la obligacion
