@@ -37,7 +37,7 @@ class MODCaja extends MODbase{
 		$this->captura('usr_mod','varchar');
 		$this->captura('desc_moneda','varchar');
 		$this->captura('desc_depto','varchar');
-			
+		$this->captura('tipo_ejecucion','varchar');	
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -54,7 +54,6 @@ class MODCaja extends MODbase{
 		$this->tipo_procedimiento='IME';
 				
 		//Define los parametros para la funcion
-		$this->setParametro('estado','estado','varchar');
 		$this->setParametro('importe_maximo','importe_maximo','numeric');
 		$this->setParametro('tipo','tipo','varchar');
 		$this->setParametro('estado_reg','estado_reg','varchar');
@@ -62,7 +61,8 @@ class MODCaja extends MODbase{
 		$this->setParametro('id_moneda','id_moneda','int4');
 		$this->setParametro('id_depto','id_depto','int4');
 		$this->setParametro('codigo','codigo','varchar');
-
+		$this->setParametro('tipo_ejecucion','tipo_ejecucion','varchar');
+		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
@@ -79,7 +79,6 @@ class MODCaja extends MODbase{
 				
 		//Define los parametros para la funcion
 		$this->setParametro('id_caja','id_caja','int4');
-		$this->setParametro('estado','estado','varchar');
 		$this->setParametro('importe_maximo','importe_maximo','numeric');
 		$this->setParametro('tipo','tipo','varchar');
 		$this->setParametro('estado_reg','estado_reg','varchar');
@@ -87,6 +86,7 @@ class MODCaja extends MODbase{
 		$this->setParametro('id_moneda','id_moneda','int4');
 		$this->setParametro('id_depto','id_depto','int4');
 		$this->setParametro('codigo','codigo','varchar');
+		$this->setParametro('tipo_ejecucion','tipo_ejecucion','varchar');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -95,7 +95,25 @@ class MODCaja extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
-			
+	
+	function abrirCerrarCaja(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_caja_ime';
+		$this->transaccion='TES_CAJA_ABRCER';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_caja','id_caja','int4');
+		$this->setParametro('estado','estado','varchar');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
 	function eliminarCaja(){
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.ft_caja_ime';

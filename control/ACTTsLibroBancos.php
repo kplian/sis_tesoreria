@@ -96,6 +96,12 @@ class ACTTsLibroBancos extends ACTbase{
         $this->res->imprimirRespuesta($this->res->generarJson());
     }
 	
+	function transferirCuenta(){
+        $this->objFunc=$this->create('MODTsLibroBancos');  
+        $this->res=$this->objFunc->transferirCuenta($this->objParam);
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
+	
 	function eliminarTsLibroBancos(){
 			$this->objFunc=$this->create('MODTsLibroBancos');	
 		$this->res=$this->objFunc->eliminarTsLibroBancos($this->objParam);

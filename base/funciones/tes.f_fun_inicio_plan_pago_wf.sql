@@ -117,7 +117,7 @@ BEGIN
              
              
          update tes.tplan_pago
-         set conformidad = split_part(v_regitros_ewf.obs,'Obs:',2),
+         set conformidad = 'SIN OBSERVACIONES',
          fecha_conformidad = now()
          where id_proceso_wf  = p_id_proceso_wf;
                  

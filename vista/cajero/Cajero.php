@@ -17,7 +17,7 @@ Phx.vista.Cajero=Ext.extend(Phx.gridInterfaz,{
     	   //llama al constructor de la clase padre
 		      Phx.vista.Cajero.superclass.constructor.call(this,config);
 		      this.init();
-		      this.load({params:{start:0, limit:this.tam_pag}})
+		      //this.load({params:{start:0, limit:this.tam_pag}})
     },
     
     tam_pag:50,
@@ -46,57 +46,30 @@ Phx.vista.Cajero=Ext.extend(Phx.gridInterfaz,{
 			 type:'Field',
 			 form:true 
 		  },
-		  
-  	 {
-        config:{
-				    name: 'estado_reg',
-				    fieldLabel: 'Estado Reg.',
-				    allowBlank: true,
-				    anchor: '80%',
-				    gwidth: 100,
-				    maxLength:10
-			     },
-			  
-			 type:'TextField',
-			 filters:{pfiltro:'cajero.estado_reg',type:'string'},
-			 id_grupo:1,
-			 grid:true,
-			 form:false
-		  },
-		   
     {
 			     config:{
 				    name: 'tipo',
-				    fieldLabel: 'tipo',
+				    fieldLabel: 'Tipo',
 				    allowBlank: false,
-				    anchor: '80%',
+				    emptyText:'Tipo Ejecucion...',
+					typeAhead: true,
+					triggerAction: 'all',
+					lazyRender:true,
+					mode: 'local',
+					anchor: '80%',
 				    gwidth: 100,
-				    maxLength:20
+					store:['responsable','auxiliar','administrador']
 			     },
 			     
-			 type:'TextField',
-			 filters:{pfiltro:'cajero.tipo',type:'string'},
+			 type:'ComboBox',
+			 filters:{
+				 pfiltro:'cajero.tipo',
+				 type:'list',
+				 options: ['responsable','auxiliar','administrador']},
 			 id_grupo:1,
 			 grid:true,
 			 form:true
     },
-		   
-    {
-        config:{
-				    name: 'estado',
-				    fieldLabel: 'estado',
-				    allowBlank: false,
-				    anchor: '80%',
-				    gwidth: 100,
-				    maxLength:20
-			     },
-    type:'TextField',
-			 filters:{pfiltro:'cajero.estado',type:'string'},
-			 id_grupo:1,
-			 grid:true,
-			 form:true
-	   },
-	    
     {
         config:{
        	name:'id_funcionario',
@@ -115,7 +88,79 @@ Phx.vista.Cajero=Ext.extend(Phx.gridInterfaz,{
    	grid:true,
    	form:true
 		  },
-		  
+    {
+        config:{
+				    name: 'estado',
+				    fieldLabel: 'estado',
+				    allowBlank: false,
+					emptyText:'Estado...',
+					typeAhead: true,
+					triggerAction: 'all',
+					lazyRender:true,
+					mode: 'local',
+				    anchor: '80%',
+				    gwidth: 100,
+				    store:['activo','inactivo']
+			     },
+    type:'ComboBox',
+			 filters:{
+				pfiltro:'cajero.estado',
+				type:'string',
+				options: ['activo','inactivo']},
+			 id_grupo:1,
+			 grid:true,
+			 form:true
+	   },
+		  {
+			     config:{
+				    name: 'fecha_inicio',
+				    fieldLabel: 'Fecha inicio',
+				    allowBlank: true,
+				    anchor: '80%',
+				    gwidth: 100,
+						  format: 'd/m/Y', 
+						  renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+			     },
+			     
+			 type:'DateField',
+			 filters:{pfiltro:'cajero.fecha_inicio',type:'date'},
+			 id_grupo:1,
+			 grid:true,
+			 form:true
+		  },
+		  {
+			     config:{
+				    name: 'fecha_fin',
+				    fieldLabel: 'Fecha fin',
+				    allowBlank: true,
+				    anchor: '80%',
+				    gwidth: 100,
+						  format: 'd/m/Y', 
+						  renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+			     },
+			     
+			 type:'DateField',
+			 filters:{pfiltro:'cajero.fecha_fin',type:'date'},
+			 id_grupo:1,
+			 grid:true,
+			 form:true
+		  },
+  	 {
+        config:{
+				    name: 'estado_reg',
+				    fieldLabel: 'Estado Reg.',
+				    allowBlank: true,
+				    anchor: '80%',
+				    gwidth: 100,
+				    maxLength:10
+			     },
+			  
+			 type:'TextField',
+			 filters:{pfiltro:'cajero.estado_reg',type:'string'},
+			 id_grupo:1,
+			 grid:true,
+			 form:false
+		  },
     {
 			     config:{
 				    name: 'fecha_reg',
@@ -205,8 +250,9 @@ Phx.vista.Cajero=Ext.extend(Phx.gridInterfaz,{
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
 		{name:'desc_funcionario', type: 'string'},
-		{name:'id_caja', type: 'numeric'}
-		
+		{name:'id_caja', type: 'numeric'},
+		{name:'fecha_inicio', type: 'date',dateFormat:'Y-m-d'},
+		{name:'fecha_fin', type: 'date',dateFormat:'Y-m-d'}
 	],
 	
 	sortInfo:{

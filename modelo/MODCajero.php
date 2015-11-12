@@ -33,6 +33,8 @@ class MODCajero extends MODbase{
 		$this->captura('usr_mod','varchar');
 	 $this->captura('desc_funcionario','text');
 		$this->captura('id_caja','int4');
+		$this->captura('fecha_inicio','date');
+		$this->captura('fecha_fin','date');
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
@@ -53,6 +55,8 @@ class MODCajero extends MODbase{
 		$this->setParametro('estado','estado','varchar');
 		$this->setParametro('id_funcionario','id_funcionario','int4');
 		$this->setParametro('id_caja','id_caja','int4');
+		$this->setParametro('fecha_inicio','fecha_inicio','date');
+		$this->setParametro('fecha_fin','fecha_fin','date');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -75,6 +79,8 @@ class MODCajero extends MODbase{
 		$this->setParametro('estado','estado','varchar');
 		$this->setParametro('id_funcionario','id_funcionario','int4');
 		$this->setParametro('id_caja','id_caja','int4');
+		$this->setParametro('fecha_inicio','fecha_inicio','date');
+		$this->setParametro('fecha_fin','fecha_fin','date');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();

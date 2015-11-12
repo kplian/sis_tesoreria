@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_ime (
   p_administrador integer,
   p_id_usuario integer,

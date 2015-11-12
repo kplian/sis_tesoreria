@@ -23,7 +23,13 @@ class ACTCaja extends ACTbase{
 		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
-				
+	
+	function abrirCerrarCaja(){
+		$this->objFunc=$this->create('MODCaja');
+		$this->res=$this->objFunc->abrirCerrarCaja($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}	
+	
 	function insertarCaja(){
 		$this->objFunc=$this->create('MODCaja');	
 		if($this->objParam->insertar('id_caja')){

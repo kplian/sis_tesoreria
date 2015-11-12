@@ -26,6 +26,15 @@ Phx.vista.CuentaBancariaESIS = {
     	Phx.vista.CuentaBancariaESIS.superclass.constructor.call(this,config);
 		
 		this.cmbDepto.on('select',this.capturaFiltros,this);
+		
+		this.addButton('trans_cuenta',
+			{	text:'Transfer Cuenta',
+				iconCls: 'btransfer',
+				disabled:false,
+				handler:this.transCuenta,
+				tooltip: '<b>Transferencia Cuenta</b><p>Transferencia entre cuentas bancarias</p>'
+			}
+		);
 	    //this.load({params:{start:0, limit:this.tam_pag, permiso : 'todos,libro_bancos'}});
 	},
 	
@@ -77,6 +86,63 @@ Phx.vista.CuentaBancariaESIS = {
 		width:250
 	}),
 	
+	transCuenta:function(){ 
+		var rec=this.sm.getSelected();
+		var NumSelect=this.sm.getCount();
+		
+		if(NumSelect != 0)
+		{						
+			Phx.CP.loadWindows('../../../sis_tesoreria/vista/transferencia_cuenta/FormTransferenciaCuenta.php',
+			'Transferencia Cuenta',
+			{
+				modal:true,
+				width:450,
+				height:450
+			}, {data:rec.data, id_depto_lb:this.store.baseParams.id_depto_lb}, this.idContenedor,'FormTransferenciaCuenta',
+			{
+				config:[{
+						  event:'beforesave',
+						  delegate: this.transferir,
+						}
+						],
+			   scope:this
+			 })
+		}
+		else
+		{
+			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
+		}							   
+	},
+	
+	transferir:function(wizard,resp){
+		Phx.CP.loadingShow();
+		Ext.Ajax.request({
+			url:'../../sis_tesoreria/control/TsLibroBancos/transferirCuenta',
+			params:{					
+				   id_cuenta_bancaria_origen:resp.id_cuenta_bancaria_origen,
+                   id_depto_lb:resp.id_depto_lb,
+				   id_cuenta_bancaria:resp.id_cuenta_bancaria,
+				   fecha:resp.fecha,
+				   a_favor:resp.a_favor,
+				   detalle:resp.detalle,
+				   importe_transferencia:resp.importe_transferencia,
+				   id_finalidad:resp.id_finalidad
+			 },
+			argument:{wizard:wizard},  
+			success:this.successWizard,
+			failure: this.conexionFailure,
+			timeout:this.timeout,
+			scope:this
+		});
+	   
+	},
+	
+	successWizard:function(resp){
+		Phx.CP.loadingHide();
+		resp.argument.wizard.panel.destroy()
+		this.reload();
+	 },
+		
     south:
           { 
           url:'../../../sis_tesoreria/vista/ts_libro_bancos/TsLibroBancos.php',

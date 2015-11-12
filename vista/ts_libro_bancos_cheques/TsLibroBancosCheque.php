@@ -118,6 +118,16 @@ header("content-type: text/javascript; charset=UTF-8");
 				tooltip: '<b>Cheques Asociados</b><br/>Cheques Asociados'
 			}
 			);
+			
+			this.addButton('btnChequesFondoAvance',
+			{
+				text: 'Cambiar Cheque Fondo Avance',
+				iconCls: 'bmoney',
+				disabled: true,
+				handler: this.onChequeFondoAvance,
+				tooltip: '<b>Cambiar Cheque Fondo en Avance</b><br/>Cheques Asociados'
+			}
+			);
 			//this.Cmp.tipo.on('select', this.onTipoSelect, this);						
         },
         Atributos:[
@@ -387,14 +397,14 @@ header("content-type: text/javascript; charset=UTF-8");
 				mode: 'local',
 				valueField: 'estilo',
 				gwidth: 60,
-				store:['CBB','SRZ','LPB','TJA','SRE','CIJ','TDD','UYU']
+				store:['CBB','SRZ','LPB','TJA','SRE','CIJ','TDD','UYU','MIA','MAD']
 			},
 			type:'ComboBox',
 			id_grupo:1,
 			filters:{	
 					 type: 'list',
 					  pfiltro:'lban.origen',
-					 options: ['CBB','SRZ','TJA','SRE','CIJ','TDD','UYU','ENDESIS']
+					 options: ['CBB','SRZ','TJA','SRE','CIJ','TDD','UYU','ENDESIS','MIA','MAD']
 				},
 			grid:true,
 			form:true
@@ -471,10 +481,6 @@ header("content-type: text/javascript; charset=UTF-8");
             },
             type:'ComboBox',
             id_grupo:0,
-            /*filters:{   
-                        pfiltro:'nombre_finalidad',
-                        type:'string'
-                    },*/
             grid:true,
             form:true
         },	
@@ -723,20 +729,7 @@ header("content-type: text/javascript; charset=UTF-8");
 						this.ocultarComponente(this.cmpImporteDeposito);
 						//this.cmpImporteCheque.setValue(0.00);
 						this.mostrarComponente(this.cmpImporteCheque);
-						/*
-						var cta_bancaria = this.cmpIdCuentaBancaria.getValue();
-					
-						Ext.Ajax.request({
-							url:'../../sis_tesoreria/control/TsLibroBancos/listarTsLibroBancos',
-							params:{start:0, limit:this.tam_pag, m_id_cuenta_bancaria:cta_bancaria,m_nro_cheque:'si'},
-							success: function (resp){
-								var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
-								this.cmpNroCheque.setValue(parseInt(reg.datos[0].nro_cheque)+1);
-							},
-							failure: this.conexionFailure,
-							timeout:this.timeout,
-							scope:this
-						});*/
+						
 						break;
 					
 					case 'transferencia_carta':

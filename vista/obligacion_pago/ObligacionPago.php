@@ -96,6 +96,14 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
         this.addButton('extenderop',{grupo:[0,1,2],text:'Ext.', iconCls: 'blist', disabled: true, handler: this.extenederOp,tooltip: '<b>Extender la obligación de pago para la siguiente gestión</b>'});
   
   
+        this.addButton('btnObs',{
+        	 		grupo:[0,1], 
+                    text :'Obs Wf',
+                    iconCls : 'bchecklist',
+                    disabled: true,
+                    handler : this.onOpenObs,
+                    tooltip : '<b>Observaciones</b><br/><b>Observaciones del WF</b>'
+          });
         function diagramGantt(){            
             var data=this.sm.getSelected().data.id_proceso_wf;
             Phx.CP.loadingShow();
@@ -1191,6 +1199,8 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
               	this.getBoton('del').disable();
               this.getBoton('reporte_com_ejec_pag').enable();
               this.getBoton('reporte_plan_pago').enable();
+             
+              
           }
           
           
@@ -1216,6 +1226,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
           }
           this.getBoton('diagrama_gantt').enable();
           this.getBoton('btnChequeoDocumentosWf').enable();
+          this.getBoton('btnObs').enable();
           
      },
      
@@ -1233,6 +1244,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 			this.getBoton('est_anticipo').disable();
 			this.getBoton('extenderop').disable();
 			this.getBoton('btnCheckPresupeusto').disable();
+			this.getBoton('btnObs').disable();
 			
 			//Inhabilita el reporte de disponibilidad
             this.getBoton('btnVerifPresup').disable();
@@ -1758,6 +1770,26 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
         resp.argument.wizard.panel.destroy()
         this.reload();
     },
+    onOpenObs:function() {
+            var rec=this.sm.getSelected();
+            
+            var data = {
+            	id_proceso_wf: rec.data.id_proceso_wf,
+            	id_estado_wf: rec.data.id_estado_wf,
+            	num_tramite: rec.data.num_tramite
+            }
+             
+            Phx.CP.loadWindows('../../../sis_workflow/vista/obs/Obs.php',
+                    'Observaciones del WF',
+                    {
+                        width:'80%',
+                        height:'70%'
+                    },
+                    data,
+                    this.idContenedor,
+                    'Obs'
+        )
+    }
 	
 })
 </script>

@@ -279,6 +279,30 @@ class MODTsLibroBancos extends MODbase{
         return $this->respuesta;
     }
 
+	function transferirCuenta(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.ft_ts_libro_bancos_ime';
+        $this->transaccion='TES_TRACUEN_IME';
+        $this->tipo_procedimiento='IME';
+        
+        //Define los parametros para la funcion
+        $this->setParametro('id_depto_lb','id_depto_lb','int4');
+		$this->setParametro('id_cuenta_bancaria_origen','id_cuenta_bancaria_origen','int4');
+        $this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
+		$this->setParametro('importe_transferencia','importe_transferencia','numeric');
+		$this->setParametro('a_favor','a_favor','varchar');
+		$this->setParametro('detalle','detalle','varchar');
+		$this->setParametro('fecha','fecha','date');
+		$this->setParametro('id_finalidad','id_finalidad','int4');
+		
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+	
 	function listarDepositosENDESIS(){
 		//Definicion de variables para ejecucion del procedimientp
 		$this->procedimiento='migra.ft_ts_libro_bancos_endesis_sel';
