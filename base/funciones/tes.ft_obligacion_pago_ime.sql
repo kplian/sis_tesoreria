@@ -28,6 +28,7 @@ DECLARE
 	v_nro_requerimiento    	integer;
 	v_parametros           	record;
     v_registros_op          record;
+    va_tipo_pago			varchar[];
    
 	v_id_requerimiento     	integer;
 	v_resp		            varchar;
@@ -258,30 +259,28 @@ BEGIN
             
 			--Sentencia de la modificacion
 			update tes.tobligacion_pago set
-			id_proveedor = v_parametros.id_proveedor,
-		    id_moneda = v_parametros.id_moneda,
-            tipo_cambio_conv=v_parametros.tipo_cambio_conv,
-			obs = v_parametros.obs,
-			--porc_retgar = v_parametros.porc_retgar,
-		    id_funcionario = v_id_funcionario_sol,
-			--porc_anticipo = v_parametros.porc_anticipo,
-		    id_depto = v_parametros.id_depto,
-			fecha_mod = now(),
-			id_usuario_mod = p_id_usuario,
-            pago_variable = v_parametros.pago_variable,
-            total_nro_cuota = v_parametros.total_nro_cuota,
-            fecha_pp_ini = v_parametros.fecha_pp_ini,
-            rotacion = v_parametros.rotacion,
-            id_plantilla = v_parametros.id_plantilla,
-            id_usuario_ai = v_parametros._id_usuario_ai,
-            usuario_ai = v_parametros._nombre_usuario_ai,
-            tipo_anticipo = v_parametros.tipo_anticipo,
-            id_funcionario_gerente = va_id_funcionario_gerente[1],
-            id_contrato = v_id_contrato
+              id_proveedor = v_parametros.id_proveedor,
+              id_moneda = v_parametros.id_moneda,
+              tipo_cambio_conv=v_parametros.tipo_cambio_conv,
+              obs = v_parametros.obs,
+              --porc_retgar = v_parametros.porc_retgar,
+              id_funcionario = v_id_funcionario_sol,
+              --porc_anticipo = v_parametros.porc_anticipo,
+              id_depto = v_parametros.id_depto,
+              fecha_mod = now(),
+              id_usuario_mod = p_id_usuario,
+              pago_variable = v_parametros.pago_variable,
+              total_nro_cuota = v_parametros.total_nro_cuota,
+              fecha_pp_ini = v_parametros.fecha_pp_ini,
+              rotacion = v_parametros.rotacion,
+              id_plantilla = v_parametros.id_plantilla,
+              id_usuario_ai = v_parametros._id_usuario_ai,
+              usuario_ai = v_parametros._nombre_usuario_ai,
+              tipo_anticipo = v_parametros.tipo_anticipo,
+              id_funcionario_gerente = va_id_funcionario_gerente[1],
+              id_contrato = v_id_contrato
             
-            
-            
-			where id_obligacion_pago = v_parametros.id_obligacion_pago;
+            where id_obligacion_pago = v_parametros.id_obligacion_pago;
             
            
             -------------------------------------
@@ -976,11 +975,25 @@ BEGIN
                          
                          v_descuentos_ley = v_monto_cuota * v_registros_plan.ps_descuento_porc;
                          
+                         
+                         
+                         
                          IF v_tipo_obligacion in  ('pago_especial') THEN
                             v_tipo_plan_pago = 'especial';
                          ELSE
+                           --verifica que tipo de apgo estan deshabilitados
+                           
+                           va_tipo_pago = regexp_split_to_array(pxp.f_get_variable_global('tes_tipo_pago_deshabilitado'), E'\\s+');
+                           
                            v_tipo_plan_pago = 'devengado_pagado';
+                           
+                           IF v_tipo_plan_pago =ANY(va_tipo_pago) THEN
+                                  v_tipo_plan_pago = 'devengado_pagado_1c';
+                           END IF;
+                           
                          END IF;
+                         
+                        
                          
                          --armar hstore 
                          v_hstore_pp =   hstore(ARRAY[

@@ -33,6 +33,15 @@ Phx.vista.AperturaCaja=Ext.extend(Phx.frmInterfaz,{
         },
 		{
             config:{
+                    labelSeparator:'',
+                    inputType:'hidden',
+                    name: 'estado'
+            },
+            type:'Field',
+            form:true 
+        },
+		{
+            config:{
                 name: 'id_depto',
                 fieldLabel: 'Depto',
                 allowBlank: false,
@@ -235,6 +244,9 @@ Phx.vista.AperturaCaja=Ext.extend(Phx.frmInterfaz,{
 		
 		this.cmpDetalle = this.getComponente('detalle');	
 		this.cmpDetalle.setValue('Para apertura de caja chica');
+		
+		this.cmpEstado = this.getComponente('estado');	
+		this.cmpEstado.setValue('abierto');
 		//Ext.apply(this.Cmp.id_cuenta_bancaria.store.baseParams,{id_depto_lb:this.id_depto_lb,permiso : 'libro_bancos'});		
 	},
 	
@@ -248,15 +260,15 @@ Phx.vista.AperturaCaja=Ext.extend(Phx.frmInterfaz,{
 	
     getValues:function(){
         var resp = {
-                   id_cuenta_bancaria_origen:this.Cmp.id_cuenta_bancaria_origen.getValue(),
                    id_depto:this.Cmp.id_depto.getValue(),
 				   id_cuenta_bancaria:this.Cmp.id_cuenta_bancaria.getValue(),
 				   fecha:this.Cmp.fecha.getValue(),
 				   a_favor:this.Cmp.a_favor.getValue(),
 				   detalle:this.Cmp.detalle.getValue(),
 				   importe:this.Cmp.importe.getValue(),
+				   estado:this.data.estado,
 				   id_finalidad:this.Cmp.id_finalidad.getValue(),
-				   estado:this.data.estado
+				   id_caja:this.data.id_caja
             }   
          return resp;   
      }

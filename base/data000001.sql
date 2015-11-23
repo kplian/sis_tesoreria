@@ -1243,3 +1243,17 @@ VALUES (E'tes_codigo_macro_pago_directo', E'TES-PD', E'codigo de proceso macro e
 
 
 /***********************************F-DAT-RAC-TES-0-08/09/2015*****************************************/
+
+/***********************************I-DAT-RAC-TES-0-23/11/2015*****************************************/
+
+
+/* Data for the 'pxp.variable_global' table  (Records 1 - 1) */
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES (E'tes_tipo_pago_deshabilitado', E'', E'codigo de los tipos de pago deshabilitados para la estacion');
+
+
+/***********************************F-DAT-RAC-TES-0-23/11/2015*****************************************/
+
+
+

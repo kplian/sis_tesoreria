@@ -94,9 +94,9 @@ BEGIN
           -- verifica el depto de conta, si no tiene lo modifica
           
          
+         
           
-          
-          IF v_registros.id_depto_conta is NULL THEN
+          IF v_registros.id_depto_conta is NULL or v_registros.id_depto_conta !=  p_id_depto_conta THEN
              --registra el depto de conta
              
              IF p_id_depto_conta is not null THEN
@@ -125,7 +125,7 @@ BEGIN
           
           END IF;
           
-          
+         
           
           -- obtener el estado de la cuota anterior
           --validar que no se salte el orden de los devengados
@@ -243,12 +243,6 @@ BEGIN
             
             END IF;
             
-            
-             
-          
-            
-            
-            
                   
             --------------------------------------------------------
             ---cambio al siguiente estado de borrador a Pendiente----
@@ -313,23 +307,23 @@ BEGIN
             v_sincronizar_internacional = pxp.f_get_variable_global('sincronizar');
             v_prioridad_depto_conta_inter = pxp.f_get_variable_global('conta_prioridad_depto_internacional');
             
-            
-           
           
             IF v_sincronizar_internacional = 'true' and (v_prioridad_depto_conta::varchar = v_prioridad_depto_conta_inter::varchar) THEN
              -- recupera la estacion destino
              -- utiliza la plantilla segun estacion destino, para generar el comprobante 
                 
-             select 
-              etp.codigo_plantilla_comprobante
-             into
-              v_codigo_plt_cbte
-             from tes.testacion e 
-             inner join tes.testacion_tipo_pago etp on e.id_estacion = etp.id_estacion and etp.estado_reg = 'activo'
-             inner join tes.ttipo_plan_pago tpp on tpp.id_tipo_plan_pago = etp.id_tipo_plan_pago 
-             where     e.id_depto_lb = v_registros.id_depto_lb 
-                  and  e.estado_reg = 'activo'
-                  and tpp.codigo =  v_registros.tipo;
+              
+             
+               select 
+                etp.codigo_plantilla_comprobante
+               into
+                v_codigo_plt_cbte
+               from tes.testacion e 
+               inner join tes.testacion_tipo_pago etp on e.id_estacion = etp.id_estacion and etp.estado_reg = 'activo'
+               inner join tes.ttipo_plan_pago tpp on tpp.id_tipo_plan_pago = etp.id_tipo_plan_pago 
+               where     e.id_depto_lb = v_registros.id_depto_lb 
+                    and  e.estado_reg = 'activo'
+                    and tpp.codigo =  v_registros.tipo;
              
             
              -- si es  internacional, 
@@ -337,10 +331,10 @@ BEGIN
            
             
             ELSE
+            
                --  Si NO  se contabiliza nacionalmente
                v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,v_registros.codigo_plantilla_comprobante,p_id_usuario,p_id_usuario_ai,p_usuario_ai, p_conexion);
             END IF;
-           
            
              --  actualiza el id_comprobante en el registro del plan de pago
             

@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -1643,6 +1645,26 @@ BEGIN
             return v_resp;        
         end;
             
+     /*********************************    
+ 	#TRANSACCION:  'TES_GETCFGPAGO_IME'
+ 	#DESCRIPCION:	Recupera la configuracion de apgos habilitados en la estación
+ 	#AUTOR:		RAC KPLIAN
+ 	#FECHA:		22-11-2015
+	***********************************/
+
+	elsif(p_transaccion='TES_GETCFGPAGO_IME')then
+
+		begin
+         --raise exception 'llega'
+            
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se cambio el estado de tiene formulario 500 '); 
+            v_resp = pxp.f_agrega_clave(v_resp,'tes_tipo_pago_deshabilitado', pxp.f_get_variable_global('tes_tipo_pago_deshabilitado'));
+            
+            --Devuelve la respuesta
+            return v_resp;        
+        end;
+    
         
         
     else

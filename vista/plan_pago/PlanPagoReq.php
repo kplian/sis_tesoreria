@@ -46,8 +46,7 @@ Phx.vista.PlanPagoReq = {
           if(dataPadre){
              this.onEnablePanel(this, dataPadre);
           }
-          else
-          {
+          else{
              this.bloquearMenus();
           }
           
@@ -62,12 +61,14 @@ Phx.vista.PlanPagoReq = {
          
          this.iniciarEventos();
          //escode boton para mandar a borrador 
-          this.getBoton('ini_estado').hide();  
+         this.getBoton('ini_estado').hide();  
+         
+          
         
     }, 
     
      
-       
+     
     
     
     

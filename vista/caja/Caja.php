@@ -350,14 +350,15 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		Ext.Ajax.request({
 			url:'../../sis_tesoreria/control/Caja/abrirCerrarCaja',
 			params:{					
-				   id_cuenta_bancaria_origen:resp.id_cuenta_bancaria_origen,
-                   id_depto_lb:resp.id_depto_lb,
+                   id_depto_lb:resp.id_depto,
 				   id_cuenta_bancaria:resp.id_cuenta_bancaria,
 				   fecha:resp.fecha,
 				   a_favor:resp.a_favor,
 				   detalle:resp.detalle,
-				   importe_transferencia:resp.importe_transferencia,
-				   id_finalidad:resp.id_finalidad
+				   importe:resp.importe,
+				   id_finalidad:resp.id_finalidad,
+				   estado:resp.estado,
+				   id_caja: resp.id_caja
 			 },
 			argument:{wizard:wizard},  
 			success:this.successWizard,

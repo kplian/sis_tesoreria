@@ -71,7 +71,7 @@ class ACTPlanPago extends ACTbase{
 	}
 						
 	function eliminarPlanPago(){
-			$this->objFunc=$this->create('MODPlanPago');	
+		$this->objFunc=$this->create('MODPlanPago');	
 		$this->res=$this->objFunc->eliminarPlanPago($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
@@ -355,7 +355,13 @@ class ACTPlanPago extends ACTbase{
 		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
-	
+   
+   function getConfigPago(){
+		$this->objFunc=$this->create('MODPlanPago');	
+		$this->res=$this->objFunc->getConfigPago($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+
 			
 }
 

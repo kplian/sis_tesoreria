@@ -105,6 +105,13 @@ class MODCaja extends MODbase{
 		//Define los parametros para la funcion
 		$this->setParametro('id_caja','id_caja','int4');
 		$this->setParametro('estado','estado','varchar');
+		$this->setParametro('fecha','fecha','date');
+		$this->setParametro('id_depto_lb','id_depto_lb','int4');
+		$this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
+		$this->setParametro('importe','importe','numeric');
+		$this->setParametro('a_favor','a_favor','varchar');
+		$this->setParametro('detalle','detalle','varchar');
+		$this->setParametro('id_finalidad','id_finalidad','int4');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();

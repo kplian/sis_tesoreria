@@ -53,11 +53,49 @@ Phx.vista.PlanPagoRegIni = {
                     
          this.creaFormularioConformidad();
          this.iniciarEventos();
-         //this.addButton('btnConformidad',{text:'Conformidad',iconCls: 'bok',disabled:true,handler:this.onButtonConformidad,tooltip: 'Generar conformidad para el pago (Firma acta de conformidad)'});
-         //escode boton para mandar a borrador 
-          this.getBoton('ini_estado').hide();  
+         //esconde boton para mandar a borrador 
+         this.getBoton('ini_estado').hide(); 
+          
+         this.getConfigPago(); 
+        
         
     }, 
+    
+     getConfigPago: function(id_plantilla){
+        var data = this.getSelectedData();
+           Phx.CP.loadingShow();
+           
+           Ext.Ajax.request({
+                
+                url: '../../sis_tesoreria/control/PlanPago/getConfigPago',
+                params: { test: 'test'},
+                success: function(resp) {
+                	Phx.CP.loadingHide();
+			           var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+			           if(!reg.ROOT.error){
+			                
+			               console.log('----llega...', reg);
+			               
+			               var tipHab = reg.ROOT.datos.tes_tipo_pago_deshabilitado.split(",");
+			               console.log('tipHab',tipHab)
+			               for (var ele = 0; ele <  tipHab.length ; ele++) {
+			               	 for (var k = 0; k <  this.arrayStore['INICIAL'].length ; k++) {
+			                  		console.log(tipHab[ele], this.arrayStore['INICIAL'][k][0])
+			                  		if(this.arrayStore['INICIAL'][k][0] == tipHab[ele]){
+			                  			 this.arrayStore['INICIAL'].splice(k, 1);
+			                  		}
+			               	    }			               	   
+						   }
+			            }
+			            else{
+			                alert(reg.ROOT.mensaje);
+			            }
+                },
+                failure: this.conexionFailure,
+                timeout: this.timeout,
+                scope: this
+            });
+     }, 
     
      
        
