@@ -11,7 +11,7 @@ RETURNS boolean AS
 $body$
 /*
 
-Autor: RAC KPLIAN
+Autor: RAC KPLIANF
 Fecha:   6 junio de 2013
 Descripcion  Esta funcion retrocede el estado de los planes de pago cuando los comprobantes son eliminados
 
@@ -153,18 +153,37 @@ BEGIN
               v_id_depto,
               'Eliminación de comprobante de la OP:'|| COALESCE(v_registros.numero,'NaN')||', cuota nro: '|| COALESCE(v_registros.nro_cuota,'NAN'));
                       
-                    
+         
+          
+          IF v_codigo_estado != 'pendiente' THEN          
                       
-          -- actualiza estado en la solicitud
+            -- actualiza estado en la solicitud
+              update tes.tplan_pago pp set 
+                 id_estado_wf =  v_id_estado_actual,
+                 estado = v_codigo_estado,
+                 id_usuario_mod=p_id_usuario,
+                 fecha_mod=now(),
+                 id_int_comprobante = NULL,
+                 id_usuario_ai = p_id_usuario_ai,
+                 usuario_ai = p_usuario_ai
+               where pp.id_plan_pago = v_registros.id_plan_pago;
+          ELSE
+          -- si el estado es pendiente conservamos el ID del cbte ...
+            
+            -- actualiza estado en la solicitud
             update tes.tplan_pago pp set 
                id_estado_wf =  v_id_estado_actual,
                estado = v_codigo_estado,
                id_usuario_mod=p_id_usuario,
                fecha_mod=now(),
-               id_int_comprobante = NULL,
                id_usuario_ai = p_id_usuario_ai,
                usuario_ai = p_usuario_ai
              where pp.id_plan_pago = v_registros.id_plan_pago;
+          
+          
+             
+          END IF;   
+             
      
            -- solo si el estado del cbte es borrador y no es un comprobante temporal
            -- desasociamos las transacciones del comprobante
