@@ -58,6 +58,22 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 			grid:true,
 			form:true
 		},
+		{
+            config:{
+                name: 'nro_tramite',
+                fieldLabel: 'Num. Tramite',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 150,
+                maxLength:200
+            },
+            type:'TextField',
+            filters:{pfiltro:'lban.num_tramite',type:'string'},
+			bottom_filter: true,
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
 		{     
 			config:{
 				    name:'id_depto',
@@ -189,6 +205,21 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 			id_grupo:1,
 			grid:true,
 			form:false
+		},
+		{
+			config:{
+				name: 'estado_proceso',
+				fieldLabel: 'Estado Proceso',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:10
+			},
+			type:'TextField',
+			filters:{pfiltro:'caja.estado_reg',type:'string'},
+			id_grupo:1,
+			grid:true,
+			form:false
 		},		
 		{
 			config:{
@@ -276,13 +307,18 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 	id_store:'id_caja',
 	fields: [
 		{name:'id_caja', type: 'numeric'},
+		{name:'nro_tramite', type: 'string'},
 		{name:'estado', type: 'string'},
 		{name:'importe_maximo', type: 'numeric'},
 		{name:'tipo', type: 'string'},
 		{name:'estado_reg', type: 'string'},
+		{name:'estado_proceso', type: 'string'},
 		{name:'porcentaje_compra', type: 'numeric'},
 		{name:'id_moneda', type: 'numeric'},
+		{name:'fecha', type: 'date',dateFormat:'Y-m-d'},
 		{name:'id_depto', type: 'numeric'},
+		{name:'id_proceso_wf', type: 'numeric'},
+		{name:'id_estado_wf', type: 'numeric'},
 		{name:'codigo', type: 'string'},
 		{name:'id_usuario_reg', type: 'numeric'},
 		{name:'fecha_reg', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
@@ -300,21 +336,8 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 	},
 	bdel:true,
 	bsave:true,
-	/*
-	abrirCerrarCaja:function(){
-	    Phx.CP.loadingShow();
-	    var d = this.sm.getSelected().data;
-        Ext.Ajax.request({
-            url:'../../sis_tesoreria/control/Caja/abrirCerrarCaja',
-            params:{id_caja:d.id_caja, estado:d.estado},
-            success:this.successAbrirCerrarCaja,
-            failure: this.conexionFailure,
-            timeout:this.timeout,
-            scope:this
-        }); 	    
-	},
-	*/
 	
+	/*	
 	abrirCerrarCaja:function(){ 
 		var rec=this.sm.getSelected();
 		var NumSelect=this.sm.getCount();
@@ -343,6 +366,70 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		{
 			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
 		}							   
+	},
+	*/
+	
+	abrirCerrarCaja:function(){
+		var rec=this.sm.getSelected();
+		var NumSelect=this.sm.getCount();
+		
+		if(NumSelect != 0)
+		{	
+		  if(rec.data.estado=='cerrado'){
+			  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+							'Estado de Wf',
+							{
+								modal:true,
+								width:700,
+								height:450
+							}, {data:{
+								   id_estado_wf:rec.data.id_estado_wf,
+								   id_proceso_wf:rec.data.id_proceso_wf								  
+								}}, this.idContenedor,'FormEstadoWf',
+							{
+								config:[{
+										  event:'beforesave',
+										  delegate: this.onSaveWizard												  
+										}],
+								
+								scope:this
+							 });
+		  }
+		}
+		else
+		{
+			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
+		}					   
+	},
+	
+	onSaveWizard:function(wizard,resp){
+		Phx.CP.loadingShow();
+		console.log(resp);
+		Ext.Ajax.request({
+			url:'../../sis_tesoreria/control/Caja/siguienteEstadoCaja',
+			params:{
+					
+				id_proceso_wf_act:  resp.id_proceso_wf_act,
+				id_estado_wf_act:   resp.id_estado_wf_act,
+				id_tipo_estado:     resp.id_tipo_estado,
+				id_funcionario_wf:  resp.id_funcionario_wf,
+				id_depto_wf:        resp.id_depto_wf,
+				obs:                resp.obs,
+				json_procesos:      Ext.util.JSON.encode(resp.procesos)
+				},
+			success:this.successWizard,
+			failure: this.conexionFailure,
+			argument:{wizard:wizard},
+			timeout:this.timeout,
+			scope:this
+		});
+	},
+	
+	successWizard:function(resp){
+		Phx.CP.loadingHide();
+		resp.argument.wizard.panel.destroy()
+		Phx.CP.getPagina(this.idContenedorPadre).reload();  
+		//this.reload();
 	},
 	
 	transferir:function(wizard,resp){

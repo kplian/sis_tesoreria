@@ -1444,11 +1444,11 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 	extenederOp:function(){
 		var me = this,
 		    d = me.sm.getSelected().data;
-	     	Phx.CP.loadingShow();
+	     	
 	     	if(!d.id_obligacion_pago_extendida && d.id_obligacion_pago_extendida != '' ){
 	     	     if(confirm('¿Está seguro de extender la obligación para la gestión siguiente?. \n Si  no existen   registros de presupuestos y partidas para la siguiente gestión , no se copiara nada, tendrá que hacer los registros faltantes manualmente. No podrá volver a ejecutar este comando')){
           		   if(confirm('¿Está realmente seguro?')){	
-					
+					        Phx.CP.loadingShow();
 							Ext.Ajax.request({
 									url:'../../sis_tesoreria/control/ObligacionPago/extenderOp',
 									success: function(){

@@ -45,7 +45,12 @@ class ACTCaja extends ACTbase{
 		$this->res=$this->objFunc->eliminarCaja($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
-			
+	
+	function siguienteEstadoCaja(){
+		$this->objFunc=$this->create('MODCaja');	
+		$this->res=$this->objFunc->siguienteEstadoCaja($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
 }
 
 ?>

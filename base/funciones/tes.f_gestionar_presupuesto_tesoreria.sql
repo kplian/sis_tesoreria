@@ -49,13 +49,14 @@ DECLARE
   v_total_adjudicado  	numeric;
   v_aux 				numeric;
   
-  v_comprometido numeric;
-  v_ejecutado    numeric;
-  v_registros_pro record;
-  v_aux_mb numeric;
-  v_fecha date;
-  v_ano_1 integer;
-  v_ano_2 integer;
+  v_comprometido 		numeric;
+  v_ejecutado    		numeric;
+  v_registros_pro 		record;
+  v_aux_mb 				numeric;
+  v_fecha 				date;
+  v_ano_1 				integer;
+  v_ano_2 				integer;
+  v_reg_op				record;
   
 
   
@@ -66,6 +67,14 @@ BEGIN
   v_nombre_funcion = 'tes.f_gestionar_presupuesto_tesoreria';
    
   v_id_moneda_base =  param.f_get_moneda_base();
+  
+  
+  SELECT
+   *
+  into
+   v_reg_op
+  FROM  tes.tobligacion_pago  op
+  where op.id_obligacion_pago = p_id_obligacion_pago;
  
   
       IF p_operacion = 'comprometer' THEN
@@ -87,7 +96,9 @@ BEGIN
                               p.id_presupuesto,
                               op.comprometido,
                               op.id_moneda,
-                              op.fecha
+                              op.fecha,
+                              op.num_tramite,
+                              op.tipo_cambio_conv
                               
                               FROM  tes.tobligacion_pago  op
                               INNER JOIN tes.tobligacion_det opd  on  opd.id_obligacion_pago = op.id_obligacion_pago and opd.estado_reg = 'activo'
@@ -125,7 +136,9 @@ BEGIN
               IF v_i > 0 THEN 
               
                     --llamada a la funcion de compromiso
-                    va_resp_ges =  pre.f_gestionar_presupuesto(va_id_presupuesto, 
+                    va_resp_ges =  pre.f_gestionar_presupuesto(p_id_usuario,
+                    										   NULL, --tipo cambio
+                                                               va_id_presupuesto, 
                                                                va_id_partida, 
                                                                va_id_moneda, 
                                                                va_monto, 
@@ -134,6 +147,7 @@ BEGIN
                                                                NULL,--  p_id_partida_ejecucion 
                                                                va_columna_relacion, 
                                                                va_fk_llave,
+                                                               v_reg_op.num_tramite,
                                                                NULL,
                                                                p_conexion);
                  
@@ -181,7 +195,9 @@ BEGIN
                               opd.revertido_mo,
                               opd.id_partida_ejecucion_com,
                               op.id_moneda,
-                              op.fecha
+                              op.fecha,
+                              op.num_tramite,
+                              op.tipo_cambio_conv
                               
                               FROM  tes.tobligacion_pago  op
                               INNER JOIN tes.tobligacion_det opd  on  opd.id_obligacion_pago = op.id_obligacion_pago and opd.estado_reg = 'activo'
@@ -246,7 +262,9 @@ BEGIN
              
              --llamada a la funcion de  reversion
                IF v_i > 0 THEN 
-                  va_resp_ges =  pre.f_gestionar_presupuesto(va_id_presupuesto, 
+                  va_resp_ges =  pre.f_gestionar_presupuesto(p_id_usuario,
+                    										 NULL, --tipo cambio
+                                                             va_id_presupuesto, 
                                                              va_id_partida, 
                                                              va_id_moneda, 
                                                              va_monto, 
@@ -255,6 +273,7 @@ BEGIN
                                                              va_id_partida_ejecucion,--  p_id_partida_ejecucion 
                                                              va_columna_relacion, 
                                                              va_fk_llave,
+                                                             v_reg_op.num_tramite,
                                                              NULL,
                                                              p_conexion
                                                              );
@@ -279,7 +298,9 @@ BEGIN
                                        od.id_obligacion_pago,
                                        od.id_obligacion_det,
                                        op.id_moneda,
-                                       op.fecha
+                                       op.fecha,
+                                       op.num_tramite,
+                                       op.tipo_cambio_conv
                                      from  tes.tprorrateo pro
                                      inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det   and od.estado_reg = 'activo'
                                      inner join tes.tobligacion_pago op on op.id_obligacion_pago = od.id_obligacion_pago
@@ -353,19 +374,23 @@ BEGIN
              
                  IF v_i > 0 THEN 
                     
-                    va_resp_ges =  pre.f_gestionar_presupuesto(va_id_presupuesto, 
-                                                               va_id_partida, 
-                                                               va_id_moneda, 
-                                                               va_monto, 
-                                                               va_fecha, --p_fecha
-                                                               va_momento, 
-                                                               va_id_partida_ejecucion,--  p_id_partida_ejecucion 
-                                                               va_columna_relacion, 
-                                                               va_fk_llave,
-                                                               NULL,
-                                                               p_conexion);
+                      va_resp_ges =  pre.f_gestionar_presupuesto(p_id_usuario,
+                                                                 NULL, --tipo cambio
+                                                                 va_id_presupuesto, 
+                                                                 va_id_partida, 
+                                                                 va_id_moneda, 
+                                                                 va_monto, 
+                                                                 va_fecha, --p_fecha
+                                                                 va_momento, 
+                                                                 va_id_partida_ejecucion,--  p_id_partida_ejecucion 
+                                                                 va_columna_relacion, 
+                                                                 va_fk_llave,
+                                                                 v_reg_op.num_tramite,
+                                                                 NULL,
+                                                                 p_conexion);
                 
-                         --quitamos la bandera de sincronizacion del plan de pago
+                         
+                         -- quitamos la bandera de sincronizacion del plan de pago
                          update tes.tplan_pago pp set
                           sinc_presupuesto = 'no'
                          where  pp.id_plan_pago =  p_id_plan_pago;

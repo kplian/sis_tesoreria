@@ -116,16 +116,7 @@ Phx.vista.AperturaCaja=Ext.extend(Phx.frmInterfaz,{
 					if(value == null)
 						value = '';
 					else 
-						value = value.dateFormat('d/m/Y');
-					
-					if(record.data['sistema_origen']=='FONDOS_AVANCE'){
-						return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'F.A. '+value+'</b></FONT>');
-					}else{
-						if(record.data['sistema_origen']=='KERP')						
-							return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'PG '+value+'</b></FONT>');					
-						else
-							return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+value+'</b></FONT>');
-					}
+						value = value.dateFormat('d/m/Y');					
 				}
 			},
 				type:'DateField',
@@ -262,7 +253,7 @@ Phx.vista.AperturaCaja=Ext.extend(Phx.frmInterfaz,{
         var resp = {
                    id_depto:this.Cmp.id_depto.getValue(),
 				   id_cuenta_bancaria:this.Cmp.id_cuenta_bancaria.getValue(),
-				   fecha:this.Cmp.fecha.getValue(),
+				   fecha:this.Cmp.fecha.getValue().dateFormat('d/m/Y'),
 				   a_favor:this.Cmp.a_favor.getValue(),
 				   detalle:this.Cmp.detalle.getValue(),
 				   importe:this.Cmp.importe.getValue(),
