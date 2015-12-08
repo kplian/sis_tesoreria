@@ -26,6 +26,7 @@ DECLARE
 	v_resp						varchar;
     v_registros 				record; 
     v_registros_pro				record; 
+    v_registros_aux				record; 
     va_prioridad     			integer[];
     v_tipo_sol   				varchar;
    
@@ -111,14 +112,14 @@ BEGIN
                
                va_momento[v_i]	= 2;   --reversion 2 (pero el valor del monto debe ser negativo)           
                va_fecha[v_i] = v_registros.fecha; --fecha del cbte               
-               va_id_presupuesto[v_i] = v_registros_pro.id_presupuesto;
+               va_id_presupuesto[v_i] = v_registros_pro.id_centro_costo;
                va_id_partida[v_i]= v_registros_pro.id_partida;
                
                va_monto[v_i]  = v_monto_cmp;
                va_id_moneda[v_i]  = v_registros.id_moneda;
-               va_id_partida_ejecucion [v_i] = v_registros_pro.id_partida_ejecucion ;   
-               va_columna_relacion[v_i]= 'id_prorrateo';
-               va_fk_llave[v_i] = v_registros.id_prorrateo;
+               va_id_partida_ejecucion [v_i] = v_registros_pro.id_partida_ejecucion_com ;   
+               va_columna_relacion[v_i]= 'id_int_transaccion';
+               va_fk_llave[v_i] = v_registros_pro.id_prorrateo;
               
                
                  
@@ -128,10 +129,10 @@ BEGIN
         
         -------------------------------------------------------------------------
          --   eliminar partidas ejecucion de las transacciones en el comprobante 
-         --   como el presupeusto fue revertido eliminamos los anteriroes
+         --   como el presupeusto fue revertido eliminamos los anteriores
          -----------------------------------------------------------------------
         
-        FOR v_registros in (
+        FOR v_registros_aux in (
                              select 
                                t.id_int_transaccion
                              from conta.tint_transaccion t
@@ -142,10 +143,11 @@ BEGIN
                   
                   update conta.tint_transaccion t set
                   id_partida_ejecucion = NULL
-                  where id_int_transaccion = v_registros.id_int_transaccion;
+                  where id_int_transaccion = v_registros_aux.id_int_transaccion;
         
         END LOOP;
-        
+       
+	
         --------------------------------------------
         --   revertir el presupuesto comprometido
         ----------------------------------------------
@@ -169,8 +171,6 @@ BEGIN
     END IF;
 			
 
-
-  
 RETURN  TRUE;
 
 

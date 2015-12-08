@@ -1379,3 +1379,19 @@ CREATE TABLE tes.testacion_tipo_pago (
 WITHOUT OIDS;
 
 /*****************************F-SCP-JRR-TES-0-25/08/2015*************/
+
+
+/*****************************I-SCP-RAC-TES-0-08/22/2015*************/
+
+
+--------------- SQL ---------------
+
+DROP VIEW IF EXISTS tes.vcomp_devtesprov_plan_pago;
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ALTER COLUMN tipo_cambio_conv TYPE NUMERIC;
+  
+  
+/*****************************F-SCP-RAC-TES-0-08/22/2015*************/
+
