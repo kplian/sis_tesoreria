@@ -93,8 +93,6 @@ BEGIN
                     
           -- verifica el depto de conta, si no tiene lo modifica
           
-         
-         
           
           IF v_registros.id_depto_conta is NULL or v_registros.id_depto_conta !=  p_id_depto_conta THEN
              --registra el depto de conta
@@ -106,7 +104,7 @@ BEGIN
                  where id_obligacion_pago = v_registros.id_obligacion_pago;
              ELSE 
              
-             raise exception 'no eligio un depto de contabilidad';
+                raise exception 'no eligio un depto de contabilidad';
              
              END IF;
              
@@ -304,7 +302,7 @@ BEGIN
            
             
             --si esta habilita la sincronizacion internacional y depto de conta es internacional
-            v_sincronizar_internacional = pxp.f_get_variable_global('sincronizar');
+            v_sincronizar_internacional = pxp.f_get_variable_global('sincronizar_internacional');
             v_prioridad_depto_conta_inter = pxp.f_get_variable_global('conta_prioridad_depto_internacional');
             
           

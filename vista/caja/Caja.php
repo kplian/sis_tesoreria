@@ -11,12 +11,13 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
-
+		
 	constructor:function(config){
 		this.maestro=config.maestro;
     	//llama al constructor de la clase padre
 		Phx.vista.Caja.superclass.constructor.call(this,config);
 		this.init();
+		this.iniciarEventos();
 		
 		this.addButton('btnAbrirCerrar',
 			{
@@ -136,6 +137,51 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 			grid:true,
 			form:true
 		},
+		{
+            config:{
+                name: 'id_cuenta_bancaria',
+                fieldLabel: 'Cuenta Bancaria',
+                allowBlank: false,
+                emptyText:'Elija una Cuenta...',
+                store:new Ext.data.JsonStore(
+                {
+                    url: '../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancariaUsuario',
+                    id: 'id_cuenta_bancaria',
+                    root:'datos',
+                    sortInfo:{
+                        field:'id_cuenta_bancaria',
+                        direction:'ASC'
+                    },
+                    totalProperty:'total',
+                    fields: ['id_cuenta_bancaria','nro_cuenta','nombre_institucion','codigo_moneda','centro','denominacion'],
+                    remoteSort: true,
+                    baseParams : {
+						par_filtro :'nro_cuenta'
+					}
+                }),
+                tpl:'<tpl for="."><div class="x-combo-list-item"><p><b>{nro_cuenta}</b></p><p>Moneda: {codigo_moneda}, {nombre_institucion}</p><p>{denominacion}, Centro: {centro}</p></div></tpl>',
+                valueField: 'id_cuenta_bancaria',
+                hiddenValue: 'id_cuenta_bancaria',
+                displayField: 'nro_cuenta',
+                gdisplayField:'desc_cuenta_bancaria',
+                listWidth:'280',
+                forceSelection:true,
+                typeAhead: false,
+                triggerAction: 'all',
+                lazyRender:true,
+                mode:'remote',
+                pageSize:20,
+                queryDelay:500,
+                gwidth: 250,
+                minChars:2,
+                renderer:function(value, p, record){return String.format('{0}', record.data['desc_cuenta_bancaria']);}
+             },
+            type:'ComboBox',
+            filters:{pfiltro:'cb.nro_cuenta',type:'string'},
+            id_grupo:1,
+            grid:false,
+            form:false
+        },
 		{
 			config:{
 				name: 'importe_maximo',
@@ -317,6 +363,8 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_moneda', type: 'numeric'},
 		{name:'fecha', type: 'date',dateFormat:'Y-m-d'},
 		{name:'id_depto', type: 'numeric'},
+		{name:'id_cuenta_bancaria', type: 'numeric'},
+		{name:'cuenta_bancaria', type: 'string'},
 		{name:'id_proceso_wf', type: 'numeric'},
 		{name:'id_estado_wf', type: 'numeric'},
 		{name:'codigo', type: 'string'},
@@ -337,6 +385,36 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 	bdel:true,
 	bsave:true,
 	
+	preparaMenu:function(n){
+         var data = this.getSelectedData();
+         
+         if(data.estado_proceso == 'borrador'){  
+		    this.getBoton('btnAbrirCerrar').enable();
+			this.getBoton('edit').enable();
+			//this.getBoton('del').enable();
+         }
+		 else{
+			 this.getBoton('edit').disable();
+			 //this.getBoton('del').disable();
+			
+			 if(data.estado_proceso =='abierto')
+				 this.getBoton('btnAbrirCerrar').enable();			 
+			 else
+				this.getBoton('btnAbrirCerrar').disable();
+		 }
+     },
+    /*
+    liberaMenu:function(){
+        var tb = Phx.vista.Caja.superclass.liberaMenu.call(this);
+        
+        if(tb){
+           this.getBoton('ant_estado').disable();
+           this.getBoton('ini_estado').disable();
+           this.getBoton('sig_estado').disable();     
+        }
+       return tb
+    }, 
+	*/
 	/*	
 	abrirCerrarCaja:function(){ 
 		var rec=this.sm.getSelected();
@@ -404,7 +482,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 	
 	onSaveWizard:function(wizard,resp){
 		Phx.CP.loadingShow();
-		console.log(resp);
+		
 		Ext.Ajax.request({
 			url:'../../sis_tesoreria/control/Caja/siguienteEstadoCaja',
 			params:{
@@ -469,7 +547,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
          this.reload();
        }
     },
-	
+		
 	south : {
 			url : '../../../sis_tesoreria/vista/cajero/Cajero.php',
 			title : 'Cajero',

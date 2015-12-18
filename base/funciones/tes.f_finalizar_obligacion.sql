@@ -82,7 +82,7 @@ BEGIN
                    from tes.tplan_pago pp
                    where pp.id_obligacion_pago =  p_id_obligacion_pago  
                         and pp.estado_reg = 'activo'
-                         and pp.estado not in ('devengado','pagado', 'anticipado', 'aplicado', 'devuelto')) THEN
+                         and pp.estado not in ('devengado','pagado', 'anticipado', 'aplicado', 'devuelto','contabilizado')) THEN
           
           
              raise exception 'existen cuotas pendientes de finanización';
@@ -273,15 +273,18 @@ BEGIN
              
       
          ELSE
-               --si no es de adquisiciones
-               --se revierte el presupeusto  sobrante si existe
-                IF v_pre_integrar_presupuestos = 'true' THEN 
-                   IF not tes.f_gestionar_presupuesto_tesoreria(p_id_obligacion_pago, p_id_usuario, 'revertir')  THEN
-                                           
-                       raise exception 'Error al revertir el presupuesto';
-                                           
+               --si no es de adquisiciones y no es un paso sin presupeustos (pago_especial)
+               
+               IF  v_registros_obli.tipo_obligacion  !=  'pago_especial' THEN
+                   --se revierte el presupeusto  sobrante si existe
+                    IF v_pre_integrar_presupuestos = 'true' THEN 
+                       IF not tes.f_gestionar_presupuesto_tesoreria(p_id_obligacion_pago, p_id_usuario, 'revertir')  THEN
+                                               
+                           raise exception 'Error al revertir el presupuesto';
+                                               
+                       END IF;
                    END IF;
-               END IF;
+              END IF;
        END IF;
       
       

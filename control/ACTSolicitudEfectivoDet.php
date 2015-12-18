@@ -11,7 +11,12 @@ class ACTSolicitudEfectivoDet extends ACTbase{
 			
 	function listarSolicitudEfectivoDet(){
 		$this->objParam->defecto('ordenacion','id_solicitud_efectivo_det');
-
+		
+		if($this->objParam->getParametro('id_solicitud_efectivo')!='')
+		{
+			$this->objParam-> addFiltro('soldet.id_solicitud_efectivo ='.$this->objParam->getParametro('id_solicitud_efectivo'));
+		}
+		
 		$this->objParam->defecto('dir_ordenacion','asc');
 		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
 			$this->objReporte = new Reporte($this->objParam,$this);

@@ -2068,6 +2068,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 	me.ocultarGrupo(2); //ocultar el grupo de ajustes
                 }
                 
+                me.mostrarGrupo(3);
           }
     },
     

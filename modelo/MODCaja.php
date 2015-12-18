@@ -29,7 +29,10 @@ class MODCaja extends MODbase{
 		$this->captura('porcentaje_compra','numeric');
 		$this->captura('id_moneda','int4');
 		$this->captura('id_depto','int4');
+		$this->captura('id_cuenta_bancaria','int4');
+		$this->captura('cuenta_bancaria','text');
 		$this->captura('codigo','varchar');
+		$this->captura('cajero','text');
 		$this->captura('id_usuario_reg','int4');
 		$this->captura('fecha_reg','timestamp');
 		$this->captura('id_usuario_mod','int4');
@@ -87,7 +90,8 @@ class MODCaja extends MODbase{
 		$this->setParametro('tipo','tipo','varchar');
 		$this->setParametro('estado_reg','estado_reg','varchar');
 		$this->setParametro('porcentaje_compra','porcentaje_compra','numeric');
-		$this->setParametro('id_moneda','id_moneda','int4');
+		$this->setParametro('id_moneda','id_moneda','int4');		
+		$this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
 		$this->setParametro('id_depto','id_depto','int4');
 		$this->setParametro('codigo','codigo','varchar');
 		$this->setParametro('tipo_ejecucion','tipo_ejecucion','varchar');
@@ -164,6 +168,30 @@ class MODCaja extends MODbase{
 
         //Devuelve la respuesta
         return $this->respuesta;
-    }	
+    }
+	
+	function anteriorEstadoCaja(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.ft_caja_ime';
+        $this->transaccion='TES_ANTECAJA_IME';
+        $this->tipo_procedimiento='IME';
+        
+        //Define los parametros para la funcion
+        $this->setParametro('id_proceso_wf','id_proceso_wf','int4');
+        $this->setParametro('id_estado_wf','id_estado_wf','int4');
+        $this->setParametro('id_funcionario_usu','id_funcionario_usu','int4');
+        $this->setParametro('id_tipo_estado','id_tipo_estado','int4');
+        $this->setParametro('id_funcionario_wf','id_funcionario_wf','int4');
+        $this->setParametro('id_depto_wf','id_depto_wf','int4');
+        $this->setParametro('obs','obs','text');
+        $this->setParametro('json_procesos','json_procesos','text');
+
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
 }
 ?>

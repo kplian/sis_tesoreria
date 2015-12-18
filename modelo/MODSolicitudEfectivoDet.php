@@ -23,7 +23,9 @@ class MODSolicitudEfectivoDet extends MODbase{
 		$this->captura('id_solicitud_efectivo_det','int4');
 		$this->captura('id_solicitud_efectivo','int4');
 		$this->captura('id_cc','int4');
+		$this->captura('codigo_cc','text');
 		$this->captura('id_concepto_ingas','int4');
+		$this->captura('desc_ingas','varchar');
 		$this->captura('id_partida_ejecucion','int4');
 		$this->captura('estado_reg','varchar');
 		$this->captura('monto','numeric');

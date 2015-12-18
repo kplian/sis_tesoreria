@@ -459,7 +459,8 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                 allowBlank: false,
                 anchor: '80%',
                 gwidth: 100,
-                maxLength:131074
+                maxLength:131074,
+				decimalPrecision : 10
             },
             type:'NumberField',
             filters:{pfiltro:'obpg.tipo_cambio_conv',type:'numeric'},

@@ -13,6 +13,17 @@ class ACTCuentaBancaria extends ACTbase{
 		$this->objParam->defecto('ordenacion','id_cuenta_bancaria');
 
 		$this->objParam->defecto('dir_ordenacion','asc');
+		
+		
+		if($this->objParam->getParametro('id_depto_lb')!=''){
+			$this->objParam->addFiltro("deptctab.id_depto = ".$this->objParam->getParametro('id_depto_lb'));
+		}
+		
+		if($this->objParam->getParametro('id_depto_lbs')!=''){
+			$this->objParam->addFiltro("deptctab.id_depto in ( ".$this->objParam->getParametro('id_depto_lbs').")");
+		}
+		
+		
 		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
 			$this->objReporte = new Reporte($this->objParam,$this);
 			$this->res = $this->objReporte->generarReporteListado('MODCuentaBancaria','listarCuentaBancaria');

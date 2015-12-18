@@ -13,6 +13,23 @@ class ACTCaja extends ACTbase{
 		$this->objParam->defecto('ordenacion','id_caja');
 
 		$this->objParam->defecto('dir_ordenacion','asc');
+		
+		if($this->objParam->getParametro('tipo_interfaz')=='cajaVb'){
+			$this->objParam->addFiltro("pc.estado in (''solicitado'')");
+		}
+		
+		if($this->objParam->getParametro('tipo_interfaz')=='cajaAbierto'){
+			$this->objParam->addFiltro("pc.estado in (''abierto'')");
+		}
+		
+		if($this->objParam->getParametro('con_detalle') == 'si'){
+			$this->objParam->addFiltro("caja.tipo_ejecucion = ''con_detalle''");
+		}		
+		
+		if($this->objParam->getParametro('con_detalle') == 'no'){
+			$this->objParam->addFiltro("caja.tipo_ejecucion = ''sin_detalle''");
+		}
+		
 		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
 			$this->objReporte = new Reporte($this->objParam,$this);
 			$this->res = $this->objReporte->generarReporteListado('MODCaja','listarCaja');
@@ -49,6 +66,12 @@ class ACTCaja extends ACTbase{
 	function siguienteEstadoCaja(){
 		$this->objFunc=$this->create('MODCaja');	
 		$this->res=$this->objFunc->siguienteEstadoCaja($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	
+	function anteriorEstadoCaja(){
+		$this->objFunc=$this->create('MODCaja');	
+		$this->res=$this->objFunc->anteriorEstadoCaja($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 }

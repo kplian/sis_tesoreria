@@ -237,8 +237,7 @@ Phx.vista.AperturaCaja=Ext.extend(Phx.frmInterfaz,{
 		this.cmpDetalle.setValue('Para apertura de caja chica');
 		
 		this.cmpEstado = this.getComponente('estado');	
-		this.cmpEstado.setValue('abierto');
-		//Ext.apply(this.Cmp.id_cuenta_bancaria.store.baseParams,{id_depto_lb:this.id_depto_lb,permiso : 'libro_bancos'});		
+		this.cmpEstado.setValue('abierto');		
 	},
 	
 	onSubmit:function(){
