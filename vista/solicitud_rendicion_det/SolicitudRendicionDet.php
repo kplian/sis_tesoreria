@@ -17,7 +17,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
     	//llama al constructor de la clase padre
 		Phx.vista.SolicitudRendicionDet.superclass.constructor.call(this,config);
 		this.init();
-		this.load({params:{start:0, limit:this.tam_pag}})
+		this.load({params:{start:0, limit:this.tam_pag, id_solicitud_efectivo:this.id_solicitud_efectivo}})
 	},
 			
 	Atributos:[
@@ -74,49 +74,6 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 			grid: true,
 			form: true
 		},*/
-		/*{
-			config: {
-				name: 'id_solicitud_efectivo',
-				fieldLabel: 'id_solicitud_efectivo',
-				allowBlank: true,
-				emptyText: 'Elija una opción...',
-				store: new Ext.data.JsonStore({
-					url: '../../sis_/control/Clase/Metodo',
-					id: 'id_',
-					root: 'datos',
-					sortInfo: {
-						field: 'nombre',
-						direction: 'ASC'
-					},
-					totalProperty: 'total',
-					fields: ['id_', 'nombre', 'codigo'],
-					remoteSort: true,
-					baseParams: {par_filtro: 'movtip.nombre#movtip.codigo'}
-				}),
-				valueField: 'id_',
-				displayField: 'nombre',
-				gdisplayField: 'desc_',
-				hiddenName: 'id_solicitud_efectivo',
-				forceSelection: true,
-				typeAhead: false,
-				triggerAction: 'all',
-				lazyRender: true,
-				mode: 'remote',
-				pageSize: 15,
-				queryDelay: 1000,
-				anchor: '100%',
-				gwidth: 150,
-				minChars: 2,
-				renderer : function(value, p, record) {
-					return String.format('{0}', record.data['desc_']);
-				}
-			},
-			type: 'ComboBox',
-			id_grupo: 0,
-			filters: {pfiltro: 'movtip.nombre',type: 'string'},
-			grid: true,
-			form: true
-		},*/
 		{
 			//configuracion del componente
 			config:{
@@ -127,9 +84,29 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 			type:'Field',
 			form:true 
 		},
+		/*{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_plantilla'
+			},
+			type:'Field',
+			form:true 
+		},
+		{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_moneda'
+			},
+			type:'Field',
+			form:true 
+		},*/
 		{
 			config: {
-				name: 'id_documento_respaldo',
+				name: 'id_doc_compra_venta',
 				fieldLabel: 'Documento Respaldo',
 				allowBlank: true,
 				emptyText: 'Elija una opción...',
@@ -149,7 +126,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 				valueField: 'id_',
 				displayField: 'nombre',
 				gdisplayField: 'desc_',
-				hiddenName: 'id_documento_respaldo',
+				hiddenName: 'id_doc_compra_venta',
 				forceSelection: true,
 				typeAhead: false,
 				triggerAction: 'all',
@@ -169,6 +146,22 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 			filters: {pfiltro: 'movtip.nombre',type: 'string'},
 			grid: true,
 			form: true
+		},
+		{
+			config:{
+				name: 'fecha',
+				fieldLabel: 'Fecha',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 100,
+				format: 'd/m/Y',
+				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+			},
+				type:'DateField',
+				filters:{pfiltro:'solefe.fecha',type:'date'},
+				id_grupo:1,
+				grid:true,
+				form:false
 		},
 		{
 			config:{
@@ -303,8 +296,26 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_solicitud_rendicion_det', type: 'numeric'},
 		{name:'id_proceso_caja', type: 'numeric'},
 		{name:'id_solicitud_efectivo', type: 'numeric'},
-		{name:'id_documento_respaldo', type: 'numeric'},
+		{name:'id_doc_compra_venta', type: 'numeric'},
+		{name:'desc_plantilla', type: 'string'},
+		{name:'desc_moneda', type: 'string'},
+		{name:'tipo', type: 'string'},
+		{name:'id_plantilla', type: 'numeric'},
+		{name:'id_moneda', type: 'numeric'},
+		{name:'fecha', type: 'date'},
+		{name:'nit', type: 'string'},
 		{name:'razon_social', type: 'string'},
+		{name:'nro_autorizacion', type: 'string'},
+		{name:'nro_documento', type: 'string'},
+		{name:'nro_dui', type: 'string'},
+		{name:'obs', type: 'string'},
+		{name:'importe_doc', type: 'string'},
+		{name:'importe_pago_liquido', type: 'string'},
+		{name:'importe_iva', type: 'string'},
+		{name:'importe_descuento', type: 'string'},
+		{name:'importe_descuento_ley', type: 'string'},
+		{name:'importe_excento', type: 'string'},
+		{name:'importe_ice', type: 'string'},
 		{name:'estado_reg', type: 'string'},
 		{name:'monto', type: 'numeric'},
 		{name:'id_usuario_reg', type: 'numeric'},
@@ -324,6 +335,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 	
 	abrirFormulario:function(tipo, record){
         //abrir formulario de solicitud
+		console.log(record);
 	   var me = this;
 	   me.objSolForm = Phx.CP.loadWindows('../../../sis_tesoreria/vista/solicitud_rendicion_det/FormRendicion.php',
 								'Formulario de rendicion',
@@ -335,8 +347,8 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 										  tipoDoc: me.tipoDoc,
 										  tipo_form : tipo,
 										  id_depto : me.id_depto,
-										  id_solicitud_efectivo : me.id_solicitud_efectivo
-										  //datosOriginales: record
+										  id_solicitud_efectivo : me.id_solicitud_efectivo,
+										  datosOriginales: record
 										  }
 								}, 
 								this.idContenedor,

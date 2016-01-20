@@ -258,7 +258,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		}],
 		title : 'Reporte Libro Bancos',		
 		ActSave : '../../sis_migracion/control/TsLibroBancos/reporteLibroBancos',
-		//ActSave : window.open('http://172.17.45.11/LibroBancos/Home/VerLibroBancosDeposito?'),
+		
 		topBar : true,
 		botones : false,
 		labelSubmit : 'Imprimir',
@@ -304,7 +304,8 @@ header("content-type: text/javascript; charset=UTF-8");
 				data = data + '&Tipo=' + this.cmpTipo.getValue();
 				data = data + '&NombreBanco=' + this.cmpNombreBanco.getValue();
 				data = data + '&NumeroCuenta=' + this.cmpNroCuenta.getValue();
-				
+				alert(data);
+				console.log(data);
 				window.open('http://sms.obairlines.bo/LibroBancos/Home/VerLibroBancos?'+data);
 				//window.open('http://localhost:2309/Home/VerLibroBancos?'+data);				
 			}else{

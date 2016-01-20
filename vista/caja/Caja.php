@@ -12,6 +12,8 @@ header("content-type: text/javascript; charset=UTF-8");
 <script>
 Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		
+	nombreVista: 'caja',
+	
 	constructor:function(config){
 		this.maestro=config.maestro;
     	//llama al constructor de la clase padre
@@ -29,7 +31,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 			}
 		);
 		
-		this.load({params:{start:0, limit:this.tam_pag}})
+		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.nombreVista}})
 	},
 	tam_pag:50,
 			
@@ -65,7 +67,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
                 fieldLabel: 'Num. Tramite',
                 allowBlank: true,
                 anchor: '80%',
-                gwidth: 150,
+                gwidth: 130,
                 maxLength:200
             },
             type:'TextField',
@@ -85,6 +87,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
         allowBlank:false,
         gdisplayField:'desc_depto',//mapea al store del grid
         gwidth:200,
+		baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'OP'},
         renderer:function (value, p, record){return String.format('{0}', record.data['desc_depto']);}
    },   
         type:'ComboRec',
@@ -156,7 +159,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
                     fields: ['id_cuenta_bancaria','nro_cuenta','nombre_institucion','codigo_moneda','centro','denominacion'],
                     remoteSort: true,
                     baseParams : {
-						par_filtro :'nro_cuenta'
+						par_filtro :'nro_cuenta', permiso:'libro_bancos'
 					}
                 }),
                 tpl:'<tpl for="."><div class="x-combo-list-item"><p><b>{nro_cuenta}</b></p><p>Moneda: {codigo_moneda}, {nombre_institucion}</p><p>{denominacion}, Centro: {centro}</p></div></tpl>',
@@ -180,7 +183,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
             filters:{pfiltro:'cb.nro_cuenta',type:'string'},
             id_grupo:1,
             grid:false,
-            form:false
+            form:true
         },
 		{
 			config:{
@@ -346,7 +349,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		}
 	],
 	
-	title:'Caja',
+	title:'Solicitud Apertura Cierre Caja',
 	ActSave:'../../sis_tesoreria/control/Caja/insertarCaja',
 	ActDel:'../../sis_tesoreria/control/Caja/eliminarCaja',
 	ActList:'../../sis_tesoreria/control/Caja/listarCaja',
@@ -391,17 +394,16 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
          if(data.estado_proceso == 'borrador'){  
 		    this.getBoton('btnAbrirCerrar').enable();
 			this.getBoton('edit').enable();
-			//this.getBoton('del').enable();
+			this.getBoton('del').enable();
          }
 		 else{
 			 this.getBoton('edit').disable();
-			 //this.getBoton('del').disable();
-			
+			 this.getBoton('del').disable();
 			 if(data.estado_proceso =='abierto')
 				 this.getBoton('btnAbrirCerrar').enable();			 
 			 else
 				this.getBoton('btnAbrirCerrar').disable();
-		 }
+		 }		 
      },
     /*
     liberaMenu:function(){
@@ -479,7 +481,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
 		}					   
 	},
-	
+		
 	onSaveWizard:function(wizard,resp){
 		Phx.CP.loadingShow();
 		
@@ -502,13 +504,13 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 			scope:this
 		});
 	},
-	
+	/*
 	successWizard:function(resp){
 		Phx.CP.loadingHide();
 		resp.argument.wizard.panel.destroy()
 		Phx.CP.getPagina(this.idContenedorPadre).reload();  
 		//this.reload();
-	},
+	},*/
 	
 	transferir:function(wizard,resp){
 		Phx.CP.loadingShow();

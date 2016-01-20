@@ -12,20 +12,17 @@ class ACTSolicitudEfectivo extends ACTbase{
 	function listarSolicitudEfectivo(){
 		$this->objParam->defecto('ordenacion','id_solicitud_efectivo');
 		
-		if($this->objParam->getParametro('vista')=='ConDetalle')
+		if($this->objParam->getParametro('tipo_interfaz')=='ConDetalle')
 		{
 			$this->objParam-> addFiltro("caja.tipo_ejecucion = ''con_detalle''");				
 		}
 		
-		if($this->objParam->getParametro('vista')=='SinDetalle')
+		if($this->objParam->getParametro('tipo_interfaz')=='SinDetalle')
 		{
 			$this->objParam-> addFiltro("caja.tipo_ejecucion = ''sin_detalle''");
 		}
 		
-		if($this->objParam->getParametro('vista')=='vb')
-		{
-			$this->objParam-> addFiltro("solefe.estado = ''vbcajero''");
-		}
+		$this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]);
 		
 		$this->objParam->defecto('dir_ordenacion','asc');
 		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){

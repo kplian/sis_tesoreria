@@ -38,7 +38,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 		);
 				
 		this.iniciarEventos();
-		this.load({params:{start:0, limit:this.tam_pag, vista:'vb'}})
+		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:'vbSolicitudEfectivo'}})
 	},
 			
 	Atributos:[

@@ -18,6 +18,9 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->procedimiento='tes.ft_solicitud_efectivo_sel';
 		$this->transaccion='TES_SOLEFE_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		$this->setParametro('id_funcionario_usu','id_funcionario_usu','int4');
+		$this->setParametro('tipo_interfaz','tipo_interfaz','varchar');
 				
 		//Definicion de la lista del resultado del query
 		$this->captura('id_solicitud_efectivo','int4');

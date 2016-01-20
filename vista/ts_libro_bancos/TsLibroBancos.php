@@ -1189,7 +1189,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 	
 	onReloadPage:function(m){
 		this.maestro=m;			
-		this.cmpIdFinalidad.store.baseParams.id_cuenta_bancaria =this.maestro.id_cuenta_bancaria;console.log(this.cls);		
+		this.cmpIdFinalidad.store.baseParams.id_cuenta_bancaria =this.maestro.id_cuenta_bancaria;		
 		this.store.baseParams={id_cuenta_bancaria:this.maestro.id_cuenta_bancaria, mycls:this.cls};
 		this.load({params:{start:0, limit:this.tam_pag}});			
 	}

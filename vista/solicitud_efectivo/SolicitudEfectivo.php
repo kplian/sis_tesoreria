@@ -30,14 +30,14 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 		this.iniciarEventos();
 		
 		this.addButton('btnRendicion', {
-			text : 'Rendicion',
+			text : 'Rendicion Efectivo',
 			iconCls : 'bballot',
 			disabled : false,
 			handler : this.onBtnRendicion,
 			tooltip : '<b>Rendicion</b>'
 		});
 		
-		this.load({params:{start:0, limit:this.tam_pag, vista: this.vista}})
+		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.vista}})
 	},
 			
 	Atributos:[
@@ -473,6 +473,12 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('edit').disable();			  
 			  this.getBoton('del').disable();
           }
+		  
+		  if (data['estado']== 'entregado'){			  
+			  this.getBoton('btnRendicion').enable();
+		  }else{
+			  this.getBoton('btnRendicion').disable();
+		  }
      },
 	
 	onBtnRendicion : function() {

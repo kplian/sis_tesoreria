@@ -12,6 +12,14 @@ class ACTSolicitudRendicionDet extends ACTbase{
 	function listarSolicitudRendicionDet(){
 		$this->objParam->defecto('ordenacion','id_solicitud_rendicion_det');
 
+		if($this->objParam->getParametro('id_solicitud_efectivo')!=''){
+			$this->objParam->addFiltro("rend.id_solicitud_efectivo = ".$this->objParam->getParametro('id_solicitud_efectivo'));	
+		}
+		
+		if($this->objParam->getParametro('id_proceso_caja')!=''){
+			$this->objParam->addFiltro("id_proceso_caja = ".$this->objParam->getParametro('id_proceso_caja'));	
+		}
+
 		$this->objParam->defecto('dir_ordenacion','asc');
 		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
 			$this->objReporte = new Reporte($this->objParam,$this);
@@ -36,7 +44,7 @@ class ACTSolicitudRendicionDet extends ACTbase{
 	
 	function insertarRendicionDocCompleto(){
 		$this->objFunc=$this->create('MODSolicitudRendicionDet');	
-		if($this->objParam->insertar('id_solicitud_rendicion_det')){
+		if($this->objParam->insertar('id_doc_compra_venta')){
 			$this->res=$this->objFunc->insertarRendicionDocCompleto($this->objParam);			
 		} else{
 			//TODO			

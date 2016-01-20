@@ -12,7 +12,7 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 Phx.vista.CajaVb = {
-    bedit:true,
+    bedit:false,
     bnew:false,
     bsave:false,
     bdel:false,
@@ -92,7 +92,7 @@ Phx.vista.CajaVb = {
     desBotoneshistorico:function(){
           this.getBoton('ant_estado').disable();         
           this.getBoton('sig_estado').disable();
-          this.getBoton('edit').disable();           
+          //this.getBoton('edit').disable();           
      }, 
     
    onButtonEdit:function(){
@@ -111,11 +111,11 @@ Phx.vista.CajaVb = {
     preparaMenu:function(n){
          var data = this.getSelectedData();
          var tb =this.tbar;
-         Phx.vista.CajaVb.superclass.preparaMenu.call(this,n); 
+         //Phx.vista.CajaVb.superclass.preparaMenu.call(this,n); 
          //if(this.historico == 'no'){  
 		    this.getBoton('ant_estado').enable();         
             this.getBoton('sig_estado').enable();
-            this.getBoton('edit').enable(); 
+            //this.getBoton('edit').enable(); 
          //} 
          //else{
          //   this.desBotoneshistorico();
@@ -292,7 +292,7 @@ Phx.vista.CajaVb = {
                 id_depto_wf:        resp.id_depto_wf,
                 obs:                resp.obs,
                 //id_depto_lb:		resp.id_depto_lb,
-                //json_procesos:      Ext.util.JSON.encode(resp.procesos)
+                json_procesos:      Ext.util.JSON.encode(resp.procesos)
                 },
             success:this.successWizard,
             failure: this.conexionFailure,

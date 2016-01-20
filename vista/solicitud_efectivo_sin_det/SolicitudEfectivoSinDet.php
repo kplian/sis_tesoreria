@@ -19,6 +19,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
     	//llama al constructor de la clase padre
 		Phx.vista.SolicitudEfectivoSinDet.superclass.constructor.call(this,config);
 		this.init();
+		this.iniciarEventos();
 		
 		this.addButton('fin_registro',
 			{	text:'Siguiente',
@@ -30,14 +31,14 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		);
 		
 		this.addButton('btnRendicion', {
-			text : 'Rendicion',
+			text : 'Rendicion Efectivo',
 			iconCls : 'bballot',
 			disabled : false,
 			handler : this.onBtnRendicion,
 			tooltip : '<b>Rendicion</b>'
 		});
 		
-		this.load({params:{start:0, limit:this.tam_pag, vista:this.vista}})
+		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:this.vista}})
 	},
 			
 	Atributos:[
@@ -146,6 +147,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 				anchor: '80%',
 				gwidth: 100,
 				format: 'd/m/Y',
+				value : new Date(),
 				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
 			},
 				type:'DateField',
@@ -394,6 +396,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_solicitud_efectivo', type: 'numeric'},
 		{name:'id_caja', type: 'numeric'},
 		{name:'codigo', type: 'string'},
+		{name:'id_depto', type: 'numeric'},
 		{name:'id_estado_wf', type: 'numeric'},
 		{name:'monto', type: 'numeric'},
 		{name:'id_proceso_wf', type: 'numeric'},
@@ -427,14 +430,28 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
           if (data['estado']== 'borrador'){    
               this.getBoton('fin_registro').enable();
 			  this.getBoton('edit').enable();
-			  this.getBoton('del').enable();
+			  this.getBoton('del').enable();			  
           }
           else{            
               this.getBoton('fin_registro').disable();
 			  this.getBoton('edit').disable();			  
 			  this.getBoton('del').disable();
           }
+		  if (data['estado']== 'entregado'){			  
+			  this.getBoton('btnRendicion').enable();
+		  }else{
+			  this.getBoton('btnRendicion').disable();
+		  }
      },
+	 
+	 iniciarEventos : function(){		 
+		this.cmpFecha=this.getComponente('fecha');
+	 },
+	 
+	 onButtonNew: function(){
+		Phx.vista.SolicitudEfectivoSinDet.superclass.onButtonNew.call(this);
+		this.cmpFecha.setValue(new Date());
+	 },
 	 
 	 onBtnRendicion : function() {
 		var rec = this.sm.getSelected();

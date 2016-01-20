@@ -59,7 +59,11 @@ BEGIN
        from conta.tint_comprobante cbte
        inner join conta.tint_transaccion tra on tra.id_int_comprobante = cbte.id_int_comprobante
        left join param.tdepto depto on depto.id_depto = cbte.id_depto_libro
-        where cbte.id_int_comprobante = p_id_int_comprobante and tra.forma_pago = 'cheque';    
+        where cbte.id_int_comprobante = p_id_int_comprobante and tra.forma_pago = 'cheque';
+
+		if(v_datos_cheque.id_cuenta_bancaria is null)then
+        	raise exception 'El comprobante % no cuenta con el id_cuenta_bancaria', p_id_int_comprobante;
+        end if;
 		        
         if(v_datos_cheque.id_depto_libro is null)then
         	raise exception 'El comprobante % no cuenta con el id_depto_libro', p_id_int_comprobante;

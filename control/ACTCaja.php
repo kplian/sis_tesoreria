@@ -13,13 +13,17 @@ class ACTCaja extends ACTbase{
 		$this->objParam->defecto('ordenacion','id_caja');
 
 		$this->objParam->defecto('dir_ordenacion','asc');
-		
+		/*
 		if($this->objParam->getParametro('tipo_interfaz')=='cajaVb'){
 			$this->objParam->addFiltro("pc.estado in (''solicitado'')");
 		}
 		
 		if($this->objParam->getParametro('tipo_interfaz')=='cajaAbierto'){
 			$this->objParam->addFiltro("pc.estado in (''abierto'')");
+		}*/
+		
+		if($this->objParam->getParametro('tipo_interfaz')=='caja'){
+			$this->objParam->addFiltro("pc.tipo = ''apertura''");
 		}
 		
 		if($this->objParam->getParametro('con_detalle') == 'si'){
@@ -29,6 +33,8 @@ class ACTCaja extends ACTbase{
 		if($this->objParam->getParametro('con_detalle') == 'no'){
 			$this->objParam->addFiltro("caja.tipo_ejecucion = ''sin_detalle''");
 		}
+		
+		$this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]);
 		
 		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
 			$this->objReporte = new Reporte($this->objParam,$this);

@@ -212,7 +212,7 @@ BEGIN
                 select pp.id_estado_wf, op.num_tramite into v_id_estado_wf_anterior, v_num_tramite
                 from tes.tplan_pago pp
                 inner join tes.tobligacion_pago op on op.id_obligacion_pago=pp.id_obligacion_pago
-                where pp.id_int_comprobante=(p_hstore->'id_int_comprobante')::int4 and pp.estado='pagado';  
+                where pp.id_int_comprobante=(p_hstore->'id_int_comprobante')::int4 and pp.estado in ('pagado','contabilizado','devengado','devuelto');  
                                 
                 IF v_id_estado_wf_anterior IS NULL THEN
                 	raise exception 'El plan de pago no se encuentra en estado pagado';

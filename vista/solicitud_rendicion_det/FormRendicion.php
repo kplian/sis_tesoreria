@@ -51,6 +51,8 @@ Phx.vista.FormRendicion = {
 				Phx.CP.loadingHide();  
 				if (r.length == 1 ) {                        
 					this.Cmp.id_depto_conta.setValue(r[0].data.id_depto_destino);
+				}else{
+					alert('Depto Conta no recuperado');
 				}     								
 			}, scope : this
 		});

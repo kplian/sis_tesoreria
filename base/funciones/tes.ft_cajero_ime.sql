@@ -1,8 +1,11 @@
-CREATE OR REPLACE FUNCTION "tes"."ft_cajero_ime" (	
-				p_administrador integer, p_id_usuario integer, p_tabla character varying, p_transaccion character varying)
-RETURNS character varying AS
-$BODY$
-
+CREATE OR REPLACE FUNCTION tes.ft_cajero_ime (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Sistema de Tesoreria
  FUNCION: 		tes.ft_cajero_ime
@@ -54,7 +57,9 @@ BEGIN
 			fecha_reg,
 			id_usuario_reg,
 			id_usuario_mod,
-			fecha_mod
+			fecha_mod,
+            fecha_inicio,
+            fecha_fin
           	) values(
 			'activo',
 			v_parametros.tipo,
@@ -64,8 +69,9 @@ BEGIN
 			now(),
 			p_id_usuario,
 			null,
-			null
-							
+			null,
+            v_parametros.fecha_inicio,
+			v_parametros.fecha_fin				
 			)RETURNING id_cajero into v_id_cajero;
 			
 			--Definicion de la respuesta
@@ -94,7 +100,9 @@ BEGIN
 			id_funcionario = v_parametros.id_funcionario,
 			id_caja = v_parametros.id_caja,
 			id_usuario_mod = p_id_usuario,
-			fecha_mod = now()
+			fecha_mod = now(),
+            fecha_inicio = v_parametros.fecha_inicio,
+            fecha_fin = v_parametros.fecha_fin
 			where id_cajero=v_parametros.id_cajero;
                
 			--Definicion de la respuesta
@@ -145,7 +153,9 @@ EXCEPTION
 		raise exception '%',v_resp;
 				        
 END;
-$BODY$
-LANGUAGE 'plpgsql' VOLATILE
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
 COST 100;
-ALTER FUNCTION "tes"."ft_cajero_ime"(integer, integer, character varying, character varying) OWNER TO postgres;
