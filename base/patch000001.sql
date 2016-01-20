@@ -1395,3 +1395,17 @@ ALTER TABLE tes.tobligacion_pago
   
 /*****************************F-SCP-RAC-TES-0-08/22/2015*************/
 
+/*****************************I-SCP-GSS-TES-0-20/21/2016*************/
+CREATE TABLE tes.tsolicitud_rendicion_det (
+  id_solicitud_rendicion_det SERIAL, 
+  id_documento_respaldo INTEGER, 
+  id_solicitud_efectivo INTEGER, 
+  id_proceso_caja INTEGER, 
+  monto NUMERIC(18,2), 
+  CONSTRAINT tsolicitud_rendicion_det_pkey PRIMARY KEY(id_solicitud_rendicion_det)
+) INHERITS (pxp.tbase)
+
+WITHOUT OIDS;;
+
+/*****************************F-SCP-GSS-TES-0-20/21/2016*************/
+

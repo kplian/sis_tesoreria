@@ -8482,5 +8482,18 @@ AS
     
 /***********************************F-DEP-RAC-TES-0-08/12/2015****************************************/ 
 
-
-
+/***********************************I-DEP-GSS-TES-0-20/01/2016****************************************/ 
+ALTER TABLE tes.tsolicitud_rendicion_det
+  ADD CONSTRAINT fk_tsolicitud_rendicion_det__id_proceso_caja FOREIGN KEY (id_proceso_caja)
+    REFERENCES tes.tproceso_caja(id_proceso_caja)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE, 
+	
+ALTER TABLE tes.tsolicitud_rendicion_det
+	ADD CONSTRAINT fk_tsolicitud_rendicion_det__id_solicitud_efectivo FOREIGN KEY (id_solicitud_efectivo)
+    REFERENCES tes.tsolicitud_efectivo(id_solicitud_efectivo)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+/***********************************F-DEP-GSS-TES-0-20/01/2016****************************************/ 
