@@ -1409,3 +1409,29 @@ WITHOUT OIDS;;
 
 /*****************************F-SCP-GSS-TES-0-20/21/2016*************/
 
+/*****************************I-SCP-GSS-TES-0-21/01/2016*************/
+ALTER TABLE tes.tcaja
+  ADD COLUMN id_cuenta_bancaria INTEGER;
+  
+ALTER TABLE tes.tcaja
+  RENAME COLUMN nombre TO codigo;
+
+ALTER TABLE tes.tcaja
+  ALTER COLUMN codigo TYPE VARCHAR(20);
+  
+ALTER TABLE tes.tcaja
+  ALTER COLUMN estado SET DEFAULT 'cerrado';
+  
+ALTER TABLE tes.tcaja
+  RENAME COLUMN monto_fondo TO importe_maximo;
+  
+ALTER TABLE tes.tcaja
+  RENAME COLUMN monto_maximo_compra TO porcentaje_compra;
+
+ALTER TABLE tes.tcaja
+  ALTER COLUMN porcentaje_compra TYPE NUMERIC(6,2);
+
+ALTER TABLE tes.tcaja
+  ALTER COLUMN tipo_ejecucion TYPE VARCHAR(25);
+  
+/*****************************F-SCP-GSS-TES-0-21/01/2016*************/
