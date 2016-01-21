@@ -8488,7 +8488,7 @@ ALTER TABLE tes.tsolicitud_rendicion_det
     REFERENCES tes.tproceso_caja(id_proceso_caja)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
-    NOT DEFERRABLE, 
+    NOT DEFERRABLE; 
 	
 ALTER TABLE tes.tsolicitud_rendicion_det
 	ADD CONSTRAINT fk_tsolicitud_rendicion_det__id_solicitud_efectivo FOREIGN KEY (id_solicitud_efectivo)
