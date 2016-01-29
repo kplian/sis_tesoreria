@@ -1435,3 +1435,13 @@ ALTER TABLE tes.tcaja
   ALTER COLUMN tipo_ejecucion TYPE VARCHAR(25);
   
 /*****************************F-SCP-GSS-TES-0-21/01/2016*************/
+
+/*****************************I-SCP-GSS-TES-0-29/01/2016*************/
+
+ALTER TABLE tes.tproceso_caja
+  ADD COLUMN fecha_inicio DATE;
+
+ALTER TABLE tes.tproceso_caja
+  ADD COLUMN fecha_fin DATE;
+  
+/*****************************F-SCP-GSS-TES-0-29/01/2016*************/

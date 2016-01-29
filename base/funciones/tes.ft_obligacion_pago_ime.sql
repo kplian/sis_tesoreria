@@ -1683,7 +1683,10 @@ BEGIN
                op.id_obligacion_pago,
                op.id_moneda,
                op.estado,
-               op.fecha
+               op.fecha,
+               op.num_tramite,
+               op.tipo_cambio_conv
+               
             into
                v_registros_op
             from tes.tobligacion_pago op
@@ -1766,7 +1769,10 @@ BEGIN
           --si se integra con presupuestos
           IF v_pre_integrar_presupuestos = 'true' THEN  
            
-            va_resp_ges =  pre.f_gestionar_presupuesto(  va_id_presupuesto, 
+            va_resp_ges =  pre.f_gestionar_presupuesto(  p_id_usuario ,
+            											 v_registros_op.tipo_cambio_conv, -- tipo de cambio
+                
+               											 va_id_presupuesto, 
                                                          va_id_partida, 
                                                          va_id_moneda, 
                                                          va_monto, 
@@ -1775,8 +1781,12 @@ BEGIN
                                                          va_id_partida_ejecucion,--  p_id_partida_ejecucion 
                                                          va_columna_relacion, 
                                                          va_fk_llave,
-                                                         NULL
+                                                         v_registros_op.num_tramite
                                                          );	
+                            
+                                                         
+                                                         
+ 
             
           END IF;
             -- Definicion de la respuesta

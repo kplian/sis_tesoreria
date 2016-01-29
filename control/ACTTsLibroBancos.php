@@ -39,7 +39,7 @@ class ACTTsLibroBancos extends ACTbase{
 		}
 		
 		if($this->objParam->getParametro('mycls')=='TsLibroBancos'){
-			$this->objParam->addFiltro("id_libro_bancos_fk is null");
+			//$this->objParam->addFiltro("id_libro_bancos_fk is null");
 		}
 		
 		if($this->objParam->getParametro('m_nro_cheque')!=''){

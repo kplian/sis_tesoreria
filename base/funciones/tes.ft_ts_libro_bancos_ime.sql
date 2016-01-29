@@ -410,7 +410,7 @@ BEGIN
          
             --Comparamos el saldo de la cuenta bancaria con el importe del cheque
             IF(v_parametros.importe_cheque > g_saldo_cuenta_bancaria) Then
-              raise exception 'El importe que intenta registrar excede el saldo general de la cuenta bancaria al %. Por favor revise el saldo de la cuenta al %.',ts_fecha,ts_fecha;
+              raise exception 'El importe que intenta registrar excede el saldo general de la cuenta bancaria al %. Por favor revise el saldo de la cuenta al %.',v_parametros.fecha,v_parametros.fecha;
             End If;
             
             
