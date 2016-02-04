@@ -89,8 +89,10 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                 tooltip : '<b>Revertir  presupuestos,  permite ver la evolucón presupuestaria y revertir parcialmente</b>'
             });
         
-        this.addButton('diagrama_gantt',{grupo:[0,1,2],text:'Gant', iconCls: 'bgantt', disabled:true, handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
+        //this.addButton('diagrama_gantt',{grupo:[0,1,2],text:'Gant', iconCls: 'bgantt', disabled:true, handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
   
+		this.addBotonesGantt();
+
         this.addButton('ajustes',{grupo:[0,1,2],text:'Ajus.', iconCls: 'blist', disabled: true, handler: this.showAjustes,tooltip: '<b>Ajustes a los anticipos totales para pagos variables</b>'});
         this.addButton('est_anticipo',{grupo:[0,1,2],text:'Ampli.', iconCls: 'blist', disabled: true, handler: this.showAnticipo,tooltip: '<b>Define el monto de ampliación util cuando necesitamos hacer pagos anticipados para la siguiente gestión</b>'});
         this.addButton('extenderop',{grupo:[0,1,2],text:'Ext.', iconCls: 'blist', disabled: true, handler: this.extenederOp,tooltip: '<b>Extender la obligación de pago para la siguiente gestión</b>'});
@@ -104,19 +106,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                     handler : this.onOpenObs,
                     tooltip : '<b>Observaciones</b><br/><b>Observaciones del WF</b>'
           });
-        function diagramGantt(){            
-            var data=this.sm.getSelected().data.id_proceso_wf;
-            Phx.CP.loadingShow();
-            Ext.Ajax.request({
-                url: '../../sis_workflow/control/ProcesoWf/diagramaGanttTramite',
-                params: { 'id_proceso_wf': data },
-                success: this.successExport,
-                failure: this.conexionFailure,
-                timeout: this.timeout,
-                scope: this
-            });         
-        }
-	
+          
 	
 	   this.construyeVariablesContratos();
 	
@@ -1507,6 +1497,52 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
         
         //Adiciona el menú a la barra de herramientas
         this.tbar.add(this.menuAdq);
+    },
+	
+	diagramGantt : function (){            
+		var data=this.sm.getSelected().data.id_proceso_wf;
+		Phx.CP.loadingShow();
+		Ext.Ajax.request({
+			url: '../../sis_workflow/control/ProcesoWf/diagramaGanttTramite',
+			params: { 'id_proceso_wf': data },
+			success: this.successExport,
+			failure: this.conexionFailure,
+			timeout: this.timeout,
+			scope: this
+		});         
+	},
+		
+	diagramGanttDinamico : function(){			
+		var data=this.sm.getSelected().data.id_proceso_wf;
+		window.open('../../../sis_workflow/reportes/gantt/gantt_dinamico.html?id_proceso_wf='+data)		
+	},
+	
+	addBotonesGantt: function() {
+        this.menuAdqGantt = new Ext.Toolbar.SplitButton({
+            id: 'b-diagrama_gantt-' + this.idContenedor,
+            text: 'Gantt',
+            disabled: true,
+            grupo:[0,1,2],
+            iconCls : 'bgantt',
+            handler:this.diagramGanttDinamico,
+            scope: this,
+            menu:{
+            items: [{
+                id:'b-gantti-' + this.idContenedor,
+                text: 'Gantt Imagen',
+                tooltip: '<b>Mues un reporte gantt en formato de imagen</b>',
+                handler:this.diagramGantt,
+                scope: this
+            }, {
+                id:'b-ganttd-' + this.idContenedor,
+                text: 'Gantt Dinámico',
+                tooltip: '<b>Muestra el reporte gantt facil de entender</b>',
+                handler:this.diagramGanttDinamico,
+                scope: this
+            }
+        ]}
+        });
+		this.tbar.add(this.menuAdqGantt);
     },
     
     onBtnAdq: function(){
