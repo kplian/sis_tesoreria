@@ -97,8 +97,12 @@ BEGIN
                         param.tperiodo per 
                        where per.fecha_ini <= g_fecha::date 
                          and per.fecha_fin >= g_fecha::date
+						 and per.id_gestion is not null
                          limit 1 offset 0;
-        
+		
+		if(v_id_periodo is null)then
+        	raise exception 'No existe periodo para la fecha %', g_fecha;
+        end if;        
         
         IF   (p_hstore->'tipo')::varchar not in ('cheque','debito_automatico','transferencia_carta','deposito','transf_interna_debe','transf_interna_haber') THEN
              raise exception 'Tipo de transaccion bancaria no valida';                
