@@ -1455,3 +1455,11 @@ select pxp.f_insert_testructura_gui ('SOLCAJA.1.1.5.1', 'SOLCAJA.1.1.5');
 select pxp.f_insert_testructura_gui ('SOLCAJA.1.1.5.1.1', 'SOLCAJA.1.1.5.1');
 
 /***********************************F-DAT-GSS-TES-0-26/01/2016*****************************************/
+
+/***********************************I-DAT-GSS-TES-0-29/01/2016*****************************************/
+
+SELECT * FROM param.f_inserta_documento('TES', 'CAJA', 'Caja Chica', 'gestion', NULL, 'depto', NULL);
+SELECT * FROM param.f_inserta_documento('TES', 'SEFE', 'Solicitud Efectivo', 'gestion', NULL, 'tabla', 'codtabla-coddoc-correlativo-gestion');
+SELECT * FROM param.f_inserta_documento('TES', 'REN', 'Rendicion', 'gestion', NULL, 'tabla', 'codtabla-coddoc-correlativo-gestion');
+
+/***********************************F-DAT-GSS-TES-0-29/01/2016*****************************************/

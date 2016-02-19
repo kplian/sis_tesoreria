@@ -109,7 +109,7 @@ Phx.vista.Cajero=Ext.extend(Phx.gridInterfaz,{
 				options: ['activo','inactivo']},
 			 id_grupo:1,
 			 grid:true,
-			 form:true
+			 form:false
 	   },
 		  {
 			     config:{

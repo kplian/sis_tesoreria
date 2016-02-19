@@ -42,7 +42,6 @@ Phx.vista.SolicitudEfectivoDet=Ext.extend(Phx.gridInterfaz,{
 			},
 			type: 'Field',
 			id_grupo: 0,
-			filters: {pfiltro: 'movtip.nombre',type: 'string'},
 			grid: false,
 			form: true
 		},
@@ -85,7 +84,7 @@ Phx.vista.SolicitudEfectivoDet=Ext.extend(Phx.gridInterfaz,{
 			},
 			type: 'ComboBox',
 			id_grupo: 0,
-			filters: {pfiltro: 'conig.desc_centro_costo',type: 'string'},
+			filters: {pfiltro: 'cc.codigo_cc',type: 'string'},
 			grid: true,
 			form: true
 		},
@@ -128,7 +127,7 @@ Phx.vista.SolicitudEfectivoDet=Ext.extend(Phx.gridInterfaz,{
 			},
 			type: 'ComboBox',
 			id_grupo: 0,
-			filters: {pfiltro: 'conig.desc_ingas',type: 'string'},
+			filters: {pfiltro: 'cingas.desc_ingas',type: 'string'},
 			grid: true,
 			form: true
 		},

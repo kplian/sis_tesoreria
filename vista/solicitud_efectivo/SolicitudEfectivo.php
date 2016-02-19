@@ -91,7 +91,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			},
 			type: 'ComboBox',
 			id_grupo: 0,
-			filters: {pfiltro: 'movtip.codigo',type: 'string'},
+			filters: {pfiltro: 'caja.codigo',type: 'string'},
 			grid: true,
 			form: true
 		},	

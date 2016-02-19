@@ -1,8 +1,11 @@
-CREATE OR REPLACE FUNCTION "tes"."ft_solicitud_rendicion_det_ime" (	
-				p_administrador integer, p_id_usuario integer, p_tabla character varying, p_transaccion character varying)
-RETURNS character varying AS
-$BODY$
-
+CREATE OR REPLACE FUNCTION tes.ft_solicitud_rendicion_det_ime (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Sistema de Obligaciones de Pago
  FUNCION: 		tes.ft_solicitud_rendicion_det_ime
@@ -27,6 +30,7 @@ DECLARE
 	v_nombre_funcion        text;
 	v_mensaje_error         text;
 	v_id_solicitud_rendicion_det	integer;
+    v_id_documento_respaldo	integer;
 			    
 BEGIN
 
@@ -45,7 +49,6 @@ BEGIN
         begin
         	--Sentencia de la insercion
         	insert into tes.tsolicitud_rendicion_det(
-			id_proceso_caja,
 			id_solicitud_efectivo,
 			id_documento_respaldo,
 			estado_reg,
@@ -57,7 +60,6 @@ BEGIN
 			fecha_mod,
 			id_usuario_mod
           	) values(
-			v_parametros.id_proceso_caja,
 			v_parametros.id_solicitud_efectivo,
 			v_parametros.id_documento_respaldo,
 			'activo',
@@ -94,19 +96,18 @@ BEGIN
 		begin
 			--Sentencia de la modificacion
 			update tes.tsolicitud_rendicion_det set
-			id_proceso_caja = v_parametros.id_proceso_caja,
-			id_solicitud_efectivo = v_parametros.id_solicitud_efectivo,
-			id_documento_respaldo = v_parametros.id_documento_respaldo,
+			--id_solicitud_efectivo = v_parametros.id_solicitud_efectivo,
+			--id_documento_respaldo = v_parametros.id_documento_respaldo,
 			monto = v_parametros.monto,
 			fecha_mod = now(),
 			id_usuario_mod = p_id_usuario,
 			id_usuario_ai = v_parametros._id_usuario_ai,
 			usuario_ai = v_parametros._nombre_usuario_ai
-			where id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
+			where id_documento_respaldo=v_parametros.id_documento_respaldo;
                
 			--Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion modificado(a)'); 
-            v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_rendicion_det',v_parametros.id_solicitud_rendicion_det::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'id_documento_respaldo',v_parametros.id_documento_respaldo::varchar);
                
             --Devuelve la respuesta
             return v_resp;
@@ -124,8 +125,15 @@ BEGIN
 
 		begin
 			--Sentencia de la eliminacion
+            select id_documento_respaldo into v_id_documento_respaldo
+            from tes.tsolicitud_rendicion_det
+            where id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
+            
 			delete from tes.tsolicitud_rendicion_det
             where id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
+            
+            delete from conta.tdoc_compra_venta
+            where id_doc_compra_venta=v_id_documento_respaldo;
                
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion eliminado(a)'); 
@@ -152,7 +160,9 @@ EXCEPTION
 		raise exception '%',v_resp;
 				        
 END;
-$BODY$
-LANGUAGE 'plpgsql' VOLATILE
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
 COST 100;
-ALTER FUNCTION "tes"."ft_solicitud_rendicion_det_ime"(integer, integer, character varying, character varying) OWNER TO postgres;

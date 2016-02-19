@@ -25,8 +25,6 @@ Phx.vista.CajaCajero = {
       
        Phx.vista.CajaCajero.superclass.constructor.call(this,config);
        
-	   this.iniciarEventos(); 
-	   
 	   this.addButton('btnRendicion', {
 			text : 'Rendicion Caja',
 			iconCls : 'bballot',
@@ -40,7 +38,8 @@ Phx.vista.CajaCajero = {
            this.store.baseParams.filtro_valor = config.filtro_directo.valor;
            this.store.baseParams.filtro_campo = config.filtro_directo.campo;
        }
-       
+       this.iniciarEventos(); 
+	   
        this.load({params:{
            start:0, 
            limit:this.tam_pag
@@ -67,8 +66,8 @@ Phx.vista.CajaCajero = {
          }
 		 else{
 			 this.getBoton('btnRendicion').disable();
-		 }
-     },
+		 }		 
+     }
     
 };
 </script>

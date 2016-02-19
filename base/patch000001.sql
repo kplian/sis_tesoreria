@@ -1444,4 +1444,7 @@ ALTER TABLE tes.tproceso_caja
 ALTER TABLE tes.tproceso_caja
   ADD COLUMN fecha_fin DATE;
   
+ALTER TABLE tes.tsolicitud_efectivo_det
+  ALTER COLUMN id_partida_ejecucion DROP NOT NULL;
+  
 /*****************************F-SCP-GSS-TES-0-29/01/2016*************/

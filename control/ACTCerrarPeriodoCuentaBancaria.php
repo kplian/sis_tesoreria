@@ -62,7 +62,8 @@ function restar($h1,$h2)
        
 
         //// Test code ////
-        $dbName = 'dbkerp'; // Change this to your db name
+        $dbName = 'dbkerp_capacitacion'; // desarrollo
+		//$dbName = 'dbkerp'; // produccion
         $dbUser = 'tesoreria'; // Change this to your db user name
         $pass = 'tesoreria.boa.2015';
 				

@@ -65,8 +65,9 @@ class ACTSolicitudEfectivo extends ACTbase{
 	}
 	
 	function insertarSolicitudEfectivoCompleta(){
+		$this->objParam->addParametro('tipo_solicitud','solicitud');		
 		$this->objFunc=$this->create('MODSolicitudEfectivo');	
-		if($this->objParam->insertar('id_solicitud_efectivo')){
+		if($this->objParam->insertar('id_solicitud_efectivo')){						
 			$this->res=$this->objFunc->insertarSolicitudEfectivoCompleta($this->objParam);			
 		} 
 		$this->res->imprimirRespuesta($this->res->generarJson());

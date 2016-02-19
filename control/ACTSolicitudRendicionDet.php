@@ -13,7 +13,12 @@ class ACTSolicitudRendicionDet extends ACTbase{
 		$this->objParam->defecto('ordenacion','id_solicitud_rendicion_det');
 
 		if($this->objParam->getParametro('id_solicitud_efectivo')!=''){
-			$this->objParam->addFiltro("rend.id_solicitud_efectivo = ".$this->objParam->getParametro('id_solicitud_efectivo'));	
+			if ($this->objParam->getParametro('interfaz')=='aprobacion_facturas'){
+				$this->objParam->addFiltro("rend.id_solicitud_efectivo = ".$this->objParam->getParametro('id_solicitud_efectivo'));	
+			}else{
+				$this->objParam->addFiltro("solefe.id_solicitud_efectivo = ".$this->objParam->getParametro('id_solicitud_efectivo'));	
+				$this->objParam->addFiltro("solren.estado=''borrador''");	
+			}
 		}
 		
 		if($this->objParam->getParametro('id_proceso_caja')!=''){
@@ -43,8 +48,11 @@ class ACTSolicitudRendicionDet extends ACTbase{
 	}
 	
 	function insertarRendicionDocCompleto(){
+		
+		$this->objParam->addParametro('tipo_solicitud','rendicion');
+		
 		$this->objFunc=$this->create('MODSolicitudRendicionDet');	
-		if($this->objParam->insertar('id_doc_compra_venta')){
+		if($this->objParam->insertar('id_solicitud_rendicion_det')){
 			$this->res=$this->objFunc->insertarRendicionDocCompleto($this->objParam);			
 		} else{
 			//TODO			

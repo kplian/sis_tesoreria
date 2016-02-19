@@ -8496,4 +8496,18 @@ ALTER TABLE tes.tsolicitud_rendicion_det
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     NOT DEFERRABLE;
+	
+ALTER TABLE tes.tproceso_caja
+  ADD CONSTRAINT tproceso_caja__id_caja FOREIGN KEY (id_caja)
+    REFERENCES tes.tcaja(id_caja)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tproceso_caja
+  ADD CONSTRAINT tproceso_caja__id_proceso_wf FOREIGN KEY (id_proceso_wf)
+    REFERENCES wf.tproceso_wf(id_proceso_wf)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
 /***********************************F-DEP-GSS-TES-0-20/01/2016****************************************/ 

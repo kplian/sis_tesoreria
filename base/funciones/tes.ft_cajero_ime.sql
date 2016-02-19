@@ -47,6 +47,17 @@ BEGIN
 	if(p_transaccion='TES_CAJERO_INS')then
 					
         begin
+        	select id_cajero into v_id_cajero
+            from tes.tcajero
+            where id_caja = v_parametros.id_caja and tipo='responsable' ;
+            
+            IF v_id_cajero is not null THEN
+            	UPDATE tes.tcajero
+                SET estado_reg = 'inactivo',
+                estado = 'inactivo'
+                WHERE id_cajero=v_id_cajero;
+            END IF;
+            
         	--Sentencia de la insercion
         	insert into tes.tcajero(
 			estado_reg,
@@ -63,7 +74,7 @@ BEGIN
           	) values(
 			'activo',
 			v_parametros.tipo,
-			v_parametros.estado,
+			'activo',
 			v_parametros.id_funcionario,
 			v_parametros.id_caja,
 			now(),
@@ -96,7 +107,6 @@ BEGIN
 			--Sentencia de la modificacion
 			update tes.tcajero set
 			tipo = v_parametros.tipo,
-			estado = v_parametros.estado,
 			id_funcionario = v_parametros.id_funcionario,
 			id_caja = v_parametros.id_caja,
 			id_usuario_mod = p_id_usuario,

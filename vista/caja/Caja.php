@@ -11,9 +11,7 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
-		
-	nombreVista: 'caja',
-	
+			
 	constructor:function(config){
 		this.maestro=config.maestro;
     	//llama al constructor de la clase padre
@@ -21,17 +19,8 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		this.init();
 		this.iniciarEventos();
 		
-		this.addButton('btnAbrirCerrar',
-			{
-				text: 'Cerrar/Abrir',
-				iconCls: 'block',
-				disabled: false,
-				handler: this.abrirCerrarCaja,
-				tooltip: '<b>Cerrar/Abrir</b><br/>Cerrar/Abrir caja'
-			}
-		);
-		
-		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.nombreVista}})
+				
+		//this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.nombreVista}})
 	},
 	tam_pag:50,
 			
@@ -57,6 +46,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 			},
 			type:'TextField',
 			filters:{pfiltro:'caja.codigo',type:'string'},
+			bottom_filter: true,
 			id_grupo:1,
 			grid:true,
 			form:true
@@ -71,7 +61,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
                 maxLength:200
             },
             type:'TextField',
-            filters:{pfiltro:'lban.num_tramite',type:'string'},
+            filters:{pfiltro:'pc.nro_tramite',type:'string'},
 			bottom_filter: true,
             id_grupo:1,
             grid:true,
@@ -92,7 +82,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
    },   
         type:'ComboRec',
         id_grupo:0,
-        filters:{pfiltro:'cc.codigo_cc',type:'string'},
+        filters:{pfiltro:'depto.nombre',type:'string'},
         grid:true,
         form:true
 			},
@@ -159,14 +149,14 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
                     fields: ['id_cuenta_bancaria','nro_cuenta','nombre_institucion','codigo_moneda','centro','denominacion'],
                     remoteSort: true,
                     baseParams : {
-						par_filtro :'nro_cuenta', permiso:'libro_bancos'
+						par_filtro :'nro_cuenta#denominacion', permiso:'libro_bancos'
 					}
                 }),
                 tpl:'<tpl for="."><div class="x-combo-list-item"><p><b>{nro_cuenta}</b></p><p>Moneda: {codigo_moneda}, {nombre_institucion}</p><p>{denominacion}, Centro: {centro}</p></div></tpl>',
                 valueField: 'id_cuenta_bancaria',
                 hiddenValue: 'id_cuenta_bancaria',
                 displayField: 'nro_cuenta',
-                gdisplayField:'desc_cuenta_bancaria',
+                gdisplayField:'cuenta_bancaria',
                 listWidth:'280',
                 forceSelection:true,
                 typeAhead: false,
@@ -229,14 +219,14 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
      },
         type:'ComboRec',
         id_grupo:0,
-        filters:{pfiltro:'cc.codigo_cc',type:'string'},
+        filters:{pfiltro:'mon.moneda',type:'string'},
         grid:true,
         form:true
   },    
 		{
 			config:{
 				name: 'estado',
-				fieldLabel: 'Estado',
+				fieldLabel: 'Estado Caja',
 				allowBlank: false,
 				emptyText:'Estado...',
 				typeAhead: true,
@@ -265,7 +255,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 				maxLength:10
 			},
 			type:'TextField',
-			filters:{pfiltro:'caja.estado_reg',type:'string'},
+			filters:{pfiltro:'pc.estado',type:'string'},
 			id_grupo:1,
 			grid:true,
 			form:false
@@ -399,7 +389,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		 else{
 			 this.getBoton('edit').disable();
 			 this.getBoton('del').disable();
-			 if(data.estado_proceso =='abierto')
+			 if(data.estado =='abierto')
 				 this.getBoton('btnAbrirCerrar').enable();			 
 			 else
 				this.getBoton('btnAbrirCerrar').disable();
@@ -449,61 +439,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 	},
 	*/
 	
-	abrirCerrarCaja:function(){
-		var rec=this.sm.getSelected();
-		var NumSelect=this.sm.getCount();
-		
-		if(NumSelect != 0)
-		{	
-		  if(rec.data.estado=='cerrado'){
-			  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
-							'Estado de Wf',
-							{
-								modal:true,
-								width:700,
-								height:450
-							}, {data:{
-								   id_estado_wf:rec.data.id_estado_wf,
-								   id_proceso_wf:rec.data.id_proceso_wf								  
-								}}, this.idContenedor,'FormEstadoWf',
-							{
-								config:[{
-										  event:'beforesave',
-										  delegate: this.onSaveWizard												  
-										}],
-								
-								scope:this
-							 });
-		  }
-		}
-		else
-		{
-			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
-		}					   
-	},
-		
-	onSaveWizard:function(wizard,resp){
-		Phx.CP.loadingShow();
-		
-		Ext.Ajax.request({
-			url:'../../sis_tesoreria/control/Caja/siguienteEstadoCaja',
-			params:{
-					
-				id_proceso_wf_act:  resp.id_proceso_wf_act,
-				id_estado_wf_act:   resp.id_estado_wf_act,
-				id_tipo_estado:     resp.id_tipo_estado,
-				id_funcionario_wf:  resp.id_funcionario_wf,
-				id_depto_wf:        resp.id_depto_wf,
-				obs:                resp.obs,
-				json_procesos:      Ext.util.JSON.encode(resp.procesos)
-				},
-			success:this.successWizard,
-			failure: this.conexionFailure,
-			argument:{wizard:wizard},
-			timeout:this.timeout,
-			scope:this
-		});
-	},
+	
 	/*
 	successWizard:function(resp){
 		Phx.CP.loadingHide();

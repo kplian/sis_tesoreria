@@ -85,7 +85,7 @@ BEGIN
                cbte.id_cuenta_bancaria_mov;*/
          select cbte.beneficiario,
                 cbte.id_depto_libro,
-                tra.glosa,
+                cbte.glosa1 as glosa,
                 tra.importe_haber,
                 tra.id_cuenta_bancaria,
                 substr(depto.codigo, 4) as origen,

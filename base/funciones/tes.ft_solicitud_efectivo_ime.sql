@@ -55,6 +55,7 @@ DECLARE
     v_id_depto				integer;
     v_id_estado_wf_ant 		integer;
     v_tipo_ejecucion		varchar;
+    v_registros_solicitud_efectivo	record;
     		    
 BEGIN
 
@@ -83,7 +84,7 @@ BEGIN
                    NULL, --id_uo 
                    NULL,    -- id_depto
                    p_id_usuario, 
-                   'FONROT', 
+                   'TES', 
                    NULL,
                    0,
                    0,
@@ -259,17 +260,71 @@ BEGIN
 	elsif(p_transaccion='TES_SOLEFE_ELI')then
 
 		begin
-			--Sentencia de la eliminacion
-            --eliminamos el detalle
-            delete from tes.tsolicitud_efectivo_det
-            where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo;
-            
-            --eliminamos la cabecera
-			delete from tes.tsolicitud_efectivo
-            where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo;
+        	select s.estado,
+			       s.id_proceso_wf,
+                   --pc.id_proceso_caja,
+                   c.id_depto,
+                   s.id_estado_wf
+            into v_registros_solicitud_efectivo
+            from tes.tsolicitud_efectivo s
+            inner join tes.tcaja c on c.id_caja=s.id_caja
+			where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo;
+                        
+            IF v_registros_solicitud_efectivo.estado !='borrador' THEN
+            	raise exception 'No es posible eliminar la solicitud de efectivo, no se encuentra en estado borrador';
+            END IF;            
+                        
+           --recuperamos el id_tipo_proceso en el WF para el estado anulado
+           --este es un estado especial que no tiene padres definidos
+                              
+           select 
+            te.id_tipo_estado
+           into
+            v_id_tipo_estado
+           from wf.tproceso_wf pw 
+           inner join wf.ttipo_proceso tp on pw.id_tipo_proceso = tp.id_tipo_proceso
+           inner join wf.ttipo_estado te on te.id_tipo_proceso = tp.id_tipo_proceso and te.codigo = 'anulado'               
+           where pw.id_proceso_wf = v_registros_solicitud_efectivo.id_proceso_wf;
                
+               
+           IF v_id_tipo_estado is NULL THEN
+               
+              raise exception 'El estado anulado para la solicitud de efectivo no esta parametrizado en el workflow';  
+               
+           END IF;
+              
+           -- pasamos la obligacion al estado anulado
+           
+           v_id_estado_actual =  wf.f_registra_estado_wf(v_id_tipo_estado, 
+                                                       NULL, 
+                                                       v_registros_solicitud_efectivo.id_estado_wf, 
+                                                       v_registros_solicitud_efectivo.id_proceso_wf,
+                                                       p_id_usuario,
+                                                       v_parametros._id_usuario_ai,
+                                                       v_parametros._nombre_usuario_ai,
+                                                       v_registros_solicitud_efectivo.id_depto,
+                                                       'Solicitud de Caja Anulada');
+            
+            
+               -- actualiza estado en solicitud de efectivo               
+            update tes.tsolicitud_efectivo set
+			     id_estado_wf =  v_id_estado_actual,
+                 estado = 'anulado',
+                 estado_reg = 'inactivo',
+                 id_usuario_mod=p_id_usuario,
+                 fecha_mod=now(),
+                 id_usuario_ai = v_parametros._id_usuario_ai,
+                 usuario_ai = v_parametros._nombre_usuario_ai
+            where id_solicitud_efectivo  = v_parametros.id_solicitud_efectivo;
+            
+			--Sentencia de la eliminacion
+            --inactivamos el detalle
+            update tes.tsolicitud_efectivo_det
+            set estado_reg = 'inactivo' 
+            where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo;
+                          
             --Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Solicitud Efectivo eliminado(a)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Solicitud Efectivo anulado'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_efectivo',v_parametros.id_solicitud_efectivo::varchar);
               
             --Devuelve la respuesta
@@ -392,12 +447,14 @@ BEGIN
                                                              v_tipo_noti,
                                                              --NULL);	
                                                              v_titulo);
-          
+          /*
           IF   v_codigo_estado_siguiente in ('entregado') and v_tipo_ejecucion = 'con_detalle'  THEN                                                   
-          	   IF not tes.f_gestionar_presupuesto_solicitud_efectivo(v_id_solicitud_efectivo, p_id_usuario, 'comprometer')  THEN
+          	   
+               IF not tes.f_gestionar_presupuesto_solicitud_efectivo(v_id_solicitud_efectivo, p_id_usuario, 'comprometer')  THEN
                    raise exception 'Error al comprometer el presupeusto';
-               END IF;
+               END IF;               
           END IF;
+          */
           
           update tes.tsolicitud_efectivo  s set 
              id_estado_wf =  v_id_estado_actual,

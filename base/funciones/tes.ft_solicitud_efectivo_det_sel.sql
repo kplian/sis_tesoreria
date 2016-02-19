@@ -1,7 +1,11 @@
-CREATE OR REPLACE FUNCTION "tes"."ft_solicitud_efectivo_det_sel"(	
-				p_administrador integer, p_id_usuario integer, p_tabla character varying, p_transaccion character varying)
-RETURNS character varying AS
-$BODY$
+CREATE OR REPLACE FUNCTION tes.ft_solicitud_efectivo_det_sel (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Sistema de Obligaciones de Pago
  FUNCION: 		tes.ft_solicitud_efectivo_det_sel
@@ -44,7 +48,9 @@ BEGIN
 						soldet.id_solicitud_efectivo_det,
 						soldet.id_solicitud_efectivo,
 						soldet.id_cc,
+            			cc.codigo_cc,
 						soldet.id_concepto_ingas,
+                        cingas.desc_ingas,
 						soldet.id_partida_ejecucion,
 						soldet.estado_reg,
 						soldet.monto,
@@ -57,6 +63,8 @@ BEGIN
 						usu1.cuenta as usr_reg,
 						usu2.cuenta as usr_mod	
 						from tes.tsolicitud_efectivo_det soldet
+                        inner join param.vcentro_costo cc on cc.id_centro_costo=soldet.id_cc
+						inner join param.tconcepto_ingas cingas on cingas.id_concepto_ingas=soldet.id_concepto_ingas
 						inner join segu.tusuario usu1 on usu1.id_usuario = soldet.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = soldet.id_usuario_mod
 				        where  ';
@@ -83,6 +91,8 @@ BEGIN
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(id_solicitud_efectivo_det)
 					    from tes.tsolicitud_efectivo_det soldet
+                        inner join param.vcentro_costo cc on cc.id_centro_costo=soldet.id_cc
+						inner join param.tconcepto_ingas cingas on cingas.id_concepto_ingas=soldet.id_concepto_ingas
 					    inner join segu.tusuario usu1 on usu1.id_usuario = soldet.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = soldet.id_usuario_mod
 					    where ';
@@ -110,7 +120,9 @@ EXCEPTION
 			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
 			raise exception '%',v_resp;
 END;
-$BODY$
-LANGUAGE 'plpgsql' VOLATILE
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
 COST 100;
-ALTER FUNCTION "tes"."ft_solicitud_efectivo_det_sel"(integer, integer, character varying, character varying) OWNER TO postgres;

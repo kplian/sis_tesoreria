@@ -1,11 +1,11 @@
 <?php
 /**
 *@package pXP
-*@file gen-SistemaDist.php
-*@author  (fprudencio)
-*@date 20-09-2011 10:22:05
+*@file FormRendicion.php
+*@author  Gonzalo Sarmiento 
+*@date 16-02-2016
 *@description Archivo con la interfaz de usuario que permite 
-*dar el visto a solicitudes de compra
+*ingresar el documento a rendir
 *
 */
 header("content-type: text/javascript; charset=UTF-8");
@@ -15,6 +15,7 @@ Phx.vista.FormRendicion = {
 	require:'../../../sis_contabilidad/vista/doc_compra_venta/FormCompraVenta.php',
 	ActSave:'../../sis_tesoreria/control/SolicitudRendicionDet/insertarRendicionDocCompleto',
 	requireclase:'Phx.vista.FormCompraVenta',
+	mostrarFormaPago : false,
 		
 	constructor: function(config) {
 	      
@@ -145,8 +146,10 @@ Phx.vista.FormRendicion = {
         	};
         	
         },this);
+		
+		this.Cmp.nit.setValue(rec.data.nit);
         
-		this.Cmp.nro_autorizacion .on('blur',this.cargarRazonSocial,this);	
+		this.Cmp.nro_autorizacion.on('blur',this.cargarRazonSocial,this);	
 		
        
 	},	

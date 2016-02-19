@@ -20,8 +20,8 @@ class ACTCaja extends ACTbase{
 		
 		if($this->objParam->getParametro('tipo_interfaz')=='cajaAbierto'){
 			$this->objParam->addFiltro("pc.estado in (''abierto'')");
-		}*/
-		
+		}
+		*/
 		if($this->objParam->getParametro('tipo_interfaz')=='caja'){
 			$this->objParam->addFiltro("pc.tipo = ''apertura''");
 		}

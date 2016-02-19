@@ -194,6 +194,30 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             type:'NumberField',
             form:true 
         },
+	    {
+	            //configuracion del componente
+	            config:{
+	                    labelSeparator:'',
+	                    inputType:'hidden',
+	                    name: 'tipo_excento',
+	                    allowDecimals: true,
+	                    decimalPrecision: 10
+	            },
+	            type: 'TextField',
+	            form: true 
+	      },
+	      {
+	            //configuracion del componente
+	            config:{
+	                    labelSeparator:'',
+	                    inputType:'hidden',
+	                    name: 'valor_excento',
+	                    allowDecimals: true,
+	                    decimalPrecision: 10
+	            },
+	            type: 'NumberField',
+	            form: true 
+	     },
         {
             config:{
                 name: 'id_obligacion_pago',
@@ -475,7 +499,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                         direction:'ASC'
                     },
                     totalProperty:'total',
-                    fields: ['id_plantilla','nro_linea','desc_plantilla','tipo','sw_tesoro', 'sw_compro','sw_monto_excento'],
+                    fields: ['id_plantilla',
+                             'nro_linea',
+                             'desc_plantilla',
+                             'tipo','sw_tesoro', 'sw_compro','sw_monto_excento','tipo_excento','valor_excento'],
                     remoteSort: true,
                     baseParams:{par_filtro:'plt.desc_plantilla',sw_compro:'si',sw_tesoro:'si'}
                 }),
@@ -1567,8 +1594,23 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         var descuento_ley = 0.00;
         
         //TODO monto exento en pp de segundo nivel
+        
+        console.log('this.tmp_porc_monto_excento_var',this.tmp_porc_monto_excento_var)
         if(this.tmp_porc_monto_excento_var){
         	this.Cmp.monto_excento.setValue(this.Cmp.monto.getValue()*this.tmp_porc_monto_excento_var)
+        }
+        else{
+        	
+        console.log('...',this.Cmp.tipo_excento.getValue(),this.Cmp.tipo_excento.getValue())
+        	if(this.Cmp.tipo_excento.getValue() == 'constante' ){
+		       this.Cmp.monto_excento.setValue(this.Cmp.valor_excento.getValue())
+		    }
+		        
+		    if(this.Cmp.tipo_excento.getValue() == 'porcentual' ){
+		        this.Cmp.monto_excento.setValue(this.Cmp.monto.getValue()*this.Cmp.valor_excento.getValue())
+		    }
+		    
+        	
         }
        
         if(this.Cmp.monto_excento.getValue() == 0){
@@ -1630,7 +1672,33 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
          }
         
         Phx.vista.PlanPago.superclass.onButtonEdit.call(this); 
+        this.getPlantilla(this.Cmp.id_plantilla.getValue());
     },
+    
+    getPlantilla: function(id_plantilla){
+    	Phx.CP.loadingShow();
+           
+           Ext.Ajax.request({
+                // form:this.form.getForm().getEl(),
+                url: '../../sis_parametros/control/Plantilla/listarPlantilla',
+                params: { id_plantilla: id_plantilla, start:0, limit:1 },
+                success:this.successPlantilla,
+                failure: this.conexionFailure,
+                timeout:this.timeout,
+                scope:this
+            });
+    	
+    },
+    successPlantilla:function(resp){
+           Phx.CP.loadingHide();
+           var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+            if(reg.total == 1){
+               	
+           	  this.Cmp.id_plantilla.fireEvent('select',this.Cmp.id_plantilla, {data:reg.datos[0] }, 0);
+           }else{
+                alert('error al recuperar la plantilla para editar, actualice su navegador');
+            }
+     },
     
      loadCheckDocumentosSolWf:function() {
             var rec=this.sm.getSelected();

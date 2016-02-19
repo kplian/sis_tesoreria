@@ -1,8 +1,11 @@
-CREATE OR REPLACE FUNCTION "tes"."ft_solicitud_efectivo_det_ime" (	
-				p_administrador integer, p_id_usuario integer, p_tabla character varying, p_transaccion character varying)
-RETURNS character varying AS
-$BODY$
-
+CREATE OR REPLACE FUNCTION tes.ft_solicitud_efectivo_det_ime (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Sistema de Obligaciones de Pago
  FUNCION: 		tes.ft_solicitud_efectivo_det_ime
@@ -27,6 +30,7 @@ DECLARE
 	v_nombre_funcion        text;
 	v_mensaje_error         text;
 	v_id_solicitud_efectivo_det	integer;
+    v_id_solicitud_efectivo	integer;
 			    
 BEGIN
 
@@ -43,17 +47,15 @@ BEGIN
 	if(p_transaccion='TES_SOLDET_INS')then
 					
         begin
+            
         	--Sentencia de la insercion
         	insert into tes.tsolicitud_efectivo_det(
 			id_solicitud_efectivo,
 			id_cc,
 			id_concepto_ingas,
-			id_partida_ejecucion,
 			estado_reg,
 			monto,
-			id_usuario_ai,
 			id_usuario_reg,
-			usuario_ai,
 			fecha_reg,
 			id_usuario_mod,
 			fecha_mod
@@ -61,20 +63,20 @@ BEGIN
 			v_parametros.id_solicitud_efectivo,
 			v_parametros.id_cc,
 			v_parametros.id_concepto_ingas,
-			v_parametros.id_partida_ejecucion,
 			'activo',
 			v_parametros.monto,
-			v_parametros._id_usuario_ai,
 			p_id_usuario,
-			v_parametros._nombre_usuario_ai,
 			now(),
 			null,
 			null
-							
-			
-			
 			)RETURNING id_solicitud_efectivo_det into v_id_solicitud_efectivo_det;
 			
+            UPDATE tes.tsolicitud_efectivo
+            SET monto =  (select sum(monto) 
+            			  from tes.tsolicitud_efectivo_det
+            			  where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo)
+            where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo;
+            
 			--Definicion de la respuesta
 			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Detalle almacenado(a) con exito (id_solicitud_efectivo_det'||v_id_solicitud_efectivo_det||')'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_efectivo_det',v_id_solicitud_efectivo_det::varchar);
@@ -99,12 +101,9 @@ BEGIN
 			id_solicitud_efectivo = v_parametros.id_solicitud_efectivo,
 			id_cc = v_parametros.id_cc,
 			id_concepto_ingas = v_parametros.id_concepto_ingas,
-			id_partida_ejecucion = v_parametros.id_partida_ejecucion,
 			monto = v_parametros.monto,
 			id_usuario_mod = p_id_usuario,
-			fecha_mod = now(),
-			id_usuario_ai = v_parametros._id_usuario_ai,
-			usuario_ai = v_parametros._nombre_usuario_ai
+			fecha_mod = now()
 			where id_solicitud_efectivo_det=v_parametros.id_solicitud_efectivo_det;
                
 			--Definicion de la respuesta
@@ -126,9 +125,20 @@ BEGIN
 	elsif(p_transaccion='TES_SOLDET_ELI')then
 
 		begin
+        	
+            SELECT id_solicitud_efectivo into v_id_solicitud_efectivo
+            FROM tes.tsolicitud_efectivo_det
+            WHERE id_solicitud_efectivo_det = v_parametros.id_solicitud_efectivo_det;
+            
 			--Sentencia de la eliminacion
 			delete from tes.tsolicitud_efectivo_det
-            where id_solicitud_efectivo_det=v_parametros.id_solicitud_efectivo_det;
+            where id_solicitud_efectivo_det=v_parametros.id_solicitud_efectivo_det;            
+            
+            UPDATE tes.tsolicitud_efectivo
+            SET monto = COALESCE((select sum(monto) 
+            			  from tes.tsolicitud_efectivo_det
+            			  where id_solicitud_efectivo=v_id_solicitud_efectivo), 0.00)
+            where id_solicitud_efectivo=v_id_solicitud_efectivo;
                
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Detalle eliminado(a)'); 
@@ -155,7 +165,9 @@ EXCEPTION
 		raise exception '%',v_resp;
 				        
 END;
-$BODY$
-LANGUAGE 'plpgsql' VOLATILE
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
 COST 100;
-ALTER FUNCTION "tes"."ft_solicitud_efectivo_det_ime"(integer, integer, character varying, character varying) OWNER TO postgres;

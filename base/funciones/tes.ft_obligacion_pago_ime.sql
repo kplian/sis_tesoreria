@@ -219,12 +219,7 @@ BEGIN
             --   revisa tabla de expcecion por concepto de gasto
             --  algunos concepto de gasto solo los pueden aprobar ciertas gerencias ....
             
-            
-            
-            
-            
-            
-            IF  v_id_funcionario_sol is not NULL  THEN
+           IF  v_id_funcionario_sol is not NULL  THEN
               
                  --OJO  si el funcionario que solicita es un gerente .... es el mimso encargado de aprobar
                  IF exists(select 1 from orga.tuo_funcionario uof 
@@ -244,7 +239,39 @@ BEGIN
                         --NOTA el valor en la primera posicion del array es el genre de menor nivel
                    
                 END IF;
-                
+              
+               -----------------------------
+               -- verificar exepcione 
+               ------------------------------- 
+              
+                  SELECT  
+                    ce.id_uo
+                  into
+                    v_id_uo
+                  FROM tes.tconcepto_excepcion ce 
+                  where   ce.estado_reg = 'activo'  and
+                           ce.id_concepto_ingas in (select 
+                                                  id_concepto_ingas
+                                                 from tes.tobligacion_det od
+                                                 where od.id_obligacion_pago = v_parametros.id_obligacion_pago
+                                                 and od.estado_reg = 'activo' )  limit 1 OFFSET 0;
+                     
+                    --si existe una excepcion cambiar el funcionar aprobador
+                    
+                    IF v_id_uo is NOT NULL THEN
+                         --recuperamos el aprobador
+                        
+                        va_id_funcionarios =  orga.f_get_funcionarios_x_uo(v_id_uo, v_fecha_op);
+                        
+                        IF va_id_funcionarios[1] is NULL THEN
+                           raise exception 'La UO configurada por excpeción no tiene un funcionario asignado para le fecha de la OP';
+                        END IF;
+                        
+                        va_id_funcionario_gerente[1] = va_id_funcionarios[1];
+                        
+                    END IF ; 
+              
+              
                  
             END IF;
             

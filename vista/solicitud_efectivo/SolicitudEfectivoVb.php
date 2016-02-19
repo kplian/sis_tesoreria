@@ -91,7 +91,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 			},
 			type: 'ComboBox',
 			id_grupo: 0,
-			filters: {pfiltro: 'movtip.codigo',type: 'string'},
+			filters: {pfiltro: 'caja.codigo',type: 'string'},
 			grid: true,
 			form: true
 		},	
@@ -116,9 +116,9 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				name: 'nro_tramite',
 				fieldLabel: 'Num Tramite',
 				allowBlank: false,
-				anchor: '80%',
-				gwidth: 100,
-				maxLength:50
+				anchor: '100%',
+				gwidth: 350,
+				maxLength:300
 			},
 				type:'TextField',
 				filters:{pfiltro:'solefe.nro_tramite',type:'string'},

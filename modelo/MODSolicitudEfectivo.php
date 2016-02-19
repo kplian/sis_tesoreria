@@ -45,6 +45,7 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->captura('fecha_mod','timestamp');
 		$this->captura('usr_reg','varchar');
 		$this->captura('usr_mod','varchar');
+		$this->captura('solicitud_efectivo_padre','varchar');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -202,8 +203,9 @@ class MODSolicitudEfectivo extends MODbase{
 			$this->setParametro('estado_reg','estado_reg','varchar');
 			$this->setParametro('motivo','motivo','text');
 			$this->setParametro('id_funcionario','id_funcionario','int4');
+			$this->setParametro('tipo_solicitud','tipo_solicitud','varchar');
 			$this->setParametro('fecha','fecha','date');
-				
+			
 			//Ejecuta la instruccion
             $this->armarConsulta();
 			$stmt = $link->prepare($this->consulta);		  

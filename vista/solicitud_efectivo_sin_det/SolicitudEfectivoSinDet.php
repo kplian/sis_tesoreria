@@ -92,7 +92,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			},
 			type: 'ComboBox',
 			id_grupo: 0,
-			filters: {pfiltro: 'movtip.codigo',type: 'string'},
+			filters: {pfiltro: 'caja.codigo',type: 'string'},
 			grid: true,
 			form: true
 		},
@@ -135,7 +135,6 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			},
 			type: 'ComboBox',
 			id_grupo: 0,
-			filters: {pfiltro: 'movtip.nombre',type: 'string'},
 			grid: false,
 			form: false
 		},		
@@ -162,7 +161,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Num Tramite',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 300,
 				maxLength:50
 			},
 				type:'TextField',
@@ -259,7 +258,6 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			},
 			type: 'ComboBox',
 			id_grupo: 0,
-			filters: {pfiltro: 'movtip.nombre',type: 'string'},
 			grid: false,
 			form: false
 		},		

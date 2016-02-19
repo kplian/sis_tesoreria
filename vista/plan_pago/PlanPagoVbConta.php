@@ -250,9 +250,14 @@ Phx.vista.PlanPagoVbConta = {
             this.Cmp.monto_excento.reset();
             if(rec.data.sw_monto_excento=='si'){
                this.Cmp.monto_excento.enable();
+               this.Cmp.tipo_excento.setValue(rec.data.tipo_excento);
+	           this.Cmp.valor_excento.setValue(rec.data.valor_excento);
             }
             else{
                this.Cmp.monto_excento.disable();
+               this.Cmp.tipo_excento.setValue('variable');
+	           this.Cmp.monto_excento.setValue(0);
+	           this.Cmp.valor_excento.setValue(0);
             }
             
         },this);

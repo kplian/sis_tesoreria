@@ -53,7 +53,7 @@ BEGIN
         where cbte.id_int_comprobante=p_id_int_comprobante and tra.forma_pago='cheque';*/
         
         select cbte.beneficiario, cbte.id_depto_libro,
-       tra.glosa, tra.importe_haber, tra.id_cuenta_bancaria, 
+       cbte.glosa1 as glosa, tra.importe_haber, tra.id_cuenta_bancaria, 
        substr(depto.codigo, 4) as origen, cbte.nro_tramite, tra.id_cuenta_bancaria_mov as id_libro_bancos_deposito
        into v_datos_cheque
        from conta.tint_comprobante cbte

@@ -59,9 +59,9 @@ BEGIN
             IF  lower(v_parametros.tipo_interfaz) = 'caja' THEN
                 
                 IF p_administrador !=1 THEN
-                   v_filtro = '(caja.id_usuario_reg='||p_id_usuario||' ) and  (pc.estado = ''borrador'' or pc.estado=''abierto'') and  ';
+                   v_filtro = '(caja.id_usuario_reg='||p_id_usuario||' ) and  pc.estado in (''borrador'',''abierto'',''cerrado'',''anulado'') and  ';
                  ELSE
-                     v_filtro = '(pc.estado = ''borrador'' or pc.estado=''abierto'') and ';
+                     v_filtro = 'pc.estado in (''borrador'',''abierto'',''cerrado'',''anulado'') and ';
                 END IF;                
                 
             END IF;                       
@@ -83,7 +83,7 @@ BEGIN
                 --IF p_administrador !=1 THEN
                 --   v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (pc.estado = ''abierto'') and  ';
                 -- ELSE
-                     v_filtro = '(pc.estado = ''abierto'') and ';
+                     v_filtro = '(caja.estado = ''abierto'') and ';
                -- END IF;                
                 
             END IF;
@@ -93,7 +93,7 @@ BEGIN
                 IF p_administrador !=1 THEN
                    v_filtro = '(caje.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (pc.estado = ''abierto'') and  ';
                  ELSE
-                     v_filtro = '(pc.estado = ''abierto'') and ';
+                     v_filtro = '(pc.estado in (''abierto'',''cerrado'')) and ';
                 END IF;                
                 
             END IF;
@@ -103,7 +103,7 @@ BEGIN
 						caja.id_caja,
 						caja.estado,
 						caja.importe_maximo,
-						pc.tipo,
+						caja.tipo,
 						caja.estado_reg,
                         pc.estado as estado_proceso,
 						caja.porcentaje_compra,
@@ -190,9 +190,9 @@ BEGIN
             IF  lower(v_parametros.tipo_interfaz) = 'caja' THEN
                 
                 IF p_administrador !=1 THEN
-                   v_filtro = '(caja.id_usuario_reg='||p_id_usuario||' ) and  (pc.estado = ''borrador'' or pc.estado=''abierto'') and  ';
+                   v_filtro = '(caja.id_usuario_reg='||p_id_usuario||' ) and  pc.estado in (''borrador'',''abierto'',''cerrado'',''anulado'') and  ';
                  ELSE
-                     v_filtro = '(pc.estado = ''borrador'' or pc.estado=''abierto'') and ';
+                     v_filtro = 'pc.estado in (''borrador'',''abierto'',''cerrado'',''anulado'') and ';
                 END IF;                
                 
             END IF;
@@ -202,7 +202,7 @@ BEGIN
                 IF p_administrador !=1 THEN
                    v_filtro = '(caje.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (pc.estado = ''abierto'') and  ';
                  ELSE
-                     v_filtro = '(pc.estado = ''abierto'') and ';
+                     v_filtro = '(pc.estado in (''abierto'',''cerrado'')) and ';
                 END IF;                
                 
             END IF;

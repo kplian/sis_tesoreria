@@ -17,6 +17,14 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
     	//llama al constructor de la clase padre
 		Phx.vista.SolicitudRendicionDet.superclass.constructor.call(this,config);
 		this.init();
+		this.addButton('fin_registro',
+			{	text:'Mandar Revision',
+				iconCls: 'badelante',
+				disabled:false,
+				handler:this.sigEstado,
+				tooltip: '<b>Mandar Revision</b><p>Mandar a revision facturas</p>'
+			}
+		);
 		this.load({params:{start:0, limit:this.tam_pag, id_solicitud_efectivo:this.id_solicitud_efectivo}})
 	},
 			
@@ -105,9 +113,41 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 			form:true 
 		},*/
 		{
+			config:{
+				name: 'desc_plantilla',
+				fieldLabel: 'Tipo Documento',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 150,
+				maxLength:100
+			},
+				type:'TextField',
+				filters:{pfiltro:'pla.desc_plantilla',type:'string'},
+				bottom_filter: true,
+				id_grupo:0,
+				grid:true,
+				form:false
+		},		
+		{
+			config:{
+				name: 'fecha',
+				fieldLabel: 'Fecha',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 150,
+				format: 'd/m/Y',
+				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+			},
+				type:'DateField',
+				filters:{pfiltro:'dc.fecha',type:'date'},
+				id_grupo:0,
+				grid:true,
+				form:false
+		},
+		{
 			config: {
 				name: 'id_doc_compra_venta',
-				fieldLabel: 'Documento Respaldo',
+				fieldLabel: 'Razon Social',
 				allowBlank: true,
 				emptyText: 'Elija una opción...',
 				store: new Ext.data.JsonStore({
@@ -143,23 +183,55 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 			},
 			type: 'ComboBox',
 			id_grupo: 0,
-			filters: {pfiltro: 'movtip.nombre',type: 'string'},
+			filters: {pfiltro: 'dc.razon_social',type: 'string'},
 			grid: true,
 			form: true
+		},		
+		{
+			config:{
+				name: 'nit',
+				fieldLabel: 'Nit',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 125,
+				maxLength:100
+			},
+				type:'TextField',
+				filters:{pfiltro:'dc.nit',type:'string'},
+				bottom_filter: true,
+				id_grupo:0,
+				grid:true,
+				form:false
 		},
 		{
 			config:{
-				name: 'fecha',
-				fieldLabel: 'Fecha',
+				name: 'nro_documento',
+				fieldLabel: 'Nro Factura',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 125,
+				maxLength:100
+			},
+				type:'TextField',
+				filters:{pfiltro:'dc.nro_documento',type:'string'},
+				bottom_filter: true,
+				id_grupo:0,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'nro_autorizacion',
+				fieldLabel: 'Nro Autorizacion',
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
-				format: 'd/m/Y',
-				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+				maxLength:100
 			},
-				type:'DateField',
-				filters:{pfiltro:'solefe.fecha',type:'date'},
-				id_grupo:1,
+				type:'TextField',
+				filters:{pfiltro:'dc.nro_autorizacion',type:'string'},
+				bottom_filter: true,
+				id_grupo:0,
 				grid:true,
 				form:false
 		},
@@ -174,7 +246,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'NumberField',
 				filters:{pfiltro:'rend.monto',type:'numeric'},
-				id_grupo:1,
+				id_grupo:0,
 				grid:true,
 				form:true
 		},
@@ -189,7 +261,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'TextField',
 				filters:{pfiltro:'rend.estado_reg',type:'string'},
-				id_grupo:1,
+				id_grupo:0,
 				grid:true,
 				form:false
 		},
@@ -204,7 +276,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'Field',
 				filters:{pfiltro:'usu1.cuenta',type:'string'},
-				id_grupo:1,
+				id_grupo:0,
 				grid:true,
 				form:false
 		},
@@ -220,7 +292,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'DateField',
 				filters:{pfiltro:'rend.fecha_reg',type:'date'},
-				id_grupo:1,
+				id_grupo:0,
 				grid:true,
 				form:false
 		},
@@ -235,7 +307,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'TextField',
 				filters:{pfiltro:'rend.usuario_ai',type:'string'},
-				id_grupo:1,
+				id_grupo:0,
 				grid:true,
 				form:false
 		},
@@ -250,7 +322,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'Field',
 				filters:{pfiltro:'rend.id_usuario_ai',type:'numeric'},
-				id_grupo:1,
+				id_grupo:0,
 				grid:false,
 				form:false
 		},
@@ -266,7 +338,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'DateField',
 				filters:{pfiltro:'rend.fecha_mod',type:'date'},
-				id_grupo:1,
+				id_grupo:0,
 				grid:true,
 				form:false
 		},
@@ -281,7 +353,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'Field',
 				filters:{pfiltro:'usu2.cuenta',type:'string'},
-				id_grupo:1,
+				id_grupo:0,
 				grid:true,
 				form:false
 		}
@@ -326,7 +398,8 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
-		
+		{name:'id_proceso_wf', type: 'numeric'},
+		{name:'id_estado_wf', type: 'numeric'}
 	],
 	sortInfo:{
 		field: 'id_solicitud_rendicion_det',
@@ -335,7 +408,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 	
 	abrirFormulario:function(tipo, record){
         //abrir formulario de solicitud
-		console.log(record);
+		//console.log(record);
 	   var me = this;
 	   me.objSolForm = Phx.CP.loadWindows('../../../sis_tesoreria/vista/solicitud_rendicion_det/FormRendicion.php',
 								'Formulario de rendicion',
@@ -385,6 +458,59 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
     onButtonEdit:function(){
         this.abrirFormulario('edit', this.sm.getSelected())
     },
+	
+	sigEstado:function(){                   
+	  var rec=this.sm.getSelected();
+	  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+								'Estado de Wf',
+								{
+									modal:true,
+									width:700,
+									height:450
+								}, {data:{
+									   id_estado_wf:rec.data.id_estado_wf,
+									   id_proceso_wf:rec.data.id_proceso_wf									  
+									}}, this.idContenedor,'FormEstadoWf',
+								{
+									config:[{
+											  event:'beforesave',
+											  delegate: this.onSaveWizard												  
+											}],
+									
+									scope:this
+								 });        
+			   
+	 },
+	 
+	 onSaveWizard:function(wizard,resp){
+			Phx.CP.loadingShow();
+			console.log(resp);
+			Ext.Ajax.request({
+				url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
+				params:{
+						
+					id_proceso_wf_act:  resp.id_proceso_wf_act,
+					id_estado_wf_act:   resp.id_estado_wf_act,
+					id_tipo_estado:     resp.id_tipo_estado,
+					id_funcionario_wf:  resp.id_funcionario_wf,
+					id_depto_wf:        resp.id_depto_wf,
+					obs:                resp.obs,
+					json_procesos:      Ext.util.JSON.encode(resp.procesos)
+					},
+				success:this.successWizard,
+				failure: this.conexionFailure,
+				argument:{wizard:wizard},
+				timeout:this.timeout,
+				scope:this
+			});
+		},
+		
+	successWizard:function(resp){
+			Phx.CP.loadingHide();
+			resp.argument.wizard.panel.destroy()
+			this.reload();
+		 },
+
 	
 	bdel:true,
 	bsave:true

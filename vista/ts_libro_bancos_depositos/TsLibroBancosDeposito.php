@@ -191,6 +191,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			},
 			type:'TextArea',
 			filters:{pfiltro:'lban.observaciones',type:'string'},
+			bottom_filter: true,
 			id_grupo:1,
 			grid:true,
 			form:true

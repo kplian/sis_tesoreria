@@ -82,11 +82,7 @@ Phx.vista.CajaVb = {
            this.store.baseParams.filtro_campo = config.filtro_directo.campo;
        }
        
-       this.load({params:{
-           start:0, 
-           limit:this.tam_pag
-        }});
-       
+       this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.nombreVista}})
     },
     //deshabilitas botones para informacion historica
     desBotoneshistorico:function(){

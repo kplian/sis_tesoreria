@@ -50,7 +50,7 @@ BEGIN
       	END LOOP;	
     	*/
         select cbte.beneficiario, cbte.id_depto_libro,
-       tra.glosa, tra.importe_haber, tra.id_cuenta_bancaria, 
+       cbte.glosa1 as glosa, tra.importe_haber, tra.id_cuenta_bancaria, 
        substr(depto.codigo, 4) as origen, cbte.nro_tramite
        into v_datos_deposito_cheque
        from conta.tint_comprobante cbte

@@ -1,0 +1,439 @@
+﻿<?php
+/**
+*@package pXP
+*@file AprobacionFacturas.php
+*@author  (gsarmiento)
+*@date 15-02-2016 15:14:01
+*@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
+*/
+
+header("content-type: text/javascript; charset=UTF-8");
+?>
+<script>
+Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
+	nombre_vista: 'aprobacion_facturas',
+	constructor:function(config){
+		this.maestro=config.maestro;
+    	//llama al constructor de la clase padre
+		Phx.vista.AprobacionFacturas.superclass.constructor.call(this,config);
+		this.init();
+		this.addButton('dev_factura',
+			{	text:'Devolver Factura',
+				iconCls: 'batras',
+				disabled:false,
+				handler:this.antEstado,
+				tooltip: '<b>Devolver Factura</b><p>Devolver Factura a Solicitante</p>'
+			}
+		);
+		//this.load({params:{start:0, limit:this.tam_pag, id_solicitud_efectivo:this.id_solicitud_efectivo}})
+	},
+			
+	Atributos:[
+		{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_solicitud_rendicion_det'
+			},
+			type:'Field',
+			form:true 
+		},
+		{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_solicitud_efectivo'
+			},
+			type:'Field',
+			form:true 
+		},
+		{
+			config:{
+				name: 'desc_plantilla',
+				fieldLabel: 'Tipo Documento',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 150,
+				maxLength:100
+			},
+				type:'TextField',
+				filters:{pfiltro:'pla.desc_plantilla',type:'string'},
+				bottom_filter: true,
+				id_grupo:0,
+				grid:true,
+				form:false
+		},		
+		{
+			config:{
+				name: 'fecha',
+				fieldLabel: 'Fecha',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 150,
+				format: 'd/m/Y',
+				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+			},
+				type:'DateField',
+				filters:{pfiltro:'dc.fecha',type:'date'},
+				id_grupo:0,
+				grid:true,
+				form:false
+		},
+		{
+			config: {
+				name: 'id_doc_compra_venta',
+				fieldLabel: 'Razon Social',
+				allowBlank: true,
+				emptyText: 'Elija una opción...',
+				store: new Ext.data.JsonStore({
+					url: '../../sis_/control/Clase/Metodo',
+					id: 'id_',
+					root: 'datos',
+					sortInfo: {
+						field: 'nombre',
+						direction: 'ASC'
+					},
+					totalProperty: 'total',
+					fields: ['id_', 'nombre', 'codigo'],
+					remoteSort: true,
+					baseParams: {par_filtro: 'movtip.nombre#movtip.codigo'}
+				}),
+				valueField: 'id_',
+				displayField: 'nombre',
+				gdisplayField: 'desc_',
+				hiddenName: 'id_doc_compra_venta',
+				forceSelection: true,
+				typeAhead: false,
+				triggerAction: 'all',
+				lazyRender: true,
+				mode: 'remote',
+				pageSize: 15,
+				queryDelay: 1000,
+				anchor: '100%',
+				gwidth: 150,
+				minChars: 2,
+				renderer : function(value, p, record) {
+					return String.format('{0}', record.data['razon_social']);
+				}
+			},
+			type: 'ComboBox',
+			id_grupo: 0,
+			filters: {pfiltro: 'dc.razon_social',type: 'string'},
+			grid: true,
+			form: true
+		},		
+		{
+			config:{
+				name: 'nit',
+				fieldLabel: 'Nit',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 125,
+				maxLength:100
+			},
+				type:'TextField',
+				filters:{pfiltro:'dc.nit',type:'string'},
+				bottom_filter: true,
+				id_grupo:0,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'nro_documento',
+				fieldLabel: 'Nro Factura',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 125,
+				maxLength:100
+			},
+				type:'TextField',
+				filters:{pfiltro:'dc.nro_documento',type:'string'},
+				bottom_filter: true,
+				id_grupo:0,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'nro_autorizacion',
+				fieldLabel: 'Nro Autorizacion',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:100
+			},
+				type:'TextField',
+				filters:{pfiltro:'dc.nro_autorizacion',type:'string'},
+				bottom_filter: true,
+				id_grupo:0,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'monto',
+				fieldLabel: 'Monto',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650
+			},
+				type:'NumberField',
+				filters:{pfiltro:'rend.monto',type:'numeric'},
+				id_grupo:0,
+				grid:true,
+				form:true
+		},
+		{
+			config:{
+				name: 'estado_reg',
+				fieldLabel: 'Estado Reg.',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:10
+			},
+				type:'TextField',
+				filters:{pfiltro:'rend.estado_reg',type:'string'},
+				id_grupo:0,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'usr_reg',
+				fieldLabel: 'Creado por',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:4
+			},
+				type:'Field',
+				filters:{pfiltro:'usu1.cuenta',type:'string'},
+				id_grupo:0,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'fecha_reg',
+				fieldLabel: 'Fecha creación',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+							format: 'd/m/Y', 
+							renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
+			},
+				type:'DateField',
+				filters:{pfiltro:'rend.fecha_reg',type:'date'},
+				id_grupo:0,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'usuario_ai',
+				fieldLabel: 'Funcionaro AI',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:300
+			},
+				type:'TextField',
+				filters:{pfiltro:'rend.usuario_ai',type:'string'},
+				id_grupo:0,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'id_usuario_ai',
+				fieldLabel: 'Funcionaro AI',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:4
+			},
+				type:'Field',
+				filters:{pfiltro:'rend.id_usuario_ai',type:'numeric'},
+				id_grupo:0,
+				grid:false,
+				form:false
+		},
+		{
+			config:{
+				name: 'fecha_mod',
+				fieldLabel: 'Fecha Modif.',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+							format: 'd/m/Y', 
+							renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
+			},
+				type:'DateField',
+				filters:{pfiltro:'rend.fecha_mod',type:'date'},
+				id_grupo:0,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'usr_mod',
+				fieldLabel: 'Modificado por',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:4
+			},
+				type:'Field',
+				filters:{pfiltro:'usu2.cuenta',type:'string'},
+				id_grupo:0,
+				grid:true,
+				form:false
+		}
+	],
+	tam_pag:50,	
+	title:'Rendicion',
+	ActSave:'../../sis_tesoreria/control/SolicitudRendicionDet/insertarSolicitudRendicionDet',
+	ActDel:'../../sis_tesoreria/control/SolicitudRendicionDet/eliminarSolicitudRendicionDet',
+	ActList:'../../sis_tesoreria/control/SolicitudRendicionDet/listarSolicitudRendicionDet',
+	id_store:'id_solicitud_rendicion_det',
+	fields: [
+		{name:'id_solicitud_rendicion_det', type: 'numeric'},
+		{name:'id_proceso_caja', type: 'numeric'},
+		{name:'id_solicitud_efectivo', type: 'numeric'},
+		{name:'id_doc_compra_venta', type: 'numeric'},
+		{name:'desc_plantilla', type: 'string'},
+		{name:'desc_moneda', type: 'string'},
+		{name:'tipo', type: 'string'},
+		{name:'id_plantilla', type: 'numeric'},
+		{name:'id_moneda', type: 'numeric'},
+		{name:'fecha', type: 'date'},
+		{name:'nit', type: 'string'},
+		{name:'razon_social', type: 'string'},
+		{name:'nro_autorizacion', type: 'string'},
+		{name:'nro_documento', type: 'string'},
+		{name:'nro_dui', type: 'string'},
+		{name:'obs', type: 'string'},
+		{name:'importe_doc', type: 'string'},
+		{name:'importe_pago_liquido', type: 'string'},
+		{name:'importe_iva', type: 'string'},
+		{name:'importe_descuento', type: 'string'},
+		{name:'importe_descuento_ley', type: 'string'},
+		{name:'importe_excento', type: 'string'},
+		{name:'importe_ice', type: 'string'},
+		{name:'estado_reg', type: 'string'},
+		{name:'monto', type: 'numeric'},
+		{name:'id_usuario_reg', type: 'numeric'},
+		{name:'fecha_reg', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
+		{name:'usuario_ai', type: 'string'},
+		{name:'id_usuario_ai', type: 'numeric'},
+		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
+		{name:'id_usuario_mod', type: 'numeric'},
+		{name:'usr_reg', type: 'string'},
+		{name:'usr_mod', type: 'string'},
+		{name:'id_proceso_wf', type: 'numeric'},
+		{name:'id_estado_wf', type: 'numeric'},
+		{name:'id_depto', type:'numeric'}
+	],
+	sortInfo:{
+		field: 'id_solicitud_rendicion_det',
+		direction: 'ASC'
+	},
+	   	
+	antEstado:function(){                   
+	  var rec=this.sm.getSelected();
+	  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+								'Estado de Wf',
+								{
+									modal:true,
+									width:700,
+									height:450
+								}, {data:{
+									   id_estado_wf:rec.data.id_estado_wf,
+									   id_proceso_wf:rec.data.id_proceso_wf									  
+									}}, this.idContenedor,'FormEstadoWf',
+								{
+									config:[{
+											  event:'beforesave',
+											  delegate: this.onSaveWizard												  
+											}],
+									
+									scope:this
+								 });        
+			   
+	 },
+	
+	onButtonEdit:function(){
+        this.abrirFormulario('edit', this.sm.getSelected())
+    },
+	
+	abrirFormulario:function(tipo, record){
+        //abrir formulario de solicitud
+		
+	   var me = this;
+	   me.objSolForm = Phx.CP.loadWindows('../../../sis_tesoreria/vista/solicitud_rendicion_det/FormRendicion.php',
+								'Formulario de rendicion',
+								{
+									modal:true,
+									width:'90%',
+									height:'90%'
+								}, {data:{objPadre: me,
+										  tipoDoc: me.tipoDoc,
+										  tipo_form : tipo,
+										  id_depto : record.data.id_depto,
+										  id_solicitud_efectivo : me.id_solicitud_efectivo,
+										  datosOriginales: record
+										  }
+								}, 
+								this.idContenedor,
+								'FormRendicion');         
+    },
+	
+	 onSaveWizard:function(wizard,resp){
+			Phx.CP.loadingShow();
+			console.log(resp);
+			Ext.Ajax.request({
+				url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
+				params:{
+						
+					id_proceso_wf_act:  resp.id_proceso_wf_act,
+					id_estado_wf_act:   resp.id_estado_wf_act,
+					id_tipo_estado:     resp.id_tipo_estado,
+					id_funcionario_wf:  resp.id_funcionario_wf,
+					id_depto_wf:        resp.id_depto_wf,
+					obs:                resp.obs,
+					json_procesos:      Ext.util.JSON.encode(resp.procesos)
+					},
+				success:this.successWizard,
+				failure: this.conexionFailure,
+				argument:{wizard:wizard},
+				timeout:this.timeout,
+				scope:this
+			});
+		},
+		
+	successWizard:function(resp){
+		Phx.CP.loadingHide();
+		resp.argument.wizard.panel.destroy()
+		this.reload();
+	 },
+
+	onReloadPage : function(m) {
+		this.maestro = m;
+		this.store.baseParams={id_solicitud_efectivo:this.maestro.id_solicitud_efectivo, interfaz:this.nombre_vista};
+		this.load({params:{start:0, limit:this.tam_pag}});			
+	},
+	
+	bdel:false,
+	bsave:false,
+	bnew:false,
+	bedit:true
+	}
+)
+</script>
+		
+		
