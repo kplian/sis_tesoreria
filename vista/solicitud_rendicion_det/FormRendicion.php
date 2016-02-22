@@ -28,6 +28,11 @@ Phx.vista.FormRendicion = {
         this.Cmp.id_solicitud_efectivo.setValue(this.data.id_solicitud_efectivo);	 
 	},
 	
+	onEdit: function(){    	
+    	Phx.vista.FormRendicion.superclass.onEdit.call(this);
+        this.Cmp.id_solicitud_efectivo.setValue(this.data.id_solicitud_efectivo);	 
+	},
+	
 	iniciarEventos: function(){
 		
 		this.Cmp.dia.hide();
@@ -73,7 +78,7 @@ Phx.vista.FormRendicion = {
 		this.Cmp.id_plantilla.on('select',function(cmb,rec,i){
 				
 				this.esconderImportes();
-				console.log('selecionar plantilla', rec.data)
+				
 				//si es el formulario para nuevo reseteamos los valores ...
 				if(this.accionFormulario == 'NEW'){
 				    this.iniciarImportes();	
@@ -146,12 +151,8 @@ Phx.vista.FormRendicion = {
         	};
         	
         },this);
-		
-		this.Cmp.nit.setValue(rec.data.nit);
-        
-		this.Cmp.nro_autorizacion.on('blur',this.cargarRazonSocial,this);	
-		
-       
+		        
+		this.Cmp.nro_autorizacion.on('blur',this.cargarRazonSocial,this);	       
 	},	
     
 	cargarPeriodo: function(obj){
