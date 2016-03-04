@@ -56,6 +56,16 @@ DECLARE
     v_id_estado_wf_ant 		integer;
     v_tipo_ejecucion		varchar;
     v_registros_solicitud_efectivo	record;
+    v_tipo					varchar;
+    v_id_tipo_solicitud		integer;
+    v_fk_id_solicitud_efectivo	integer;
+    v_solicitud_efectivo	record;
+    v_monto_solicitado		numeric;
+	v_monto_rendido			numeric;
+    v_monto_devuelto		numeric;
+    v_monto_repuesto		numeric;
+    v_saldo					numeric;
+    
     		    
 BEGIN
 
@@ -73,135 +83,8 @@ BEGIN
 					
         begin
         
-         	select pv.codigo into v_codigo_tabla
-         	from tes.tcaja pv
-         	where pv.id_caja = v_parametros.id_caja;
-            
-         	-- obtener correlativo
-         	v_num_sol_efe =  param.f_obtener_correlativo(
-                  'SEFE', 
-                   NULL,-- par_id, 
-                   NULL, --id_uo 
-                   NULL,    -- id_depto
-                   p_id_usuario, 
-                   'TES', 
-                   NULL,
-                   0,
-                   0,
-                   'tes.tcaja',
-                   v_parametros.id_caja,
-                   v_codigo_tabla                   
-                   );
-                   
-        	--fin obtener correlativo
-            IF (v_num_sol_efe is NULL or v_num_sol_efe ='') THEN
-               raise exception 'No se pudo obtener un numero correlativo para la solicitud efectivo caja consulte con el administrador';
-            END IF;
-            --obtener id del proceso macro
-        
-            select 
-             pm.id_proceso_macro
-            into
-             v_id_proceso_macro
-            from wf.tproceso_macro pm
-            where pm.codigo = 'FR';
-                        
-            If v_id_proceso_macro is NULL THEN
-             raise exception 'El proceso macro  de codigo % no esta configurado en el sistema WF',v_codigo_proceso_macro;  
-            END IF;
-                        
-            
-            --   obtener el codigo del tipo_proceso
-           
-            select   tp.codigo 
-                into v_codigo_tipo_proceso
-            from  wf.ttipo_proceso tp 
-            where   tp.id_proceso_macro = v_id_proceso_macro
-                    and tp.estado_reg = 'activo' and tp.inicio = 'si';
-                
-             
-            IF v_codigo_tipo_proceso is NULL THEN
-               raise exception 'No existe un proceso inicial para el proceso macro indicado % (Revise la configuración)',v_codigo_proceso_macro;
-            END IF;
-            
-            select 
-             ges.id_gestion
-            into 
-              v_id_gestion
-            from param.tgestion ges
-            where ges.gestion = (date_part('year', current_date))::integer
-            limit 1 offset 0;
-             
-            -- inciar el tramite en el sistema de WF
-             SELECT 
-                   ps_num_tramite ,
-                   ps_id_proceso_wf ,
-                   ps_id_estado_wf ,
-                   ps_codigo_estado 
-                into
-                   v_num_tramite,
-                   v_id_proceso_wf,
-                   v_id_estado_wf,
-                   v_codigo_estado   
-                      
-              FROM wf.f_inicia_tramite(
-                   p_id_usuario,
-                   NULL,
-                   NULL,
-                   v_id_gestion, 
-                   v_codigo_tipo_proceso, 
-                   NULL,
-                   --v_parametros.id_depto,
-                   NULL,
-                   'Fondo Rotativo ('||v_num_sol_efe||') '::varchar,
-                   v_num_sol_efe );
-            
-            IF(pxp.f_existe_parametro(p_tabla,'motivo'))THEN
-            	v_motivo = v_parametros.motivo;
-            ELSE
-            	v_motivo = NULL;
-            END IF;
-            
-        	--Sentencia de la insercion
-        	insert into tes.tsolicitud_efectivo(
-			id_caja,
-			id_estado_wf,
-			monto,
-			id_proceso_wf,
-			nro_tramite,
-			estado,
-			estado_reg,
-			motivo,
-			id_funcionario,
-			fecha,
-			id_usuario_ai,
-			fecha_reg,
-			usuario_ai,
-			id_usuario_reg,
-			id_usuario_mod,
-			fecha_mod
-          	) values(
-			v_parametros.id_caja,
-			v_id_estado_wf,
-			v_parametros.monto,
-			v_id_proceso_wf,
-			v_num_sol_efe,
-			v_codigo_estado,
-			'activo',
-			v_motivo,
-			v_parametros.id_funcionario,
-			v_parametros.fecha,
-			v_parametros._id_usuario_ai,
-			now(),
-			v_parametros._nombre_usuario_ai,
-			p_id_usuario,
-			null,
-			null
-							
-			
-			
-			)RETURNING id_solicitud_efectivo into v_id_solicitud_efectivo;
-			
+        	v_id_solicitud_efectivo=tes.f_inserta_solicitud_efectivo(p_administrador,p_id_usuario,hstore(v_parametros));
+        	
 			--Definicion de la respuesta
 			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Solicitud Efectivo almacenado(a) con exito (id_solicitud_efectivo'||v_id_solicitud_efectivo||')'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_efectivo',v_id_solicitud_efectivo::varchar);
@@ -269,10 +152,17 @@ BEGIN
             from tes.tsolicitud_efectivo s
             inner join tes.tcaja c on c.id_caja=s.id_caja
 			where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo;
+            
+            IF v_registros_solicitud_efectivo.estado ='revision' THEN
+            	IF EXISTS (select 1 from tes.tsolicitud_rendicion_det where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo)THEN
+                	raise exception 'No es posible eliminar la rendicion de efectivo, esta contiene facturas rendidas,
+                    devuelva las facturas al solicitante';
+                END IF;
+            END IF; 
                         
-            IF v_registros_solicitud_efectivo.estado !='borrador' THEN
+            IF v_registros_solicitud_efectivo.estado not in ('borrador','revision') THEN
             	raise exception 'No es posible eliminar la solicitud de efectivo, no se encuentra en estado borrador';
-            END IF;            
+            END IF;
                         
            --recuperamos el id_tipo_proceso en el WF para el estado anulado
            --este es un estado especial que no tiene padres definidos
@@ -349,7 +239,6 @@ BEGIN
         $this->setParametro('id_funcionario_wf','id_funcionario_wf','int4');
         $this->setParametro('id_depto_wf','id_depto_wf','int4');
         $this->setParametro('obs','obs','text');
-        $this->setParametro('json_procesos','json_procesos','text');
         */
         
         --obtenermos datos basicos
@@ -370,7 +259,7 @@ BEGIN
         from tes.tsolicitud_efectivo se
         where se.id_proceso_wf  = v_parametros.id_proceso_wf_act;
         
-        SELECT cj.tipo_ejecucion into v_tipo_ejecucion
+        SELECT cj.tipo_ejecucion, cj.id_depto into v_tipo_ejecucion, v_id_depto
         from tes.tsolicitud_efectivo se
         inner join tes.tcaja cj on cj.id_caja=se.id_caja
         where se.id_solicitud_efectivo=v_id_solicitud_efectivo;
@@ -462,8 +351,69 @@ BEGIN
              id_usuario_mod=p_id_usuario,
              fecha_mod=now()                           
           where id_proceso_wf = v_parametros.id_proceso_wf_act;
-                       
-		
+          
+          --solo en caso de rendicion y finalizacion de solicitud se hara devolucion o reposicion
+          IF   v_codigo_estado_siguiente in ('rendido','finalizado')   THEN             
+            IF  pxp.f_existe_parametro(p_tabla,'devolucion_dinero') and pxp.f_existe_parametro(p_tabla,'saldo') THEN
+            	
+              select id_caja, id_funcionario, current_date as fecha, 
+              case when v_parametros.saldo > 0 then 'devolucion' else 'reposicion' end as tipo_solicitud,
+              case when v_parametros.saldo > 0 then v_parametros.saldo else v_parametros.saldo * (-1) end as monto,
+              fk_id_solicitud_efectivo as id_solicitud_efectivo,
+              id_estado_wf
+              into v_solicitud_efectivo
+              from tes.tsolicitud_efectivo
+              where id_solicitud_efectivo=v_id_solicitud_efectivo;
+                 
+              --crear devolucion o ampliacion
+              v_id_solicitud_efectivo=tes.f_inserta_solicitud_efectivo(p_administrador,p_id_usuario,hstore(v_parametros)||hstore(v_solicitud_efectivo));
+            
+            ELSE
+              /*
+              --finalizar solicitud de efectivo
+              select id_caja, id_funcionario, current_date as fecha, 
+              case when v_parametros.saldo > 0 then 'devolucion' else 'reposicion' end as tipo_solicitud,
+              case when v_parametros.saldo > 0 then v_parametros.saldo else v_parametros.saldo * (-1) end as monto,
+              fk_id_solicitud_efectivo as id_solicitud_efectivo
+              into v_solicitud_efectivo
+              from tes.tsolicitud_efectivo
+              where id_solicitud_efectivo=v_id_solicitud_efectivo;
+              */
+
+            select sum(sol.monto) into v_monto_rendido
+            from tes.tsolicitud_efectivo sol
+            where sol.fk_id_solicitud_efectivo=v_id_solicitud_efectivo and sol.estado='rendido';
+            
+            select sum(sol.monto) into v_monto_devuelto
+            from tes.tsolicitud_efectivo sol
+            where sol.fk_id_solicitud_efectivo=v_id_solicitud_efectivo and sol.estado='devuelto';
+            
+            select sum(sol.monto) into v_monto_repuesto
+            from tes.tsolicitud_efectivo sol
+            where sol.fk_id_solicitud_efectivo=v_id_solicitud_efectivo and sol.estado='repuesto';
+            
+            select sum(sol.monto) into v_monto_solicitado
+            from tes.tsolicitud_efectivo sol
+            where sol.id_solicitud_efectivo=v_id_solicitud_efectivo;
+
+            v_saldo = v_monto_solicitado - COALESCE(v_monto_rendido,0) - COALESCE(v_monto_devuelto,0) + COALESCE(v_monto_repuesto,0);
+
+            IF v_saldo != 0 THEN
+              select id_caja, id_funcionario, current_date as fecha,
+                     case when v_saldo > 0 then 'devolucion' else 'reposicion' end as tipo_solicitud,
+                     case when v_saldo > 0 then v_saldo else v_saldo*(-1) end as monto,
+                     id_solicitud_efectivo,
+                     nro_tramite
+              into v_solicitud_efectivo
+              from tes.tsolicitud_efectivo
+              where id_solicitud_efectivo=v_id_solicitud_efectivo;
+              
+              v_id_solicitud_efectivo=tes.f_inserta_solicitud_efectivo(p_administrador,p_id_usuario,hstore(v_parametros)||hstore(v_solicitud_efectivo)||hstore(v_id_depto));
+            END IF;
+          END IF;
+                          
+          END IF;
+          
           -- si hay mas de un estado disponible  preguntamos al usuario
           v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado de la solicitud de efectivo)'); 
           v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');

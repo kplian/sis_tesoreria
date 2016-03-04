@@ -11,6 +11,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 			
 	function listarSolicitudEfectivo(){
 		$this->objParam->defecto('ordenacion','id_solicitud_efectivo');
+		$this->objParam->defecto('dir_ordenacion','asc');
 		
 		if($this->objParam->getParametro('tipo_interfaz')=='ConDetalle')
 		{
@@ -21,10 +22,19 @@ class ACTSolicitudEfectivo extends ACTbase{
 		{
 			$this->objParam-> addFiltro("caja.tipo_ejecucion = ''sin_detalle''");
 		}
+				
+		if($this->objParam->getParametro('id_caja')!='')
+		{
+			$this->objParam-> addFiltro('ren.id_caja ='.$this->objParam->getParametro('id_caja'));
+		}
+		
+		if($this->objParam->getParametro('id_solicitud_efectivo')!='')
+		{
+			$this->objParam-> addFiltro('solefe.fk_id_solicitud_efectivo ='.$this->objParam->getParametro('id_solicitud_efectivo'));
+		}
 		
 		$this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]);
-		
-		$this->objParam->defecto('dir_ordenacion','asc');
+				
 		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
 			$this->objReporte = new Reporte($this->objParam,$this);
 			$this->res = $this->objReporte->generarReporteListado('MODSolicitudEfectivo','listarSolicitudEfectivo');

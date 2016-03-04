@@ -52,12 +52,12 @@ class ACTSolicitudRendicionDet extends ACTbase{
 		$this->objParam->addParametro('tipo_solicitud','rendicion');
 		
 		$this->objFunc=$this->create('MODSolicitudRendicionDet');	
-		if($this->objParam->insertar('id_solicitud_rendicion_det')){
+		if($this->objParam->insertar('id_doc_compra_venta')){
 			$this->res=$this->objFunc->insertarRendicionDocCompleto($this->objParam);			
 		} else{
 			//TODO			
 			//$this->res=$this->objFunc->modificarSolicitud($this->objParam);
-			//trabajar en la modificacion compelta de solicitud ....
+			//trabajar en la modificacion compelta de solicitud ....			
 			$this->res=$this->objFunc->modificarRendicionDocCompleto($this->objParam);
 		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
@@ -66,6 +66,12 @@ class ACTSolicitudRendicionDet extends ACTbase{
 	function eliminarSolicitudRendicionDet(){
 			$this->objFunc=$this->create('MODSolicitudRendicionDet');	
 		$this->res=$this->objFunc->eliminarSolicitudRendicionDet($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	
+	function devolverFactura(){
+		$this->objFunc=$this->create('MODSolicitudRendicionDet');
+		$this->res=$this->objFunc->devolverFactura($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 			

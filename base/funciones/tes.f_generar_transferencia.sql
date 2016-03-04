@@ -96,7 +96,11 @@ BEGIN
 		 inner join conta.tint_transaccion tra on tra.id_int_comprobante = cbte.id_int_comprobante
 		 left join param.tdepto depto on depto.id_depto = cbte.id_depto_libro
          where cbte.id_int_comprobante = p_id_int_comprobante and tra.forma_pago = 'transferencia';
-               
+
+		IF(v_datos_transferencia.forma_pago is null) THEN
+         	raise exception 'El comprobante % no tiene como forma de pago transferencia',p_id_int_comprobante; 
+         END IF;
+		 
         IF(v_datos_transferencia.id_libro_bancos_deposito is null)THEN
             v_resp = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,
                         array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','sistema_origen','id_int_comprobante'],

@@ -26,6 +26,7 @@ class MODCaja extends MODbase{
 		$this->captura('id_caja','int4');
 		$this->captura('estado','varchar');
 		$this->captura('importe_maximo','numeric');
+		$this->captura('saldo','numeric');
 		$this->captura('tipo','varchar');
 		$this->captura('estado_reg','varchar');
 		$this->captura('estado_proceso','varchar');
@@ -52,7 +53,6 @@ class MODCaja extends MODbase{
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
-		//var_dump($this->consulta); exit;
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}

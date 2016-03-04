@@ -161,22 +161,22 @@ BEGIN
                              When LBRBAN.tipo = ''deposito'' Then LBRBAN.importe_deposito 
                              				  - COALESCE((Select COALESCE(sum(lb.importe_cheque),0)
                                               	From tes.tts_libro_bancos lb
-                                                Where lb.id_libro_bancos_fk = LBRBAN.id_libro_bancos and lb.tipo <> ''deposito''), 0) 
+                                                Where lb.id_libro_bancos_fk = LBRBAN.id_libro_bancos and lb.tipo not in (''deposito'',''transf_interna_haber'')), 0) 
                                               + COALESCE((Select COALESCE(sum(lb.importe_deposito), 0)
                                               	From tes.tts_libro_bancos lb
-                                              	Where lb.id_libro_bancos_fk = LBRBAN.id_libro_bancos and lb.tipo = ''deposito''), 0)
+                                              	Where lb.id_libro_bancos_fk = LBRBAN.id_libro_bancos and lb.tipo in (''deposito'',''transf_interna_haber'')), 0)
                              When (LBRBAN.tipo in (''cheque'', ''debito_automatico'',''transferencia_carta'') and LBRBAN.id_libro_bancos_fk is not null) Then 
                              					(Select COALESCE(lb.importe_deposito,0)
                                                 From tes.tts_libro_bancos lb
                              					Where lb.id_libro_bancos = LBRBAN.id_libro_bancos_fk) 
                              				   + (Select COALESCE(sum(lb.importe_deposito), 0)
                              					  From tes.tts_libro_bancos lb
-                             					  Where lb.id_libro_bancos_fk = LBRBAN.id_libro_bancos_fk and lb.tipo = ''deposito'')
+                             					  Where lb.id_libro_bancos_fk = LBRBAN.id_libro_bancos_fk and lb.tipo in (''deposito'',''transf_interna_haber''))
                                                - (Select sum(lb2.importe_cheque)
                              					  From tes.tts_libro_bancos lb2
                              					  Where lb2.id_libro_bancos <= LBRBAN.id_libro_bancos and
                                    				  lb2.id_libro_bancos_fk = LBRBAN.id_libro_bancos_fk and
-                                   				  lb2.tipo <> ''deposito'')
+                                   				  lb2.tipo not in (''deposito'',''transf_interna_haber''))
                              Else 0
                            END as saldo
                     		FROM tes.tts_libro_bancos LBRBAN
@@ -190,29 +190,29 @@ BEGIN
                             				 - COALESCE((Select COALESCE(sum(lb.importe_cheque),0)
                                              			 From tes.tts_libro_bancos lb
                                                          Where lb.id_libro_bancos_fk = LBRBAN.id_libro_bancos 
-                                                         and lb.tipo <> ''deposito''), 0) 
+                                                         and lb.tipo not in (''deposito'',''transf_interna_haber'')), 0) 
                                              + COALESCE((Select COALESCE(sum(lb.importe_deposito), 0)
                          								 From tes.tts_libro_bancos lb
                          								 Where lb.id_libro_bancos_fk = LBRBAN.id_libro_bancos and
-                               							 lb.tipo = ''deposito''), 0)
+                               							 lb.tipo in (''deposito'',''transf_interna_haber'')), 0)
         					When (LBRBAN.tipo in (''cheque'', ''debito_automatico'',''transferencia_carta'') and LBRBAN.id_libro_bancos_fk is not null) Then
                             							(Select COALESCE(lb.importe_deposito, 0)
                                                  		 From tes.tts_libro_bancos lb
                                                  		 Where lb.id_libro_bancos = LBRBAN.id_libro_bancos_fk) 
             								 + (Select COALESCE(sum(lb.importe_deposito), 0)
         												 From tes.tts_libro_bancos lb
-        												 Where lb.id_libro_bancos_fk = LBRBAN.id_libro_bancos_fk and lb.tipo = ''deposito'')
+        												 Where lb.id_libro_bancos_fk = LBRBAN.id_libro_bancos_fk and lb.tipo in (''deposito'',''transf_interna_haber''))
                                              - (Select sum(lb2.importe_cheque)
 												         From tes.tts_libro_bancos lb2
 												         Where lb2.id_libro_bancos <= LBRBAN.id_libro_bancos and
-										                 lb2.id_libro_bancos_fk = LBRBAN.id_libro_bancos_fk and lb2.tipo <> ''deposito'')
+										                 lb2.id_libro_bancos_fk = LBRBAN.id_libro_bancos_fk and lb2.tipo not in (''deposito'',''transf_interna_haber''))
         					Else 0
       						END > 0 and ';
             
             v_consulta := v_consulta || v_filtro_saldo;
             v_consulta := v_consulta || v_parametros.filtro;
             v_consulta := v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
- 			
+ 			raise notice '%', v_consulta;
             return v_consulta;
         END;
 
@@ -236,22 +236,22 @@ BEGIN
                             				 - COALESCE((Select COALESCE(sum(lb.importe_cheque),0)
                                              			 From tes.tts_libro_bancos lb
                                                          Where lb.id_libro_bancos_fk = LBRBAN.id_libro_bancos 
-                                                         and lb.tipo <> ''deposito''), 0) 
+                                                         and lb.tipo not in (''deposito'',''transf_interna_haber'')), 0) 
                                              + COALESCE((Select COALESCE(sum(lb.importe_deposito), 0)
                          								 From tes.tts_libro_bancos lb
                          								 Where lb.id_libro_bancos_fk = LBRBAN.id_libro_bancos and
-                               							 lb.tipo = ''deposito''), 0)
+                               							 lb.tipo in (''deposito'',''transf_interna_haber'')), 0)
         					When (LBRBAN.tipo in (''cheque'', ''debito_automatico'',''transferencia_carta'') and LBRBAN.id_libro_bancos_fk is not null) Then
                             							(Select COALESCE(lb.importe_deposito, 0)
                                                  		 From tes.tts_libro_bancos lb
                                                  		 Where lb.id_libro_bancos = LBRBAN.id_libro_bancos_fk) 
             								 + (Select COALESCE(sum(lb.importe_deposito), 0)
         												 From tes.tts_libro_bancos lb
-        												 Where lb.id_libro_bancos_fk = LBRBAN.id_libro_bancos_fk and lb.tipo = ''deposito'')
+        												 Where lb.id_libro_bancos_fk = LBRBAN.id_libro_bancos_fk and lb.tipo in (''deposito'',''transf_interna_haber''))
                                              - (Select sum(lb2.importe_cheque)
 												         From tes.tts_libro_bancos lb2
 												         Where lb2.id_libro_bancos <= LBRBAN.id_libro_bancos and
-										                 lb2.id_libro_bancos_fk = LBRBAN.id_libro_bancos_fk and lb2.tipo <> ''deposito'')
+										                 lb2.id_libro_bancos_fk = LBRBAN.id_libro_bancos_fk and lb2.tipo not in (''deposito'',''transf_interna_haber''))
         					Else 0
       						END > 0 and ';
             

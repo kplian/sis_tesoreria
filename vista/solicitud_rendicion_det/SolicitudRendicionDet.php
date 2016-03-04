@@ -461,30 +461,33 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 	
 	sigEstado:function(){                   
 	  var rec=this.sm.getSelected();
-	  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
-								'Estado de Wf',
-								{
-									modal:true,
-									width:700,
-									height:450
-								}, {data:{
-									   id_estado_wf:rec.data.id_estado_wf,
-									   id_proceso_wf:rec.data.id_proceso_wf									  
-									}}, this.idContenedor,'FormEstadoWf',
-								{
-									config:[{
-											  event:'beforesave',
-											  delegate: this.onSaveWizard												  
-											}],
-									
-									scope:this
-								 });        
-			   
+	  
+	  if(typeof rec == 'undefined'){
+		  Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un registro.');		  
+	  }else{	  
+		  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+									'Estado de Wf',
+									{
+										modal:true,
+										width:700,
+										height:450
+									}, {data:{
+										   id_estado_wf:rec.data.id_estado_wf,
+										   id_proceso_wf:rec.data.id_proceso_wf									  
+										}}, this.idContenedor,'FormEstadoWf',
+									{
+										config:[{
+												  event:'beforesave',
+												  delegate: this.onSaveWizard												  
+												}],
+										
+										scope:this
+									 });        
+	   }
 	 },
 	 
 	 onSaveWizard:function(wizard,resp){
-			Phx.CP.loadingShow();
-			console.log(resp);
+			Phx.CP.loadingShow();			
 			Ext.Ajax.request({
 				url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
 				params:{
@@ -495,7 +498,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 					id_funcionario_wf:  resp.id_funcionario_wf,
 					id_depto_wf:        resp.id_depto_wf,
 					obs:                resp.obs,
-					json_procesos:      Ext.util.JSON.encode(resp.procesos)
+					//json_procesos:      Ext.util.JSON.encode(resp.procesos)		
 					},
 				success:this.successWizard,
 				failure: this.conexionFailure,

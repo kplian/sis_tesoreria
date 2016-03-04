@@ -351,7 +351,13 @@ class MODSolicitudRendicionDet extends MODbase{
 			$this->setParametro('importe_descuento_ley','importe_descuento_ley','numeric');
 			$this->setParametro('importe_pago_liquido','importe_pago_liquido','numeric');
 			$this->setParametro('nro_dui','nro_dui','varchar');
-			$this->setParametro('id_moneda','id_moneda','int4');
+			$this->setParametro('id_moneda','id_moneda','int4');			
+			
+			$this->setParametro('importe_pendiente','importe_pendiente','numeric');
+			$this->setParametro('importe_anticipo','importe_anticipo','numeric');
+			$this->setParametro('importe_retgar','importe_retgar','numeric');
+			$this->setParametro('importe_neto','importe_neto','numeric');
+			$this->setParametro('id_auxiliar','id_auxiliar','integer');
 			
 			//Ejecuta la instruccion
             $this->armarConsulta();
@@ -418,6 +424,7 @@ class MODSolicitudRendicionDet extends MODbase{
 				$this->arreglo['id_orden_trabajo'] = (isset($f['id_orden_trabajo'])?$f['id_orden_trabajo']:'null');
 				$this->arreglo['id_concepto_ingas'] = $f['id_concepto_ingas'];
 				$this->arreglo['precio_total'] = $f['precio_total'];
+				$this->arreglo['precio_total_final'] = $f['precio_total_final'];
 				$this->arreglo['cantidad_sol'] = $f['cantidad_sol'];
 				
 				
@@ -445,7 +452,7 @@ class MODSolicitudRendicionDet extends MODbase{
 				$this->setParametro('precio_unitario','precio_unitario','numeric');
 				$this->setParametro('precio_total','precio_total','numeric');
 				$this->setParametro('id_doc_concepto','id_doc_concepto','numeric');
-				
+				$this->setParametro('precio_total_final','precio_total_final','numeric');
 				
 				//Ejecuta la instruccion
 	            $this->armarConsulta();
@@ -542,6 +549,26 @@ class MODSolicitudRendicionDet extends MODbase{
 				
 		//Define los parametros para la funcion
 		$this->setParametro('id_solicitud_rendicion_det','id_solicitud_rendicion_det','int4');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
+	function devolverFactura(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_solicitud_rendicion_det_ime';
+		$this->transaccion='TES_RENDEVFAC_IME';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_solicitud_rendicion_det','id_solicitud_rendicion_det','int4');
+		$this->setParametro('id_doc_compra_venta','id_doc_compra_venta','int4');		
+		$this->setParametro('tipo_solicitud','tipo_solicitud','varchar');	
+		$this->setParametro('fecha','fecha','date');	
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();

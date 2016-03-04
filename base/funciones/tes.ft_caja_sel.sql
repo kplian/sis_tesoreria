@@ -103,6 +103,7 @@ BEGIN
 						caja.id_caja,
 						caja.estado,
 						caja.importe_maximo,
+                        caja.importe_maximo -(select sum(monto) from tes.tsolicitud_efectivo where id_caja=caja.id_caja and estado=''entregado'') as saldo,
 						caja.tipo,
 						caja.estado_reg,
                         pc.estado as estado_proceso,

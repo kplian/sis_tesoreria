@@ -70,13 +70,13 @@ BEGIN
 			null,
 			null
 			)RETURNING id_solicitud_efectivo_det into v_id_solicitud_efectivo_det;
-			
-            UPDATE tes.tsolicitud_efectivo
-            SET monto =  (select sum(monto) 
-            			  from tes.tsolicitud_efectivo_det
-            			  where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo)
-            where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo;
             
+            UPDATE tes.tsolicitud_efectivo
+            SET monto = COALESCE((select sum(monto) 
+            			  from tes.tsolicitud_efectivo_det
+            			  where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo), 0.00)
+            where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo;
+			            
 			--Definicion de la respuesta
 			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Detalle almacenado(a) con exito (id_solicitud_efectivo_det'||v_id_solicitud_efectivo_det||')'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_efectivo_det',v_id_solicitud_efectivo_det::varchar);
@@ -105,7 +105,14 @@ BEGIN
 			id_usuario_mod = p_id_usuario,
 			fecha_mod = now()
 			where id_solicitud_efectivo_det=v_parametros.id_solicitud_efectivo_det;
-               
+            
+            
+            UPDATE tes.tsolicitud_efectivo
+            SET monto = COALESCE((select sum(monto) 
+            			  from tes.tsolicitud_efectivo_det
+            			  where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo), 0.00)
+            where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo;
+            
 			--Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Detalle modificado(a)'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_efectivo_det',v_parametros.id_solicitud_efectivo_det::varchar);

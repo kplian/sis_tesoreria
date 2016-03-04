@@ -1113,7 +1113,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		
 		onButtonEdit:function(){
 			Phx.vista.TsLibroBancosCheque.superclass.onButtonEdit.call(this);
-			this.cmpTipo.disable();			
+			//this.cmpTipo.disable();			
 			var data = this.getSelectedData();
 			
 			if(data.tipo=='cheque')
@@ -1125,11 +1125,13 @@ header("content-type: text/javascript; charset=UTF-8");
 				this.cmpFecha.disable();
 				this.cmpImporteCheque.disable();
 				this.cmpNroCheque.disable();
+				this.cmpTipo.disable();
 			}else{
 				this.cmpDepto.enable();
 				this.cmpFecha.enable();
 				this.cmpImporteCheque.enable();
 				this.cmpNroCheque.enable();
+				this.cmpTipo.enable();
 			}
 		},
 		

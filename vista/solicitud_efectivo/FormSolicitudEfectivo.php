@@ -558,6 +558,7 @@ Phx.vista.FormSolicitudEfectivo=Ext.extend(Phx.frmInterfaz,{
 				name: 'monto',
 				fieldLabel: 'Monto',
 				allowBlank: true,
+				inputType:'hidden',
 				anchor: '80%',
 				gwidth: 100,
 				maxLength:1179650

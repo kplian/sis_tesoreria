@@ -21,7 +21,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 			{	text:'Devolver Factura',
 				iconCls: 'batras',
 				disabled:false,
-				handler:this.antEstado,
+				handler:this.devolverFactura,
 				tooltip: '<b>Devolver Factura</b><p>Devolver Factura a Solicitante</p>'
 			}
 		);
@@ -343,32 +343,39 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 		field: 'id_solicitud_rendicion_det',
 		direction: 'ASC'
 	},
-	   	
-	antEstado:function(){                   
-	  var rec=this.sm.getSelected();
-	  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
-								'Estado de Wf',
-								{
-									modal:true,
-									width:700,
-									height:450
-								}, {data:{
-									   id_estado_wf:rec.data.id_estado_wf,
-									   id_proceso_wf:rec.data.id_proceso_wf									  
-									}}, this.idContenedor,'FormEstadoWf',
-								{
-									config:[{
-											  event:'beforesave',
-											  delegate: this.onSaveWizard												  
-											}],
-									
-									scope:this
-								 });        
-			   
-	 },
+		 
+	devolverFactura:function(res,eve)
+	{                   
+		var d= this.sm.getSelected().data;
+		Phx.CP.loadingShow();
+		
+		Ext.Ajax.request({
+			url:'../../sis_tesoreria/control/SolicitudRendicionDet/devolverFactura',
+			params:{id_solicitud_rendicion_det:d.id_solicitud_rendicion_det,
+					id_doc_compra_venta: d.id_doc_compra_venta,
+					id_depto: d.id_depto,
+					tipo_solicitud:'rendicion',
+					fecha:new Date()},
+			success:this.successSinc,
+			failure: this.conexionFailure,
+			timeout:this.timeout,
+			scope:this
+		});     
+	},
+	
+	successSinc:function(resp){
+		Phx.CP.loadingHide();
+		var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+		console.log(reg.ROOT.datos);
+		if(reg.ROOT.datos.resultado!='falla'){ 
+			this.onReloadPadre();
+		 }else{
+			alert(reg.ROOT.datos.mensaje)
+		}
+	},
 	
 	onButtonEdit:function(){
-        this.abrirFormulario('edit', this.sm.getSelected())
+        this.abrirFormulario('edit', this.sm.getSelected());		
     },
 	
 	abrirFormulario:function(tipo, record){
@@ -382,7 +389,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 									width:'90%',
 									height:'90%'
 								}, {data:{objPadre: me,
-										  tipoDoc: me.tipoDoc,
+										  tipoDoc: record.data.tipo,
 										  tipo_form : tipo,
 										  id_depto : record.data.id_depto,
 										  id_solicitud_efectivo : me.id_solicitud_efectivo,
@@ -390,42 +397,17 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 										  }
 								}, 
 								this.idContenedor,
-								'FormRendicion');         
+								'FormRendicion');     
     },
 	
-	 onSaveWizard:function(wizard,resp){
-			Phx.CP.loadingShow();
-			console.log(resp);
-			Ext.Ajax.request({
-				url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
-				params:{
-						
-					id_proceso_wf_act:  resp.id_proceso_wf_act,
-					id_estado_wf_act:   resp.id_estado_wf_act,
-					id_tipo_estado:     resp.id_tipo_estado,
-					id_funcionario_wf:  resp.id_funcionario_wf,
-					id_depto_wf:        resp.id_depto_wf,
-					obs:                resp.obs,
-					json_procesos:      Ext.util.JSON.encode(resp.procesos)
-					},
-				success:this.successWizard,
-				failure: this.conexionFailure,
-				argument:{wizard:wizard},
-				timeout:this.timeout,
-				scope:this
-			});
-		},
-		
-	successWizard:function(resp){
-		Phx.CP.loadingHide();
-		resp.argument.wizard.panel.destroy()
-		this.reload();
-	 },
-
 	onReloadPage : function(m) {
 		this.maestro = m;
 		this.store.baseParams={id_solicitud_efectivo:this.maestro.id_solicitud_efectivo, interfaz:this.nombre_vista};
 		this.load({params:{start:0, limit:this.tam_pag}});			
+	},
+	
+	onReloadPadre : function(){
+		Phx.CP.getPagina(this.idContenedorPadre).reload();
 	},
 	
 	bdel:false,

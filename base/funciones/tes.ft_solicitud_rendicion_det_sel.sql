@@ -77,9 +77,14 @@ BEGIN
 						rend.id_usuario_mod,
 						usu1.cuenta as usr_reg,
 						usu2.cuenta as usr_mod,
-                        solefe.nro_tramite	
+                        solefe.nro_tramite,
+                        solren.id_proceso_wf,
+				        solren.id_estado_wf,
+                        caja.id_depto	
 						from tes.tsolicitud_rendicion_det rend
-                        inner join tes.tsolicitud_efectivo solefe on solefe.id_solicitud_efectivo= rend.id_solicitud_efectivo
+                        inner join tes.tsolicitud_efectivo solren on solren.id_solicitud_efectivo = rend.id_solicitud_efectivo
+                        inner join tes.tsolicitud_efectivo solefe on solefe.id_solicitud_efectivo=solren.fk_id_solicitud_efectivo
+                        inner join tes.tcaja caja on caja.id_caja=solefe.id_caja
                         left join conta.tdoc_compra_venta dc on dc.id_doc_compra_venta=rend.id_documento_respaldo
                         left join param.tplantilla pla on pla.id_plantilla = dc.id_plantilla
 						left join param.tmoneda mon on mon.id_moneda = dc.id_moneda
@@ -109,7 +114,8 @@ BEGIN
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(id_solicitud_rendicion_det)
 					    from tes.tsolicitud_rendicion_det rend
-                        inner join tes.tsolicitud_efectivo solefe on solefe.id_solicitud_efectivo= rend.id_solicitud_efectivo
+                        inner join tes.tsolicitud_efectivo solren on solren.id_solicitud_efectivo = rend.id_solicitud_efectivo and solren.estado=''borrador''
+                        inner join tes.tsolicitud_efectivo solefe on solefe.id_solicitud_efectivo=solren.fk_id_solicitud_efectivo
                         left join conta.tdoc_compra_venta dc on dc.id_doc_compra_venta=rend.id_documento_respaldo
                         left join param.tplantilla pla on pla.id_plantilla = dc.id_plantilla
 						left join param.tmoneda mon on mon.id_moneda = dc.id_moneda

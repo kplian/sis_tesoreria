@@ -31,6 +31,10 @@ DECLARE
 	v_mensaje_error         text;
 	v_id_solicitud_rendicion_det	integer;
     v_id_documento_respaldo	integer;
+    v_solicitud_efectivo	record;
+    v_id_solicitud_efectivo_rend	integer;
+    v_total_rendiciones		numeric;
+    
 			    
 BEGIN
 
@@ -47,6 +51,25 @@ BEGIN
 	if(p_transaccion='TES_REND_INS')then
 					
         begin
+             
+             select sol.id_solicitud_efectivo into v_id_solicitud_efectivo_rend 
+             from tes.tsolicitud_efectivo sol
+             inner join tes.ttipo_solicitud tp on tp.id_tipo_solicitud=sol.id_tipo_solicitud
+             where sol.fk_id_solicitud_efectivo= v_parametros.id_solicitud_efectivo
+             and sol.estado='borrador' and tp.codigo='RENEFE';
+             
+             IF v_id_solicitud_efectivo_rend is null THEN
+               
+               select id_caja, id_funcionario into v_solicitud_efectivo
+               from tes.tsolicitud_efectivo
+               where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo;
+
+               v_resp = tes.f_inserta_solicitud_efectivo(p_administrador, p_id_usuario,hstore(v_parametros)||hstore(v_solicitud_efectivo));
+             
+               v_id_solicitud_efectivo_rend = v_resp;
+
+             END IF;
+
         	--Sentencia de la insercion
         	insert into tes.tsolicitud_rendicion_det(
 			id_solicitud_efectivo,
@@ -60,7 +83,7 @@ BEGIN
 			fecha_mod,
 			id_usuario_mod
           	) values(
-			v_parametros.id_solicitud_efectivo,
+			v_id_solicitud_efectivo_rend,
 			v_parametros.id_documento_respaldo,
 			'activo',
 			v_parametros.monto,
@@ -70,11 +93,21 @@ BEGIN
 			v_parametros._id_usuario_ai,
 			null,
 			null
-							
-			
-			
 			)RETURNING id_solicitud_rendicion_det into v_id_solicitud_rendicion_det;
-			
+            
+            UPDATE conta.tdoc_compra_venta
+            SET tabla_origen='tes.ft_solicitud_rendicion_det',
+            id_origen=v_id_solicitud_rendicion_det
+            WHERE id_doc_compra_venta=v_parametros.id_documento_respaldo;
+			            
+            select sum(rend.monto) into v_total_rendiciones
+            from tes.tsolicitud_rendicion_det rend
+            where rend.id_solicitud_efectivo=v_id_solicitud_efectivo_rend;
+             
+            UPDATE tes.tsolicitud_efectivo
+            SET monto=v_total_rendiciones
+            WHERE id_solicitud_efectivo=v_id_solicitud_efectivo_rend;
+            
 			--Definicion de la respuesta
 			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion almacenado(a) con exito (id_solicitud_rendicion_det'||v_id_solicitud_rendicion_det||')'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_rendicion_det',v_id_solicitud_rendicion_det::varchar);
@@ -104,6 +137,16 @@ BEGIN
 			id_usuario_ai = v_parametros._id_usuario_ai,
 			usuario_ai = v_parametros._nombre_usuario_ai
 			where id_documento_respaldo=v_parametros.id_documento_respaldo;
+            
+            select id_solicitud_efectivo into v_id_solicitud_efectivo_rend
+            from tes.tsolicitud_rendicion_det
+            where id_documento_respaldo=v_parametros.id_documento_respaldo;
+            
+            UPDATE tes.tsolicitud_efectivo
+            SET monto=(select sum(monto)
+              		   from tes.tsolicitud_rendicion_det
+            		   where id_solicitud_efectivo=v_id_solicitud_efectivo_rend)
+            WHERE id_solicitud_efectivo=v_id_solicitud_efectivo_rend;
                
 			--Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion modificado(a)'); 
@@ -143,7 +186,54 @@ BEGIN
             return v_resp;
 
 		end;
-         
+        
+    elsif(p_transaccion='TES_RENDEVFAC_IME')then
+    	begin
+        	--recuperamos el id de la solicitud de efectivo             
+        	 select sol.id_caja, sol.id_funcionario, ren.monto, 
+             sol.fk_id_solicitud_efectivo as id_solicitud_efectivo, 
+             sol.id_solicitud_efectivo as id_solicitud_efectivo_rendicion
+             into v_solicitud_efectivo
+             from tes.tsolicitud_efectivo sol
+             inner join tes.tsolicitud_rendicion_det ren on ren.id_solicitud_efectivo=sol.id_solicitud_efectivo
+             where ren.id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
+                 
+             select sol.id_solicitud_efectivo into v_id_solicitud_efectivo_rend 
+             from tes.tsolicitud_efectivo sol
+             inner join tes.ttipo_solicitud tp on tp.id_tipo_solicitud=sol.id_tipo_solicitud
+             where sol.fk_id_solicitud_efectivo= v_solicitud_efectivo.id_solicitud_efectivo
+             and sol.estado='borrador' and tp.codigo='RENEFE';
+             
+             --verificamos si existe alguna rendicion activa
+             IF v_id_solicitud_efectivo_rend is null THEN
+               
+               v_resp = tes.f_inserta_solicitud_efectivo(p_administrador, p_id_usuario,hstore(v_parametros)||hstore(v_solicitud_efectivo));
+             
+               v_id_solicitud_efectivo_rend = v_resp;
+
+             END IF;
+             
+             UPDATE tes.tsolicitud_rendicion_det
+             SET id_solicitud_efectivo=v_id_solicitud_efectivo_rend
+             WHERE id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
+
+             --actualizamos el monto total de la rendicion parcial
+             select sum(rend.monto) into v_total_rendiciones
+             from tes.tsolicitud_rendicion_det rend
+             where rend.id_solicitud_efectivo=v_solicitud_efectivo.id_solicitud_efectivo_rendicion;
+             
+             UPDATE tes.tsolicitud_efectivo
+             SET monto=COALESCE(v_total_rendiciones,0)
+             WHERE id_solicitud_efectivo=v_solicitud_efectivo.id_solicitud_efectivo_rendicion;
+             
+             --Definicion de la respuesta
+			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion Factura devuelta a la solicitud de efectivo con exito (id_solicitud_rendicion_det'||v_id_solicitud_rendicion_det||')'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_rendicion_det',v_id_solicitud_rendicion_det::varchar);
+
+            --Devuelve la respuesta
+            return v_resp;
+             
+        end;         
 	else
      
     	raise exception 'Transaccion inexistente: %',p_transaccion;

@@ -207,7 +207,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'monto',
-				fieldLabel: 'Monto',
+				fieldLabel: 'Monto Solicitado',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,

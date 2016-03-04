@@ -46,6 +46,7 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->captura('usr_reg','varchar');
 		$this->captura('usr_mod','varchar');
 		$this->captura('solicitud_efectivo_padre','varchar');
+		$this->captura('saldo','numeric');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -139,7 +140,9 @@ class MODSolicitudEfectivo extends MODbase{
         $this->setParametro('id_funcionario_wf','id_funcionario_wf','int4');
         $this->setParametro('id_depto_wf','id_depto_wf','int4');
         $this->setParametro('obs','obs','text');
-        $this->setParametro('json_procesos','json_procesos','text');
+		
+        $this->setParametro('saldo','saldo','numeric');
+        $this->setParametro('devolucion_dinero','devolucion_dinero','varchar');		
 
         //Ejecuta la instruccion
         $this->armarConsulta();
@@ -207,7 +210,7 @@ class MODSolicitudEfectivo extends MODbase{
 			$this->setParametro('fecha','fecha','date');
 			
 			//Ejecuta la instruccion
-            $this->armarConsulta();
+            $this->armarConsulta();			
 			$stmt = $link->prepare($this->consulta);		  
 		  	$stmt->execute();
 			$result = $stmt->fetch(PDO::FETCH_ASSOC);				
@@ -217,7 +220,6 @@ class MODSolicitudEfectivo extends MODbase{
 			if ($resp_procedimiento['tipo_respuesta']=='ERROR') {
 				throw new Exception("Error al ejecutar en la bd", 3);
 			}
-			
 			$respuesta = $resp_procedimiento['datos'];
 			
 			$id_solicitud_efectivo = $respuesta['id_solicitud_efectivo'];

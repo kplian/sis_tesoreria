@@ -36,6 +36,15 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			handler : this.onBtnRendicion,
 			tooltip : '<b>Rendicion</b>'
 		});
+		/*
+		this.addButton('btnDevolucionReposicion', {
+			text : 'Devolucion/Reposicion Efectivo',
+			iconCls : 'bballot',
+			disabled : false,
+			handler : this.onBtnDevolucionReposicion,
+			tooltip : '<b>Devolucion/Reposicion</b>'
+		});
+		*/
 		
 		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.vista}})
 	},
@@ -117,12 +126,13 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Num Tramite',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 50,
 				maxLength:50
 			},
 				type:'TextField',
 				filters:{pfiltro:'solefe.nro_tramite',type:'string'},
 				id_grupo:1,
+				bottom_filter:true,
 				grid:true,
 				form:false
 		},	
@@ -191,7 +201,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'monto',
-				fieldLabel: 'Monto',
+				fieldLabel: 'Monto Solicitado',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
@@ -202,7 +212,63 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 				id_grupo:1,
 				grid:true,
 				form:true
-		},	
+		},
+		{
+			config:{
+				name: 'monto_rendido',
+				fieldLabel: 'Monto Rendido',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650
+			},
+				type:'NumberField',
+				id_grupo:1,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'monto_devuelto',
+				fieldLabel: 'Monto Devuelto',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650
+			},
+				type:'NumberField',
+				id_grupo:1,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'monto_repuesto',
+				fieldLabel: 'Monto Repuesto',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650
+			},
+				type:'NumberField',
+				id_grupo:1,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'saldo',
+				fieldLabel: 'Saldo',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650
+			},
+				type:'NumberField',
+				id_grupo:1,
+				grid:true,
+				form:false
+		},		
 		{
 			config: {
 				name: 'id_proceso_wf',
@@ -413,11 +479,12 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
-		
+		{name:'monto_rendido', type: 'numeric'},		
+		{name:'saldo', type: 'numeric'}		
 	],
 	sortInfo:{
-		field: 'id_solicitud_efectivo',
-		direction: 'ASC'
+		field: 'solefe.id_solicitud_efectivo',
+		direction: 'DESC'
 	},
 	bdel:true,
 	bsave:true,
@@ -463,7 +530,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
           var tb =this.tbar;          
           
           Phx.vista.SolicitudEfectivo.superclass.preparaMenu.call(this,n); 
-          if (data['estado']== 'borrador'){    
+          if (data['estado']== 'borrador' || data['estado']== 'entregado'){    
               this.getBoton('fin_registro').enable();
 			  this.getBoton('edit').enable();
 			  this.getBoton('del').enable();
@@ -474,7 +541,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('del').disable();
           }
 		  
-		  if (data['estado']== 'entregado'){			  
+		  if (data['estado'] == 'entregado' || data['estado'] == 'finalizado'){			  
 			  this.getBoton('btnRendicion').enable();
 		  }else{
 			  this.getBoton('btnRendicion').disable();
@@ -489,7 +556,16 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			height : '95%',
 		}, rec.data, this.idContenedor, 'SolicitudRendicionDet');
 	},
-	
+	/*
+	onBtnDevolucionReposicion : function() {
+		var rec = this.sm.getSelected();
+		Phx.CP.loadWindows('../../../sis_tesoreria/vista/rendicion_efectivo/DevolucionReposicionEfectivo.php', 'Devolucion/Reposicion Efectivo', {
+			modal : true,
+			width : '95%',
+			height : '95%',
+		}, rec.data, this.idContenedor, 'DevolucionReposicionEfectivo');
+	},
+	*/
 	sigEstado:function(){                   
 	  var rec=this.sm.getSelected();
 	  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
