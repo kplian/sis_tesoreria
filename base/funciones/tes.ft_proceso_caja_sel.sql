@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_proceso_caja_sel (
   p_administrador integer,
   p_id_usuario integer,

@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_solicitud_rendicion_det_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -34,6 +36,8 @@ DECLARE
     v_solicitud_efectivo	record;
     v_id_solicitud_efectivo_rend	integer;
     v_total_rendiciones		numeric;
+    v_tipo					varchar;
+    v_id_proceso_caja		integer;
     
 			    
 BEGIN
@@ -226,6 +230,38 @@ BEGIN
              SET monto=COALESCE(v_total_rendiciones,0)
              WHERE id_solicitud_efectivo=v_solicitud_efectivo.id_solicitud_efectivo_rendicion;
              
+             --Definicion de la respuesta
+			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion Factura devuelta a la solicitud de efectivo con exito (id_solicitud_rendicion_det'||v_id_solicitud_rendicion_det||')'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_rendicion_det',v_id_solicitud_rendicion_det::varchar);
+
+            --Devuelve la respuesta
+            return v_resp;
+             
+        end;         
+        
+    elsif(p_transaccion='TES_RENEXCFAC_IME')then
+    	begin
+        	--recuperamos el id de la solicitud de efectivo             
+        	 SELECT pc.tipo, pc.id_proceso_caja into v_tipo, v_id_proceso_caja
+             FROM tes.tsolicitud_rendicion_det ren
+             INNER JOIN tes.tproceso_caja pc on pc.id_proceso_caja=ren.id_proceso_caja
+             WHERE ren.id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
+             
+             IF v_tipo IS NULL THEN
+             	raise exception 'No existe una factura seleccionada';
+             END IF;
+             
+             UPDATE tes.tsolicitud_rendicion_det
+             SET id_proceso_caja = NULL
+             WHERE id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
+             
+             IF v_tipo='rendicion_reposicion' THEN                 
+             	--actualizamos el monto reposicion
+                UPDATE tes.tproceso_caja
+                SET monto_reposicion = (SELECT sum(monto) FROM tes.tsolicitud_rendicion_det WHERE id_proceso_caja=v_id_proceso_caja) 
+                WHERE id_proceso_caja=v_id_proceso_caja;
+             END IF;
+                                       
              --Definicion de la respuesta
 			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion Factura devuelta a la solicitud de efectivo con exito (id_solicitud_rendicion_det'||v_id_solicitud_rendicion_det||')'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_rendicion_det',v_id_solicitud_rendicion_det::varchar);

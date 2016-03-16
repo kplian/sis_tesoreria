@@ -1,6 +1,6 @@
 --------------- SQL ---------------
 
-CREATE OR REPLACE FUNCTION tes.f_gestionar_presupuesto_tesoreria (
+CREATE OR REPLACE FUNCTION tes.f_gestionar_presupuesto_tesoreria_old (
   p_id_obligacion_pago integer,
   p_id_usuario integer,
   p_operacion varchar,
@@ -37,7 +37,6 @@ DECLARE
   va_id_partida_ejecucion integer[];
   va_columna_relacion     varchar[];
   va_fk_llave             integer[];
-  va_nro_tramite		  varchar[];
   v_i   				  integer;
   v_cont				  integer;
   va_id_obligacion_det	  integer[];
@@ -130,7 +129,6 @@ BEGIN
                     va_fk_llave[v_i] = v_registros.id_obligacion_pago;
                     va_id_obligacion_det[v_i]= v_registros.id_obligacion_det;
                     va_fecha[v_i]= v_registros.fecha::date;
-                    va_nro_tramite[v_i] = v_reg_op.num_tramite;
              
              
              END LOOP;
@@ -149,7 +147,7 @@ BEGIN
                                                                NULL,--  p_id_partida_ejecucion 
                                                                va_columna_relacion, 
                                                                va_fk_llave,
-                                                               va_nro_tramite,
+                                                               v_reg_op.num_tramite,
                                                                NULL,
                                                                p_conexion);
                  

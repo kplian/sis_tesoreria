@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_cerrar_periodo_cuentas_bancarias (
 )
 RETURNS varchar AS

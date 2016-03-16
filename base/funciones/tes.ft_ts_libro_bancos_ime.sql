@@ -1066,9 +1066,16 @@ BEGIN
        		--recuperaq estado anterior segun Log del WF
           
         
-          SELECT LBRBAN.fecha, LBRBAN.id_cuenta_bancaria into g_fecha, v_id_cuenta_bancaria
+          SELECT LBRBAN.fecha, LBRBAN.id_cuenta_bancaria, LBRBAN.id_libro_bancos
+          into g_fecha, v_id_cuenta_bancaria, v_id_libro_bancos
           FROM tes.tts_libro_bancos LBRBAN
           WHERE LBRBAN.id_estado_wf = v_parametros.id_estado_wf;
+          
+          IF EXISTS (select 1 from tes.tts_libro_bancos 
+          			 where id_libro_bancos_fk=v_id_libro_bancos
+                     and estado not in ('borrador'))THEN
+          	raise exception 'No puede retroceder tiene registros que no se encuentran en borrador';
+          END IF;
                     
           select ctaper.estado, per.periodo
           into v_estado, v_periodo

@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_cajero_ime (
   p_administrador integer,
   p_id_usuario integer,

@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_solicitud_efectivo_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -131,10 +133,19 @@ BEGIN
                 from tes.ttipo_solicitud
                 where codigo='RENEFE';
                 
-                v_saldo = 'solpri.monto - COALESCE((select sum(monto)
-                                        from tes.tsolicitud_efectivo
-                                        where fk_id_solicitud_efectivo = solefe.fk_id_solicitud_efectivo
-                                        and estado=''finalizado''), 0) - solefe.monto as saldo';
+                v_saldo = 'solpri.monto - COALESCE((
+                                 select sum(monto)
+                                 from tes.tsolicitud_efectivo
+                                 where fk_id_solicitud_efectivo =
+                                   solpri.id_solicitud_efectivo and
+                                       estado in  (''rendido'',''devuelto'')
+                                 ), 0) + COALESCE((
+                                                           select sum(monto)
+                                                           from tes.tsolicitud_efectivo
+                                                           where fk_id_solicitud_efectivo =
+                                                             solpri.id_solicitud_efectivo and
+                                                                 estado in  (''repuesto'')
+                                 ), 0) - solefe.monto as saldo';
                 
             	v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = solefe.id_estado_wf';
             	IF p_administrador !=1 THEN
@@ -163,6 +174,9 @@ BEGIN
                         caja.id_depto,
 						solefe.id_estado_wf,
 						solefe.monto,
+                        COALESCE((select sum(monto) from tes.tsolicitud_efectivo where fk_id_solicitud_efectivo=solefe.id_solicitud_efectivo and estado=''rendido''),0) as monto_rendido,
+	   					COALESCE((select sum(monto) from tes.tsolicitud_efectivo where fk_id_solicitud_efectivo=solefe.id_solicitud_efectivo and estado=''devuelto''),0) as monto_devuelto,
+	       				COALESCE((select sum(monto) from tes.tsolicitud_efectivo where fk_id_solicitud_efectivo=solefe.id_solicitud_efectivo and estado=''repuesto''),0) as monto_repuesto,       
 						solefe.id_proceso_wf,
 						solefe.nro_tramite,
 						solefe.estado,

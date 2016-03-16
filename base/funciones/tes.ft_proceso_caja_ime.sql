@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_proceso_caja_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -51,6 +53,7 @@ DECLARE
     v_id_usuario_reg		integer;
     v_id_depto				integer;
     v_id_estado_wf_ant		integer;
+    v_monto_reposicion		numeric;
     		    
 BEGIN
 
@@ -77,7 +80,7 @@ BEGIN
                    NULL, --id_uo 
                    NULL,    -- id_depto
                    p_id_usuario, 
-                   'FONROT', 
+                   'TES', 
                    NULL,
                    0,
                    0,
@@ -133,7 +136,18 @@ BEGIN
                      v_registros_trendicion.codigo,
                      v_num_rendicion::varchar
                    );
+                   
+            v_monto_reposicion=0;
             
+            IF(v_parametros.tipo = 'rendicion_reposicion')THEN
+            	select sum(r.monto) into v_monto_reposicion
+                from tes.tsolicitud_rendicion_det r
+                inner join tes.tsolicitud_efectivo efe on efe.id_solicitud_efectivo=r.id_solicitud_efectivo
+                inner join conta.tdoc_compra_venta d on d.id_doc_compra_venta=r.id_documento_respaldo
+                where r.id_proceso_caja is null and efe.id_caja=v_parametros.id_caja
+                and d.fecha BETWEEN v_parametros.fecha_inicio and v_parametros.fecha_fin
+                and efe.estado='rendido';
+            END IF;
                       
         	--Sentencia de la insercion
         	insert into tes.tproceso_caja(
@@ -147,7 +161,7 @@ BEGIN
 			id_caja,
 			fecha,
 			id_proceso_wf,
-			--monto_reposicion,
+			monto_reposicion,
 			--id_comprobante_pago,
 			id_estado_wf,
 			fecha_inicio,
@@ -168,7 +182,7 @@ BEGIN
 			v_parametros.id_caja,
 			v_parametros.fecha,
 			v_id_proceso_wf,
-			--v_parametros.monto_reposicion,
+			v_monto_reposicion,
 			--v_parametros.id_comprobante_pago,
 			v_id_estado_wf,
 			v_parametros.fecha_inicio,
@@ -187,7 +201,8 @@ BEGIN
                                                 inner join tes.tsolicitud_efectivo efe on efe.id_solicitud_efectivo=r.id_solicitud_efectivo
                                                 inner join conta.tdoc_compra_venta d on d.id_doc_compra_venta=r.id_documento_respaldo
                                                 where r.id_proceso_caja is null and efe.id_caja=v_parametros.id_caja
-                                                and d.fecha BETWEEN v_parametros.fecha_inicio and v_parametros.fecha_fin);
+                                                and d.fecha BETWEEN v_parametros.fecha_inicio and v_parametros.fecha_fin
+                                                and efe.estado='rendido');
 			
 			--Definicion de la respuesta
 			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion Caja almacenado(a) con exito (id_proceso_caja'||v_id_proceso_caja||')'); 

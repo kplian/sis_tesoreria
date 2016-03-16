@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_gestionar_presupuesto_solicitud_efectivo (
   p_id_solicitud_efectivo integer,
   p_id_usuario integer,

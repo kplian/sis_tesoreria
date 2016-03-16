@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_solicitud_efectivo_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -54,7 +56,7 @@ DECLARE
     v_id_usuario_reg		integer;
     v_id_depto				integer;
     v_id_estado_wf_ant 		integer;
-    v_tipo_ejecucion		varchar;
+    v_caja					record;
     v_registros_solicitud_efectivo	record;
     v_tipo					varchar;
     v_id_tipo_solicitud		integer;
@@ -65,7 +67,7 @@ DECLARE
     v_monto_devuelto		numeric;
     v_monto_repuesto		numeric;
     v_saldo					numeric;
-    
+    v_doc_compra_venta		record;
     		    
 BEGIN
 
@@ -259,7 +261,7 @@ BEGIN
         from tes.tsolicitud_efectivo se
         where se.id_proceso_wf  = v_parametros.id_proceso_wf_act;
         
-        SELECT cj.tipo_ejecucion, cj.id_depto into v_tipo_ejecucion, v_id_depto
+        SELECT cj.tipo_ejecucion, cj.id_depto into v_caja
         from tes.tsolicitud_efectivo se
         inner join tes.tcaja cj on cj.id_caja=se.id_caja
         where se.id_solicitud_efectivo=v_id_solicitud_efectivo;
@@ -352,35 +354,41 @@ BEGIN
              fecha_mod=now()                           
           where id_proceso_wf = v_parametros.id_proceso_wf_act;
           
-          --solo en caso de rendicion y finalizacion de solicitud se hara devolucion o reposicion
-          IF   v_codigo_estado_siguiente in ('rendido','finalizado')   THEN             
-            IF  pxp.f_existe_parametro(p_tabla,'devolucion_dinero') and pxp.f_existe_parametro(p_tabla,'saldo') THEN
-            	
-              select id_caja, id_funcionario, current_date as fecha, 
-              case when v_parametros.saldo > 0 then 'devolucion' else 'reposicion' end as tipo_solicitud,
-              case when v_parametros.saldo > 0 then v_parametros.saldo else v_parametros.saldo * (-1) end as monto,
-              fk_id_solicitud_efectivo as id_solicitud_efectivo,
-              id_estado_wf
-              into v_solicitud_efectivo
-              from tes.tsolicitud_efectivo
-              where id_solicitud_efectivo=v_id_solicitud_efectivo;
-                 
-              --crear devolucion o ampliacion
-              v_id_solicitud_efectivo=tes.f_inserta_solicitud_efectivo(p_administrador,p_id_usuario,hstore(v_parametros)||hstore(v_solicitud_efectivo));
+          	--solo en caso de rendicion se compromete presupuesto
+            IF v_codigo_estado_siguiente='rendido' THEN
+              FOR v_doc_compra_venta IN (select doc.id_doc_compra_venta
+                                       from tes.tsolicitud_rendicion_det rendet
+                                       inner join conta.tdoc_compra_venta doc on doc.id_doc_compra_venta=rendet.id_documento_respaldo
+                                       where rendet.id_solicitud_efectivo= v_id_solicitud_efectivo)LOOP
+                    --to do comprometer presupuesto
+                    IF not tes.f_gestionar_presupuesto_doc_compra_venta(v_doc_compra_venta.id_doc_compra_venta::integer, p_id_usuario, 'comprometer')  THEN
+                        raise exception 'Error al comprometer el presupeusto';
+                    END IF;   
+              END LOOP;
             
+            IF pxp.f_existe_parametro(p_tabla,'devolucion_dinero') and pxp.f_existe_parametro(p_tabla,'saldo')THEN
+            	IF v_parametros.devolucion_dinero = 'si' THEN
+                  select id_caja, id_funcionario, current_date as fecha, 
+                  case when v_parametros.saldo > 0 then 'devolucion' else 'reposicion' end as tipo_solicitud,
+                  case when v_parametros.saldo > 0 then v_parametros.saldo else v_parametros.saldo * (-1) end as monto,
+                  fk_id_solicitud_efectivo as id_solicitud_efectivo,
+                  id_estado_wf
+                  into v_solicitud_efectivo
+                  from tes.tsolicitud_efectivo
+                  where id_solicitud_efectivo=v_id_solicitud_efectivo;
+                     
+                  --crear devolucion o ampliacion
+                  v_id_solicitud_efectivo=tes.f_inserta_solicitud_efectivo(p_administrador,p_id_usuario,hstore(v_parametros)||hstore(v_solicitud_efectivo));
+                  --finalizar solicitud efectivo---------------------------
+			    END IF;
             ELSE
-              /*
-              --finalizar solicitud de efectivo
-              select id_caja, id_funcionario, current_date as fecha, 
-              case when v_parametros.saldo > 0 then 'devolucion' else 'reposicion' end as tipo_solicitud,
-              case when v_parametros.saldo > 0 then v_parametros.saldo else v_parametros.saldo * (-1) end as monto,
-              fk_id_solicitud_efectivo as id_solicitud_efectivo
-              into v_solicitud_efectivo
-              from tes.tsolicitud_efectivo
-              where id_solicitud_efectivo=v_id_solicitud_efectivo;
-              */
-
-            select sum(sol.monto) into v_monto_rendido
+            	--finalizar solicitud efectivo--------------------
+            END IF;
+            
+          END IF;
+          
+          IF v_codigo_estado_siguiente='finalizado' THEN
+          	select sum(sol.monto) into v_monto_rendido
             from tes.tsolicitud_efectivo sol
             where sol.fk_id_solicitud_efectivo=v_id_solicitud_efectivo and sol.estado='rendido';
             
@@ -395,25 +403,23 @@ BEGIN
             select sum(sol.monto) into v_monto_solicitado
             from tes.tsolicitud_efectivo sol
             where sol.id_solicitud_efectivo=v_id_solicitud_efectivo;
-
+			--calcular saldo solicitud efectivo
             v_saldo = v_monto_solicitado - COALESCE(v_monto_rendido,0) - COALESCE(v_monto_devuelto,0) + COALESCE(v_monto_repuesto,0);
 
             IF v_saldo != 0 THEN
               select id_caja, id_funcionario, current_date as fecha,
-                     case when v_saldo > 0 then 'devolucion' else 'reposicion' end as tipo_solicitud,
-                     case when v_saldo > 0 then v_saldo else v_saldo*(-1) end as monto,
+					 'devolucion' as tipo_solicitud,
+                     v_saldo as monto,
                      id_solicitud_efectivo,
                      nro_tramite
               into v_solicitud_efectivo
               from tes.tsolicitud_efectivo
               where id_solicitud_efectivo=v_id_solicitud_efectivo;
-              
-              v_id_solicitud_efectivo=tes.f_inserta_solicitud_efectivo(p_administrador,p_id_usuario,hstore(v_parametros)||hstore(v_solicitud_efectivo)||hstore(v_id_depto));
+              --crear devolucion
+              v_id_solicitud_efectivo=tes.f_inserta_solicitud_efectivo(p_administrador,p_id_usuario,hstore(v_parametros)||hstore(v_solicitud_efectivo)||hstore(v_caja));
             END IF;
           END IF;
-                          
-          END IF;
-          
+                    
           -- si hay mas de un estado disponible  preguntamos al usuario
           v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado de la solicitud de efectivo)'); 
           v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');

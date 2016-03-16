@@ -98,7 +98,7 @@ BEGIN
     
 
 	
-    v_respuesta = pxp.f_agrega_clave(v_respuesta,'mensaje','Deposito y cheque generado'); 
+    v_respuesta = pxp.f_agrega_clave(v_respuesta,'mensaje','Cheque generado'); 
     v_respuesta = pxp.f_agrega_clave(v_respuesta,'operacion','cambio_exitoso');
     v_respuesta = pxp.f_agrega_clave(v_respuesta,'id_libro_bancos',v_id_deposito);            
     return v_respuesta;

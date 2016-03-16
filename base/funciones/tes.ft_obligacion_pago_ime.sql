@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -224,7 +222,7 @@ BEGIN
                  --OJO  si el funcionario que solicita es un gerente .... es el mimso encargado de aprobar
                  IF exists(select 1 from orga.tuo_funcionario uof 
                            inner join orga.tuo uo on uo.id_uo = uof.id_uo and uo.estado_reg = 'activo'
-                           inner join orga.tnivel_organizacional no on no.id_nivel_organizacional = uo.id_nivel_organizacional and no.numero_nivel in (1,2)
+                           inner join orga.tnivel_organizacional no on no.id_nivel_organizacional = uo.id_nivel_organizacional and no.numero_nivel in (1)
                            where  uof.estado_reg = 'activo' and  uof.id_funcionario = v_id_funcionario_sol ) THEN
                   
                       va_id_funcionario_gerente[1] = v_id_funcionario_sol;
