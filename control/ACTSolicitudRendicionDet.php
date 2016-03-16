@@ -74,6 +74,12 @@ class ACTSolicitudRendicionDet extends ACTbase{
 		$this->res=$this->objFunc->devolverFactura($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	
+	function excluirFactura(){
+		$this->objFunc=$this->create('MODSolicitudRendicionDet');
+		$this->res=$this->objFunc->excluirFactura($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
 			
 }
 

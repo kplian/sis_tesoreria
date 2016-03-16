@@ -149,8 +149,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				gwidth: 120,
 				store:new Ext.data.ArrayStore({
                             fields: ['variable', 'valor'],
-                            data : [ ['rendicion_parcial','Rendición Parcial'],
-									 ['rendicion_reposicion','Rendición Reposición'],
+                            data : [ ['rendicion_reposicion','Rendición Reposición'],
 									 ['rendicion','Rendición']
                                     ]
                                     }),

@@ -192,7 +192,7 @@ class MODSolicitudRendicionDet extends MODbase{
 			$this->setParametro('id_solicitud_efectivo','id_solicitud_efectivo','int4');
 			$this->setParametro('id_documento_respaldo','id_documento_respaldo','int4');
 			$this->setParametro('estado_reg','estado_reg','varchar');
-			$this->setParametro('monto','importe_doc','numeric');
+			$this->setParametro('monto','importe_neto','numeric');
 			$this->setParametro('tipo_solicitud','tipo_solicitud','varchar');			
 			
 			$this->armarConsulta();			
@@ -387,7 +387,7 @@ class MODSolicitudRendicionDet extends MODbase{
 			$this->setParametro('id_solicitud_efectivo','id_solicitud_efectivo','int4');
 			$this->setParametro('id_documento_respaldo','id_documento_respaldo','int4');
 			$this->setParametro('estado_reg','estado_reg','varchar');
-			$this->setParametro('monto','importe_doc','numeric');
+			$this->setParametro('monto','importe_neto','numeric');
 			
 			$this->armarConsulta();
 			$stmt = $link->prepare($this->consulta);		  
@@ -577,6 +577,23 @@ class MODSolicitudRendicionDet extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
-			
+	
+	function excluirFactura(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_solicitud_rendicion_det_ime';
+		$this->transaccion='TES_RENEXCFAC_IME';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_solicitud_rendicion_det','id_solicitud_rendicion_det','int4');
+		$this->setParametro('id_doc_compra_venta','id_doc_compra_venta','int4');		
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}	
 }
 ?>

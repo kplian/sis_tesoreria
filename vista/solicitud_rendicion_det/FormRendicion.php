@@ -30,7 +30,8 @@ Phx.vista.FormRendicion = {
 	
 	onEdit: function(){    	
     	Phx.vista.FormRendicion.superclass.onEdit.call(this);		
-        this.Cmp.id_solicitud_efectivo.setValue(this.data.id_solicitud_efectivo);	 
+        this.Cmp.id_solicitud_efectivo.setValue(this.data.id_solicitud_efectivo);
+		this.cargarPeriodo();		
 	},
 	
 	iniciarEventos: function(config){

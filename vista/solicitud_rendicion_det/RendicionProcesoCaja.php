@@ -17,6 +17,15 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
     	//llama al constructor de la clase padre
 		Phx.vista.RendicionProcesoCaja.superclass.constructor.call(this,config);
 		this.init();
+		
+		this.addButton('excluir',
+			{	text:'Excluir',
+				iconCls: 'bengineremove',
+				disabled:false,
+				handler:this.excluir,
+				tooltip: '<b>Excluir</b><p>Excluir Factura de Rendicion</p>'
+			}
+		);
 		//this.load({params:{start:0, limit:this.tam_pag}})
 	},
 			
@@ -338,6 +347,48 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		this.store.baseParams={id_proceso_caja:this.maestro.id_proceso_caja};
 		this.load({params:{start:0, limit:this.tam_pag}});			
 	},
+	
+	excluir:function(res,eve)
+	{                   
+		var d= this.sm.getSelected().data;
+		Phx.CP.loadingShow();
+		console.log(d);
+		Ext.Ajax.request({
+			url:'../../sis_tesoreria/control/SolicitudRendicionDet/excluirFactura',
+			params:{id_solicitud_rendicion_det:d.id_solicitud_rendicion_det,
+					id_doc_compra_venta: d.id_doc_compra_venta},
+			success:this.successSinc,
+			failure: this.conexionFailure,
+			timeout:this.timeout,
+			scope:this
+		});     
+	},
+	
+	successSinc:function(resp){
+		Phx.CP.loadingHide();
+		var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+		console.log(reg.ROOT.datos);
+		if(reg.ROOT.datos.resultado!='falla'){                
+			Phx.CP.getPagina(this.idContenedorPadre).reload()
+			//this.reload();
+		 }else{
+			alert(reg.ROOT.datos.mensaje)
+		}
+	},
+	
+	preparaMenu:function(n){
+         
+         Phx.vista.RendicionProcesoCaja.superclass.preparaMenu.call(this,n); 
+         var padre = Phx.CP.getPagina(this.idContenedorPadre).nombreVista;
+		 console.log('llega');
+         console.log(padre);
+         if(padre == 'ProcesoCaja'){
+               this.getBoton('excluir').disable();
+         }
+         else{             
+             	this.getBoton('excluir').enable();                            
+         }
+     },
 	
 	bnew:false,
 	bedit:false,

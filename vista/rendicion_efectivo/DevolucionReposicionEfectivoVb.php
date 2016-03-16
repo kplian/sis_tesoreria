@@ -1,23 +1,23 @@
-﻿<?php
+<?php
 /**
 *@package pXP
-*@file RendicionEfectivo.php
+*@file DevolucionReposicionEfectivoVb.php
 *@author  (gsarmiento)
-*@date 12-02-2016
+*@date 01-03-2016
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
 */
 
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
-Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
+Phx.vista.DevolucionReposicionEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 	
-	nombreVista: 'RendicionEfectivo',
+	nombreVista: 'DevolucionReposicionEfectivoVb',
 
 	constructor:function(config){
 		this.maestro=config.maestro;
     	//llama al constructor de la clase padre
-		Phx.vista.RendicionEfectivo.superclass.constructor.call(this,config);
+		Phx.vista.DevolucionReposicionEfectivoVb.superclass.constructor.call(this,config);
 		this.init();
 		this.addButton('fin_registro',
 			{	text:'Siguiente',
@@ -28,9 +28,9 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 			}
 		);
 		//carga de grilla
-		if(this.nombreVista == 'RendicionEfectivo'){
-			this.load({params:{start:0, limit: this.tam_pag, tipo_interfaz:this.nombreVista, id_caja:this.id_caja}});
-		}
+		//if(this.nombreVista == 'RendicionEfectivo'){
+			this.load({params:{start:0, limit: this.tam_pag, tipo_interfaz:this.nombreVista}});
+		//}
 		
 	},
 	
@@ -121,6 +121,21 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 				form:false
 		},		
 		{
+			config:{
+				name: 'nro_tramite',
+				fieldLabel: 'Num Tramite Rendición Efectivo',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 180,
+				maxLength:50
+			},
+				type:'TextField',
+				filters:{pfiltro:'solefe.nro_tramite',type:'string'},
+				id_grupo:1,
+				grid:true,
+				form:false
+		},	
+		{
    			config:{
        		    name:'id_funcionario',
        		     hiddenName: 'id_funcionario',
@@ -185,10 +200,10 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'monto',
-				fieldLabel: 'Monto Rendicion',
+				fieldLabel: 'Monto',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 120,
+				gwidth: 80,
 				maxLength:1179650
 			},
 				type:'NumberField',
@@ -421,15 +436,16 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 	bedit:false,
 	bsave:false,
 	bnew:false,
-	
+	/*
 	onButtonNew: function(){    	
-    	Phx.vista.RendicionEfectivo.superclass.onButtonNew.call(this);		
+    	Phx.vista.DevolucionRendicionEfectivoVb.superclass.onButtonNew.call(this);		
         this.Cmp.id_caja.setValue(this.id_caja);	 
 	},
-	
+	*/
 	sigEstado:function(){                   
 	  var rec=this.sm.getSelected();	  
-	  var configExtra = [];
+	  //var configExtra = [];
+	  /*
 	  if(rec.data.saldo != 0 ){
 		  configExtra = [{
 							config:{
@@ -460,7 +476,7 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 							type:'ComboBox',						
 							form:true
 						}];
-	  }	
+	  }	*/
 	  
 	  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
 								'Estado de Wf',
@@ -469,7 +485,7 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 									width:700,
 									height:450
 								}, {
-									configExtra: configExtra,
+									//configExtra: configExtra,
 									data:{
 									   id_estado_wf:rec.data.id_estado_wf,
 									   id_proceso_wf:rec.data.id_proceso_wf									  
@@ -497,10 +513,8 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 					id_tipo_estado:     resp.id_tipo_estado,
 					id_funcionario_wf:  resp.id_funcionario_wf,
 					id_depto_wf:        resp.id_depto_wf,
-					obs:                resp.obs,
+					obs:                resp.obs
 					//json_procesos:      Ext.util.JSON.encode(resp)
-					saldo:				resp.saldo,
-					devolucion_dinero:	resp.devolucion_dinero
 					},
 				success:this.successWizard,
 				failure: this.conexionFailure,
@@ -514,8 +528,8 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
           var data = this.getSelectedData();
           var tb =this.tbar;          
           		  
-          Phx.vista.RendicionEfectivo.superclass.preparaMenu.call(this,n); 
-          if (data['estado']== 'revision'){    
+          Phx.vista.DevolucionReposicionEfectivoVb.superclass.preparaMenu.call(this,n); 
+          if (data['estado']== 'vbcajero'){    
               this.getBoton('fin_registro').enable();			  
           }
           else{            
@@ -527,16 +541,7 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 			Phx.CP.loadingHide();
 			resp.argument.wizard.panel.destroy()
 			this.reload();
-		 },
-	
-	tabsouth:[
-            { 
-             url:'../../../sis_tesoreria/vista/solicitud_rendicion_det/AprobacionFacturas.php',
-             title:'Detalle', 
-             height:'50%',
-             cls:'AprobacionFacturas'
-            }    
-       ]
+		 }
 	   
 	}
 )

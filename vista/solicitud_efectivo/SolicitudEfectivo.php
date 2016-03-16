@@ -480,6 +480,8 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
 		{name:'monto_rendido', type: 'numeric'},		
+		{name:'monto_repuesto', type: 'numeric'},		
+		{name:'monto_devuelto', type: 'numeric'},		
 		{name:'saldo', type: 'numeric'}		
 	],
 	sortInfo:{

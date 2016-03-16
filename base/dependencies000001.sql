@@ -8511,3 +8511,70 @@ ALTER TABLE tes.tproceso_caja
     ON UPDATE NO ACTION
     NOT DEFERRABLE;
 /***********************************F-DEP-GSS-TES-0-20/01/2016****************************************/ 
+
+/***********************************I-DEP-GSS-TES-0-08/03/2016****************************************/ 
+
+ALTER TABLE tes.tsolicitud_efectivo_det
+  ADD CONSTRAINT fk_tsolicitud_efectivo_det__id_solicitud_efectivo FOREIGN KEY (id_solicitud_efectivo)
+    REFERENCES tes.tsolicitud_efectivo(id_solicitud_efectivo)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_efectivo_det
+  ADD CONSTRAINT fk_tsolicitud_efectivo_det__id_concepto_ingas FOREIGN KEY (id_concepto_ingas)
+    REFERENCES param.tconcepto_ingas(id_concepto_ingas)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_efectivo_det
+  ADD CONSTRAINT fk_tsolicitud_efectivo_det__id_cc FOREIGN KEY (id_cc)
+    REFERENCES param.tcentro_costo(id_centro_costo)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD CONSTRAINT fk_tsolicitud_efectivo__id_solicitud_efectiivo FOREIGN KEY (fk_id_solicitud_efectivo)
+    REFERENCES tes.tsolicitud_efectivo(id_solicitud_efectivo)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD CONSTRAINT fk_tsolicitud_efectivo__id_caja FOREIGN KEY (id_caja)
+    REFERENCES tes.tcaja(id_caja)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD CONSTRAINT fk_tsolicitud_efectivo__id_tipo_solicitud FOREIGN KEY (id_tipo_solicitud)
+    REFERENCES tes.ttipo_solicitud(id_tipo_solicitud)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD CONSTRAINT fk_tsolicitud_efectivo__id_gestion FOREIGN KEY (id_gestion)
+    REFERENCES param.tgestion(id_gestion)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tcaja
+  ADD CONSTRAINT fk_tcaja__id_cuenta_bancaria FOREIGN KEY (id_cuenta_bancaria)
+    REFERENCES tes.tcuenta_bancaria(id_cuenta_bancaria)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_rendicion_det
+  ADD CONSTRAINT fk_tsolicitud_rendicion_det__id_documento_respaldo FOREIGN KEY (id_documento_respaldo)
+    REFERENCES conta.tdoc_compra_venta(id_doc_compra_venta)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+	
+/***********************************F-DEP-GSS-TES-0-08/03/2016****************************************/ 

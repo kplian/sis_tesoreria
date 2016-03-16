@@ -29,6 +29,9 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->captura('id_depto','int4');
 		$this->captura('id_estado_wf','int4');
 		$this->captura('monto','numeric');
+		$this->captura('monto_rendido','numeric');
+		$this->captura('monto_devuelto','numeric');
+		$this->captura('monto_repuesto','numeric');
 		$this->captura('id_proceso_wf','int4');
 		$this->captura('nro_tramite','varchar');
 		$this->captura('estado','varchar');
