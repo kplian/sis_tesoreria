@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION tes.f_lista_funcionario_cajero_caja_chica_wf_sel (
+ÔªøCREATE OR REPLACE FUNCTION tes.f_lista_funcionario_cajero_caja_chica_wf_sel (
   p_id_usuario integer,
   p_id_tipo_estado integer,
   p_fecha date = now(),
@@ -14,24 +14,24 @@ $body$
  SISTEMA ENDESIS - SISTEMA DE ...
 ***************************************************************************
  SCRIPT: 		tes.f_lista_funcionario_cajero_caja_chica_wf_sel
- DESCRIPCI”N: 	Lista los fucionarios cajeros de caja chica a partir del id_Estado_wf de la solicitud de efectivo
+ DESCRIPCI√ìN: 	Lista los fucionarios cajeros de caja chica a partir del id_Estado_wf de la solicitud de efectivo
  AUTOR: 		Gonzalo Sarmiento Sejas
  FECHA:			10/12/2015
  COMENTARIOS:	
 ***************************************************************************
  HISTORIA DE MODIFICACIONES:
 
- DESCRIPCI”N:
+ DESCRIPCI√ìN:
  AUTOR:       
  FECHA:      
 
 ***************************************************************************/
 
 -------------------------
--- CUERPO DE LA FUNCI”N --
+-- CUERPO DE LA FUNCI√ìN --
 --------------------------
 
--- PAR¡METROS FIJOS
+-- PAR√ÅMETROS FIJOS
 /*
 
 
