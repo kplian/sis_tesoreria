@@ -46,7 +46,8 @@ BEGIN
         --v_respuesta_libro_bancos = tes.f_generar_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','internacional');      
         v_resp= 'true';     
     elsif(v_registros.prioridad_conta in (0,1) and v_registros.prioridad_libro in (0,1))then
-    	 select ctab.centro into v_centro
+    	 /*
+		 select ctab.centro into v_centro
          from conta.tint_transaccion tra
          inner join tes.tcuenta_bancaria ctab on ctab.id_cuenta_bancaria=tra.id_cuenta_bancaria
          where tra.id_int_comprobante=p_id_int_comprobante;
@@ -54,6 +55,7 @@ BEGIN
          IF v_centro='esp' then
     		v_respuesta_libro_bancos = tes.f_generar_deposito_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','nacional');	
     	 END IF;
+		 */
          v_resp = 'true';
         
     elsif(v_registros.prioridad_conta= 2 and v_registros.prioridad_libro in (0,1))then	--analizar este caso
