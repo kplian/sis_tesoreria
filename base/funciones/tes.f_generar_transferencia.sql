@@ -90,7 +90,8 @@ BEGIN
                 tra.id_cuenta_bancaria,
                 substr(depto.codigo, 4) as origen,
                 cbte.nro_tramite,
-                tra.id_cuenta_bancaria_mov as id_libro_bancos_deposito
+                tra.id_cuenta_bancaria_mov as id_libro_bancos_deposito,
+				tra.forma_pago
          into v_datos_transferencia
          from conta.tint_comprobante cbte
 		 inner join conta.tint_transaccion tra on tra.id_int_comprobante = cbte.id_int_comprobante

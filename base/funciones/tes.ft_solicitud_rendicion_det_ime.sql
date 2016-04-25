@@ -255,7 +255,7 @@ BEGIN
              SET id_proceso_caja = NULL
              WHERE id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
              
-             IF v_tipo='rendicion_reposicion' THEN                 
+             IF v_tipo in ('RENYREP','RENYCER') THEN                 
              	--actualizamos el monto reposicion
                 UPDATE tes.tproceso_caja
                 SET monto_reposicion = (SELECT sum(monto) FROM tes.tsolicitud_rendicion_det WHERE id_proceso_caja=v_id_proceso_caja) 

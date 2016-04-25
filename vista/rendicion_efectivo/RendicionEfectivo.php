@@ -415,7 +415,7 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 	],
 	sortInfo:{
 		field: 'id_solicitud_efectivo',
-		direction: 'ASC'
+		direction: 'DESC'
 	},	
 	bdel:true,
 	bedit:false,
@@ -430,7 +430,7 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 	sigEstado:function(){                   
 	  var rec=this.sm.getSelected();	  
 	  var configExtra = [];
-	  if(rec.data.saldo != 0 ){
+	  if(rec.data.saldo > 0 ){
 		  configExtra = [{
 							config:{
 								name: 'saldo',
@@ -460,7 +460,41 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 							type:'ComboBox',						
 							form:true
 						}];
-	  }	
+	  }
+	  
+	  if(rec.data.saldo < 0 ){
+		  configExtra = [{
+							config:{
+								name: 'saldo',
+								fieldLabel: 'Saldo Efectivo',
+								allowBlank: true,
+								disabled: true,
+								anchor: '50%',
+								value : rec.data.saldo
+							},
+							type:'NumberField',
+							id_grupo:1,
+							form:true
+							},
+							{
+							config:{
+								name: 'devolucion_dinero',
+								fieldLabel: 'Devolucion dinero?',
+								allowBlank: false,
+								emptyText:'Elija una opcion...',
+								typeAhead: true,
+								disabled :true,
+								triggerAction: 'all',
+								lazyRender:true,
+								mode: 'local',
+								anchor: '50%',
+								store:['si','no'],
+								value: 'si'
+							},
+							type:'ComboBox',						
+							form:true
+						}];
+	  }
 	  
 	  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
 								'Estado de Wf',
@@ -486,28 +520,101 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 	 },
 	 
 	 onSaveWizard:function(wizard,resp){
-			Phx.CP.loadingShow();
-			console.log(resp);
-			Ext.Ajax.request({
-				url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
-				params:{
-						
-					id_proceso_wf_act:  resp.id_proceso_wf_act,
-					id_estado_wf_act:   resp.id_estado_wf_act,
-					id_tipo_estado:     resp.id_tipo_estado,
-					id_funcionario_wf:  resp.id_funcionario_wf,
-					id_depto_wf:        resp.id_depto_wf,
-					obs:                resp.obs,
-					//json_procesos:      Ext.util.JSON.encode(resp)
-					saldo:				resp.saldo,
-					devolucion_dinero:	resp.devolucion_dinero
-					},
-				success:this.successWizard,
-				failure: this.conexionFailure,
-				argument:{wizard:wizard},
-				timeout:this.timeout,
-				scope:this
-			});
+			//Phx.CP.loadingShow();
+			
+			if(resp.saldo !== 0 && typeof(resp.saldo) !=='undefined'){
+				
+				if(resp.devolucion_dinero == 'si'){
+				   Ext.Msg.show({
+				   title:'Confirmación',
+				   scope: this,
+				   msg: 'Esta seguro de SI devolver el dinero? Si esta de acuerdo presione el botón "Si"',
+				   buttons: Ext.Msg.YESNO,
+				   fn: function(id, value, opt) {			   		
+						if (id == 'yes') {  							
+							Ext.Ajax.request({
+								url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
+								params:{
+										
+									id_proceso_wf_act:  resp.id_proceso_wf_act,
+									id_estado_wf_act:   resp.id_estado_wf_act,
+									id_tipo_estado:     resp.id_tipo_estado,
+									id_funcionario_wf:  resp.id_funcionario_wf,
+									id_depto_wf:        resp.id_depto_wf,
+									obs:                resp.obs,
+									saldo:				resp.saldo,
+									devolucion_dinero:	resp.devolucion_dinero
+									},
+								success:this.successWizard,
+								failure: this.conexionFailure,
+								argument:{wizard:wizard},
+								timeout:this.timeout,
+								scope:this
+							});
+						} else {
+							opt.hide;
+						}
+				   },	
+				   animEl: 'elId',
+				   icon: Ext.MessageBox.WARNING
+				}, this);
+				}else{
+					console.log('sarmiento');
+					Ext.Msg.show({
+				   title:'Confirmación',
+				   scope: this,
+				   msg: 'Esta seguro de NO devolver el dinero? Si esta de acuerdo presione el botón "Si"',
+				   buttons: Ext.Msg.YESNO,
+				   fn: function(id, value, opt) {			   		
+						if (id == 'yes') {     							
+							Ext.Ajax.request({
+								url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
+								params:{
+										
+									id_proceso_wf_act:  resp.id_proceso_wf_act,
+									id_estado_wf_act:   resp.id_estado_wf_act,
+									id_tipo_estado:     resp.id_tipo_estado,
+									id_funcionario_wf:  resp.id_funcionario_wf,
+									id_depto_wf:        resp.id_depto_wf,
+									obs:                resp.obs,
+									saldo:				resp.saldo,
+									devolucion_dinero:	resp.devolucion_dinero
+									},
+								success:this.successWizard,
+								failure: this.conexionFailure,
+								argument:{wizard:wizard},
+								timeout:this.timeout,
+								scope:this
+							});
+						} else {
+							opt.hide;
+						}
+				   },
+				   animEl: 'elId',
+				   icon: Ext.MessageBox.WARNING
+				}, this);
+				}
+			}else{
+				Ext.Ajax.request({
+								url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
+								params:{
+										
+									id_proceso_wf_act:  resp.id_proceso_wf_act,
+									id_estado_wf_act:   resp.id_estado_wf_act,
+									id_tipo_estado:     resp.id_tipo_estado,
+									id_funcionario_wf:  resp.id_funcionario_wf,
+									id_depto_wf:        resp.id_depto_wf,
+									obs:                resp.obs,
+									saldo:				resp.saldo,
+									devolucion_dinero:	resp.devolucion_dinero
+									},
+								success:this.successWizard,
+								failure: this.conexionFailure,
+								argument:{wizard:wizard},
+								timeout:this.timeout,
+								scope:this
+							});
+			}			
 		},		
 	
 	preparaMenu:function(n){

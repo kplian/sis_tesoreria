@@ -12,6 +12,8 @@ header("content-type: text/javascript; charset=UTF-8");
 <script>
 Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 	tipoDoc: 'compra',
+	id_estado_workflow : 0,
+	id_proceso_workflow : 0,
 	constructor:function(config){
 		this.maestro=config.maestro;
     	//llama al constructor de la clase padre
@@ -25,7 +27,11 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Mandar Revision</b><p>Mandar a revision facturas</p>'
 			}
 		);
-		this.load({params:{start:0, limit:this.tam_pag, id_solicitud_efectivo:this.id_solicitud_efectivo}})
+		
+		this.load({params:{start:0, limit:this.tam_pag, id_solicitud_efectivo:this.id_solicitud_efectivo}, me : this, callback:function(r,o,s){
+			this.me.id_estado_workflow = r[0].data.id_estado_wf;
+			this.me.id_proceso_workflow = r[0].data.id_proceso_wf;
+		} });
 	},
 			
 	Atributos:[
@@ -134,7 +140,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Fecha',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 150,
+				gwidth: 100,
 				format: 'd/m/Y',
 				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
 			},
@@ -193,7 +199,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Nit',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 125,
+				gwidth: 100,
 				maxLength:100
 			},
 				type:'TextField',
@@ -209,7 +215,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Nro Factura',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 125,
+				gwidth: 100,
 				maxLength:100
 			},
 				type:'TextField',
@@ -237,12 +243,89 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
-				name: 'monto',
-				fieldLabel: 'Monto',
+				name: 'importe_doc',
+				fieldLabel: 'Importe Total',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-				maxLength:1179650
+				maxLength:1179650,				
+				renderer:function (value,p,record){
+					return  String.format('{0}', value);
+				}
+			},
+			type:'NumberField',
+			id_grupo:0,
+			grid:true,
+			form:true
+		},		
+		{
+			config:{
+				name: 'importe_descuento',
+				fieldLabel: 'Descuento',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650,				
+				renderer:function (value,p,record){
+					return  String.format('{0}', value);
+				}
+			},
+			type:'NumberField',
+			id_grupo:0,
+			grid:true,
+			form:true
+		},
+		{
+			config:{
+				name: 'importe_descuento_ley',
+				fieldLabel: 'Descuento Ley',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650,				
+				renderer:function (value,p,record){
+					return  String.format('{0}', value);
+				}
+			},
+			type:'NumberField',
+			id_grupo:0,
+			grid:true,
+			form:true
+		},
+		{
+			config:{
+				name: 'importe_excento',
+				fieldLabel: 'Excento',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650,				
+				renderer:function (value,p,record){
+					return  String.format('{0}', value);
+				}
+			},
+			type:'NumberField',
+			id_grupo:0,
+			grid:true,
+			form:true
+		},
+		{
+			config:{
+				name: 'monto',
+				fieldLabel: 'Liquido Pagable',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650,				
+				renderer:function (value,p,record){
+						if(record.data.tipo != 'summary'){
+							return  String.format('{0}', value);
+						}
+						else{
+							return  String.format('<b><font size=2 >{0}</font><b>', value==null?0:value);
+						}
+						
+					}
 			},
 				type:'NumberField',
 				filters:{pfiltro:'rend.monto',type:'numeric'},
@@ -408,8 +491,8 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 	
 	abrirFormulario:function(tipo, record){
         //abrir formulario de solicitud
-		//console.log(record);
 	   var me = this;
+	   
 	   me.objSolForm = Phx.CP.loadWindows('../../../sis_tesoreria/vista/solicitud_rendicion_det/FormRendicion.php',
 								'Formulario de rendicion',
 								{
@@ -422,7 +505,8 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 										  id_depto : me.id_depto,
 										  id_solicitud_efectivo : me.id_solicitud_efectivo,
 										  datosOriginales: record
-										  }
+										  },
+									id_moneda_defecto : me.id_moneda
 								}, 
 								this.idContenedor,
 								'FormRendicion');         
@@ -459,32 +543,70 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
         this.abrirFormulario('edit', this.sm.getSelected())
     },
 	
-	sigEstado:function(){                   
-	  var rec=this.sm.getSelected();
-	  
-	  if(typeof rec == 'undefined'){
-		  Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un registro.');		  
-	  }else{	  
-		  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
-									'Estado de Wf',
-									{
-										modal:true,
-										width:700,
-										height:450
-									}, {data:{
-										   id_estado_wf:rec.data.id_estado_wf,
-										   id_proceso_wf:rec.data.id_proceso_wf									  
-										}}, this.idContenedor,'FormEstadoWf',
-									{
-										config:[{
-												  event:'beforesave',
-												  delegate: this.onSaveWizard												  
-												}],
-										
-										scope:this
-									 });        
-	   }
+	sigEstado:function(){
+		var id_estado_workflow = this.id_estado_workflow;
+		var id_proceso_workflow = this.id_proceso_workflow;
+		
+		if(id_estado_workflow ==0 || id_proceso_workflow==0){
+			Ext.MessageBox.alert('Alerta','Debe tener al menos una factura registrada');
+		}else{
+			Ext.Msg.show({
+				   title:'Confirmación',
+				   scope: this,
+				   msg: 'Todas las facturas seran enviadas a rendicion? Para enviar presione el botón "Si"',
+				   buttons: Ext.Msg.YESNO,
+				   fn: function(id, value, opt) {			   		
+						if (id == 'yes') {
+							this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+										'Estado de Wf',
+										{
+											modal:true,
+											width:700,
+											height:450
+										}, {data:{
+											   id_estado_wf:id_estado_workflow,
+											   id_proceso_wf:id_proceso_workflow									  
+											}}, this.idContenedor,'FormEstadoWf',
+										{
+											config:[{
+													  event:'beforesave',
+													  delegate: this.onSaveWizard												  
+													}],
+											
+											scope:this
+										 });        
+						} else {
+							opt.hide;
+						}
+				   },	
+				   animEl: 'elId',
+				   icon: Ext.MessageBox.WARNING
+				}, this);
+		}
 	 },
+	 
+	 liberaMenu:function(n){		 
+		  if (this.estado=='finalizado'){
+			  this.getBoton('new').disable();
+			  this.getBoton('edit').disable();
+			  this.getBoton('del').disable();
+			  this.getBoton('fin_registro').disable();
+		  }else{
+			  this.getBoton('new').enable();
+			  this.getBoton('edit').enable();
+			  this.getBoton('del').enable();
+			  this.getBoton('fin_registro').enable();
+		  }
+     },
+	 
+	 preparaMenu:function(n){
+		  Phx.vista.SolicitudEfectivoDet.superclass.preparaMenu.call(this);
+		  if (this.estado=='finalizado'){
+			  this.getBoton('edit').disable();
+		  }else{
+			  this.getBoton('edit').enable();
+		  }
+     },
 	 
 	 onSaveWizard:function(wizard,resp){
 			Phx.CP.loadingShow();			
@@ -508,7 +630,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 			});
 		},
 		
-	successWizard:function(resp){
+		successWizard:function(resp){
 			Phx.CP.loadingHide();
 			resp.argument.wizard.panel.destroy()
 			this.reload();
@@ -516,7 +638,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 
 	
 	bdel:true,
-	bsave:true
+	bsave:false
 	}
 )
 </script>

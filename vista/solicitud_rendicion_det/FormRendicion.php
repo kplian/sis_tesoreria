@@ -17,10 +17,8 @@ Phx.vista.FormRendicion = {
 	requireclase:'Phx.vista.FormCompraVenta',
 	mostrarFormaPago : false,
 		
-	constructor: function(config) {
-	      
-	   Phx.vista.FormRendicion.superclass.constructor.call(this,config);
-                 
+	constructor: function(config) {		
+	   Phx.vista.FormRendicion.superclass.constructor.call(this,config);	   
     },
     
 	onNew: function(){    	
@@ -99,7 +97,12 @@ Phx.vista.FormRendicion = {
 		//}
 		//else{
 			Phx.CP.getPagina(this.idContenedorPadre).reload();
-		//}		
+		//}	
+		if(Phx.CP.getPagina(this.idContenedorPadre).cls =='AprobacionFacturas'){
+			//console.log(Phx.CP.getPagina(this.idContenedorPadre));
+			Phx.CP.getPagina(this.idContenedorPadre).onReloadPadre();	
+		}
+		
         this.panel.close();
     },	
 };

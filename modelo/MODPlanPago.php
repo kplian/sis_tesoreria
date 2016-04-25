@@ -834,6 +834,79 @@ class MODPlanPago extends MODbase{
         return $this->respuesta;
     }
 
+function listarPagos(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.f_plan_pago_sel';
+		$this->transaccion='TES_PAGOSB_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		//$this->setCount(true);
+		
+		  $this->captura('id_plan_pago', 'INTEGER');
+		  $this->captura('id_gestion', 'INTEGER');
+		  $this->captura('gestion', 'INTEGER');
+		  $this->captura('id_obligacion_pago', 'INTEGER');
+		  $this->captura('num_tramite', 'VARCHAR');
+		
+		  $this->captura('tipo_obligacion', 'VARCHAR');
+		  $this->captura('pago_variable', 'VARCHAR');
+		  $this->captura('desc_proveedor', 'VARCHAR');
+		  $this->captura('estado', 'VARCHAR');
+		  $this->captura('usuario_reg', 'VARCHAR');
+		  $this->captura('fecha', 'DATE');
+		  $this->captura('fecha_reg', 'TIMESTAMP');
+		  $this->captura('ob_obligacion_pago', 'VARCHAR');
+		  $this->captura('fecha_tentativa_de_pago', 'DATE');
+		  $this->captura('nro_cuota', 'NUMERIC');
+		  $this->captura('tipo_plan_pago', 'VARCHAR');
+		  $this->captura('estado_plan_pago', 'VARCHAR');
+		  $this->captura('obs_descuento_inter_serv', 'TEXT');
+		  $this->captura('obs_descuentos_anticipo', 'TEXT');
+		  $this->captura('obs_descuentos_ley', 'TEXT');
+		  $this->captura('obs_monto_no_pagado', 'TEXT');
+		  $this->captura('obs_otros_descuentos', 'TEXT');
+		  $this->captura('codigo', 'VARCHAR');
+		 
+		  $this->captura('monto_cuota', 'NUMERIC');
+		  $this->captura('monto_anticipo', 'NUMERIC');
+		  $this->captura('monto_excento', 'NUMERIC');
+		  $this->captura('monto_retgar_mo', 'NUMERIC');
+		  $this->captura('monto_ajuste_ag', 'NUMERIC');
+		  $this->captura('monto_ajuste_siguiente_pago', 'NUMERIC');
+		  
+		  
+		  $this->captura('liquido_pagable', 'NUMERIC');
+		  $this->captura('id_contrato', 'integer');
+		  
+		 
+		  $this->captura('desc_contrato', 'text');
+		  $this->captura('desc_funcionario1', 'text');
+		  $this->captura('bancarizacion', 'varchar');
+		  
+		  $this->captura('id_proceso_wf', 'integer');
+		  
+		  
+		  $this->captura('id_plantilla', 'integer');
+          $this->captura('desc_plantilla', 'VARCHAR');
+          $this->captura('tipo_informe', 'VARCHAR');
+		  
+		  
+		  
+		  
+		
+                            
+                              
+                               
+		  
+				
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
 
 
 }

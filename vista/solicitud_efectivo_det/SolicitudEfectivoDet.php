@@ -335,8 +335,46 @@ Phx.vista.SolicitudEfectivoDet=Ext.extend(Phx.gridInterfaz,{
 		this.Atributos[2].config.store.baseParams.id_depto = this.maestro.id_depto;
 		this.store.baseParams = { id_solicitud_efectivo : this.maestro.id_solicitud_efectivo };
 		this.load({	params : {start : 0, limit : 50}})
-	}
-	}
+	},
+	
+	preparaMenu:function(){
+        var tb = Phx.vista.SolicitudEfectivoDet.superclass.preparaMenu.call(this);
+        
+		if(this.maestro.estado ==  'borrador'){                 		
+			this.getBoton('save').enable();
+			this.getBoton('edit').enable();
+			this.getBoton('del').enable();
+			this.getBoton('new').enable();  
+		 } 
+		 else{                              
+			this.getBoton('edit').disable();
+			this.getBoton('del').disable();
+			this.getBoton('new').disable();
+			this.getBoton('save').disable();   
+		 }
+		 
+       return tb
+    },
+	
+	 liberaMenu:function(){
+        var tb = Phx.vista.SolicitudEfectivoDet.superclass.liberaMenu.call(this);
+        
+		if(this.maestro.estado ==  'borrador'){                 		
+			this.getBoton('save').enable();
+			this.getBoton('edit').enable();
+			this.getBoton('del').enable();
+			this.getBoton('new').enable();  
+		 } 
+		 else{                              
+			this.getBoton('edit').disable();
+			this.getBoton('del').disable();
+			this.getBoton('new').disable();
+			this.getBoton('save').disable();   
+		 }
+		 
+       return tb
+    }
+}
 )
 </script>
 		

@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -905,6 +907,101 @@ BEGIN
 			return v_consulta;
 
 		end;
+   
+   /*********************************    
+ 	#TRANSACCION:  'TES_PAGOSB_SEL'
+ 	#DESCRIPCION:	Consulta para reporte de pagos
+ 	#AUTOR:		rac	
+ 	#FECHA:		22-12-2014 15:43:23
+	***********************************/
+
+	ELSIF(p_transaccion='TES_PAGOSB_SEL')then
+     				
+    	begin
+        
+            --Sentencia de la consulta
+			v_consulta:='SELECT 
+                                id_plan_pago,
+                                id_gestion,
+                                gestion,
+                                id_obligacion_pago,
+                                num_tramite,
+                                tipo_obligacion,
+                                pago_variable,
+                                desc_proveedor,
+                                estado,
+                                usuario_reg,
+                                fecha,
+                                fecha_reg,
+                                ob_obligacion_pago,
+                                fecha_tentativa_de_pago,
+                                nro_cuota,
+                                tipo_plan_pago,
+                                estado_plan_pago,
+                                obs_descuento_inter_serv,
+                                obs_descuentos_anticipo,
+                                obs_descuentos_ley,
+                                obs_monto_no_pagado,
+                                obs_otros_descuentos,
+                                codigo,
+                                monto_cuota,
+                                monto_anticipo,
+                                monto_excento,
+                                monto_retgar_mo,
+                                monto_ajuste_ag,
+                                monto_ajuste_siguiente_pago,
+                                liquido_pagable,
+                                id_contrato,
+                                desc_contrato,
+                                desc_funcionario1,
+                                bancarizacion,
+                                id_proceso_wf,
+                                id_plantilla,
+                                desc_plantilla,
+                                tipo_informe
+                            FROM 
+                                tes.vpagos 
+							WHERE  ';
+			
+			--Definicion de la respuesta
+			v_consulta:=v_consulta||v_parametros.filtro;
+			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ', nro_cuota ASC limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+
+             raise notice '%',v_consulta;
+
+			--Devuelve la respuesta
+			return v_consulta;
+						
+		end;
+        
+   /*********************************    
+ 	#TRANSACCION:  'TES_PAGOSB_CONT'
+ 	#DESCRIPCION:	Conteo de registros para el reporte de  pagos
+ 	#AUTOR:		rac	
+ 	#FECHA:		22-12-2014 15:43:23
+	***********************************/
+
+	elsif(p_transaccion='TES_PAGOSB_CONT')then
+
+		begin
+        
+        
+        v_filtro='';
+            
+			v_consulta:='SELECT count(id_plan_pago)
+						 FROM  tes.vpagos  
+                         WHERE ';
+            
+			--Definicion de la respuesta		    
+			v_consulta:=v_consulta||v_parametros.filtro;
+         
+            raise notice '% .',v_consulta;
+			--Devuelve la respuesta
+			return v_consulta;
+
+		end; 
+    
+    
     
     else
 					     

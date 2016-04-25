@@ -317,7 +317,19 @@ Phx.vista.PlanPagoVb = {
         //Evento para ocultar/motrar componentes por cheque o transferencia
         this.Cmp.forma_pago.on('change',function(groupRadio,radio){
             this.ocultarCheCue(this,radio.inputValue);
-        },this);   
+        },this);  
+        
+        //eventos de fechas de costo
+        this.Cmp.fecha_costo_ini.on('change',function( o, newValue, oldValue ){
+        	this.Cmp.fecha_costo_fin.setMinValue(newValue);
+        	this.Cmp.fecha_costo_fin.reset();
+        		
+        }, this)
+        
+        //eventos de fechas de costo
+        this.Cmp.fecha_costo_fin.on('change',function(o, newValue, oldValue){
+        	this.Cmp.fecha_costo_ini.setMaxValue(newValue);
+        }, this) 
         
                 
     

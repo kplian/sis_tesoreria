@@ -27,6 +27,7 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->captura('id_caja','int4');
 		$this->captura('codigo','varchar');		
 		$this->captura('id_depto','int4');
+		$this->captura('id_moneda','int4');
 		$this->captura('id_estado_wf','int4');
 		$this->captura('monto','numeric');
 		$this->captura('monto_rendido','numeric');
@@ -76,6 +77,9 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->setParametro('motivo','motivo','text');
 		$this->setParametro('id_funcionario','id_funcionario','int4');
 		$this->setParametro('fecha','fecha','date');
+		
+		$this->setParametro('tipo_solicitud','tipo_solicitud','varchar');
+		$this->setParametro('id_solicitud_efectivo_fk','id_solicitud_efectivo_fk','int4');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -104,6 +108,8 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->setParametro('id_funcionario','id_funcionario','int4');
 		$this->setParametro('fecha','fecha','date');
 
+		$this->setParametro('tipo_solicitud','tipo_solicitud','varchar');
+			
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
@@ -179,6 +185,55 @@ class MODSolicitudEfectivo extends MODbase{
         return $this->respuesta;
     }
 	
+	function devolucionSolicitudEfectivo(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.ft_solicitud_efectivo_ime';
+        $this->transaccion='TES_DEVSOLEFE_IME';
+        $this->tipo_procedimiento='IME';
+        
+        //Define los parametros para la funcion
+        $this->setParametro('id_proceso_wf','id_proceso_wf','int4');
+        $this->setParametro('id_estado_wf','id_estado_wf','int4');
+        $this->setParametro('id_funcionario_usu','id_funcionario_usu','int4');
+        $this->setParametro('id_tipo_estado','id_tipo_estado','int4');
+        $this->setParametro('id_funcionario_wf','id_funcionario_wf','int4');
+        $this->setParametro('id_depto_wf','id_depto_wf','int4');
+        $this->setParametro('obs','obs','text');
+        $this->setParametro('json_procesos','json_procesos','text');
+
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+	
+	function reporteSolicitudEfectivo(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.ft_solicitud_efectivo_sel';
+		$this->transaccion='TES_REPEFE_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+				
+		//Definicion de la lista del resultado del query
+		$this->captura('codigo','varchar');
+		$this->captura('monto','numeric');		
+		$this->captura('moneda','varchar');
+		$this->captura('codigo_moneda','varchar');
+		$this->captura('monto_literal','varchar');		
+		$this->captura('nro_tramite','varchar');
+		$this->captura('estado','varchar');
+		$this->captura('motivo','text');
+		$this->captura('desc_funcionario','text');
+		$this->captura('fecha','date');
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
 	function insertarSolicitudEfectivoCompleta(){
 		
 		//Abre conexion con PDO
@@ -211,7 +266,7 @@ class MODSolicitudEfectivo extends MODbase{
 			$this->setParametro('id_funcionario','id_funcionario','int4');
 			$this->setParametro('tipo_solicitud','tipo_solicitud','varchar');
 			$this->setParametro('fecha','fecha','date');
-			
+						
 			//Ejecuta la instruccion
             $this->armarConsulta();			
 			$stmt = $link->prepare($this->consulta);		  

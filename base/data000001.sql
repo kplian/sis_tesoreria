@@ -1258,7 +1258,7 @@ VALUES (E'tes_tipo_pago_deshabilitado', E'', E'codigo de los tipos de pago desha
 
 /***********************************I-DAT-GSS-TES-0-26/01/2016*****************************************/
 
-select pxp.f_insert_tgui ('Solicitud Apertura/Cierre Caja', 'Solicitud Apertura/Cierre Caja', 'SOLCAJA', 'si', 11, 'sis_tesoreria/vista/caja/Caja.php', 2, '', 'Caja', 'TES');
+select pxp.f_insert_tgui ('Solicitud Apertura/Cierre Caja', 'Solicitud Apertura/Cierre Caja', 'SOLCAJA', 'si', 11, 'sis_tesoreria/vista/caja/CajaSolicitud.php', 2, '', 'CajaSolicitud', 'TES');
 select pxp.f_insert_tgui ('Visto Bueno Apertura Cajas', 'Visto bueno apertura cajas', 'VBCAJA', 'si', 12, 'sis_tesoreria/vista/caja/CajaVB.php', 2, '', 'CajaVb', 'TES');
 select pxp.f_insert_tgui ('Solicitud Efectivo Con Detalle', 'Solicitud Efectivo', 'SOLEFE', 'si', 14, 'sis_tesoreria/vista/solicitud_efectivo/SolicitudEfectivo.php', 2, '', 'SolicitudEfectivo', 'TES');
 select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'CAJA.2', 'no', 0, 'sis_workflow/vista/estado_wf/FormEstadoWf.php', 3, '', 'FormEstadoWf', 'TES');
@@ -1281,7 +1281,7 @@ select pxp.f_insert_tgui ('Estados por momento', 'Estados por momento', 'VBCAJA.
 select pxp.f_insert_tgui ('Pagos similares', 'Pagos similares', 'VBCAJA.1.1.5', 'no', 0, 'sis_tesoreria/vista/plan_pago/RepFilPlanPago.php', 5, '', '90%', 'TES');
 select pxp.f_insert_tgui ('73%', '73%', 'VBCAJA.1.1.5.1', 'no', 0, 'sis_tesoreria/vista/plan_pago/RepPlanPago.php', 6, '', 'RepPlanPago', 'TES');
 select pxp.f_insert_tgui ('Chequear documento del WF', 'Chequear documento del WF', 'VBCAJA.1.1.5.1.1', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 7, '', '90%', 'TES');
-select pxp.f_insert_tgui ('Solicitud Efectivo Sin Detalle', 'Solicitud Efectivo Sin Detalle', 'SOLEFESD', 'si', 15, 'sis_tesoreria/vista/solicitud_efectivo_sin_det/SolicitudEfectivoSinDet.php', 2, '', 'SolicitudEfectivoSinDet', 'TES');
+select pxp.f_insert_tgui ('Solicitud Efectivo Sin Detalle', 'Solicitud Efectivo Sin Detalle', 'SOLEFESD', 'si', 15, 'sis_tesoreria/vista/solicitud_efectivo/SolicitudEfectivoSinDet.php', 2, '', 'SolicitudEfectivoSinDet', 'TES');
 select pxp.f_insert_tgui ('Visto Bueno Solicitud Efectivo', 'Visto Bueno Solicitud Efectivo', 'VBSOLEFE', 'si', 16, 'sis_tesoreria/vista/solicitud_efectivo/SolicitudEfectivoVb.php', 2, '', 'SolicitudEfectivoVb', 'TES');
 select pxp.f_insert_tgui ('Visto Bueno Cajas Rendiciones', 'Visto Bueno Cajas Rendiciones', 'VBRENCJ', 'si', 17, 'sis_tesoreria/vista/proceso_caja/ProcesoCajaVb.php', 2, '', 'ProcesoCajaVb', 'TES');
 select pxp.f_insert_tgui ('Rendicion Caja', 'Rendicion Caja', 'CAJA.3', 'no', 0, 'sis_tesoreria/vista/proceso_caja/ProcesoCaja.php', 3, '', '95%', 'TES');
@@ -1463,3 +1463,13 @@ SELECT * FROM param.f_inserta_documento('TES', 'SEFE', 'Solicitud Efectivo', 'ge
 SELECT * FROM param.f_inserta_documento('TES', 'REN', 'Rendicion', 'gestion', NULL, 'tabla', 'codtabla-coddoc-correlativo-gestion');
 
 /***********************************F-DAT-GSS-TES-0-29/01/2016*****************************************/
+
+
+/***********************************I-DAT-RAC-TES-0-23/0/2016*****************************************/
+
+select pxp.f_insert_tgui ('Reporte de Pagos Basico', 'RPB', 'REPPPBA', 'si', 6, 'sis_tesoreria/vista/plan_pago/ReportePagosSimple.php', 3, '', 'ReportePagosSimple', 'TES');
+select pxp.f_insert_testructura_gui ('REPPPBA', 'REPOP');
+
+/***********************************F-DAT-RAC-TES-0-23/0/2016*****************************************/
+
+

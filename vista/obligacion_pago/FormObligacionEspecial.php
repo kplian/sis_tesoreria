@@ -491,6 +491,7 @@ Phx.vista.FormObligacionEspecial=Ext.extend(Phx.frmInterfaz,{
                 fieldLabel: 'Fecha Sol',
                 qtip: 'Según esta fecha se escoje el formulario de solicitud', 
                 allowBlank: false,
+                readOnly : true,
                 gwidth: 100,
                 format: 'd/m/Y'
             },

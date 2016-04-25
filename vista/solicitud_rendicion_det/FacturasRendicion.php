@@ -11,21 +11,22 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
-	nombre_vista: 'aprobacion_facturas',
+	nombre_vista: 'facturas_rendicion',
 	constructor:function(config){
 		this.maestro=config.maestro;
     	//llama al constructor de la clase padre
+		
 		Phx.vista.AprobacionFacturas.superclass.constructor.call(this,config);
 		this.init();
-		this.addButton('dev_factura',
-			{	text:'Devolver Factura',
-				iconCls: 'batras',
-				disabled:false,
-				handler:this.devolverFactura,
-				tooltip: '<b>Devolver Factura</b><p>Devolver Factura a Solicitante</p>'
-			}
-		);
-		//this.load({params:{start:0, limit:this.tam_pag, id_solicitud_efectivo:this.id_solicitud_efectivo}})
+		//recargar valores segunda pestaña
+		var dataPadre = Phx.CP.getPagina(this.idContenedorPadre).getSelectedData()			  
+			  if(dataPadre){
+				 this.onEnablePanel(this, dataPadre);
+			  }
+			  else
+			  {
+				 this.bloquearMenus();
+			  }
 	},
 			
 	Atributos:[
@@ -71,7 +72,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Fecha',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 80,
 				format: 'd/m/Y',
 				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
 			},
@@ -130,7 +131,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Nit',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 125,
+				gwidth: 80,
 				maxLength:100
 			},
 				type:'TextField',
@@ -146,7 +147,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Nro Factura',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 80,
 				maxLength:100
 			},
 				type:'TextField',
@@ -178,7 +179,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Importe Total',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 80,
 				maxLength:1179650,				
 				renderer:function (value,p,record){
 					return  String.format('{0}', value);
@@ -195,7 +196,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Descuento',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 80,
 				maxLength:1179650,				
 				renderer:function (value,p,record){
 					return  String.format('{0}', value);
@@ -212,7 +213,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Descuento Ley',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 90,
 				maxLength:1179650,				
 				renderer:function (value,p,record){
 					return  String.format('{0}', value);
@@ -229,7 +230,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Excento',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 70,
 				maxLength:1179650,				
 				renderer:function (value,p,record){
 					return  String.format('{0}', value);
@@ -246,7 +247,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Liquido Pagable',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 80,
 				maxLength:1179650
 			},
 				type:'NumberField',
@@ -365,8 +366,6 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 	],
 	tam_pag:50,	
 	title:'Rendicion',
-	ActSave:'../../sis_tesoreria/control/SolicitudRendicionDet/insertarSolicitudRendicionDet',
-	ActDel:'../../sis_tesoreria/control/SolicitudRendicionDet/eliminarSolicitudRendicionDet',
 	ActList:'../../sis_tesoreria/control/SolicitudRendicionDet/listarSolicitudRendicionDet',
 	id_store:'id_solicitud_rendicion_det',
 	fields: [
@@ -411,62 +410,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 		field: 'id_solicitud_rendicion_det',
 		direction: 'ASC'
 	},
-		 
-	devolverFactura:function(res,eve)
-	{                   
-		var d= this.sm.getSelected().data;
-		Phx.CP.loadingShow();
-		
-		Ext.Ajax.request({
-			url:'../../sis_tesoreria/control/SolicitudRendicionDet/devolverFactura',
-			params:{id_solicitud_rendicion_det:d.id_solicitud_rendicion_det,
-					id_doc_compra_venta: d.id_doc_compra_venta,
-					id_depto: d.id_depto,
-					tipo_solicitud:'rendicion',
-					fecha:new Date()},
-			success:this.successSinc,
-			failure: this.conexionFailure,
-			timeout:this.timeout,
-			scope:this
-		});     
-	},
-	
-	successSinc:function(resp){
-		Phx.CP.loadingHide();
-		var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));		
-		if(reg.ROOT.datos.resultado!='falla'){ 
-			this.onReloadPadre();
-		 }else{
-			alert(reg.ROOT.datos.mensaje)
-		}
-	},
-	
-	onButtonEdit:function(){
-        this.abrirFormulario('edit', this.sm.getSelected());		
-    },
-	
-	abrirFormulario:function(tipo, record){
-        //abrir formulario de solicitud
-		
-	   var me = this;
-	   me.objSolForm = Phx.CP.loadWindows('../../../sis_tesoreria/vista/solicitud_rendicion_det/FormRendicion.php',
-								'Formulario de rendicion',
-								{
-									modal:true,
-									width:'90%',
-									height:'90%'
-								}, {data:{objPadre: me,
-										  tipoDoc: record.data.tipo,
-										  tipo_form : tipo,
-										  id_depto : record.data.id_depto,
-										  id_solicitud_efectivo : me.id_solicitud_efectivo,
-										  datosOriginales: record
-										  }
-								}, 
-								this.idContenedor,
-								'FormRendicion');     
-    },
-	
+			
 	onReloadPage : function(m) {
 		this.maestro = m;
 		this.store.baseParams={id_solicitud_efectivo:this.maestro.id_solicitud_efectivo, interfaz:this.nombre_vista};
@@ -480,9 +424,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 	bdel:false,
 	bsave:false,
 	bnew:false,
-	bedit:true
+	bedit:false
 	}
 )
 </script>
-		
-		

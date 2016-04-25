@@ -50,12 +50,15 @@ Phx.vista.ProcesoCajaVb = {
           var tb =this.tbar;
           //Phx.vista.ProcesoCajaVb.superclass.preparaMenu.call(this,n);      
 		  
-		  if (data['estado']== 'revision'){    
+		  if (data['estado']!= 'pendiente' && data['estado']!= 'contabilizado' && data['estado']!= 'cerrado' && data['estado']!= 'rendido'){    
               this.getBoton('fin_registro').enable();
+              this.getBoton('ant_estado').enable();
           }
           else{            
               this.getBoton('fin_registro').disable();
-          }		  
+              this.getBoton('ant_estado').disable();
+          }		
+        this.getBoton('chkpresupuesto').enable();	  
 	},
 	
 	antEstado:function(res){

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
 *@package pXP
 *@file CajaSolicitud.php
@@ -16,20 +16,45 @@ Phx.vista.CajaSolicitud = {
     requireclase:'Phx.vista.Caja',
     title:'Solicitud Caja',
     nombreVista: 'caja',
+	
+	gruposBarraTareas:[{name:'borrador',title:'<H1 align="center"><i class="fa fa-thumbs-o-down"></i> Borradores</h1>',grupo:0,height:0},
+                       {name:'proceso',title:'<H1 align="center"><i class="fa fa-eye"></i> Iniciados</h1>',grupo:1,height:0},
+                       {name:'finalizados',title:'<H1 align="center"><i class="fa fa-thumbs-o-up"></i> Finalizados</h1>',grupo:2,height:0}],
+	
+	actualizarSegunTab: function(name, indice){
+		
+    	if(this.finCons){
+    		 this.store.baseParams.pes_estado = name;
+    	     this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.nombreVista}});
+    	   }
+    },
+	
+	beditGroups: [0],
+    bdelGroups:  [0],
+    bactGroups:  [0,1,2],
+    btestGroups: [0],
+    bexcelGroups: [0,1,2],
     
     constructor: function(config) {
       
        Phx.vista.CajaSolicitud.superclass.constructor.call(this,config);
           
 	   
-	   this.addButton('diagrama_gantt',{text:'Gantt',iconCls: 'bgantt',disabled:false,handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
+	   this.addButton('diagrama_gantt',
+						{text:'Gantt',
+						grupo:[0,1,2],
+						iconCls: 'bgantt',
+						disabled:false,
+						handler:diagramGantt,
+						tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
+						
        this.addButton('btnAbrirCerrar',
 			{
-				text: 'Cerrar/Abrir',
-				iconCls: 'block',
+				text: 'Crear',
+				iconCls: 'badelante',
 				disabled: false,
 				handler: this.abrirCerrarCaja,
-				tooltip: '<b>Cerrar/Abrir</b><br/>Cerrar/Abrir caja'
+				tooltip: '<b>Crear</b><br/>Crear caja'
 			}
 		);
 		
@@ -46,7 +71,11 @@ Phx.vista.CajaSolicitud = {
             });         
         }
 		
-        this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.nombreVista}})
+		this.store.baseParams.pes_estado = 'borrador';
+		
+        this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.nombreVista}});
+		
+		this.finCons = true;
     },
 	
 		
@@ -74,7 +103,7 @@ Phx.vista.CajaSolicitud = {
 		
 		if(NumSelect != 0)
 		{	
-		  if(rec.data.estado=='cerrado'){
+		  if(rec.data.estado=='creando'){
 			  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
 							'Estado de Wf',
 							{
@@ -93,6 +122,8 @@ Phx.vista.CajaSolicitud = {
 								
 								scope:this
 							 });
+		  }else{
+			  Ext.MessageBox.alert('Alerta', 'La caja no se encuentra en estado creando.');
 		  }
 		}
 		else

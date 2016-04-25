@@ -117,7 +117,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Num Tramite',
 				allowBlank: false,
 				anchor: '100%',
-				gwidth: 350,
+				gwidth: 150,
 				maxLength:300
 			},
 				type:'TextField',
@@ -417,7 +417,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 	],
 	sortInfo:{
 		field: 'id_solicitud_efectivo',
-		direction: 'ASC'
+		direction: 'DESC'
 	},
 	bdel:false,
 	bsave:false,

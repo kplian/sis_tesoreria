@@ -1,6 +1,6 @@
 --------------- SQL ---------------
 
-CREATE OR REPLACE FUNCTION tes.f_gestionar_presupuesto_tesoreria_old (
+CREATE OR REPLACE FUNCTION tes.f_gestionar_presupuesto_tesoreria (
   p_id_obligacion_pago integer,
   p_id_usuario integer,
   p_operacion varchar,
@@ -57,6 +57,10 @@ DECLARE
   v_ano_1 				integer;
   v_ano_2 				integer;
   v_reg_op				record;
+  va_nro_tramite		varchar[];
+  v_resp_pre			varchar;
+  v_mensage_error 		varchar;
+  v_sw_error 			boolean;
   
 
   
@@ -129,6 +133,7 @@ BEGIN
                     va_fk_llave[v_i] = v_registros.id_obligacion_pago;
                     va_id_obligacion_det[v_i]= v_registros.id_obligacion_det;
                     va_fecha[v_i]= v_registros.fecha::date;
+                    va_nro_tramite[v_i]=v_reg_op.num_tramite;
              
              
              END LOOP;
@@ -147,7 +152,7 @@ BEGIN
                                                                NULL,--  p_id_partida_ejecucion 
                                                                va_columna_relacion, 
                                                                va_fk_llave,
-                                                               v_reg_op.num_tramite,
+                                                               va_nro_tramite,
                                                                NULL,
                                                                p_conexion);
                  
@@ -254,6 +259,7 @@ BEGIN
                         va_fk_llave[v_i] = v_registros.id_obligacion_pago;
                         va_id_obligacion_det[v_i]= v_registros.id_obligacion_det;
                         va_fecha[v_i]=v_fecha;
+                        va_nro_tramite[v_i]=v_reg_op.num_tramite;
                     END IF;
              
              END LOOP;
@@ -273,7 +279,7 @@ BEGIN
                                                              va_id_partida_ejecucion,--  p_id_partida_ejecucion 
                                                              va_columna_relacion, 
                                                              va_fk_llave,
-                                                             v_reg_op.num_tramite,
+                                                             va_nro_tramite,
                                                              NULL,
                                                              p_conexion
                                                              );
@@ -338,6 +344,7 @@ BEGIN
                                     va_columna_relacion[v_i]= 'id_obligacion_pago';
                                     va_fk_llave[v_i] = v_registros_pro.id_obligacion_pago;
                                     va_id_obligacion_det[v_i]= v_registros_pro.id_obligacion_det;
+                                    va_nro_tramite[v_i]=v_reg_op.num_tramite;
                                     
                                     --si la el año de pago es mayor que el año del devengado , el pago va con fecha de 31 de diciembre del año del devengado
                                     va_fecha[v_i]=now()::date;
@@ -385,7 +392,7 @@ BEGIN
                                                                  va_id_partida_ejecucion,--  p_id_partida_ejecucion 
                                                                  va_columna_relacion, 
                                                                  va_fk_llave,
-                                                                 v_reg_op.num_tramite,
+                                                                 va_nro_tramite,
                                                                  NULL,
                                                                  p_conexion);
                 
@@ -397,10 +404,80 @@ BEGIN
                  
                  END IF;
       
+       
+       ELSEIF p_operacion = 'verificar' THEN
+        
+          --compromete al finalizar el registro de la obligacion
+           v_i = 0;  
+           v_sw_error = FALSE;
+           v_mensage_error ='';       
+           -- verifica que solicitud
+       
+          FOR v_registros in (SELECT
+   									opd.id_centro_costo,
+                                    op.id_gestion,
+                                    op.id_obligacion_pago,
+                                    opd.id_partida,
+                                    sum(opd.monto_pago_mb) as monto_pago_mb,
+                                    sum(opd.monto_pago_mo) as monto_pago_mo,
+                                    p.id_presupuesto,
+                                    op.id_moneda,
+                                    op.fecha,
+                                    op.num_tramite,
+                                    op.tipo_cambio_conv,
+                                    par.codigo,
+                                    par.nombre_partida,
+                                    p.codigo_cc
+                                                              
+                                    FROM  tes.tobligacion_pago  op
+                                    INNER JOIN tes.tobligacion_det opd  on  opd.id_obligacion_pago = op.id_obligacion_pago and opd.estado_reg = 'activo'
+                                    inner join pre.tpartida par on par.id_partida  = opd.id_partida
+                                    INNER JOIN pre.vpresupuesto_cc   p  on p.id_centro_costo = opd.id_centro_costo 
+                                    WHERE  
+                                           op.id_obligacion_pago = p_id_obligacion_pago
+                                           and opd.estado_reg = 'activo' 
+                                           and opd.monto_pago_mo > 0
+                                    group by
+                                              opd.id_centro_costo,
+                                              op.id_gestion,
+                                              op.id_obligacion_pago,
+                                              opd.id_partida,
+                                              p.id_presupuesto,
+                                              op.id_moneda,
+                                              op.fecha,
+                                              op.num_tramite,
+                                              op.tipo_cambio_conv,
+                                              par.codigo,
+                                              par.nombre_partida,
+                                              p.codigo_cc ) LOOP
+                                     
+                   
+                              v_resp_pre = pre.f_verificar_presupuesto_partida ( v_registros.id_presupuesto,
+                                                                        v_registros.id_partida,
+                                                                        v_registros.id_moneda,
+                                                                        v_registros.monto_pago_mo);
+                                                        
+                                                        
+                              IF   v_resp_pre = 'false' THEN                                   
+                                   v_mensage_error = v_mensage_error||format('Presupuesto:  %s, partida (%s) %s <BR/>', v_registros.codigo_cc, v_registros.codigo,v_registros.nombre_partida);    
+                                   v_sw_error = true;
+                              
+                              END IF;
+             
+          
+         
+          
+          END LOOP;
+          
+          
+            
+         IF v_sw_error THEN
+             raise exception 'No se tiene suficiente presupeusto para; <BR/>%', v_mensage_error;
+         END IF;
+             
+             
        ELSE
-       
-          raise exception 'Operación no implementada';
-       
+         raise exception 'Operación no implementada';
        END IF;
    
 

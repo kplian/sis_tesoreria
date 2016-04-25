@@ -330,6 +330,28 @@ class ACTPlanPago extends ACTbase{
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
    
+   function listarPagos() {
+		
+		$this->objParam->defecto('ordenacion','id_plan_pago');
+
+		$this->objParam->defecto('dir_ordenacion','asc');
+		
+		if($this->objParam->getParametro('id_gestion')!=''){
+            $this->objParam->addFiltro("id_gestion = ".$this->objParam->getParametro('id_gestion'));  
+        }
+        
+        if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+			$this->objReporte = new Reporte($this->objParam,$this);
+			$this->res = $this->objReporte->generarReporteListado('MODPlanPago','listarPagos');
+		} else{
+			
+			$this->objFunc=$this->create('MODPlanPago');
+			
+			$this->res=$this->objFunc->listarPagos($this->objParam);
+		}
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+   
    function listadosPagosRelacionados() {
 		
 		$this->objParam->defecto('ordenacion','id_plan_pago');
