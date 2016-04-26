@@ -15,6 +15,9 @@ class ACTSolicitudRendicionDet extends ACTbase{
 		if($this->objParam->getParametro('id_solicitud_efectivo')!=''){
 			if ($this->objParam->getParametro('interfaz')=='aprobacion_facturas'){
 				$this->objParam->addFiltro("rend.id_solicitud_efectivo = ".$this->objParam->getParametro('id_solicitud_efectivo'));	
+			}elseif ($this->objParam->getParametro('interfaz')=='facturas_rendicion'){
+				$this->objParam->addFiltro("solren.id_solicitud_efectivo_fk = ".$this->objParam->getParametro('id_solicitud_efectivo'));	
+				$this->objParam->addFiltro("solren.estado=''rendido''");	
 			}else{
 				$this->objParam->addFiltro("solefe.id_solicitud_efectivo = ".$this->objParam->getParametro('id_solicitud_efectivo'));	
 				$this->objParam->addFiltro("solren.estado=''borrador''");	
@@ -34,6 +37,16 @@ class ACTSolicitudRendicionDet extends ACTbase{
 			
 			$this->res=$this->objFunc->listarSolicitudRendicionDet($this->objParam);
 		}
+		
+		$temp = Array();
+			$temp['monto'] = $this->res->extraData['monto'];	
+			$temp['tipo'] = 'summary';
+			$temp['id_solicitud_rendicion_det'] = 0;			
+			
+			$this->res->total++;
+			
+			$this->res->addLastRecDatos($temp);
+			
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 				
@@ -80,7 +93,46 @@ class ACTSolicitudRendicionDet extends ACTbase{
 		$this->res=$this->objFunc->excluirFactura($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	/*
+	function listarFacturasRendidas(){
+		$this->objParam->defecto('ordenacion','id_solicitud_rendicion_det');
+
+		if($this->objParam->getParametro('id_solicitud_efectivo')!=''){
+			if ($this->objParam->getParametro('interfaz')=='aprobacion_facturas'){
+				$this->objParam->addFiltro("rend.id_solicitud_efectivo = ".$this->objParam->getParametro('id_solicitud_efectivo'));	
+			}elseif ($this->objParam->getParametro('interfaz')=='facturas_rendicion'){
+				$this->objParam->addFiltro("solefe.id_solicitud_efectivo_fk = ".$this->objParam->getParametro('id_solicitud_efectivo'));	
+			}else{
+				$this->objParam->addFiltro("solefe.id_solicitud_efectivo = ".$this->objParam->getParametro('id_solicitud_efectivo'));	
+				$this->objParam->addFiltro("solren.estado=''borrador''");	
+			}
+		}
+		
+		if($this->objParam->getParametro('id_proceso_caja')!=''){
+			$this->objParam->addFiltro("id_proceso_caja = ".$this->objParam->getParametro('id_proceso_caja'));	
+		}
+
+		$this->objParam->defecto('dir_ordenacion','asc');
+		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+			$this->objReporte = new Reporte($this->objParam,$this);
+			$this->res = $this->objReporte->generarReporteListado('MODSolicitudRendicionDet','listarSolicitudRendicionDet');
+		} else{
+			$this->objFunc=$this->create('MODSolicitudRendicionDet');
 			
+			$this->res=$this->objFunc->listarSolicitudRendicionDet($this->objParam);
+		}
+		
+		$temp = Array();
+			$temp['monto'] = $this->res->extraData['monto'];	
+			$temp['tipo'] = 'summary';
+			$temp['id_solicitud_rendicion_det'] = 0;			
+			
+			$this->res->total++;
+			
+			$this->res->addLastRecDatos($temp);
+			
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}*/
 }
 
 ?>

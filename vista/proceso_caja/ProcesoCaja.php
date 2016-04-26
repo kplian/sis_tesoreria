@@ -27,6 +27,16 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
 			}
 		);
+		
+		this.addButton('chkpresupuesto',
+			{	text:'Chk Presupuesto',
+				iconCls: 'blist',
+				disabled:false,
+				handler:this.checkPresupuesto,
+				tooltip: '<b>Revisar Presupuesto</b><p>Revisar estado de ejecución presupeustaria para el tramite</p>'
+			}
+		);
+		
 		//carga de grilla
 		if(this.nombreVista == 'ProcesoCaja'){
 			this.load({params:{start:0, limit: this.tam_pag, tipo_interfaz:this.nombreVista, id_caja:this.id_caja}});
@@ -147,22 +157,42 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				mode: 'local',
 				valueField: 'estilo',
 				gwidth: 120,
-				store:new Ext.data.ArrayStore({
-                            fields: ['variable', 'valor'],
-                            data : [ ['rendicion_reposicion','Rendición Reposición'],
-									 ['rendicion','Rendición']
-                                    ]
-                                    }),
-				valueField: 'variable',
-				displayField: 'valor'
+				
+				store: new Ext.data.JsonStore({
+                         url: '../../sis_tesoreria/control/TipoProcesoCaja/listarTipoProcesoCaja',
+                         id: 'id_tipo_proceso_caja',
+                         root: 'datos',
+                         sortInfo:{
+                            field: 'nombre',
+                            direction: 'ASC'
+                    },
+                    totalProperty: 'total',
+                    fields: ['id_tipo_proceso_caja','nombre','codigo'],
+                    // turn on remote sorting
+                    remoteSort: true,
+                    baseParams:{par_filtro:'nombre'//, estado_caja: 'apertura'
+					}
+                    }),
+				valueField: 'codigo',
+				displayField: 'nombre',
+				hiddenName: 'codigo',
+                forceSelection:true,
+                typeAhead: false,
+                triggerAction: 'all',
+                lazyRender:true,
+                mode:'remote',
+                pageSize:10,
+                queryDelay:1000,
+                listWidth:300,
+                resizable:true,
+                anchor:'80%',
+                renderer : function(value, p, record) {
+					return String.format('{0}', record.data['nombre']);
+				}
 			},
 			type:'ComboBox',
 			id_grupo:1,
-			filters:{	
-					 type: 'list',
-					  pfiltro:'ren.tipo',
-					 options: ['rendicion_parcial','rendicion_reposicion','rendicion'],	
-				},
+			filters:{pfiltro:'ren.tipo',type:'string'},
 			grid:true,
 			form:true
 		},	
@@ -492,8 +522,8 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-							format: 'd/m/Y', 
-							renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
+				format: 'd/m/Y', 
+				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
 			},
 				type:'DateField',
 				filters:{pfiltro:'ren.fecha_mod',type:'date'},
@@ -526,17 +556,17 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 	fields: [
 		{name:'id_proceso_caja', type: 'numeric'},
 		{name:'estado', type: 'string'},
-		{name:'id_comprobante_diario', type: 'numeric'},
+		{name:'id_int_comprobante', type: 'numeric'},
 		{name:'nro_tramite', type: 'string'},
 		{name:'tipo', type: 'string'},
 		{name:'motivo', type: 'string'},
 		{name:'estado_reg', type: 'string'},
 		{name:'fecha_fin', type: 'date',dateFormat:'Y-m-d'},
 		{name:'id_caja', type: 'numeric'},
+		{name:'id_depto_lb', type: 'numeric'},
 		{name:'fecha', type: 'date',dateFormat:'Y-m-d'},
 		{name:'id_proceso_wf', type: 'numeric'},
 		{name:'monto_reposicion', type: 'numeric'},
-		{name:'id_comprobante_pago', type: 'numeric'},
 		{name:'id_estado_wf', type: 'numeric'},
 		{name:'fecha_inicio', type: 'date',dateFormat:'Y-m-d'},
 		{name:'fecha_reg', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
@@ -547,11 +577,12 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
+		{name:'nombre', type: 'string'}	
 		
 	],
 	sortInfo:{
 		field: 'id_proceso_caja',
-		direction: 'ASC'
+		direction: 'DESC'
 	},	
 	bdel:true,
 	bedit:false,
@@ -559,18 +590,80 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 	
 	onButtonNew: function(){    	
     	Phx.vista.ProcesoCaja.superclass.onButtonNew.call(this);		
-        this.Cmp.id_caja.setValue(this.id_caja);	 
+        this.Cmp.id_caja.setValue(this.id_caja);
+		
+		this.Cmp.tipo.reset();
+        this.Cmp.tipo.store.baseParams = Ext.apply(this.Cmp.tipo.store.baseParams,{estado_caja: this.estado} )
+        this.Cmp.tipo.modificado = true;
+		
+		if(this.estado=='cerrado'){
+			this.ocultarComponente(this.Cmp.fecha_inicio);
+			this.ocultarComponente(this.Cmp.fecha_fin);			
+		}
 	},
 	
 	sigEstado:function(){                   
 	  var rec=this.sm.getSelected();
+	  var configExtra = [];
+	  if(rec.data.estado == 'vbconta' || rec.data.estado == 'revision' || rec.data.estado == 'vbfondos'){
+		  configExtra = [	
+							{
+								config:{
+									name: 'id_cuenta_bancaria',
+									fieldLabel: 'Cuenta Bancaria',
+									allowBlank: false,
+									emptyText:'Elija una Cuenta...',
+									store:new Ext.data.JsonStore(
+										{
+										url: '../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancariaUsuario',
+										id: 'id_cuenta_bancaria',
+										root:'datos',
+										sortInfo:{
+											field:'id_cuenta_bancaria',
+											direction:'ASC'
+										},
+										totalProperty:'total',
+										fields: ['id_cuenta_bancaria','nro_cuenta','nombre_institucion','codigo_moneda','centro','denominacion'],
+										remoteSort: true,
+										baseParams : {
+											par_filtro :'nro_cuenta', id_depto_lb: rec.data.id_depto_lb, permiso: 'todos'
+										}
+										}),
+									tpl:'<tpl for="."><div class="x-combo-list-item"><p><b>{nro_cuenta}</b></p><p>Moneda: {codigo_moneda}, {nombre_institucion}</p><p>{denominacion}, Centro: {centro}</p></div></tpl>',
+									valueField: 'id_cuenta_bancaria',
+									hiddenValue: 'id_cuenta_bancaria',
+									displayField: 'nro_cuenta',
+									gdisplayField:'desc_cuenta_bancaria',
+									listWidth:'280',
+									forceSelection:true,
+									typeAhead: false,
+									triggerAction: 'all',
+									lazyRender:true,
+									mode:'remote',
+									pageSize:20,
+									queryDelay:500,
+									gwidth: 250,
+									anchor: '50%',
+									minChars:2,
+									renderer:function(value, p, record){return String.format('{0}', record.data['desc_cuenta_bancaria']);}
+							},
+							type:'ComboBox',
+							filters:{pfiltro:'cb.nro_cuenta',type:'string'},
+							id_grupo:1,
+							grid:true,
+							form:true
+						}];
+	  }
+	  
 	  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
 								'Estado de Wf',
 								{
 									modal:true,
 									width:700,
 									height:450
-								}, {data:{
+								}, {
+									configExtra: configExtra,
+									data:{
 									   id_estado_wf:rec.data.id_estado_wf,
 									   id_proceso_wf:rec.data.id_proceso_wf									  
 									}}, this.idContenedor,'FormEstadoWf',
@@ -581,13 +674,39 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 											}],
 									
 									scope:this
-								 });        
+								 });
 			   
 	 },
 	 
-	 onSaveWizard:function(wizard,resp){
+	 
+	 
+	 checkPresupuesto:function(){                   
+	  var rec=this.sm.getSelected();
+	  var configExtra = [];
+	  this.objChkPres = Phx.CP.loadWindows('../../../sis_presupuestos/vista/presup_partida/ChkPresupuesto.php',
+								'Estado del Presupuesto',
+								{
+									modal:true,
+									width:700,
+									height:450
+								}, {
+									data:{
+									   nro_tramite: rec.data.nro_tramite								  
+									}}, this.idContenedor,'ChkPresupuesto',
+								{
+									config:[{
+											  event:'onclose',
+											  delegate: this.onCloseChk												  
+											}],
+									
+									scope:this
+								 });
+			   
+	 },
+	 
+	 
+	 onSaveWizard:function(wizard,resp){		
 			Phx.CP.loadingShow();
-			console.log(resp);
 			Ext.Ajax.request({
 				url:'../../sis_tesoreria/control/ProcesoCaja/siguienteEstadoProcesoCaja',
 				params:{
@@ -598,6 +717,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 					id_funcionario_wf:  resp.id_funcionario_wf,
 					id_depto_wf:        resp.id_depto_wf,
 					obs:                resp.obs,
+					id_cuenta_bancaria:	resp.id_cuenta_bancaria,
 					json_procesos:      Ext.util.JSON.encode(resp.procesos)
 					},
 				success:this.successWizard,
@@ -620,7 +740,18 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
           else{            
               this.getBoton('fin_registro').disable();
 			  this.getBoton('del').disable();
-          }
+          }	
+          
+          this.getBoton('chkpresupuesto').enable();	  
+          
+     },
+     
+     liberaMenu:function(n){
+          var data = this.getSelectedData();
+          var tb =this.tbar;          
+          		  
+          Phx.vista.ProcesoCaja.superclass.liberaMenu.call(this,n); 
+          this.getBoton('chkpresupuesto').disable();	  
      },
 		
 	successWizard:function(resp){

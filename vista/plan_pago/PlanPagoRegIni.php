@@ -178,6 +178,21 @@ Phx.vista.PlanPagoRegIni = {
         	}
         	
         },this);
+        
+        
+        //eventos de fechas de costo
+        this.Cmp.fecha_costo_ini.on('change',function( o, newValue, oldValue ){
+        	this.Cmp.fecha_costo_fin.setMinValue(newValue);
+        	this.Cmp.fecha_costo_fin.reset();
+        		
+        }, this)
+        
+        //eventos de fechas de costo
+        this.Cmp.fecha_costo_fin.on('change',function(o, newValue, oldValue){
+        	this.Cmp.fecha_costo_ini.setMaxValue(newValue);
+        }, this)
+        
+        
        
     },
     

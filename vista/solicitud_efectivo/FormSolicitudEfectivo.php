@@ -464,6 +464,16 @@ Phx.vista.FormSolicitudEfectivo=Ext.extend(Phx.frmInterfaz,{
 			form:true 
 		},		
 		{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'tipo_solicitud'
+			},
+			type:'Field',
+			form:true 
+		},
+		{
         //configuracion del componente
 			     config:{
 					   labelSeparator:'',
@@ -485,7 +495,7 @@ Phx.vista.FormSolicitudEfectivo=Ext.extend(Phx.frmInterfaz,{
 					id: 'id_caja',
 					root: 'datos',
 					sortInfo: {
-						field: 'nombre',
+						field: 'codigo',
 						direction: 'ASC'
 					},
 					totalProperty: 'total',
@@ -692,7 +702,7 @@ Phx.vista.FormSolicitudEfectivo=Ext.extend(Phx.frmInterfaz,{
         //this.Cmp.total_nro_cuota.setValue(1);
         //this.Cmp.rotacion.setValue(0);
         
-        
+        this.Cmp.tipo_solicitud.setValue('solicitud');
 	    
 	    
 	    

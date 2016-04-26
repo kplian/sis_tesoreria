@@ -68,15 +68,15 @@ BEGIN
                 
                  v_saldo = 'solefe.monto - COALESCE((select sum(monto)
                                         from tes.tsolicitud_efectivo
-                                        where fk_id_solicitud_efectivo = solefe.id_solicitud_efectivo
+                                        where id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo
                                         and estado=''rendido''), 0) 
                                         - COALESCE((select sum(monto)
                                         from tes.tsolicitud_efectivo
-                                        where fk_id_solicitud_efectivo = solefe.id_solicitud_efectivo
+                                        where id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo
                                         and estado=''devuelto''), 0)
                                         + COALESCE((select sum(monto)
                                         from tes.tsolicitud_efectivo
-                                        where fk_id_solicitud_efectivo = solefe.id_solicitud_efectivo
+                                        where id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo
                                         and estado=''repuesto''), 0)
                                         as saldo';
                 
@@ -96,7 +96,7 @@ BEGIN
                 
                 v_saldo = 'solefe.monto - COALESCE((select sum(monto)
                                         from tes.tsolicitud_efectivo
-                                        where fk_id_solicitud_efectivo = solefe.id_solicitud_efectivo
+                                        where id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo
                                         and estado=''finalizado''), 0) as saldo';
                 
             	v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = solefe.id_estado_wf';
@@ -116,7 +116,7 @@ BEGIN
                 
                 v_saldo = 'solefe.monto - COALESCE((select sum(monto)
                                         from tes.tsolicitud_efectivo
-                                        where fk_id_solicitud_efectivo = solefe.id_solicitud_efectivo
+                                        where id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo
                                         and estado=''finalizado''), 0) as saldo';
                 
             	v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = solefe.id_estado_wf';
@@ -136,13 +136,13 @@ BEGIN
                 v_saldo = 'solpri.monto - COALESCE((
                                  select sum(monto)
                                  from tes.tsolicitud_efectivo
-                                 where fk_id_solicitud_efectivo =
+                                 where id_solicitud_efectivo_fk =
                                    solpri.id_solicitud_efectivo and
                                        estado in  (''rendido'',''devuelto'')
                                  ), 0) + COALESCE((
                                                            select sum(monto)
                                                            from tes.tsolicitud_efectivo
-                                                           where fk_id_solicitud_efectivo =
+                                                           where id_solicitud_efectivo_fk =
                                                              solpri.id_solicitud_efectivo and
                                                                  estado in  (''repuesto'')
                                  ), 0) - solefe.monto as saldo';
@@ -172,11 +172,12 @@ BEGIN
 						solefe.id_caja,
                         caja.codigo,
                         caja.id_depto,
+                        caja.id_moneda,
 						solefe.id_estado_wf,
 						solefe.monto,
-                        COALESCE((select sum(monto) from tes.tsolicitud_efectivo where fk_id_solicitud_efectivo=solefe.id_solicitud_efectivo and estado=''rendido''),0) as monto_rendido,
-	   					COALESCE((select sum(monto) from tes.tsolicitud_efectivo where fk_id_solicitud_efectivo=solefe.id_solicitud_efectivo and estado=''devuelto''),0) as monto_devuelto,
-	       				COALESCE((select sum(monto) from tes.tsolicitud_efectivo where fk_id_solicitud_efectivo=solefe.id_solicitud_efectivo and estado=''repuesto''),0) as monto_repuesto,       
+                        COALESCE((select sum(monto) from tes.tsolicitud_efectivo where id_solicitud_efectivo_fk=solefe.id_solicitud_efectivo and estado=''rendido''),0) as monto_rendido,
+	   					COALESCE((select sum(monto) from tes.tsolicitud_efectivo where id_solicitud_efectivo_fk=solefe.id_solicitud_efectivo and estado=''devuelto''),0) as monto_devuelto,
+	       				COALESCE((select sum(monto) from tes.tsolicitud_efectivo where id_solicitud_efectivo_fk=solefe.id_solicitud_efectivo and estado=''repuesto''),0) as monto_repuesto,       
 						solefe.id_proceso_wf,
 						solefe.nro_tramite,
 						solefe.estado,
@@ -200,7 +201,7 @@ BEGIN
                         inner join tes.tcaja caja on caja.id_caja=solefe.id_caja
                         inner join orga.vfuncionario fun on fun.id_funcionario = solefe.id_funcionario
 						left join segu.tusuario usu2 on usu2.id_usuario = solefe.id_usuario_mod
-                        left join tes.tsolicitud_efectivo solpri on solpri.id_solicitud_efectivo=solefe.fk_id_solicitud_efectivo
+                        left join tes.tsolicitud_efectivo solpri on solpri.id_solicitud_efectivo=solefe.id_solicitud_efectivo_fk
                         '||v_inner||'                      
 				        where  ' || v_filtro;
 			
@@ -212,7 +213,41 @@ BEGIN
 			return v_consulta;
 						
 		end;
+	
+    /*********************************    
+ 	#TRANSACCION:  'TES_REPEFE_SEL'
+ 	#DESCRIPCION:	Consulta de datos para reporte
+ 	#AUTOR:		gsarmiento	
+ 	#FECHA:		04-04-2016
+	***********************************/
 
+	elsif(p_transaccion='TES_REPEFE_SEL')then
+     				
+    	begin
+                                 
+    		--Sentencia de la consulta
+			v_consulta:='select caja.codigo,
+                         solefe.monto,
+                         pxp.f_convertir_num_a_letra(monto) as monto_literal,
+                         solefe.nro_tramite,
+                         solefe.estado,
+                         solefe.motivo,
+                         fun.desc_funcionario1 as desc_funcionario,
+                         solefe.fecha       
+                  from tes.tsolicitud_efectivo solefe
+                       inner join tes.tcaja caja on caja.id_caja = solefe.id_caja
+                       inner join orga.vfuncionario fun on fun.id_funcionario = solefe.id_funcionario
+                  where ';
+			
+			--Definicion de la respuesta
+            v_consulta:=v_consulta||v_parametros.filtro;
+			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+			--Devuelve la respuesta
+            raise notice '%', v_consulta;
+			return v_consulta;
+						
+		end;
+        
 	/*********************************    
  	#TRANSACCION:  'TES_SOLEFE_CONT'
  	#DESCRIPCION:	Conteo de registros
@@ -285,7 +320,7 @@ BEGIN
 						inner join tes.tcaja caja on caja.id_caja=solefe.id_caja
                         inner join orga.vfuncionario fun on fun.id_funcionario = solefe.id_funcionario
 						left join segu.tusuario usu2 on usu2.id_usuario = solefe.id_usuario_mod
-                        left join tes.tsolicitud_efectivo solpri on solpri.id_solicitud_efectivo=solefe.fk_id_solicitud_efectivo
+                        left join tes.tsolicitud_efectivo solpri on solpri.id_solicitud_efectivo=solefe.id_solicitud_efectivo_fk
                         '||v_inner||'
 					    where '||v_filtro;
 			

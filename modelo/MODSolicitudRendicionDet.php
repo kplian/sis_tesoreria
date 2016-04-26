@@ -20,6 +20,8 @@ class MODSolicitudRendicionDet extends MODbase{
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
 				
 		//Definicion de la lista del resultado del query
+		$this->capturaCount('monto','numeric');
+		
 		$this->captura('id_solicitud_rendicion_det','int4');
 		//$this->captura('id_proceso_caja','int4');
 		$this->captura('id_solicitud_efectivo','int4');
@@ -189,10 +191,10 @@ class MODSolicitudRendicionDet extends MODbase{
 						
 			
 			$this->arreglo['id_documento_respaldo'] = $id_doc_compra_venta;
-			$this->setParametro('id_solicitud_efectivo','id_solicitud_efectivo','int4');
+			$this->setParametro('id_solicitud_efectivo_fk','id_solicitud_efectivo','int4');
 			$this->setParametro('id_documento_respaldo','id_documento_respaldo','int4');
 			$this->setParametro('estado_reg','estado_reg','varchar');
-			$this->setParametro('monto','importe_neto','numeric');
+			$this->setParametro('monto','importe_pago_liquido','numeric');
 			$this->setParametro('tipo_solicitud','tipo_solicitud','varchar');			
 			
 			$this->armarConsulta();			
@@ -384,7 +386,7 @@ class MODSolicitudRendicionDet extends MODbase{
 			$this->tipo_procedimiento='IME';
 			
 			$this->arreglo['id_documento_respaldo'] = $id_doc_compra_venta;
-			$this->setParametro('id_solicitud_efectivo','id_solicitud_efectivo','int4');
+			$this->setParametro('id_solicitud_efectivo_fk','id_solicitud_efectivo','int4');
 			$this->setParametro('id_documento_respaldo','id_documento_respaldo','int4');
 			$this->setParametro('estado_reg','estado_reg','varchar');
 			$this->setParametro('monto','importe_neto','numeric');

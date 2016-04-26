@@ -71,7 +71,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Fecha',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 150,
+				gwidth: 100,
 				format: 'd/m/Y',
 				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
 			},
@@ -146,7 +146,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Nro Factura',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 125,
+				gwidth: 100,
 				maxLength:100
 			},
 				type:'TextField',
@@ -174,8 +174,76 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
+				name: 'importe_doc',
+				fieldLabel: 'Importe Total',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650,				
+				renderer:function (value,p,record){
+					return  String.format('{0}', value);
+				}
+			},
+			type:'NumberField',
+			id_grupo:0,
+			grid:true,
+			form:true
+		},		
+		{
+			config:{
+				name: 'importe_descuento',
+				fieldLabel: 'Descuento',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650,				
+				renderer:function (value,p,record){
+					return  String.format('{0}', value);
+				}
+			},
+			type:'NumberField',
+			id_grupo:0,
+			grid:true,
+			form:true
+		},
+		{
+			config:{
+				name: 'importe_descuento_ley',
+				fieldLabel: 'Descuento Ley',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650,				
+				renderer:function (value,p,record){
+					return  String.format('{0}', value);
+				}
+			},
+			type:'NumberField',
+			id_grupo:0,
+			grid:true,
+			form:true
+		},
+		{
+			config:{
+				name: 'importe_excento',
+				fieldLabel: 'Excento',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650,				
+				renderer:function (value,p,record){
+					return  String.format('{0}', value);
+				}
+			},
+			type:'NumberField',
+			id_grupo:0,
+			grid:true,
+			form:true
+		},
+		{
+			config:{
 				name: 'monto',
-				fieldLabel: 'Monto',
+				fieldLabel: 'Liquido Pagable',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
@@ -365,8 +433,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 	
 	successSinc:function(resp){
 		Phx.CP.loadingHide();
-		var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
-		console.log(reg.ROOT.datos);
+		var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));		
 		if(reg.ROOT.datos.resultado!='falla'){ 
 			this.onReloadPadre();
 		 }else{

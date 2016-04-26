@@ -25,12 +25,12 @@ class MODCaja extends MODbase{
 		//Definicion de la lista del resultado del query
 		$this->captura('id_caja','int4');
 		$this->captura('estado','varchar');
-		$this->captura('importe_maximo','numeric');
+		$this->captura('importe_maximo_caja','numeric');
 		$this->captura('saldo','numeric');
 		$this->captura('tipo','varchar');
 		$this->captura('estado_reg','varchar');
 		$this->captura('estado_proceso','varchar');
-		$this->captura('porcentaje_compra','numeric');
+		$this->captura('importe_maximo_item','numeric');
 		$this->captura('id_moneda','int4');
 		$this->captura('id_depto','int4');
 		$this->captura('id_cuenta_bancaria','int4');
@@ -45,6 +45,7 @@ class MODCaja extends MODbase{
 		$this->captura('usr_mod','varchar');
 		$this->captura('desc_moneda','varchar');
 		$this->captura('desc_depto','varchar');
+		$this->captura('desc_depto_lb','varchar');
 		$this->captura('tipo_ejecucion','varchar');	
 		$this->captura('id_proceso_wf','int4');
 		$this->captura('id_estado_wf','int4');
@@ -53,6 +54,7 @@ class MODCaja extends MODbase{
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
+		//var_dump($this->consulta); exit;
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
@@ -64,12 +66,12 @@ class MODCaja extends MODbase{
 		$this->tipo_procedimiento='IME';
 				
 		//Define los parametros para la funcion
-		$this->setParametro('importe_maximo','importe_maximo','numeric');
+		$this->setParametro('importe_maximo_caja','importe_maximo_caja','numeric');
 		$this->setParametro('tipo','tipo','varchar');
 		$this->setParametro('estado_reg','estado_reg','varchar');
-		$this->setParametro('porcentaje_compra','porcentaje_compra','numeric');
+		$this->setParametro('importe_maximo_item','importe_maximo_item','numeric');
 		$this->setParametro('id_moneda','id_moneda','int4');
-		$this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
+		$this->setParametro('id_depto_lb','id_depto_lb','int4');
 		$this->setParametro('id_depto','id_depto','int4');
 		$this->setParametro('codigo','codigo','varchar');
 		$this->setParametro('tipo_ejecucion','tipo_ejecucion','varchar');
@@ -90,10 +92,10 @@ class MODCaja extends MODbase{
 				
 		//Define los parametros para la funcion
 		$this->setParametro('id_caja','id_caja','int4');
-		$this->setParametro('importe_maximo','importe_maximo','numeric');
+		$this->setParametro('importe_maximo_caja','importe_maximo_caja','numeric');
 		$this->setParametro('tipo','tipo','varchar');
 		$this->setParametro('estado_reg','estado_reg','varchar');
-		$this->setParametro('porcentaje_compra','porcentaje_compra','numeric');
+		$this->setParametro('importe_maximo_item','importe_maximo_item','numeric');
 		$this->setParametro('id_moneda','id_moneda','int4');		
 		$this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
 		$this->setParametro('id_depto','id_depto','int4');

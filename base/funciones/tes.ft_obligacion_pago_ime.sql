@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_pago_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -581,7 +583,7 @@ BEGIN
 		begin
         
         
-         --raise exception 'xxxxx... % ...', v_parametros;
+        
        -- raise exception '... % ...', v_parametros.id_obligacion_pago;
         
             v_resp = tes.f_finalizar_obligacion_total(v_parametros.id_obligacion_pago,p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_parametros.forzar_fin);
@@ -610,6 +612,8 @@ BEGIN
         $this->setParametro('obs','obs','text');
         $this->setParametro('json_procesos','json_procesos','text');
         */
+        
+       
         
         --obtenermos datos basicos
          select 
@@ -1063,6 +1067,17 @@ BEGIN
                             v_fecha_pp_ini =  v_fecha_pp_ini + interval  '1 month'*v_rotacion;
                      END LOOP;
           END IF;
+          
+          
+           IF  v_codigo_estado = 'borrador'   and v_tipo_obligacion != 'adquisiciones' and v_tipo_obligacion != 'pago_especial' and   v_pre_integrar_presupuestos = 'true'  THEN
+         
+               --si es borrador verificamos que el presupeusto sea suficiente para proseguir con la ordenç
+               IF not tes.f_gestionar_presupuesto_tesoreria(v_parametros.id_obligacion_pago, p_id_usuario, 'verificar')  THEN
+                   raise exception 'Error al verificar  presupeusto';
+               END IF;
+           
+           END IF;
+           
           
           -----------------------------------------------------------------------------
           -- COMPROMISO PRESUPUESTARIO

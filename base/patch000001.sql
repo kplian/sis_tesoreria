@@ -1448,3 +1448,88 @@ ALTER TABLE tes.tsolicitud_efectivo_det
   ALTER COLUMN id_partida_ejecucion DROP NOT NULL;
   
 /*****************************F-SCP-GSS-TES-0-29/01/2016*************/
+
+
+  
+/*****************************I-SCP-RAC-TES-0-22/03/2016*************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tproceso_caja
+  ADD COLUMN id_depto_conta INTEGER;
+
+COMMENT ON COLUMN tes.tproceso_caja.id_depto_conta
+IS 'hace referencia donde  se contabiliza el proceso';
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tproceso_caja
+  ADD COLUMN id_gestion INTEGER;
+
+COMMENT ON COLUMN tes.tproceso_caja.id_gestion
+IS 'gestion del proceso';
+
+
+/*****************************F-SCP-RAC-TES-0-22/03/2016*************/
+
+/*****************************I-SCP-GSS-TES-0-28/03/2016*************/
+
+ALTER TABLE tes.tproceso_caja
+  RENAME COLUMN id_comprobante_pago TO id_int_comprobante;
+
+ALTER TABLE tes.tproceso_caja
+  DROP COLUMN id_comprobante_diario;
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tcaja
+  ADD COLUMN fecha_apertura DATE;
+
+COMMENT ON COLUMN tes.tcaja.fecha_apertura
+IS 'ultima fecha de apertura de caja';
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tcaja
+  ADD COLUMN fecha_cierre DATE;
+
+COMMENT ON COLUMN tes.tcaja.fecha_cierre
+IS 'ultima fecha de cierre de caja';
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tproceso_caja
+  ADD COLUMN id_proceso_caja_fk INTEGER;
+
+COMMENT ON COLUMN tes.tproceso_caja.id_proceso_caja_fk
+IS 'hace referencia al proceso de caja origen';
+
+-------------- SQL -------------------
+
+ALTER TABLE tes.tcaja
+  ADD UNIQUE (codigo);
+
+--------------- SQL ------------------
+  
+ALTER TABLE tes.tsolicitud_efectivo
+  RENAME COLUMN fk_id_solicitud_efectivo TO id_solicitud_efectivo_fk;
+  
+  --------------- SQL ---------------
+
+ALTER TABLE tes.tproceso_caja
+  ADD COLUMN id_solicitud_efectivo_rel INTEGER;
+
+COMMENT ON COLUMN tes.tproceso_caja.id_solicitud_efectivo_rel
+IS 'en lso procesos de  apertura, reposición o cierre se inserta un registro en solicitud efectivo para facilitar el arqueo de caja';
+  
+/*****************************F-SCP-GSS-TES-0-28/03/2016*************/
+
+
+
+
+
+

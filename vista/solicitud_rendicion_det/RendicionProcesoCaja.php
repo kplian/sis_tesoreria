@@ -129,9 +129,57 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				form:false
 		},
 		{
+			config:{
+				name: 'desc_plantilla',
+				fieldLabel: 'Tipo Documento',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 150,
+				maxLength:100
+			},
+				type:'TextField',
+				filters:{pfiltro:'pla.desc_plantilla',type:'string'},
+				bottom_filter: true,
+				id_grupo:0,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'fecha',
+				fieldLabel: 'Fecha',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 100,
+				format: 'd/m/Y',
+				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+			},
+				type:'DateField',
+				filters:{pfiltro:'dc.fecha',type:'date'},
+				id_grupo:0,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'nro_documento',
+				fieldLabel: 'Nro Factura',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:100
+			},
+				type:'TextField',
+				filters:{pfiltro:'dc.nro_documento',type:'string'},
+				bottom_filter: true,
+				id_grupo:0,
+				grid:true,
+				form:false
+		},
+		{
 			config: {
 				name: 'id_doc_compra_venta',
-				fieldLabel: 'Documento Respaldo',
+				fieldLabel: 'Razon Social',
 				allowBlank: true,
 				emptyText: 'Elija una opción...',
 				store: new Ext.data.JsonStore({
@@ -173,8 +221,59 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
+				name: 'importe_doc',
+				fieldLabel: 'Importe Total',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650,				
+				renderer:function (value,p,record){
+					return  String.format('{0}', value);
+				}
+			},
+			type:'NumberField',
+			id_grupo:0,
+			grid:true,
+			form:true
+		},		
+		{
+			config:{
+				name: 'importe_descuento',
+				fieldLabel: 'Descuento',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650,				
+				renderer:function (value,p,record){
+					return  String.format('{0}', value);
+				}
+			},
+			type:'NumberField',
+			id_grupo:0,
+			grid:true,
+			form:true
+		},
+		{
+			config:{
+				name: 'importe_excento',
+				fieldLabel: 'Excento',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650,				
+				renderer:function (value,p,record){
+					return  String.format('{0}', value);
+				}
+			},
+			type:'NumberField',
+			id_grupo:0,
+			grid:true,
+			form:true
+		},
+		{
+			config:{
 				name: 'monto',
-				fieldLabel: 'Monto',
+				fieldLabel: 'Liquido Pagable',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
@@ -380,8 +479,7 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
          
          Phx.vista.RendicionProcesoCaja.superclass.preparaMenu.call(this,n); 
          var padre = Phx.CP.getPagina(this.idContenedorPadre).nombreVista;
-		 console.log('llega');
-         console.log(padre);
+		 
          if(padre == 'ProcesoCaja'){
                this.getBoton('excluir').disable();
          }

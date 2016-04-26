@@ -38,6 +38,14 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			tooltip : '<b>Rendicion</b>'
 		});
 		
+		this.addButton('btnSolicitud', {
+			text : 'Solicitud',
+			iconCls : 'bpdf',
+			disabled : false,
+			handler : this.onBtnSolicitud,
+			tooltip : '<b>Solicitud Gastos</b>'
+		});
+		
 		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:this.vista}})
 	},
 			
@@ -53,6 +61,16 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			form:true 
 		},
 		{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'tipo_solicitud'
+			},
+			type:'Field',
+			form:true 
+		},
+		{
 			config: {
 				name: 'id_caja',
 				fieldLabel: 'Caja',
@@ -63,7 +81,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 					id: 'id_caja',
 					root: 'datos',
 					sortInfo: {
-						field: 'nombre',
+						field: 'codigo',
 						direction: 'ASC'
 					},
 					totalProperty: 'total',
@@ -82,7 +100,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 				mode: 'remote',
 				pageSize: 15,
 				queryDelay: 1000,
-				anchor: '100%',
+				anchor: '80%',
 				gwidth: 100,
 				minChars: 2,
 				tpl: '<tpl for="."><div class="x-combo-list-item"><p><b>{codigo}</b></p><p>CAJERO: {cajero}</p></div></tpl>',
@@ -161,7 +179,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Num Tramite',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 300,
+				gwidth: 150,
 				maxLength:50
 			},
 				type:'TextField',
@@ -178,6 +196,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
    				fieldLabel:'Funcionario',
    				allowBlank:false,
                 gwidth:200,
+				anchor: '80%',
    				valueField: 'id_funcionario',
    			    gdisplayField: 'desc_funcionario',   			    
       			renderer:function(value, p, record){return String.format('{0}', record.data['desc_funcionario']);}
@@ -218,6 +237,62 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 				id_grupo:1,
 				grid:true,
 				form:true
+		},
+		{
+			config:{
+				name: 'monto_rendido',
+				fieldLabel: 'Monto Rendido',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650
+			},
+				type:'NumberField',
+				id_grupo:1,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'monto_devuelto',
+				fieldLabel: 'Monto Devuelto',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650
+			},
+				type:'NumberField',
+				id_grupo:1,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'monto_repuesto',
+				fieldLabel: 'Monto Repuesto',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650
+			},
+				type:'NumberField',
+				id_grupo:1,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'saldo',
+				fieldLabel: 'Saldo',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650
+			},
+				type:'NumberField',
+				id_grupo:1,
+				grid:true,
+				form:false
 		},
 		{
 			config: {
@@ -394,6 +469,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_solicitud_efectivo', type: 'numeric'},
 		{name:'id_caja', type: 'numeric'},
 		{name:'codigo', type: 'string'},
+		{name:'id_moneda', type: 'numeric'},
 		{name:'id_depto', type: 'numeric'},
 		{name:'id_estado_wf', type: 'numeric'},
 		{name:'monto', type: 'numeric'},
@@ -413,7 +489,10 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
-		
+		{name:'monto_rendido', type: 'numeric'},		
+		{name:'monto_repuesto', type: 'numeric'},		
+		{name:'monto_devuelto', type: 'numeric'},		
+		{name:'saldo', type: 'numeric'}
 	],
 	sortInfo:{
 		field: 'id_solicitud_efectivo',
@@ -444,11 +523,19 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 	 
 	 iniciarEventos : function(){		 
 		this.cmpFecha=this.getComponente('fecha');
+		this.cmpFuncionario=this.getComponente('id_funcionario');
+		this.cmpFuncionario.store.baseParams.fecha = this.cmpFecha.getValue().dateFormat(this.cmpFecha.format);
+	 },
+	 
+	 onButtonEdit: function(){
+		Phx.vista.SolicitudEfectivoSinDet.superclass.onButtonEdit.call(this);
+		this.Cmp.tipo_solicitud.setValue('solicitud');
 	 },
 	 
 	 onButtonNew: function(){
 		Phx.vista.SolicitudEfectivoSinDet.superclass.onButtonNew.call(this);
 		this.cmpFecha.setValue(new Date());
+		this.Cmp.tipo_solicitud.setValue('solicitud');
 	 },
 	 
 	 onBtnRendicion : function() {
@@ -458,6 +545,18 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			width : '95%',
 			height : '95%',
 		}, rec.data, this.idContenedor, 'SolicitudRendicionDet');
+	},
+	
+	onBtnSolicitud : function() {
+		var rec=this.sm.getSelected();
+        Ext.Ajax.request({
+            url:'../../sis_tesoreria/control/SolicitudEfectivo/reporteSolicitudEfectivo',
+            params:{'id_solicitud_efectivo':rec.data.id_solicitud_efectivo,'estado':rec.data.estado},
+            success: this.successExport,
+            failure: this.conexionFailure,
+            timeout:this.timeout,
+            scope:this
+        }); 
 	},
 	 
 	sigEstado:function(){                   
@@ -485,7 +584,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 	 
 	 onSaveWizard:function(wizard,resp){
 			Phx.CP.loadingShow();
-			console.log(resp);
+			
 			Ext.Ajax.request({
 				url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
 				params:{

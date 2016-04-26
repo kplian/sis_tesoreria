@@ -31,20 +31,11 @@ Phx.vista.SolicitudEfectivoDetVb = {
 	   Phx.vista.SolicitudEfectivoDetVb.superclass.constructor.call(this,config);
                  
     },
-       
-       
 	
-   preparaMenu:function(n){
-          var data = this.getSelectedData();
-          var tb =this.tbar;
-          Phx.vista.SolicitudEfectivoDetVb.superclass.preparaMenu.call(this,n);         
+    preparaMenu:function(n){
 	},
 	
-    liberaMenu:function(){
-	  	
-        var tb = Phx.vista.SolicitudEfectivoDetVb.superclass.liberaMenu.call(this);      
-	    
-       return tb
-   },	
+    liberaMenu:function(){	  	
+    }
 };
 </script>

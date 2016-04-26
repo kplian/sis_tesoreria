@@ -25,17 +25,17 @@ class MODProcesoCaja extends MODbase{
 		//Definicion de la lista del resultado del query
 		$this->captura('id_proceso_caja','int4');
 		$this->captura('estado','varchar');
-		$this->captura('id_comprobante_diario','int4');
+		$this->captura('id_int_comprobante','int4');
 		$this->captura('nro_tramite','varchar');
 		$this->captura('tipo','varchar');
 		$this->captura('motivo','text');
 		$this->captura('estado_reg','varchar');
 		$this->captura('fecha_fin','date');
 		$this->captura('id_caja','int4');
+		$this->captura('id_depto_lb','int4');
 		$this->captura('fecha','date');
 		$this->captura('id_proceso_wf','int4');
 		$this->captura('monto_reposicion','numeric');
-		$this->captura('id_comprobante_pago','int4');
 		$this->captura('id_estado_wf','int4');
 		$this->captura('fecha_inicio','date');
 		$this->captura('fecha_reg','timestamp');
@@ -46,11 +46,12 @@ class MODProcesoCaja extends MODbase{
 		$this->captura('id_usuario_mod','int4');
 		$this->captura('usr_reg','varchar');
 		$this->captura('usr_mod','varchar');
+		$this->captura('nombre','varchar');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
-		
+		//var_dump($this->consulta); exit;
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
@@ -146,6 +147,7 @@ class MODProcesoCaja extends MODbase{
         $this->setParametro('id_tipo_estado','id_tipo_estado','int4');
         $this->setParametro('id_funcionario_wf','id_funcionario_wf','int4');
         $this->setParametro('id_depto_wf','id_depto_wf','int4');
+        $this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
         $this->setParametro('obs','obs','text');
         $this->setParametro('json_procesos','json_procesos','text');
 

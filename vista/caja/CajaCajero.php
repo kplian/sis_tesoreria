@@ -26,11 +26,11 @@ Phx.vista.CajaCajero = {
        Phx.vista.CajaCajero.superclass.constructor.call(this,config);
        
 	   this.addButton('btnRendicion', {
-			text : 'Rendicion Caja',
+			text : 'Procesos Caja',
 			iconCls : 'bballot',
 			disabled : false,
 			handler : this.onBtnRendicion,
-			tooltip : '<b>Rendicion</b>'
+			tooltip : '<b>Procesos Caja</b>'
 	   });
 		
        this.store.baseParams={tipo_interfaz:this.nombreVista};
@@ -50,8 +50,7 @@ Phx.vista.CajaCajero = {
 	
 	onBtnRendicion : function() {
 		var rec = this.sm.getSelected();
-		console.log(rec.data);
-		Phx.CP.loadWindows('../../../sis_tesoreria/vista/proceso_caja/ProcesoCaja.php', 'Rendicion Caja', {
+		Phx.CP.loadWindows('../../../sis_tesoreria/vista/proceso_caja/ProcesoCaja.php', 'Proceso Caja', {
 			modal : true,
 			width : '95%',
 			height : '95%',
@@ -61,12 +60,13 @@ Phx.vista.CajaCajero = {
 	preparaMenu:function(n){
          var data = this.getSelectedData();
          		 
-		 if(data.estado == 'abierto'){  
+		 /*if(data.estado == 'abierto'){  
 		    this.getBoton('btnRendicion').enable();
          }
 		 else{
 			 this.getBoton('btnRendicion').disable();
-		 }		 
+		 }	
+		*/		 
      }
     
 };

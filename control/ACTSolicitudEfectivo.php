@@ -6,6 +6,9 @@
 *@date 24-11-2015 12:59:51
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
 */
+require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
+require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
+require_once(dirname(__FILE__).'/../reportes/RSolicitudEfectivo.php');
 
 class ACTSolicitudEfectivo extends ACTbase{    
 			
@@ -75,13 +78,179 @@ class ACTSolicitudEfectivo extends ACTbase{
 	}
 	
 	function insertarSolicitudEfectivoCompleta(){
-		$this->objParam->addParametro('tipo_solicitud','solicitud');		
+		//$this->objParam->addParametro('tipo_solicitud','solicitud');		
 		$this->objFunc=$this->create('MODSolicitudEfectivo');	
 		if($this->objParam->insertar('id_solicitud_efectivo')){						
 			$this->res=$this->objFunc->insertarSolicitudEfectivoCompleta($this->objParam);			
 		} 
 		$this->res->imprimirRespuesta($this->res->generarJson());
-	}	
+	}
+
+	function devolucionSolicitudEfectivo(){		
+		$this->objFunc=$this->create('MODSolicitudEfectivo');							
+		$this->res=$this->objFunc->devolucionSolicitudEfectivo($this->objParam);					
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	
+	function reporteSolicitudEfectivo($create_file=false, $onlyData = false){
+		$dataSource = new DataSource();
+		//captura datos de firma
+		if ($this->objParam->getParametro('firmar') == 'si') {
+			$firmar = 'si';
+			$fecha_firma = $this->objParam->getParametro('fecha_firma');
+			$usuario_firma = $this->objParam->getParametro('usuario_firma');
+		} else {
+			$firmar = 'no';
+			$fecha_firma = '';
+			$usuario_firma = '';
+		}
+		
+		if($this->objParam->getParametro('id_solicitud_efectivo')!='')
+		{
+			$this->objParam-> addFiltro('solefe.id_solicitud_efectivo ='.$this->objParam->getParametro('id_solicitud_efectivo'));
+		}
+		
+		$this->objParam->addParametroConsulta('ordenacion','id_solicitud_efectivo');
+		$this->objParam->addParametroConsulta('dir_ordenacion','ASC');
+		$this->objParam->addParametroConsulta('cantidad',1000);
+		$this->objParam->addParametroConsulta('puntero',0);
+		
+		$this->objFunc = $this->create('MODSolicitudEfectivo');
+		
+		$resultSolicitud = $this->objFunc->reporteSolicitudEfectivo();
+		
+		$datosSolicitud = $resultSolicitud->getDatos();
+		
+		//armamos el array parametros y metemos ahi los data sets de las otras tablas
+		$dataSource->putParameter('codigo', $datosSolicitud[0]['codigo']);
+		$dataSource->putParameter('monto', $datosSolicitud[0]['monto']);
+		$dataSource->putParameter('moneda', $datosSolicitud[0]['moneda']);
+		$dataSource->putParameter('codigo_moneda', $datosSolicitud[0]['codigo_moneda']);
+		$dataSource->putParameter('monto_literal', $datosSolicitud[0]['monto_literal']);
+		$dataSource->putParameter('nro_tramite', $datosSolicitud[0]['nro_tramite']);
+		$dataSource->putParameter('estado', $datosSolicitud[0]['estado']);
+		$dataSource->putParameter('desc_funcionario', $datosSolicitud[0]['desc_funcionario']);		
+		$dataSource->putParameter('motivo', $datosSolicitud[0]['motivo']);
+		$dataSource->putParameter('fecha', $datosSolicitud[0]['fecha']);
+		
+		//get detalle
+    //Reset all extra params:
+    $this->objParam->defecto('ordenacion', 'id_solicitud_efectivo_det');
+    $this->objParam->defecto('cantidad', 1000);
+    $this->objParam->defecto('puntero', 0);
+    
+    $modSolicitudEfecitovDet = $this->create('MODSolicitudEfectivoDet');
+    //lista el detalle de la solicitud
+    $resultSolicitudEfectivoDet = $modSolicitudEfecitovDet->listarSolicitudEfectivoDet();
+    
+	//agrupa el detalle de la solcitud por centros de costos y partidas    
+    $solicitudEfectivoDetAgrupado = $this->groupArray($resultSolicitudEfectivoDet->getDatos(), 'desc_ingas','codigo_cc', $datosSolicitud[0]['id_moneda'],$datosSolicitud[0]['estado'],$onlyData);
+    //var_dump($solicitudEfectivoDetAgrupado); exit;
+    
+    $solicitudEfectivoDetDataSource = new DataSource();    
+    $solicitudEfectivoDetDataSource->setDataSet($solicitudEfectivoDetAgrupado);
+	
+	//inserta el detalle de la solicitud como origen de datos    
+    $dataSource->putParameter('detalleDataSource', $solicitudEfectivoDetDataSource);
+    			
+		if ($onlyData){
+			
+			return $dataSource;
+		} 
+		$nombreArchivo = uniqid(md5(session_id()).'SolicitudEfectivo') . '.pdf'; 
+		$this->objParam->addParametro('orientacion','P');
+		$this->objParam->addParametro('tamano','LETTER');		
+		$this->objParam->addParametro('titulo_archivo','SOLICITUD DE EFECTIVO');
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);  
+		$this->objParam->addParametro('firmar',$firmar); 
+		$this->objParam->addParametro('fecha_firma',$fecha_firma); 
+		$this->objParam->addParametro('usuario_firma',$usuario_firma);   
+		//build the report
+		$reporte = new RSolicitudEfectivo($this->objParam);
+		
+		$reporte->setDataSource($dataSource);
+		
+		$reporte->write();
+		
+			if(!$create_file){
+						$mensajeExito = new Mensaje();
+						$mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
+														'Se generó con éxito el reporte: '.$nombreArchivo,'control');
+						$mensajeExito->setArchivoGenerado($nombreArchivo);
+						//anade los datos de firma a la respuesta
+						/*if ($firmar == 'si') {
+							$mensajeExito->setDatos($datos_firma);
+						}*/
+						$this->res = $mensajeExito;
+						$this->res->imprimirRespuesta($this->res->generarJson());
+			}
+			else{
+						
+				return dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo;  
+				
+			}
+	}
+	
+function groupArray($array,$groupkey,$groupkeyTwo,$id_moneda,$estado_sol, $onlyData){
+	 if (count($array)>0)
+	 {
+	 	//recupera las llaves del array    
+	 	$keys = array_keys($array[0]);
+	 	
+	 	$removekey = array_search($groupkey, $keys);
+	 	$removekeyTwo = array_search($groupkeyTwo, $keys);
+	 	
+		if ($removekey===false)
+ 		     return array("Clave \"$groupkey\" no existe");
+		if($removekeyTwo===false)
+ 		     return array("Clave \"$groupkeyTwo\" no existe");
+ 		     
+	 	
+	 	//crea los array para agrupar y para busquedas
+	 	$groupcriteria = array();
+	 	$arrayResp=array();
+	 	
+	 	//recorre el resultado de la consulta de oslicitud detalle
+	 	foreach($array as $value)
+	 	{
+	 		//por cada registro almacena el valor correspondiente en $item     
+	 		$item=null;
+	 		foreach ($keys as $key)
+	 		{
+	 			$item[$key] = $value[$key];
+	 		}
+	 		
+	 		//buscar si el grupo ya se incerto
+	 	 	$busca = array_search($value[$groupkey].$value[$groupkeyTwo], $groupcriteria);
+	 		
+	 		if ($busca === false)
+	 		{
+	 		     //si el grupo no existe lo crea
+	 		    //en la siguiente posicicion de crupcriteria agrega el identificador del grupo
+	 			$groupcriteria[]=$value[$groupkey].$value[$groupkeyTwo];
+	 			
+	 			//en la siguiente posivion cre ArrayResp cre un btupo con el identificaor nuevo  
+	 			//y un bubgrupo para acumular los detalle de semejaste caracteristicas
+	 			
+	 			$arrayResp[]=array($groupkey.$groupkeyTwo=>$value[$groupkey].$value[$groupkeyTwo],'groupeddata'=>array(),'presu_verificado'=>"false");
+	 			$arrayPresuVer[]=
+	 			//coloca el indice en la ultima posicion insertada
+	 			$busca=count($arrayResp)-1;
+	 			
+	 			
+	 			
+	 		}
+	 		
+	 		//inserta el registro en el subgrupo correspondiente
+	 		$arrayResp[$busca]['groupeddata'][]=$item;
+	 		
+	 	}
+	 	
+	 	return $arrayResp;
+	 }
+	 else
+	 	return array();
+	}
 }
 
 ?>

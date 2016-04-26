@@ -338,14 +338,6 @@ BEGIN
                                                              v_tipo_noti,
                                                              --NULL);	
                                                              v_titulo);
-          /*
-          IF   v_codigo_estado_siguiente in ('entregado') and v_tipo_ejecucion = 'con_detalle'  THEN                                                   
-          	   
-               IF not tes.f_gestionar_presupuesto_solicitud_efectivo(v_id_solicitud_efectivo, p_id_usuario, 'comprometer')  THEN
-                   raise exception 'Error al comprometer el presupeusto';
-               END IF;               
-          END IF;
-          */
           
           update tes.tsolicitud_efectivo  s set 
              id_estado_wf =  v_id_estado_actual,
@@ -361,8 +353,14 @@ BEGIN
                                        inner join conta.tdoc_compra_venta doc on doc.id_doc_compra_venta=rendet.id_documento_respaldo
                                        where rendet.id_solicitud_efectivo= v_id_solicitud_efectivo)LOOP
                     --to do comprometer presupuesto
-                    IF not tes.f_gestionar_presupuesto_doc_compra_venta(v_doc_compra_venta.id_doc_compra_venta::integer, p_id_usuario, 'comprometer')  THEN
+                    IF not tes.f_gestionar_presupuesto_doc_compra_venta(
+                            v_doc_compra_venta.id_doc_compra_venta::integer,
+                            NULL, -- id_proceso_caja 
+                            p_id_usuario, 
+                            'comprometer')  THEN
+                            
                         raise exception 'Error al comprometer el presupeusto';
+                        
                     END IF;   
               END LOOP;
             
@@ -380,9 +378,19 @@ BEGIN
                   --crear devolucion o ampliacion
                   v_id_solicitud_efectivo=tes.f_inserta_solicitud_efectivo(p_administrador,p_id_usuario,hstore(v_parametros)||hstore(v_solicitud_efectivo));
                   --finalizar solicitud efectivo---------------------------
+                  
+                  IF tes.f_finalizar_solicitud_efectivo(p_id_usuario,v_solicitud_efectivo.id_solicitud_efectivo) = false THEN
+                  	raise exception 'No se pudo finalizar la solicitud de efectivo automaticamente';
+                  END IF;
+                   
 			    END IF;
             ELSE
             	--finalizar solicitud efectivo--------------------
+                /*
+                IF tes.f_finalizar_solicitud_efectivo(p_id_usuario,v_solicitud_efectivo.id_solicitud_efectivo) = false THEN
+                	raise exception 'No se pudo finalizar la solicitud de efectivo automaticamente';
+                END IF;
+                */
             END IF;
             
           END IF;

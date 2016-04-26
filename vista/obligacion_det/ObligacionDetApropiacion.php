@@ -57,6 +57,19 @@ Phx.vista.ObligacionDetApropiacion = {
         
         this.Cmp.id_orden_trabajo.store.baseParams.fecha_solicitud = this.maestro.fecha.dateFormat('d/m/Y');
         this.Cmp.id_orden_trabajo.modificado = true;
+        
+        if(this.maestro.tipo_obligacion=='adquisiciones'){
+        	this.Cmp.id_concepto_ingas.store.baseParams.autorizacion = 'adquisiciones';
+        }
+        if(this.maestro.tipo_obligacion=='pago_directo'){
+        	this.Cmp.id_concepto_ingas.store.baseParams.autorizacion = 'pago_directo';
+        }
+        if(this.maestro.tipo_obligacion=='pago_unico'){
+        	this.Cmp.id_concepto_ingas.store.baseParams.autorizacion = 'pago_unico';
+        }
+        if(this.maestro.tipo_obligacion=='especial'){
+        	this.Cmp.id_concepto_ingas.store.baseParams.autorizacion = 'pago_especial';
+        }
        
     },
     onButtonEdit:function(){	    

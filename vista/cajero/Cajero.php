@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
 *@package pXP
 *@file gen-Cajero.php
@@ -17,37 +17,35 @@ Phx.vista.Cajero=Ext.extend(Phx.gridInterfaz,{
     	   //llama al constructor de la clase padre
 		      Phx.vista.Cajero.superclass.constructor.call(this,config);
 		      this.init();
-		      //this.load({params:{start:0, limit:this.tam_pag}})
+			  this.iniciarEventos();
     },
     
     tam_pag:50,
 			 
     Atributos:[
-		  {
+			{
          //configuracion del componente
-			      config:{
-					    labelSeparator:'',
-									inputType:'hidden',
-									name: 'id_cajero'
-			      },
-			 
-			 type:'Field',
-			 form:true 
-		  },
+				config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_cajero'
+				},			 
+				type:'Field',
+				form:true 
+			},
 		  
-    {
-        //configuracion del componente
-			     config:{
-					   labelSeparator:'',
-					   inputType:'hidden',
-					   name: 'id_caja'
-			     },
-			 
-			 type:'Field',
-			 form:true 
-		  },
-    {
-			     config:{
+			{
+			//configuracion del componente
+				config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_caja'
+				},			 
+				type:'Field',
+				form:true 
+			},
+			{
+			    config:{
 				    name: 'tipo',
 				    fieldLabel: 'Tipo',
 				    allowBlank: false,
@@ -59,37 +57,37 @@ Phx.vista.Cajero=Ext.extend(Phx.gridInterfaz,{
 					anchor: '80%',
 				    gwidth: 100,
 					store:['responsable','auxiliar','administrador']
-			     },
-			     
-			 type:'ComboBox',
-			 filters:{
-				 pfiltro:'cajero.tipo',
-				 type:'list',
-				 options: ['responsable','auxiliar','administrador']},
-			 id_grupo:1,
-			 grid:true,
-			 form:true
-    },
-    {
-        config:{
-       	name:'id_funcionario',
-       	hiddenName: 'id_funcionario',
-   				 origen:'FUNCIONARIOCAR',
-   				 fieldLabel:'Funcionario',
-   				 allowBlank:false,
-        gwidth:200,
-   				 valueField: 'id_funcionario',
-   			  gdisplayField: 'desc_funcionario',
-   			  renderer:function(value, p, record){return String.format('{0}', record.data['desc_funcionario']);}
-       	},
-    type:'ComboRec',//ComboRec
-   	id_grupo:0,
-   	filters:{pfiltro:'fun.desc_funcionario1',type:'string'},
-   	grid:true,
-   	form:true
-		  },
-    {
-        config:{
+			    },			     
+				type:'ComboBox',
+				filters:{
+				pfiltro:'cajero.tipo',
+				type:'list',
+				options: ['responsable','auxiliar','administrador']},
+				id_grupo:1,
+				grid:true,
+				form:true
+			},
+			{
+				config:{
+					name:'id_funcionario',
+					hiddenName: 'id_funcionario',
+					origen:'FUNCIONARIOCAR',
+					fieldLabel:'Funcionario',
+					allowBlank:false,
+					gwidth:200,
+					anchor: '80%',
+					valueField: 'id_funcionario',
+					gdisplayField: 'desc_funcionario',
+					renderer:function(value, p, record){return String.format('{0}', record.data['desc_funcionario']);}
+				},
+				type:'ComboRec',//ComboRec
+				id_grupo:0,
+				filters:{pfiltro:'fun.desc_funcionario1',type:'string'},
+				grid:true,
+				form:true
+			},
+			{
+				config:{
 				    name: 'estado',
 				    fieldLabel: 'estado',
 				    allowBlank: false,
@@ -102,134 +100,124 @@ Phx.vista.Cajero=Ext.extend(Phx.gridInterfaz,{
 				    gwidth: 100,
 				    store:['activo','inactivo']
 			     },
-    type:'ComboBox',
-			 filters:{
+				type:'ComboBox',
+				filters:{
 				pfiltro:'cajero.estado',
 				type:'string',
 				options: ['activo','inactivo']},
-			 id_grupo:1,
-			 grid:true,
-			 form:false
-	   },
-		  {
-			     config:{
+				id_grupo:1,
+				grid:true,
+				form:false
+			},
+		    {
+			    config:{
 				    name: 'fecha_inicio',
 				    fieldLabel: 'Fecha inicio',
 				    allowBlank: true,
 				    anchor: '80%',
 				    gwidth: 100,
-						  format: 'd/m/Y', 
-						  renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
-			     },
-			     
-			 type:'DateField',
-			 filters:{pfiltro:'cajero.fecha_inicio',type:'date'},
-			 id_grupo:1,
-			 grid:true,
-			 form:true
-		  },
-		  {
-			     config:{
+				    format: 'd/m/Y', 
+					renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+			    },			     
+				type:'DateField',
+				filters:{pfiltro:'cajero.fecha_inicio',type:'date'},
+				id_grupo:1,
+				grid:true,
+				form:true
+			},
+		    {
+			    config:{
 				    name: 'fecha_fin',
 				    fieldLabel: 'Fecha fin',
 				    allowBlank: true,
 				    anchor: '80%',
 				    gwidth: 100,
-						  format: 'd/m/Y', 
-						  renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
-			     },
-			     
-			 type:'DateField',
-			 filters:{pfiltro:'cajero.fecha_fin',type:'date'},
-			 id_grupo:1,
-			 grid:true,
-			 form:true
-		  },
-  	 {
-        config:{
+					format: 'd/m/Y', 
+					renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+			    },			     
+				type:'DateField',
+				filters:{pfiltro:'cajero.fecha_fin',type:'date'},
+				id_grupo:1,
+				grid:true,
+				form:true
+			},
+			{
+				config:{
 				    name: 'estado_reg',
 				    fieldLabel: 'Estado Reg.',
 				    allowBlank: true,
 				    anchor: '80%',
 				    gwidth: 100,
 				    maxLength:10
-			     },
-			  
-			 type:'TextField',
-			 filters:{pfiltro:'cajero.estado_reg',type:'string'},
-			 id_grupo:1,
-			 grid:true,
-			 form:false
-		  },
-    {
-			     config:{
+			    },			  
+				type:'TextField',
+				filters:{pfiltro:'cajero.estado_reg',type:'string'},
+				id_grupo:1,
+				grid:true,
+				form:false
+			},
+			{
+			    config:{
 				    name: 'fecha_reg',
 				    fieldLabel: 'Fecha creación',
 				    allowBlank: true,
 				    anchor: '80%',
 				    gwidth: 100,
-						  format: 'd/m/Y', 
-						  renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
-			     },
-			     
-			 type:'DateField',
-			 filters:{pfiltro:'cajero.fecha_reg',type:'date'},
-			 id_grupo:1,
-			 grid:true,
-			 form:false
-		  },
-		  
-		  {
-			     config:{
+				    format: 'd/m/Y', 
+					renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
+			    },			     
+				type:'DateField',
+				filters:{pfiltro:'cajero.fecha_reg',type:'date'},
+				id_grupo:1,
+				grid:true,
+				form:false
+			},		  
+			{
+			    config:{
 				    name: 'usr_reg',
 				    fieldLabel: 'Creado por',
 				    allowBlank: true,
 				    anchor: '80%',
 				    gwidth: 100,
 				    maxLength:4
-			     },
-			      
-			 type:'NumberField',
-			 filters:{pfiltro:'usu1.cuenta',type:'string'},
-		  id_grupo:1,
-		  grid:true,
-		  form:false
-		  },
-		   
-		  {
-			     config:{
+			    },			      
+				type:'NumberField',
+				filters:{pfiltro:'usu1.cuenta',type:'string'},
+				id_grupo:1,
+				grid:true,
+				form:false
+			},		   
+			{
+			    config:{
 				    name: 'usr_mod',
 				    fieldLabel: 'Modificado por',
 				    allowBlank: true,
 				    anchor: '80%',
 				    gwidth: 100,
 				    maxLength:4
-			     },
-			 type:'NumberField',
-			 filters:{pfiltro:'usu2.cuenta',type:'string'},
-			 id_grupo:1,
-		  grid:true,
-		  form:false	
-		  },
-		   
-		  {
-			     config:{
+			    },
+				type:'NumberField',
+				filters:{pfiltro:'usu2.cuenta',type:'string'},
+				id_grupo:1,
+				grid:true,
+				form:false	
+			},		   
+			{
+			    config:{
 				    name: 'fecha_mod',
 				    fieldLabel: 'Fecha Modif.',
 				    allowBlank: true,
-			     anchor: '80%',
-			     gwidth: 100,
-					   format: 'd/m/Y', 
-					   renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
-					   },
-			  
-			 type:'DateField',
-		  filters:{pfiltro:'cajero.fecha_mod',type:'date'},
-		  id_grupo:1,
-		  grid:true,			  
-		  form:false
-		  }
-		
+					anchor: '80%',
+					gwidth: 100,
+					format: 'd/m/Y', 
+					renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
+				},			  
+				type:'DateField',
+				filters:{pfiltro:'cajero.fecha_mod',type:'date'},
+				id_grupo:1,
+				grid:true,			  
+				form:false
+			}		
 	],
 	
 	title:'Cajero',
@@ -262,27 +250,19 @@ Phx.vista.Cajero=Ext.extend(Phx.gridInterfaz,{
 	
 	bdel:true,
 	bsave:true,
-	
+		
 	onReloadPage : function(m) {
 		this.maestro = m;
-  this.Atributos[1].valorInicial = this.maestro.id_caja;
-  this.store.baseParams = {
-                    id_caja : this.maestro.id_caja
-                    };
-                    this.load({
-                    params : {
-                        start : 0,
-                        limit : 50
-                    }
-                })
-  
-  
-	}
+		this.Atributos[1].valorInicial = this.maestro.id_caja;
+		this.store.baseParams = { id_caja : this.maestro.id_caja };
+        this.load({ params : { start : 0, limit : 50 }})    
+	},
 	
+	iniciarEventos : function(){		 
+		this.cmpFuncionario=this.getComponente('id_funcionario');
+		this.cmpFuncionario.store.baseParams.fecha = new Date();
+	 }
 	
-	
-	}
+}
 )
 </script>
-		
-		

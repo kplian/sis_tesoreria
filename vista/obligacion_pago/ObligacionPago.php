@@ -270,6 +270,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                 //minValue:(Phx.CP.config_ini.sis_integracion=='ENDESIS')?new Date('1/1/2014'):undefined,
                 fieldLabel: 'Fecha',
                 allowBlank: false,
+                readOnly : true,
                 gwidth: 100,
                         format: 'd/m/Y', 
                         renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
@@ -592,8 +593,8 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                 fieldLabel: 'Fecha Ini.',
                 allowBlank: false,
                 gwidth: 100,
-                        format: 'd/m/Y', 
-                        renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+                format: 'd/m/Y', 
+                renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
             },
             type:'DateField',
             filters:{pfiltro:'obpg.fecha_pp_ini',type:'date'},
@@ -875,9 +876,12 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
           },this);
 		
 		this.Cmp.id_proveedor.on('select', function(cmb,rec,ind){
+			
 			this.Cmp.id_contrato.enable();
 			this.Cmp.id_contrato.reset();
 			this.Cmp.id_contrato.store.baseParams.filter = "[{\"type\":\"numeric\",\"comparison\":\"eq\", \"value\":\""+cmb.getValue()+"\",\"field\":\"CON.id_proveedor\"}]";
+			
+			
 			this.Cmp.id_contrato.modificado = true;
 			
 		}, this);

@@ -25,35 +25,43 @@ $body$
 
 DECLARE
 
-	v_nro_requerimiento    	integer;
-	v_parametros           	record;
-	v_id_requerimiento     	integer;
-	v_resp		            varchar;
-	v_nombre_funcion        text;
-	v_mensaje_error         text;
-	v_id_proceso_caja	integer;
-    v_codigo_tabla			varchar;
-    v_num_rendicion			varchar;
-    v_registros_trendicion	record;
-    v_registros				record;
-    v_id_estado_wf			integer;
-    v_id_proceso_wf			integer;
-	v_codigo_estado			varchar;
-    v_id_tipo_estado		integer;
-    v_pedir_obs				varchar;
+	v_nro_requerimiento    		integer;
+	v_parametros           		record;
+	v_id_requerimiento     		integer;
+	v_resp		            	varchar;
+	v_nombre_funcion        	text;
+	v_mensaje_error         	text;
+	v_id_proceso_caja			integer;
+    v_codigo_tabla				varchar;
+    v_num_rendicion				varchar;
+    v_registros_trendicion		record;
+    v_registros					record;
+    v_id_estado_wf				integer;
+    v_id_proceso_wf				integer;
+	v_codigo_estado				varchar;
+    v_id_tipo_estado			integer;
+    v_pedir_obs					varchar;
     v_codigo_estado_siguiente	varchar;
-    v_obs					varchar;
-    v_acceso_directo		varchar;
-    v_clase					varchar;
-    v_parametros_ad			varchar;
-    v_tipo_noti				varchar;
-    v_titulo				varchar;
-    v_id_estado_actual		integer;
-    v_id_funcionario		integer;
-    v_id_usuario_reg		integer;
-    v_id_depto				integer;
-    v_id_estado_wf_ant		integer;
-    v_monto_reposicion		numeric;
+    v_obs						varchar;
+    v_acceso_directo			varchar;
+    v_clase						varchar;
+    v_parametros_ad				varchar;
+    v_tipo_noti					varchar;
+    v_titulo					varchar;
+    v_id_estado_actual			integer;
+    v_id_funcionario			integer;
+    v_id_usuario_reg			integer;
+    v_id_depto					integer;
+    v_id_estado_wf_ant			integer;
+    v_monto_reposicion			numeric;
+    v_codigo_plantilla_cbte		varchar;
+    
+    v_nombre_conexion			varchar;
+    v_id_int_comprobante 		integer;
+    v_anho						integer;
+    v_id_gestion 				integer;
+    v_codigo_documento			varchar;
+    v_proceso_pendiente			varchar;
     		    
 BEGIN
 
@@ -61,21 +69,47 @@ BEGIN
     v_parametros = pxp.f_get_record(p_tabla);
 
 	/*********************************    
- 	#TRANSACCION:  'TES_REN_INS'
- 	#DESCRIPCION:	Insercion de registros
- 	#AUTOR:		gsarmiento	
- 	#FECHA:		21-12-2015 20:15:22
+ 	#	TRANSACCION:  'TES_REN_INS'
+ 	#	DESCRIPCION:	Insercion de registros
+ 	#	AUTOR:		gsarmiento	
+ 	#	FECHA:		21-12-2015 20:15:22
 	***********************************/
 
 	if(p_transaccion='TES_REN_INS')then
 					
         begin
-        	select pv.codigo into v_codigo_tabla
+        	--verificar que no existen procesos pendientes de finalizacion por rendicion o reposicion solo deberia existir un proceso
+            select pc.nro_tramite into v_proceso_pendiente
+            from tes.tproceso_caja pc
+            where pc.id_caja=22 and pc.tipo in ('RENYREP','RENCYCER','REPO')
+            and pc.estado not in ('contabilizado','rendido');
+        	
+            IF v_proceso_pendiente is not null THEN               
+               raise exception 'No se puede registra un nuevo proceso caja, existe el proceso % pendiente de finalizacion', v_proceso_pendiente;            
+            END IF;
+            
+            
+           
+            
+        	select 
+               pv.codigo 
+            into 
+              v_codigo_tabla
          	from tes.tcaja pv
          	where pv.id_caja = v_parametros.id_caja;            
             
+         
+            
+            IF v_parametros.tipo = 'REPO' THEN
+            	v_codigo_documento = 'REP';
+            ELSIF v_parametros.tipo = 'RENYREP' or  v_parametros.tipo = 'RENYCER' THEN
+            	v_codigo_documento = 'REN';
+            END IF;
+            
+            
+            
             v_num_rendicion = param.f_obtener_correlativo(
-                  'REN', 
+                   v_codigo_documento, 
                    NULL,-- par_id, 
                    NULL, --id_uo 
                    NULL,    -- id_depto
@@ -93,30 +127,28 @@ BEGIN
             IF (v_num_rendicion is NULL or v_num_rendicion ='') THEN
                raise exception 'No se pudo obtener un numero correlativo para la rendicion de caja consulte con el administrador';
             END IF;
-            
-            select 
-            tp.codigo
-           into
-           v_registros_trendicion
+           --raise exception 'tipo %', v_parametros.tipo;
+           select tp.codigo, tpc.id_tipo_proceso_caja into v_registros_trendicion
            from  wf.ttipo_proceso tp
-           where tp.codigo_llave =  v_parametros.tipo::varchar; 
+           inner join tes.ttipo_proceso_caja tpc on tpc.codigo_wf=tp.codigo
+           where tpc.codigo =  v_parametros.tipo::varchar;
            
            IF  v_registros_trendicion.codigo is NULL or v_registros_trendicion.codigo = '' THEN
               
                raise exception 'La rendicion de tipo (%) no tiene un proceso de WF relacionado',v_parametros.tipo;
            
            END IF;           
-
-            select caj.id_proceso_wf, caj.id_estado_wf, c.id_depto, c.codigo, caj.nro_tramite, caj.estado 
+			--recupera datos de la caja y de su proceso caja de apertura
+            select caj.id_proceso_wf, caj.id_estado_wf, c.id_depto, c.codigo, caj.nro_tramite, caj.estado, c.importe_maximo 
             into v_registros
             from tes.tproceso_caja caj
             inner join tes.tcaja c on c.id_caja=caj.id_caja
             where caj.id_caja = v_parametros.id_caja and caj.tipo='apertura';
-
+			/*
             IF(v_registros.estado is null or v_registros.estado!='abierto')THEN
             	raise exception 'La caja (%) no se encuentra abierto', v_registros.codigo;
             END if;
-            
+            */
 
             SELECT   ps_id_proceso_wf,
                      ps_id_estado_wf,
@@ -139,7 +171,7 @@ BEGIN
                    
             v_monto_reposicion=0;
             
-            IF(v_parametros.tipo = 'rendicion_reposicion')THEN
+            IF(v_parametros.tipo = 'RENYREP')THEN
             	select sum(r.monto) into v_monto_reposicion
                 from tes.tsolicitud_rendicion_det r
                 inner join tes.tsolicitud_efectivo efe on efe.id_solicitud_efectivo=r.id_solicitud_efectivo
@@ -148,29 +180,52 @@ BEGIN
                 and d.fecha BETWEEN v_parametros.fecha_inicio and v_parametros.fecha_fin
                 and efe.estado='rendido';
             END IF;
+            
+            IF (v_parametros.tipo = 'REPO') THEN
+            	v_monto_reposicion =v_registros.importe_maximo;
+            END IF; 
+            
+             --obtener gestion
+              v_anho = (date_part('year', v_parametros.fecha::date))::integer;
+      			
+              select 
+               ges.id_gestion
+              into 
+                v_id_gestion
+              from param.tgestion ges
+              where ges.gestion = v_anho
+              limit 1 offset 0;
+              
+              IF  v_id_gestion is null  THEN
+                raise exception 'no se encontro una gestion parametrizada para el año %',v_anho;
+              END IF;
+              
+             
                       
-        	--Sentencia de la insercion
+        	--Sentencia de la insercion de la rendicion o reposicion de caja
         	insert into tes.tproceso_caja(
-			estado,
-			--id_comprobante_diario,
-			nro_tramite,
-			tipo,
-			motivo,
-			estado_reg,
-			fecha_fin,
-			id_caja,
-			fecha,
-			id_proceso_wf,
-			monto_reposicion,
-			--id_comprobante_pago,
-			id_estado_wf,
-			fecha_inicio,
-			fecha_reg,
-			usuario_ai,
-			id_usuario_reg,
-			id_usuario_ai,
-			fecha_mod,
-			id_usuario_mod
+                estado,
+                --id_comprobante_diario,
+                nro_tramite,
+                tipo,
+                motivo,
+                estado_reg,
+                fecha_fin,
+                id_caja,
+                fecha,
+                id_proceso_wf,
+                monto_reposicion,
+                --id_comprobante_pago,
+                id_estado_wf,
+                fecha_inicio,
+                fecha_reg,
+                usuario_ai,
+                id_usuario_reg,
+                id_usuario_ai,
+                fecha_mod,
+                id_usuario_mod,
+                id_tipo_proceso_caja,
+                id_gestion
           	) values(
 			v_codigo_estado,
 			--v_parametros.id_comprobante_diario,
@@ -191,9 +246,12 @@ BEGIN
 			p_id_usuario,
 			v_parametros._id_usuario_ai,
 			null,
-			null
+			null,
+            v_registros_trendicion.id_tipo_proceso_caja,
+            v_id_gestion
 			)RETURNING id_proceso_caja into v_id_proceso_caja;
-            
+          	
+            --asocia las facturas con el proceso caja de la rendicion de caja  
             UPDATE tes.tsolicitud_rendicion_det
             SET id_proceso_caja = v_id_proceso_caja
             WHERE id_solicitud_rendicion_det in (select r.id_solicitud_rendicion_det
@@ -304,13 +362,22 @@ BEGIN
         select
             pc.id_proceso_caja,
             pc.id_proceso_wf,
-            pc.estado
+            pc.estado,
+            tpc.codigo_plantilla_cbte
         into 
             v_id_proceso_caja,
             v_id_proceso_wf,
-            v_codigo_estado
+            v_codigo_estado,
+            v_codigo_plantilla_cbte
+            
         from tes.tproceso_caja pc
+        inner join tes.ttipo_proceso_caja tpc on tpc.id_tipo_proceso_caja = pc.id_tipo_proceso_caja
         where pc.id_proceso_wf = v_parametros.id_proceso_wf_act;
+        
+        
+       
+        
+        
           
           select 
             ew.id_tipo_estado,
@@ -392,8 +459,49 @@ BEGIN
              id_usuario_mod=p_id_usuario,
              fecha_mod=now()                           
           where id_proceso_wf = v_parametros.id_proceso_wf_act;
+          
+           IF v_codigo_estado_siguiente = 'supconta' THEN
+                
+                update tes.tproceso_caja  p set 
+                 id_depto_conta = v_id_depto           
+                where id_proceso_wf = v_parametros.id_proceso_wf_act;  
+                        
+          END IF;	
                        
-		
+		  IF v_codigo_estado_siguiente = 'pendiente' THEN
+                
+                update tes.tproceso_caja  p set 
+                 id_cuenta_bancaria=v_parametros.id_cuenta_bancaria           
+                where id_proceso_wf = v_parametros.id_proceso_wf_act;          
+          	
+            
+                --TODO
+                
+                 --  generacion de comprobante
+                select * into v_nombre_conexion from migra.f_crear_conexion();     
+                 
+                --  Si NO  se contabiliza nacionalmente
+                v_id_int_comprobante =   conta.f_gen_comprobante ( 
+                                                     v_id_proceso_caja , 
+                                                     v_codigo_plantilla_cbte ,
+                                                     p_id_usuario,
+                                                     v_parametros._id_usuario_ai, 
+                                                     v_parametros._nombre_usuario_ai, 
+                                                     v_nombre_conexion);
+            
+          
+                 
+                
+                update tes.tproceso_caja  p set 
+                    id_int_comprobante = v_id_int_comprobante          
+                where id_proceso_wf = v_parametros.id_proceso_wf_act;          
+                    	
+                 
+          
+                 select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'exito'); 
+                
+            
+          END IF;
           -- si hay mas de un estado disponible  preguntamos al usuario
           v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado del proceso caja)'); 
           v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');

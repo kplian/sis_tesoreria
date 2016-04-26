@@ -12,16 +12,8 @@ class ACTCaja extends ACTbase{
 	function listarCaja(){
 		$this->objParam->defecto('ordenacion','id_caja');
 
-		$this->objParam->defecto('dir_ordenacion','asc');
-		/*
-		if($this->objParam->getParametro('tipo_interfaz')=='cajaVb'){
-			$this->objParam->addFiltro("pc.estado in (''solicitado'')");
-		}
+		$this->objParam->defecto('dir_ordenacion','desc');
 		
-		if($this->objParam->getParametro('tipo_interfaz')=='cajaAbierto'){
-			$this->objParam->addFiltro("pc.estado in (''abierto'')");
-		}
-		*/
 		if($this->objParam->getParametro('tipo_interfaz')=='caja'){
 			$this->objParam->addFiltro("pc.tipo = ''apertura''");
 		}
@@ -33,6 +25,16 @@ class ACTCaja extends ACTbase{
 		if($this->objParam->getParametro('con_detalle') == 'no'){
 			$this->objParam->addFiltro("caja.tipo_ejecucion = ''sin_detalle''");
 		}
+		
+		if($this->objParam->getParametro('pes_estado')=='borrador'){
+             $this->objParam->addFiltro("pc.estado in (''borrador'')");
+        }
+        if($this->objParam->getParametro('pes_estado')=='proceso'){
+             $this->objParam->addFiltro("pc.estado = ''solicitado''");
+        }
+        if($this->objParam->getParametro('pes_estado')=='finalizados'){
+             $this->objParam->addFiltro("pc.estado in (''aprobado'',''rechazado'',''anulado'')");
+        }
 		
 		$this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]);
 		

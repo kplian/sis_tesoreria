@@ -19,8 +19,6 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		this.init();
 		this.iniciarEventos();
 		
-				
-		//this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.nombreVista}})
 	},
 	tam_pag:50,
 			
@@ -69,23 +67,24 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
         },
 		{     
 			config:{
-				    name:'id_depto',
-        origen:'DEPTO',
-        fieldLabel: 'Departamento',
-        url: '../../sis_parametros/control/Depto/listarDepto',
-        emptyText : 'Departamento...',
-        allowBlank:false,
-        gdisplayField:'desc_depto',//mapea al store del grid
-        gwidth:200,
-		baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'OP'},
-        renderer:function (value, p, record){return String.format('{0}', record.data['desc_depto']);}
-   },   
-        type:'ComboRec',
-        id_grupo:0,
-        filters:{pfiltro:'depto.nombre',type:'string'},
-        grid:true,
-        form:true
-			},
+				name:'id_depto',
+				origen:'DEPTO',
+				fieldLabel: 'Departamento Obligacion Pago',
+				url: '../../sis_parametros/control/Depto/listarDepto',
+				emptyText : 'Departamento Obligacion Pago...',
+				allowBlank:false,
+				gdisplayField:'desc_depto',//mapea al store del grid
+				gwidth:200,
+				anchor: '80%',
+				baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'OP'},
+				renderer:function (value, p, record){return String.format('{0}', record.data['desc_depto']);}
+			},   
+			type:'ComboRec',
+			id_grupo:0,
+			filters:{pfiltro:'depto.nombre',type:'string'},
+			grid:true,
+			form:true
+		},
 		{
 			config:{
 				name: 'tipo',
@@ -173,56 +172,90 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
             filters:{pfiltro:'cb.nro_cuenta',type:'string'},
             id_grupo:1,
             grid:false,
-            form:true
+            form:false
         },
+		{     
+			config:{
+				name:'id_depto_lb',
+				origen:'DEPTO',
+				fieldLabel: 'Departamento Libro Bancos',
+				url: '../../sis_parametros/control/Depto/listarDepto',
+				emptyText : 'Departamento Libro Bancos...',
+				allowBlank:false,
+				gdisplayField:'desc_depto',//mapea al store del grid
+				gwidth:200,
+				anchor: '80%',
+				baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'LB'},
+				renderer:function (value, p, record){return String.format('{0}', record.data['desc_depto_lb']);}
+			},   
+			type:'ComboRec',
+			id_grupo:0,
+			filters:{pfiltro:'depto.nombre',type:'string'},
+			grid:false,
+			form:true
+		},
 		{
 			config:{
-				name: 'importe_maximo',
-				fieldLabel: 'Importe máximo',
+				name: 'importe_maximo_caja',
+				fieldLabel: 'Importe máximo Caja',
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
 				maxLength:1179650
 			},
 			type:'NumberField',
-			filters:{pfiltro:'caja.importe_maximo',type:'numeric'},
+			filters:{pfiltro:'caja.importe_maximo_caja',type:'numeric'},
 			id_grupo:1,
 			grid:true,
 			form:true
 		},
 		{
 			config:{
-				name: 'porcentaje_compra',
-				fieldLabel: 'Porcentaje  compra',
+				name: 'importe_maximo_item',
+				fieldLabel: 'Importe maximo Item',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 120,
 				maxLength:393218
 			},
 			type:'NumberField',
-			filters:{pfiltro:'caja.porcentaje_compra',type:'numeric'},
+			filters:{pfiltro:'caja.importe_maximo_item',type:'numeric'},
 			id_grupo:1,
 			grid:true,
 			form:true
 		},
 		{
-     config:{
-        name:'id_moneda',
-        origen:'MONEDA',
-        fieldLabel: 'Moneda',
-        url: '../../sis_parametros/control/Moneda/listarMoneda',
-        emptyText : 'Moneda...',
-        allowBlank:false,
-        gdisplayField:'desc_moneda',//mapea al store del grid
-        gwidth:100,
-        renderer:function (value, p, record){return String.format('{0}', record.data['desc_moneda']);}
-     },
-        type:'ComboRec',
-        id_grupo:0,
-        filters:{pfiltro:'mon.moneda',type:'string'},
-        grid:true,
-        form:true
-  },    
+			config:{
+				name: 'saldo',
+				fieldLabel: 'Saldo',
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650
+			},
+			type:'NumberField',
+			id_grupo:1,
+			grid:true,
+			form:false
+		},
+		{
+			config:{
+				name:'id_moneda',
+				origen:'MONEDA',
+				fieldLabel: 'Moneda',
+				url: '../../sis_parametros/control/Moneda/listarMoneda',
+				emptyText : 'Moneda...',
+				allowBlank:false,
+				gdisplayField:'desc_moneda',//mapea al store del grid
+				gwidth:100,
+				anchor: '80%',
+				renderer:function (value, p, record){return String.format('{0}', record.data['desc_moneda']);}
+			},
+			type:'ComboRec',
+			id_grupo:0,
+			filters:{pfiltro:'mon.moneda',type:'string'},
+			grid:true,
+			form:true
+	    },    
 		{
 			config:{
 				name: 'estado',
@@ -348,11 +381,12 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_caja', type: 'numeric'},
 		{name:'nro_tramite', type: 'string'},
 		{name:'estado', type: 'string'},
-		{name:'importe_maximo', type: 'numeric'},
+		{name:'importe_maximo_caja', type: 'numeric'},
+		{name:'saldo', type: 'numeric'},
 		{name:'tipo', type: 'string'},
 		{name:'estado_reg', type: 'string'},
 		{name:'estado_proceso', type: 'string'},
-		{name:'porcentaje_compra', type: 'numeric'},
+		{name:'importe_maximo_item', type: 'numeric'},
 		{name:'id_moneda', type: 'numeric'},
 		{name:'fecha', type: 'date',dateFormat:'Y-m-d'},
 		{name:'id_depto', type: 'numeric'},
@@ -369,11 +403,12 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		{name:'usr_mod', type: 'string'},
 		{name:'desc_moneda', type: 'string'},
 		{name:'desc_depto', type: 'string'},
+		{name:'desc_depto_lb', type: 'string'},
 		{name:'tipo_ejecucion', type: 'string'}
 	],
 	sortInfo:{
 		field: 'id_caja',
-		direction: 'ASC'
+		direction: 'DESC'
 	},
 	bdel:true,
 	bsave:true,
@@ -395,51 +430,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 				this.getBoton('btnAbrirCerrar').disable();
 		 }		 
      },
-    /*
-    liberaMenu:function(){
-        var tb = Phx.vista.Caja.superclass.liberaMenu.call(this);
-        
-        if(tb){
-           this.getBoton('ant_estado').disable();
-           this.getBoton('ini_estado').disable();
-           this.getBoton('sig_estado').disable();     
-        }
-       return tb
-    }, 
-	*/
-	/*	
-	abrirCerrarCaja:function(){ 
-		var rec=this.sm.getSelected();
-		var NumSelect=this.sm.getCount();
-		
-		if(NumSelect != 0)
-		{	
-			if(rec.data.estado=='cerrado'){
-				Phx.CP.loadWindows('../../../sis_tesoreria/vista/apertura_caja/AperturaCaja.php',
-				'Apertura Caja',
-				{
-					modal:true,
-					width:450,
-					height:450
-				}, {data:rec.data}, this.idContenedor,'AperturaCaja',
-				{
-					config:[{
-							  event:'beforesave',
-							  delegate: this.transferir,
-							}
-							],
-				   scope:this
-				 })
-			}
-		}
-		else
-		{
-			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
-		}							   
-	},
-	*/
-	
-	
+    
 	/*
 	successWizard:function(resp){
 		Phx.CP.loadingHide();
@@ -495,6 +486,4 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 	}
 	
 )
-</script>
-		
-		
+</script>		

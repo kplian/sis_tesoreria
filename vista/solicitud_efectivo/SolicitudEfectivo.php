@@ -36,15 +36,22 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			handler : this.onBtnRendicion,
 			tooltip : '<b>Rendicion</b>'
 		});
-		/*
-		this.addButton('btnDevolucionReposicion', {
-			text : 'Devolucion/Reposicion Efectivo',
+		
+		this.addButton('btnDevol', {
+			text : 'Devolucion Efectivo',
 			iconCls : 'bballot',
-			disabled : false,
-			handler : this.onBtnDevolucionReposicion,
-			tooltip : '<b>Devolucion/Reposicion</b>'
+			disabled : true,
+			handler : this.onBtnDevolucion,
+			tooltip : '<b>Devolucion Sin Añadir Facturas</b>'
 		});
-		*/
+		
+		this.addButton('btnSolicitud', {
+			text : 'Solicitud',
+			iconCls : 'bpdf',
+			disabled : false,
+			handler : this.onBtnSolicitud,
+			tooltip : '<b>Solicitud Gastos</b>'
+		});
 		
 		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.vista}})
 	},
@@ -71,7 +78,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 					id: 'id_caja',
 					root: 'datos',
 					sortInfo: {
-						field: 'nombre',
+						field: 'codigo',
 						direction: 'ASC'
 					},
 					totalProperty: 'total',
@@ -110,7 +117,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Fecha',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 80,
 				format: 'd/m/Y',
 				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
 			},
@@ -126,7 +133,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Num Tramite',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 50,
+				gwidth: 170,
 				maxLength:50
 			},
 				type:'TextField',
@@ -461,6 +468,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_caja', type: 'numeric'},
 		{name:'codigo', type: 'string'},
 		{name:'id_depto', type: 'numeric'},
+		{name:'id_moneda', type: 'numeric'},
 		{name:'id_estado_wf', type: 'numeric'},
 		{name:'monto', type: 'numeric'},
 		{name:'id_proceso_wf', type: 'numeric'},
@@ -530,9 +538,9 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 	preparaMenu:function(n){
           var data = this.getSelectedData();
           var tb =this.tbar;          
-          
+		  
           Phx.vista.SolicitudEfectivo.superclass.preparaMenu.call(this,n); 
-          if (data['estado']== 'borrador' || data['estado']== 'entregado'){    
+          if (data['estado']== 'borrador'){    
               this.getBoton('fin_registro').enable();
 			  this.getBoton('edit').enable();
 			  this.getBoton('del').enable();
@@ -543,10 +551,20 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('del').disable();
           }
 		  
+		  if (data['estado']== 'entregado'){    
+              this.getBoton('fin_registro').enable();
+          }
+		  
 		  if (data['estado'] == 'entregado' || data['estado'] == 'finalizado'){			  
 			  this.getBoton('btnRendicion').enable();
 		  }else{
 			  this.getBoton('btnRendicion').disable();
+		  }
+		  
+		  if(data['saldo'] == 0.00){
+			  this.getBoton('btnDevol').disable();
+		  }else{
+			  this.getBoton('btnDevol').enable();
 		  }
      },
 	
@@ -558,16 +576,53 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			height : '95%',
 		}, rec.data, this.idContenedor, 'SolicitudRendicionDet');
 	},
-	/*
-	onBtnDevolucionReposicion : function() {
-		var rec = this.sm.getSelected();
-		Phx.CP.loadWindows('../../../sis_tesoreria/vista/rendicion_efectivo/DevolucionReposicionEfectivo.php', 'Devolucion/Reposicion Efectivo', {
-			modal : true,
-			width : '95%',
-			height : '95%',
-		}, rec.data, this.idContenedor, 'DevolucionReposicionEfectivo');
+	
+	onBtnDevolucion : function() {
+		var rec=this.sm.getSelected();
+		
+		Ext.Msg.show({
+		   title:'Confirmación',
+		   scope: this,
+		   msg: 'Esta seguro de SI devolver el dinero? Saldo: '+ rec.data.saldo + ' Si esta de acuerdo presione el botón "Si"',
+		   buttons: Ext.Msg.YESNO,
+		   fn: function(id, value, opt) {			   		
+				if (id == 'yes') {  							
+					Ext.Ajax.request({
+						url:'../../sis_tesoreria/control/SolicitudEfectivo/insertarSolicitudEfectivo',
+						params:{
+							'id_solicitud_efectivo_fk':rec.data.id_solicitud_efectivo,
+							'id_caja':rec.data.id_caja,
+							'monto':rec.data.saldo,
+							'id_funcionario':rec.data.id_funcionario,
+							'tipo_solicitud':'devolucion',
+							'fecha':new Date()
+							},
+						success:this.successDevolucion,
+						failure: this.conexionFailure,
+						timeout:this.timeout,
+						scope:this
+					});
+				} else {
+					opt.hide;
+				}
+		   },	
+		   animEl: 'elId',
+		   icon: Ext.MessageBox.WARNING
+		}, this);
 	},
-	*/
+	
+	onBtnSolicitud : function() {
+		var rec=this.sm.getSelected();
+        Ext.Ajax.request({
+            url:'../../sis_tesoreria/control/SolicitudEfectivo/reporteSolicitudEfectivo',
+            params:{'id_solicitud_efectivo':rec.data.id_solicitud_efectivo,'estado':rec.data.estado},
+            success: this.successExport,
+            failure: this.conexionFailure,
+            timeout:this.timeout,
+            scope:this
+        }); 
+	},
+	
 	sigEstado:function(){                   
 	  var rec=this.sm.getSelected();
 	  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
@@ -592,8 +647,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 	 },
 	 
 	 onSaveWizard:function(wizard,resp){
-			Phx.CP.loadingShow();
-			console.log(resp);
+			Phx.CP.loadingShow();			
 			Ext.Ajax.request({
 				url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
 				params:{
@@ -613,6 +667,17 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 				scope:this
 			});
 		},
+
+	successDevolucion:function(resp){
+			Phx.CP.loadingHide();
+			//var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+			
+            //if(reg.ROOT.datos.resultado!='falla'){                
+                this.reload();
+             //}else{
+             //   alert(reg.ROOT.datos.mensaje)
+            //}			
+		 },
 		
 	successWizard:function(resp){
 			Phx.CP.loadingHide();
@@ -626,6 +691,12 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
              title:'Detalle', 
              height:'50%',
              cls:'SolicitudEfectivoDet'
+            },
+            {
+              url:'../../../sis_tesoreria/vista/solicitud_rendicion_det/FacturasRendicion.php',
+              title:'Facturas Rendidas', 
+              height:'50%',
+              cls:'AprobacionFacturas'
             }    
        ]
 	}
