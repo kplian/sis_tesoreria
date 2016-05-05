@@ -1555,5 +1555,20 @@ IS 'id del proceso de caja que identifica el proceso con el que se repone la ren
 
 /*****************************F-SCP-RAC-TES-0-04/05/2016*************/
 
+/*****************************I-SCP-GSS-TES-0-05/05/2016*************/
+---------------- SQL ---------------
+CREATE TABLE tes.ttipo_solicitud (
+  id_tipo_solicitud SERIAL, 
+  codigo VARCHAR, 
+  nombre VARCHAR, 
+  codigo_proceso_llave_wf VARCHAR, 
+  codigo_plantilla_comprobante VARCHAR, 
+  CONSTRAINT ttipo_solicitud_pkey PRIMARY KEY(id_tipo_solicitud)
+) INHERITS (pxp.tbase)
 
+WITH (oids = false);
 
+ALTER TABLE tes.tproceso_caja
+  ADD COLUMN id_cuenta_bancaria INTEGER;
+
+/*****************************F-SCP-GSS-TES-0-05/05/2016*************/
