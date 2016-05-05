@@ -1539,7 +1539,7 @@ ADD COLUMN id_funcionario_jefe_aprobador INTEGER;
 COMMENT ON COLUMN tes.tsolicitud_efectivo.id_funcionario_jefe_aprobador
 IS 'id del jefe que aprobo la solicitud de efectivo del solicitante';
   
-/*****************************I-SCP-GSS-TES-0-28/04/2016*************/
+/*****************************F-SCP-GSS-TES-0-28/04/2016*************/
 
 
 
