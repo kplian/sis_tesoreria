@@ -1529,7 +1529,30 @@ IS 'en lso procesos de  apertura, reposición o cierre se inserta un registro en
 /*****************************F-SCP-GSS-TES-0-28/03/2016*************/
 
 
+/*****************************I-SCP-GSS-TES-0-28/04/2016*************/
 
+  --------------- SQL ---------------
+
+ADD COLUMN id_funcionario_jefe_aprobador INTEGER;
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.id_funcionario_jefe_aprobador
+IS 'id del jefe que aprobo la solicitud de efectivo del solicitante';
+  
+/*****************************I-SCP-GSS-TES-0-28/04/2016*************/
+
+
+
+/*****************************I-SCP-RAC-TES-0-04/05/2016*************/
+--------------- SQL ---------------
+
+ALTER TABLE tes.tproceso_caja
+  ADD COLUMN id_proceso_caja_repo INTEGER;
+
+COMMENT ON COLUMN tes.tproceso_caja.id_proceso_caja_repo
+IS 'id del proceso de caja que identifica el proceso con el que se repone la rendiciones sueltas';
+
+
+/*****************************F-SCP-RAC-TES-0-04/05/2016*************/
 
 
 

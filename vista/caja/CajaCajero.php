@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
 *@package pXP
 *@file CajaVB.php

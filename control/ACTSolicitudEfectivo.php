@@ -28,7 +28,12 @@ class ACTSolicitudEfectivo extends ACTbase{
 				
 		if($this->objParam->getParametro('id_caja')!='')
 		{
-			$this->objParam-> addFiltro('ren.id_caja ='.$this->objParam->getParametro('id_caja'));
+			if($this->objParam->getParametro('tipo_interfaz')=='efectivoCaja'){
+				$this->objParam-> addFiltro('solefe.id_caja ='.$this->objParam->getParametro('id_caja'));
+				$this->objParam-> addFiltro('solefe.id_solicitud_efectivo_fk is null');
+			}else{
+				$this->objParam-> addFiltro('ren.id_caja ='.$this->objParam->getParametro('id_caja'));
+			}
 		}
 		
 		if($this->objParam->getParametro('id_solicitud_efectivo')!='')

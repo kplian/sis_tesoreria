@@ -33,6 +33,9 @@ DECLARE
 	v_mensaje_error         text;
 	v_id_solicitud_efectivo_det	integer;
     v_id_solicitud_efectivo	integer;
+    v_id_caja				integer;
+    v_monto_solicitud		numeric;
+    v_saldo_caja			numeric;
 			    
 BEGIN
 
@@ -73,10 +76,22 @@ BEGIN
 			null
 			)RETURNING id_solicitud_efectivo_det into v_id_solicitud_efectivo_det;
             
+            select id_caja into v_id_caja
+            from tes.tsolicitud_efectivo
+            where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo;
+            
+            select sum(monto) into v_monto_solicitud
+            from tes.tsolicitud_efectivo_det
+            where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo;
+                      
+            v_saldo_caja = tes.f_calcular_saldo_caja(v_id_caja);
+                
+            IF v_saldo_caja < v_monto_solicitud THEN
+                raise exception 'El monto que esta intentando solicitar excede el saldo de la caja';
+            END IF;
+            
             UPDATE tes.tsolicitud_efectivo
-            SET monto = COALESCE((select sum(monto) 
-            			  from tes.tsolicitud_efectivo_det
-            			  where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo), 0.00)
+            SET monto = v_monto_solicitud
             where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo;
 			            
 			--Definicion de la respuesta

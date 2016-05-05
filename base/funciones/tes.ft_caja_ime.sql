@@ -167,10 +167,10 @@ BEGIN
                           
         	--Sentencia de la insercion
         	insert into tes.tcaja(
-			importe_maximo,
+			importe_maximo_caja,
 			tipo,
 			estado_reg,
-			porcentaje_compra,
+			importe_maximo_item,
 			id_moneda,
 			id_depto,
 			codigo,
@@ -179,12 +179,13 @@ BEGIN
 			id_usuario_mod,
 			fecha_mod,
             tipo_ejecucion,
-            id_cuenta_bancaria
+            --id_cuenta_bancaria
+            id_depto_lb
           	) values(
-			v_parametros.importe_maximo,
+			v_parametros.importe_maximo_caja,
 			v_parametros.tipo,
 			'activo',
-			v_parametros.porcentaje_compra,
+			v_parametros.importe_maximo_item,
 			v_parametros.id_moneda,
 			v_parametros.id_depto,
 			v_parametros.codigo,
@@ -193,7 +194,8 @@ BEGIN
 			null,
 			null,
 			v_parametros.tipo_ejecucion,
-            v_parametros.id_cuenta_bancaria				
+            --v_parametros.id_cuenta_bancaria				
+            v_parametros.id_depto_lb
 			)RETURNING id_caja into v_id_caja;
 			
             insert into tes.tproceso_caja(
@@ -242,9 +244,9 @@ BEGIN
             end if;
 			--Sentencia de la modificacion
 			update tes.tcaja set
-			importe_maximo = v_parametros.importe_maximo,
+			importe_maximo_caja = v_parametros.importe_maximo_caja,
 			tipo = v_parametros.tipo,
-			porcentaje_compra = v_parametros.porcentaje_compra,
+			importe_maximo_item = v_parametros.importe_maximo_item,
 			id_moneda = v_parametros.id_moneda,
 			id_depto = v_parametros.id_depto,
             id_cuenta_bancaria = v_id_cuenta_bancaria,
@@ -384,31 +386,33 @@ BEGIN
           IF v_id_cajero is null THEN
               raise exception 'Deber asignar un responsable vigente en fecha de la Caja antes de aperturarla';
           END IF;
-                
+          /*      
           select c.id_cuenta_bancaria, c.id_depto, c.importe_maximo, c.codigo 
           into v_id_cuenta_bancaria, v_id_depto_lb, v_importe, v_codigo
           from tes.tcaja c
           where c.id_caja=v_id_caja;
-                
+          */
+          /*      
           IF(v_id_cuenta_bancaria is null) then
               raise exception 'Debe ingresar la cuenta bancaria de donde se generara el cheque';
           END IF;
+          */
         
-          if(v_codigo_estado_siguiente = 'abierto')then
-          
-            UPDATE tes.tcaja
-            SET estado='abierto'
-            WHERE id_caja = v_id_caja;
-            
-          end if;    
-          
-          if(v_codigo_estado_siguiente = 'cerrado')then
+          if(v_codigo_estado_siguiente = 'aprobado')then
           
             UPDATE tes.tcaja
             SET estado='cerrado'
             WHERE id_caja = v_id_caja;
             
-          end if;
+          end if;    
+          /*
+          if(v_codigo_estado_siguiente = 'rechazado')then
+          
+            UPDATE tes.tcaja
+            SET estado='cerrado'
+            WHERE id_caja = v_id_caja;
+            
+          end if;*/
                 
           --end if;              
 		

@@ -430,7 +430,7 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 	sigEstado:function(){                   
 	  var rec=this.sm.getSelected();	  
 	  var configExtra = [];
-	  if(rec.data.saldo > 0 ){
+	  /*if(rec.data.saldo > 0 ){
 		  configExtra = [{
 							config:{
 								name: 'saldo',
@@ -455,7 +455,7 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 								lazyRender:true,
 								mode: 'local',
 								anchor: '50%',
-								store:['si','no']
+								store:['si']
 							},
 							type:'ComboBox',						
 							form:true
@@ -463,6 +463,8 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 	  }
 	  
 	  if(rec.data.saldo < 0 ){
+		  */
+	  if(rec.data.saldo != 0){
 		  configExtra = [{
 							config:{
 								name: 'saldo',
@@ -488,7 +490,7 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 								lazyRender:true,
 								mode: 'local',
 								anchor: '50%',
-								store:['si','no'],
+								//store:['si'],
 								value: 'si'
 							},
 							type:'ComboBox',						
@@ -559,7 +561,6 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 				   icon: Ext.MessageBox.WARNING
 				}, this);
 				}else{
-					console.log('sarmiento');
 					Ext.Msg.show({
 				   title:'Confirmación',
 				   scope: this,
@@ -622,7 +623,7 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
           var tb =this.tbar;          
           		  
           Phx.vista.RendicionEfectivo.superclass.preparaMenu.call(this,n); 
-          if (data['estado']== 'revision'){    
+          if (data['estado']== 'revision' || data['estado'] == 'vbjefedevsol'){    
               this.getBoton('fin_registro').enable();			  
           }
           else{            

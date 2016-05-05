@@ -476,13 +476,28 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
          this.reload();
        }
     },
-		
+	/*	
 	south : {
 			url : '../../../sis_tesoreria/vista/cajero/Cajero.php',
 			title : 'Cajero',
 			height : '50%',
 			cls : 'Cajero'
-		},
+		},*/
+	
+	tabsouth:[
+            { 
+             url:'../../../sis_tesoreria/vista/cajero/Cajero.php',
+             title:'Cajero', 
+             height:'50%',
+             cls:'Cajero'
+            },
+            {
+              url:'../../../sis_tesoreria/vista/solicitud_efectivo/SolicitudEfectivoCaja.php',
+              title:'Solicitud Efectivo', 
+              height:'50%',
+              cls:'SolicitudEfectivoCaja'
+            }    
+       ]
 	}
 	
 )

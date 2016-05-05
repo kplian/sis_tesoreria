@@ -1473,3 +1473,18 @@ select pxp.f_insert_testructura_gui ('REPPPBA', 'REPOP');
 /***********************************F-DAT-RAC-TES-0-23/0/2016*****************************************/
 
 
+/***********************************I-DAT-RAC-TES-0-4/5/2016*****************************************/
+
+
+
+/* Data for the 'pxp.variable_global' table  (Records 1 - 1) */
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES 
+  (E'pre_verificar_categoria', E'no', E'verificar presupuestaria por categoria, (por defecto no, es verificacion solo presupeusto)');
+
+
+
+/***********************************F-DAT-RAC-TES-0-4/5/2016*****************************************/
+
+

@@ -61,9 +61,12 @@ BEGIN
             IF  lower(v_parametros.tipo_interfaz) = 'caja' THEN
                 
                 IF p_administrador !=1 THEN
-                   v_filtro = '(caja.id_usuario_reg='||p_id_usuario||' ) and  pc.estado in (''borrador'',''abierto'',''cerrado'',''anulado'') and  ';
+                   --v_filtro = '(caja.id_usuario_reg='||p_id_usuario||' ) and  pc.estado in (''borrador'',''abierto'',''cerrado'',''anulado'',''rechazado'') and  ';
+                   v_filtro = '(caja.id_usuario_reg='||p_id_usuario||' ) and ';  
+                   --pc.estado in (''borrador'',''anulado'',''rechazado'') and  ';
                  ELSE
-                     v_filtro = 'pc.estado in (''borrador'',''abierto'',''cerrado'',''anulado'') and ';
+                     --v_filtro = '(caja.id_usuario_reg='||p_id_usuario||' ) and  pc.estado in (''borrador'',''abierto'',''cerrado'',''anulado'',''rechazado'') and  ';
+					 --v_filtro = 'pc.estado in (''borrador'',''anulado'',''rechazado'') and  ';
                 END IF;                
                 
             END IF;                       
@@ -85,7 +88,7 @@ BEGIN
                 --IF p_administrador !=1 THEN
                 --   v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (pc.estado = ''abierto'') and  ';
                 -- ELSE
-                     v_filtro = '(caja.estado = ''abierto'') and ';
+                     v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and ';
                -- END IF;                
                 
             END IF;
@@ -93,9 +96,9 @@ BEGIN
             IF  lower(v_parametros.tipo_interfaz) = 'cajacajero' THEN
                 
                 IF p_administrador !=1 THEN
-                   v_filtro = '(caje.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (pc.estado = ''abierto'') and  ';
+                   v_filtro = '(caje.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (pc.estado in (''abierto'',''cerrado'',''aprobado'')) and  ';
                  ELSE
-                     v_filtro = '(pc.estado in (''abierto'',''cerrado'')) and ';
+                     v_filtro = '(pc.estado in (''abierto'',''cerrado'',''aprobado'')) and ';
                 END IF;                
                 
             END IF;
@@ -104,12 +107,12 @@ BEGIN
 			v_consulta:='select
 						caja.id_caja,
 						caja.estado,
-						caja.importe_maximo,
-                        caja.importe_maximo -(select sum(monto) from tes.tsolicitud_efectivo where id_caja=caja.id_caja and estado=''entregado'') as saldo,
+						caja.importe_maximo_caja,
+                        tes.f_calcular_saldo_caja(caja.id_caja) as saldo,
 						caja.tipo,
 						caja.estado_reg,
                         pc.estado as estado_proceso,
-						caja.porcentaje_compra,
+						caja.importe_maximo_item,
 						caja.id_moneda,
 						caja.id_depto,
                         caja.id_cuenta_bancaria,
@@ -124,6 +127,7 @@ BEGIN
 						usu2.cuenta as usr_mod,
 						mon.moneda as desc_moneda,	
 						depto.nombre as desc_depto,
+                        deplb.nombre as desc_depto_lb,
                         caja.tipo_ejecucion,
                         pc.id_proceso_wf,
 				        pc.id_estado_wf,
@@ -134,6 +138,7 @@ BEGIN
 						left join segu.tusuario usu2 on usu2.id_usuario = caja.id_usuario_mod
 						inner join param.tmoneda mon on mon.id_moneda= caja.id_moneda
 						inner join param.tdepto depto on depto.id_depto=caja.id_depto
+                        left join param.tdepto deplb on deplb.id_depto=caja.id_depto_lb
                         left join tes.tcuenta_bancaria ctab on ctab.id_cuenta_bancaria=caja.id_cuenta_bancaria
                         left join tes.tcajero caje on caje.id_caja=caja.id_caja and caje.tipo=''responsable''
 						left join orga.vfuncionario fun on fun.id_funcionario=caje.id_funcionario
@@ -185,7 +190,7 @@ BEGIN
                -- IF p_administrador !=1 THEN
                --    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (pc.estado = ''abierto'') and  ';
                --  ELSE
-                     v_filtro = '(pc.estado = ''abierto'') and ';
+                     v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and ';
                -- END IF;                
                 
             END IF;
@@ -193,9 +198,9 @@ BEGIN
             IF  lower(v_parametros.tipo_interfaz) = 'caja' THEN
                 
                 IF p_administrador !=1 THEN
-                   v_filtro = '(caja.id_usuario_reg='||p_id_usuario||' ) and  pc.estado in (''borrador'',''abierto'',''cerrado'',''anulado'') and  ';
+                   v_filtro = '(caja.id_usuario_reg='||p_id_usuario||' ) and  pc.estado in (''borrador'',''anulado'',''rechazado'') and ';
                  ELSE
-                     v_filtro = 'pc.estado in (''borrador'',''abierto'',''cerrado'',''anulado'') and ';
+                     v_filtro = 'pc.estado in (''borrador'',''anulado'',''rechazado'') and  ';
                 END IF;                
                 
             END IF;
@@ -203,9 +208,9 @@ BEGIN
             IF  lower(v_parametros.tipo_interfaz) = 'cajacajero' THEN
                 
                 IF p_administrador !=1 THEN
-                   v_filtro = '(caje.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (pc.estado = ''abierto'') and  ';
+                   v_filtro = '(caje.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (pc.estado in (''abierto'',''cerrado'',''aprobado'')) and  ';
                  ELSE
-                     v_filtro = '(pc.estado in (''abierto'',''cerrado'')) and ';
+                     v_filtro = '(pc.estado in (''abierto'',''cerrado'',''aprobado'')) and ';
                 END IF;                
                 
             END IF;
@@ -218,6 +223,7 @@ BEGIN
 						left join segu.tusuario usu2 on usu2.id_usuario = caja.id_usuario_mod
 						inner join param.tmoneda mon on mon.id_moneda= caja.id_moneda
                         inner join param.tdepto depto on depto.id_depto=caja.id_depto
+                        left join param.tdepto deplb on deplb.id_depto=caja.id_depto_lb
                         left join tes.tcuenta_bancaria ctab on ctab.id_cuenta_bancaria=caja.id_cuenta_bancaria
                         left join tes.tcajero caje on caje.id_caja=caja.id_caja and caje.tipo=''responsable''
 						left join orga.vfuncionario fun on fun.id_funcionario=caje.id_funcionario

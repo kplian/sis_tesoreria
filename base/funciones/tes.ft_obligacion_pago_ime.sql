@@ -156,6 +156,7 @@ DECLARE
      v_registros_proc 			record;
      v_codigo_tipo_pro   		varchar;
      v_pre_integrar_presupuestos	varchar;
+     va_num_tramite				VARCHAR[];
 
      
 			    
@@ -1789,6 +1790,7 @@ BEGIN
                 va_fk_llave[v_i] = v_registros_op.id_obligacion_pago;
                 va_fecha[v_i] = v_fecha ;
                 va_id_obligacion_det[v_i] = v_registros.id_obligacion_det;
+                va_num_tramite[v_i] =  v_registros_op.num_tramite;
                 v_indice = v_i;
                 
                 FOR v_j IN 1..v_tam LOOP
@@ -1821,7 +1823,7 @@ BEGIN
                                                          va_id_partida_ejecucion,--  p_id_partida_ejecucion 
                                                          va_columna_relacion, 
                                                          va_fk_llave,
-                                                         v_registros_op.num_tramite
+                                                         va_num_tramite
                                                          );	
                             
                                                          

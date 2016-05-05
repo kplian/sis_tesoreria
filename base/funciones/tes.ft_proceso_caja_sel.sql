@@ -81,17 +81,17 @@ BEGIN
 			v_consulta:='select
 						ren.id_proceso_caja,
 						ren.estado,
-						ren.id_comprobante_diario,
+						ren.id_int_comprobante,
 						ren.nro_tramite,
 						ren.tipo,
 						ren.motivo,
 						ren.estado_reg,
 						ren.fecha_fin,
 						ren.id_caja,
+                        cj.id_depto_lb,
 						ren.fecha,
 						ren.id_proceso_wf,
 						ren.monto_reposicion,
-						ren.id_comprobante_pago,
 						ren.id_estado_wf,
 						ren.fecha_inicio,
 						ren.fecha_reg,
@@ -101,10 +101,13 @@ BEGIN
 						ren.fecha_mod,
 						ren.id_usuario_mod,
 						usu1.cuenta as usr_reg,
-						usu2.cuenta as usr_mod	
+						usu2.cuenta as usr_mod,
+                        tpc.nombre	
 						from tes.tproceso_caja ren
 						inner join segu.tusuario usu1 on usu1.id_usuario = ren.id_usuario_reg
-						left join segu.tusuario usu2 on usu2.id_usuario = ren.id_usuario_mod 
+						left join segu.tusuario usu2 on usu2.id_usuario = ren.id_usuario_mod
+                        left join tes.ttipo_proceso_caja tpc on tpc.id_tipo_proceso_caja=ren.id_tipo_proceso_caja 
+                        left join tes.tcaja cj on cj.id_caja=ren.id_caja
                         '||v_inner||' 
 				        where ' ||v_filtro;
 			
@@ -160,6 +163,8 @@ BEGIN
 					    from tes.tproceso_caja ren
 					    inner join segu.tusuario usu1 on usu1.id_usuario = ren.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = ren.id_usuario_mod
+                        left join tes.ttipo_proceso_caja tpc on tpc.id_tipo_proceso_caja=ren.id_tipo_proceso_caja 
+                        left join tes.tcaja cj on cj.id_caja=ren.id_caja
                         '||v_inner||'
 					    where '||v_filtro;
 			

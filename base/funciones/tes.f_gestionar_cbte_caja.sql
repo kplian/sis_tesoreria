@@ -165,7 +165,7 @@ BEGIN
     
      
            ----------------------------------------------------------------------------------
-           -- 3.1)  si es tipo de rendir y reponer  o rendi y cerrar
+           -- 3.1)  si es tipo de rendir y reponer  o rendr y cerrar
            --       asociamos un nuevo proceso de caja en estado 
            --       pendiente segun corresponda
            -----------------------------------------------------------------------------------
@@ -199,11 +199,19 @@ BEGIN
                        IF  v_registros.codigo_tpc = 'RENYREP' THEN
                           v_codigo_tpc = 'REPO';
                           v_monto = v_registros.monto_reposicion;
+                       
+                          -- TODO obtener array de rendiciones SOLREN (rendiciones sueltas desde la ultima apertura de caja) 
+                          
+                          -- TODO adicionar el monto a rendir 
+                       
+                       
                        ELSE
                           v_codigo_tpc = 'CIERRE';
                           
                           --  calcular si tiene monto para cierre de caja
                           v_saldo_caja =  tes.f_calcular_saldo_caja(v_registros.id_caja);
+                          
+                          --TODO  sumar montos de deposito
                           
                           --   IF  si no tiene monto a cerrar se salta el proceso disparado de cierre
                           IF COALESCE(v_saldo_caja,0) = 0 THEN
@@ -230,8 +238,6 @@ BEGIN
                     
                      
                        -- Evalua si se dispara el proceso de cierre o reposicion
-                       
-                           
                        IF v_sw_disparo THEN
                       
                             --  Manejo de estados con el WF     
@@ -303,6 +309,10 @@ BEGIN
                                 v_registros.id_cuenta_bancaria,
                                 v_registros.id_proceso_caja
                             )RETURNING id_proceso_caja into v_id_proceso_caja;
+                            
+                            
+                            
+                            --TODO FOR  insertar referencia a id_proceso_caja_repo, segun array
                              
                              
                               ---------------------------------------------------------------------------
@@ -382,6 +392,19 @@ BEGIN
                              update tes.tproceso_caja  pc set 
                                 id_int_comprobante = v_id_int_comprobante          
                              where pc.id_proceso_caja  = v_id_proceso_caja;                                
+                  
+                  ELSE
+                       IF  v_registros.codigo_tpc = 'RENYCER'  THEN
+                            
+                            --si el proceso es de rendir y cerrar, perto no hay monto para cerrar
+                            --  cerramos directamente la caja
+                            update tes.tcaja ca set
+                              estado = 'cerrado',
+                              fecha_cierre = v_registros.fecha_cbte
+                            where ca.id_caja = v_registros.id_caja;
+                           
+                           
+                       END IF;
                   END IF;
             
            END IF;
@@ -391,23 +414,31 @@ BEGIN
            -- si el comprobante es tipo reposicion 
            ------------------------------------------
            
-           IF   v_registros.codigo_tpc ='REPO'  THEN
+           IF   v_registros.codigo_tpc ='REPO' or  v_registros.codigo_tpc = 'SOLREP'  THEN
                
            
                IF  v_registros.id_proceso_caja_fk  is  null  THEN
-                 v_tmp_tipo = 'apertura_caja';
+                   
+                   IF  v_registros.codigo_tpc = 'SOLREP' THEN
+                     
+                       v_tmp_tipo = 'apertura_caja';
+                       --   abrimo la caja        
+                       update tes.tcaja ca set
+                          estado = 'abierto',
+                          fecha_apertura = v_registros.fecha_cbte
+                       where ca.id_caja = v_registros.id_caja;
+                   
+                   ELSE
+                       v_tmp_tipo = 'ingreso_caja';
+                   END IF;
                 
                ELSE
-                 v_tmp_tipo = 'ingreso_caja';
+                 	v_tmp_tipo = 'ingreso_caja';
                END IF;
                 
                 v_monto = v_registros.monto_reposicion;
                 
-                --abrimo la caja        
-               update tes.tcaja ca set
-                  estado = 'abierto',
-                  fecha_apertura = v_registros.fecha_cbte
-               where ca.id_caja = v_registros.id_caja;
+                
            
                 --  registro de repoisicion para arqueos
                 v_hstore_registros =   hstore(ARRAY[
@@ -442,17 +473,18 @@ BEGIN
                where ca.id_caja = v_registros.id_caja;
                
                
-               -- si el proceso es de un cierre no deribado
+               -- obtenemos el monto del cierre
                v_monto = v_registros.monto_reposicion;
                
                
                
                IF v_monto > 0 THEN
-                   -- TODO si hay monto de cierre introduce el valor para arqueos
-                    v_tmp_tipo = 'salida_caja';
                    
+                     --  si hay monto de cierre introduce el valor para arqueos
+                    
+                     v_tmp_tipo = 'salida_caja';
                    
-                   --  registro de reposicion para arqueos
+                    --  registro de reposicion para arqueos
                     v_hstore_registros =   hstore(ARRAY[
                                                       'id_caja', v_registros.id_caja::varchar,
                                                       'monto',  v_monto::varchar,
@@ -465,6 +497,7 @@ BEGIN
                     v_id_solicitud_efectivo=tes.f_inserta_solicitud_efectivo(0,p_id_usuario,v_hstore_registros);
                     
                END IF;
+               
                --guardamos la relacion      
                update tes.tproceso_caja  set
                   id_solicitud_efectivo_rel = v_id_solicitud_efectivo

@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION tes.f_calcular_saldo_caja (
 RETURNS numeric AS
 $body$
 DECLARE
-	v_fecha_apertura		date;
+	v_fecha_apertura		timestamp;
     v_monto_apertura		numeric;
     v_monto_entregado		numeric;
     v_monto_percibido		numeric;
@@ -15,8 +15,8 @@ DECLARE
     v_resp					varchar;    
   
 BEGIN
-  --calculo de facha de apertura de caja	
-  select max(efe.fecha) into v_fecha_apertura
+  --calculo de fecha de apertura de caja	
+  select max(efe.fecha_reg) into v_fecha_apertura
   from tes.tsolicitud_efectivo efe
   where efe.id_caja=p_id_caja
   and (efe.id_tipo_solicitud=(SELECT id_tipo_solicitud 
@@ -28,7 +28,7 @@ BEGIN
   select efe.monto into v_monto_apertura
   from tes.tsolicitud_efectivo efe
   where efe.id_caja=p_id_caja
-  and efe.fecha >= v_fecha_apertura
+  and efe.fecha_reg = v_fecha_apertura
   and (efe.id_tipo_solicitud=(SELECT id_tipo_solicitud 
   							  FROM tes.ttipo_solicitud
                               WHERE codigo='APECAJ')
@@ -38,7 +38,7 @@ BEGIN
   select sum(efe.monto) into v_monto_entregado
   from tes.tsolicitud_efectivo efe
   where efe.id_caja=p_id_caja
-  and efe.fecha >= v_fecha_apertura
+  and efe.fecha_reg >= v_fecha_apertura
   and (efe.id_tipo_solicitud=(SELECT id_tipo_solicitud 
   							  FROM tes.ttipo_solicitud
                               WHERE codigo='SOLEFE')
@@ -48,7 +48,7 @@ BEGIN
   select sum(efe.monto) into v_monto_percibido
   from tes.tsolicitud_efectivo efe
   where efe.id_caja=p_id_caja
-  and efe.fecha >= v_fecha_apertura
+  and efe.fecha_reg >= v_fecha_apertura
   and (efe.id_tipo_solicitud=(SELECT id_tipo_solicitud 
   							  FROM tes.ttipo_solicitud
                               WHERE codigo='DEVEFE')
@@ -58,7 +58,7 @@ BEGIN
   select sum(efe.monto) into v_monto_reintegrado
   from tes.tsolicitud_efectivo efe
   where efe.id_caja=p_id_caja
-  and efe.fecha >= v_fecha_apertura
+  and efe.fecha_reg >= v_fecha_apertura
   and (efe.id_tipo_solicitud=(SELECT id_tipo_solicitud 
   							  FROM tes.ttipo_solicitud
                               WHERE codigo='REPEFE')
@@ -68,7 +68,7 @@ BEGIN
   select sum(efe.monto) into v_monto_reposicion_caja
   from tes.tsolicitud_efectivo efe
   where efe.id_caja=p_id_caja
-  and efe.fecha >= v_fecha_apertura
+  and efe.fecha_reg >= v_fecha_apertura
   and (efe.id_tipo_solicitud=(SELECT id_tipo_solicitud 
   							  FROM tes.ttipo_solicitud
                               WHERE codigo='INGEFE')
@@ -78,12 +78,18 @@ BEGIN
   select sum(efe.monto) into v_monto_cierre_caja
   from tes.tsolicitud_efectivo efe
   where efe.id_caja=p_id_caja
-  and efe.fecha >= v_fecha_apertura
+  and efe.fecha_reg >= v_fecha_apertura
   and (efe.id_tipo_solicitud=(SELECT id_tipo_solicitud 
   							  FROM tes.ttipo_solicitud
                               WHERE codigo='SALEFE')
        and efe.estado in ('salida'));
   
+  raise notice 'v_monto_apertura %', v_monto_apertura;
+  raise notice 'v_monto_entregado %', v_monto_entregado;
+  raise notice 'v_monto_percibido %', v_monto_percibido;
+  raise notice 'v_monto_reintegrado %', v_monto_reintegrado;
+  raise notice 'v_monto_reposicion_caja %', v_monto_reposicion_caja;
+      raise notice 'v_monto_cierre_caja %', v_monto_cierre_caja;
        
   v_saldo_caja = COALESCE(v_monto_apertura,0) - COALESCE(v_monto_entregado,0) + COALESCE(v_monto_percibido,0) 
   				- COALESCE(v_monto_reintegrado,0) + COALESCE(v_monto_reposicion_caja,0) - COALESCE(v_monto_cierre_caja,0);
