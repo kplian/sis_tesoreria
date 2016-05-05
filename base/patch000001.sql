@@ -1514,9 +1514,10 @@ ALTER TABLE tes.tcaja
   ADD UNIQUE (codigo);
 
 --------------- SQL ------------------
-  
+
+
 ALTER TABLE tes.tsolicitud_efectivo
-  RENAME COLUMN fk_id_solicitud_efectivo TO id_solicitud_efectivo_fk;
+  ADD COLUMN id_solicitud_efectivo_fk INTEGER;
   
   --------------- SQL ---------------
 
@@ -1532,7 +1533,7 @@ IS 'en lso procesos de  apertura, reposición o cierre se inserta un registro en
 /*****************************I-SCP-GSS-TES-0-28/04/2016*************/
 
   --------------- SQL ---------------
-
+ALTER TABLE tes.tsolicitud_efectivo
 ADD COLUMN id_funcionario_jefe_aprobador INTEGER;
 
 COMMENT ON COLUMN tes.tsolicitud_efectivo.id_funcionario_jefe_aprobador
