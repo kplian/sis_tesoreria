@@ -693,7 +693,6 @@ class MODPlanPago extends MODbase{
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		echo $this->thisconsulta;
-		exit;
 		$this->ejecutarConsulta();
 		
 		//Devuelve la respuesta
