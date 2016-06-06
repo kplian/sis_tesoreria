@@ -1,9 +1,11 @@
 /************************************I-SCP-JRR-INFORMIX-0-19/04/2016*************************************************/
 CREATE EXTENSION  IF NOT EXISTS informix_fdw;
-
 CREATE SERVER sai1
 FOREIGN DATA WRAPPER informix_fdw
 OPTIONS (informixserver 'sai1');
+
+/************************************F-SCP-JRR-INFORMIX-0-19/04/2016*************************************************/
+/************************************I-SCP-JRR-INFORMIX-1-19/04/2016*************************************************/
 
 --ejemplo creacion de user mapping
 
@@ -57,6 +59,6 @@ ALTER TABLE informix.tmigracion
 ALTER TABLE informix.tmigracion
   ADD CONSTRAINT chk__tmigracion__tipo CHECK (tipo = 'parametrica' or tipo = 'transaccional');
 
-/************************************F-SCP-JRR-INFORMIX-0-19/04/2016*************************************************/
+/************************************F-SCP-JRR-INFORMIX-1-19/04/2016*************************************************/
 
 
