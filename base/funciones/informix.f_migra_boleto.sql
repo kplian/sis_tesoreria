@@ -25,6 +25,7 @@ BEGIN
     v_fecha_texto = to_char(p_fecha,'DD-MM-YYYY');
         v_consulta = '''SELECT b.pais,b.billete, b.pasajero, b.fecha, b.importe, b.neto, 
                         b.moneda, b.agt, b.agtnoiata,b.codgds,b.tipdoc,b.retbsp,b.fechareg,b.horareg,
+                        b.ruta,b.cupones,b.origen,b.destino,b.tipopax,
                         sum(CASE 
                            WHEN c.importe > 0 THEN (c.importe *-1)
                            WHEN c.importe is null then 0
@@ -34,7 +35,8 @@ BEGIN
                         inner join bcomision c on c.billete = b.billete
                         where estado = 1 and fechareg = ''''' || v_fecha_texto || ''''' 
                         group by b.pais,b.billete, b.pasajero, b.fecha, b.importe, b.neto, 
-						b.moneda, b.agt, b.agtnoiata,b.codgds,b.tipdoc,b.retbsp,b.fechareg,b.horareg 
+						b.moneda, b.agt, b.agtnoiata,b.codgds,b.tipdoc,b.retbsp,b.fechareg,b.horareg,
+                        b.ruta,b.cupones,b.origen,b.destino,b.tipopax 
                         ''';
 
 	select informix.f_user_mapping() into v_resp;
@@ -53,7 +55,12 @@ BEGIN
       tipodoc varchar(5),
       retbsp varchar(5),
       fechareg date,
-      horareg varchar,
+      horareg varchar,      
+      ruta varchar(1),
+      cupones integer,
+      origen varchar(3),
+      destino varchar(3),
+      tipopax varchar(3),
       comision numeric(18,2)
       ) SERVER sai1
 
@@ -176,7 +183,12 @@ BEGIN
             liquido,
             id_agencia,
             id_moneda_boleto,
-            comision
+            comision,
+            ruta,
+            cupones,
+            origen,
+            destino,
+            tipopax
           )
           VALUES (
           	v_id_boleto,
@@ -196,7 +208,12 @@ BEGIN
             v_registros.neto + v_registros.comision,
             v_registros.id_agencia,
             v_registros.id_moneda,
-            v_registros.comision
+            v_registros.comision,
+            trim (both ' ' from v_registros.ruta),
+            v_registros.cupones,
+            trim (both ' ' from v_registros.origen),
+            trim (both ' ' from v_registros.destino),
+            trim (both ' ' from v_registros.tipopax)            
           );
           
                  
@@ -315,7 +332,7 @@ BEGIN
 EXCEPTION  				
 	WHEN OTHERS THEN
 			--update a la tabla informix.migracion
-			
+			--raise exception '%',SQLERRM;
             return 'Ha ocurrido un error en la funcion ' || v_nombre_funcion || '. El mensaje es : ' || SQLERRM || '. Billete: ' || v_registros.billete;
 END;
 $body$
