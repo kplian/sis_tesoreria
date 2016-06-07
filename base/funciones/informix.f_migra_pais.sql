@@ -21,7 +21,7 @@ BEGIN
     
     v_consulta = '''select p.pais,p.nombre
                     from pais p
-                    where p.pais in (select pais from agencias group by pais)''';
+                    ''';
 
 	select informix.f_user_mapping() into v_resp;
     
@@ -116,6 +116,7 @@ BEGIN
 EXCEPTION  				
 	WHEN OTHERS THEN
 			--update a la tabla informix.migracion
+            
             v_resp = 'Ha ocurrido un error en la funcion '||v_nombre_funcion || '. El mensaje es : ' || SQLERRM ||'. Pais: '||v_registros.nombre;
             
             return v_resp;
