@@ -94,7 +94,8 @@ Phx.vista.CajaSolicitud = {
 				 this.getBoton('btnAbrirCerrar').enable();			 
 			 else
 				this.getBoton('btnAbrirCerrar').disable();
-		 }		 
+		 }
+		 this.getBoton('diagrama_gantt').enable();		 
      },
     
 	 abrirCerrarCaja:function(){

@@ -830,15 +830,6 @@ IS 'este campo sirve para marcar los pagos revisados por las asistente';
 /***********************************I-SCP-RAC-TES-0-25/09/2014***************************************/
 
 
---------------- SQL ---------------
-
---DROP VIEW tes.vcomp_devtesprov_plan_pago;
-
---------------- SQL ---------------
-
-DROP VIEW tes.vcomp_devtesprov_plan_pago_2;
---------------- SQL ---------------
-
 ALTER TABLE tes.tplan_pago
   ALTER COLUMN nro_cuenta_bancaria TYPE VARCHAR(100) COLLATE pg_catalog."default";
 
@@ -1499,6 +1490,13 @@ ALTER TABLE tes.tcaja
 COMMENT ON COLUMN tes.tcaja.fecha_cierre
 IS 'ultima fecha de cierre de caja';
 
+--------------- SQL ---------------
+
+ALTER TABLE tes.tproceso_caja
+  ADD COLUMN id_tipo_proceso_caja INTEGER;
+
+COMMENT ON COLUMN tes.tproceso_caja.id_tipo_proceso_caja
+IS 'hace referencia al tipo de proceso de caja';
 
 --------------- SQL ---------------
 
@@ -1571,4 +1569,51 @@ WITH (oids = false);
 ALTER TABLE tes.tproceso_caja
   ADD COLUMN id_cuenta_bancaria INTEGER;
 
+ALTER TABLE tes.tproceso_caja
+  ADD COLUMN id_cuenta_bancaria_mov INTEGER;
+
 /*****************************F-SCP-GSS-TES-0-05/05/2016*************/
+
+
+/*****************************I-SCP-GSS-TES-0-24/05/2016*************/
+
+---------------- SQL ---------------
+ALTER TABLE tes.tfinalidad
+  ADD COLUMN tipo VARCHAR;
+
+COMMENT ON COLUMN tes.tfinalidad.tipo
+IS 'ingreso o egreso';
+ 
+/*****************************F-SCP-GSS-TES-0-24/05/2016*************/
+
+
+/*****************************I-SCP-GSS-TES-0-30/05/2016*************/
+
+---------------- SQL ---------------
+ALTER TABLE tes.tfinalidad
+  ADD COLUMN sw_tipo_interfaz VARCHAR(50)[];
+ 
+/*****************************F-SCP-GSS-TES-0-30/05/2016*************/
+
+/*****************************I-SCP-GSS-TES-0-08/06/2016*************/
+
+  --------------- SQL ---------------
+ALTER TABLE tes.tsolicitud_efectivo
+ADD COLUMN id_gestion INTEGER;
+
+  --------------- SQL ---------------
+ALTER TABLE tes.tsolicitud_efectivo
+ADD COLUMN id_tipo_solicitud INTEGER;
+
+  --------------- SQL ---------------
+ALTER TABLE tes.tsolicitud_efectivo
+ADD COLUMN fecha_entrega DATE;
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.fecha_entrega
+IS 'fecha de entrega del efectivo';
+
+  --------------- SQL ---------------
+ALTER TABLE tes.tproceso_caja
+ADD COLUMN num_memo VARCHAR;
+  
+/*****************************F-SCP-GSS-TES-0-08/06/2016*************/

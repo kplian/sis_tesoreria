@@ -773,7 +773,7 @@ Phx.vista.FormObligacion=Ext.extend(Phx.frmInterfaz,{
             	this.Cmp.id_depto.modificado = true;
             	this.Cmp.id_depto.enable();
             	
-            	this.Cmp.id_depto.store.load({params:{start:0,limit:this.tam_pag}, 
+            	this.Cmp.id_depto.store.load({params:{ start:0, limit: this.tam_pag}, 
 		           callback : function (r) {
 		                if (r.length == 1 ) {                       
 		                    this.Cmp.id_depto.setValue(r[0].data.id_depto);

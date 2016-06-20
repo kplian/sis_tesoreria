@@ -16,7 +16,22 @@ Phx.vista.SolicitudEfectivoCaja=Ext.extend(Phx.gridInterfaz,{
 	
 	constructor:function(config){
 		this.maestro=config.maestro;
-    	//llama al constructor de la clase padre
+    	
+		this.Atributos[this.getIndAtributo('monto_rendido')].config.renderer = function(value, p, record) {			
+				    var saldo = parseFloat(record.data.monto) + parseFloat(record.data.monto_repuesto) - parseFloat(record.data.monto_rendido) - parseFloat(record.data.monto_devuelto);
+					if (record.data.estado == 'entregado' || record.data.estado == 'finalizado') {
+						return String.format("<font color = 'red'>Rendido: {0}</font><br>"+
+											 "<font color = 'slategray' >Devuelto a Caja:{1}</font><br>"+
+											 "<font color = 'green' >Devuelto a Solicitante:{2}</font><br>"											 
+											 ,record.data.monto_rendido, record.data.monto_devuelto, record.data.monto_repuesto											 
+											 );
+					} 
+					else {
+						return String.format('');
+					}
+			};
+			
+		//llama al constructor de la clase padre
 		Phx.vista.SolicitudEfectivoCaja.superclass.constructor.call(this,config);
 		this.init();
 		
@@ -200,10 +215,10 @@ Phx.vista.SolicitudEfectivoCaja=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'monto_rendido',
-				fieldLabel: 'Monto Rendido',
+				fieldLabel: 'Montos',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 150,
 				maxLength:1179650
 			},
 				type:'NumberField',
@@ -222,7 +237,7 @@ Phx.vista.SolicitudEfectivoCaja=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'NumberField',
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:false
 		},
 		{
@@ -236,7 +251,7 @@ Phx.vista.SolicitudEfectivoCaja=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'NumberField',
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:false
 		},
 		{
@@ -245,7 +260,7 @@ Phx.vista.SolicitudEfectivoCaja=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Saldo',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 80,
 				maxLength:1179650
 			},
 				type:'NumberField',

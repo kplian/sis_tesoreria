@@ -52,6 +52,14 @@ class ACTCuentaBancaria extends ACTbase{
 				$this->objParam->addFiltro("usrbanc.tipo_permiso = ''".$permisos[0]."''");
 		}*/
 		
+		if($this->objParam->getParametro('id_moneda')!=''){
+			$this->objParam->addFiltro("ctaban.id_moneda = ".$this->objParam->getParametro('id_moneda'));
+		}
+		
+		if($this->objParam->getParametro('tipo_interfaz')!=''){
+			$this->objParam->addFiltro("''".$this->objParam->getParametro('tipo_interfaz')."''=ANY(fin.sw_tipo_interfaz)");
+		}
+			
 		$this->objFunc=$this->create('MODCuentaBancaria');			
 		$this->res=$this->objFunc->listarCuentaBancariaUsuario($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
@@ -72,7 +80,7 @@ class ACTCuentaBancaria extends ACTbase{
 		$this->res=$this->objFunc->eliminarCuentaBancaria($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
-			
+				
 }
 
 ?>

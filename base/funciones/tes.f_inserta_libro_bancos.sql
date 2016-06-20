@@ -85,7 +85,6 @@ BEGIN
             (p_hstore->'id_depto')::integer
     
     */
-    
     --determina la fecha del periodo
          IF(p_hstore ? 'fecha' = false)THEN
          	g_fecha = now();
@@ -133,7 +132,7 @@ BEGIN
         
         --obtener id del proceso macro
         v_sistema_origen = COALESCE(p_hstore->'sistema_origen','PXP')::varchar;
-
+		--si es un ingreso independiente de otros sistemas
 		IF( v_sistema_origen != 'KERP' OR (v_sistema_origen = 'KERP' AND (p_hstore->'tipo') in ('deposito','transferencia_carta')))THEN
         
             select 
@@ -172,18 +171,7 @@ BEGIN
                 from param.tgestion ges
                 where ges.gestion = v_anho
                 limit 1 offset 0;
-            /*
-            select f.id_funcionario into v_id_funcionario
-                          from segu.tusuario u
-                          inner join orga.tfuncionario f on f.id_persona=u.id_persona
-                          where u.id_usuario=p_id_usuario;
-                          
-            IF (v_id_funcionario is NULL)THEN
-                          
-            raise exception 'El usuario no es funcionario permitido para usar el modulo de libro de bancos';
             
-            END IF;*/        
-                  
             -- inciar el tramite en el sistema de WF
              SELECT 
                    ps_num_tramite ,
@@ -213,18 +201,25 @@ BEGIN
                    v_codigo_estado; 
               	
             ELSE 
+            	--si es un registro disparado por otros sistemas
+            	/*
                 select pp.id_estado_wf, op.num_tramite into v_id_estado_wf_anterior, v_num_tramite
                 from tes.tplan_pago pp
                 inner join tes.tobligacion_pago op on op.id_obligacion_pago=pp.id_obligacion_pago
                 where pp.id_int_comprobante=(p_hstore->'id_int_comprobante')::int4 and pp.estado in ('pagado','contabilizado','devengado','devuelto');  
+                */
+                select cp.id_estado_wf, cp.nro_tramite into v_id_estado_wf_anterior, v_num_tramite
+                from conta.tint_comprobante cp
+                --inner join tes.tobligacion_pago op on op.id_obligacion_pago=pp.id_obligacion_pago
+                where cp.id_int_comprobante=(p_hstore->'id_int_comprobante')::int4;  
                                 
                 IF v_id_estado_wf_anterior IS NULL THEN
-                	raise exception 'El plan de pago no se encuentra en estado pagado';
+                	raise exception 'No existe estado wf para ejecutar el disparador en el workflow';
                 END IF;
                 
                 select id_depto into v_id_depto
-                from param.tdepto
-                where codigo='OP-CBB';
+				from tes.tdepto_cuenta_bancaria
+				where id_cuenta_bancaria=(p_hstore->'id_cuenta_bancaria')::int4;
                 
                 IF v_id_depto IS NULL THEN
                 	raise exception 'No existe un departamento con el codigo Obligaciones de Pago';
@@ -258,9 +253,9 @@ BEGIN
                          v_codigo_tipo_pro);                         
                 
             END IF;    
-			
+
             IF(p_hstore ? 'fecha' = false)THEN
-            
+
             	insert into tes.tts_libro_bancos(
                 id_cuenta_bancaria,
                 a_favor,
@@ -318,7 +313,7 @@ BEGIN
                 )RETURNING id_libro_bancos into v_id_libro_bancos;    		
             
             ELSE
-            
+              
               insert into tes.tts_libro_bancos(
                   id_cuenta_bancaria,
                   fecha,

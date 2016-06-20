@@ -9,6 +9,7 @@
 include_once(dirname(__FILE__).'/../../lib/lib_general/funciones.inc.php');
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
 require_once(dirname(__FILE__).'/../../sis_tesoreria/reportes/RLibroBancos.php');
+require_once(dirname(__FILE__).'/../reportes/RMemoCajaChica.php');
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
 include_once(dirname(__FILE__).'/../../lib/PHPMailer/class.phpmailer.php');
 include_once(dirname(__FILE__).'/../../lib/PHPMailer/class.smtp.php');
@@ -89,6 +90,12 @@ class ACTTsLibroBancos extends ACTbase{
 		$this->res=$this->objFunc->siguienteEstadoLibroBancos($this->objParam);					
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	
+	function fondoDevolucionRetencion(){
+        $this->objFunc=$this->create('MODTsLibroBancos');  
+        $this->res=$this->objFunc->fondoDevolucionRetencion($this->objParam);
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
 	
 	function transferirDeposito(){
         $this->objFunc=$this->create('MODTsLibroBancos');  
@@ -359,6 +366,58 @@ class ACTTsLibroBancos extends ACTbase{
 		}
 	}
 	
+	function imprimirMemoCajaChica( $create_file = false){
+		
+		$dataSource = new DataSource();
+		//$idSolicitud = $this->objParam->getParametro('id_solicitud');
+		//$id_proceso_wf= $this->objParam->getParametro('id_proceso_wf');				
+		$this->objParam->addParametroConsulta('ordenacion','id_cotizacion');
+		$this->objParam->addParametroConsulta('dir_ordenacion','ASC');
+		$this->objParam->addParametroConsulta('cantidad',1000);
+		$this->objParam->addParametroConsulta('puntero',0);
+		$this->objFunc = $this->create('MODSolicitudEfectivo');
+		$resultMemoCajaChica = $this->objFunc->memoCajaChica();
+		
+		$funciones = new funciones();
+		
+		if($resultMemoCajaChica->getTipo()=='EXITO'){
+			
+			$datosMemoCajaChica = $resultMemoCajaChica->getDatos();
+			
+			$newDate = date("d-m-Y", strtotime($datosMemoCajaChica[0]['fecha']));
+			
+			//armamos el array parametros y metemos ahi los data sets de las otras tablas
+			$dataSource->putParameter('fecha', $newDate);
+			$dataSource->putParameter('nro_cheque', $datosMemoCajaChica[0]['nro_cheque']);
+			$dataSource->putParameter('codigo', $datosMemoCajaChica[0]['codigo']);
+			$dataSource->putParameter('aprobador', $datosMemoCajaChica[0]['aprobador']);
+			$dataSource->putParameter('cargo_aprobador', $datosMemoCajaChica[0]['cargo_aprobador']);
+			$dataSource->putParameter('cajero', $datosMemoCajaChica[0]['cajero']);
+			$dataSource->putParameter('cargo_cajero', $datosMemoCajaChica[0]['cargo_cajero']);
+			$dataSource->putParameter('importe_cheque', $datosMemoCajaChica[0]['importe_cheque']);
+			$dataSource->putParameter('importe_literal', $funciones->num2letrasCheque($datosMemoCajaChica[0]['importe_cheque']));
+			$dataSource->putParameter('num_memo', $datosMemoCajaChica[0]['num_memo']);
+			
+			//build the report
+			$reporte = new RMemoCajaChica();
+			$reporte->setDataSource($dataSource);
+			$nombreArchivo = 'memoCajaChica.docx';
+			
+			$reporte->write(dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo);		
+			
+			$mensajeExito = new Mensaje();
+			$mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
+			'Se generó con éxito el reporte: '.$nombreArchivo,'control');
+			$mensajeExito->setArchivoGenerado($nombreArchivo);
+			$this->res = $mensajeExito;
+			$this->res->imprimirRespuesta($this->res->generarJson());				
+	   }
+	   else{
+				
+			 $resultMemoCajaChica->imprimirRespuesta($resultMemoCajaChica->generarJson());
+	   }
+	}
+		
 	/*
     * 
     * Author: GSS

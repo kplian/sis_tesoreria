@@ -66,7 +66,8 @@ Phx.vista.CajaCajero = {
 		 else{
 			 this.getBoton('btnRendicion').disable();
 		 }	
-		*/		 
+		*/	
+		this.getBoton('diagrama_gantt').enable();	 
      }
     
 };

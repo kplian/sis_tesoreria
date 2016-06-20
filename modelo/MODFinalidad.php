@@ -54,7 +54,8 @@ class MODFinalidad extends MODbase{
 		$this->captura('estado','varchar');
 		$this->captura('color','varchar');
 		$this->captura('estado_reg','varchar');
-		$this->captura('nombre_finalidad','varchar');
+		$this->captura('nombre_finalidad','varchar');		
+		$this->captura('sw_tipo_interfaz','varchar');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -121,6 +122,23 @@ class MODFinalidad extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
-			
+	
+	function editTipoInterfaz(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_finalidad_ime';
+		$this->transaccion='TES_EDTUI_IME';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_finalidad','id_finalidad','int4');
+		$this->setParametro('sw_tipo_interfaz','sw_tipo_interfaz','varchar');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}	
 }
 ?>

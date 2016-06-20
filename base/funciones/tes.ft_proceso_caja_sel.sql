@@ -65,13 +65,36 @@ BEGIN
             
             END IF;
             
-            IF  lower(v_parametros.tipo_interfaz) = 'procesocajavb' THEN
+            IF  lower(v_parametros.tipo_interfaz) = 'procesocajavbfondos' THEN
                 
                 IF p_administrador !=1 THEN
                    v_inner =  ' inner join wf.testado_wf ew on ew.id_estado_wf = ren.id_estado_wf ';
-                   v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))  ) and  (lower(ren.estado)!=''borrador'') and ';
+                   v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') and  (lower(ren.estado) in (''vbfondos'')) and ';
                  ELSE
-                     v_filtro = ' (lower(ren.estado)!=''borrador'') and ';
+                     v_filtro = ' (lower(ren.estado) in (''vbfondos'')) and ';
+                END IF;                
+                
+            END IF; 
+
+            IF  lower(v_parametros.tipo_interfaz) = 'procesocajavbconta' THEN
+                
+                IF p_administrador !=1 THEN
+                   v_inner =  ' inner join wf.testado_wf ew on ew.id_estado_wf = ren.id_estado_wf ';
+                   v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))  ) and  (lower(ren.estado)not in (''supconta'',''vbconta'',''pendiente'')) and ';
+                 ELSE
+                     v_filtro = ' (lower(ren.estado) in (''supconta'',''vbconta'',''pendiente'')) and ';
+                END IF;
+                
+                
+            END IF; 
+            
+            IF  lower(v_parametros.tipo_interfaz) = 'procesocajavbpresup' THEN
+                
+                IF p_administrador !=1 THEN
+                   v_inner =  ' inner join wf.testado_wf ew on ew.id_estado_wf = ren.id_estado_wf ';
+                   v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') and  (lower(ren.estado)=''vbpresup'') and ';
+                 ELSE
+                     v_filtro = ' (lower(ren.estado)=''vbpresup'') and ';
                 END IF;
                 
                 
@@ -102,7 +125,8 @@ BEGIN
 						ren.id_usuario_mod,
 						usu1.cuenta as usr_reg,
 						usu2.cuenta as usr_mod,
-                        tpc.nombre	
+                        tpc.nombre,
+                        cj.id_moneda	
 						from tes.tproceso_caja ren
 						inner join segu.tusuario usu1 on usu1.id_usuario = ren.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = ren.id_usuario_mod
@@ -175,7 +199,52 @@ BEGIN
 			return v_consulta;
 
 		end;
-					
+    
+	/*********************************    
+ 	#TRANSACCION:  'TES_DEPCAJ_SEL'
+ 	#DESCRIPCION:	Consulta de datos
+ 	#AUTOR:		gsarmiento	
+ 	#FECHA:		17-05-2016 20:15:22
+	***********************************/
+
+	elsif(p_transaccion='TES_DEPCAJ_SEL')then
+
+    	v_consulta:='select cb.id_cuenta_bancaria, cb.denominacion ||'' ''||cb.nro_cuenta as desc_cuenta_bancaria, t.fecha, t.tipo, t.importe_deposito, 
+        			 t.origen, f.nombre_finalidad,t.id_libro_bancos, t.observaciones
+					 from tes.tts_libro_bancos t
+					 inner join tes.tcuenta_bancaria cb on cb.id_cuenta_bancaria=t.id_cuenta_bancaria
+					 inner join tes.tfinalidad f on f.id_finalidad=t.id_finalidad
+					 where t.tabla='''||v_parametros.tabla||'''
+					 and t.columna_pk = '''||v_parametros.columna_pk||''' 
+                     and t.columna_pk_valor='||v_parametros.columna_pk_valor||' and ';
+        
+		v_consulta:=v_consulta||v_parametros.filtro;
+        
+        v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+		raise notice 'v_consulta %',v_consulta;
+        return v_consulta;
+    
+    /*********************************    
+ 	#TRANSACCION:  'TES_DEPCAJ_CONT'
+ 	#DESCRIPCION:	Consulta de datos
+ 	#AUTOR:		gsarmiento	
+ 	#FECHA:		29-05-2016 20:15:22
+	***********************************/
+
+	elsif(p_transaccion='TES_DEPCAJ_CONT')then
+		
+    	v_consulta:='select count(cb.id_cuenta_bancaria)
+					 from tes.tts_libro_bancos t
+					 inner join tes.tcuenta_bancaria cb on cb.id_cuenta_bancaria=t.id_cuenta_bancaria
+					 inner join tes.tfinalidad f on f.id_finalidad=t.id_finalidad
+					 where t.tabla='''||v_parametros.tabla||'''
+					 and t.columna_pk = '''||v_parametros.columna_pk||''' 
+                     and t.columna_pk_valor='||v_parametros.columna_pk_valor|| ' and ';
+        
+		v_consulta:=v_consulta||v_parametros.filtro;
+        
+        return v_consulta;
+    
 	else
 					     
 		raise exception 'Transaccion inexistente';
@@ -184,12 +253,12 @@ BEGIN
 					
 EXCEPTION
 					
-	WHEN OTHERS THEN
-			v_resp='';
-			v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
-			v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
-			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
-			raise exception '%',v_resp;
+WHEN OTHERS THEN
+        v_resp='';
+        v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+        v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
+        v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+        raise exception '%',v_resp;
 END;
 $body$
 LANGUAGE 'plpgsql'

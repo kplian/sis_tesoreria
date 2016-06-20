@@ -17,7 +17,9 @@ Phx.vista.Finalidad=Ext.extend(Phx.gridInterfaz,{
     	//llama al constructor de la clase padre
 		Phx.vista.Finalidad.superclass.constructor.call(this,config);
 		this.init();
-		this.load({params:{start:0, limit:this.tam_pag}})
+		this.load({params:{start:0, limit:this.tam_pag, vista:''}})
+		this.crearFormTipoInterfaz();
+		this.addButton('inserInterfaz',{ text: 'Configurar Interfaz', iconCls: 'blist', disabled: false, handler: this.mostarFormTipoInterfaz, tooltip: '<b>Configurar interfaces</b><br/>Permite seleccionar que interfaces manejara la finalidad'});
 	},
 			
 	Atributos:[
@@ -79,7 +81,7 @@ Phx.vista.Finalidad=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'nombre_finalidad',
-				fieldLabel: 'nombre_finalidad',
+				fieldLabel: 'Nombre Finalidad',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
@@ -188,7 +190,7 @@ Phx.vista.Finalidad=Ext.extend(Phx.gridInterfaz,{
 	title:'Finalidad',
 	ActSave:'../../sis_tesoreria/control/Finalidad/insertarFinalidad',
 	ActDel:'../../sis_tesoreria/control/Finalidad/eliminarFinalidad',
-	ActList:'../../sis_tesoreria/control/Finalidad/listarFinalidad',
+	ActList:'../../sis_tesoreria/control/Finalidad/listarFinalidadCuentaBancaria',
 	id_store:'id_finalidad',
 	fields: [
 		{name:'id_finalidad', type: 'numeric'},
@@ -204,15 +206,136 @@ Phx.vista.Finalidad=Ext.extend(Phx.gridInterfaz,{
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
+		{name:'sw_tipo_interfaz', type: 'string'}
 		
 	],
 	sortInfo:{
 		field: 'id_finalidad',
 		direction: 'ASC'
 	},
-	bdel:true,
-	bsave:true
-	}
+	bdel:false,
+	bsave:false,
+	bedit:false,
+	bnew:false,
+	/*
+	onReloadPage:function(m)
+	{
+		this.maestro=m;						
+		//this.store.baseParams={id_cuenta_bancaria:this.maestro.id_cuenta_bancaria,vista:'cuenta_bancaria'};
+		this.load({params:{start:0, limit:50}});			
+	},*/
+	
+	//formulario de operaciones
+	crearFormTipoInterfaz:function(){
+		  this.formTipoInterfaz = new Ext.form.FormPanel({
+            baseCls: 'x-plain',
+            autoDestroy: true,
+           
+            border: false,
+            layout: 'form',
+             autoHeight: true,
+           
+    
+            items: [
+                 {
+       				name:'sw_tipo_interfaz',
+       				xtype:"awesomecombo",
+       				fieldLabel:'Modulos',
+       				allowBlank: true,
+       				emptyText:'Modulos...',
+       				store: new Ext.data.ArrayStore({
+                        fields: ['variable', 'valor'],
+                        data : [ ['caja_chica', 'Caja Chica'],
+                                 ['fondos_avance', 'Fondos Avance']
+                               ]
+                        }),
+       				valueField: 'variable',
+				    displayField: 'valor',
+				    mode: 'local',
+	       		    forceSelection:true,
+       				typeAhead: true,
+           			triggerAction: 'all',
+           			lazyRender: true,
+       				queryDelay: 1000,
+       				width: 250,
+       				minChars: 2 ,
+	       			enableMultiSelect: true
+       			}]
+        });
+        
+		
+		
+		this.wTipoInterfaz = new Ext.Window({
+            title: 'Configuracion',
+            collapsible: true,
+            maximizable: true,
+            autoDestroy: true,
+            width: 380,
+            height: 170,
+            layout: 'fit',
+            plain: true,
+            bodyStyle: 'padding:5px;',
+            buttonAlign: 'center',
+            items: this.formTipoInterfaz,
+            modal:true,
+             closeAction: 'hide',
+            buttons: [{
+                text: 'Guardar',
+                handler: this.saveTipoInterfaz,
+                scope: this
+                
+            },
+             {
+                text: 'Cancelar',
+                handler: function(){ this.wTipoInterfaz.hide() },
+                scope: this
+            }]
+        });
+        
+         this.cmpTipoInterfaz = this.formTipoInterfaz.getForm().findField('sw_tipo_interfaz');
+                  
+	},
+	
+	mostarFormTipoInterfaz:function(){
+		var data = this.getSelectedData();
+		if(data){
+			this.cmpTipoInterfaz.setValue(data.sw_tipo_interfaz);
+			this.wTipoInterfaz.show();
+		}		
+	},
+	
+	saveTipoInterfaz: function(){
+		    var d = this.getSelectedData();
+		    Phx.CP.loadingShow();
+            Ext.Ajax.request({
+                url: '../../sis_tesoreria/control/Finalidad/editTipoInterfaz',
+                params: { 
+                	      sw_tipo_interfaz: this.cmpTipoInterfaz.getValue(),
+                	      id_finalidad: d.id_finalidad
+                	    },
+                success: this.successSinc,
+                failure: this.conexionFailure,
+                timeout: this.timeout,
+                scope: this
+            });		
+	},
+	
+	successSinc:function(resp){
+            Phx.CP.loadingHide();
+            var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+            if(!reg.ROOT.error){
+            	if(this.wTipoInterfaz){
+            		this.wTipoInterfaz.hide(); 
+            	}                
+                this.reload();
+             }else{
+                alert('ocurrio un error durante el proceso')
+            }
+    }
+
+}
+	
+	
 )
 </script>
 		

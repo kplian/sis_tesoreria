@@ -57,6 +57,7 @@ class MODTsLibroBancos extends MODbase{
 		$this->captura('nombre_regional','varchar');
 		$this->captura('sistema_origen','varchar');
 		$this->captura('notificado','varchar');
+		$this->captura('fondo_devolucion_retencion','varchar');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -251,6 +252,24 @@ class MODTsLibroBancos extends MODbase{
         $this->setParametro('obs','obs','text');
         $this->setParametro('json_procesos','json_procesos','text');
 
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+	
+	function fondoDevolucionRetencion(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.ft_ts_libro_bancos_ime';
+        $this->transaccion='TES_DEVRET_IME';
+        $this->tipo_procedimiento='IME';
+                
+        //Define los parametros para la funcion
+        $this->setParametro('id_libro_bancos','id_libro_bancos','int4');
+		$this->setParametro('operacion','operacion','varchar');
+		
         //Ejecuta la instruccion
         $this->armarConsulta();
         $this->ejecutarConsulta();

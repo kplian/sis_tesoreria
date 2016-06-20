@@ -75,6 +75,15 @@ header("content-type: text/javascript; charset=UTF-8");
 					tooltip: '<b>Transferencia Depósito</b><p>Transferencia de Depósito Saldo o Parcial</p>'
 				}
 			);
+			
+			this.addButton('devolucion_retencion',
+				{	text:'Asignacion Fondo Devolucion/Retencion',
+					iconCls: 'bpagar',
+					disabled:false,
+					handler:this.devolucionRetencion,
+					tooltip: '<b>Asignacion de Fondo para Devolucion/Retencion</b><p>CajaChica/FondoAvance</p>'
+				}
+			);
 		},
 		Atributos : [{
 			config : {
@@ -615,7 +624,8 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'nombre_finalidad', type: 'string'},
 		{name:'color', type: 'string'},
 		{name:'saldo_deposito', type: 'numeric'},
-		{name:'sistema_origen', type: 'string'}
+		{name:'sistema_origen', type: 'string'},
+		{name:'fondo_devolucion_retencion', type: 'string'}
 	],
 		sortInfo : {
 			//field : 'fecha',
@@ -690,6 +700,46 @@ header("content-type: text/javascript; charset=UTF-8");
 				timeout:this.timeout,
 				scope:this
 			});     
+		},
+		
+		devolucionRetencion:function()
+		{                   
+			var d= this.sm.getSelected().data;
+			console.log(d);
+			var operacion = d.fondo_devolucion_retencion == 'si'?'quitar':'colocar'; 
+			
+			Ext.Msg.show({
+			   title:'Alerta',
+			   scope: this,
+			   msg: operacion == 'colocar'?'Esta seguro de establecer este Fondo para Devoluciones/Retenciones?':'Esta seguro de quitar este Fondo para Devoluciones/Retenciones?',
+			   buttons: Ext.Msg.YESNO,
+			   fn: function(id, value, opt) {			   		
+			   		if (id == 'yes') {
+						
+						Phx.CP.loadingShow();
+			   			Ext.Ajax.request({
+							url:'../../sis_tesoreria/control/TsLibroBancos/fondoDevolucionRetencion',
+							params:{id_libro_bancos:d.id_libro_bancos,
+									operacion: operacion},
+							success:this.successSinc,
+							failure: this.conexionFailure,
+							timeout:this.timeout,
+							scope:this
+						});
+			   		}			   },	
+			   animEl: 'elId',
+			   icon: Ext.MessageBox.WARNING
+			}, this);
+			/*
+			Ext.Ajax.request({
+				url:'../../sis_tesoreria/control/TsLibroBancos/fondoDevolucionRetencion',
+				params:{id_libro_bancos:d.id_libro_bancos,
+						operacion: operacion},
+				success:this.successSinc,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});   */  
 		},
 		
 		successSinc:function(resp){

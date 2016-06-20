@@ -205,6 +205,30 @@ BEGIN
             return v_resp;
 
 		end;
+        
+    /*********************************    
+ 	#TRANSACCION:  'TES_CTABOPE_IME'
+ 	#DESCRIPCION:	Permite configurar las operaciones para las cuentas bancarias (retenciones, devoluciones)
+ 	#AUTOR:		Gonzalo Sarmiento
+ 	#FECHA:		24-05-2016
+	***********************************/
+
+	elsif(p_transaccion='TES_CTABOPE_IME')then
+
+		begin        
+        
+             update tes.tcuenta_bancaria set
+			  sw_operacion = string_to_array(v_parametros.sw_operacion,',')::varchar[]
+             where id_cuenta_bancaria=v_parametros.id_cuenta_bancaria;
+                          
+             --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se modificaron las operaciones de la cuenta bancaria'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_cuenta_bancaria',v_parametros.id_cuenta_bancaria::varchar);
+              
+            --Devuelve la respuesta
+            return v_resp;
+
+		end; 
          
 	else
      

@@ -56,7 +56,12 @@ class ACTFinalidad extends ACTbase{
 		$this->res=$this->objFunc->eliminarFinalidad($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
-			
+		
+	function editTipoInterfaz(){
+		$this->objFunc=$this->create('MODFinalidad');	
+		$this->res=$this->objFunc->editTipoInterfaz($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
 }
 
 ?>

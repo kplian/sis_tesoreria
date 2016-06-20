@@ -11,7 +11,7 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
-	
+
 	nombreVista: 'ProcesoCaja',
 
 	constructor:function(config){
@@ -27,7 +27,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
 			}
 		);
-		
+
 		this.addButton('chkpresupuesto',
 			{	text:'Chk Presupuesto',
 				iconCls: 'blist',
@@ -36,14 +36,14 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Revisar Presupuesto</b><p>Revisar estado de ejecución presupeustaria para el tramite</p>'
 			}
 		);
-		
+
 		//carga de grilla
 		if(this.nombreVista == 'ProcesoCaja'){
 			this.load({params:{start:0, limit: this.tam_pag, tipo_interfaz:this.nombreVista, id_caja:this.id_caja}});
 		}
-		
+
 	},
-			
+
 	Atributos:[
 		{
 			//configuracion del componente
@@ -53,7 +53,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 					name: 'id_proceso_caja'
 			},
 			type:'Field',
-			form:true 
+			form:true
 		},
 		{
 			config: {
@@ -120,7 +120,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-							format: 'd/m/Y', 
+							format: 'd/m/Y',
 							renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
 			},
 				type:'DateField',
@@ -136,7 +136,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-							format: 'd/m/Y', 
+							format: 'd/m/Y',
 							renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
 			},
 				type:'DateField',
@@ -157,7 +157,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				mode: 'local',
 				valueField: 'estilo',
 				gwidth: 120,
-				
+
 				store: new Ext.data.JsonStore({
                          url: '../../sis_tesoreria/control/TipoProcesoCaja/listarTipoProcesoCaja',
                          id: 'id_tipo_proceso_caja',
@@ -195,7 +195,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			filters:{pfiltro:'ren.tipo',type:'string'},
 			grid:true,
 			form:true
-		},	
+		},
 		{
 			config:{
 				name: 'estado',
@@ -277,7 +277,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 					name: 'id_caja'
 			},
 			type:'Field',
-			form:true 
+			form:true
 		},
 		{
 			config:{
@@ -286,7 +286,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
-							format: 'd/m/Y', 
+							format: 'd/m/Y',
 							renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
 			},
 				type:'DateField',
@@ -352,7 +352,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				id_grupo:1,
 				grid:true,
 				form:false
-		},		
+		},
 		{
 			config:{
 				name: 'estado_reg',
@@ -367,7 +367,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				id_grupo:1,
 				grid:true,
 				form:false
-		},		
+		},
 		{
 			config: {
 				name: 'id_comprobante_pago',
@@ -461,7 +461,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-							format: 'd/m/Y', 
+							format: 'd/m/Y',
 							renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
 			},
 				type:'DateField',
@@ -522,7 +522,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-				format: 'd/m/Y', 
+				format: 'd/m/Y',
 				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
 			},
 				type:'DateField',
@@ -547,7 +547,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				form:false
 		}
 	],
-	tam_pag:50,	
+	tam_pag:50,
 	title:'Rendicion Caja',
 	ActSave:'../../sis_tesoreria/control/ProcesoCaja/insertarProcesoCaja',
 	ActDel:'../../sis_tesoreria/control/ProcesoCaja/eliminarProcesoCaja',
@@ -563,6 +563,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		{name:'estado_reg', type: 'string'},
 		{name:'fecha_fin', type: 'date',dateFormat:'Y-m-d'},
 		{name:'id_caja', type: 'numeric'},
+		{name:'id_moneda', type: 'numeric'},
 		{name:'id_depto_lb', type: 'numeric'},
 		{name:'fecha', type: 'date',dateFormat:'Y-m-d'},
 		{name:'id_proceso_wf', type: 'numeric'},
@@ -577,36 +578,37 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
-		{name:'nombre', type: 'string'}	
-		
+		{name:'nombre', type: 'string'}
+
 	],
 	sortInfo:{
 		field: 'id_proceso_caja',
 		direction: 'DESC'
-	},	
+	},
 	bdel:true,
 	bedit:false,
 	bsave:true,
-	
-	onButtonNew: function(){    	
-    	Phx.vista.ProcesoCaja.superclass.onButtonNew.call(this);		
+
+	onButtonNew: function(){
+    	Phx.vista.ProcesoCaja.superclass.onButtonNew.call(this);
         this.Cmp.id_caja.setValue(this.id_caja);
-		
+
 		this.Cmp.tipo.reset();
         this.Cmp.tipo.store.baseParams = Ext.apply(this.Cmp.tipo.store.baseParams,{estado_caja: this.estado} )
         this.Cmp.tipo.modificado = true;
-		
+
 		if(this.estado=='cerrado'){
 			this.ocultarComponente(this.Cmp.fecha_inicio);
-			this.ocultarComponente(this.Cmp.fecha_fin);			
+			this.ocultarComponente(this.Cmp.fecha_fin);
 		}
 	},
-	
-	sigEstado:function(){                   
+
+	sigEstado:function(){
 	  var rec=this.sm.getSelected();
 	  var configExtra = [];
+	  console.log(rec.data.tipo);
 	  if(rec.data.estado == 'vbconta' || rec.data.estado == 'revision' || rec.data.estado == 'vbfondos'){
-		  configExtra = [	
+		  configExtra = [
 							{
 								config:{
 									name: 'id_cuenta_bancaria',
@@ -642,8 +644,8 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 									mode:'remote',
 									pageSize:20,
 									queryDelay:500,
-									gwidth: 250,
-									anchor: '50%',
+									gwidth: 550,
+									anchor: '80%',
 									minChars:2,
 									renderer:function(value, p, record){return String.format('{0}', record.data['desc_cuenta_bancaria']);}
 							},
@@ -652,35 +654,87 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 							id_grupo:1,
 							grid:true,
 							form:true
-						}];
+						},
+						{
+            config:{
+                name: 'id_cuenta_bancaria_mov',
+                fieldLabel: 'Fondo',
+                allowBlank: true,
+                emptyText : 'Fondo...',
+                store: new Ext.data.JsonStore({
+                    url:'../../sis_tesoreria/control/TsLibroBancos/listarTsLibroBancosDepositosConSaldo',
+                    id : 'id_cuenta_bancaria_mov',
+                    root: 'datos',
+                    sortInfo:{
+                            field: 'fecha',
+                            direction: 'DESC'
+                    },
+                    totalProperty: 'total',
+                    fields: ['id_libro_bancos','id_cuenta_bancaria','fecha','detalle','observaciones','importe_deposito','saldo'],
+                    remoteSort: true,
+                    baseParams:{par_filtro:'detalle#observaciones#fecha'}
+               }),
+               valueField: 'id_libro_bancos',
+               displayField: 'importe_deposito',
+               gdisplayField: 'desc_deposito',
+               hiddenName: 'id_cuenta_bancaria_mov',
+               forceSelection:true,
+               typeAhead: false,
+               triggerAction: 'all',
+               listWidth:350,
+               lazyRender:true,
+               mode:'remote',
+               pageSize:10,
+               queryDelay:1000,
+               anchor: '80%',
+               gwidth:200,
+               minChars:2,
+               tpl: '<tpl for="."><div class="x-combo-list-item"><p>{detalle}</p><p>Fecha:<strong>{fecha}</strong></p><p>Importe:<strong>{importe_deposito}</strong></p><p>Saldo:<strong>{saldo}</strong></p></div></tpl>',
+               renderer:function(value, p, record){return String.format('{0}', record.data['desc_deposito']);}
+            },
+            type:'ComboBox',
+            filters:{pfiltro:'cbanmo.detalle#cbanmo.nro_doc_tipo',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        }];
+		
+		this.eventosExtra = function(obj){								 
+								 //Evento para filtrar los depósitos a partir de la cuenta bancaria
+						        obj.Cmp.id_cuenta_bancaria.on('select',function(data,rec,ind){
+						        	//si es de una regional nacional
+								    this.Cmp.id_cuenta_bancaria_mov.reset();
+						            this.Cmp.id_cuenta_bancaria_mov.modificado=true;
+						            Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: rec.id});
+						        },obj);   	
+								    			
+						};
 	  }
 	  
 	  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
-								'Estado de Wf',
-								{
-									modal:true,
-									width:700,
-									height:450
-								}, {
-									configExtra: configExtra,
-									data:{
-									   id_estado_wf:rec.data.id_estado_wf,
-									   id_proceso_wf:rec.data.id_proceso_wf									  
-									}}, this.idContenedor,'FormEstadoWf',
-								{
-									config:[{
-											  event:'beforesave',
-											  delegate: this.onSaveWizard												  
-											}],
-									
-									scope:this
-								 });
-			   
+							'Estado de Wf',
+							{
+								modal:true,
+								width:700,
+								height:450
+							}, {
+								configExtra: configExtra,
+								eventosExtra: this.eventosExtra,
+								data:{
+								   id_estado_wf:rec.data.id_estado_wf,
+								   id_proceso_wf:rec.data.id_proceso_wf
+								}}, this.idContenedor,'FormEstadoWf',
+							{
+								config:[{
+										  event:'beforesave',
+										  delegate: this.onSaveWizard
+										}],
+
+								scope:this
+							 });
 	 },
-	 
-	 
-	 
-	 checkPresupuesto:function(){                   
+
+	 checkPresupuesto:function(){
 	  var rec=this.sm.getSelected();
 	  var configExtra = [];
 	  this.objChkPres = Phx.CP.loadWindows('../../../sis_presupuestos/vista/presup_partida/ChkPresupuesto.php',
@@ -691,26 +745,26 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 									height:450
 								}, {
 									data:{
-									   nro_tramite: rec.data.nro_tramite								  
+									   nro_tramite: rec.data.nro_tramite
 									}}, this.idContenedor,'ChkPresupuesto',
 								{
 									config:[{
 											  event:'onclose',
-											  delegate: this.onCloseChk												  
+											  delegate: this.onCloseChk
 											}],
-									
+
 									scope:this
 								 });
-			   
+
 	 },
-	 
-	 
-	 onSaveWizard:function(wizard,resp){		
+
+
+	 onSaveWizard:function(wizard,resp){
 			Phx.CP.loadingShow();
 			Ext.Ajax.request({
 				url:'../../sis_tesoreria/control/ProcesoCaja/siguienteEstadoProcesoCaja',
 				params:{
-						
+
 					id_proceso_wf_act:  resp.id_proceso_wf_act,
 					id_estado_wf_act:   resp.id_estado_wf_act,
 					id_tipo_estado:     resp.id_tipo_estado,
@@ -718,6 +772,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 					id_depto_wf:        resp.id_depto_wf,
 					obs:                resp.obs,
 					id_cuenta_bancaria:	resp.id_cuenta_bancaria,
+					id_cuenta_bancaria_mov : resp.id_cuenta_bancaria_mov,
 					json_procesos:      Ext.util.JSON.encode(resp.procesos)
 					},
 				success:this.successWizard,
@@ -726,51 +781,55 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				timeout:this.timeout,
 				scope:this
 			});
-		},		
-	
+		},
+
 	preparaMenu:function(n){
           var data = this.getSelectedData();
-          var tb =this.tbar;          
-          		  
-          Phx.vista.ProcesoCaja.superclass.preparaMenu.call(this,n); 
-          if (data['estado']== 'borrador'){    
+          var tb =this.tbar;
+
+          Phx.vista.ProcesoCaja.superclass.preparaMenu.call(this,n);
+          if (data['estado']== 'borrador'){
               this.getBoton('fin_registro').enable();
 			  this.getBoton('del').enable();
           }
-          else{            
+          else{
               this.getBoton('fin_registro').disable();
 			  this.getBoton('del').disable();
-          }	
-          
-          this.getBoton('chkpresupuesto').enable();	  
-          
+          }
+
+          this.getBoton('chkpresupuesto').enable();
+
      },
-     
+
      liberaMenu:function(n){
           var data = this.getSelectedData();
-          var tb =this.tbar;          
-          		  
-          Phx.vista.ProcesoCaja.superclass.liberaMenu.call(this,n); 
-          this.getBoton('chkpresupuesto').disable();	  
+          var tb =this.tbar;
+
+          Phx.vista.ProcesoCaja.superclass.liberaMenu.call(this,n);
+          this.getBoton('chkpresupuesto').disable();
      },
-		
+
 	successWizard:function(resp){
 			Phx.CP.loadingHide();
 			resp.argument.wizard.panel.destroy()
 			this.reload();
 		 },
-	
+
 	tabsouth:[
-            { 
+            {
              url:'../../../sis_tesoreria/vista/solicitud_rendicion_det/RendicionProcesoCaja.php',
-             title:'Detalle', 
+             title:'Detalle',
              height:'50%',
              cls:'RendicionProcesoCaja'
-            }    
+			},
+			{
+				url:'../../../sis_tesoreria/vista/caja/CajaDeposito.php',
+				title:'Depositos',
+				height:'50%',
+				cls:'CajaDeposito'
+			}
        ]
-	   
+
 	}
 )
 </script>
-		
-		

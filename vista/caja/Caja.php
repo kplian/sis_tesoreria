@@ -19,6 +19,9 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		this.init();
 		this.iniciarEventos();
 		
+	    this.addBotonesGantt();
+        
+		
 	},
 	tam_pag:50,
 			
@@ -200,7 +203,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Importe máximo Caja',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 120,
 				maxLength:1179650
 			},
 			type:'NumberField',
@@ -229,7 +232,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 				name: 'saldo',
 				fieldLabel: 'Saldo',
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 80,
 				maxLength:1179650
 			},
 			type:'NumberField',
@@ -497,8 +500,59 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
               height:'50%',
               cls:'SolicitudEfectivoCaja'
             }    
-       ]
-	}
+    ],
 	
-)
+	addBotonesGantt: function() {
+        this.menuAdqGantt = new Ext.Toolbar.SplitButton({
+		            id: 'b-diagrama_gantt-' + this.idContenedor,
+		            text: 'Gantt',
+		            disabled: true,
+		            grupo:[0,1,2,3],
+		            iconCls : 'bgantt',
+		            handler:this.diagramGanttDinamico,
+		            scope: this,
+		            menu:{
+		            items: [{
+		                id:'b-gantti-' + this.idContenedor,
+		                text: 'Gantt Imagen',
+		                tooltip: '<b>Muestra un reporte gantt en formato de imagen</b>',
+		                handler:this.diagramGantt,
+		                scope: this
+		            }, {
+		                id:'b-ganttd-' + this.idContenedor,
+		                text: 'Gantt Dinámico',
+		                tooltip: '<b>Muestra el reporte gantt facil de entender</b>',
+		                handler:this.diagramGanttDinamico,
+		                scope: this
+		            }
+		        ]}
+        });
+		this.tbar.add(this.menuAdqGantt);
+    },
+    diagramGantt: function (){			
+			var data=this.sm.getSelected().data.id_proceso_wf;
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+				url: '../../sis_workflow/control/ProcesoWf/diagramaGanttTramite',
+				params: { 'id_proceso_wf': data },
+				success: this.successExport,
+				failure: this.conexionFailure,
+				timeout: this.timeout,
+				scope: this
+			});			
+	},
+	diagramGanttDinamico: function (){			
+			var data=this.sm.getSelected().data.id_proceso_wf;
+			window.open('../../../sis_workflow/reportes/gantt/gantt_dinamico.html?id_proceso_wf='+data)		
+	},
+	
+   liberaMenu:function(){
+        var tb = Phx.vista.Caja.superclass.liberaMenu.call(this);
+        if(tb){
+           this.getBoton('diagrama_gantt').disable();
+        }
+        return tb
+    },
+	
+})
 </script>		

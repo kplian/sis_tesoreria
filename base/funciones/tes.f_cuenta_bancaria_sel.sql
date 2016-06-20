@@ -52,7 +52,7 @@ BEGIN
      				
     	begin
     		--Sentencia de la consulta
-			v_consulta:='select
+			v_consulta:='select DISTINCT
 						ctaban.id_cuenta_bancaria,
 						ctaban.estado_reg,
 						ctaban.fecha_baja,
@@ -98,7 +98,7 @@ BEGIN
 
 		begin
 			--Sentencia de la consulta de conteo de registros
-			v_consulta:='select count(id_cuenta_bancaria)
+			v_consulta:='select count(DISTINCT id_cuenta_bancaria)
 					    from tes.tcuenta_bancaria ctaban
                         inner join param.tinstitucion inst on inst.id_institucion = ctaban.id_institucion                        
                         left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda
@@ -133,7 +133,7 @@ BEGIN
             END IF;
                            
             --if(v_id_usuario!=1)then
-				v_consulta:='select
+				v_consulta:='select DISTINCT
 						ctaban.id_cuenta_bancaria,
 						ctaban.estado_reg,
 						ctaban.fecha_baja,
@@ -154,7 +154,8 @@ BEGIN
 						from tes.tcuenta_bancaria ctaban
                         inner join param.tinstitucion inst on inst.id_institucion = ctaban.id_institucion
                         inner join tes.tdepto_cuenta_bancaria deptctab on deptctab.id_cuenta_bancaria=ctaban.id_cuenta_bancaria
-                        left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda ';
+                        left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda                        
+                        left join tes.tfinalidad fin on fin.id_finalidad=ANY(ctaban.id_finalidad) ';
                 IF p_administrador !=1 THEN
                		v_consulta = v_consulta || 'inner join tes.tusuario_cuenta_banc usrbanc on usrbanc.id_cuenta_bancaria=ctaban.id_cuenta_bancaria ';
             	END IF;                        
@@ -170,35 +171,10 @@ BEGIN
                         
 				raise notice 'sarmiento %', v_parametros.filtro;
 				--Definicion de la respuesta
-				v_consulta:=v_consulta||v_parametros.filtro;
-            /*else
-            	v_consulta:='select
-						ctaban.id_cuenta_bancaria,
-						ctaban.estado_reg,
-						ctaban.fecha_baja,
-						ctaban.nro_cuenta,
-						ctaban.fecha_alta,
-						ctaban.id_institucion,
-                        inst.nombre as nombre_institucion,
-						ctaban.fecha_reg,
-						ctaban.id_usuario_reg,
-						ctaban.fecha_mod,
-						ctaban.id_usuario_mod,
-						usu1.cuenta as usr_reg,
-						usu2.cuenta as usr_mod,
-                        mon.id_moneda,	
-                        mon.codigo as codigo_moneda,
-                        ctaban.denominacion,
-                        ctaban.centro
-						from tes.tcuenta_bancaria ctaban
-                        inner join param.tinstitucion inst on inst.id_institucion = ctaban.id_institucion
-                        inner join tes.tdepto_cuenta_bancaria deptctab on deptctab.id_cuenta_bancaria=ctaban.id_cuenta_bancaria
-                        left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda
-						inner join segu.tusuario usu1 on usu1.id_usuario = ctaban.id_usuario_reg
-						left join segu.tusuario usu2 on usu2.id_usuario = ctaban.id_usuario_mod';
-            end if;*/
-			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
-			raise notice 'consulta %', v_consulta;
+				v_consulta:=v_consulta||v_parametros.filtro;                
+           		v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+                
+			raise notice 'notice %', v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 						
@@ -219,11 +195,12 @@ BEGIN
                v_filtro = 'usrbanc.id_usuario='||p_id_usuario|| ' and ' ;
             END IF;
 			--Sentencia de la consulta de conteo de registros
-			v_consulta:='select count(ctaban.id_cuenta_bancaria)
+			v_consulta:='select count(DISTINCT ctaban.id_cuenta_bancaria)
 					    from tes.tcuenta_bancaria ctaban
                         inner join param.tinstitucion inst on inst.id_institucion = ctaban.id_institucion
                         inner join tes.tdepto_cuenta_bancaria deptctab on deptctab.id_cuenta_bancaria=ctaban.id_cuenta_bancaria
-                        left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda ';
+                        left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda
+                        left join tes.tfinalidad fin on fin.id_finalidad=ANY(ctaban.id_finalidad) ';
             
             IF p_administrador !=1 THEN
         	v_consulta = v_consulta || 'inner join tes.tusuario_cuenta_banc usrbanc on usrbanc.id_cuenta_bancaria=ctaban.id_cuenta_bancaria ';

@@ -50,7 +50,7 @@ Phx.vista.FormRendicion = {
 			totalProperty: 'total',
 			fields: ['id_depto_depto', 'id_depto_destino'],
 			remoteSort: true,
-			baseParams: {id_depto: this.data.id_depto}
+			baseParams: {id_depto: this.data.id_depto, id_subsistema : 10}
 		});
 		
 		this.Cmp.id_depto_conta.store.load({params:{start:0,limit:this.tam_pag}, 

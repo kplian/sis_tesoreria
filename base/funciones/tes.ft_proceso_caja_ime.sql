@@ -29,9 +29,10 @@ DECLARE
 	v_parametros           	record;
 	v_id_requerimiento     	integer;
 	v_resp		            varchar;
+    v_resp2		            varchar;
 	v_nombre_funcion        text;
 	v_mensaje_error         text;
-	v_id_proceso_caja		integer;
+	v_id_proceso_caja	integer;
     v_codigo_tabla			varchar;
     v_num_rendicion			varchar;
     v_registros_trendicion	record;
@@ -64,6 +65,16 @@ DECLARE
     v_proceso_pendiente			varchar;
     v_sincronizar				varchar;
     v_num_tramite				varchar;
+    v_cuenta_bancaria			record;
+    v_depositante				text;
+    v_id_finalidad			integer;
+    v_respuesta				varchar;
+    v_posicion_inicial		integer;
+    v_posicion_final		integer;
+    v_id_deposito			integer;
+    v_id_fondo_rotativo		integer;
+    v_fecha_inicio			date;
+    v_fecha_fin				date;
     		    
 BEGIN
 
@@ -113,12 +124,12 @@ BEGIN
          	from tes.tcaja pv
          	where pv.id_caja = v_parametros.id_caja;            
                         
-            IF v_parametros.tipo = 'REPO' THEN
+            IF v_parametros.tipo = 'REPO' or v_parametros.tipo = 'SOLREP' THEN
             	v_codigo_documento = 'REP';
-            ELSIF v_parametros.tipo = 'RENYREP' or  v_parametros.tipo = 'RENYCER' THEN
+            ELSIF  v_parametros.tipo = 'SOLREN' or v_parametros.tipo = 'RENYREP' or  v_parametros.tipo = 'RENYCER' THEN
             	v_codigo_documento = 'REN';
-            /*ELSIF v_parametros.tipo = 'REPINI' THEN
-            	v_codigo_documento = 'REPINI';*/
+            ELSIF v_parametros.tipo = 'CIERRE' THEN
+            	v_codigo_documento = 'CIER';                
             ELSE
                 raise exception 'Tipo inexistente %', v_codigo_documento;
             END IF;
@@ -190,20 +201,46 @@ BEGIN
                    v_num_rendicion);
             --END IF;  
             v_monto_reposicion=0;
-            
-            IF(v_parametros.tipo = 'RENYREP')THEN
-            	select sum(r.monto) into v_monto_reposicion
-                from tes.tsolicitud_rendicion_det r
-                inner join tes.tsolicitud_efectivo efe on efe.id_solicitud_efectivo=r.id_solicitud_efectivo
-                inner join conta.tdoc_compra_venta d on d.id_doc_compra_venta=r.id_documento_respaldo
-                where r.id_proceso_caja is null and efe.id_caja=v_parametros.id_caja
-                and d.fecha BETWEEN v_parametros.fecha_inicio and v_parametros.fecha_fin
-                and efe.estado='rendido';
-            END IF;
-            
-            IF (v_parametros.tipo = 'REPO') THEN
-            	v_monto_reposicion =v_registros.importe_maximo_caja;
-            END IF; 
+			/*
+            CASE WHEN v_parametros.tipo in ('RENYREP','RENYCER') THEN            
+                    select sum(r.monto) into v_monto_reposicion
+                    from tes.tsolicitud_rendicion_det r
+                    inner join tes.tsolicitud_efectivo efe on efe.id_solicitud_efectivo=r.id_solicitud_efectivo
+                    inner join conta.tdoc_compra_venta d on d.id_doc_compra_venta=r.id_documento_respaldo
+                    where r.id_proceso_caja is null and efe.id_caja=v_parametros.id_caja
+                    and d.fecha BETWEEN v_parametros.fecha_inicio and v_parametros.fecha_fin
+                    and efe.estado='rendido';
+                 WHEN v_parametros.tipo = 'SOLREP' THEN
+                 	select sum(monto_reposicion) into v_monto_reposicion
+                    from tes.tproceso_caja
+                    where tipo='SOLREN' and id_caja=v_parametros.id_caja 
+                    and estado ='rendido' and id_proceso_caja_repo is null;                                        
+            	 WHEN v_parametros.tipo = 'REPO' THEN
+            	    v_monto_reposicion =v_registros.importe_maximo_caja;
+                 ELSE
+             END CASE; 
+              */
+             IF v_parametros.tipo in ('RENYREP','RENYCER') THEN            
+                    select sum(r.monto) into v_monto_reposicion
+                    from tes.tsolicitud_rendicion_det r
+                    inner join tes.tsolicitud_efectivo efe on efe.id_solicitud_efectivo=r.id_solicitud_efectivo
+                    inner join conta.tdoc_compra_venta d on d.id_doc_compra_venta=r.id_documento_respaldo
+                    where r.id_proceso_caja is null and efe.id_caja=v_parametros.id_caja
+                    and d.fecha BETWEEN v_parametros.fecha_inicio and v_parametros.fecha_fin
+                    and efe.estado='rendido';
+             END IF;
+             
+             IF v_parametros.tipo = 'SOLREP' THEN
+                 	select sum(det.monto) into v_monto_reposicion
+                    from tes.tproceso_caja c
+                    inner join tes.tsolicitud_rendicion_det det on det.id_proceso_caja=c.id_proceso_caja
+                    where c.tipo='SOLREN' and c.id_caja=v_parametros.id_caja 
+                    and c.estado ='rendido' and c.id_proceso_caja_repo is null;
+             END IF;
+             
+             IF v_parametros.tipo = 'REPO' THEN
+            	    v_monto_reposicion =v_registros.importe_maximo_caja;
+             END IF;
                       
         	--Sentencia de la insercion de la rendicion o reposicion de caja
         	insert into tes.tproceso_caja(
@@ -254,17 +291,24 @@ BEGIN
             v_id_gestion
 			)RETURNING id_proceso_caja into v_id_proceso_caja;
           	
-            --asocia las facturas con el proceso caja de la rendicion de caja  
-            UPDATE tes.tsolicitud_rendicion_det
-            SET id_proceso_caja = v_id_proceso_caja
-            WHERE id_solicitud_rendicion_det in (select r.id_solicitud_rendicion_det
-                                                from tes.tsolicitud_rendicion_det r
-                                                inner join tes.tsolicitud_efectivo efe on efe.id_solicitud_efectivo=r.id_solicitud_efectivo
-                                                inner join conta.tdoc_compra_venta d on d.id_doc_compra_venta=r.id_documento_respaldo
-                                                where r.id_proceso_caja is null and efe.id_caja=v_parametros.id_caja
-                                                and d.fecha BETWEEN v_parametros.fecha_inicio and v_parametros.fecha_fin
-                                                and efe.estado='rendido');
-			
+            IF v_parametros.tipo in ('SOLREN','RENYREP','RENYCER') THEN
+                --asocia las facturas con el proceso caja de la rendicion de caja  
+                UPDATE tes.tsolicitud_rendicion_det
+                SET id_proceso_caja = v_id_proceso_caja
+                WHERE id_solicitud_rendicion_det in (select r.id_solicitud_rendicion_det
+                                                    from tes.tsolicitud_rendicion_det r
+                                                    inner join tes.tsolicitud_efectivo efe on efe.id_solicitud_efectivo=r.id_solicitud_efectivo
+                                                    inner join conta.tdoc_compra_venta d on d.id_doc_compra_venta=r.id_documento_respaldo
+                                                    where r.id_proceso_caja is null and efe.id_caja=v_parametros.id_caja
+                                                    and d.fecha BETWEEN v_parametros.fecha_inicio and v_parametros.fecha_fin
+                                                    and efe.estado='rendido');
+    		ELSIF v_parametros.tipo = 'SOLREP' THEN
+            	UPDATE tes.tproceso_caja
+                SET id_proceso_caja_repo = v_id_proceso_caja
+                WHERE tipo='SOLREN' and id_caja=v_parametros.id_caja 
+                and estado='rendido' and id_proceso_caja_repo is null;
+            END IF;
+            	
 			--Definicion de la respuesta
 			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion Caja almacenado(a) con exito (id_proceso_caja'||v_id_proceso_caja||')'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_proceso_caja',v_id_proceso_caja::varchar);
@@ -330,6 +374,10 @@ BEGIN
             SET id_proceso_caja = NULL
             WHERE id_proceso_caja = v_parametros.id_proceso_caja;
             
+            UPDATE tes.tproceso_caja
+            SET id_proceso_caja_repo = NULL
+            WHERE id_proceso_caja_repo = v_parametros.id_proceso_caja;
+            
             delete from tes.tproceso_caja
             where id_proceso_caja=v_parametros.id_proceso_caja;
               
@@ -377,11 +425,6 @@ BEGIN
         from tes.tproceso_caja pc
         inner join tes.ttipo_proceso_caja tpc on tpc.id_tipo_proceso_caja = pc.id_tipo_proceso_caja
         where pc.id_proceso_wf = v_parametros.id_proceso_wf_act;
-        
-        
-       
-        
-        
           
           select 
             ew.id_tipo_estado,
@@ -467,7 +510,7 @@ BEGIN
            IF v_codigo_estado_siguiente in ('supconta','vbfondos') THEN
                 
                 update tes.tproceso_caja  p set 
-                 id_depto_conta = v_id_depto           
+                 id_depto_conta = v_id_depto     
                 where id_proceso_wf = v_parametros.id_proceso_wf_act;  
                         
           END IF;	
@@ -475,7 +518,8 @@ BEGIN
 		  IF v_codigo_estado_siguiente = 'pendiente' THEN
                 
                 update tes.tproceso_caja  p set 
-                 id_cuenta_bancaria=v_parametros.id_cuenta_bancaria           
+                 id_cuenta_bancaria=v_parametros.id_cuenta_bancaria,
+                 id_cuenta_bancaria_mov = v_parametros.id_cuenta_bancaria_mov      
                 where id_proceso_wf = v_parametros.id_proceso_wf_act;          
           	
             
@@ -491,6 +535,7 @@ BEGIN
                 v_id_int_comprobante =   conta.f_gen_comprobante ( 
                                                      v_id_proceso_caja , 
                                                      v_codigo_plantilla_cbte ,
+                                                     v_id_estado_actual,
                                                      p_id_usuario,
                                                      v_parametros._id_usuario_ai, 
                                                      v_parametros._nombre_usuario_ai, 
@@ -597,7 +642,183 @@ BEGIN
             return v_resp;
                         
         END;
-         
+        
+    /*********************************    
+ 	#	TRANSACCION:  'TES_DEP_INS'
+ 	#	DESCRIPCION:	Insercion de registro de depositos de caja
+ 	#	AUTOR:		gsarmiento	
+ 	#	FECHA:		17-05-2016 20:15:22
+	***********************************/
+
+	elsif(p_transaccion='TES_DEP_INS')then
+    	BEGIN
+
+        IF v_parametros.id_cuenta_bancaria is NULL THEN
+        	raise exception 'No existe una cuenta bancaria a la cual se depositara';
+        END IF;
+
+        select dcb.id_depto,int.nombre, cb.nro_cuenta into v_cuenta_bancaria
+        from tes.tdepto_cuenta_bancaria dcb
+        inner join tes.tcuenta_bancaria cb on cb.id_cuenta_bancaria=dcb.id_cuenta_bancaria
+		inner join param.tinstitucion int on int.id_institucion=cb.id_institucion
+        where dcb.id_cuenta_bancaria=v_parametros.id_cuenta_bancaria::integer;
+        
+        IF v_cuenta_bancaria.id_depto IS NULL THEN
+        	raise exception 'No existe un departamento de libro de bancos relacionado a la cuenta bancaria %',v_cuenta_bancaria.nombre;
+        END IF;
+        
+        SELECT p.nombre_completo1 into v_depositante
+        FROM segu.tusuario u
+        INNER JOIN segu.vpersona p on p.id_persona=u.id_persona
+        WHERE u.id_usuario=p_id_usuario;
+
+		IF v_parametros.tipo_deposito = 'FONDO ROTATIVO' THEN
+            SELECT id_finalidad into v_id_finalidad
+            FROM tes.tfinalidad
+            WHERE nombre_finalidad ilike 'Fondo Rotativo'::varchar;
+		ELSIF v_parametros.tipo_deposito = 'RETENCION' THEN
+        	SELECT id_finalidad into v_id_finalidad
+            FROM tes.tfinalidad
+            WHERE nombre_finalidad ilike 'Proveedores'::varchar;
+        ELSE
+        	raise exception 'Tipo de Deposito inexistente';
+        END IF;
+                
+        IF pxp.f_get_variable_global('sincronizar_central') THEN  --internacional
+            v_resp2 = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,
+            array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','fecha','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','id_int_comprobante','sistema_origen'],
+            array[' 0 = 0 ','','','','','NULL','NULL',v_parametros.id_cuenta_bancaria::varchar,v_cuenta_bancaria.id_depto::varchar,''||v_parametros.fecha::varchar||'',(v_cuenta_bancaria.nombre||' '||v_cuenta_bancaria.nro_cuenta||' DEPOSITO')::varchar,''::varchar,v_parametros.importe_deposito::varchar,'','DEPOSITADO POR '||v_depositante::varchar,v_parametros.origen::varchar,v_parametros.observaciones::varchar,'0'::varchar,'NULL','','','deposito'::varchar,v_id_finalidad::varchar,''::varchar,''::varchar],
+            array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','date','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','int4','varchar']
+            ,'',NULL,NULL);
+        ELSE	--central
+        	
+        	IF v_parametros.tipo_deposito = 'FONDO ROTATIVO' THEN
+                       
+            	select max(id_libro_bancos) into v_id_fondo_rotativo
+                from tes.tts_libro_bancos 
+                where id_cuenta_bancaria=v_parametros.id_cuenta_bancaria::integer
+                and fondo_devolucion_retencion='si';
+                
+                IF v_id_fondo_rotativo IS NULL THEN
+                	raise exception 'No existe un fondo asignado como fondo para depositos de devolucion';
+                END IF;
+                
+                RAISE NOTICE 'id_finalidad %, id_libro_bancos %', v_id_finalidad, v_id_fondo_rotativo;
+                		
+                v_resp2 = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,
+                            array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','fecha','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','id_int_comprobante','sistema_origen'],
+                            array[' 0 = 0 ','','','','','NULL','NULL',v_parametros.id_cuenta_bancaria::varchar,v_cuenta_bancaria.id_depto::varchar,''||v_parametros.fecha::varchar||'',(v_cuenta_bancaria.nombre||' '||v_cuenta_bancaria.nro_cuenta||' DEPOSITO')::varchar,''::varchar,v_parametros.importe_deposito::varchar,'','DEPOSITADO POR '||v_depositante::varchar,v_parametros.origen::varchar,v_parametros.observaciones::varchar,'0'::varchar,v_id_fondo_rotativo::varchar,'','','deposito'::varchar,v_id_finalidad::varchar,''::varchar,''::varchar],
+                            array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','date','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','int4','varchar']
+                            ,'',NULL,NULL);
+            ELSIF v_parametros.tipo_deposito = 'RETENCION' THEN
+            
+            	select fecha_ini, fecha_fin into v_fecha_inicio, v_fecha_fin
+                from param.tperiodo p
+                where v_parametros.fecha BETWEEN fecha_ini and fecha_fin;
+            	
+            	select id_libro_bancos into v_id_fondo_rotativo
+                from tes.tts_libro_bancos 
+                where id_cuenta_bancaria=v_parametros.id_cuenta_bancaria::integer
+                and fondo_devolucion_retencion='si' and (fecha between v_fecha_inicio and v_fecha_fin);
+                
+                IF v_id_fondo_rotativo IS NULL THEN
+                	v_resp2 = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,
+                            array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','fecha','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','id_int_comprobante','sistema_origen'],
+                            array[' 0 = 0 ','','','','','NULL','NULL',v_parametros.id_cuenta_bancaria::varchar,v_cuenta_bancaria.id_depto::varchar,''||v_parametros.fecha::varchar||'',(v_cuenta_bancaria.nombre||' '||v_cuenta_bancaria.nro_cuenta||' DEPOSITO')::varchar,''::varchar,v_parametros.importe_deposito::varchar,'','DEPOSITADO POR '||v_depositante::varchar,v_parametros.origen::varchar,v_parametros.observaciones::varchar,'0'::varchar,'NULL','','','deposito'::varchar,v_id_finalidad::varchar,''::varchar,''::varchar],
+                            array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','date','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','int4','varchar']
+                            ,'',NULL,NULL);
+                            
+                    v_respuesta = substring(v_resp2 from '%#"tipo_respuesta":"_____"#"%' for '#');
+                                                    
+                    IF v_respuesta = 'tipo_respuesta":"ERROR"' THEN
+                        v_posicion_inicial = position('"mensaje":"' in v_resp2) + 11;	
+                        v_posicion_final = position('"codigo_error":' in v_resp2) - 2;	
+                        RAISE EXCEPTION 'No se pudo ingresar el deposito en libro de bancos ERP-BOA: mensaje: %',substring(v_resp2 from v_posicion_inicial for (v_posicion_final-v_posicion_inicial));
+                    ELSE 
+                        v_posicion_inicial = position('"id_libro_bancos":"' in v_resp2) + 19;
+                        v_posicion_final = position('"}' in v_resp2);
+                        v_id_deposito=substring(v_resp2 from v_posicion_inicial for (v_posicion_final-v_posicion_inicial));
+                                                          
+                    END IF;--fin error respuesta 
+                      
+                    UPDATE tes.tts_libro_bancos
+                    SET fondo_devolucion_retencion = 'si'
+                    WHERE id_libro_bancos=v_id_deposito;
+                    
+                ELSE
+                	v_resp2 = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,
+                            array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','fecha','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','id_int_comprobante','sistema_origen'],
+                            array[' 0 = 0 ','','','','','NULL','NULL',v_parametros.id_cuenta_bancaria::varchar,v_cuenta_bancaria.id_depto::varchar,''||v_parametros.fecha::varchar||'',(v_cuenta_bancaria.nombre||' '||v_cuenta_bancaria.nro_cuenta||' DEPOSITO')::varchar,''::varchar,v_parametros.importe_deposito::varchar,'','DEPOSITADO POR '||v_depositante::varchar,v_parametros.origen::varchar,v_parametros.observaciones::varchar,'0'::varchar,v_id_fondo_rotativo::varchar,'','','deposito'::varchar,v_id_finalidad::varchar,''::varchar,''::varchar],
+                            array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','date','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','int4','varchar']
+                            ,'',NULL,NULL);
+                END IF;
+                
+            ELSE
+            	raise exception 'No existe el tipo de deposito mencionado';	
+            END IF;
+        END IF;
+            
+                                   
+        v_respuesta = substring(v_resp2 from '%#"tipo_respuesta":"_____"#"%' for '#');
+                                                    
+        IF v_respuesta = 'tipo_respuesta":"ERROR"' THEN
+            v_posicion_inicial = position('"mensaje":"' in v_resp2) + 11;	
+            v_posicion_final = position('"codigo_error":' in v_resp2) - 2;	
+            RAISE EXCEPTION 'No se pudo ingresar el deposito en libro de bancos ERP-BOA: mensaje: %',substring(v_resp2 from v_posicion_inicial for (v_posicion_final-v_posicion_inicial));
+        ELSE 
+            v_posicion_inicial = position('"id_libro_bancos":"' in v_resp2) + 19;
+            v_posicion_final = position('"}' in v_resp2);
+            v_id_deposito=substring(v_resp2 from v_posicion_inicial for (v_posicion_final-v_posicion_inicial));
+                                            
+        END IF;--fin error respuesta 
+        
+        UPDATE tes.tts_libro_bancos
+        SET tabla=v_parametros.tabla,
+        columna_pk=v_parametros.columna_pk,
+        columna_pk_valor=v_parametros.columna_pk_valor
+        WHERE id_libro_bancos=v_id_deposito;
+        
+        --Definicion de la respuesta
+        v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Deposito de Caja almacenado(a) con exito'); 
+        v_resp = pxp.f_agrega_clave(v_resp,'columna_pk_valor',v_parametros.columna_pk_valor::varchar);
+        v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_id_deposito::varchar);
+        
+       
+        
+
+        --Devuelve la respuesta
+        return v_resp;
+    	
+        END;
+    
+    /*********************************    
+ 	#	TRANSACCION:  'TES_DEP_ELI'
+ 	#	DESCRIPCION:	Eliminacion de registro de depositos de caja
+ 	#	AUTOR:		gsarmiento	
+ 	#	FECHA:		20-05-2016 20:15:22
+	***********************************/
+
+	elsif(p_transaccion='TES_DEP_ELI')then
+    	begin
+            
+            IF NOT EXISTS (SELECT 1
+            			   FROM tes.tts_libro_bancos
+            			   WHERE id_libro_bancos=v_parametros.id_libro_bancos)THEN
+            	raise exception 'No existe el registro que desea eliminar';
+            END IF;
+            
+            delete from tes.tts_libro_bancos
+            where id_libro_bancos=v_parametros.id_libro_bancos;
+              
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Deposito eliminado(a)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_parametros.id_libro_bancos::varchar);
+              
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;
+        
 	else
      
     	raise exception 'Transaccion inexistente: %',p_transaccion;

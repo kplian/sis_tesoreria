@@ -9,23 +9,25 @@
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
 require_once(dirname(__FILE__).'/../reportes/RSolicitudEfectivo.php');
+require_once(dirname(__FILE__).'/../reportes/RReciboEntrega.php');
+require_once(dirname(__FILE__).'/../reportes/RRendicionEfectivo.php');
 
-class ACTSolicitudEfectivo extends ACTbase{    
-			
+class ACTSolicitudEfectivo extends ACTbase{
+
 	function listarSolicitudEfectivo(){
 		$this->objParam->defecto('ordenacion','id_solicitud_efectivo');
 		$this->objParam->defecto('dir_ordenacion','asc');
-		
+
 		if($this->objParam->getParametro('tipo_interfaz')=='ConDetalle')
 		{
-			$this->objParam-> addFiltro("caja.tipo_ejecucion = ''con_detalle''");				
+			$this->objParam-> addFiltro("caja.tipo_ejecucion = ''con_detalle''");
 		}
-		
+
 		if($this->objParam->getParametro('tipo_interfaz')=='SinDetalle')
 		{
 			$this->objParam-> addFiltro("caja.tipo_ejecucion = ''sin_detalle''");
 		}
-				
+
 		if($this->objParam->getParametro('id_caja')!='')
 		{
 			if($this->objParam->getParametro('tipo_interfaz')=='efectivoCaja'){
@@ -35,68 +37,68 @@ class ACTSolicitudEfectivo extends ACTbase{
 				$this->objParam-> addFiltro('ren.id_caja ='.$this->objParam->getParametro('id_caja'));
 			}
 		}
-		
+
 		if($this->objParam->getParametro('id_solicitud_efectivo')!='')
 		{
 			$this->objParam-> addFiltro('solefe.fk_id_solicitud_efectivo ='.$this->objParam->getParametro('id_solicitud_efectivo'));
 		}
-		
+
 		$this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]);
-				
+
 		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
 			$this->objReporte = new Reporte($this->objParam,$this);
 			$this->res = $this->objReporte->generarReporteListado('MODSolicitudEfectivo','listarSolicitudEfectivo');
 		} else{
 			$this->objFunc=$this->create('MODSolicitudEfectivo');
-			
+
 			$this->res=$this->objFunc->listarSolicitudEfectivo($this->objParam);
 		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
-				
+
 	function insertarSolicitudEfectivo(){
-		$this->objFunc=$this->create('MODSolicitudEfectivo');	
+		$this->objFunc=$this->create('MODSolicitudEfectivo');
 		if($this->objParam->insertar('id_solicitud_efectivo')){
-			$this->res=$this->objFunc->insertarSolicitudEfectivo($this->objParam);			
-		} else{			
+			$this->res=$this->objFunc->insertarSolicitudEfectivo($this->objParam);
+		} else{
 			$this->res=$this->objFunc->modificarSolicitudEfectivo($this->objParam);
 		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
-						
+
 	function eliminarSolicitudEfectivo(){
-			$this->objFunc=$this->create('MODSolicitudEfectivo');	
+			$this->objFunc=$this->create('MODSolicitudEfectivo');
 		$this->res=$this->objFunc->eliminarSolicitudEfectivo($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
-	
+
 	function siguienteEstadoSolicitudEfectivo(){
-			$this->objFunc=$this->create('MODSolicitudEfectivo');	
+			$this->objFunc=$this->create('MODSolicitudEfectivo');
 		$this->res=$this->objFunc->siguienteEstadoSolicitudEfectivo($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
-	
+
 	function anteriorEstadoSolicitudEfectivo(){
-			$this->objFunc=$this->create('MODSolicitudEfectivo');	
+			$this->objFunc=$this->create('MODSolicitudEfectivo');
 		$this->res=$this->objFunc->anteriorEstadoSolicitudEfectivo($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
-	
+
 	function insertarSolicitudEfectivoCompleta(){
-		//$this->objParam->addParametro('tipo_solicitud','solicitud');		
-		$this->objFunc=$this->create('MODSolicitudEfectivo');	
-		if($this->objParam->insertar('id_solicitud_efectivo')){						
-			$this->res=$this->objFunc->insertarSolicitudEfectivoCompleta($this->objParam);			
-		} 
+		//$this->objParam->addParametro('tipo_solicitud','solicitud');
+		$this->objFunc=$this->create('MODSolicitudEfectivo');
+		if($this->objParam->insertar('id_solicitud_efectivo')){
+			$this->res=$this->objFunc->insertarSolicitudEfectivoCompleta($this->objParam);
+		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 
-	function devolucionSolicitudEfectivo(){		
-		$this->objFunc=$this->create('MODSolicitudEfectivo');							
-		$this->res=$this->objFunc->devolucionSolicitudEfectivo($this->objParam);					
+	function devolucionSolicitudEfectivo(){
+		$this->objFunc=$this->create('MODSolicitudEfectivo');
+		$this->res=$this->objFunc->devolucionSolicitudEfectivo($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
-	
+
 	function reporteSolicitudEfectivo($create_file=false, $onlyData = false){
 		$dataSource = new DataSource();
 		//captura datos de firma
@@ -109,23 +111,23 @@ class ACTSolicitudEfectivo extends ACTbase{
 			$fecha_firma = '';
 			$usuario_firma = '';
 		}
-		
+
 		if($this->objParam->getParametro('id_solicitud_efectivo')!='')
 		{
 			$this->objParam-> addFiltro('solefe.id_solicitud_efectivo ='.$this->objParam->getParametro('id_solicitud_efectivo'));
 		}
-		
+
 		$this->objParam->addParametroConsulta('ordenacion','id_solicitud_efectivo');
 		$this->objParam->addParametroConsulta('dir_ordenacion','ASC');
 		$this->objParam->addParametroConsulta('cantidad',1000);
 		$this->objParam->addParametroConsulta('puntero',0);
-		
+
 		$this->objFunc = $this->create('MODSolicitudEfectivo');
-		
+
 		$resultSolicitud = $this->objFunc->reporteSolicitudEfectivo();
-		
+
 		$datosSolicitud = $resultSolicitud->getDatos();
-		
+
 		//armamos el array parametros y metemos ahi los data sets de las otras tablas
 		$dataSource->putParameter('codigo', $datosSolicitud[0]['codigo']);
 		$dataSource->putParameter('monto', $datosSolicitud[0]['monto']);
@@ -134,49 +136,49 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$dataSource->putParameter('monto_literal', $datosSolicitud[0]['monto_literal']);
 		$dataSource->putParameter('nro_tramite', $datosSolicitud[0]['nro_tramite']);
 		$dataSource->putParameter('estado', $datosSolicitud[0]['estado']);
-		$dataSource->putParameter('desc_funcionario', $datosSolicitud[0]['desc_funcionario']);		
+		$dataSource->putParameter('desc_funcionario', $datosSolicitud[0]['desc_funcionario']);
 		$dataSource->putParameter('motivo', $datosSolicitud[0]['motivo']);
 		$dataSource->putParameter('fecha', $datosSolicitud[0]['fecha']);
-		
+
 		//get detalle
     //Reset all extra params:
     $this->objParam->defecto('ordenacion', 'id_solicitud_efectivo_det');
     $this->objParam->defecto('cantidad', 1000);
     $this->objParam->defecto('puntero', 0);
-    
+
     $modSolicitudEfecitovDet = $this->create('MODSolicitudEfectivoDet');
     //lista el detalle de la solicitud
     $resultSolicitudEfectivoDet = $modSolicitudEfecitovDet->listarSolicitudEfectivoDet();
-    
-	//agrupa el detalle de la solcitud por centros de costos y partidas    
+	
+	//agrupa el detalle de la solcitud por centros de costos y partidas
     $solicitudEfectivoDetAgrupado = $this->groupArray($resultSolicitudEfectivoDet->getDatos(), 'desc_ingas','codigo_cc', $datosSolicitud[0]['id_moneda'],$datosSolicitud[0]['estado'],$onlyData);
     //var_dump($solicitudEfectivoDetAgrupado); exit;
-    
-    $solicitudEfectivoDetDataSource = new DataSource();    
+
+    $solicitudEfectivoDetDataSource = new DataSource();
     $solicitudEfectivoDetDataSource->setDataSet($solicitudEfectivoDetAgrupado);
-	
-	//inserta el detalle de la solicitud como origen de datos    
+
+	//inserta el detalle de la solicitud como origen de datos
     $dataSource->putParameter('detalleDataSource', $solicitudEfectivoDetDataSource);
-    			
+
 		if ($onlyData){
-			
+
 			return $dataSource;
-		} 
-		$nombreArchivo = uniqid(md5(session_id()).'SolicitudEfectivo') . '.pdf'; 
+		}
+		$nombreArchivo = uniqid(md5(session_id()).'SolicitudEfectivo') . '.pdf';
 		$this->objParam->addParametro('orientacion','P');
-		$this->objParam->addParametro('tamano','LETTER');		
+		$this->objParam->addParametro('tamano','LETTER');
 		$this->objParam->addParametro('titulo_archivo','SOLICITUD DE EFECTIVO');
-		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);  
-		$this->objParam->addParametro('firmar',$firmar); 
-		$this->objParam->addParametro('fecha_firma',$fecha_firma); 
-		$this->objParam->addParametro('usuario_firma',$usuario_firma);   
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+		$this->objParam->addParametro('firmar',$firmar);
+		$this->objParam->addParametro('fecha_firma',$fecha_firma);
+		$this->objParam->addParametro('usuario_firma',$usuario_firma);
 		//build the report
 		$reporte = new RSolicitudEfectivo($this->objParam);
-		
+
 		$reporte->setDataSource($dataSource);
-		
+
 		$reporte->write();
-		
+
 			if(!$create_file){
 						$mensajeExito = new Mensaje();
 						$mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
@@ -190,13 +192,188 @@ class ACTSolicitudEfectivo extends ACTbase{
 						$this->res->imprimirRespuesta($this->res->generarJson());
 			}
 			else{
-						
-				return dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo;  
-				
+
+				return dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo;
+
+			}
+	}
+
+	function reporteReciboEntrega($create_file=false, $onlyData = false){
+		$dataSource = new DataSource();
+		//captura datos de firma
+		if ($this->objParam->getParametro('firmar') == 'si') {
+			$firmar = 'si';
+			$fecha_firma = $this->objParam->getParametro('fecha_firma');
+			$usuario_firma = $this->objParam->getParametro('usuario_firma');
+		} else {
+			$firmar = 'no';
+			$fecha_firma = '';
+			$usuario_firma = '';
+		}
+
+		if($this->objParam->getParametro('id_solicitud_efectivo')!='')
+		{
+			$this->objParam-> addFiltro('sol.id_solicitud_efectivo ='.$this->objParam->getParametro('id_solicitud_efectivo'));
+		}
+
+		$this->objParam->addParametroConsulta('ordenacion','sol.id_solicitud_efectivo');
+		$this->objParam->addParametroConsulta('dir_ordenacion','ASC');
+		$this->objParam->addParametroConsulta('cantidad',1000);
+		$this->objParam->addParametroConsulta('puntero',0);
+
+		$this->objFunc = $this->create('MODSolicitudEfectivo');
+
+		$resultSolicitud = $this->objFunc->reporteReciboEntrega();
+
+		$datosSolicitud = $resultSolicitud->getDatos();		
+		
+		//armamos el array parametros y metemos ahi los data sets de las otras tablas
+		$dataSource->putParameter('fecha_entrega', $datosSolicitud[0]['fecha_entrega']);
+		$dataSource->putParameter('moneda', $datosSolicitud[0]['moneda']);
+		$dataSource->putParameter('nro_tramite', $datosSolicitud[0]['nro_tramite']);
+		$dataSource->putParameter('codigo', $datosSolicitud[0]['codigo']);
+		$dataSource->putParameter('cajero', $datosSolicitud[0]['cajero']);
+		$dataSource->putParameter('nombre_unidad', $datosSolicitud[0]['nombre_unidad']);
+		$dataSource->putParameter('solicitante', $datosSolicitud[0]['solicitante']);
+		$dataSource->putParameter('motivo', $datosSolicitud[0]['motivo']);
+		$dataSource->putParameter('monto', $datosSolicitud[0]['monto']);
+		
+		if ($onlyData){
+
+			return $dataSource;
+		}
+		$nombreArchivo = uniqid(md5(session_id()).'ReciboEntregaSolicitante') . '.pdf';
+		$this->objParam->addParametro('orientacion','P');
+		$this->objParam->addParametro('tamano','LETTER');
+		$this->objParam->addParametro('titulo_archivo','RECIBO DE ENTREGA');
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+		$this->objParam->addParametro('firmar',$firmar);
+		$this->objParam->addParametro('fecha_firma',$fecha_firma);
+		$this->objParam->addParametro('usuario_firma',$usuario_firma);
+		//build the report
+		$reporte = new RReciboEntrega($this->objParam);
+
+		$reporte->setDataSource($dataSource);
+
+		$reporte->write();
+
+			if(!$create_file){
+						$mensajeExito = new Mensaje();
+						$mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
+														'Se generó con éxito el reporte: '.$nombreArchivo,'control');
+						$mensajeExito->setArchivoGenerado($nombreArchivo);
+						//anade los datos de firma a la respuesta
+						/*if ($firmar == 'si') {
+							$mensajeExito->setDatos($datos_firma);
+						}*/
+						$this->res = $mensajeExito;
+						$this->res->imprimirRespuesta($this->res->generarJson());
+			}
+			else{
+
+				return dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo;
+
 			}
 	}
 	
-function groupArray($array,$groupkey,$groupkeyTwo,$id_moneda,$estado_sol, $onlyData){
+	function reporteRendicionEfectivo($create_file=false, $onlyData = false){
+		$dataSource = new DataSource();
+		//captura datos de firma
+		if ($this->objParam->getParametro('firmar') == 'si') {
+			$firmar = 'si';
+			$fecha_firma = $this->objParam->getParametro('fecha_firma');
+			$usuario_firma = $this->objParam->getParametro('usuario_firma');
+		} else {
+			$firmar = 'no';
+			$fecha_firma = '';
+			$usuario_firma = '';
+		}
+
+		if($this->objParam->getParametro('id_solicitud_efectivo')!='')
+		{
+			$this->objParam-> addFiltro('sol.id_solicitud_efectivo ='.$this->objParam->getParametro('id_solicitud_efectivo'));
+		}
+
+		$this->objParam->addParametroConsulta('ordenacion','sol.id_solicitud_efectivo');
+		$this->objParam->addParametroConsulta('dir_ordenacion','ASC');
+		$this->objParam->addParametroConsulta('cantidad',1000);
+		$this->objParam->addParametroConsulta('puntero',0);
+
+		$this->objFunc = $this->create('MODSolicitudEfectivo');
+
+		$resultReciboEntrega = $this->objFunc->reporteReciboEntrega();
+
+		$datosReciboEntrega = $resultReciboEntrega->getDatos();		
+
+		//armamos el array parametros y metemos ahi los data sets de las otras tablas
+		$dataSource->putParameter('fecha_entrega', $datosReciboEntrega[0]['fecha_entrega']);
+		$dataSource->putParameter('moneda', $datosReciboEntrega[0]['moneda']);
+		$dataSource->putParameter('nro_tramite', $datosReciboEntrega[0]['nro_tramite']);
+		$dataSource->putParameter('codigo', $datosReciboEntrega[0]['codigo']);
+		$dataSource->putParameter('cajero', $datosReciboEntrega[0]['cajero']);
+		$dataSource->putParameter('nombre_unidad', $datosReciboEntrega[0]['nombre_unidad']);
+		$dataSource->putParameter('solicitante', $datosReciboEntrega[0]['solicitante']);
+		$dataSource->putParameter('motivo', $datosReciboEntrega[0]['motivo']);
+		$dataSource->putParameter('monto', $datosReciboEntrega[0]['monto']);
+		$dataSource->putParameter('fecha_rendicion', $datosReciboEntrega[0]['fecha_rendicion']);
+		
+		$this->objParam->defecto('ordenacion', 'fecha');
+		$this->objParam->defecto('cantidad', 1000);
+		$this->objParam->defecto('puntero', 0);
+
+		$modRendicionEfectivo = $this->create('MODSolicitudEfectivo');
+		//lista el detalle de la rendicion
+		$resultRendicionEfectivo = $modRendicionEfectivo->reporteRendicionEfectivo();
+		//var_dump($resultRendicionEfectivo); exit;
+		//agrupa el detalle de la rendicion por centros de costos y partidas
+		//$solicitudRendicionEfectivoAgrupado = $this->groupArray($resultRendicionEfectivo->getDatos(), 'desc_ingas','codigo_cc', $datosSolicitud[0]['id_moneda'],$datosSolicitud[0]['estado'],$onlyData);
+		
+		
+		$solicitudRendicionEfectivoDataSource = new DataSource();
+		$solicitudRendicionEfectivoDataSource->setDataSet($resultRendicionEfectivo->getDatos());
+
+		//inserta el detalle de la solicitud como origen de datos
+		$dataSource->putParameter('detalleDataSource', $solicitudRendicionEfectivoDataSource);
+		
+		if ($onlyData){
+
+			return $dataSource;
+		}
+		$nombreArchivo = uniqid(md5(session_id()).'RendicionEfectivo') . '.pdf';
+		$this->objParam->addParametro('orientacion','P');
+		$this->objParam->addParametro('tamano','LETTER');
+		$this->objParam->addParametro('titulo_archivo','RECIBO DE ENTREGA');
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+		$this->objParam->addParametro('firmar',$firmar);
+		$this->objParam->addParametro('fecha_firma',$fecha_firma);
+		$this->objParam->addParametro('usuario_firma',$usuario_firma);
+		//build the report
+		$reporte = new RRendicionEfectivo($this->objParam);
+
+		$reporte->setDataSource($dataSource);
+
+		$reporte->write();
+
+			if(!$create_file){
+						$mensajeExito = new Mensaje();
+						$mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
+														'Se generó con éxito el reporte: '.$nombreArchivo,'control');
+						$mensajeExito->setArchivoGenerado($nombreArchivo);
+						//anade los datos de firma a la respuesta
+						/*if ($firmar == 'si') {
+							$mensajeExito->setDatos($datos_firma);
+						}*/
+						$this->res = $mensajeExito;
+						$this->res->imprimirRespuesta($this->res->generarJson());
+			}
+			else{
+
+				return dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo;
+
+			}
+	}
+	
+	function groupArray($array,$groupkey,$groupkeyTwo,$id_moneda,$estado_sol, $onlyData){
 	 if (count($array)>0)
 	 {
 	 	//recupera las llaves del array    

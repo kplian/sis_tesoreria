@@ -481,19 +481,43 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 							{
 							config:{
 								name: 'devolucion_dinero',
-								fieldLabel: 'Devolucion dinero?',
-								allowBlank: false,
-								emptyText:'Elija una opcion...',
-								typeAhead: true,
-								disabled :true,
-								triggerAction: 'all',
-								lazyRender:true,
-								mode: 'local',
-								anchor: '50%',
-								//store:['si'],
+								inputType:'hidden',
 								value: 'si'
 							},
-							type:'ComboBox',						
+							type:'Field',						
+							form:true
+						},
+						{
+							config:{
+								name: 'estado',
+								fieldLabel: 'estado',
+								inputType:'hidden',
+								value : rec.data.estado
+							},
+							type:'Field',						
+							form:true
+						}];
+	  }else{
+		  configExtra = [
+						{
+							config:{
+								name: 'saldo',
+								fieldLabel: 'Saldo Efectivo',
+								inputType:'hidden',
+								value : rec.data.saldo
+							},
+							type:'NumberField',
+							id_grupo:1,
+							form:true
+						},
+						{
+							config:{
+								name: 'estado',
+								fieldLabel: 'estado',
+								inputType:'hidden',
+								value : rec.data.estado
+							},
+							type:'Field',						
 							form:true
 						}];
 	  }
@@ -523,17 +547,14 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 	 
 	 onSaveWizard:function(wizard,resp){
 			//Phx.CP.loadingShow();
-			
-			if(resp.saldo !== 0 && typeof(resp.saldo) !=='undefined'){
-				
-				if(resp.devolucion_dinero == 'si'){
-				   Ext.Msg.show({
+			if(resp.estado == 'revision' && resp.saldo == 0 ){				
+				Ext.Msg.show({
 				   title:'Confirmación',
 				   scope: this,
-				   msg: 'Esta seguro de SI devolver el dinero? Si esta de acuerdo presione el botón "Si"',
+				   msg: 'Esta seguro de comprometer presupuesto?',
 				   buttons: Ext.Msg.YESNO,
-				   fn: function(id, value, opt) {			   		
-						if (id == 'yes') {  							
+				   fn: function(id, value, opt) {
+						if (id == 'yes') {
 							Ext.Ajax.request({
 								url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
 								params:{
@@ -552,7 +573,7 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 								argument:{wizard:wizard},
 								timeout:this.timeout,
 								scope:this
-							});
+							});							
 						} else {
 							opt.hide;
 						}
@@ -560,14 +581,15 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 				   animEl: 'elId',
 				   icon: Ext.MessageBox.WARNING
 				}, this);
-				}else{
-					Ext.Msg.show({
+			}
+			else if	(resp.estado == 'revision' && resp.saldo > 0 ){
+				Ext.Msg.show({
 				   title:'Confirmación',
 				   scope: this,
-				   msg: 'Esta seguro de NO devolver el dinero? Si esta de acuerdo presione el botón "Si"',
+				   msg: 'Esta seguro de comprometer presupuesto? y devolver el saldo a CAJA? Si esta de acuerdo presione el botón "Si"',
 				   buttons: Ext.Msg.YESNO,
-				   fn: function(id, value, opt) {			   		
-						if (id == 'yes') {     							
+				   fn: function(id, value, opt) {
+						if (id == 'yes') {
 							Ext.Ajax.request({
 								url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
 								params:{
@@ -586,15 +608,48 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 								argument:{wizard:wizard},
 								timeout:this.timeout,
 								scope:this
-							});
+							});							
 						} else {
 							opt.hide;
 						}
-				   },
+				   },	
 				   animEl: 'elId',
 				   icon: Ext.MessageBox.WARNING
 				}, this);
-				}
+			} else if(resp.estado == 'vbjefedevsol' && resp.saldo < 0 ){
+				Ext.Msg.show({
+				   title:'Confirmación',
+				   scope: this,
+				   msg: 'Esta seguro de comprometer presupuesto? y reponer la diferencia al SOLICITANTE? Si esta de acuerdo presione el botón "Si"',
+				   buttons: Ext.Msg.YESNO,
+				   fn: function(id, value, opt) {	
+						if (id == 'yes') {
+							Ext.Ajax.request({
+								url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
+								params:{
+										
+									id_proceso_wf_act:  resp.id_proceso_wf_act,
+									id_estado_wf_act:   resp.id_estado_wf_act,
+									id_tipo_estado:     resp.id_tipo_estado,
+									id_funcionario_wf:  resp.id_funcionario_wf,
+									id_depto_wf:        resp.id_depto_wf,
+									obs:                resp.obs,
+									saldo:				resp.saldo,
+									devolucion_dinero:	resp.devolucion_dinero
+									},
+								success:this.successWizard,
+								failure: this.conexionFailure,
+								argument:{wizard:wizard},
+								timeout:this.timeout,
+								scope:this
+							});							
+						} else {
+							opt.hide;
+						}
+				   },	
+				   animEl: 'elId',
+				   icon: Ext.MessageBox.WARNING
+				}, this);
 			}else{
 				Ext.Ajax.request({
 								url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
@@ -614,8 +669,8 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 								argument:{wizard:wizard},
 								timeout:this.timeout,
 								scope:this
-							});
-			}			
+							});	
+			}
 		},		
 	
 	preparaMenu:function(n){

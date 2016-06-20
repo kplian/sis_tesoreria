@@ -11,11 +11,25 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
-	
+
 	vista:'ConDetalle',
-	
+
 	constructor:function(config){
 		this.maestro=config.maestro;
+		
+		this.Atributos[this.getIndAtributo('monto_rendido')].config.renderer = function(value, p, record) {			
+				    var saldo = parseFloat(record.data.monto) + parseFloat(record.data.monto_repuesto) - parseFloat(record.data.monto_rendido) - parseFloat(record.data.monto_devuelto);
+					if (record.data.estado == 'entregado' || record.data.estado == 'finalizado') {
+						return String.format("<font color = 'red'>Rendido: {0}</font><br>"+
+											 "<font color = 'slategray' >Devuelto a Caja:{1}</font><br>"+
+											 "<font color = 'green' >Devuelto a Solicitante:{2}</font><br>"											 
+											 ,record.data.monto_rendido, record.data.monto_devuelto, record.data.monto_repuesto											 
+											 );
+					} 
+					else {
+						return String.format('');
+					}
+			};
     	//llama al constructor de la clase padre
 		Phx.vista.SolicitudEfectivo.superclass.constructor.call(this,config);
 		this.init();
@@ -28,7 +42,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			}
 		);
 		this.iniciarEventos();
-		
+
 		this.addButton('btnRendicion', {
 			text : 'Rendicion Efectivo',
 			iconCls : 'bballot',
@@ -36,7 +50,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			handler : this.onBtnRendicion,
 			tooltip : '<b>Rendicion</b>'
 		});
-		
+
 		this.addButton('btnDevol', {
 			text : 'Devolucion Efectivo',
 			iconCls : 'bballot',
@@ -44,7 +58,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			handler : this.onBtnDevolucion,
 			tooltip : '<b>Devolucion Sin Añadir Facturas</b>'
 		});
-		
+
 		this.addButton('btnSolicitud', {
 			text : 'Solicitud',
 			iconCls : 'bpdf',
@@ -52,10 +66,18 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			handler : this.onBtnSolicitud,
 			tooltip : '<b>Solicitud Gastos</b>'
 		});
-		
+
+		this.addButton('btnReciboEntrega', {
+			text : 'Recibo Entrega Efectivo',
+			iconCls : 'bpdf',
+			disabled : false,
+			handler : this.onBtnReciboEntrega,
+			tooltip : '<b>Recibo Entrega Efectivo</b>'
+		});
+
 		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.vista}})
 	},
-			
+
 	Atributos:[
 		{
 			//configuracion del componente
@@ -65,7 +87,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 					name: 'id_solicitud_efectivo'
 			},
 			type:'Field',
-			form:true 
+			form:true
 		},
 		{
 			config: {
@@ -110,7 +132,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			filters: {pfiltro: 'caja.codigo',type: 'string'},
 			grid: true,
 			form: true
-		},	
+		},
 		{
 			config:{
 				name: 'fecha',
@@ -126,7 +148,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 				id_grupo:1,
 				grid:true,
 				form:true
-		},	
+		},
 		{
 			config:{
 				name: 'nro_tramite',
@@ -142,7 +164,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 				bottom_filter:true,
 				grid:true,
 				form:false
-		},	
+		},
 		{
    			config:{
        		    name:'id_funcionario',
@@ -152,7 +174,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
    				allowBlank:false,
                 gwidth:200,
    				valueField: 'id_funcionario',
-   			    gdisplayField: 'desc_funcionario',   			    
+   			    gdisplayField: 'desc_funcionario',
       			renderer:function(value, p, record){return String.format('{0}', record.data['desc_funcionario']);}
        	     },
    			type:'ComboRec',//ComboRec
@@ -223,10 +245,10 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'monto_rendido',
-				fieldLabel: 'Monto Rendido',
+				fieldLabel: 'Montos',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 150,
 				maxLength:1179650
 			},
 				type:'NumberField',
@@ -245,7 +267,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'NumberField',
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:false
 		},
 		{
@@ -259,7 +281,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'NumberField',
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:false
 		},
 		{
@@ -268,14 +290,14 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Saldo',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 70,
 				maxLength:1179650
 			},
 				type:'NumberField',
 				id_grupo:1,
 				grid:true,
 				form:false
-		},		
+		},
 		{
 			config: {
 				name: 'id_proceso_wf',
@@ -386,7 +408,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-							format: 'd/m/Y', 
+							format: 'd/m/Y',
 							renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
 			},
 				type:'DateField',
@@ -447,7 +469,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-							format: 'd/m/Y', 
+							format: 'd/m/Y',
 							renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
 			},
 				type:'DateField',
@@ -457,7 +479,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 				form:false
 		}
 	],
-	tam_pag:50,	
+	tam_pag:50,
 	title:'Solicitud Efectivo Con Detalle',
 	ActSave:'../../sis_tesoreria/control/SolicitudEfectivo/insertarSolicitudEfectivo',
 	ActDel:'../../sis_tesoreria/control/SolicitudEfectivo/eliminarSolicitudEfectivo',
@@ -487,10 +509,10 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
-		{name:'monto_rendido', type: 'numeric'},		
-		{name:'monto_repuesto', type: 'numeric'},		
-		{name:'monto_devuelto', type: 'numeric'},		
-		{name:'saldo', type: 'numeric'}		
+		{name:'monto_rendido', type: 'numeric'},
+		{name:'monto_repuesto', type: 'numeric'},
+		{name:'monto_devuelto', type: 'numeric'},
+		{name:'saldo', type: 'numeric'}
 	],
 	sortInfo:{
 		field: 'solefe.id_solicitud_efectivo',
@@ -498,7 +520,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 	},
 	bdel:true,
 	bsave:true,
-	
+
 	onButtonNew:function(){
         //abrir formulario de solicitud
 	       var me = this;
@@ -509,65 +531,67 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 	                                    width:'90%',
 	                                    height:'90%'
 	                                }, {data:{objPadre: me}
-	                                }, 
+	                                },
 	                                this.idContenedor,
 	                                'FormSolicitudEfectivo',
 									{
 	                                    config:[{
 	                                              event:'successsave',
 	                                              delegate: this.onSaveForm,
-	                                              
+
 	                                            }],
-	                                    
+
 	                                    scope:this
-	                                 }); 
-        
+	                                 });
+
     },
-		
+
 	onSaveForm: function(form,  objRes){
     	var me = this;
     	form.panel.destroy();
-        me.reload();    	
+        me.reload();
     },
-	
+
 	iniciarEventos:function(){
 		this.cmpMonto=this.getComponente('monto');
 		this.cmpMonto.disable();
 	},
-	
+
 	preparaMenu:function(n){
           var data = this.getSelectedData();
-          var tb =this.tbar;          
-		  
-          Phx.vista.SolicitudEfectivo.superclass.preparaMenu.call(this,n); 
-          if (data['estado']== 'borrador'){    
+          var tb =this.tbar;
+
+          Phx.vista.SolicitudEfectivo.superclass.preparaMenu.call(this,n);
+          if (data['estado']== 'borrador'){
               this.getBoton('fin_registro').enable();
 			  this.getBoton('edit').enable();
 			  this.getBoton('del').enable();
           }
-          else{            
+          else{
               this.getBoton('fin_registro').disable();
-			  this.getBoton('edit').disable();			  
+			  this.getBoton('edit').disable();
 			  this.getBoton('del').disable();
           }
-		  
-		  if (data['estado']== 'entregado'){    
+
+		  if (data['estado']== 'entregado'){
               this.getBoton('fin_registro').enable();
           }
-		  
-		  if (data['estado'] == 'entregado' || data['estado'] == 'finalizado'){			  
+
+		  if (data['estado'] == 'entregado' || data['estado'] == 'finalizado'){
 			  this.getBoton('btnRendicion').enable();
+				this.getBoton('btnReciboEntrega').enable();
 		  }else{
 			  this.getBoton('btnRendicion').disable();
+				this.getBoton('btnReciboEntrega').disable();
 		  }
-		  
+
 		  if(data['saldo'] == 0.00){
 			  this.getBoton('btnDevol').disable();
 		  }else{
 			  this.getBoton('btnDevol').enable();
 		  }
      },
-	
+
 	onBtnRendicion : function() {
 		var rec = this.sm.getSelected();
 		Phx.CP.loadWindows('../../../sis_tesoreria/vista/solicitud_rendicion_det/SolicitudRendicionDet.php', 'Rendicion', {
@@ -576,17 +600,17 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			height : '95%',
 		}, rec.data, this.idContenedor, 'SolicitudRendicionDet');
 	},
-	
+
 	onBtnDevolucion : function() {
 		var rec=this.sm.getSelected();
-		
+
 		Ext.Msg.show({
 		   title:'Confirmación',
 		   scope: this,
 		   msg: 'Esta seguro de SI devolver el dinero? Saldo: '+ rec.data.saldo + ' Si esta de acuerdo presione el botón "Si"',
 		   buttons: Ext.Msg.YESNO,
-		   fn: function(id, value, opt) {			   		
-				if (id == 'yes') {  							
+		   fn: function(id, value, opt) {
+				if (id == 'yes') {
 					Ext.Ajax.request({
 						url:'../../sis_tesoreria/control/SolicitudEfectivo/insertarSolicitudEfectivo',
 						params:{
@@ -605,12 +629,12 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 				} else {
 					opt.hide;
 				}
-		   },	
+		   },
 		   animEl: 'elId',
 		   icon: Ext.MessageBox.WARNING
 		}, this);
 	},
-	
+
 	onBtnSolicitud : function() {
 		var rec=this.sm.getSelected();
         Ext.Ajax.request({
@@ -620,10 +644,22 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
             failure: this.conexionFailure,
             timeout:this.timeout,
             scope:this
-        }); 
+        });
 	},
-	
-	sigEstado:function(){                   
+
+	onBtnReciboEntrega : function() {
+		var rec=this.sm.getSelected();
+        Ext.Ajax.request({
+            url:'../../sis_tesoreria/control/SolicitudEfectivo/reporteReciboEntrega',
+            params:{'id_solicitud_efectivo':rec.data.id_solicitud_efectivo},
+            success: this.successExport,
+            failure: this.conexionFailure,
+            timeout:this.timeout,
+            scope:this
+        });
+	},
+
+	sigEstado:function(){
 	  var rec=this.sm.getSelected();
 	  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
 								'Estado de Wf',
@@ -633,25 +669,25 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 									height:450
 								}, {data:{
 									   id_estado_wf:rec.data.id_estado_wf,
-									   id_proceso_wf:rec.data.id_proceso_wf									  
+									   id_proceso_wf:rec.data.id_proceso_wf
 									}}, this.idContenedor,'FormEstadoWf',
 								{
 									config:[{
 											  event:'beforesave',
-											  delegate: this.onSaveWizard												  
+											  delegate: this.onSaveWizard
 											}],
-									
+
 									scope:this
-								 });        
-			   
+								 });
+
 	 },
-	 
+
 	 onSaveWizard:function(wizard,resp){
-			Phx.CP.loadingShow();			
+			Phx.CP.loadingShow();
 			Ext.Ajax.request({
 				url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
 				params:{
-						
+
 					id_proceso_wf_act:  resp.id_proceso_wf_act,
 					id_estado_wf_act:   resp.id_estado_wf_act,
 					id_tipo_estado:     resp.id_tipo_estado,
@@ -670,37 +706,29 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 
 	successDevolucion:function(resp){
 			Phx.CP.loadingHide();
-			//var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
-			
-            //if(reg.ROOT.datos.resultado!='falla'){                
-                this.reload();
-             //}else{
-             //   alert(reg.ROOT.datos.mensaje)
-            //}			
-		 },
-		
+            this.reload();
+	},
+
 	successWizard:function(resp){
 			Phx.CP.loadingHide();
 			resp.argument.wizard.panel.destroy()
 			this.reload();
 		 },
-	
+
 	tabsouth:[
-            { 
+            {
              url:'../../../sis_tesoreria/vista/solicitud_efectivo_det/SolicitudEfectivoDet.php',
-             title:'Detalle', 
+             title:'Detalle',
              height:'50%',
              cls:'SolicitudEfectivoDet'
             },
             {
               url:'../../../sis_tesoreria/vista/solicitud_rendicion_det/FacturasRendicion.php',
-              title:'Facturas Rendidas', 
+              title:'Facturas Rendidas',
               height:'50%',
               cls:'AprobacionFacturas'
-            }    
+            }
        ]
 	}
 )
 </script>
-		
-		

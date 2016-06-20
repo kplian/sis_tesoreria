@@ -19,7 +19,7 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 		Phx.vista.CuentaBancaria.superclass.constructor.call(this,config);
 		this.init();
 		this.cmbDepto.on('select',this.capturaFiltros,this);
-		//this.load({params:{start:0, limit:this.tam_pag}})
+		//this.load({params:{start:0, limit:this.tam_pag}})		
 	},
 	
 	capturaFiltros:function(combo, record, index){
@@ -308,20 +308,7 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 	},
 	bdel:true,
 	bsave:true,	
-	/*south:{	   
-        url:'../../../sis_tesoreria/vista/chequera/Chequera.php',
-        title:'Chequeras', 
-        height : '50%',
-        cls:'Chequera'
-   },*/
-	
-	south:{	   
-        url:'../../../sis_tesoreria/vista/cuenta_bancaria_periodo/CuentaBancariaPeriodo.php',
-        title:'Periodos por Cuenta Bancaria', 
-        height : '50%',
-        cls:'CuentaBancariaPeriodo'
-	},
-   
+		
 	onButtonEdit: function(){
 		Phx.vista.CuentaBancaria.superclass.onButtonEdit.call(this);
 		this.Cmp.nro_cuenta.disable();
@@ -330,7 +317,15 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 		Phx.vista.CuentaBancaria.superclass.onButtonNew.call(this);
 		this.Cmp.id_depto_lb.setValue(this.cmbDepto.getValue());
 		this.Cmp.nro_cuenta.enable();
-	}
+	},
+		
+	south:{
+        url:'../../../sis_tesoreria/vista/cuenta_bancaria_periodo/CuentaBancariaPeriodo.php',
+        title:'Periodos por Cuenta Bancaria',
+        height : '50%',
+        cls:'CuentaBancariaPeriodo'
+    }
+   
 })	
 </script>
 		

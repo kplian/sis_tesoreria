@@ -217,7 +217,7 @@ Phx.vista.PlanPagoReq = {
               this.Cmp.id_obligacion_pago.setValue(this.maestro.id_obligacion_pago);
               this.mostrarComponente(this.Cmp.tipo_pago);
                
-               if(this.maestro.nro_cuota_vigente ==0){
+               if(this.maestro.nro_cuota_vigente == 0){
                     this.Cmp.tipo_pago.setValue('normal');
                     this.Cmp.tipo_pago.enable();
                 }
@@ -386,7 +386,7 @@ Phx.vista.PlanPagoReq = {
           this.getBoton('btnObs').enable();
      },
      
-    liberaMenu:function(){
+    liberaMenu: function(){
         var tb = Phx.vista.PlanPagoReq.superclass.liberaMenu.call(this);
         if(tb){
           

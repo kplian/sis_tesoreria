@@ -184,14 +184,22 @@ header("content-type: text/javascript; charset=UTF-8");
 					else 
 						value = value.dateFormat('d/m/Y');
 					
-					if(record.data['sistema_origen']=='FONDOS_AVANCE'){
-						return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'F.A. '+value+'</b></FONT>');
+					if(record.data['sistema_origen']=='KERP'){
+						if(record.data['num_tramite'].search('FA-')>=0){
+							return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'F.A. '+value+'</b></FONT>');					
+						}
+						if(record.data['num_tramite'].search('REP-')>=0){
+							return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'C.CH. '+value+'</b></FONT>');
+						}						
+						return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'PG '+value+'</b></FONT>');
 					}else{
-						if(record.data['sistema_origen']=='KERP')						
-							return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'PG '+value+'</b></FONT>');					
-						else
-							return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+value+'</b></FONT>');
-					}
+						if(record.data['sistema_origen']=='FONDOS_AVANCE'){
+							return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'F.A. '+value+'</b></FONT>');					
+						}
+						else{
+						   return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+value+'</b></FONT>');
+						}
+					}										
 				}
 			},
 				type:'DateField',
@@ -784,8 +792,9 @@ header("content-type: text/javascript; charset=UTF-8");
 						this.getBoton('btnCheque2').enable();						
 						this.getBoton('ant_estado').enable();
 						this.getBoton('fin_registro').enable();
-					}  
-					if(data['sistema_origen']=='FONDOS_AVANCE'){						
+					} 
+					//if(data['observaciones']=='FONDOS_AVANCE'){						
+					if(data['num_tramite'].search('REP-') >= 0 || data['num_tramite'].search('FA-') >= 0 ){						
 						this.getBoton('btnMemoramdum').enable();
 						if(data['notificado']=='no')
 							this.getBoton('btnNotificacion').enable();
@@ -803,7 +812,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				  this.getBoton('btnCheque').disable();
 				  this.getBoton('btnCheque2').disable();				
 				  this.getBoton('btnVistaPrevia').disable();
-				  this.getBoton('btnChequeoDocumentosWf').disable();
+				  //this.getBoton('btnChequeoDocumentosWf').disable();
 				  if(data['estado']=='borrador'){
 					this.getBoton('edit').enable();
 					this.getBoton('del').enable();
@@ -859,10 +868,26 @@ header("content-type: text/javascript; charset=UTF-8");
 			var NumSelect=this.sm.getCount();
 			
 			if(NumSelect != 0)
-			{		
-				var data='id='+ data.id_libro_bancos;  
-				console.log(data);
-				window.open('http://sms.obairlines.bo/ReportesPXP/Home/MemorandumFondosEnAvance?'+data);
+			{		 
+				var url = '';
+				if(data['num_tramite'].search('REP-')>=0){
+					//memo caja chica
+					url = '../../sis_tesoreria/control/TsLibroBancos/imprimirMemoCajaChica';
+				}else{
+					//memo fondo en avance
+				}
+				console.log(url);
+				Ext.Ajax.request({
+					url: url,
+					params:{
+						'id_libro_bancos':data.id_libro_bancos
+					},
+					success:this.successExport,
+					failure: this.conexionFailure,
+					timeout:this.timeout,
+					scope:this
+				});
+				//window.open('http://sms.obairlines.bo/ReportesPXP/Home/MemorandumFondosEnAvance?'+data);
 			}
 			else
 			{

@@ -60,7 +60,7 @@ DECLARE
     v_registros_solicitud_efectivo	record;
     v_tipo					varchar;
     v_id_tipo_solicitud		integer;
-    v_fk_id_solicitud_efectivo	integer;
+    v_id_solicitud_efectivo_fk	integer;
     v_solicitud_efectivo	record;
     v_monto_solicitado		numeric;
 	v_monto_rendido			numeric;
@@ -68,6 +68,7 @@ DECLARE
     v_monto_repuesto		numeric;
     v_saldo					numeric;
     v_doc_compra_venta		record;
+    v_saldo_caja			numeric;
     		    
 BEGIN
 
@@ -111,6 +112,14 @@ BEGIN
             	v_motivo = v_parametros.motivo;
             ELSE
             	v_motivo = NULL;
+            END IF;
+            
+            IF v_parametros.tipo_solicitud = 'solicitud' THEN
+            	v_saldo_caja = tes.f_calcular_saldo_caja(v_parametros.id_caja);
+                
+                IF v_saldo_caja < v_parametros.monto THEN
+					raise exception 'El monto que esta intentando solicitar excede el saldo de la caja';
+                END IF;
             END IF;
             
 			--Sentencia de la modificacion
@@ -318,6 +327,35 @@ BEGIN
              
              END IF;
              
+             
+            --verifica saldo de caja
+            IF v_codigo_estado_siguiente = 'entregado' THEN
+            	select id_caja, monto
+                into v_solicitud_efectivo
+                from tes.tsolicitud_efectivo
+                where id_solicitud_efectivo=v_id_solicitud_efectivo;
+                
+                v_saldo_caja = tes.f_calcular_saldo_caja(v_solicitud_efectivo.id_caja::integer)::numeric;
+                
+                IF v_saldo_caja < v_solicitud_efectivo.monto THEN
+					raise exception 'El monto que esta intentando entregar excede el saldo de la caja, SALDO CAJA: %', v_saldo_caja;
+                END IF;
+                
+                UPDATE tes.tsolicitud_efectivo
+                SET fecha_entrega=current_date
+                where id_solicitud_efectivo=v_id_solicitud_efectivo;
+                
+            END IF;
+
+            --registra id_funcionario_jefe
+            IF v_codigo_estado_siguiente = 'vbjefe' THEN
+
+            	UPDATE tes.tsolicitud_efectivo
+                SET id_funcionario_jefe_aprobador = v_parametros.id_funcionario_wf
+                WHERE id_solicitud_efectivo=v_id_solicitud_efectivo;
+                                
+            END IF;
+            
              -- hay que recuperar el supervidor que seria el estado inmediato,...
              v_id_estado_actual =  wf.f_registra_estado_wf(v_parametros.id_tipo_estado, 
                                                              v_parametros.id_funcionario_wf, 
@@ -345,7 +383,7 @@ BEGIN
              id_usuario_mod=p_id_usuario,
              fecha_mod=now()                           
           where id_proceso_wf = v_parametros.id_proceso_wf_act;
-          
+                         
           	--solo en caso de rendicion se compromete presupuesto
             IF v_codigo_estado_siguiente='rendido' THEN
               FOR v_doc_compra_venta IN (select doc.id_doc_compra_venta
@@ -363,13 +401,13 @@ BEGIN
                         
                     END IF;   
               END LOOP;
-            
+              
             IF pxp.f_existe_parametro(p_tabla,'devolucion_dinero') and pxp.f_existe_parametro(p_tabla,'saldo')THEN
             	IF v_parametros.devolucion_dinero = 'si' THEN
                   select id_caja, id_funcionario, current_date as fecha, 
                   case when v_parametros.saldo > 0 then 'devolucion' else 'reposicion' end as tipo_solicitud,
                   case when v_parametros.saldo > 0 then v_parametros.saldo else v_parametros.saldo * (-1) end as monto,
-                  fk_id_solicitud_efectivo as id_solicitud_efectivo,
+                  id_solicitud_efectivo_fk as id_solicitud_efectivo_fk,
                   id_estado_wf
                   into v_solicitud_efectivo
                   from tes.tsolicitud_efectivo
@@ -379,10 +417,11 @@ BEGIN
                   v_id_solicitud_efectivo=tes.f_inserta_solicitud_efectivo(p_administrador,p_id_usuario,hstore(v_parametros)||hstore(v_solicitud_efectivo));
                   --finalizar solicitud efectivo---------------------------
                   
+                  /*
                   IF tes.f_finalizar_solicitud_efectivo(p_id_usuario,v_solicitud_efectivo.id_solicitud_efectivo) = false THEN
                   	raise exception 'No se pudo finalizar la solicitud de efectivo automaticamente';
                   END IF;
-                   
+                  */ 
 			    END IF;
             ELSE
             	--finalizar solicitud efectivo--------------------
@@ -398,15 +437,15 @@ BEGIN
           IF v_codigo_estado_siguiente='finalizado' THEN
           	select sum(sol.monto) into v_monto_rendido
             from tes.tsolicitud_efectivo sol
-            where sol.fk_id_solicitud_efectivo=v_id_solicitud_efectivo and sol.estado='rendido';
+            where sol.id_solicitud_efectivo_fk=v_id_solicitud_efectivo and sol.estado='rendido';
             
             select sum(sol.monto) into v_monto_devuelto
             from tes.tsolicitud_efectivo sol
-            where sol.fk_id_solicitud_efectivo=v_id_solicitud_efectivo and sol.estado='devuelto';
+            where sol.id_solicitud_efectivo_fk=v_id_solicitud_efectivo and sol.estado='devuelto';
             
             select sum(sol.monto) into v_monto_repuesto
             from tes.tsolicitud_efectivo sol
-            where sol.fk_id_solicitud_efectivo=v_id_solicitud_efectivo and sol.estado='repuesto';
+            where sol.id_solicitud_efectivo_fk=v_id_solicitud_efectivo and sol.estado='repuesto';
             
             select sum(sol.monto) into v_monto_solicitado
             from tes.tsolicitud_efectivo sol
@@ -418,7 +457,7 @@ BEGIN
               select id_caja, id_funcionario, current_date as fecha,
 					 'devolucion' as tipo_solicitud,
                      v_saldo as monto,
-                     id_solicitud_efectivo,
+                     id_solicitud_efectivo as id_solicitud_efectivo_fk,
                      nro_tramite
               into v_solicitud_efectivo
               from tes.tsolicitud_efectivo

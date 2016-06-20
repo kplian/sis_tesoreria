@@ -19,7 +19,8 @@ BEGIN
   --gonzalo insercion de cheque en libro bancos
   select dpc.prioridad as prioridad_conta,
   		 dpl.prioridad as prioridad_libro,
-         tra.forma_pago
+         tra.forma_pago,
+         pla.codigo
   into v_registros
   from conta.tint_comprobante cp
   inner join conta.tint_transaccion tra on tra.id_int_comprobante=cp.id_int_comprobante and tra.forma_pago is not null
@@ -27,6 +28,7 @@ BEGIN
   left join tes.tdepto_cuenta_bancaria dpcb on dpcb.id_cuenta_bancaria=tra.id_cuenta_bancaria
   left join param.tdepto dpl on dpl.id_depto =dpcb.id_depto
   --left join param.tdepto dpl on dpl.id_depto = cp.id_depto_libro
+  inner join conta.tplantilla_comprobante pla on pla.id_plantilla_comprobante=cp.id_plantilla_comprobante
   where cp.id_int_comprobante = p_id_int_comprobante;
   
   IF v_registros.prioridad_libro is null THEN
@@ -57,7 +59,7 @@ BEGIN
         v_resp= 'true';     
     elsif(v_registros.prioridad_conta in (0,1) and v_registros.prioridad_libro in (0,1))then
     	 /*
-		 select ctab.centro into v_centro
+         select ctab.centro into v_centro
          from conta.tint_transaccion tra
          inner join tes.tcuenta_bancaria ctab on ctab.id_cuenta_bancaria=tra.id_cuenta_bancaria
          where tra.id_int_comprobante=p_id_int_comprobante;
@@ -65,7 +67,17 @@ BEGIN
          IF v_centro='esp' then
     		v_respuesta_libro_bancos = tes.f_generar_deposito_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','nacional');	
     	 END IF;
-		 */
+         */
+         
+         IF v_registros.codigo in ('REPOCAJA','SOLFONDAV','CIERRE_CAJA') THEN
+         	                   
+            select fin.id_finalidad into v_id_finalidad
+            from tes.tfinalidad fin
+            where fin.nombre_finalidad ilike 'Fondo Rotativo';
+            
+         	v_respuesta_libro_bancos = tes.f_generar_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','nacional');
+         END IF;
+         
          v_resp = 'true';
         
     elsif(v_registros.prioridad_conta= 2 and v_registros.prioridad_libro in (0,1))then	--analizar este caso

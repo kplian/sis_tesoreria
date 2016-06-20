@@ -59,14 +59,14 @@ BEGIN
              select sol.id_solicitud_efectivo into v_id_solicitud_efectivo_rend 
              from tes.tsolicitud_efectivo sol
              inner join tes.ttipo_solicitud tp on tp.id_tipo_solicitud=sol.id_tipo_solicitud
-             where sol.fk_id_solicitud_efectivo= v_parametros.id_solicitud_efectivo
+             where sol.id_solicitud_efectivo_fk= v_parametros.id_solicitud_efectivo_fk
              and sol.estado='borrador' and tp.codigo='RENEFE';
              
              IF v_id_solicitud_efectivo_rend is null THEN
                
                select id_caja, id_funcionario into v_solicitud_efectivo
                from tes.tsolicitud_efectivo
-               where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo;
+               where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo_fk;
 
                v_resp = tes.f_inserta_solicitud_efectivo(p_administrador, p_id_usuario,hstore(v_parametros)||hstore(v_solicitud_efectivo));
              
@@ -195,7 +195,7 @@ BEGIN
     	begin
         	--recuperamos el id de la solicitud de efectivo             
         	 select sol.id_caja, sol.id_funcionario, ren.monto, 
-             sol.fk_id_solicitud_efectivo as id_solicitud_efectivo, 
+             sol.id_solicitud_efectivo_fk as id_solicitud_efectivo_fk, 
              sol.id_solicitud_efectivo as id_solicitud_efectivo_rendicion
              into v_solicitud_efectivo
              from tes.tsolicitud_efectivo sol
@@ -205,7 +205,7 @@ BEGIN
              select sol.id_solicitud_efectivo into v_id_solicitud_efectivo_rend 
              from tes.tsolicitud_efectivo sol
              inner join tes.ttipo_solicitud tp on tp.id_tipo_solicitud=sol.id_tipo_solicitud
-             where sol.fk_id_solicitud_efectivo= v_solicitud_efectivo.id_solicitud_efectivo
+             where sol.id_solicitud_efectivo_fk= v_solicitud_efectivo.id_solicitud_efectivo_fk
              and sol.estado='borrador' and tp.codigo='RENEFE';
              
              --verificamos si existe alguna rendicion activa
@@ -221,7 +221,7 @@ BEGIN
              SET id_solicitud_efectivo=v_id_solicitud_efectivo_rend
              WHERE id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
 
-             --actualizamos el monto total de la rendicion parcial
+             --actualizamos el monto total de la rendicion actual
              select sum(rend.monto) into v_total_rendiciones
              from tes.tsolicitud_rendicion_det rend
              where rend.id_solicitud_efectivo=v_solicitud_efectivo.id_solicitud_efectivo_rendicion;
@@ -229,6 +229,15 @@ BEGIN
              UPDATE tes.tsolicitud_efectivo
              SET monto=COALESCE(v_total_rendiciones,0)
              WHERE id_solicitud_efectivo=v_solicitud_efectivo.id_solicitud_efectivo_rendicion;
+             
+             --actualizamos el monto total de la nueva rendicion
+             select sum(rend.monto) into v_total_rendiciones
+             from tes.tsolicitud_rendicion_det rend
+             where rend.id_solicitud_efectivo=v_id_solicitud_efectivo_rend;
+             
+             UPDATE tes.tsolicitud_efectivo
+             SET monto=COALESCE(v_total_rendiciones,0)
+             WHERE id_solicitud_efectivo=v_id_solicitud_efectivo_rend;             
              
              --Definicion de la respuesta
 			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion Factura devuelta a la solicitud de efectivo con exito (id_solicitud_rendicion_det'||v_id_solicitud_rendicion_det||')'); 

@@ -22,7 +22,7 @@ Descripcion  Esta funcion gestiona los cbtes de caja cuando son validados
 
 DECLARE
 
-	 v_nombre_funcion   				text;
+	 v_nombre_funcion   			text;
 	 v_resp							varchar;
      v_registros 					record;
      v_id_estado_actual  			integer;
@@ -62,7 +62,7 @@ BEGIN
  
    -- 1) con el id_comprobante identificar el plan de pago
    
-      select 
+   select 
             pc.id_proceso_caja,
             pc.id_estado_wf,
             pc.id_proceso_wf,
@@ -113,14 +113,10 @@ BEGIN
         raise exception 'El comprobante no esta relacionado con ningun proceso de caja';
      END IF;
     
-     
-    
     --------------------------------------------------------
     ---  cambiar el estado del proceso de caja         -----
     --------------------------------------------------------
-        
-        
-          -- obtiene el siguiente estado del flujo 
+            -- obtiene el siguiente estado del flujo 
                SELECT 
                    *
                 into
@@ -161,7 +157,7 @@ BEGIN
                            fecha_mod=now(),
                            id_usuario_ai = p_id_usuario_ai,
                            usuario_ai = p_usuario_ai
-                         where pc.id_proceso_caja  = v_registros.id_proceso_caja; 
+              where pc.id_proceso_caja  = v_registros.id_proceso_caja; 
     
      
            ----------------------------------------------------------------------------------
@@ -170,7 +166,7 @@ BEGIN
            --       pendiente segun corresponda
            -----------------------------------------------------------------------------------
            
-           IF  v_registros.codigo_tpc in ('RENYREP', 'RENYCER' ) THEN
+           IF  v_registros.codigo_tpc in ('RENYREP', 'RENYCER' , 'SOLREN' ) THEN
                  
                       --  relacionar facturas con el comprobante de rendicion 
                       FOR v_registros_cv in ( 
@@ -189,29 +185,42 @@ BEGIN
                        
                        END LOOP; 
                        
+               
+           END IF;
+           
+           IF  v_registros.codigo_tpc in ('RENYREP', 'RENYCER' ) THEN        
                        
                        ----------------------------------------------------
                        --  Crear procesos derivados por cierre o reposición
                        ----------------------------------------------------
+                       
+                       
+                       -- TODO obtener array de rendiciones SOLREN (rendiciones sueltas desde la ultima apertura de caja) 
+                       
                  
                        v_sw_disparo = true;
                        
                        IF  v_registros.codigo_tpc = 'RENYREP' THEN
-                          v_codigo_tpc = 'REPO';
-                          v_monto = v_registros.monto_reposicion;
-                       
-                          -- TODO obtener array de rendiciones SOLREN (rendiciones sueltas desde la ultima apertura de caja) 
                           
-                          -- TODO adicionar el monto a rendir 
+                           v_codigo_tpc = 'SOLREP';
+                           v_monto = v_registros.monto_reposicion;
+                       
+                           
+                           
+                          
+                              
+                           -- TODO adicionar el monto a rendir 
                        
                        
                        ELSE
+                          
                           v_codigo_tpc = 'CIERRE';
                           
                           --  calcular si tiene monto para cierre de caja
                           v_saldo_caja =  tes.f_calcular_saldo_caja(v_registros.id_caja);
                           
                           --TODO  sumar montos de deposito
+                          -- los depositos tiene que coincidir con el monto de cierre
                           
                           --   IF  si no tiene monto a cerrar se salta el proceso disparado de cierre
                           IF COALESCE(v_saldo_caja,0) = 0 THEN
@@ -263,7 +272,7 @@ BEGIN
                                     );      
                              
                            -- insertar proceso de caja, asociado al proceso de rendicion 
-                           --Sentencia de la insercion de la rendicion o reposicion de caja
+                           -- Sentencia de la insercion de la rendicion o reposicion de caja
                             insert into tes.tproceso_caja(
                                 estado,
                                 nro_tramite,
@@ -343,10 +352,9 @@ BEGIN
                                                                            'para revisión de contabiliad');
                              
                               ---------------------------------------------------------------------------
-                              --antes de generar el comprobante pasa al estado pendiente 
+                              -- antes de generar el comprobante pasa al estado pendiente 
                               ---------------------------------------------------------------------------   
                               
-                                 
                                select   
                                 te.id_tipo_estado
                                into
@@ -378,12 +386,14 @@ BEGIN
                                      estado = 'pendiente'
                                where pc.id_proceso_caja  = v_id_proceso_caja;
                                    
-                              --------------------------------------------------
-                              -- solicitar negeracion de comprobantes de pago
-                              ---------------------------------------------------
+                             -------------------------------------------------
+                             -- solicitar negeracion de comprobantes de pago
+                             -------------------------------------------------
+                             
                              v_id_int_comprobante =   conta.f_gen_comprobante ( 
                                                            v_id_proceso_caja , 
                                                            v_registros_tpc.codigo_plantilla_cbte ,
+                                                           v_id_estado_actual,
                                                            p_id_usuario,
                                                            p_id_usuario_ai, 
                                                            p_usuario_ai, 
@@ -416,11 +426,11 @@ BEGIN
            
            IF   v_registros.codigo_tpc ='REPO' or  v_registros.codigo_tpc = 'SOLREP'  THEN
                
-           
-               IF  v_registros.id_proceso_caja_fk  is  null  THEN
-                   
-                   IF  v_registros.codigo_tpc = 'SOLREP' THEN
-                     
+            
+               
+               IF  v_registros.id_proceso_caja_fk  is  null  THEN 
+                                 
+                   IF  v_registros.codigo_tpc = 'REPO' THEN                     
                        v_tmp_tipo = 'apertura_caja';
                        --   abrimo la caja        
                        update tes.tcaja ca set
@@ -460,12 +470,14 @@ BEGIN
                
            END IF;
            
+         
+           
            --------------------------------------------------------
            -- si el comprobante es de tipo cierre cerramos la caja    
 		   --------------------------------------------------------
           
           
-             IF   v_registros.codigo_tpc ='CIERRE'   THEN
+             IF   v_registros.codigo_tpc = 'CIERRE' THEN
                        
                update tes.tcaja ca set
                   estado = 'cerrado',
@@ -476,14 +488,9 @@ BEGIN
                -- obtenemos el monto del cierre
                v_monto = v_registros.monto_reposicion;
                
-               
-               
-               IF v_monto > 0 THEN
-                   
-                     --  si hay monto de cierre introduce el valor para arqueos
-                    
-                     v_tmp_tipo = 'salida_caja';
-                   
+               IF v_monto > 0 THEN                   
+                    --  si hay monto de cierre introduce el valor para arqueos
+                    v_tmp_tipo = 'salida_caja';
                     --  registro de reposicion para arqueos
                     v_hstore_registros =   hstore(ARRAY[
                                                       'id_caja', v_registros.id_caja::varchar,
@@ -494,8 +501,7 @@ BEGIN
                                                       'motivo', v_registros.motivo::varchar
                                                     ]);
                     
-                    v_id_solicitud_efectivo=tes.f_inserta_solicitud_efectivo(0,p_id_usuario,v_hstore_registros);
-                    
+                    v_id_solicitud_efectivo = tes.f_inserta_solicitud_efectivo(0,p_id_usuario,v_hstore_registros);                    
                END IF;
                
                --guardamos la relacion      

@@ -16,6 +16,21 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 	
 	constructor:function(config){
 		this.maestro=config.maestro;
+		
+		this.Atributos[this.getIndAtributo('monto_rendido')].config.renderer = function(value, p, record) {			
+				    var saldo = parseFloat(record.data.monto) + parseFloat(record.data.monto_repuesto) - parseFloat(record.data.monto_rendido) - parseFloat(record.data.monto_devuelto);
+					if (record.data.estado == 'entregado' || record.data.estado == 'finalizado') {
+						return String.format("<font color = 'red'>Rendido: {0}</font><br>"+
+											 "<font color = 'slategray' >Devuelto a Caja:{1}</font><br>"+
+											 "<font color = 'green' >Devuelto a Solicitante:{2}</font><br>"											 
+											 ,record.data.monto_rendido, record.data.monto_devuelto, record.data.monto_repuesto											 
+											 );
+					} 
+					else {
+						return String.format('');
+					}
+			};
+			
     	//llama al constructor de la clase padre
 		Phx.vista.SolicitudEfectivoSinDet.superclass.constructor.call(this,config);
 		this.init();
@@ -38,12 +53,36 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			tooltip : '<b>Rendicion</b>'
 		});
 		
+		this.addButton('btnDevol', {
+			text : 'Devolucion Efectivo',
+			iconCls : 'bballot',
+			disabled : true,
+			handler : this.onBtnDevolucion,
+			tooltip : '<b>Devolucion Sin Añadir Facturas</b>'
+		});
+		
 		this.addButton('btnSolicitud', {
 			text : 'Solicitud',
 			iconCls : 'bpdf',
 			disabled : false,
 			handler : this.onBtnSolicitud,
 			tooltip : '<b>Solicitud Gastos</b>'
+		});
+		
+		this.addButton('btnReciboEntrega', {
+			text : 'Recibo Entrega Efectivo',
+			iconCls : 'bpdf',
+			disabled : false,
+			handler : this.onBtnReciboEntrega,
+			tooltip : '<b>Recibo Entrega Efectivo</b>'
+		});
+		
+		this.addButton('btnRendicionEfectivo', {
+			text : 'Rendicion Efectivo',
+			iconCls : 'bpdf',
+			disabled : false,
+			handler : this.onBtnRendicionEfectivo,
+			tooltip : '<b>Rendicion Efectivo</b>'
 		});
 		
 		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:this.vista}})
@@ -241,10 +280,10 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'monto_rendido',
-				fieldLabel: 'Monto Rendido',
+				fieldLabel: 'Montos',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 150,
 				maxLength:1179650
 			},
 				type:'NumberField',
@@ -263,7 +302,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'NumberField',
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:false
 		},
 		{
@@ -277,7 +316,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'NumberField',
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:false
 		},
 		{
@@ -286,7 +325,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Saldo',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 70,
 				maxLength:1179650
 			},
 				type:'NumberField',
@@ -496,9 +535,9 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 	],
 	sortInfo:{
 		field: 'id_solicitud_efectivo',
-		direction: 'ASC'
+		direction: 'DESC'
 	},
-	
+	/*
 	preparaMenu:function(n){
           var data = this.getSelectedData();
           var tb =this.tbar;          
@@ -518,6 +557,55 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('btnRendicion').enable();
 		  }else{
 			  this.getBoton('btnRendicion').disable();
+		  }
+     },*/
+	 
+	 preparaMenu:function(n){
+          var data = this.getSelectedData();
+          var tb =this.tbar;
+
+          Phx.vista.SolicitudEfectivoSinDet.superclass.preparaMenu.call(this,n);
+          if (data['estado'] == 'borrador'){
+              this.getBoton('fin_registro').enable();
+			  this.getBoton('edit').enable();
+			  this.getBoton('del').enable();
+			  this.getBoton('btnRendicion').disable();
+			  this.getBoton('btnReciboEntrega').disable();
+			  this.getBoton('btnRendicionEfectivo').disable();
+          }else if (data['estado'] == 'entregado'){
+              this.getBoton('fin_registro').enable();
+			  this.getBoton('edit').disable();
+			  this.getBoton('del').disable();
+			  this.getBoton('btnRendicion').enable();
+			  this.getBoton('btnReciboEntrega').enable();
+			  this.getBoton('btnRendicionEfectivo').enable();
+          }else if (data['estado'] == 'finalizado'){
+			  this.getBoton('fin_registro').disable();
+			  this.getBoton('edit').disable();
+			  this.getBoton('del').disable();
+			  this.getBoton('btnRendicion').disable();
+			  this.getBoton('btnReciboEntrega').enable();
+			  this.getBoton('btnRendicionEfectivo').enable();
+		  }else if(data['estado'] == 'vbjefe'){
+			  this.getBoton('fin_registro').disable();
+			  this.getBoton('edit').disable();
+			  this.getBoton('del').disable();
+			  this.getBoton('btnRendicion').disable();
+			  this.getBoton('btnReciboEntrega').disable();					
+			  this.getBoton('btnRendicionEfectivo').disable();
+		  }else{
+              this.getBoton('fin_registro').enable();
+			  this.getBoton('edit').disable();
+			  this.getBoton('del').disable();
+			  this.getBoton('btnRendicion').disable();
+			  this.getBoton('btnReciboEntrega').disable();
+			  this.getBoton('btnRendicionEfectivo').disable();
+          }
+
+		  if(data['saldo'] == 0.00){
+			  this.getBoton('btnDevol').disable();
+		  }else{
+			  this.getBoton('btnDevol').enable();
 		  }
      },
 	 
@@ -547,6 +635,40 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		}, rec.data, this.idContenedor, 'SolicitudRendicionDet');
 	},
 	
+	onBtnDevolucion : function() {
+		var rec=this.sm.getSelected();
+
+		Ext.Msg.show({
+		   title:'Confirmación',
+		   scope: this,
+		   msg: 'Esta seguro de SI devolver el dinero? Saldo: '+ rec.data.saldo + ' Si esta de acuerdo presione el botón "Si"',
+		   buttons: Ext.Msg.YESNO,
+		   fn: function(id, value, opt) {
+				if (id == 'yes') {
+					Ext.Ajax.request({
+						url:'../../sis_tesoreria/control/SolicitudEfectivo/insertarSolicitudEfectivo',
+						params:{
+							'id_solicitud_efectivo_fk':rec.data.id_solicitud_efectivo,
+							'id_caja':rec.data.id_caja,
+							'monto':rec.data.saldo,
+							'id_funcionario':rec.data.id_funcionario,
+							'tipo_solicitud':'devolucion',
+							'fecha':new Date()
+							},
+						success:this.successDevolucion,
+						failure: this.conexionFailure,
+						timeout:this.timeout,
+						scope:this
+					});
+				} else {
+					opt.hide;
+				}
+		   },
+		   animEl: 'elId',
+		   icon: Ext.MessageBox.WARNING
+		}, this);
+	},
+	
 	onBtnSolicitud : function() {
 		var rec=this.sm.getSelected();
         Ext.Ajax.request({
@@ -559,6 +681,31 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
         }); 
 	},
 	 
+	 
+	onBtnReciboEntrega : function() {
+		var rec=this.sm.getSelected();
+        Ext.Ajax.request({
+            url:'../../sis_tesoreria/control/SolicitudEfectivo/reporteReciboEntrega',
+            params:{'id_solicitud_efectivo':rec.data.id_solicitud_efectivo},
+            success: this.successExport,
+            failure: this.conexionFailure,
+            timeout:this.timeout,
+            scope:this
+        }); 
+	},
+	
+	onBtnRendicionEfectivo : function() {
+		var rec=this.sm.getSelected();
+        Ext.Ajax.request({
+            url:'../../sis_tesoreria/control/SolicitudEfectivo/reporteRendicionEfectivo',
+            params:{'id_solicitud_efectivo':rec.data.id_solicitud_efectivo},
+            success: this.successExport,
+            failure: this.conexionFailure,
+            timeout:this.timeout,
+            scope:this
+        }); 
+	},
+	
 	sigEstado:function(){                   
 	  var rec=this.sm.getSelected();
 	  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
@@ -603,6 +750,11 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 				timeout:this.timeout,
 				scope:this
 			});
+		},
+		
+		successDevolucion:function(resp){
+			Phx.CP.loadingHide();
+            this.reload();
 		},
 		
 		successWizard:function(resp){

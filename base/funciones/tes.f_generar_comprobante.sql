@@ -81,7 +81,8 @@ BEGIN
              op.id_moneda,
              pp.tipo,
              tpp.codigo_plantilla_comprobante,
-             pp.id_depto_lb
+             pp.id_depto_lb,
+             pp.id_estado_wf
            into
               v_registros
            FROM tes.tplan_pago pp
@@ -325,13 +326,28 @@ BEGIN
              
             
              -- si es  internacional, 
-                v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago, v_codigo_plt_cbte, p_id_usuario, p_id_usuario_ai,p_usuario_ai, p_conexion, true);
+                v_id_int_comprobante =   conta.f_gen_comprobante (
+                                         v_registros.id_plan_pago, 
+                                         v_codigo_plt_cbte,
+                                         v_id_estado_actual, 
+                                         p_id_usuario, 
+                                         p_id_usuario_ai,
+                                         p_usuario_ai, 
+                                         p_conexion, 
+                                         true);
            
             
             ELSE
             
                --  Si NO  se contabiliza nacionalmente
-               v_id_int_comprobante =   conta.f_gen_comprobante (v_registros.id_plan_pago,v_registros.codigo_plantilla_comprobante,p_id_usuario,p_id_usuario_ai,p_usuario_ai, p_conexion);
+               v_id_int_comprobante =   conta.f_gen_comprobante ( 
+               									v_registros.id_plan_pago,
+                                                v_registros.codigo_plantilla_comprobante,
+                                                v_id_estado_actual,
+                                                p_id_usuario,
+                                                p_id_usuario_ai,
+                                                p_usuario_ai, 
+                                                p_conexion);
             END IF;
            
              --  actualiza el id_comprobante en el registro del plan de pago

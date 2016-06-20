@@ -234,6 +234,81 @@ class MODSolicitudEfectivo extends MODbase{
 		return $this->respuesta;
 	}
 	
+	function reporteReciboEntrega(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.ft_solicitud_efectivo_sel';
+		$this->transaccion='TES_SOLENT_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		//Definicion de la lista del resultado del query
+		$this->captura('fecha_entrega','date');
+		$this->captura('moneda','varchar');		
+		$this->captura('nro_tramite','varchar');
+		$this->captura('codigo','varchar');
+		$this->captura('cajero','text');		
+		$this->captura('nombre_unidad','varchar');
+		$this->captura('solicitante','text');
+		$this->captura('motivo','text');
+		$this->captura('monto','numeric');
+		$this->captura('fecha_rendicion','date');
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
+	function memoCajaChica(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.ft_solicitud_efectivo_sel';
+		$this->transaccion='TES_MEMOCJ_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this->setCount(false);		
+		
+		$this->setParametro('id_libro_bancos','id_libro_bancos','int4');
+		//Definicion de la lista del resultado del query
+		$this->captura('fecha','date');
+		$this->captura('nro_cheque','int4');		
+		$this->captura('codigo','varchar');
+		$this->captura('aprobador','text');
+		$this->captura('cargo_aprobador','varchar');		
+		$this->captura('cajero','text');
+		$this->captura('cargo_cajero','varchar');
+		$this->captura('importe_cheque','numeric');
+		$this->captura('num_memo','varchar');
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
+	function reporteRendicionEfectivo(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.ft_solicitud_efectivo_sel';
+		$this->transaccion='TES_RNDEFE_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		$this->setParametro('id_solicitud_efectivo','id_solicitud_efectivo','int4');
+		//Definicion de la lista del resultado del query
+		$this->captura('fecha_entrega','date');
+		$this->captura('desc_plantilla','varchar');		
+		$this->captura('rendicion','text');
+		$this->captura('importe_neto','numeric');
+		$this->captura('impuesto_descuento_ley','numeric');		
+		$this->captura('cargo','numeric');
+		$this->captura('descargo','numeric');
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//var_dump($this->consulta); exit;
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
 	function insertarSolicitudEfectivoCompleta(){
 		
 		//Abre conexion con PDO
