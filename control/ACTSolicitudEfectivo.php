@@ -112,9 +112,9 @@ class ACTSolicitudEfectivo extends ACTbase{
 			$usuario_firma = '';
 		}
 
-		if($this->objParam->getParametro('id_solicitud_efectivo')!='')
+		if($this->objParam->getParametro('id_proceso_wf')!='')
 		{
-			$this->objParam-> addFiltro('solefe.id_solicitud_efectivo ='.$this->objParam->getParametro('id_solicitud_efectivo'));
+			$this->objParam-> addFiltro('solefe.id_proceso_wf ='.$this->objParam->getParametro('id_proceso_wf'));
 		}
 
 		$this->objParam->addParametroConsulta('ordenacion','id_solicitud_efectivo');
@@ -211,9 +211,9 @@ class ACTSolicitudEfectivo extends ACTbase{
 			$usuario_firma = '';
 		}
 
-		if($this->objParam->getParametro('id_solicitud_efectivo')!='')
+		if($this->objParam->getParametro('id_proceso_wf')!='')
 		{
-			$this->objParam-> addFiltro('sol.id_solicitud_efectivo ='.$this->objParam->getParametro('id_solicitud_efectivo'));
+			$this->objParam-> addFiltro('sol.id_proceso_wf ='.$this->objParam->getParametro('id_proceso_wf'));
 		}
 
 		$this->objParam->addParametroConsulta('ordenacion','sol.id_solicitud_efectivo');
@@ -288,11 +288,12 @@ class ACTSolicitudEfectivo extends ACTbase{
 			$fecha_firma = '';
 			$usuario_firma = '';
 		}
-
-		if($this->objParam->getParametro('id_solicitud_efectivo')!='')
+		/*
+		if($this->objParam->getParametro('id_proceso_wf')!='')
 		{
-			$this->objParam-> addFiltro('sol.id_solicitud_efectivo ='.$this->objParam->getParametro('id_solicitud_efectivo'));
+			$this->objParam-> addFiltro('sol.id_proceso_wf ='.$this->objParam->getParametro('id_proceso_wf'));
 		}
+		*/
 
 		$this->objParam->addParametroConsulta('ordenacion','sol.id_solicitud_efectivo');
 		$this->objParam->addParametroConsulta('dir_ordenacion','ASC');

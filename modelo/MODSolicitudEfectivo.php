@@ -291,7 +291,7 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->transaccion='TES_RNDEFE_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
 		
-		$this->setParametro('id_solicitud_efectivo','id_solicitud_efectivo','int4');
+		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');
 		//Definicion de la lista del resultado del query
 		$this->captura('fecha_entrega','date');
 		$this->captura('desc_plantilla','varchar');		

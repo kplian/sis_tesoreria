@@ -61,6 +61,16 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			tooltip : '<b>Devolucion Sin Añadir Facturas</b>'
 		});
 		
+		this.addButton('btnChequeoDocumentosWf',
+			{
+				text: 'Documentos',
+				iconCls: 'bchecklist',
+				disabled: false,
+				handler: this.loadCheckDocumentosSolWf,
+				tooltip: '<b>Documentos de la Solicitud</b><br/>Los documetos de la solicitud seleccionada.'
+			}
+		);
+		/*
 		this.addButton('btnSolicitud', {
 			text : 'Solicitud',
 			iconCls : 'bpdf',
@@ -76,7 +86,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			handler : this.onBtnReciboEntrega,
 			tooltip : '<b>Recibo Entrega Efectivo</b>'
 		});
-		
+		*/
 		this.addButton('btnRendicionEfectivo', {
 			text : 'Rendicion Efectivo',
 			iconCls : 'bpdf',
@@ -84,7 +94,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			handler : this.onBtnRendicionEfectivo,
 			tooltip : '<b>Rendicion Efectivo</b>'
 		});
-		
+	
 		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:this.vista}})
 	},
 			
@@ -669,11 +679,26 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		}, this);
 	},
 	
+	loadCheckDocumentosSolWf:function() {
+			var rec=this.sm.getSelected();
+			rec.data.nombreVista = this.nombreVista;
+			Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
+					'Chequear documento del WF',
+					{
+						width:'90%',
+						height:500
+					},
+					rec.data,
+					this.idContenedor,
+					'DocumentoWf'
+		)
+	},
+		
 	onBtnSolicitud : function() {
 		var rec=this.sm.getSelected();
         Ext.Ajax.request({
             url:'../../sis_tesoreria/control/SolicitudEfectivo/reporteSolicitudEfectivo',
-            params:{'id_solicitud_efectivo':rec.data.id_solicitud_efectivo,'estado':rec.data.estado},
+            params:{'id_proceso_wf':rec.data.id_proceso_wf,'estado':rec.data.estado},
             success: this.successExport,
             failure: this.conexionFailure,
             timeout:this.timeout,
@@ -686,7 +711,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		var rec=this.sm.getSelected();
         Ext.Ajax.request({
             url:'../../sis_tesoreria/control/SolicitudEfectivo/reporteReciboEntrega',
-            params:{'id_solicitud_efectivo':rec.data.id_solicitud_efectivo},
+            params:{'id_proceso_wf':rec.data.id_proceso_wf},
             success: this.successExport,
             failure: this.conexionFailure,
             timeout:this.timeout,
@@ -698,7 +723,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		var rec=this.sm.getSelected();
         Ext.Ajax.request({
             url:'../../sis_tesoreria/control/SolicitudEfectivo/reporteRendicionEfectivo',
-            params:{'id_solicitud_efectivo':rec.data.id_solicitud_efectivo},
+            params:{'id_proceso_wf':rec.data.id_proceso_wf},
             success: this.successExport,
             failure: this.conexionFailure,
             timeout:this.timeout,

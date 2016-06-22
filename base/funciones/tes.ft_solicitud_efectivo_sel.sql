@@ -341,7 +341,7 @@ BEGIN
                                    sol.monto as cargo,
                                    0.00 as descargo
                           from tes.tsolicitud_efectivo sol
-                          where sol.id_solicitud_efectivo='||v_parametros.id_solicitud_efectivo||'
+                          where sol.id_proceso_wf='||v_parametros.id_proceso_wf||'
                           UNION ALL
             					   select doc.fecha, pla.desc_plantilla,
                                    ''Razon Social: ''       || doc.razon_social || '' N° Doc: '' ||
@@ -358,7 +358,7 @@ BEGIN
                                inner join conta.tdoc_compra_venta doc on doc.id_doc_compra_venta =
                                  det.id_documento_respaldo
                                inner join param.tplantilla pla on pla.id_plantilla = doc.id_plantilla
-                          where ren.estado = ''rendido'' and sol.id_solicitud_efectivo='||v_parametros.id_solicitud_efectivo||' ';
+                          where ren.estado = ''rendido'' and sol.id_proceso_wf='||v_parametros.id_proceso_wf||' ';
 			
 			--Definicion de la respuesta
             --v_consulta:=v_consulta||v_parametros.filtro;

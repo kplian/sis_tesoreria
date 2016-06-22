@@ -639,7 +639,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 		var rec=this.sm.getSelected();
         Ext.Ajax.request({
             url:'../../sis_tesoreria/control/SolicitudEfectivo/reporteSolicitudEfectivo',
-            params:{'id_solicitud_efectivo':rec.data.id_solicitud_efectivo,'estado':rec.data.estado},
+            params:{'id_proceso_wf':rec.data.id_proceso_wf,'estado':rec.data.estado},
             success: this.successExport,
             failure: this.conexionFailure,
             timeout:this.timeout,
