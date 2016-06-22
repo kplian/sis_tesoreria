@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION tes.f_pago_tiene_servicio (
+﻿CREATE OR REPLACE FUNCTION tes.f_pago_tiene_servicio (
   p_id_plan_pago integer
 )
 RETURNS integer AS

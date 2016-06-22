@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION tes.f_lista_funcionario_registro_op (
 RETURNS SETOF record AS
 $body$
 /**************************************************************************
- SISTEMA ENDESIS - SISTEMA DE ...
+ SISTEMA ENDESIS - SISTEMA DE
 ***************************************************************************
  SCRIPT: 		tes.f_lista_funcionario_registro_op
  DESCRIPCIÓN: 	Lista el funcionario que registra la Obligacion de pago

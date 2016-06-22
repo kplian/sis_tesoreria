@@ -1,4 +1,4 @@
---------------- SQL ---------------
+﻿--------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION tes.ft_solicitud_rendicion_det_ime (
   p_administrador integer,
