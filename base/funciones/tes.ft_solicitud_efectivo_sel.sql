@@ -1,4 +1,4 @@
---------------- SQL ---------------
+﻿--------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION tes.ft_solicitud_efectivo_sel (
   p_administrador integer,
@@ -344,7 +344,7 @@ BEGIN
                           where sol.id_proceso_wf='||v_parametros.id_proceso_wf||'
                           UNION ALL
             					   select doc.fecha, pla.desc_plantilla,
-                                   ''Razon Social: ''       || doc.razon_social || '' N� Doc: '' ||
+                                   ''Razon Social: ''       || doc.razon_social || '' N° Doc: '' ||
                                    doc.nro_documento || ''Nit:'' || doc.nit || '' Nro Autorizacion:'' ||
                                    doc.nro_autorizacion || '' Cod Control: '' || doc.codigo_control as rendicion,
                                    doc.importe_neto,

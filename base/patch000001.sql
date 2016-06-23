@@ -1615,5 +1615,32 @@ IS 'fecha de entrega del efectivo';
   --------------- SQL ---------------
 ALTER TABLE tes.tproceso_caja
 ADD COLUMN num_memo VARCHAR;
-  
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tcaja
+  ADD COLUMN id_depto_lb INTEGER;
+
+ALTER TABLE tes.tcaja
+  RENAME COLUMN importe_maximo TO importe_maximo_caja;
+ 
+ALTER TABLE tes.tcaja
+  RENAME COLUMN porcentaje_compra TO importe_maximo_item;
+
 /*****************************F-SCP-GSS-TES-0-08/06/2016*************/
+
+/*****************************I-SCP-GSS-TES-0-15/06/2016*************/
+
+CREATE TABLE tes.ttipo_proceso_caja (
+  id_tipo_proceso_caja SERIAL, 
+  codigo VARCHAR, 
+  nombre VARCHAR, 
+  codigo_plantilla_cbte VARCHAR, 
+  codigo_wf VARCHAR, 
+  visible_en VARCHAR, 
+  CONSTRAINT ttipo_proceso_caja_pkey PRIMARY KEY(id_tipo_proceso_caja), 
+  CONSTRAINT chk_ttipo_proceso_caja__visible_en CHECK (((((visible_en)::text = 'abierto'::text) OR ((visible_en)::text = 'cerrado'::text)) OR ((visible_en)::text = 'ninguno'::text)) OR ((visible_en)::text = 'todos'::text))
+) INHERITS (pxp.tbase)
+WITHOUT OIDS;
+
+/*****************************F-SCP-GSS-TES-0-15/06/2016*************/
