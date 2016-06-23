@@ -1631,6 +1631,12 @@ ALTER TABLE tes.tcaja
 
 /*****************************I-SCP-GSS-TES-0-15/06/2016*************/
 
+ALTER TABLE tes.tproceso_caja
+  ADD COLUMN id_tipo_proceso_caja INTEGER;
+  
+ALTER TABLE tes.tproceso_caja
+  ADD COLUMN id_cuenta_bancaria_mov INTEGER;
+  
 CREATE TABLE tes.ttipo_proceso_caja (
   id_tipo_proceso_caja SERIAL, 
   codigo VARCHAR, 
