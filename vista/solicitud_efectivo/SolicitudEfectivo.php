@@ -30,6 +30,28 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 						return String.format('');
 					}
 			};
+			
+		this.Atributos[this.getIndAtributo('tiempo_rendicion')].config.renderer = function(value, p, record) {			
+				    var dias = parseFloat(record.data.dias_maximo_rendicion) - parseFloat(record.data.dias_no_rendido);
+					
+					if (record.data.estado == 'entregado' || record.data.estado == 'finalizado') {
+						if(dias < 0){
+							return String.format("<font color = 'red'>Dias para rendir: {0}</font><br>"+
+											 "<font color = 'red' >Dias restantes:{1}</font><br>"											 
+											 ,record.data.dias_maximo_rendicion, dias											 
+											 );
+						}else{
+							return String.format("<font color = 'green'>Dias para rendir: {0}</font><br>"+
+											 "<font color = 'green' >Dias restantes:{1}</font><br>"											 
+											 ,record.data.dias_maximo_rendicion, dias											 
+											 );
+						}
+					} 
+					else {
+						return String.format('');
+					}
+			};
+			
     	//llama al constructor de la clase padre
 		Phx.vista.SolicitudEfectivo.superclass.constructor.call(this,config);
 		this.init();
@@ -57,8 +79,18 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			disabled : true,
 			handler : this.onBtnDevolucion,
 			tooltip : '<b>Devolucion Sin Añadir Facturas</b>'
-		});
-
+		});		
+		
+		this.addButton('btnChequeoDocumentosWf',
+			{
+				text: 'Documentos',
+				iconCls: 'bchecklist',
+				disabled: false,
+				handler: this.loadCheckDocumentosSolWf,
+				tooltip: '<b>Documentos de la Solicitud</b><br/>Los documetos de la solicitud seleccionada.'
+			}
+		);
+		/*
 		this.addButton('btnSolicitud', {
 			text : 'Solicitud',
 			iconCls : 'bpdf',
@@ -74,7 +106,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			handler : this.onBtnReciboEntrega,
 			tooltip : '<b>Recibo Entrega Efectivo</b>'
 		});
-
+		*/
 		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.vista}})
 	},
 
@@ -88,6 +120,16 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			},
 			type:'Field',
 			form:true
+		},
+		{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'tipo_solicitud'
+			},
+			type:'Field',
+			form:true 
 		},
 		{
 			config: {
@@ -119,8 +161,8 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 				mode: 'remote',
 				pageSize: 15,
 				queryDelay: 1000,
-				anchor: '100%',
-				gwidth: 100,
+				anchor: '80%',
+				gwidth: 80,
 				minChars: 2,
 				tpl: '<tpl for="."><div class="x-combo-list-item"><p><b>{codigo}</b></p><p>CAJERO: {cajero}</p></div></tpl>',
 				renderer : function(value, p, record) {
@@ -136,11 +178,12 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'fecha',
-				fieldLabel: 'Fecha',
+				fieldLabel: 'Fecha Solicitud',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 80,
+				gwidth: 90,
 				format: 'd/m/Y',
+				value : new Date(),
 				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
 			},
 				type:'DateField',
@@ -151,11 +194,42 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
+				name: 'fecha_entrega',
+				fieldLabel: 'Fecha Entrega',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 90,
+				format: 'd/m/Y',
+				value : new Date(),
+				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+			},
+				type:'DateField',
+				filters:{pfiltro:'solefe.fecha_entrega',type:'date'},
+				id_grupo:1,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'tiempo_rendicion',
+				fieldLabel: 'Dias Rendicion',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 110,
+				maxLength:1179650
+			},
+				type:'NumberField',
+				id_grupo:1,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
 				name: 'nro_tramite',
 				fieldLabel: 'Num Tramite',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 170,
+				gwidth: 150,
 				maxLength:50
 			},
 				type:'TextField',
@@ -173,6 +247,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
    				fieldLabel:'Funcionario',
    				allowBlank:false,
                 gwidth:200,
+				anchor: '80%',
    				valueField: 'id_funcionario',
    			    gdisplayField: 'desc_funcionario',
       			renderer:function(value, p, record){return String.format('{0}', record.data['desc_funcionario']);}
@@ -230,10 +305,10 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'monto',
-				fieldLabel: 'Monto Solicitado',
+				fieldLabel: 'Solicitado',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 60,
 				maxLength:1179650
 			},
 				type:'NumberField',
@@ -337,7 +412,6 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 			},
 			type: 'ComboBox',
 			id_grupo: 0,
-			filters: {pfiltro: 'movtip.nombre',type: 'string'},
 			grid: false,
 			form: false
 		},
@@ -501,6 +575,9 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_funcionario', type: 'numeric'},
 		{name:'desc_funcionario', type: 'string'},
 		{name:'fecha', type: 'date',dateFormat:'Y-m-d'},
+		{name:'fecha_entrega', type: 'date',dateFormat:'Y-m-d'},
+		{name:'dias_maximo_rendicion', type: 'numeric'},
+		{name:'dias_no_rendido', type: 'numeric'},
 		{name:'id_usuario_ai', type: 'numeric'},
 		{name:'fecha_reg', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'usuario_ai', type: 'string'},
@@ -635,6 +712,21 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 		}, this);
 	},
 
+	loadCheckDocumentosSolWf:function() {
+			var rec=this.sm.getSelected();
+			rec.data.nombreVista = this.nombreVista;
+			Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
+					'Chequear documento del WF',
+					{
+						width:'90%',
+						height:500
+					},
+					rec.data,
+					this.idContenedor,
+					'DocumentoWf'
+		)
+	},
+	
 	onBtnSolicitud : function() {
 		var rec=this.sm.getSelected();
         Ext.Ajax.request({

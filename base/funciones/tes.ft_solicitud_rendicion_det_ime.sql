@@ -38,6 +38,7 @@ DECLARE
     v_total_rendiciones		numeric;
     v_tipo					varchar;
     v_id_proceso_caja		integer;
+    v_importe_maximo		numeric;
     
 			    
 BEGIN
@@ -56,11 +57,17 @@ BEGIN
 					
         begin
              
-             select sol.id_solicitud_efectivo into v_id_solicitud_efectivo_rend 
+             select sol.id_solicitud_efectivo, cj.importe_maximo_item 
+             into v_id_solicitud_efectivo_rend, v_importe_maximo 
              from tes.tsolicitud_efectivo sol
              inner join tes.ttipo_solicitud tp on tp.id_tipo_solicitud=sol.id_tipo_solicitud
+             inner join tes.tcaja cj on cj.id_caja=sol.id_caja
              where sol.id_solicitud_efectivo_fk= v_parametros.id_solicitud_efectivo_fk
              and sol.estado='borrador' and tp.codigo='RENEFE';
+             
+             IF v_importe_maximo < v_parametros.monto THEN
+             	raise exception 'El importe no puede ser mayor al importe maximo item de la caja';
+             END IF;
              
              IF v_id_solicitud_efectivo_rend is null THEN
                
@@ -131,6 +138,17 @@ BEGIN
 	elsif(p_transaccion='TES_REND_MOD')then
 
 		begin
+        	select det.id_solicitud_efectivo,cj.importe_maximo_item 
+            into v_id_solicitud_efectivo_rend, v_importe_maximo
+            from tes.tsolicitud_rendicion_det det
+            inner join tes.tsolicitud_efectivo sol on sol.id_solicitud_efectivo=det.id_solicitud_efectivo
+            inner join tes.tcaja cj on cj.id_caja=sol.id_caja
+            where id_documento_respaldo=v_parametros.id_documento_respaldo;
+            
+        	IF v_importe_maximo < v_parametros.monto THEN
+             	raise exception 'El importe no puede ser mayor al importe maximo item de la caja';
+             END IF;
+             
 			--Sentencia de la modificacion
 			update tes.tsolicitud_rendicion_det set
 			--id_solicitud_efectivo = v_parametros.id_solicitud_efectivo,
@@ -141,11 +159,7 @@ BEGIN
 			id_usuario_ai = v_parametros._id_usuario_ai,
 			usuario_ai = v_parametros._nombre_usuario_ai
 			where id_documento_respaldo=v_parametros.id_documento_respaldo;
-            
-            select id_solicitud_efectivo into v_id_solicitud_efectivo_rend
-            from tes.tsolicitud_rendicion_det
-            where id_documento_respaldo=v_parametros.id_documento_respaldo;
-            
+                        
             UPDATE tes.tsolicitud_efectivo
             SET monto=(select sum(monto)
               		   from tes.tsolicitud_rendicion_det

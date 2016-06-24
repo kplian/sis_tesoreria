@@ -164,6 +164,10 @@ BEGIN
                    v_parametros.id_depto,
                    'Caja ('||v_num||') '::varchar,
                    v_num );
+                   
+             IF (SELECT 1 FROM tes.tcaja where codigo=upper(v_parametros.codigo))THEN
+             	raise exception 'Ya existe una caja con ese codigo';
+             END IF;
                           
         	--Sentencia de la insercion
         	insert into tes.tcaja(
@@ -171,6 +175,7 @@ BEGIN
 			tipo,
 			estado_reg,
 			importe_maximo_item,
+            dias_maximo_rendicion,
 			id_moneda,
 			id_depto,
 			codigo,
@@ -186,9 +191,10 @@ BEGIN
 			v_parametros.tipo,
 			'activo',
 			v_parametros.importe_maximo_item,
+            v_parametros.dias_maximo_rendicion,
 			v_parametros.id_moneda,
 			v_parametros.id_depto,
-			v_parametros.codigo,
+			upper(v_parametros.codigo),
 			p_id_usuario,
 			now(),
 			null,

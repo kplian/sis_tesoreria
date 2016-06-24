@@ -50,6 +50,7 @@ class MODCaja extends MODbase{
 		$this->captura('id_proceso_wf','int4');
 		$this->captura('id_estado_wf','int4');
 		$this->captura('nro_tramite','varchar');		
+		$this->captura('dias_maximo_rendicion','int4');		
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -70,6 +71,7 @@ class MODCaja extends MODbase{
 		$this->setParametro('tipo','tipo','varchar');
 		$this->setParametro('estado_reg','estado_reg','varchar');
 		$this->setParametro('importe_maximo_item','importe_maximo_item','numeric');
+		$this->setParametro('dias_maximo_rendicion','dias_maximo_rendicion','numeric');
 		$this->setParametro('id_moneda','id_moneda','int4');
 		$this->setParametro('id_depto_lb','id_depto_lb','int4');
 		$this->setParametro('id_depto','id_depto','int4');

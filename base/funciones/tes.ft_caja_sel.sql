@@ -131,7 +131,8 @@ BEGIN
                         caja.tipo_ejecucion,
                         pc.id_proceso_wf,
 				        pc.id_estado_wf,
-       					pc.nro_tramite
+       					pc.nro_tramite,
+                        caja.dias_maximo_rendicion
 						from tes.tcaja caja
 						inner join segu.tusuario usu1 on usu1.id_usuario = caja.id_usuario_reg
                         inner join tes.tproceso_caja pc on pc.id_caja= caja.id_caja

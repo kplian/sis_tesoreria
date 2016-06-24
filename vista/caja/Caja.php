@@ -200,7 +200,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'importe_maximo_caja',
-				fieldLabel: 'Importe máximo Caja',
+				fieldLabel: 'Importe Máximo Caja',
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 120,
@@ -215,7 +215,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'importe_maximo_item',
-				fieldLabel: 'Importe maximo Item',
+				fieldLabel: 'Importe Maximo Item',
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 120,
@@ -223,6 +223,22 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 			},
 			type:'NumberField',
 			filters:{pfiltro:'caja.importe_maximo_item',type:'numeric'},
+			id_grupo:1,
+			grid:true,
+			form:true
+		},
+		{
+			config:{
+				name: 'dias_maximo_rendicion',
+				fieldLabel: 'Dias Maximo Rendicion',
+				allowBlank: false,
+				allowDecimals : false,
+				anchor: '80%',
+				gwidth: 120,
+				maxLength:393218
+			},
+			type:'NumberField',
+			filters:{pfiltro:'caja.dias_maximo_rendicion',type:'numeric'},
 			id_grupo:1,
 			grid:true,
 			form:true
@@ -390,6 +406,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		{name:'estado_reg', type: 'string'},
 		{name:'estado_proceso', type: 'string'},
 		{name:'importe_maximo_item', type: 'numeric'},
+		{name:'dias_maximo_rendicion', type: 'numeric'},
 		{name:'id_moneda', type: 'numeric'},
 		{name:'fecha', type: 'date',dateFormat:'Y-m-d'},
 		{name:'id_depto', type: 'numeric'},

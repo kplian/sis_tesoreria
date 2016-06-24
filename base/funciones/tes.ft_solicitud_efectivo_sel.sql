@@ -169,8 +169,7 @@ BEGIN
                      v_filtro = '(solefe.estado !=''vbcajero'') and 
                      solefe.id_tipo_solicitud in (select id_tipo_solicitud from tes.ttipo_solicitud where codigo in (''DEVEFE'',''REPEFE'')) and ';
                 END IF;                 
-            END IF;
-                     
+            END IF;        
     		--Sentencia de la consulta
 			v_consulta:='select
 						solefe.id_solicitud_efectivo,
@@ -191,6 +190,9 @@ BEGIN
 						solefe.id_funcionario,
                         fun.desc_funcionario1 as desc_funcionario,
 						solefe.fecha,
+                        solefe.fecha_entrega,
+                        caja.dias_maximo_rendicion,
+                        CURRENT_DATE -COALESCE(solefe.fecha_entrega,current_date) as dias_no_rendidos,
 						solefe.id_usuario_ai,
 						solefe.fecha_reg,
 						solefe.usuario_ai,

@@ -34,10 +34,12 @@ DECLARE
     v_motivo				varchar;
     v_tipo					varchar;
     v_id_tipo_solicitud		integer;
-    v_fk_id_solicitud_efectivo	integer;
+    v_id_solicitud_efectivo_fk	integer;
     v_nombre_funcion		varchar;
     v_resp					varchar;
     v_codigo_proceso_llave_wf	varchar;
+    v_saldo_caja			numeric;
+    v_id_cajero				integer;
 
 BEGIN
             v_nombre_funcion = 'f_inserta_solicitud_efectivo';
@@ -50,7 +52,7 @@ BEGIN
                     (p_hstore->'tipo')::varchar,
                     (p_hstore->'fecha')::date,
 					(p_hstore->'motivo')::varchar,
-                    (p_hstore->'id_solicitud_efectivo')::integer                                
+                    (p_hstore->'id_solicitud_efectivo_fk')::integer                                
             */
 
 			select pv.codigo into v_codigo_tabla
@@ -65,10 +67,23 @@ BEGIN
                 v_tipo = 'REPEFE';
             ELSIF (p_hstore->'tipo_solicitud')::varchar = 'solicitud' THEN
 				v_tipo='SOLEFE';
+                
+                v_saldo_caja = tes.f_calcular_saldo_caja((p_hstore->'id_caja')::integer);
+                
+                IF v_saldo_caja < (p_hstore->'monto')::numeric THEN
+					raise exception 'El monto que esta intentando solicitar excede el saldo de la caja';
+                END IF;
+                
+            ELSIF (p_hstore->'tipo_solicitud')::varchar = 'apertura_caja' THEN
+                v_tipo = 'APECAJ';
+            ELSIF (p_hstore->'tipo_solicitud')::varchar = 'ingreso_caja' THEN
+                v_tipo = 'INGEFE';
+            ELSIF (p_hstore->'tipo_solicitud')::varchar = 'salida_caja' THEN
+				v_tipo='SALEFE';
             ELSE
             	raise exception 'Tipo de solicitud '' % '', no definido', (p_hstore->'tipo_solicitud')::varchar;
 			END IF;            
-            
+
             IF v_tipo = 'SOLEFE' THEN
               -- obtener correlativo
               v_num_sol_efe =  param.f_obtener_correlativo(
@@ -90,13 +105,14 @@ BEGIN
                  raise exception 'No se pudo obtener un numero correlativo para la solicitud efectivo caja consulte con el administrador';
               END IF;
             ELSE
-
-              select nro_tramite into v_num_sol_efe
-              from tes.tsolicitud_efectivo
-              where id_solicitud_efectivo = (p_hstore->'id_solicitud_efectivo')::integer;
+              
+              select sol.nro_tramite, cajero.id_funcionario into v_num_sol_efe, v_id_cajero
+              from tes.tsolicitud_efectivo sol
+              inner join tes.tcajero cajero on cajero.id_caja=sol.id_caja and cajero.estado='activo'
+              where sol.id_solicitud_efectivo = (p_hstore->'id_solicitud_efectivo_fk')::integer;
 
             END IF;
-              
+                   
               select tp.codigo, t.id_tipo_solicitud into v_codigo_tipo_proceso, v_id_tipo_solicitud
             from tes.ttipo_solicitud t
             inner join wf.ttipo_proceso tp on tp.codigo_llave=t.codigo_proceso_llave_wf
@@ -109,7 +125,7 @@ BEGIN
             from param.tgestion ges
             where ges.gestion = (date_part('year', current_date))::integer
             limit 1 offset 0;
-             
+                         
             -- inciar el tramite en el sistema de WF
              SELECT 
                    ps_num_tramite ,
@@ -128,11 +144,11 @@ BEGIN
                    NULL,
                    v_id_gestion, 
                    v_codigo_tipo_proceso, 
-                   NULL,
+                   v_id_cajero,--id_funcionario
                    --v_parametros.id_depto,
                    NULL,
-                   'Fondo Rotativo ('||v_num_sol_efe||') '::varchar,
-                   v_num_sol_efe );
+                   'Fondo Rotativo ('||COALESCE(v_num_sol_efe,'')||') '::varchar,
+                   COALESCE(v_num_sol_efe,'') );
 
             IF (p_hstore->'motivo') IS NOT NULL THEN
             	v_motivo = (p_hstore->'motivo')::varchar;
@@ -140,53 +156,53 @@ BEGIN
             	v_motivo = NULL;
             END IF;
 
-            IF (p_hstore->'id_solicitud_efectivo') IS NOT NULL THEN
-            	v_fk_id_solicitud_efectivo = (p_hstore->'id_solicitud_efectivo')::integer;
+            IF (p_hstore->'id_solicitud_efectivo_fk') IS NOT NULL THEN
+            	v_id_solicitud_efectivo_fk = (p_hstore->'id_solicitud_efectivo_fk')::integer;
             ELSE	
-            	v_fk_id_solicitud_efectivo = NULL;
+            	v_id_solicitud_efectivo_fk = NULL;
             END IF;
             
             --Sentencia de la insercion
             insert into tes.tsolicitud_efectivo(
-            id_caja,
-            id_estado_wf,
-            monto,
-            id_proceso_wf,
-            nro_tramite,
-            estado,
-            estado_reg,
-            motivo,
-            id_funcionario,
-            fecha,
-            id_usuario_ai,
-            fecha_reg,
-            usuario_ai,
-            id_usuario_reg,
-            id_usuario_mod,
-            fecha_mod,
-            id_tipo_solicitud,
-            fk_id_solicitud_efectivo,
-            id_gestion
+                id_caja,
+                id_estado_wf,
+                monto,
+                id_proceso_wf,
+                nro_tramite,
+                estado,
+                estado_reg,
+                motivo,
+                id_funcionario,
+                fecha,
+                id_usuario_ai,
+                fecha_reg,
+                usuario_ai,
+                id_usuario_reg,
+                id_usuario_mod,
+                fecha_mod,
+                id_tipo_solicitud,
+                id_solicitud_efectivo_fk,
+                id_gestion
             ) values(
-            (p_hstore->'id_caja')::integer,
-            v_id_estado_wf,
-            (p_hstore->'monto')::numeric,
-            v_id_proceso_wf,
-            v_num_sol_efe,
-            v_codigo_estado,
-            'activo',
-            v_motivo,
-            (p_hstore->'id_funcionario')::integer,
-            (p_hstore->'fecha')::date,
-            (p_hstore->'_id_usuario_ai')::integer,
-            now(),
-            (p_hstore->'_nombre_usuario_ai')::varchar,
-            p_id_usuario,
-            null,
-            null,
-            v_id_tipo_solicitud,
-            v_fk_id_solicitud_efectivo,
-            v_id_gestion			
+                (p_hstore->'id_caja')::integer,
+                v_id_estado_wf,
+                (p_hstore->'monto')::numeric,
+                v_id_proceso_wf,
+                v_num_sol_efe,
+                v_codigo_estado,
+                'activo',
+                v_motivo,
+                (p_hstore->'id_funcionario')::integer,
+                (p_hstore->'fecha')::date,
+                (p_hstore->'_id_usuario_ai')::integer,
+                now(),
+                (p_hstore->'_nombre_usuario_ai')::varchar,
+                p_id_usuario,
+                null,
+                null,
+                v_id_tipo_solicitud,
+                v_id_solicitud_efectivo_fk,
+                v_id_gestion			
             )RETURNING id_solicitud_efectivo into v_id_solicitud_efectivo;
 
              v_resp = v_id_solicitud_efectivo::varchar;

@@ -41,6 +41,9 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->captura('id_funcionario','int4');
 		$this->captura('desc_funcionario','text');
 		$this->captura('fecha','date');
+		$this->captura('fecha_entrega','date');
+		$this->captura('dias_maximo_rendicion','int4');
+		$this->captura('dias_no_rendido','int4');
 		$this->captura('id_usuario_ai','int4');
 		$this->captura('fecha_reg','timestamp');
 		$this->captura('usuario_ai','varchar');
@@ -55,7 +58,6 @@ class MODSolicitudEfectivo extends MODbase{
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
-		
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}

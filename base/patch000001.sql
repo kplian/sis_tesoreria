@@ -1650,3 +1650,10 @@ CREATE TABLE tes.ttipo_proceso_caja (
 WITHOUT OIDS;
 
 /*****************************F-SCP-GSS-TES-0-15/06/2016*************/
+
+/*****************************I-SCP-GSS-TES-0-23/06/2016*************/
+
+ALTER TABLE tes.tcaja
+  ADD COLUMN dias_maximo_rendicion INTEGER;
+  
+/*****************************F-SCP-GSS-TES-0-23/06/2016*************/
