@@ -34,52 +34,52 @@ DECLARE
 	v_mensaje_error         text;
 	v_id_plan_pago			integer;
     v_estado_aux			varchar;
-    
-    v_otros_descuentos_mb numeric;
-    v_monto_no_pagado_mb numeric;
+    v_sw_retenciones 		varchar;
+    v_otros_descuentos_mb 	numeric;
+    v_monto_no_pagado_mb 	numeric;
     v_descuento_anticipo_mb numeric;
-    v_monto_anticipo numeric;
-    v_monto_total numeric;
-    v_resp_doc   boolean;
+    v_monto_anticipo 		numeric;
+    v_monto_total 			numeric;
+    v_resp_doc   			boolean;
     
-    v_nro_cuota numeric;
+    v_nro_cuota 			numeric;
     
     v_registros record;
-     va_id_tipo_estado_pro integer[];
-    va_codigo_estado_pro varchar[];
-    va_disparador_pro varchar[];
-    va_regla_pro varchar[];
-    va_prioridad_pro integer[];
+     va_id_tipo_estado_pro 	integer[];
+    va_codigo_estado_pro 	varchar[];
+    va_disparador_pro 		varchar[];
+    va_regla_pro 			varchar[];
+    va_prioridad_pro 		integer[];
     
-    v_id_estado_actual integer;
+    v_id_estado_actual 		integer;
     
     
-    v_id_proceso_wf integer;
-    v_id_estado_wf integer;
-    v_codigo_estado varchar;
+    v_id_proceso_wf 		integer;
+    v_id_estado_wf 			integer;
+    v_codigo_estado 		varchar;
     
-    v_monto_mb numeric;
-    v_liquido_pagable numeric;
+    v_monto_mb 				numeric;
+    v_liquido_pagable 		numeric;
     
-    v_liquido_pagable_mb numeric;
+    v_liquido_pagable_mb 	numeric;
     
     v_monto_ejecutar_total_mo numeric;
     v_monto_ejecutar_total_mb numeric;
     
-    v_tipo varchar;
-    v_id_tipo_estado integer;
-    v_fecha_tentativa date;
-    v_monto numeric;
-    v_cont integer;  
-    v_id_prorrateo integer;
+    v_tipo 					varchar;
+    v_id_tipo_estado 		integer;
+    v_fecha_tentativa 		date;
+    v_monto 				numeric;
+    v_cont 					integer;  
+    v_id_prorrateo 			integer;
     
-    v_tipo_sol varchar;
+    v_tipo_sol 				varchar;
     
-    va_id_tipo_estado integer[];
-    va_codigo_estado varchar[];
-    va_disparador    varchar[];
-    va_regla         varchar[]; 
-    va_prioridad     integer[];
+    va_id_tipo_estado 		integer[];
+    va_codigo_estado 		varchar[];
+    va_disparador    		varchar[];
+    va_regla         		varchar[]; 
+    va_prioridad     		integer[];
     
     v_monto_ejecutar_mo 	numeric;
     
@@ -952,7 +952,7 @@ BEGIN
            --validacion de la cuota
            
            select  
-             pp.*,op.total_pago,op.comprometido
+             pp.*,op.total_pago,op.comprometido, op.id_contrato
            into
              v_registros
            from tes.tplan_pago pp
@@ -1040,6 +1040,28 @@ BEGIN
                    
                    END IF ;
             
+           END IF;
+           
+          
+           --si es un pago de vengado , revisar si tiene contrato
+           --si tiene contrato con renteciones de garantia validar que la rentecion de garantia sea mayor a cero
+           IF  v_registros.tipo in ('devengado','devengado_pagado','devengado_pagado_1c') THEN
+               IF v_registros.id_contrato is not null THEN
+                  
+                   v_sw_retenciones = 'no';
+                   select 
+                     c.tiene_retencion
+                   into 
+                     v_sw_retenciones
+                   from leg.tcontrato c
+                   where c.id_contrato = v_registros.id_contrato;
+               
+                   IF v_sw_retenciones = 'si' and  v_registros.monto_retgar_mo = 0 THEN
+                      raise exception 'Según contrato este pago debe tener retenciones de garantia';
+                   END IF;
+               
+               END IF;
+              
            END IF;
            
            

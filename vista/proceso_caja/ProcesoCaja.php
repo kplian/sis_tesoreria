@@ -27,6 +27,15 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
 			}
 		);
+		
+		this.addButton('relacionar_deposito',
+			{	text:'Relacionar Depósito',
+				iconCls: 'btransfer',
+				disabled:false,
+				handler:this.relacionarDeposito,
+				tooltip: '<b>Relacionar Depósito</b><p>Relacionar Deposito</p>'
+			}
+		);
 
 		this.addButton('chkpresupuesto',
 			{	text:'Chk Presupuesto',
@@ -36,7 +45,16 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Revisar Presupuesto</b><p>Revisar estado de ejecución presupeustaria para el tramite</p>'
 			}
 		);
-
+		
+		this.addButton('consolidado',
+			{	text:'Consolidado Rendiciones',
+				iconCls: 'blist',
+				disabled:false,
+				handler:this.consolidado,
+				tooltip: '<b>Reporte Consolidado</b><p>Reporte Consolidado Rendiciones</p>'
+			}
+		);
+		
 		//carga de grilla
 		if(this.nombreVista == 'ProcesoCaja'){
 			this.load({params:{start:0, limit: this.tam_pag, tipo_interfaz:this.nombreVista, id_caja:this.id_caja}});
@@ -733,6 +751,56 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 								scope:this
 							 });
 	 },
+	 	
+	 relacionarDeposito:function(){ 
+		var rec=this.sm.getSelected();
+		
+		var NumSelect=this.sm.getCount();
+		
+		if(NumSelect != 0)
+		{						
+			Phx.CP.loadWindows('../../../sis_tesoreria/vista/deposito/FormRelacionarDeposito.php',
+			'Relacionar Deposito',
+			{
+				modal:true,
+				width:500,
+				height:250
+			}, {data:rec.data}, this.idContenedor,'FormRelacionarDeposito',
+			{
+				config:[{
+						  event:'beforesave',
+						  delegate: this.transferir,
+						}
+						],
+			   scope:this
+			 })
+		}
+		else
+		{
+			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
+		}
+							   
+	},
+	
+	transferir:function(wizard,resp){
+		Phx.CP.loadingShow();
+		Ext.Ajax.request({
+			url:'../../sis_tesoreria/control/ProcesoCaja/relacionarDeposito',
+			params:{
+					id_cuenta_bancaria:resp.id_cuenta_bancaria,
+					id_libro_bancos:resp.id_libro_bancos,
+					tabla:'tes.tproceso_caja', 
+					columna_pk:'id_proceso_caja',
+					columna_pk_valor:resp.id_proceso_caja					
+			 },
+			argument:{wizard:wizard},  
+			success:this.successWizard,
+			failure: this.conexionFailure,
+			timeout:this.timeout,
+			scope:this
+		});
+	   
+	},
 
 	 checkPresupuesto:function(){
 	  var rec=this.sm.getSelected();
@@ -786,7 +854,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 	preparaMenu:function(n){
           var data = this.getSelectedData();
           var tb =this.tbar;
-
+		
           Phx.vista.ProcesoCaja.superclass.preparaMenu.call(this,n);
           if (data['estado']== 'borrador'){
               this.getBoton('fin_registro').enable();
@@ -796,6 +864,12 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
               this.getBoton('fin_registro').disable();
 			  this.getBoton('del').disable();
           }
+		  
+		  if(data['tipo']=='CIERRE'){
+			  this.getBoton('relacionar_deposito').enable();
+		  }else{
+			  this.getBoton('relacionar_deposito').disable();
+		  }
 
           this.getBoton('chkpresupuesto').enable();
 
@@ -814,6 +888,23 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			resp.argument.wizard.panel.destroy()
 			this.reload();
 		 },
+		 
+	consolidado : function() {
+		var rec = this.getSelectedData();
+		var NumSelect=this.sm.getCount();
+		
+		if(NumSelect != 0)
+		{		
+			var data ='id_proceso_caja='+ rec.id_proceso_caja;  			
+			data += '&nro_tramite=' + rec.nro_tramite;
+			//window.open('http://sms.obairlines.bo/ReportesPXP/Home/MemorandumFondosEnAvance?'+data);				
+			window.open('http://localhost:22021/Home/ReporteConsolidadoRendicionesCajaChica?'+data);				
+		}
+		else
+		{
+			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
+		}
+	},
 
 	tabsouth:[
             {

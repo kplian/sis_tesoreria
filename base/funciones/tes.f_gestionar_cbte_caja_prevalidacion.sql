@@ -102,7 +102,7 @@ BEGIN
     
     
     
-      IF  v_registros.codigo_tpc in ('RENYREP', 'RENYCER' ) THEN
+      IF  v_registros.codigo_tpc in ('RENYREP', 'RENYCER','SOLREN' ) THEN
                  
                    -- revertir el presupuesto de las facturas rendidas
                        
