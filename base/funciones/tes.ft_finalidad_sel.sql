@@ -1,3 +1,5 @@
+------------------SQL----------------------
+
 CREATE OR REPLACE FUNCTION tes.ft_finalidad_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -112,7 +114,8 @@ BEGIN
                                                 fin.estado,
                                                 fin.color,
                                                 fin.estado_reg,
-                                                fin.nombre_finalidad 
+                                                fin.nombre_finalidad,
+                        array_to_string(fin.sw_tipo_interfaz, '','',''null'')::varchar                                                  
                         from tes.tcuenta_bancaria cb
                         inner join tes.tfinalidad fin on cb.id_finalidad @> ARRAY[fin.id_finalidad]
                         where ';

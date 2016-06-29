@@ -1,8 +1,13 @@
-CREATE OR REPLACE FUNCTION "tes"."ft_finalidad_ime" (	
-				p_administrador integer, p_id_usuario integer, p_tabla character varying, p_transaccion character varying)
-RETURNS character varying AS
-$BODY$
+--------------------------SQL-----------------------
 
+CREATE OR REPLACE FUNCTION tes.ft_finalidad_ime (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Sistema de Obligaciones de Pago
  FUNCION: 		tes.ft_finalidad_ime
@@ -132,6 +137,30 @@ BEGIN
             return v_resp;
 
 		end;
+    
+    /*********************************    
+ 	#TRANSACCION:  'TES_EDTUI_IME'
+ 	#DESCRIPCION:	Permite configurar los interfaces para las finalidades (caja_chica, fondos_avance)
+ 	#AUTOR:		Gonzalo Sarmiento
+ 	#FECHA:		24-05-2016
+	***********************************/
+
+	elsif(p_transaccion='TES_EDTUI_IME')then
+
+		begin        
+        
+             update tes.tfinalidad set
+			  sw_tipo_interfaz = string_to_array(v_parametros.sw_tipo_interfaz,',')::varchar[]
+             where id_finalidad=v_parametros.id_finalidad;
+                          
+             --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se modificaron las interfaces de las finalidades'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_finalidad',v_parametros.id_finalidad::varchar);
+              
+            --Devuelve la respuesta
+            return v_resp;
+
+		end; 
          
 	else
      
@@ -149,7 +178,9 @@ EXCEPTION
 		raise exception '%',v_resp;
 				        
 END;
-$BODY$
-LANGUAGE 'plpgsql' VOLATILE
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
 COST 100;
-ALTER FUNCTION "tes"."ft_finalidad_ime"(integer, integer, character varying, character varying) OWNER TO postgres;
