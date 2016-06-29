@@ -209,8 +209,8 @@ BEGIN
 
 	elsif(p_transaccion='TES_DEPCAJ_SEL')then
 
-    	v_consulta:='select cb.id_cuenta_bancaria, cb.denominacion ||'' ''||cb.nro_cuenta as desc_cuenta_bancaria, t.fecha, t.tipo, t.importe_deposito, 
-        			 t.origen, f.nombre_finalidad,t.id_libro_bancos, t.observaciones
+    	v_consulta:='select cb.id_cuenta_bancaria, cb.denominacion ||'' ''||cb.nro_cuenta as desc_cuenta_bancaria, t.fecha, t.tipo, t.nro_deposito,
+        			 t.importe_deposito, t.origen, f.nombre_finalidad,t.id_libro_bancos, t.observaciones
 					 from tes.tts_libro_bancos t
 					 inner join tes.tcuenta_bancaria cb on cb.id_cuenta_bancaria=t.id_cuenta_bancaria
 					 inner join tes.tfinalidad f on f.id_finalidad=t.id_finalidad

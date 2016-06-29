@@ -14,6 +14,24 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 	
 	vista:'SinDetalle',
 	
+	gruposBarraTareas:[{name:'borrador',title:'<H1 align="center"><i class="fa fa-thumbs-o-down"></i> Borradores</h1>',grupo:0,height:0},
+                       {name:'entregado',title:'<H1 align="center"><i class="fa fa-eye"></i> Iniciados</h1>',grupo:1,height:0},
+                       {name:'finalizado',title:'<H1 align="center"><i class="fa fa-thumbs-o-up"></i> Finalizados</h1>',grupo:2,height:0}],
+	
+	actualizarSegunTab: function(name, indice){
+		
+    	if(this.finCons){
+    		 this.store.baseParams.pes_estado = name;
+    	     this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.vista}});
+    	   }
+    },
+	
+	beditGroups: [0],
+    bdelGroups:  [0],
+    bactGroups:  [0,1,2],
+    btestGroups: [0],
+    bexcelGroups: [0,1,2],
+	
 	constructor:function(config){
 		this.maestro=config.maestro;
 		
@@ -36,12 +54,12 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 					
 					if (record.data.estado == 'entregado' || record.data.estado == 'finalizado') {
 						if(dias < 0){
-							return String.format("<font color = 'red'>Dias para rendir: {0}</font><br>"+
+							return String.format("<font color = 'red'>Dias máximo rendir: {0}</font><br>"+
 											 "<font color = 'red' >Dias restantes:{1}</font><br>"											 
 											 ,record.data.dias_maximo_rendicion, dias											 
 											 );
 						}else{
-							return String.format("<font color = 'green'>Dias para rendir: {0}</font><br>"+
+							return String.format("<font color = 'green'>Dias máximo rendir: {0}</font><br>"+
 											 "<font color = 'green' >Dias restantes:{1}</font><br>"											 
 											 ,record.data.dias_maximo_rendicion, dias											 
 											 );
@@ -59,7 +77,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		
 		this.addButton('fin_registro',
 			{	text:'Siguiente',
-				iconCls: 'badelante',
+				iconCls: 'badelante',				
 				disabled:false,
 				handler:this.sigEstado,
 				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
@@ -69,6 +87,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		this.addButton('btnRendicion', {
 			text : 'Rendicion Efectivo',
 			iconCls : 'bballot',
+			grupo:[1,2],
 			disabled : false,
 			handler : this.onBtnRendicion,
 			tooltip : '<b>Rendicion</b>'
@@ -77,6 +96,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		this.addButton('btnDevol', {
 			text : 'Devolucion Efectivo',
 			iconCls : 'bballot',
+			grupo:[1],
 			disabled : true,
 			handler : this.onBtnDevolucion,
 			tooltip : '<b>Devolucion Sin Añadir Facturas</b>'
@@ -86,6 +106,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			{
 				text: 'Documentos',
 				iconCls: 'bchecklist',
+				grupo:[0,1,2],
 				disabled: false,
 				handler: this.loadCheckDocumentosSolWf,
 				tooltip: '<b>Documentos de la Solicitud</b><br/>Los documetos de la solicitud seleccionada.'
@@ -107,7 +128,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			handler : this.onBtnReciboEntrega,
 			tooltip : '<b>Recibo Entrega Efectivo</b>'
 		});
-		*/
+		
 		this.addButton('btnRendicionEfectivo', {
 			text : 'Rendicion Efectivo',
 			iconCls : 'bpdf',
@@ -115,8 +136,13 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			handler : this.onBtnRendicionEfectivo,
 			tooltip : '<b>Rendicion Efectivo</b>'
 		});
-	
+		*/
+		
+		this.store.baseParams.pes_estado = 'borrador';
+		
 		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:this.vista}})
+		
+		this.finCons = true;
 	},
 			
 	Atributos:[
@@ -266,7 +292,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Dias Rendicion',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 110,
+				gwidth: 120,
 				maxLength:1179650
 			},
 				type:'NumberField',
@@ -640,12 +666,12 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('del').enable();
 			  this.getBoton('btnRendicion').disable();
 			  //this.getBoton('btnReciboEntrega').disable();
-			  this.getBoton('btnRendicionEfectivo').disable();
+			  //this.getBoton('btnRendicionEfectivo').disable();
           }else if (data['estado'] == 'entregado'){
               this.getBoton('fin_registro').enable();
 			  this.getBoton('edit').disable();
 			  this.getBoton('del').disable();
-			  this.getBoton('btnRendicionEfectivo').enable();
+			  //this.getBoton('btnRendicionEfectivo').enable();
 			  if(dias < 0)
 				this.getBoton('btnRendicion').disable();
 			  else
@@ -658,21 +684,21 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('del').disable();
 			  this.getBoton('btnRendicion').disable();
 			  //this.getBoton('btnReciboEntrega').enable();
-			  this.getBoton('btnRendicionEfectivo').enable();
+			  //this.getBoton('btnRendicionEfectivo').enable();
 		  }else if(data['estado'] == 'vbjefe'){
 			  this.getBoton('fin_registro').disable();
 			  this.getBoton('edit').disable();
 			  this.getBoton('del').disable();
 			  this.getBoton('btnRendicion').disable();
 			  //this.getBoton('btnReciboEntrega').disable();					
-			  this.getBoton('btnRendicionEfectivo').disable();
+			  //this.getBoton('btnRendicionEfectivo').disable();
 		  }else{
               this.getBoton('fin_registro').enable();
 			  this.getBoton('edit').disable();
 			  this.getBoton('del').disable();
 			  this.getBoton('btnRendicion').disable();
 			  //this.getBoton('btnReciboEntrega').disable();
-			  this.getBoton('btnRendicionEfectivo').disable();
+			  //this.getBoton('btnRendicionEfectivo').disable();
           }
 
 		  if(data['saldo'] == 0.00){

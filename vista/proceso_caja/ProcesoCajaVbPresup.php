@@ -30,6 +30,13 @@ Phx.vista.ProcesoCajaVbPresup = {
 
 	   Phx.vista.ProcesoCajaVbPresup.superclass.constructor.call(this,config);
 
-    }
+    },
+	
+	preparaMenu:function(){
+	  
+	   Phx.vista.ProcesoCajaVbPresup.superclass.preparaMenu.call(this);
+	   this.getBoton('relacionar_deposito').disable();
+
+     }
 };
 </script>

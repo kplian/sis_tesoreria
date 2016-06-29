@@ -269,6 +269,22 @@ header("content-type: text/javascript; charset=UTF-8");
 		},
 		{
 			config:{
+				name: 'nro_deposito',
+				fieldLabel: 'Numero Deposito',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 125,
+				maxLength:50
+			},
+				type:'TextField',
+				filters:{pfiltro:'lban.nro_deposito',type:'string'},
+				bottom_filter: true,
+				id_grupo:1,
+				grid:true,
+				form:true
+		},
+		{
+			config:{
 				name: 'importe_deposito',
 				fieldLabel: 'Importe Deposito',
 				allowBlank: false,
@@ -554,6 +570,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'nombre', type: 'string'},
 		{name:'nro_cheque', type: 'numeric'},
 		{name:'importe_deposito', type: 'numeric'},
+		{name:'nro_deposito', type: 'numeric'},
 		{name:'nro_liquidacion', type: 'string'},
 		{name:'detalle', type: 'string'},
 		{name:'origen', type: 'string'},

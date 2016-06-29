@@ -9291,3 +9291,153 @@ AS
          dco.id_concepto_ingas;
          
 /***********************************F-DEP-RAC-TES-0-20/05/2016****************************************/
+
+
+/***********************************I-DEP-GSS-TES-0-28/06/2016****************************************/
+
+CREATE OR REPLACE VIEW tes.vlibro_bancos(
+    id_libro_bancos,
+    num_tramite,
+    id_cuenta_bancaria,
+    fecha,
+    a_favor,
+    nro_cheque,
+    importe_deposito,
+    nro_liquidacion,
+    detalle,
+    origen,
+    observaciones,
+    importe_cheque,
+    id_libro_bancos_fk,
+    estado,
+    nro_comprobante,
+    indice,
+    estado_reg,
+    tipo,
+    nro_deposito,
+    fecha_reg,
+    id_usuario_reg,
+    fecha_mod,
+    id_usuario_mod,
+    usr_reg,
+    usr_mod,
+    id_depto,
+    nombre_depto,
+    id_proceso_wf,
+    id_estado_wf,
+    fecha_cheque_literal,
+    id_finalidad,
+    nombre_finalidad,
+    color,
+    saldo_deposito,
+    nombre_regional,
+    sistema_origen,
+    comprobante_sigma,
+    notificado,
+    fondo_devolucion_retencion)
+AS
+  SELECT lban.id_libro_bancos,
+         lban.num_tramite,
+         lban.id_cuenta_bancaria,
+         lban.fecha,
+         lban.a_favor,
+         lban.nro_cheque,
+         lban.importe_deposito,
+         lban.nro_liquidacion,
+         lban.detalle,
+         lban.origen,
+         lban.observaciones,
+         lban.importe_cheque,
+         lban.id_libro_bancos_fk,
+         lban.estado,
+         lban.nro_comprobante,
+         lban.indice,
+         lban.estado_reg,
+         lban.tipo,
+         lban.nro_deposito,
+         lban.fecha_reg,
+         lban.id_usuario_reg,
+         lban.fecha_mod,
+         lban.id_usuario_mod,
+         usu1.cuenta AS usr_reg,
+         usu2.cuenta AS usr_mod,
+         lban.id_depto,
+         depto.nombre AS nombre_depto,
+         lban.id_proceso_wf,
+         lban.id_estado_wf,
+         upper(pxp.f_fecha_literal(lban.fecha)) AS fecha_cheque_literal,
+         lban.id_finalidad,
+         fin.nombre_finalidad,
+         fin.color,
+         CASE
+           WHEN lban.tipo::text = 'deposito' ::text THEN lban.importe_deposito -
+             COALESCE((
+                        SELECT COALESCE(sum(lb.importe_cheque), 0::numeric) AS
+                          "coalesce"
+                        FROM tes.tts_libro_bancos lb
+                        WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos AND
+                              (lb.tipo::text <> ALL (ARRAY [ 'deposito'
+                                ::character varying::text,
+                                'transf_interna_haber' ::character varying::text
+                                ]))
+         ), 0::numeric) + COALESCE((
+                                     SELECT COALESCE(sum(lb.importe_deposito),
+                                       0::numeric) AS "coalesce"
+                                     FROM tes.tts_libro_bancos lb
+                                     WHERE lb.id_libro_bancos_fk =
+                                       lban.id_libro_bancos AND
+                                           (lb.tipo::text = ANY (ARRAY [
+                                             'deposito' ::character
+                                             varying::text,
+                                             'transf_interna_haber' ::character
+                                             varying::text ]))
+         ), 0::numeric)
+           WHEN (lban.tipo::text = ANY (ARRAY [ 'cheque' ::character
+             varying::text, 'debito_automatico' ::character varying::text,
+             'transferencia_carta' ::character varying::text,
+             'transf_interna_debe' ::character varying::text ])) AND
+             lban.id_libro_bancos_fk IS NOT NULL THEN ((
+                                                         SELECT COALESCE(
+                                                           lb.importe_deposito,
+                                                           0::numeric) AS
+                                                           "coalesce"
+                                                         FROM
+                                                           tes.tts_libro_bancos
+                                                           lb
+                                                         WHERE
+                                                           lb.id_libro_bancos =
+                                                           lban.id_libro_bancos_fk
+         )) +((
+                SELECT COALESCE(sum(lb.importe_deposito), 0::numeric) AS
+                  "coalesce"
+                FROM tes.tts_libro_bancos lb
+                WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos_fk AND
+                      (lb.tipo::text = ANY (ARRAY [ 'deposito' ::character
+                        varying::text, 'transf_interna_haber' ::character
+                        varying::text ]))
+         )) -((
+                SELECT sum(lb2.importe_cheque) AS sum
+                FROM tes.tts_libro_bancos lb2
+                WHERE lb2.id_libro_bancos <= lban.id_libro_bancos AND
+                      lb2.id_libro_bancos_fk = lban.id_libro_bancos_fk AND
+                      (lb2.tipo::text <> ALL (ARRAY [ 'deposito' ::character
+                        varying::text, 'transf_interna_haber' ::character
+                        varying::text ]))
+         ))
+           ELSE 0::numeric
+         END AS saldo_deposito,
+         reg.nombre_regional,
+         lban.sistema_origen,
+         lban.comprobante_sigma,
+         lban.notificado,
+         lban.fondo_devolucion_retencion
+  FROM tes.tts_libro_bancos lban
+       JOIN segu.tusuario usu1 ON usu1.id_usuario = lban.id_usuario_reg
+       LEFT JOIN param.tdepto depto ON depto.id_depto = lban.id_depto
+       LEFT JOIN segu.tusuario usu2 ON usu2.id_usuario = lban.id_usuario_mod
+       JOIN tes.tfinalidad fin ON fin.id_finalidad = lban.id_finalidad
+       LEFT JOIN param.tregional reg ON reg.codigo_regional::text =
+         lban.origen::text
+  ORDER BY lban.fecha DESC;
+
+/***********************************F-DEP-GSS-TES-0-28/06/2016****************************************/

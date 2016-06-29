@@ -26,6 +26,16 @@ class ACTSolicitudEfectivo extends ACTbase{
 		if($this->objParam->getParametro('tipo_interfaz')=='SinDetalle')
 		{
 			$this->objParam-> addFiltro("caja.tipo_ejecucion = ''sin_detalle''");
+			
+			if($this->objParam->getParametro('pes_estado')=='borrador'){
+				 $this->objParam->addFiltro("solefe.estado in (''borrador'')");
+			}
+			if($this->objParam->getParametro('pes_estado')=='entregado'){
+				 $this->objParam->addFiltro("solefe.estado = ''entregado''");
+			}
+			if($this->objParam->getParametro('pes_estado')=='finalizado'){
+				 $this->objParam->addFiltro("solefe.estado in (''finalizado'')");
+			}
 		}
 
 		if($this->objParam->getParametro('id_caja')!='')

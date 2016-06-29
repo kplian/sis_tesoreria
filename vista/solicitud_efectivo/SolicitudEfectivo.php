@@ -13,6 +13,24 @@ header("content-type: text/javascript; charset=UTF-8");
 Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 
 	vista:'ConDetalle',
+	
+	gruposBarraTareas:[{name:'borrador',title:'<H1 align="center"><i class="fa fa-thumbs-o-down"></i> Borradores</h1>',grupo:0,height:0},
+                       {name:'proceso',title:'<H1 align="center"><i class="fa fa-eye"></i> Iniciados</h1>',grupo:1,height:0},
+                       {name:'finalizados',title:'<H1 align="center"><i class="fa fa-thumbs-o-up"></i> Finalizados</h1>',grupo:2,height:0}],
+	
+	actualizarSegunTab: function(name, indice){
+		
+    	if(this.finCons){
+    		 this.store.baseParams.pes_estado = name;
+    	     this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.nombreVista}});
+    	   }
+    },
+	
+	beditGroups: [0],
+    bdelGroups:  [0],
+    bactGroups:  [0,1,2],
+    btestGroups: [0],
+    bexcelGroups: [0,1,2],
 
 	constructor:function(config){
 		this.maestro=config.maestro;
@@ -36,12 +54,12 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 					
 					if (record.data.estado == 'entregado' || record.data.estado == 'finalizado') {
 						if(dias < 0){
-							return String.format("<font color = 'red'>Dias para rendir: {0}</font><br>"+
+							return String.format("<font color = 'red'>Dias máximo rendir: {0}</font><br>"+
 											 "<font color = 'red' >Dias restantes:{1}</font><br>"											 
 											 ,record.data.dias_maximo_rendicion, dias											 
 											 );
 						}else{
-							return String.format("<font color = 'green'>Dias para rendir: {0}</font><br>"+
+							return String.format("<font color = 'green'>Dias máximo rendir: {0}</font><br>"+
 											 "<font color = 'green' >Dias restantes:{1}</font><br>"											 
 											 ,record.data.dias_maximo_rendicion, dias											 
 											 );
@@ -108,6 +126,8 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 		});
 		*/
 		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.vista}})
+		
+		this.finCons = true;
 	},
 
 	Atributos:[
@@ -215,7 +235,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Dias Rendicion',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 110,
+				gwidth: 120,
 				maxLength:1179650
 			},
 				type:'NumberField',

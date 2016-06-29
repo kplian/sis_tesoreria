@@ -26,7 +26,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				}
 			});
 			this.Atributos[1].valorInicial = this.id_cuenta_bancaria;
-			this.Atributos[17].config.store.baseParams.id_cuenta_bancaria =this.id_cuenta_bancaria;		
+			this.Atributos[18].config.store.baseParams.id_cuenta_bancaria =this.id_cuenta_bancaria;		
 			
 			this.addButton('btnClonar',
 				{
@@ -295,6 +295,22 @@ header("content-type: text/javascript; charset=UTF-8");
 				filters:{pfiltro:'lban.nro_cheque',type:'numeric'},
 				id_grupo:1,
 				grid:false,
+				form:true
+		},
+		{
+			config:{
+				name: 'nro_deposito',
+				fieldLabel: 'Numero Deposito',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 125,
+				maxLength:50
+			},
+				type:'TextField',
+				filters:{pfiltro:'lban.nro_deposito',type:'string'},
+				bottom_filter: true,
+				id_grupo:1,
+				grid:true,
 				form:true
 		},
 		{
@@ -612,6 +628,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'indice', type: 'numeric'},
 		{name:'estado_reg', type: 'string'},
 		{name:'tipo', type: 'string'},
+		{name:'nro_deposito', type: 'numeric'},
 		{name:'fecha_reg', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'id_usuario_reg', type: 'numeric'},
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},

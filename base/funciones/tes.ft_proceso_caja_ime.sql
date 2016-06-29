@@ -75,6 +75,9 @@ DECLARE
     v_id_fondo_rotativo		integer;
     v_fecha_inicio			date;
     v_fecha_fin				date;
+    
+    v_codigo_proceso		varchar;
+    v_importe_deposito		numeric;
     		    
 BEGIN
 
@@ -240,6 +243,10 @@ BEGIN
              
              IF v_parametros.tipo = 'REPO' THEN
             	    v_monto_reposicion =v_registros.importe_maximo_caja;
+             END IF;
+             
+             IF v_parametros.tipo = 'CIERRE' THEN
+            	    v_monto_reposicion = tes.f_calcular_saldo_caja(v_parametros.id_caja);
              END IF;
                       
         	--Sentencia de la insercion de la rendicion o reposicion de caja
@@ -415,16 +422,35 @@ BEGIN
             pc.id_proceso_caja,
             pc.id_proceso_wf,
             pc.estado,
-            tpc.codigo_plantilla_cbte
+            tpc.codigo_plantilla_cbte,
+            tpc.codigo,
+            pc.id_proceso_caja,
+            pc.monto_reposicion
         into 
             v_id_proceso_caja,
             v_id_proceso_wf,
             v_codigo_estado,
-            v_codigo_plantilla_cbte
-            
+            v_codigo_plantilla_cbte,
+            v_codigo_proceso,
+            v_id_proceso_caja,
+            v_monto_reposicion
         from tes.tproceso_caja pc
         inner join tes.ttipo_proceso_caja tpc on tpc.id_tipo_proceso_caja = pc.id_tipo_proceso_caja
         where pc.id_proceso_wf = v_parametros.id_proceso_wf_act;
+        
+        IF(v_codigo_estado = 'borrador' AND v_codigo_proceso='CIERRE') THEN
+        
+        	select sum(lb.importe_deposito) into v_importe_deposito
+            from tes.tts_libro_bancos lb
+            where lb.tabla='tes.tproceso_caja'
+            and lb.columna_pk='id_proceso_caja'
+            and lb.columna_pk_valor=v_id_proceso_caja;
+            
+            IF v_importe_deposito <> v_monto_reposicion THEN
+            	raise exception 'La suma de los depositos no iguala al monto de cierre de caja';
+            END IF;
+            
+        END IF;
           
           select 
             ew.id_tipo_estado,
@@ -706,9 +732,9 @@ BEGIN
                 RAISE NOTICE 'id_finalidad %, id_libro_bancos %', v_id_finalidad, v_id_fondo_rotativo;
                 		
                 v_resp2 = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,
-                            array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','fecha','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','id_int_comprobante','sistema_origen'],
-                            array[' 0 = 0 ','','','','','NULL','NULL',v_parametros.id_cuenta_bancaria::varchar,v_cuenta_bancaria.id_depto::varchar,''||v_parametros.fecha::varchar||'',(v_cuenta_bancaria.nombre||' '||v_cuenta_bancaria.nro_cuenta||' DEPOSITO')::varchar,''::varchar,v_parametros.importe_deposito::varchar,'','DEPOSITADO POR '||v_depositante::varchar,v_parametros.origen::varchar,v_parametros.observaciones::varchar,'0'::varchar,v_id_fondo_rotativo::varchar,'','','deposito'::varchar,v_id_finalidad::varchar,''::varchar,''::varchar],
-                            array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','date','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','int4','varchar']
+                            array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','fecha','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','id_int_comprobante','sistema_origen','nro_deposito'],
+                            array[' 0 = 0 ','','','','','NULL','NULL',v_parametros.id_cuenta_bancaria::varchar,v_cuenta_bancaria.id_depto::varchar,''||v_parametros.fecha::varchar||'',(v_cuenta_bancaria.nombre||' '||v_cuenta_bancaria.nro_cuenta||' DEPOSITO')::varchar,''::varchar,v_parametros.importe_deposito::varchar,'','DEPOSITADO POR '||v_depositante::varchar,v_parametros.origen::varchar,v_parametros.observaciones::varchar,'0'::varchar,v_id_fondo_rotativo::varchar,'','','deposito'::varchar,v_id_finalidad::varchar,''::varchar,''::varchar,v_parametros.nro_deposito::varchar],
+                            array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','date','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','int4','varchar','int4']
                             ,'',NULL,NULL);
             ELSIF v_parametros.tipo_deposito = 'RETENCION' THEN
             
@@ -723,9 +749,9 @@ BEGIN
                 
                 IF v_id_fondo_rotativo IS NULL THEN
                 	v_resp2 = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,
-                            array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','fecha','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','id_int_comprobante','sistema_origen'],
-                            array[' 0 = 0 ','','','','','NULL','NULL',v_parametros.id_cuenta_bancaria::varchar,v_cuenta_bancaria.id_depto::varchar,''||v_parametros.fecha::varchar||'',(v_cuenta_bancaria.nombre||' '||v_cuenta_bancaria.nro_cuenta||' DEPOSITO')::varchar,''::varchar,v_parametros.importe_deposito::varchar,'','DEPOSITADO POR '||v_depositante::varchar,v_parametros.origen::varchar,v_parametros.observaciones::varchar,'0'::varchar,'NULL','','','deposito'::varchar,v_id_finalidad::varchar,''::varchar,''::varchar],
-                            array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','date','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','int4','varchar']
+                            array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','fecha','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','id_int_comprobante','sistema_origen','nro_deposito'],
+                            array[' 0 = 0 ','','','','','NULL','NULL',v_parametros.id_cuenta_bancaria::varchar,v_cuenta_bancaria.id_depto::varchar,''||v_parametros.fecha::varchar||'',(v_cuenta_bancaria.nombre||' '||v_cuenta_bancaria.nro_cuenta||' DEPOSITO')::varchar,''::varchar,v_parametros.importe_deposito::varchar,'','DEPOSITADO POR '||v_depositante::varchar,v_parametros.origen::varchar,v_parametros.observaciones::varchar,'0'::varchar,'NULL','','','deposito'::varchar,v_id_finalidad::varchar,''::varchar,''::varchar,v_parametros.nro_deposito::varchar],
+                            array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','date','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','int4','varchar','int4']
                             ,'',NULL,NULL);
                             
                     v_respuesta = substring(v_resp2 from '%#"tipo_respuesta":"_____"#"%' for '#');
@@ -747,9 +773,9 @@ BEGIN
                     
                 ELSE
                 	v_resp2 = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,
-                            array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','fecha','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','id_int_comprobante','sistema_origen'],
-                            array[' 0 = 0 ','','','','','NULL','NULL',v_parametros.id_cuenta_bancaria::varchar,v_cuenta_bancaria.id_depto::varchar,''||v_parametros.fecha::varchar||'',(v_cuenta_bancaria.nombre||' '||v_cuenta_bancaria.nro_cuenta||' DEPOSITO')::varchar,''::varchar,v_parametros.importe_deposito::varchar,'','DEPOSITADO POR '||v_depositante::varchar,v_parametros.origen::varchar,v_parametros.observaciones::varchar,'0'::varchar,v_id_fondo_rotativo::varchar,'','','deposito'::varchar,v_id_finalidad::varchar,''::varchar,''::varchar],
-                            array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','date','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','int4','varchar']
+                            array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','fecha','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','id_int_comprobante','sistema_origen','nro_deposito'],
+                            array[' 0 = 0 ','','','','','NULL','NULL',v_parametros.id_cuenta_bancaria::varchar,v_cuenta_bancaria.id_depto::varchar,''||v_parametros.fecha::varchar||'',(v_cuenta_bancaria.nombre||' '||v_cuenta_bancaria.nro_cuenta||' DEPOSITO')::varchar,''::varchar,v_parametros.importe_deposito::varchar,'','DEPOSITADO POR '||v_depositante::varchar,v_parametros.origen::varchar,v_parametros.observaciones::varchar,'0'::varchar,v_id_fondo_rotativo::varchar,'','','deposito'::varchar,v_id_finalidad::varchar,''::varchar,''::varchar,v_parametros.nro_deposito::varchar],
+                            array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','date','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','int4','varchar','int4']
                             ,'',NULL,NULL);
                 END IF;
                 
@@ -812,6 +838,30 @@ BEGIN
               
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Deposito eliminado(a)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_parametros.id_libro_bancos::varchar);
+              
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;
+    
+    elsif(p_transaccion='TES_RELDEP_INS')then
+    	begin
+            
+            IF NOT EXISTS (SELECT 1
+            			   FROM tes.tts_libro_bancos
+            			   WHERE id_libro_bancos=v_parametros.id_libro_bancos)THEN
+            	raise exception 'No existe el registro que desea eliminar';
+            END IF;
+            
+            UPDATE tes.tts_libro_bancos
+            SET tabla = v_parametros.tabla,
+            columna_pk = v_parametros.columna_pk,
+            columna_pk_valor = v_parametros.columna_pk_valor
+            WHERE id_libro_bancos = v_parametros.id_libro_bancos;
+              
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Deposito relacionado'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_parametros.id_libro_bancos::varchar);
               
             --Devuelve la respuesta

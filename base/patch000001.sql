@@ -1655,5 +1655,8 @@ WITHOUT OIDS;
 
 ALTER TABLE tes.tcaja
   ADD COLUMN dias_maximo_rendicion INTEGER;
+ 
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN nro_deposito INTEGER UNIQUE;
   
 /*****************************F-SCP-GSS-TES-0-23/06/2016*************/

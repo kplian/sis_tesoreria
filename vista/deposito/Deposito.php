@@ -176,6 +176,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				emptyText:'Tipo...',
 				typeAhead: true,
 				triggerAction: 'all',
+				disabled:true,
 				lazyRender:true,
 				mode: 'local',
 				valueField: 'estilo',
@@ -214,7 +215,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				gwidth: 80,
 				store:new Ext.data.ArrayStore({
                             fields: ['variable', 'valor'],
-                            data : [ ['FONDO ROTATIVO','Devolución por saldo'],
+                            data : [ ['FONDO ROTATIVO','Depósito'],
 									['RETENCION','Retención']
                                     ]
                                     }),
@@ -226,6 +227,22 @@ header("content-type: text/javascript; charset=UTF-8");
 			id_grupo:1,
 			grid:false,
 			form:true
+		},
+		{
+			config:{
+				name: 'nro_deposito',
+				fieldLabel: 'Numero Deposito',
+				allowBlank: true,
+				anchor: '70%',
+				gwidth: 125,
+				maxLength:50
+			},
+				type:'TextField',
+				filters:{pfiltro:'lban.nro_deposito',type:'string'},
+				bottom_filter: true,
+				id_grupo:1,
+				grid:true,
+				form:true
 		},
 		{
 			config:{
@@ -374,6 +391,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'observaciones', type: 'string'},
 		{name:'id_libro_bancos_fk', type: 'numeric'},
 		{name:'tipo', type: 'string'},
+		{name:'nro_deposito', type: 'numeric'},
 		{name:'fecha_reg', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'id_usuario_reg', type: 'numeric'},
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},

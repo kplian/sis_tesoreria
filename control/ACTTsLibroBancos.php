@@ -43,6 +43,11 @@ class ACTTsLibroBancos extends ACTbase{
 			//$this->objParam->addFiltro("id_libro_bancos_fk is null");
 		}
 		
+		if($this->objParam->getParametro('mycls')=='RelacionDeposito'){
+			$this->objParam->addFiltro("columna_pk is null");	
+			$this->objParam->addFiltro("tipo=''deposito''");
+		}
+		
 		if($this->objParam->getParametro('m_nro_cheque')!=''){
 			$this->objParam->addFiltro("nro_cheque= (Select max (lb.nro_cheque)
 													From tes.tts_libro_bancos lb 
@@ -62,15 +67,14 @@ class ACTTsLibroBancos extends ACTbase{
 	
 	function listarTsLibroBancosDepositosConSaldo(){
 		$this->objParam->defecto('ordenacion','fecha');
-		$this->objParam->defecto('dir_ordenacion','desc');
-		
+		$this->objParam->defecto('dir_ordenacion','desc');		
 		$this->objFunc=$this->create('MODTsLibroBancos');
 		$this->res=$this->objFunc->listarTsLibroBancosDepositosConSaldo($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 				
 	function insertarTsLibroBancos(){
-		$this->objFunc=$this->create('MODTsLibroBancos');	
+		$this->objFunc=$this->create('MODTsLibroBancos');
 		if($this->objParam->insertar('id_libro_bancos')){
 			$this->res=$this->objFunc->insertarTsLibroBancos($this->objParam);			
 		} else{			

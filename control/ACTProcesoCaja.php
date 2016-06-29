@@ -94,6 +94,12 @@ class ACTProcesoCaja extends ACTbase{
 		$this->res=$this->objFunc->eliminarCajaDeposito($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	
+	function relacionarDeposito(){
+		$this->objFunc=$this->create('MODProcesoCaja');
+		$this->res=$this->objFunc->relacionarDeposito($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
 }
 
 ?>

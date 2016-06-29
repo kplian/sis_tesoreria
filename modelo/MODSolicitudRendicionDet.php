@@ -194,7 +194,7 @@ class MODSolicitudRendicionDet extends MODbase{
 			$this->setParametro('id_solicitud_efectivo_fk','id_solicitud_efectivo','int4');
 			$this->setParametro('id_documento_respaldo','id_documento_respaldo','int4');
 			$this->setParametro('estado_reg','estado_reg','varchar');
-			$this->setParametro('monto','importe_pago_liquido','numeric');
+			$this->setParametro('monto','importe_neto','numeric');
 			$this->setParametro('tipo_solicitud','tipo_solicitud','varchar');			
 			
 			$this->armarConsulta();			

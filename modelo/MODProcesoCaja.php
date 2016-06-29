@@ -202,6 +202,7 @@ class MODProcesoCaja extends MODbase{
 		$this->captura('desc_cuenta_bancaria','text');
 		$this->captura('fecha','date');
 		$this->captura('tipo','varchar');
+		$this->captura('nro_deposito','int4');
 		$this->captura('importe_deposito','numeric');
 		$this->captura('origen','varchar');
 		$this->captura('nombre_finalidad','varchar');
@@ -227,6 +228,7 @@ class MODProcesoCaja extends MODbase{
 		$this->setParametro('fecha','fecha','date');
 		$this->setParametro('tipo','tipo','varchar');
 		$this->setParametro('observaciones','observaciones','varchar');
+		$this->setParametro('nro_deposito','nro_deposito','numeric');
 		$this->setParametro('importe_deposito','importe_deposito','numeric');
 		$this->setParametro('origen','origen','varchar');
 		$this->setParametro('tabla','tabla','varchar');
@@ -250,6 +252,27 @@ class MODProcesoCaja extends MODbase{
 
 		//Define los parametros para la funcion
 		$this->setParametro('id_libro_bancos','id_libro_bancos','int4');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
+	function relacionarDeposito(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_proceso_caja_ime';
+		$this->transaccion='TES_RELDEP_INS';
+		$this->tipo_procedimiento='IME';
+
+		//Define los parametros para la funcion
+		$this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
+		$this->setParametro('id_libro_bancos','id_libro_bancos','int4');
+		$this->setParametro('tabla','tabla','varchar');
+        $this->setParametro('columna_pk','columna_pk','varchar');
+        $this->setParametro('columna_pk_valor','columna_pk_valor','int4');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();

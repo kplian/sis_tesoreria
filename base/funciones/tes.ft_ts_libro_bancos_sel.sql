@@ -67,6 +67,7 @@ BEGIN
                         indice,
                         estado_reg,
                         tipo,
+                        nro_deposito,
                         fecha_reg,
                         id_usuario_reg,
                         fecha_mod,
@@ -84,7 +85,8 @@ BEGIN
                         saldo_deposito,
                         nombre_regional,
                         sistema_origen,
-                        notificado
+                        notificado,
+                        fondo_devolucion_retencion
                         from tes.vlibro_bancos lban
 				        where  ';
 			
