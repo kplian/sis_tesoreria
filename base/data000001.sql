@@ -1674,3 +1674,11 @@ select wf.f_import_ttipo_documento_estado ('insert','SOLEFE','SOLEFE','borrador'
 
 /***********************************F-DAT-GSS-TES-0-22/06/2016*****************************************/
 
+/***********************************I-DAT-GSS-TES-0-30/06/2016*****************************************/
+
+select param.f_import_tdocumento ('insert','REP','Reposicion Caja','TES','tabla','gestion','','codtabla-coddoc-correlativo-gestion');
+select param.f_import_tdocumento ('insert','REN','Rendicion Caja','TES','tabla','gestion','','codtabla-coddoc-correlativo-gestion');
+select param.f_import_tdocumento ('insert','CIER','Cierre Caja','TES','tabla','gestion','','codtabla-coddoc-correlativo-gestion');
+select param.f_import_tdocumento ('insert','MEMO','Memorandum de Asginacion de Fondos','TES','depto','gestion','','OB.AA.depto.ME correlativo.gestion');
+
+/***********************************F-DAT-GSS-TES-0-30/06/2016*****************************************/

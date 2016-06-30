@@ -90,50 +90,59 @@ BEGIN
        
           FOR v_registros in ( 
                             SELECT
-                              opd.id_obligacion_det,
-                              opd.id_centro_costo,
-                              op.id_gestion,
-                              op.id_obligacion_pago,
-                              opd.id_partida,
-                              opd.monto_pago_mb,
-                              opd.monto_pago_mo,
-                              p.id_presupuesto,
-                              op.comprometido,
-                              op.id_moneda,
-                              op.fecha,
-                              op.num_tramite,
-                              op.tipo_cambio_conv
+                                    opd.id_obligacion_det,
+                                    opd.id_centro_costo,
+                                    op.id_gestion,
+                                    op.id_obligacion_pago,
+                                    opd.id_partida,
+                                    opd.monto_pago_mb,
+                                    opd.monto_pago_mo,
+                                    p.id_presupuesto,
+                                    op.comprometido,
+                                    op.id_moneda,
+                                    op.fecha,
+                                    op.num_tramite,
+                                    op.tipo_cambio_conv,
+                                    par.sw_movimiento,
+                                    tp.movimiento
                               
                               FROM  tes.tobligacion_pago  op
                               INNER JOIN tes.tobligacion_det opd  on  opd.id_obligacion_pago = op.id_obligacion_pago and opd.estado_reg = 'activo'
                               INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = opd.id_centro_costo 
+                              INNER JOIN pre.tpartida par on par.id_partida  = opd.id_partida
+                              INNER JOIN pre.ttipo_presupuesto tp on tp.codigo = p.tipo_pres
+                              
+                              
                               WHERE  
                                      op.id_obligacion_pago = p_id_obligacion_pago
                                      and opd.estado_reg = 'activo' 
                                      and opd.monto_pago_mo > 0 ) LOOP
                                      
                                 
-                     IF(v_registros.comprometido='si') THEN
-                     
-                        raise exception 'El presupuesto ya se encuentra comprometido';
-                     
+                     IF(v_registros.comprometido='si') THEN                     
+                        raise exception 'El presupuesto ya se encuentra comprometido';                     
                      END IF;
                      
-                     v_i = v_i +1;                
+                     IF v_registros.sw_movimiento = 'flujo'  THEN                              
+                           IF v_registros.movimiento != 'administrativo'  THEN
+                                 raise exception 'partida de flujo solo son admitidas con presupuestos administrativos';
+                           END IF;
+                     ELSE
+                     
+                         v_i = v_i +1; 
+                       --armamos los array para enviar a presupuestos 
+                        va_id_presupuesto[v_i] = v_registros.id_presupuesto;
+                        va_id_partida[v_i]= v_registros.id_partida;
+                        va_momento[v_i]	= 1; --el momento 1 es el comprometido
+                        va_monto[v_i]  = v_registros.monto_pago_mo; --v_registros.monto_pago_mb;
+                        va_id_moneda[v_i]  = v_registros.id_moneda; --v_id_moneda_base;                      
+                        va_columna_relacion[v_i]= 'id_obligacion_pago';
+                        va_fk_llave[v_i] = v_registros.id_obligacion_pago;
+                        va_id_obligacion_det[v_i]= v_registros.id_obligacion_det;
+                        va_fecha[v_i]= v_registros.fecha::date;
+                        va_nro_tramite[v_i]=v_reg_op.num_tramite;
                    
-                   --armamos los array para enviar a presupuestos          
-           
-                    va_id_presupuesto[v_i] = v_registros.id_presupuesto;
-                    va_id_partida[v_i]= v_registros.id_partida;
-                    va_momento[v_i]	= 1; --el momento 1 es el comprometido
-                    va_monto[v_i]  = v_registros.monto_pago_mo; --v_registros.monto_pago_mb;
-                    va_id_moneda[v_i]  = v_registros.id_moneda; --v_id_moneda_base;
-                  
-                    va_columna_relacion[v_i]= 'id_obligacion_pago';
-                    va_fk_llave[v_i] = v_registros.id_obligacion_pago;
-                    va_id_obligacion_det[v_i]= v_registros.id_obligacion_det;
-                    va_fecha[v_i]= v_registros.fecha::date;
-                    va_nro_tramite[v_i]=v_reg_op.num_tramite;
+                   END IF;  
              
              
              END LOOP;
@@ -212,54 +221,49 @@ BEGIN
                                      and opd.estado_reg = 'activo' 
                                      and opd.monto_pago_mo > 0  ) LOOP
                                      
-                     IF(v_registros.id_partida_ejecucion_com is NULL) THEN
-                     
-                        raise exception 'El presupuesto del detalle con el identificador (%)  no se encuntra comprometido',v_registros.id_obligacion_det;
-                     
-                     END IF;
-                     
-                     
-                     SELECT 
-                             COALESCE(ps_comprometido,0), 
-                             COALESCE(ps_ejecutado,0)  
-                         into 
-                             v_comprometido,
-                             v_ejecutado
-                     FROM pre.f_verificar_com_eje_pag(v_registros.id_partida_ejecucion_com,v_registros.id_moneda);
-                
-                    --la fecha de reversion no puede ser anterior a la fecha de la solictud
-                    -- la fecha de solictud es la fecha de compromiso 
-                    IF  now()  < v_registros.fecha THEN
-                      v_fecha = v_registros.fecha::date;
-                    ELSE
-                       -- la fecha de reversion como maximo puede ser el 31 de diciembre   
-                       v_fecha = now()::date;
-                       v_ano_1 =  EXTRACT(YEAR FROM  now()::date);
-                       v_ano_2 =  EXTRACT(YEAR FROM  v_registros.fecha::date);
-                       
-                       IF  v_ano_1  >  v_ano_2 THEN
-                         v_fecha = ('31-12-'|| v_ano_2::varchar)::date;
-                       END IF;
-                    END IF; 
+                     IF(v_registros.id_partida_ejecucion_com is not  NULL) THEN                     
                     
-                   
-                     
-                      --armamos los array para enviar a presupuestos          
-                    IF v_comprometido - v_ejecutado > 0 THEN
-                     
-                       	v_i = v_i +1;                
-                       
-                        va_id_presupuesto[v_i] = v_registros.id_presupuesto;
-                        va_id_partida[v_i]= v_registros.id_partida;
-                        va_momento[v_i]	= 2; --el momento 2 con signo negativo  es revertir
-                        va_monto[v_i]  = (v_comprometido  - v_ejecutado)*-1;  -- considera la posibilidad de que a este item se le aya revertido algun monto
-                        va_id_moneda[v_i]  = v_registros.id_moneda;
-                        va_id_partida_ejecucion[v_i]= v_registros.id_partida_ejecucion_com;
-                        va_columna_relacion[v_i]= 'id_obligacion_pago';
-                        va_fk_llave[v_i] = v_registros.id_obligacion_pago;
-                        va_id_obligacion_det[v_i]= v_registros.id_obligacion_det;
-                        va_fecha[v_i]=v_fecha;
-                        va_nro_tramite[v_i]=v_reg_op.num_tramite;
+                              SELECT 
+                                       COALESCE(ps_comprometido,0), 
+                                       COALESCE(ps_ejecutado,0)  
+                                   into 
+                                       v_comprometido,
+                                       v_ejecutado
+                               FROM pre.f_verificar_com_eje_pag(v_registros.id_partida_ejecucion_com,v_registros.id_moneda);
+                          
+                              --la fecha de reversion no puede ser anterior a la fecha de la solictud
+                              -- la fecha de solictud es la fecha de compromiso 
+                              IF  now()  < v_registros.fecha THEN
+                                v_fecha = v_registros.fecha::date;
+                              ELSE
+                                 -- la fecha de reversion como maximo puede ser el 31 de diciembre   
+                                 v_fecha = now()::date;
+                                 v_ano_1 =  EXTRACT(YEAR FROM  now()::date);
+                                 v_ano_2 =  EXTRACT(YEAR FROM  v_registros.fecha::date);
+                                 
+                                 IF  v_ano_1  >  v_ano_2 THEN
+                                   v_fecha = ('31-12-'|| v_ano_2::varchar)::date;
+                                 END IF;
+                              END IF; 
+                              
+                              --armamos los array para enviar a presupuestos          
+                              IF v_comprometido - v_ejecutado > 0 THEN
+                               
+                                  v_i = v_i +1;                
+                                 
+                                  va_id_presupuesto[v_i] = v_registros.id_presupuesto;
+                                  va_id_partida[v_i]= v_registros.id_partida;
+                                  va_momento[v_i]	= 2; --el momento 2 con signo negativo  es revertir
+                                  va_monto[v_i]  = (v_comprometido  - v_ejecutado)*-1;  -- considera la posibilidad de que a este item se le aya revertido algun monto
+                                  va_id_moneda[v_i]  = v_registros.id_moneda;
+                                  va_id_partida_ejecucion[v_i]= v_registros.id_partida_ejecucion_com;
+                                  va_columna_relacion[v_i]= 'id_obligacion_pago';
+                                  va_fk_llave[v_i] = v_registros.id_obligacion_pago;
+                                  va_id_obligacion_det[v_i]= v_registros.id_obligacion_det;
+                                  va_fecha[v_i]=v_fecha;
+                                  va_nro_tramite[v_i]=v_reg_op.num_tramite;
+                              END IF;
+                    
                     END IF;
              
              END LOOP;
@@ -306,27 +310,37 @@ BEGIN
                                        op.id_moneda,
                                        op.fecha,
                                        op.num_tramite,
-                                       op.tipo_cambio_conv
+                                       op.tipo_cambio_conv,     
+                                       par.sw_movimiento,
+                                       tp.movimiento
                                      from  tes.tprorrateo pro
-                                     inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det   and od.estado_reg = 'activo'
-                                     inner join tes.tobligacion_pago op on op.id_obligacion_pago = od.id_obligacion_pago
+                                     INNER JOIN tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det   and od.estado_reg = 'activo'
+                                     INNER JOIN tes.tobligacion_pago op on op.id_obligacion_pago = od.id_obligacion_pago
                                      INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = od.id_centro_costo  
+                                     INNER JOIN pre.ttipo_presupuesto tp on tp.codigo = p.tipo_pres
+   									 INNER JOIN pre.tpartida par on par.id_partida  = od.id_partida
                                      where  pro.id_plan_pago = p_id_plan_pago
                                        and pro.estado_reg = 'activo') LOOP
-                             v_comprometido=0;
-                             v_ejecutado=0;
-    				        
-                             SELECT 
-                                   ps_comprometido, 
-                                   COALESCE(ps_ejecutado,0)  
-                               into 
-                                   v_comprometido,
-                                   v_ejecutado
-                            FROM pre.f_verificar_com_eje_pag(v_registros_pro.id_partida_ejecucion_com, v_registros_pro.id_moneda);
-                    
+                             
+                             
+                              IF v_registros_pro.sw_movimiento = 'flujo'  THEN                              
+                                     IF v_registros_pro.movimiento != 'administrativo'  THEN
+                                           raise exception 'partida de flujo solo son admitidas con presupuestos administrativos';
+                                     END IF;
+                               ELSE 
+                                  v_comprometido=0;
+                                  v_ejecutado=0;        				        
+                                  SELECT 
+                                       ps_comprometido, 
+                                       COALESCE(ps_ejecutado,0)  
+                                   into 
+                                       v_comprometido,
+                                       v_ejecutado
+                                  FROM pre.f_verificar_com_eje_pag(v_registros_pro.id_partida_ejecucion_com, v_registros_pro.id_moneda);
+                              END IF;
                        
                           --verifica si el presupuesto comprometido sobrante alcanza para devengar
-                          IF  ( v_comprometido - v_ejecutado)  <  v_registros_pro.monto_ejecutar_mo   THEN
+                          IF  ( v_comprometido - v_ejecutado)  <  v_registros_pro.monto_ejecutar_mo and  v_registros_pro.sw_movimiento != 'flujo' THEN
                              
                              v_aux =  v_registros_pro.monto_ejecutar_mo -  (v_comprometido-v_ejecutado);
                          
@@ -413,26 +427,30 @@ BEGIN
            v_mensage_error ='';       
            -- verifica que solicitud
        
-          FOR v_registros in (SELECT
-   									opd.id_centro_costo,
-                                    op.id_gestion,
-                                    op.id_obligacion_pago,
-                                    opd.id_partida,
-                                    sum(opd.monto_pago_mb) as monto_pago_mb,
-                                    sum(opd.monto_pago_mo) as monto_pago_mo,
-                                    p.id_presupuesto,
-                                    op.id_moneda,
-                                    op.fecha,
-                                    op.num_tramite,
-                                    op.tipo_cambio_conv,
-                                    par.codigo,
-                                    par.nombre_partida,
-                                    p.codigo_cc
+          FOR v_registros in (
+          						SELECT
+                                        opd.id_centro_costo,
+                                        op.id_gestion,
+                                        op.id_obligacion_pago,
+                                        opd.id_partida,
+                                        sum(opd.monto_pago_mb) as monto_pago_mb,
+                                        sum(opd.monto_pago_mo) as monto_pago_mo,
+                                        p.id_presupuesto,
+                                        op.id_moneda,
+                                        op.fecha,
+                                        op.num_tramite,
+                                        op.tipo_cambio_conv,
+                                        par.codigo,
+                                        par.nombre_partida,
+                                        p.codigo_cc,
+                                        par.sw_movimiento,
+                                        tp.movimiento
                                                               
                                     FROM  tes.tobligacion_pago  op
                                     INNER JOIN tes.tobligacion_det opd  on  opd.id_obligacion_pago = op.id_obligacion_pago and opd.estado_reg = 'activo'
                                     inner join pre.tpartida par on par.id_partida  = opd.id_partida
-                                    INNER JOIN pre.vpresupuesto_cc   p  on p.id_centro_costo = opd.id_centro_costo 
+                                    INNER JOIN pre.vpresupuesto_cc   p  on p.id_centro_costo = opd.id_centro_costo
+                                    INNER JOIN pre.ttipo_presupuesto tp on tp.codigo = p.tipo_pres 
                                     WHERE  
                                            op.id_obligacion_pago = p_id_obligacion_pago
                                            and opd.estado_reg = 'activo' 
@@ -449,20 +467,35 @@ BEGIN
                                               op.tipo_cambio_conv,
                                               par.codigo,
                                               par.nombre_partida,
-                                              p.codigo_cc ) LOOP
+                                              p.codigo_cc,
+                                              par.sw_movimiento,
+      										  tp.movimiento) LOOP
                                      
-                   
-                              v_resp_pre = pre.f_verificar_presupuesto_partida ( v_registros.id_presupuesto,
+                              IF v_registros.sw_movimiento = 'flujo'  THEN
+                              
+                                   IF v_registros.movimiento != 'administrativo'  THEN
+                                     raise exception 'partida de flujo solo son admitidas con presupeustos administrativos (% - % - %)', v_registros.codigo_cc, v_registros.codigo,v_registros.nombre_partida;
+                                   END IF;
+                              
+                              
+                              ELSE
+                                  v_resp_pre = pre.f_verificar_presupuesto_partida ( v_registros.id_presupuesto,
                                                                         v_registros.id_partida,
                                                                         v_registros.id_moneda,
                                                                         v_registros.monto_pago_mo);
-                                                        
-                                                        
-                              IF   v_resp_pre = 'false' THEN                                   
-                                   v_mensage_error = v_mensage_error||format('Presupuesto:  %s, partida (%s) %s <BR/>', v_registros.codigo_cc, v_registros.codigo,v_registros.nombre_partida);    
-                                   v_sw_error = true;
+                                                                        
+                                   IF   v_resp_pre = 'false' THEN                                   
+                                      v_mensage_error = v_mensage_error||format('Presupuesto:  %s, partida (%s) %s <BR/>', v_registros.codigo_cc, v_registros.codigo,v_registros.nombre_partida);    
+                                      v_sw_error = true;
+                                   END IF;                                      
+                                                                        
                               
                               END IF;
+          
+                              
+                                                        
+                                                        
+                             
              
           
          

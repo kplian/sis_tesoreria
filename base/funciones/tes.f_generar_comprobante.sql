@@ -10,9 +10,7 @@ CREATE OR REPLACE FUNCTION tes.f_generar_comprobante (
 )
 RETURNS varchar [] AS
 $body$
-/*
-*
-*  Autor:   RAC
+/* Autor:   RAC
 *  DESC:     Generar comprobantes de devengado o pago segun correponda al tipo de plan de pago
 *            y pasa al siguiente estado
 *  Fecha:   10/06/2013
@@ -164,26 +162,37 @@ BEGIN
                                    pro.monto_ejecutar_mo,
                                    od.id_partida_ejecucion_com,
                                    od.descripcion,
-                                   od.id_concepto_ingas
+                                   od.id_concepto_ingas,
+                                   par.sw_movimiento,
+                                   tp.movimiento                                   
                                  from  tes.tprorrateo pro
-                                 inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det   
+                                 inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det
+                                 INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = od.id_centro_costo  
+   								 INNER JOIN pre.tpartida par on par.id_partida  = od.id_partida  
+                                 INNER JOIN pre.ttipo_presupuesto tp on tp.codigo = p.tipo_pres
+                                 
+                                 
                                  where  pro.id_plan_pago = p_id_plan_pago
                                    and pro.estado_reg = 'activo') LOOP
                 
                 
                         v_comprometido=0;
                         v_ejecutado=0;
-				        SELECT 
-                               ps_comprometido, 
-                               COALESCE(ps_ejecutado,0)  
-                           into 
-                               v_comprometido,
-                               v_ejecutado
-                        FROM pre.f_verificar_com_eje_pag(v_registros_pro.id_partida_ejecucion_com, v_registros.id_moneda,p_conexion);
-                
+                        
+                        IF v_registros_pro.sw_movimiento != 'flujo'  THEN                              
+                                    
+				          SELECT 
+                                   ps_comprometido, 
+                                   COALESCE(ps_ejecutado,0)  
+                               into 
+                                   v_comprometido,
+                                   v_ejecutado
+                            FROM pre.f_verificar_com_eje_pag(v_registros_pro.id_partida_ejecucion_com, v_registros.id_moneda,p_conexion);
+                       
+                        END IF;
                    
                       --verifica si el presupuesto comprometido sobrante alcanza para devengar
-                      IF  ( v_comprometido - v_ejecutado)  <  v_registros_pro.monto_ejecutar_mo   THEN
+                      IF  ( v_comprometido - v_ejecutado)  <  v_registros_pro.monto_ejecutar_mo  and v_registros_pro.sw_movimiento != 'flujo' THEN
                          
                          -- raise EXCEPTION  '% - % = % < %',v_comprometido,v_ejecutado,v_comprometido - v_ejecutado, v_registros_pro.monto_ejecutar_mb;
                     
