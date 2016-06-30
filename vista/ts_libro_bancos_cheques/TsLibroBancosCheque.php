@@ -794,7 +794,7 @@ header("content-type: text/javascript; charset=UTF-8");
 						this.getBoton('fin_registro').enable();
 					} 
 					//if(data['observaciones']=='FONDOS_AVANCE'){						
-					if(data['num_tramite'].search('REP-') >= 0 || data['num_tramite'].search('FA-') >= 0 ){						
+					if(data['num_tramite'].search('REP-') >= 0 || data['num_tramite'].search('FA-') >= 0 || data['sistema_origen'] == 'FONDOS_AVANCE'){						
 						this.getBoton('btnMemoramdum').enable();
 						if(data['notificado']=='no')
 							this.getBoton('btnNotificacion').enable();
@@ -875,19 +875,9 @@ header("content-type: text/javascript; charset=UTF-8");
 					url = '../../sis_tesoreria/control/TsLibroBancos/imprimirMemoCajaChica';
 				}else{
 					//memo fondo en avance
+					data='id='+ data.id_libro_bancos;  
+					window.open('http://sms.obairlines.bo/ReportesPXP/Home/MemorandumFondosEnAvance?'+data);
 				}
-				console.log(url);
-				Ext.Ajax.request({
-					url: url,
-					params:{
-						'id_libro_bancos':data.id_libro_bancos
-					},
-					success:this.successExport,
-					failure: this.conexionFailure,
-					timeout:this.timeout,
-					scope:this
-				});
-				//window.open('http://sms.obairlines.bo/ReportesPXP/Home/MemorandumFondosEnAvance?'+data);
 			}
 			else
 			{
