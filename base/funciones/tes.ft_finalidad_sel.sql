@@ -128,7 +128,8 @@ BEGIN
                                              ''activo'' as estado,
                                              ''#FFFFFF'' as color,
                                              ''activo'' as estado_reg,
-                                             ''Todos'' as nombre_finalidad';
+                                             ''Todos'' as nombre_finalidad,
+											 ''''';
         	end if;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 
