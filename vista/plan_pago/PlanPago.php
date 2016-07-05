@@ -888,7 +888,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             filters:{pfiltro:'cbanmo.detalle#cbanmo.nro_doc_tipo',type:'string'},
             id_grupo:1,
             grid:true,
-            form:true
+            form:false
         },
         {
             config:{

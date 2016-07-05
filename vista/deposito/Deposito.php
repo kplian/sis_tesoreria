@@ -17,6 +17,16 @@ header("content-type: text/javascript; charset=UTF-8");
         constructor : function(config) {
             this.maestro = config.maestro;
             Phx.vista.Deposito.superclass.constructor.call(this, config);
+			
+			this.addButton('relacionar_deposito',
+				{	text:'Relacionar Depósito',
+					iconCls: 'btransfer',
+					disabled:false,
+					handler:this.relacionarDeposito,
+					tooltip: '<b>Relacionar Depósito</b><p>Relacionar Deposito</p>'
+				}
+			);
+		
             this.iniciarEventos();
 			
         },
@@ -431,7 +441,51 @@ header("content-type: text/javascript; charset=UTF-8");
 		   Phx.CP.getPagina(this.idContenedorPadre).reload();
 		},
 		
+		relacionarDeposito:function(){ 
+			var rec=this.sm.getSelected();			
+			Phx.CP.loadWindows('../../../sis_tesoreria/vista/deposito/FormRelacionarDeposito.php',
+			'Relacionar Deposito',
+			{
+				modal:true,
+				width:500,
+				height:250
+			}, {data:this.maestro}, this.idContenedor,'FormRelacionarDeposito',
+			{
+				config:[{
+						  event:'beforesave',
+						  delegate: this.transferir,
+						}
+						],
+			   scope:this
+			 })								   
+		},
 		
+		transferir:function(wizard,resp){
+			var me=this;
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+				url:'../../sis_tesoreria/control/ProcesoCaja/relacionarDeposito',
+				params:{
+						id_cuenta_bancaria:resp.id_cuenta_bancaria,
+						id_libro_bancos:resp.id_libro_bancos,
+						tabla:me.tablaOrigen, 
+						columna_pk:resp.id_clave,
+						columna_pk_valor:resp.valor_clave					
+				 },
+				argument:{wizard:wizard},  
+				success:this.successWizard,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});
+		   
+		},
+		
+		successWizard:function(resp){
+			Phx.CP.loadingHide();
+			resp.argument.wizard.panel.destroy()
+			this.reload();
+		 },
 
 		iniciarEventos:function(){
             var me = this;

@@ -206,15 +206,19 @@ Phx.vista.FormRelacionarDeposito=Ext.extend(Phx.frmInterfaz,{
 		   this.getValues();
        }
     },
+    
+    
+    id_clave: 'id_proceso_caja',
+    valor_clave: 0,
 	
     getValues:function(){
-		var idProcesoCaja = this.data.id_proceso_caja;
+		var me = this;
+		
         var resp = {
                    id_cuenta_bancaria:this.Cmp.id_cuenta_bancaria.getValue(),
-                   //tipo:this.Cmp.tipo.getValue(),
-				   //importe_transferencia:this.Cmp.importe_transferencia.getValue(),
 				   id_libro_bancos:this.Cmp.id_cuenta_bancaria_mov.getValue(),
-				   id_proceso_caja:idProcesoCaja
+				   id_clave: me.id_clave,
+				   valor_clave: me.data[me.id_clave]				   
             }   
          return resp;   
      }    

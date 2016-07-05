@@ -104,7 +104,7 @@ Phx.vista.CajaSolicitud = {
 		
 		if(NumSelect != 0)
 		{	
-		  if(rec.data.estado=='creando'){
+		  if(rec.data.estado=='creando' || rec.data.estado=='cerrado'){
 			  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
 							'Estado de Wf',
 							{

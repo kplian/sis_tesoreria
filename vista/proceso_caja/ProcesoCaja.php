@@ -27,7 +27,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
 			}
 		);
-		
+		/*
 		this.addButton('relacionar_deposito',
 			{	text:'Relacionar Depósito',
 				iconCls: 'btransfer',
@@ -36,7 +36,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Relacionar Depósito</b><p>Relacionar Deposito</p>'
 			}
 		);
-
+		*/
 		this.addButton('chkpresupuesto',
 			{	text:'Chk Presupuesto',
 				iconCls: 'blist',
@@ -751,7 +751,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 								scope:this
 							 });
 	 },
-	 	
+	 /*	
 	 relacionarDeposito:function(){ 
 		var rec=this.sm.getSelected();
 		
@@ -800,7 +800,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			scope:this
 		});
 	   
-	},
+	},*/
 
 	 checkPresupuesto:function(){
 	  var rec=this.sm.getSelected();
@@ -850,6 +850,21 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				scope:this
 			});
 		},
+	
+	enableTabDepositos:function(){
+     	if(this.TabPanelSouth.get(1)){
+     		      this.TabPanelSouth.get(1).enable();	
+		          this.TabPanelSouth.setActiveTab(1)
+		        }
+     },
+	 
+	disableTabDepositos:function(){
+     	if(this.TabPanelSouth.get(1)){
+     		      this.TabPanelSouth.get(1).disable();	
+		          this.TabPanelSouth.setActiveTab(0)
+		          
+		}
+     },
 
 	preparaMenu:function(n){
           var data = this.getSelectedData();
@@ -866,11 +881,13 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
           }
 		  
 		  if(data['tipo']=='CIERRE'){
-			  this.getBoton('relacionar_deposito').enable();
+			  //habilitar pestaña depositos
+			  this.enableTabDepositos();
 		  }else{
-			  this.getBoton('relacionar_deposito').disable();
+			  //deshabilitar pestaña depositos
+			  this.disableTabDepositos();
 		  }
-
+		  	
           this.getBoton('chkpresupuesto').enable();
 
      },
