@@ -8,8 +8,9 @@ v_pass varchar;
 v_te varchar;
 BEGIN
 
-v_user = pxp.f_get_variable_global('INFORMIX_DB_USER');
-v_pass = pxp.f_get_variable_global('INFORMIX_DB_PASS');
+
+  v_user = pxp.f_get_variable_global('informix_db_user');
+  v_pass = pxp.f_get_variable_global('informix_db_pass');
 
 --raise exception 'us %',current_user;
 execute 'DROP USER MAPPING IF EXISTS FOR "' || current_user ||'" SERVER sai1'; 

@@ -19,6 +19,7 @@ DECLARE
     v_id_impuesto		integer;
     v_id_forma_pago		integer;
     v_id_moneda			integer;    
+    v_id_boleto_antiguo	integer;
 BEGIN
   	v_nombre_funcion = 'informix.f_migra_boleto';
 	
@@ -32,7 +33,7 @@ BEGIN
                           ELSE c.importe
                         END)  as comision
                         FROM boletos b
-                        inner join bcomision c on c.billete = b.billete
+                        left join bcomision c on c.billete = b.billete
                         where estado = 1 and fechareg = ''''' || v_fecha_texto || ''''' 
                         group by b.pais,b.billete, b.pasajero, b.fecha, b.importe, b.neto, 
 						b.moneda, b.agt, b.agtnoiata,b.codgds,b.tipdoc,b.retbsp,b.fechareg,b.horareg,
@@ -160,6 +161,34 @@ BEGIN
           
         if (v_registros.id_moneda is null) then
             raise exception 'No se tiene registrada la moneda % en la tabla moneda',v_registros.moneda;
+        end if;
+        v_id_boleto_antiguo = NULL;
+        
+        select id_boleto into v_id_boleto_antiguo
+        from obingresos.tboleto b
+        where nro_boleto=v_registros.billete::varchar and b.estado_reg = 'activo';
+        --Si el boleto ya existe guardamos el historico y lo insertamos nuevamente
+        IF(v_id_boleto_antiguo is not null) then
+        	update obingresos.tboleto
+            set estado_reg = 'inactivo',
+            fecha_mod = now()::date
+            where id_boleto = v_id_boleto_antiguo and estado_reg = 'activo';
+            
+            update obingresos.tboleto_impuesto
+            set estado_reg = 'inactivo',
+            fecha_mod = now()::date
+            where id_boleto = v_id_boleto_antiguo and estado_reg = 'activo';
+            
+            update obingresos.tboleto_comision
+            set estado_reg = 'inactivo',
+            fecha_mod = now()::date
+            where id_boleto = v_id_boleto_antiguo and estado_reg = 'activo';
+            
+            update obingresos.tboleto_forma_pago
+            set estado_reg = 'inactivo',
+            fecha_mod = now()::date
+            where id_boleto = v_id_boleto_antiguo and estado_reg = 'activo';            
+            
         end if;
         
         select nextval('obingresos.tboleto_id_boleto_seq'::regclass) into v_id_boleto;   
@@ -332,7 +361,7 @@ BEGIN
 EXCEPTION  				
 	WHEN OTHERS THEN
 			--update a la tabla informix.migracion
-			--raise exception '%',SQLERRM;
+			
             return 'Ha ocurrido un error en la funcion ' || v_nombre_funcion || '. El mensaje es : ' || SQLERRM || '. Billete: ' || v_registros.billete;
 END;
 $body$

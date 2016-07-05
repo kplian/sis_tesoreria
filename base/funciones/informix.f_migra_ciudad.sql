@@ -22,7 +22,8 @@ BEGIN
     
     v_consulta = '''select c.pais,c.ciudad,c.nombre
                     from ciudad c
-                    where c.ciudad in (select estacion from agencias group by estacion)''';
+                    where c.ciudad in (select estacion from agencias group by estacion) or 
+                    c.ciudad in (select ciudad from aeropuerto group by ciudad)''';
 
 	select informix.f_user_mapping() into v_resp;
     

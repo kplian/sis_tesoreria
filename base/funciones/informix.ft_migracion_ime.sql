@@ -51,7 +51,7 @@ BEGIN
 					
         begin
         	v_resp = 'exito';
-            v_fecha = '10/01/2016'::date;
+             v_fecha = now()::date;
         	--migrar las tablas parametricas en orden sin fecha solo las tablas que no se actualziarn hasta la fecha actual
             for v_registros in (select * 
             					from informix.tmigracion 
