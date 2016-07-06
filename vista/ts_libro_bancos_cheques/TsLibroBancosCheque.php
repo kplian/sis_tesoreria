@@ -108,7 +108,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				tooltip: '<b>Vista Previa Cheque</b><br/>Vista Previa Cheque'
 			}
 			);
-			
+			/*
 			this.addButton('btnChequesAsociados',
 			{
 				text: 'Cheques Asociados',
@@ -118,13 +118,13 @@ header("content-type: text/javascript; charset=UTF-8");
 				tooltip: '<b>Cheques Asociados</b><br/>Cheques Asociados'
 			}
 			);
-			
-			this.addButton('btnChequesFondoAvance',
+			*/
+			this.addButton('btnChequesTramite',
 			{
-				text: 'Cambiar Cheque Fondo Avance',
+				text: 'Cambiar Cheque Tramite',
 				iconCls: 'bmoney',
 				disabled: true,
-				handler: this.onChequeFondoAvance,
+				handler: this.onChequeTramite,
 				tooltip: '<b>Cambiar Cheque Fondo en Avance</b><br/>Cheques Asociados'
 			}
 			);
@@ -830,6 +830,11 @@ header("content-type: text/javascript; charset=UTF-8");
 					}
 				  }
 			  }
+			  if(data['sistema_origen'] != ''){
+				  this.getBoton('btnChequesTramite').enable();
+			  }	else{
+				  this.getBoton('btnChequesTramite').disable();
+			  }
 			  
 		  }else{
 				this.getBoton('btnChequeoDocumentosWf').disable();
@@ -862,6 +867,49 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.cmpTipo.fireEvent('select',this,record);
 			
 		},
+		
+		onChequeTramite:function(){ 
+			var rec=this.sm.getSelected();			
+			Phx.CP.loadWindows('../../../sis_tesoreria/vista/ts_libro_bancos_cheques/FormRelacionarCheque.php',
+			'Relacionar Cheque a Tramite',
+			{
+				modal:true,
+				width:500,
+				height:250
+			}, {data:this.maestro}, this.idContenedor,'FormRelacionarCheque',
+			{
+				config:[{
+						  event:'beforesave',
+						  delegate: this.relacionar,
+						}
+						],
+			   scope:this
+			 })								   
+		},
+		
+		relacionar:function(wizard,resp){			
+			var me=this;
+			var data = this.getSelectedData();
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+				url:'../../sis_tesoreria/control/TsLibroBancos/relacionarCheque',
+				params:{
+						id_libro_bancos_old : data.id_libro_bancos,
+						id_libro_bancos_new : resp.id_libro_bancos				
+				 },
+				argument:{wizard:wizard},  
+				success:this.successWizard,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});		   
+		},
+		
+		successWizard:function(resp){
+			Phx.CP.loadingHide();
+			resp.argument.wizard.panel.destroy()
+			this.reload();
+		 },
 		
 		memoramdum : function(){
 			var data = this.getSelectedData();

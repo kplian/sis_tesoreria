@@ -63,7 +63,6 @@ class MODTsLibroBancos extends MODbase{
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
-		
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
@@ -315,6 +314,24 @@ class MODTsLibroBancos extends MODbase{
 		$this->setParametro('detalle','detalle','varchar');
 		$this->setParametro('fecha','fecha','date');
 		$this->setParametro('id_finalidad','id_finalidad','int4');
+		
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+	
+	function relacionarCheque(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.ft_ts_libro_bancos_ime';
+        $this->transaccion='TES_RELCHQ_IME';
+        $this->tipo_procedimiento='IME';
+        
+        //Define los parametros para la funcion
+        $this->setParametro('id_libro_bancos_old','id_libro_bancos_old','int4');
+        $this->setParametro('id_libro_bancos_new','id_libro_bancos_new','int4');
 		
         //Ejecuta la instruccion
         $this->armarConsulta();

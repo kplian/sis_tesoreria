@@ -9334,7 +9334,9 @@ CREATE OR REPLACE VIEW tes.vlibro_bancos(
     sistema_origen,
     comprobante_sigma,
     notificado,
-    fondo_devolucion_retencion)
+    fondo_devolucion_retencion,
+	columna_pk,
+    id_int_comprobante)
 AS
   SELECT lban.id_libro_bancos,
          lban.num_tramite,
@@ -9430,7 +9432,9 @@ AS
          lban.sistema_origen,
          lban.comprobante_sigma,
          lban.notificado,
-         lban.fondo_devolucion_retencion
+         lban.fondo_devolucion_retencion,
+		 lban.columna_pk,
+         lban.id_int_comprobante
   FROM tes.tts_libro_bancos lban
        JOIN segu.tusuario usu1 ON usu1.id_usuario = lban.id_usuario_reg
        LEFT JOIN param.tdepto depto ON depto.id_depto = lban.id_depto

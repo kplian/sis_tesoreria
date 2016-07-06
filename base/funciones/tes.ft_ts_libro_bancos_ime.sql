@@ -77,6 +77,8 @@ DECLARE
     v_resp_doc				boolean;
     g_verifica_documento	varchar;
 	g_origen				varchar;
+    g_nro_tramite			varchar;
+    g_id_int_comprobante	integer;
 BEGIN
     v_nombre_funcion = 'tes.ft_ts_libro_bancos_ime';
     v_parametros = pxp.f_get_record(p_tabla);
@@ -478,9 +480,13 @@ BEGIN
 		begin
         
         	--obtenermos el estado actual del registro
-            Select lb.estado into g_estado_actual
+            Select lb.estado, lb.id_int_comprobante, lb.num_tramite into g_estado_actual, g_id_int_comprobante, g_nro_tramite
             From tes.tts_libro_bancos lb 
             where lb.id_libro_bancos=v_parametros.id_libro_bancos;
+                        
+            IF g_id_int_comprobante is not null THEN
+            	raise exception 'No puede eliminar el cheque, esta relacionado al tramite %, debe crear otro cheque y relacionar a ese tramite', g_nro_tramite;
+            END IF;
             
             --eliminamos solo los que estan en estado borrador	
     		if(g_estado_actual = 'borrador')then 
@@ -489,7 +495,7 @@ BEGIN
 			else
             	raise exception 'Solo los registros en estado BORRADOR pueden ser eliminados. El estado actual del registro es: %.',upper( g_estado_actual);
             end if;
-			   
+			                           
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Depósitos eliminado(a)'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_parametros.id_libro_bancos::varchar);
@@ -498,7 +504,53 @@ BEGIN
             return v_resp;
 
 		end;
+    
+    /*********************************    
+ 	#TRANSACCION:  'TES_RELCHQ_IME'
+ 	#DESCRIPCION:	Relaciona cheque con tramite de otro cheque
+ 	#AUTOR:		Gonzalo Sarmiento Sejas
+ 	#FECHA:		06-07-2016 09:10:17
+	***********************************/
+
+	elsif(p_transaccion='TES_RELCHQ_IME')then
+
+		begin
+        	--cheque nuevo
             
+            Select lb.id_int_comprobante, lb.num_tramite into g_id_int_comprobante, g_nro_tramite
+            From tes.tts_libro_bancos lb 
+            where lb.id_libro_bancos=v_parametros.id_libro_bancos_new;
+            
+            IF g_id_int_comprobante is not null THEN
+            	raise exception 'El cheque no es manual, el cheque esta asocicado al tramite %', g_nro_tramite;
+            END IF;	
+        
+        	--obtenermos del cheque anterior
+            Select lb.id_int_comprobante, lb.num_tramite into g_id_int_comprobante, g_nro_tramite
+            From tes.tts_libro_bancos lb 
+            where lb.id_libro_bancos=v_parametros.id_libro_bancos_old;
+                        
+            IF g_id_int_comprobante is null THEN
+            	raise exception 'No puede relacionar el cheque, el cheque del tramite %, no cuenta con un comprobante', g_nro_tramite;
+            END IF;
+			
+            UPDATE tes.tts_libro_bancos
+            SET id_int_comprobante=g_id_int_comprobante
+            WHERE id_libro_bancos=v_parametros.id_libro_bancos_new;
+			
+            UPDATE tes.tts_libro_bancos
+            SET id_int_comprobante=NULL
+            WHERE id_libro_bancos=v_parametros.id_libro_bancos_old;
+			                           
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Cheque relacionado'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_parametros.id_libro_bancos_new::varchar);
+              
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;
+          
     /*********************************    
  	#TRANSACCION:  'TES_SIGELB_IME'
  	#DESCRIPCION:	funcion que controla el cambio al Siguiente estado de los movimientos bancarios, integrado  con el WF

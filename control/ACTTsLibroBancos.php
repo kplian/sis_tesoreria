@@ -48,6 +48,11 @@ class ACTTsLibroBancos extends ACTbase{
 			$this->objParam->addFiltro("tipo=''deposito''");
 		}
 		
+		if($this->objParam->getParametro('mycls')=='RelacionarCheque'){
+			$this->objParam->addFiltro("id_int_comprobante is null");	
+			$this->objParam->addFiltro("tipo=''cheque''");		
+		}
+		
 		if($this->objParam->getParametro('m_nro_cheque')!=''){
 			$this->objParam->addFiltro("nro_cheque= (Select max (lb.nro_cheque)
 													From tes.tts_libro_bancos lb 
@@ -104,6 +109,12 @@ class ACTTsLibroBancos extends ACTbase{
 	function transferirDeposito(){
         $this->objFunc=$this->create('MODTsLibroBancos');  
         $this->res=$this->objFunc->transferirDeposito($this->objParam);
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
+		
+	function relacionarCheque(){
+        $this->objFunc=$this->create('MODTsLibroBancos');  
+        $this->res=$this->objFunc->relacionarCheque($this->objParam);
         $this->res->imprimirRespuesta($this->res->generarJson());
     }
 	
