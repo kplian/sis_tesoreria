@@ -359,7 +359,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'monto_reposicion',
-				fieldLabel: 'Monto Reposicion',
+				fieldLabel: 'Monto',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,

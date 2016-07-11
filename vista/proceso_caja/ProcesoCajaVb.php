@@ -42,7 +42,7 @@ Phx.vista.ProcesoCajaVb = {
 
 		  this.store.baseParams={tipo_interfaz:this.nombreVista};
 
-      this.load({params:{start:0, limit:this.tam_pag}})
+      //this.load({params:{start:0, limit:this.tam_pag}})
     },
 
 

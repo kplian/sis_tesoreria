@@ -18,6 +18,16 @@ class ACTProcesoCaja extends ACTbase{
 		{
 			$this->objParam-> addFiltro('ren.id_caja ='.$this->objParam->getParametro('id_caja'));
 		}
+		
+		if($this->objParam->getParametro('pes_estado')!='')
+		{			
+			if($this->objParam->getParametro('pes_estado')=='no_contabilizados'){
+				 $this->objParam->addFiltro("ren.estado in (''supconta'',''vbconta'',''pendiente'')");
+			}
+			if($this->objParam->getParametro('pes_estado')=='contabilizados'){
+				 $this->objParam->addFiltro("ren.estado in (''contabilizado'',''rendido'',''entregado'')");
+			}			
+		}
 
 		$this->objParam->defecto('dir_ordenacion','asc');
 		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){

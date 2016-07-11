@@ -86,7 +86,7 @@ BEGIN
                  			else 0.00 end as saldo';
                 
                 IF p_administrador !=1 THEN
-                   v_filtro = '(solefe.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or solefe.id_usuario_reg='||p_id_usuario||' ) and solefe.id_tipo_solicitud = '||v_id_tipo_solicitud||' and ';
+                   v_filtro = '(solefe.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or solefe.id_usuario_reg='||p_id_usuario||' or solefe.id_usuario_mod='||p_id_usuario||') and solefe.id_tipo_solicitud = '||v_id_tipo_solicitud||' and ';
                 ELSE
                   --   v_filtro = '(pc.estado = ''solicitado'') and ';
                    v_filtro = 'solefe.id_tipo_solicitud = '||v_id_tipo_solicitud||' and ';

@@ -29,7 +29,7 @@ Phx.vista.ProcesoCajaVbPresup = {
 	constructor: function(config) {
 
 	   Phx.vista.ProcesoCajaVbPresup.superclass.constructor.call(this,config);
-
+		this.load({params:{start:0, limit:this.tam_pag}})
     },
 	
 	preparaMenu:function(){

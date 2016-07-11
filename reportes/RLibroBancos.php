@@ -57,8 +57,8 @@ require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
 		{	
 			$this->Cell($width1, $height, 'Fecha', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width2, $height, 'A Favor', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$this->Cell($width3, $height, 'Detalle', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');			
-			$this->Cell($width4, $height, 'Nº Liq/Cite', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width3-1, $height, 'Detalle', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');			
+			$this->Cell($width4+1, $height, 'Nº Liq/Cite', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width1-3, $height, 'Nº Com.', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width4+2, $height, 'Com. Sigma', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width4, $height, 'Nº Cheque', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');								
@@ -67,8 +67,8 @@ require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
 		}else{
 			$this->Cell($width1, $height, 'Fecha', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width2-8, $height, 'A Favor', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$this->Cell($width3-8, $height, 'Detalle', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
-			$this->Cell($width4, $height, 'Nº Liq/Cite', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width3-9, $height, 'Detalle', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
+			$this->Cell($width4+1, $height, 'Nº Liq/Cite', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width1-3, $height, 'Nº Com.', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width4+2, $height, 'Com. Sigma', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');
 			$this->Cell($width4, $height, 'Nº Cheque', $blackAll, 0, 'C', true, '', 1, false, 'T', 'C');								
@@ -156,12 +156,12 @@ Class RLibroBancos extends Report {
 		if($this->getDataSource()->getParameter('estado') != 'Todos' )
 		{	
 			$pdf->SetFillColor(255,255,255, true);
-			$pdf->tablewidths=array($width1,$width2,$width3,$width4,$width1-3,$width4+2,$width4,$width5,$width5);
+			$pdf->tablewidths=array($width1,$width2,$width3-1,$width4+1,$width1-3,$width4+2,$width4,$width5,$width5);
 			$pdf->tablealigns=array('L','L','L','C','C','C','C','R','R');
 			$pdf->tablenumbers=array(0,0,0,0,0,0,0,0,0);
 		}else{
 			$pdf->SetFillColor(255,255,255, true);
-			$pdf->tablewidths=array($width1,$width2-8,$width3-8,$width4,$width1-3,$width4+2,$width4,$width5,$width5,$width5);
+			$pdf->tablewidths=array($width1,$width2-8,$width3-9,$width4+1,$width1-3,$width4+2,$width4,$width5,$width5,$width5);
 			$pdf->tablealigns=array('L','L','L','C','C','C','C','R','R','R');
 			$pdf->tablenumbers=array(0,0,0,0,0,0,0,0,0,0);
 		}

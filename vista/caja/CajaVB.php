@@ -83,6 +83,8 @@ Phx.vista.CajaVb = {
        }
        
        this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.nombreVista}})
+	   
+	   this.disableTabSolicitud();
     },
     //deshabilitas botones para informacion historica
     desBotoneshistorico:function(){

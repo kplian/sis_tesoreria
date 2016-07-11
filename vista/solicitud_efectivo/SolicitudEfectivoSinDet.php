@@ -326,7 +326,8 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
                 gwidth:200,
 				anchor: '80%',
    				valueField: 'id_funcionario',
-   			    gdisplayField: 'desc_funcionario',   			    
+   			    gdisplayField: 'desc_funcionario',
+				baseParams: { es_combo_solicitud : 'si' },   			    
       			renderer:function(value, p, record){return String.format('{0}', record.data['desc_funcionario']);}
        	     },
    			type:'ComboRec',//ComboRec

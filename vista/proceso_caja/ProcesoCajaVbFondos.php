@@ -29,7 +29,7 @@ Phx.vista.ProcesoCajaVbFondos = {
 	constructor: function(config) {
 
 	   Phx.vista.ProcesoCajaVbFondos.superclass.constructor.call(this,config);
-	  
+	   this.load({params:{start:0, limit:this.tam_pag}})
     }
 };
 </script>

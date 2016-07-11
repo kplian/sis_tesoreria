@@ -450,6 +450,15 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 				this.getBoton('btnAbrirCerrar').disable();
 		 }		 
      },
+	 
+	 
+	 disableTabSolicitud:function(){
+     	if(this.TabPanelSouth.get(1)){
+     		      this.TabPanelSouth.get(1).disable();	
+		          this.TabPanelSouth.setActiveTab(0)
+		          
+		}
+     },
     
 	/*
 	successWizard:function(resp){

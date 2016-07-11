@@ -69,6 +69,7 @@ DECLARE
     v_saldo					numeric;
     v_doc_compra_venta		record;
     v_saldo_caja			numeric;
+    v_importe_maximo_solicitud	numeric;
     		    
 BEGIN
 
@@ -85,7 +86,12 @@ BEGIN
 	if(p_transaccion='TES_SOLEFE_INS')then
 					
         begin
-        
+            IF EXISTS (select 1
+					 from tes.tproceso_caja
+					 where tipo='CIERRE' and id_caja=v_parametros.id_caja)  THEN
+            	raise exception 'No puede realizar solicitudes ni rendiciones, la caja se encuentra en proceso de cierre';
+            END IF;
+            
         	v_id_solicitud_efectivo=tes.f_inserta_solicitud_efectivo(p_administrador,p_id_usuario,hstore(v_parametros));
         	
 			--Definicion de la respuesta
@@ -120,6 +126,15 @@ BEGIN
                 IF v_saldo_caja < v_parametros.monto THEN
 					raise exception 'El monto que esta intentando solicitar excede el saldo de la caja';
                 END IF;
+                
+                select importe_maximo_item into v_importe_maximo_solicitud
+                from tes.tcaja
+                where id_caja=v_parametros.id_caja;
+                
+                IF v_importe_maximo_solicitud < v_parametros.monto THEN
+                	raise exception 'El monto que esta intentando solicitar excede el importe maximo de gasto';
+                END IF;
+                
             END IF;
             
 			--Sentencia de la modificacion

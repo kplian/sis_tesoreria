@@ -273,7 +273,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				type:'TextField',
 				filters:{pfiltro:'solefe.motivo',type:'string'},
 				id_grupo:1,
-				grid:false,
+				grid:true,
 				form:false
 		},
 		{

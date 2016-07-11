@@ -76,6 +76,8 @@ Phx.vista.CajaSolicitud = {
         this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.nombreVista}});
 		
 		this.finCons = true;
+		
+		this.disableTabSolicitud();		 
     },
 	
 		
@@ -97,7 +99,7 @@ Phx.vista.CajaSolicitud = {
 		 }
 		 this.getBoton('diagrama_gantt').enable();		 
      },
-    
+	     
 	 abrirCerrarCaja:function(){
 		var rec=this.sm.getSelected();
 		var NumSelect=this.sm.getCount();

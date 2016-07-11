@@ -165,11 +165,26 @@ header("content-type: text/javascript; charset=UTF-8");
 		},
 		{
 			config:{
+				name: 'detalle',
+				fieldLabel: 'Detalle',
+				allowBlank: true,
+				anchor: '70%',
+				gwidth: 300,
+				maxLength:600
+			},
+				type:'TextField',
+				filters:{pfiltro:'lban.detalle',type:'string'},
+				id_grupo:1,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
 				name: 'observaciones',
 				fieldLabel: 'Observaciones',
 				allowBlank: true,
 				anchor: '70%',
-				gwidth: 100,
+				gwidth: 250,
 				maxLength:200
 			},
 				type:'TextArea',
@@ -247,7 +262,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				gwidth: 125,
 				maxLength:50
 			},
-				type:'TextField',
+				type:'NumberField',
 				filters:{pfiltro:'lban.nro_deposito',type:'string'},
 				bottom_filter: true,
 				id_grupo:1,
@@ -399,6 +414,8 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'importe_deposito', type: 'numeric'},
 		{name:'origen', type: 'string'},
 		{name:'observaciones', type: 'string'},
+		{name:'detalle', type: 'string'},
+		{name:'sistema_origen', type: 'string'},
 		{name:'id_libro_bancos_fk', type: 'numeric'},
 		{name:'tipo', type: 'string'},
 		{name:'nro_deposito', type: 'numeric'},
@@ -441,6 +458,18 @@ header("content-type: text/javascript; charset=UTF-8");
 		   Phx.CP.getPagina(this.idContenedorPadre).reload();
 		},
 		
+		preparaMenu:function(n){
+          var data = this.getSelectedData();
+          var tb =this.tbar;
+			  
+          Phx.vista.Deposito.superclass.preparaMenu.call(this,n);
+          if (data['sistema_origen'] == 'CAJA_CHICA'){              
+			  this.getBoton('del').enable();
+		  }else{
+			  this.getBoton('del').disable();
+          }
+		},
+	 
 		relacionarDeposito:function(){ 
 			var rec=this.sm.getSelected();			
 			Phx.CP.loadWindows('../../../sis_tesoreria/vista/deposito/FormRelacionarDeposito.php',

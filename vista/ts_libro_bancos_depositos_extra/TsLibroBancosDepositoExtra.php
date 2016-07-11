@@ -276,7 +276,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				gwidth: 125,
 				maxLength:50
 			},
-				type:'TextField',
+				type:'NumberField',
 				filters:{pfiltro:'lban.nro_deposito',type:'string'},
 				bottom_filter: true,
 				id_grupo:1,

@@ -78,6 +78,7 @@ DECLARE
     
     v_codigo_proceso		varchar;
     v_importe_deposito		numeric;
+    v_sistema_origen		varchar;
     		    
 BEGIN
 
@@ -733,7 +734,7 @@ BEGIN
                 		
                 v_resp2 = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,
                             array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','fecha','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','id_int_comprobante','sistema_origen','nro_deposito'],
-                            array[' 0 = 0 ','','','','','NULL','NULL',v_parametros.id_cuenta_bancaria::varchar,v_cuenta_bancaria.id_depto::varchar,''||v_parametros.fecha::varchar||'',(v_cuenta_bancaria.nombre||' '||v_cuenta_bancaria.nro_cuenta||' DEPOSITO')::varchar,''::varchar,v_parametros.importe_deposito::varchar,'','DEPOSITADO POR '||v_depositante::varchar,v_parametros.origen::varchar,v_parametros.observaciones::varchar,'0'::varchar,v_id_fondo_rotativo::varchar,'','','deposito'::varchar,v_id_finalidad::varchar,''::varchar,''::varchar,v_parametros.nro_deposito::varchar],
+                            array[' 0 = 0 ','','','','','NULL','NULL',v_parametros.id_cuenta_bancaria::varchar,v_cuenta_bancaria.id_depto::varchar,''||v_parametros.fecha::varchar||'',(v_cuenta_bancaria.nombre||' '||v_cuenta_bancaria.nro_cuenta||' DEPOSITO')::varchar,''::varchar,v_parametros.importe_deposito::varchar,'','DEPOSITADO POR '||v_depositante::varchar,v_parametros.origen::varchar,v_parametros.observaciones::varchar,'0'::varchar,v_id_fondo_rotativo::varchar,'','','deposito'::varchar,v_id_finalidad::varchar,''::varchar,'CAJA_CHICA'::varchar,v_parametros.nro_deposito::varchar],
                             array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','date','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','int4','varchar','int4']
                             ,'',NULL,NULL);
             ELSIF v_parametros.tipo_deposito = 'RETENCION' THEN
@@ -750,7 +751,7 @@ BEGIN
                 IF v_id_fondo_rotativo IS NULL THEN
                 	v_resp2 = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,
                             array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','fecha','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','id_int_comprobante','sistema_origen','nro_deposito'],
-                            array[' 0 = 0 ','','','','','NULL','NULL',v_parametros.id_cuenta_bancaria::varchar,v_cuenta_bancaria.id_depto::varchar,''||v_parametros.fecha::varchar||'',(v_cuenta_bancaria.nombre||' '||v_cuenta_bancaria.nro_cuenta||' DEPOSITO')::varchar,''::varchar,v_parametros.importe_deposito::varchar,'','DEPOSITADO POR '||v_depositante::varchar,v_parametros.origen::varchar,v_parametros.observaciones::varchar,'0'::varchar,'NULL','','','deposito'::varchar,v_id_finalidad::varchar,''::varchar,''::varchar,v_parametros.nro_deposito::varchar],
+                            array[' 0 = 0 ','','','','','NULL','NULL',v_parametros.id_cuenta_bancaria::varchar,v_cuenta_bancaria.id_depto::varchar,''||v_parametros.fecha::varchar||'',(v_cuenta_bancaria.nombre||' '||v_cuenta_bancaria.nro_cuenta||' DEPOSITO')::varchar,''::varchar,v_parametros.importe_deposito::varchar,'','DEPOSITADO POR '||v_depositante::varchar,v_parametros.origen::varchar,v_parametros.observaciones::varchar,'0'::varchar,'NULL','','','deposito'::varchar,v_id_finalidad::varchar,''::varchar,'CAJA_CHICA'::varchar,v_parametros.nro_deposito::varchar],
                             array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','date','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','int4','varchar','int4']
                             ,'',NULL,NULL);
                             
@@ -774,7 +775,7 @@ BEGIN
                 ELSE
                 	v_resp2 = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,
                             array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','fecha','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','id_int_comprobante','sistema_origen','nro_deposito'],
-                            array[' 0 = 0 ','','','','','NULL','NULL',v_parametros.id_cuenta_bancaria::varchar,v_cuenta_bancaria.id_depto::varchar,''||v_parametros.fecha::varchar||'',(v_cuenta_bancaria.nombre||' '||v_cuenta_bancaria.nro_cuenta||' DEPOSITO')::varchar,''::varchar,v_parametros.importe_deposito::varchar,'','DEPOSITADO POR '||v_depositante::varchar,v_parametros.origen::varchar,v_parametros.observaciones::varchar,'0'::varchar,v_id_fondo_rotativo::varchar,'','','deposito'::varchar,v_id_finalidad::varchar,''::varchar,''::varchar,v_parametros.nro_deposito::varchar],
+                            array[' 0 = 0 ','','','','','NULL','NULL',v_parametros.id_cuenta_bancaria::varchar,v_cuenta_bancaria.id_depto::varchar,''||v_parametros.fecha::varchar||'',(v_cuenta_bancaria.nombre||' '||v_cuenta_bancaria.nro_cuenta||' DEPOSITO')::varchar,''::varchar,v_parametros.importe_deposito::varchar,'','DEPOSITADO POR '||v_depositante::varchar,v_parametros.origen::varchar,v_parametros.observaciones::varchar,'0'::varchar,v_id_fondo_rotativo::varchar,'','','deposito'::varchar,v_id_finalidad::varchar,''::varchar,'CAJA_CHICA'::varchar,v_parametros.nro_deposito::varchar],
                             array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','date','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','int4','varchar','int4']
                             ,'',NULL,NULL);
                 END IF;
@@ -832,6 +833,14 @@ BEGIN
             			   WHERE id_libro_bancos=v_parametros.id_libro_bancos)THEN
             	raise exception 'No existe el registro que desea eliminar';
             END IF;
+            
+            SELECT sistema_origen into v_sistema_origen
+            FROM tes.tts_libro_bancos
+            WHERE id_libro_bancos=v_parametros.id_libro_bancos;
+
+            IF v_sistema_origen != 'CAJA_CHICA' or v_sistema_origen IS NULL THEN 
+            	raise exception 'No es posible eliminar un deposito que no se registro por Caja Chica';
+            END IF;            
             
             delete from tes.tts_libro_bancos
             where id_libro_bancos=v_parametros.id_libro_bancos;

@@ -31,7 +31,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 				 $this->objParam->addFiltro("solefe.estado in (''borrador'')");
 			}
 			if($this->objParam->getParametro('pes_estado')=='entregado'){
-				 $this->objParam->addFiltro("solefe.estado = ''entregado''");
+				 $this->objParam->addFiltro("solefe.estado in (''vbjefe'',''vbcajero'',''entregado'')");
 			}
 			if($this->objParam->getParametro('pes_estado')=='finalizado'){
 				 $this->objParam->addFiltro("solefe.estado in (''finalizado'')");

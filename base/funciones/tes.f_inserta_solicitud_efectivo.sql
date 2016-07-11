@@ -1,3 +1,5 @@
+---------------------------SQL-------------------------
+
 CREATE OR REPLACE FUNCTION tes.f_inserta_solicitud_efectivo (
   p_administrador integer,
   p_id_usuario integer,
@@ -40,6 +42,7 @@ DECLARE
     v_codigo_proceso_llave_wf	varchar;
     v_saldo_caja			numeric;
     v_id_cajero				integer;
+    v_importe_maximo_solicitud	numeric;
 
 BEGIN
             v_nombre_funcion = 'f_inserta_solicitud_efectivo';
@@ -72,6 +75,14 @@ BEGIN
                 
                 IF v_saldo_caja < (p_hstore->'monto')::numeric THEN
 					raise exception 'El monto que esta intentando solicitar excede el saldo de la caja';
+                END IF;
+                
+                select importe_maximo_item into v_importe_maximo_solicitud
+                from tes.tcaja
+                where id_caja=(p_hstore->'id_caja')::integer;
+                
+                IF v_importe_maximo_solicitud < (p_hstore->'monto')::numeric THEN
+                	raise exception 'El monto que esta intentando solicitar excede el importe maximo de gasto';
                 END IF;
                 
             ELSIF (p_hstore->'tipo_solicitud')::varchar = 'apertura_caja' THEN

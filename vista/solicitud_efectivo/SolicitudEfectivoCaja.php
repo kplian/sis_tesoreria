@@ -30,11 +30,21 @@ Phx.vista.SolicitudEfectivoCaja=Ext.extend(Phx.gridInterfaz,{
 						return String.format('');
 					}
 			};
-			
+						
 		//llama al constructor de la clase padre
 		Phx.vista.SolicitudEfectivoCaja.superclass.constructor.call(this,config);
 		this.init();
-		
+				
+		this.addButton('btnChequeoDocumentosWf',
+				{
+					text: 'Documentos',
+					iconCls: 'bchecklist',
+					disabled: true,
+					handler: this.loadCheckDocumentosSolWf,
+					tooltip: '<b>Documentos de la Solicitud</b><br/>Subir los documetos requeridos en la solicitud seleccionada.'
+				}
+			);
+			
 		//recargar valores segunda pestaña
 		var dataPadre = Phx.CP.getPagina(this.idContenedorPadre).getSelectedData()			  
 			  if(dataPadre){
@@ -496,6 +506,21 @@ Phx.vista.SolicitudEfectivoCaja=Ext.extend(Phx.gridInterfaz,{
 	iniciarEventos:function(){
 		this.cmpMonto=this.getComponente('monto');
 		this.cmpMonto.disable();
+	},
+	
+	loadCheckDocumentosSolWf:function() {
+			var rec=this.sm.getSelected();
+			rec.data.nombreVista = this.nombreVista;
+			Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
+					'Chequear documento del WF',
+					{
+						width:'90%',
+						height:500
+					},
+					rec.data,
+					this.idContenedor,
+					'DocumentoWf'
+		)
 	},
 	
 	onReloadPage : function(m) {

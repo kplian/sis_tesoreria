@@ -80,9 +80,9 @@ BEGIN
                 
                 IF p_administrador !=1 THEN
                    v_inner =  ' inner join wf.testado_wf ew on ew.id_estado_wf = ren.id_estado_wf ';
-                   v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))  ) and  (lower(ren.estado)not in (''supconta'',''vbconta'',''pendiente'')) and ';
+                   v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))  ) and  (lower(ren.estado) in (''supconta'',''vbconta'',''pendiente'',''contabilizado'',''rendido'')) and ';
                  ELSE
-                     v_filtro = ' (lower(ren.estado) in (''supconta'',''vbconta'',''pendiente'')) and ';
+                     v_filtro = ' (lower(ren.estado) in (''supconta'',''vbconta'',''pendiente'',''contabilizado'',''rendido'')) and ';
                 END IF;
                 
                 
@@ -210,7 +210,7 @@ BEGIN
 	elsif(p_transaccion='TES_DEPCAJ_SEL')then
 
     	v_consulta:='select cb.id_cuenta_bancaria, cb.denominacion ||'' ''||cb.nro_cuenta as desc_cuenta_bancaria, t.fecha, t.tipo, t.nro_deposito,
-        			 t.importe_deposito, t.origen, f.nombre_finalidad,t.id_libro_bancos, t.observaciones
+        			 t.importe_deposito, t.origen, f.nombre_finalidad,t.id_libro_bancos, t.observaciones, t.detalle, t.sistema_origen
 					 from tes.tts_libro_bancos t
 					 inner join tes.tcuenta_bancaria cb on cb.id_cuenta_bancaria=t.id_cuenta_bancaria
 					 inner join tes.tfinalidad f on f.id_finalidad=t.id_finalidad

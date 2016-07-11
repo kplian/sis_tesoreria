@@ -25,18 +25,31 @@ Phx.vista.ProcesoCajaVbConta = {
 	 *  de rendiciones apruebe las rendiciones , y pase por los pasos configurados en el WF
 	 *  de validacion, aprobacion
 	 * */
+	 
+	gruposBarraTareas:[{name:'no_contabilizados',title:'<H1 align="center"><i class="fa fa-thumbs-o-down"></i> No Contabilizados</h1>',grupo:0,height:0},
+                       {name:'contabilizados',title:'<H1 align="center"><i class="fa fa-thumbs-o-up"></i> Contabilizados</h1>',grupo:1,height:0}],
+	
+	actualizarSegunTab: function(name, indice){
+		
+    	if(this.finCons){
+    		 this.store.baseParams.pes_estado = name;
+    	     this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.nombreVista}});
+    	   }
+    },
 
+	bactGroups:  [0,1],
+	
 	constructor: function(config) {
 
+	   this.finCons = true;
 	   Phx.vista.ProcesoCajaVbConta.superclass.constructor.call(this,config);	   
-
+	   
     },
 	
 	preparaMenu:function(){
 	  
-	   Phx.vista.ProcesoCajaVbPresup.superclass.preparaMenu.call(this);
-	   this.getBoton('relacionar_deposito').disable();
+	   Phx.vista.ProcesoCajaVbConta.superclass.preparaMenu.call(this);
 
-     }
+	   }
 };
 </script>

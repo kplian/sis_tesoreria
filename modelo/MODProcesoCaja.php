@@ -208,11 +208,13 @@ class MODProcesoCaja extends MODbase{
 		$this->captura('nombre_finalidad','varchar');
 		$this->captura('id_libro_bancos','int4');
 		$this->captura('observaciones','text');
+		$this->captura('detalle','text');
+		$this->captura('sistema_origen','varchar');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
-		//var_dump($this->consulta); exit;
+		
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
