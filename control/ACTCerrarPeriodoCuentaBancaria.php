@@ -62,11 +62,13 @@ function restar($h1,$h2)
        
 
         //// Test code ////
-        $dbName = 'dbkerp_capacitacion'; // desarrollo
-		//$dbName = 'dbkerp'; // produccion
+        //$dbName = 'dbkerp_capacitacion'; // desarrollo
+		$dbName = 'dbkerp'; // produccion
         $dbUser = 'tesoreria'; // Change this to your db user name
         $pass = 'tesoreria.boa.2015';
 				
-		$db = pg_connect("host=172.17.45.229 dbname=".$dbName.' user='.$dbUser." password=".$pass." port=5432");
-				
+		//$db = pg_connect("host=172.17.45.229 dbname=".$dbName.' user='.$dbUser." password=".$pass." port=5432");
+		//cambio a nuevo servidor de base de datos
+		$db = pg_connect("host=10.150.0.21 dbname=".$dbName.' user='.$dbUser." password=".$pass." port=5432");
+		
 CerrarPeriodoCuentaBancaria($db);
