@@ -128,7 +128,7 @@ Phx.vista.FormRelacionarDeposito=Ext.extend(Phx.frmInterfaz,{
                     totalProperty: 'total',
                     fields: ['id_libro_bancos','id_cuenta_bancaria','fecha','detalle','observaciones','nro_comprobante','importe_deposito','saldo_deposito','comprobante_sigma'],
                     remoteSort: true,
-                    baseParams:{par_filtro:'detalle#nro_comprobante#importe_deposito'}
+                    baseParams:{par_filtro:'detalle#nro_comprobante#importe_deposito#comprobante_sigma'}
                }),
                valueField: 'id_libro_bancos',
                displayField: 'detalle',

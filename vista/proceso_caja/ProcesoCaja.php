@@ -41,17 +41,29 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			{	text:'Chk Presupuesto',
 				iconCls: 'blist',
 				disabled:false,
+				grupo:[0,1],
 				handler:this.checkPresupuesto,
 				tooltip: '<b>Revisar Presupuesto</b><p>Revisar estado de ejecución presupeustaria para el tramite</p>'
 			}
 		);
 		
-		this.addButton('consolidado',
-			{	text:'Consolidado Rendiciones',
+		this.addButton('consolidado_rendicion',
+			{	text:'Reporte Rendicion',
 				iconCls: 'blist',
 				disabled:false,
-				handler:this.consolidado,
-				tooltip: '<b>Reporte Consolidado</b><p>Reporte Consolidado Rendiciones</p>'
+				grupo:[0,1],
+				handler:this.consolidado_rendicion,
+				tooltip: '<b>Consolidado Rendicion</b><p>Consolidado por Rendicion</p>'
+			}
+		);
+		
+		this.addButton('consolidado_reposicion',
+			{	text:'Reporte Reposicion',
+				iconCls: 'blist',
+				disabled:false,
+				grupo:[0,1],
+				handler:this.consolidado_reposicion,
+				tooltip: '<b>Consolidado Reposicion</b><p>Consolidado por Reposicion</p>'
 			}
 		);
 		
@@ -244,49 +256,6 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				grid:true,
 				form:true
 		},
-		/*{
-			config: {
-				name: 'id_caja',
-				fieldLabel: 'id_caja',
-				allowBlank: false,
-				emptyText: 'Elija una opción...',
-				store: new Ext.data.JsonStore({
-					url: '../../sis_/control/Clase/Metodo',
-					id: 'id_',
-					root: 'datos',
-					sortInfo: {
-						field: 'nombre',
-						direction: 'ASC'
-					},
-					totalProperty: 'total',
-					fields: ['id_', 'nombre', 'codigo'],
-					remoteSort: true,
-					baseParams: {par_filtro: 'movtip.nombre#movtip.codigo'}
-				}),
-				valueField: 'id_',
-				displayField: 'nombre',
-				gdisplayField: 'desc_',
-				hiddenName: 'id_caja',
-				forceSelection: true,
-				typeAhead: false,
-				triggerAction: 'all',
-				lazyRender: true,
-				mode: 'remote',
-				pageSize: 15,
-				queryDelay: 1000,
-				anchor: '100%',
-				gwidth: 150,
-				minChars: 2,
-				renderer : function(value, p, record) {
-					return String.format('{0}', record.data['desc_']);
-				}
-			},
-			type: 'ComboBox',
-			id_grupo: 0,
-			filters: {pfiltro: 'movtip.nombre',type: 'string'},
-			grid: false,
-			form: true
-		},*/
 		{
 			//configuracion del componente
 			config:{
@@ -906,7 +875,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			this.reload();
 		 },
 		 
-	consolidado : function() {
+	consolidado_rendicion : function() {
 		var rec = this.getSelectedData();
 		var NumSelect=this.sm.getCount();
 		
@@ -914,8 +883,35 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		{		
 			var data ='id_proceso_caja='+ rec.id_proceso_caja;  			
 			data += '&nro_tramite=' + rec.nro_tramite;
+			data += '&fecha_inicio=' + rec.fecha_inicio.format('d-m-Y');
+			data += '&fecha_fin=' + rec.fecha_fin.format('d-m-Y');
+			data += '&reporte=rendicion';
+			console.log(data);
 			//window.open('http://sms.obairlines.bo/ReportesPXP/Home/MemorandumFondosEnAvance?'+data);				
-			window.open('http://localhost:22021/Home/ReporteConsolidadoRendicionesCajaChica?'+data);				
+			//window.open('http://localhost:22021/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
+			window.open('http://sms.obairlines.bo/ReportesPXP/Home/ReporteConsolidadoRendicionesCajaChica?'+data);							
+		}
+		else
+		{
+			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
+		}
+	},
+	
+	consolidado_reposicion : function() {
+		var rec = this.getSelectedData();
+		var NumSelect=this.sm.getCount();
+		
+		if(NumSelect != 0)
+		{		
+			var data ='id_proceso_caja='+ rec.id_proceso_caja;  			
+			data += '&nro_tramite=' + rec.nro_tramite;
+			data += '&fecha_inicio=' + rec.fecha_inicio.format('d-m-Y');
+			data += '&fecha_fin=' + rec.fecha_fin.format('d-m-Y');			
+			data += '&reporte=reposicion';
+			console.log(data);
+			//window.open('http://sms.obairlines.bo/ReportesPXP/Home/MemorandumFondosEnAvance?'+data);				
+			//window.open('http://localhost:22021/Home/ReporteConsolidadoRendicionesCajaChica?'+data);				
+			window.open('http://sms.obairlines.bo/ReportesPXP/Home/ReporteConsolidadoRendicionesCajaChica?'+data);				
 		}
 		else
 		{

@@ -59,6 +59,18 @@ Phx.vista.ProcesoCajaVb = {
               this.getBoton('fin_registro').disable();
               this.getBoton('ant_estado').disable();
           }
+		  		  
+		  if(data['tipo']=='SOLREN'){
+			this.getBoton('consolidado_rendicion').enable();	
+			this.getBoton('consolidado_reposicion').disable();	
+		  }else if(data['tipo']=='SOLREP'){
+			this.getBoton('consolidado_rendicion').disable();
+			this.getBoton('consolidado_reposicion').enable();	
+		  }else{
+			this.getBoton('consolidado_rendicion').disable();
+			this.getBoton('consolidado_reposicion').disable();	
+		  }
+		  
         this.getBoton('chkpresupuesto').enable();
 	},
 

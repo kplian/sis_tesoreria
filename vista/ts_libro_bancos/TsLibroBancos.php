@@ -821,7 +821,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 	 
 	 onButtonEdit:function(){
 		Phx.vista.TsLibroBancos.superclass.onButtonEdit.call(this);
-		this.cmpTipo.disable();
+		//this.cmpTipo.disable();
 		var data = this.getSelectedData();			
 		
 		if(data.tipo=='cheque'){

@@ -442,6 +442,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		
 		tablaOrigen: 'tes.tproceso_caja',
 		idOrigen: 'id_proceso_caja',
+		idOrigenValor: '',
 
 		onButtonNew:function(){
 			var me = this;
@@ -450,7 +451,8 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.cmpImporteDeposito.enable();
 			this.cmpTabla.setValue(me.tablaOrigen);
 			this.cmpColumnaPk.setValue(me.idOrigen);
-			this.cmpColumnaPkValor.setValue(me.maestro[me.idOrigen]);
+			//this.cmpColumnaPkValor.setValue(me.maestro[me.idOrigen]);
+			this.cmpColumnaPkValor.setValue(me.idOrigenValor);
 		},
 
 		successSave: function(resp) {
@@ -498,8 +500,10 @@ header("content-type: text/javascript; charset=UTF-8");
 						id_cuenta_bancaria:resp.id_cuenta_bancaria,
 						id_libro_bancos:resp.id_libro_bancos,
 						tabla:me.tablaOrigen, 
-						columna_pk:resp.id_clave,
-						columna_pk_valor:resp.valor_clave					
+						/*columna_pk:resp.id_clave,
+						columna_pk_valor:resp.valor_clave					*/
+						columna_pk:me.idOrigen,
+						columna_pk_valor:me.idOrigenValor
 				 },
 				argument:{wizard:wizard},  
 				success:this.successWizard,
@@ -535,6 +539,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		onReloadPage:function(m) {
 			var me = this;
 			this.maestro = m;
+			this.idOrigenValor = me.maestro[me.idOrigen];
 			this.Cmp.id_cuenta_bancaria.store.baseParams.id_moneda = this.maestro.id_moneda;					
 			this.Cmp.id_cuenta_bancaria.store.baseParams.tipo_interfaz = me.tipo_interfaz;
 			this.store.baseParams={tabla : me.tablaOrigen,columna_pk: me.idOrigen,columna_pk_valor : me.maestro[me.idOrigen]};

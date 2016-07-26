@@ -47,9 +47,15 @@ Phx.vista.ProcesoCajaVbConta = {
     },
 	
 	preparaMenu:function(){
-	  
+	   var data = this.getSelectedData();
 	   Phx.vista.ProcesoCajaVbConta.superclass.preparaMenu.call(this);
-
-	   }
+		if(data['tipo']=='CIERRE'){
+			  //habilitar pestaña depositos
+			  this.enableTabDepositos();
+		  }else{
+			  //deshabilitar pestaña depositos
+			  this.disableTabDepositos();
+		  }		
+	}
 };
 </script>
