@@ -77,7 +77,8 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		
 		this.addButton('fin_registro',
 			{	text:'Siguiente',
-				iconCls: 'badelante',				
+				iconCls: 'badelante',
+				grupo:[1,2],
 				disabled:false,
 				handler:this.sigEstado,
 				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
@@ -87,7 +88,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		this.addButton('btnRendicion', {
 			text : 'Rendicion Efectivo',
 			iconCls : 'bballot',
-			grupo:[1,2],
+			grupo:[0,1],
 			disabled : false,
 			handler : this.onBtnRendicion,
 			tooltip : '<b>Rendicion</b>'
