@@ -126,9 +126,9 @@ Phx.vista.FormRelacionarDeposito=Ext.extend(Phx.frmInterfaz,{
                             direction: 'DESC'
                     },
                     totalProperty: 'total',
-                    fields: ['id_libro_bancos','id_cuenta_bancaria','fecha','detalle','observaciones','nro_comprobante','importe_deposito','saldo_deposito','comprobante_sigma'],
+                    fields: ['id_libro_bancos','id_cuenta_bancaria','fecha','detalle','observaciones','comprobante_sigma','importe_deposito','saldo_deposito','nro_deposito'],
                     remoteSort: true,
-                    baseParams:{par_filtro:'detalle#nro_comprobante#importe_deposito#comprobante_sigma'}
+                    baseParams:{par_filtro:'detalle#nro_deposito#importe_deposito#comprobante_sigma'}
                }),
                valueField: 'id_libro_bancos',
                displayField: 'detalle',
@@ -145,7 +145,7 @@ Phx.vista.FormRelacionarDeposito=Ext.extend(Phx.frmInterfaz,{
                anchor: '95%',
                gwidth:200,
                minChars:2,
-               tpl: '<tpl for="."><div class="x-combo-list-item"><p>{detalle}</p><p>Fecha:<strong>{fecha}</strong></p><p>Importe:<strong>{importe_deposito}</strong></p><p>Cbte:<strong>{nro_comprobante}</strong></p>			   <p>Cbte Sigma:<strong>{comprobante_sigma}</strong></p><p>Saldo:<strong>{saldo_deposito}</strong></p></div></tpl>',
+               tpl: '<tpl for="."><div class="x-combo-list-item"><p>{detalle}</p><p>Fecha:<strong>{fecha}</strong></p><p>Importe:<strong>{importe_deposito}</strong></p><p>Nro Deposito:<strong>{nro_deposito}</strong></p><p>Cbte Sigma:<strong>{comprobante_sigma}</strong></p><p>Saldo:<strong>{saldo_deposito}</strong></p></div></tpl>',
                renderer:function(value, p, record){return String.format('{0}', record.data['desc_deposito']);}
             },
             type:'ComboBox',

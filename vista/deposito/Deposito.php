@@ -431,9 +431,11 @@ header("content-type: text/javascript; charset=UTF-8");
             field : 'fecha',
             direction : 'DESC'
         },
-        bdel : true,
+        bdel : false,
         bsave : false,
 		bedit : false,
+		bnew : false,
+		
 		fheight:'80%',
 
 		loadValoresIniciales:function(){
@@ -465,11 +467,13 @@ header("content-type: text/javascript; charset=UTF-8");
           var tb =this.tbar;
 			  
           Phx.vista.Deposito.superclass.preparaMenu.call(this,n);
-          if (data['sistema_origen'] == 'CAJA_CHICA'){              
+          /*
+		  if (data['sistema_origen'] == 'CAJA_CHICA'){              
 			  this.getBoton('del').enable();
 		  }else{
 			  this.getBoton('del').disable();
           }
+		  */
 		},
 	 
 		relacionarDeposito:function(){ 
