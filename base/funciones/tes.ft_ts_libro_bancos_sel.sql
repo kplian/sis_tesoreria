@@ -275,6 +275,7 @@ BEGIN
             begin
             
                 --1. Obtención de cadena de conexión a ENDESIS
+                /*
                 v_cnx = migra.f_obtener_cadena_conexion();
                 
                 --1.1 Apertura de la conexión
@@ -299,7 +300,15 @@ BEGIN
                               as (
                               email2 varchar,
                                nombre_completo text)';
+            	*/
         		
+                v_consulta:= 'Select emp.email_empresa,
+                                  emp.desc_funcionario1
+                              from tes.tts_libro_bancos t
+                              inner join cd.tcuenta_doc cd on cd.id_int_comprobante=t.id_int_comprobante
+                              inner join orga.vfuncionario_persona emp on emp.id_funcionario=cd.id_funcionario
+                              where t.id_libro_bancos='||v_parametros.id_libro_bancos||'';
+                
                 UPDATE tes.tts_libro_bancos
                 SET notificado='si'
                 WHERE id_libro_bancos= v_parametros.id_libro_bancos;

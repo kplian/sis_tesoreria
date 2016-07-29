@@ -107,7 +107,7 @@ BEGIN
 			)RETURNING id_solicitud_rendicion_det into v_id_solicitud_rendicion_det;
             
             UPDATE conta.tdoc_compra_venta
-            SET tabla_origen='tes.ft_solicitud_rendicion_det',
+            SET tabla_origen='tes.tsolicitud_rendicion_det',
             id_origen=v_id_solicitud_rendicion_det
             WHERE id_doc_compra_venta=v_parametros.id_documento_respaldo;
 			            
