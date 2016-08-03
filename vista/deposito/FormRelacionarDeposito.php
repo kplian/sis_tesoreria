@@ -178,8 +178,8 @@ Phx.vista.FormRelacionarDeposito=Ext.extend(Phx.frmInterfaz,{
 			  }
 		  },this);
 		 */
-		this.Cmp.id_cuenta_bancaria.store.baseParams.id_depto_lb = this.data.id_depto_lb;
-		this.Cmp.id_cuenta_bancaria.store.baseParams.permiso = 'todos';
+		//this.Cmp.id_cuenta_bancaria.store.baseParams.id_depto_lb = this.data.id_depto_lb;
+		this.Cmp.id_cuenta_bancaria.store.baseParams.permiso = 'fondo_avance';
 		
 		this.Cmp.id_cuenta_bancaria.on('select',function(data,rec,ind){            
             /*if(rec.data.centro=='no'){
