@@ -74,12 +74,11 @@ class MODObligacionPago extends MODbase{
 		$this->captura('ajuste_aplicado','numeric');
 		$this->captura('monto_estimado_sg','numeric');
 		$this->captura('id_obligacion_pago_extendida','integer');
-		
 		$this->captura('desc_contrato','text');
 		$this->captura('id_contrato','integer');
 		$this->captura('obs_presupuestos','varchar');
-		$this->captura('obs_poa','varchar');
 		$this->captura('codigo_poa','varchar');
+        $this->captura('obs_poa','varchar');
 		$this->captura('uo_ex','varchar');
 		
 		
