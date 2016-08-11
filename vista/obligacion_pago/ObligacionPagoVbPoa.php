@@ -219,16 +219,39 @@ Phx.vista.ObligacionPagoVbPoa = {
             layout: 'form',
             autoHeight: true,
             items: [
-                 {
+                {
                     name: 'codigo_poa',
-                    xtype: 'textfield',
+                    xtype: 'awesomecombo',
                     fieldLabel: 'Código POA',
                     allowBlank: false,
-                    grow: true,
-                    growMin : '80%',
-                    value:'',
-                    anchor: '80%',
-                    maxLength:500
+                    emptyText : 'Actividad...',
+                    store : new Ext.data.JsonStore({
+                        url : '../../sis_presupuestos/control/Objetivo/listarObjetivo',
+                        id : 'codigo',
+                        root : 'datos',
+                        sortInfo : {
+                            field : 'codigo',
+                            direction : 'ASC'
+                        },
+                        totalProperty : 'total',
+                        fields : ['codigo', 'descripcion','sw_transaccional','detalle_descripcion'],
+                        remoteSort : true,
+                        baseParams : {
+                            par_filtro : 'obj.codigo#obj.descripcion'
+                        }
+                    }),
+                    valueField : 'codigo',
+                    displayField : 'detalle_descripcion',
+                    forceSelection : true,
+                    typeAhead : false,
+                    triggerAction : 'all',
+                    lazyRender : true,
+                    mode : 'remote',
+                    pageSize : 10,
+                    queryDelay : 1000,
+                    gwidth : 150,
+                    minChars : 2,
+                    enableMultiSelect:true
                 },
                  
                  {
@@ -279,6 +302,8 @@ Phx.vista.ObligacionPagoVbPoa = {
 	initObs:function(){
 		var d= this.sm.getSelected().data;
         this.cmbCodigoPoa.setValue(d.codigo_poa);
+        this.cmbCodigoPoa.store.baseParams.id_gestion = d.id_gestion;
+        this.cmbCodigoPoa.store.baseParams.sw_transaccional = 'movimiento';
         this.cmbObsPoa.setValue(d.obs_poa);
 		this.wObs.show()
 	},
