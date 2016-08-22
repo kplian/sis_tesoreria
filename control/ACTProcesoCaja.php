@@ -110,6 +110,12 @@ class ACTProcesoCaja extends ACTbase{
 		$this->res=$this->objFunc->relacionarDeposito($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	
+	function corregirImporteContable(){
+		$this->objFunc=$this->create('MODProcesoCaja');
+		$this->res=$this->objFunc->importeContableDeposito($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
 }
 
 ?>

@@ -210,6 +210,7 @@ class MODProcesoCaja extends MODbase{
 		$this->captura('observaciones','text');
 		$this->captura('detalle','text');
 		$this->captura('sistema_origen','varchar');
+		$this->captura('importe_contable_deposito','numeric');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -262,7 +263,7 @@ class MODProcesoCaja extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
-	
+		
 	function relacionarDeposito(){
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.ft_proceso_caja_ime';
@@ -275,6 +276,25 @@ class MODProcesoCaja extends MODbase{
 		$this->setParametro('tabla','tabla','varchar');
         $this->setParametro('columna_pk','columna_pk','varchar');
         $this->setParametro('columna_pk_valor','columna_pk_valor','int4');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+		
+	function importeContableDeposito(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_proceso_caja_ime';
+		$this->transaccion='TES_IMPDEP_IME';
+		$this->tipo_procedimiento='IME';
+
+		//Define los parametros para la funcion
+		$this->setParametro('importe_contable_deposito','importe_contable_deposito','numeric');
+		$this->setParametro('id_cuenta_doc','id_cuenta_doc','integer');
+		$this->setParametro('id_libro_bancos','id_libro_bancos','integer');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();

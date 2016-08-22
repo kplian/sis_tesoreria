@@ -210,10 +210,12 @@ BEGIN
 	elsif(p_transaccion='TES_DEPCAJ_SEL')then
 
     	v_consulta:='select cb.id_cuenta_bancaria, cb.denominacion ||'' ''||cb.nro_cuenta as desc_cuenta_bancaria, t.fecha, t.tipo, t.nro_deposito,
-        			 t.importe_deposito, t.origen, f.nombre_finalidad,t.id_libro_bancos, t.observaciones, t.detalle, t.sistema_origen
+        			 t.importe_deposito, t.origen, f.nombre_finalidad,t.id_libro_bancos, t.observaciones, t.detalle, t.sistema_origen,
+                     COALESCE(dcd.importe_contable_deposito,t.importe_deposito)::numeric as importe_contable_deposito
 					 from tes.tts_libro_bancos t
 					 inner join tes.tcuenta_bancaria cb on cb.id_cuenta_bancaria=t.id_cuenta_bancaria
 					 inner join tes.tfinalidad f on f.id_finalidad=t.id_finalidad
+                     left join cd.tdeposito_cd dcd on dcd.id_cuenta_doc='|| v_parametros.columna_pk_valor || 'and dcd.id_libro_bancos=t.id_libro_bancos
 					 where t.tabla='''||v_parametros.tabla||'''
 					 and t.columna_pk = '''||v_parametros.columna_pk||''' 
                      and t.columna_pk_valor='||v_parametros.columna_pk_valor||' and ';

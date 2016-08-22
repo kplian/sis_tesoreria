@@ -113,6 +113,17 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Documentos de la Solicitud</b><br/>Los documetos de la solicitud seleccionada.'
 			}
 		);
+		
+		this.addButton('ant_estado',
+			{	text:'Anterior',
+				argument: {estado: 'anterior'},
+				iconCls: 'batras',
+				disabled:true,
+				grupo:[2],
+				handler:this.antEstado,
+				tooltip: '<b>Anterior</b><p>Pasa al anterior estado</p>'
+			}
+		);	
 		/*
 		this.addButton('btnSolicitud', {
 			text : 'Solicitud',
@@ -844,6 +855,51 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 								 });        
 			   
 	 },
+	 
+	 antEstado:function(res){
+         var rec=this.sm.getSelected();
+         Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/AntFormEstadoWf.php',
+            'Estado de Wf',
+            {
+                modal:true,
+                width:450,
+                height:250
+            }, { data:rec.data, estado_destino: res.argument.estado }, this.idContenedor,'AntFormEstadoWf',
+            {
+                config:[{
+                          event:'beforesave',
+                          delegate: this.onAntEstado,
+                        }
+                        ],
+               scope:this
+             })
+     },
+   
+     onAntEstado: function(wizard,resp){
+            Phx.CP.loadingShow();
+            Ext.Ajax.request({
+                // form:this.form.getForm().getEl(),
+                url:'../../sis_tesoreria/control/SolicitudEfectivo/anteriorEstadoSolicitudEfectivo',
+                params:{
+                        id_proceso_wf: resp.id_proceso_wf,
+                        id_estado_wf:  resp.id_estado_wf,  
+                        obs: resp.obs,
+                        estado_destino: resp.estado_destino
+                 },
+                argument:{wizard:wizard},  
+                success:this.successEstadoSinc,
+                failure: this.conexionFailure,
+                timeout:this.timeout,
+                scope:this
+            });
+           
+     },
+	 
+	 successEstadoSinc:function(resp){
+        Phx.CP.loadingHide();
+        resp.argument.wizard.panel.destroy()
+        this.reload();
+     }, 
 	 
 	 onSaveWizard:function(wizard,resp){
 			Phx.CP.loadingShow();

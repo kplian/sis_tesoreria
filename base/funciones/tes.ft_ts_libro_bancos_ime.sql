@@ -867,7 +867,20 @@ BEGIN
           if(v_codigo_estado_siguiente='cobrado' and v_tipo='transferencia_carta' and g_fecha is null)then
           	raise exception 'No se puede pasar al siguiente estado, registre fecha de la transferencia';
           end if;
-			
+          
+          IF EXISTS (select 1
+                     from tes.tts_libro_bancos lb
+                     inner join cd.tcuenta_doc cd on cd.id_int_comprobante=lb.id_int_comprobante
+                     where lb.id_libro_bancos=v_id_libro_bancos) THEN
+          	if(v_codigo_estado_siguiente='entregado')then
+          		UPDATE cd.tcuenta_doc
+                SET fecha_entrega= current_date
+                WHERE id_int_comprobante=(select id_int_comprobante
+                 						  from tes.tts_libro_bancos
+                                          where id_libro_bancos=v_id_libro_bancos);
+          	end if;
+          END IF;
+                    	
           if(v_codigo_estado_siguiente='impreso')then
           	if(v_tipo='cheque' AND v_nro_cheque is null)then
             	raise exception 'No puede pasar al siguiente estado si no esta registrado el numero de cheque';

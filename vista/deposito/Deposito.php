@@ -26,6 +26,15 @@ header("content-type: text/javascript; charset=UTF-8");
 					tooltip: '<b>Relacionar Depósito</b><p>Relacionar Deposito</p>'
 				}
 			);
+			
+			this.addButton('corregir_importe_contable',
+				{	text:'Corregir Importe Contable',
+					iconCls: 'bedit',
+					disabled:false,
+					handler:this.corregir_importe_contable,
+					tooltip: '<b>Corregir Importe Contable</b><p>Corregir Importe Contable Deposito</p>'
+				}
+			);
 		
             this.iniciarEventos();
 			
@@ -287,6 +296,20 @@ header("content-type: text/javascript; charset=UTF-8");
 		},
 		{
 			config:{
+				name: 'importe_contable_deposito',
+				fieldLabel: 'Importe Contable Deposito',
+				allowBlank: false,
+				anchor: '70%',
+				gwidth: 100,
+				maxLength:1310722
+			},
+				type:'NumberField',
+				id_grupo:1,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
 				name:'origen',
 				fieldLabel:'Origen',
 				allowBlank:false,
@@ -425,7 +448,8 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
-		{name:'nombre_finalidad', type: 'string'}
+		{name:'nombre_finalidad', type: 'string'},
+		{name:'importe_contable_deposito', type: 'numeric'}
 	],
         sortInfo : {
             field : 'fecha',
@@ -475,7 +499,44 @@ header("content-type: text/javascript; charset=UTF-8");
           }
 		  */
 		},
-	 
+		
+		corregir_importe_contable:function(){ 
+			var rec=this.sm.getSelected();			
+			Phx.CP.loadWindows('../../../sis_tesoreria/vista/deposito/FormImporteContableDeposito.php',
+			'Corregir Importe Contable Deposito',
+			{
+				modal:true,
+				width:500,
+				height:250
+			}, {data:this.maestro, rec : rec.data }, this.idContenedor,'FormImporteContableDeposito',
+			{
+				config:[{
+						  event:'beforesave',
+						  delegate: this.corregir_importe,
+						}
+						],
+			   scope:this
+			 })								   
+		},
+		
+		corregir_importe:function(wizard,resp){
+			var me=this;
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+				url:'../../sis_tesoreria/control/ProcesoCaja/corregirImporteContable',
+				params:{
+						importe_contable_deposito:resp.importe_contable_deposito,
+						id_cuenta_doc: resp.id_cuenta_doc,						
+						id_libro_bancos:resp.id_libro_bancos				 },
+				argument:{wizard:wizard},  
+				success:this.successWizard,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});
+		   
+		},
+		
 		relacionarDeposito:function(){ 
 			var rec=this.sm.getSelected();			
 			Phx.CP.loadWindows('../../../sis_tesoreria/vista/deposito/FormRelacionarDeposito.php',

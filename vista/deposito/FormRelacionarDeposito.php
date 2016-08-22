@@ -161,7 +161,7 @@ Phx.vista.FormRelacionarDeposito=Ext.extend(Phx.frmInterfaz,{
 	iniciarEventos:function(){
 	
 		//this.cmpTipo = this.getComponente('tipo');	
-		this.cmpImporteTransferencia = this.getComponente('importe_transferencia');	
+		//this.cmpImporteTransferencia = this.getComponente('importe_transferencia');	
 		/*		
 		 this.cmpTipo.on('select',function(com,dat){
 		 

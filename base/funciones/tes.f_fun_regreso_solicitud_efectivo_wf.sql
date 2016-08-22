@@ -38,7 +38,14 @@ BEGIN
          usuario_ai = p_usuario_ai
     where id_proceso_wf = p_id_proceso_wf;
    
-      
+     IF p_codigo_estado = 'entregado' THEN
+    	delete
+        from tes.tsolicitud_efectivo
+        where id_solicitud_efectivo_fk=(
+        select id_solicitud_efectivo
+        from tes.tsolicitud_efectivo
+        where id_proceso_wf=p_id_proceso_wf) and estado='devuelto';
+    END IF;    
 
 RETURN   TRUE;
 

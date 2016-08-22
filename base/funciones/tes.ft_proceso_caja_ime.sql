@@ -79,6 +79,7 @@ DECLARE
     v_codigo_proceso		varchar;
     v_importe_deposito		numeric;
     v_sistema_origen		varchar;
+    v_importe				numeric;
     		    
 BEGIN
 
@@ -860,17 +861,57 @@ BEGIN
             IF NOT EXISTS (SELECT 1
             			   FROM tes.tts_libro_bancos
             			   WHERE id_libro_bancos=v_parametros.id_libro_bancos)THEN
-            	raise exception 'No existe el registro que desea eliminar';
+            	raise exception 'No existe el registro que desea relacionar';
             END IF;
+            
+            select importe_deposito into v_importe
+            from tes.tts_libro_bancos
+            where id_libro_bancos=v_parametros.id_libro_bancos;
             
             UPDATE tes.tts_libro_bancos
             SET tabla = v_parametros.tabla,
             columna_pk = v_parametros.columna_pk,
             columna_pk_valor = v_parametros.columna_pk_valor
             WHERE id_libro_bancos = v_parametros.id_libro_bancos;
+            
+            INSERT INTO cd.tdeposito_cd
+            (id_cuenta_doc, id_libro_bancos, importe_contable_deposito)
+            VALUES
+            (v_parametros.columna_pk_valor,v_parametros.id_libro_bancos,v_importe);
               
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Deposito relacionado'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_parametros.id_libro_bancos::varchar);
+              
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;
+        
+    elsif(p_transaccion='TES_IMPDEP_IME')then
+    	begin
+            
+            IF NOT EXISTS (SELECT 1
+            			   FROM cd.tdeposito_cd
+            			   WHERE id_libro_bancos=v_parametros.id_libro_bancos
+                           AND id_cuenta_doc=v_parametros.id_cuenta_doc)THEN
+                           
+            	INSERT INTO cd.tdeposito_cd
+                (id_cuenta_doc, id_libro_bancos, importe_contable_deposito)
+                VALUES
+                (v_parametros.id_cuenta_doc,v_parametros.id_libro_bancos,v_parametros.importe_contable_deposito);
+            
+            ELSE           	
+                            
+                UPDATE cd.tdeposito_cd
+                SET importe_contable_deposito = v_parametros.importe_contable_deposito
+                WHERE id_libro_bancos = v_parametros.id_libro_bancos
+                AND id_cuenta_doc=v_parametros.id_cuenta_doc;
+                
+            END IF;
+              
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Importe Contable Deposito modificado'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_parametros.id_libro_bancos::varchar);
               
             --Devuelve la respuesta
