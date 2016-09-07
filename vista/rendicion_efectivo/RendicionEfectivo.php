@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
 *@package pXP
 *@file RendicionEfectivo.php
@@ -15,6 +15,28 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 	nombreVista: 'RendicionEfectivo',
 
 	constructor:function(config){
+
+		this.historico = 'no';
+		this.tbarItems = ['-',{
+			text: 'Histórico',
+			enableToggle: true,
+			pressed: false,
+			toggleHandler: function(btn, pressed) {
+
+				if(pressed){
+					this.historico = 'si';
+					this.desBotoneshistorico();
+				}
+				else{
+					this.historico = 'no'
+				}
+
+				this.store.baseParams.historico = this.historico;
+				this.reload();
+			},
+			scope: this
+		}];
+
 		this.maestro=config.maestro;
     	//llama al constructor de la clase padre
 		Phx.vista.RendicionEfectivo.superclass.constructor.call(this,config);
@@ -426,6 +448,12 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
     	Phx.vista.RendicionEfectivo.superclass.onButtonNew.call(this);		
         this.Cmp.id_caja.setValue(this.id_caja);	 
 	},
+
+	desBotoneshistorico: function(){
+		this.getBoton('fin_registro').disable();
+		//this.getBoton('bdel').disable();
+		this.liberaMenu();
+	},
 	
 	sigEstado:function(){                   
 	  var rec=this.sm.getSelected();	  
@@ -677,13 +705,15 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
           var data = this.getSelectedData();
           var tb =this.tbar;          
           		  
-          Phx.vista.RendicionEfectivo.superclass.preparaMenu.call(this,n); 
-          if (data['estado']== 'revision' || data['estado'] == 'vbjefedevsol'){    
-              this.getBoton('fin_registro').enable();			  
-          }
-          else{            
-              this.getBoton('fin_registro').disable();
-          }
+          Phx.vista.RendicionEfectivo.superclass.preparaMenu.call(this,n);
+		  if(this.historico == 'no') {
+			  if (data['estado'] == 'revision' || data['estado'] == 'vbjefedevsol') {
+				  this.getBoton('fin_registro').enable();
+			  }
+			  else {
+				  this.getBoton('fin_registro').disable();
+			  }
+		  }
      },
 		
 	successWizard:function(resp){
