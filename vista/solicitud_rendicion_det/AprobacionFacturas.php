@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
 *@package pXP
 *@file AprobacionFacturas.php
@@ -25,6 +25,15 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Devolver Factura</b><p>Devolver Factura a Solicitante</p>'
 			}
 		);
+
+		this.addButton('btnShowDoc',
+		{
+			text: 'Ver Detalle',
+			iconCls: 'brenew',
+			disabled: true,
+			handler: this.showDoc,
+			tooltip: 'Muestra el detalle del documento'
+		});
 		//this.load({params:{start:0, limit:this.tam_pag, id_solicitud_efectivo:this.id_solicitud_efectivo}})
 	},
 			
@@ -445,7 +454,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
         this.abrirFormulario('edit', this.sm.getSelected());		
     },
 	
-	abrirFormulario:function(tipo, record){
+	abrirFormulario:function(tipo, record, readOnly){
         //abrir formulario de solicitud
 		
 	   var me = this;
@@ -460,12 +469,18 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 										  tipo_form : tipo,
 										  id_depto : record.data.id_depto,
 										  id_solicitud_efectivo : me.id_solicitud_efectivo,
-										  datosOriginales: record
-										  }
+										  datosOriginales: record,
+				   					      readOnly: readOnly
+										  },
+				   					bsubmit: !readOnly
 								}, 
 								this.idContenedor,
 								'FormRendicion');     
     },
+
+	showDoc:  function() {
+		this.abrirFormulario('edit', this.sm.getSelected(), true);
+	},
 	
 	onReloadPage : function(m) {
 		this.maestro = m;

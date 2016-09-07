@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
 *@package pXP
 *@file SolicitudEfectivoSinDet.php
@@ -71,8 +71,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			};
 			
     	//llama al constructor de la clase padre
-		Phx.vista.SolicitudEfectivoSinDet.superclass.constructor.call(this,config);
-		this.init();
+		Phx.vista.SolicitudEfectivoSinDet.superclass.constructor.call(this,config);		
 		this.iniciarEventos();
 		
 		this.addButton('fin_registro',
@@ -123,7 +122,19 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 				handler:this.antEstado,
 				tooltip: '<b>Anterior</b><p>Pasa al anterior estado</p>'
 			}
-		);	
+		);
+
+		this.addButton('diagrama_gantt',
+            {
+                grupo:[0,1,2],
+                text:'Gant',
+                iconCls: 'bgantt',
+                disabled:true,
+                handler:this.diagramGantt,
+                tooltip: '<b>Diagrama Gantt de Solicitud de Efectivo</b>'
+            }
+		);
+
 		/*
 		this.addButton('btnSolicitud', {
 			text : 'Solicitud',
@@ -149,7 +160,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			tooltip : '<b>Rendicion Efectivo</b>'
 		});
 		*/
-		
+		this.init();
 		this.store.baseParams.pes_estado = 'borrador';
 		
 		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:this.vista}})
@@ -669,9 +680,9 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 	 preparaMenu:function(n){
           var data = this.getSelectedData();
           var tb =this.tbar;
-		  
+
 		  var dias = parseFloat(data.dias_maximo_rendicion) - parseFloat(data.dias_no_rendido);
-			  
+          this.getBoton('diagrama_gantt').disable();
           Phx.vista.SolicitudEfectivoSinDet.superclass.preparaMenu.call(this,n);
           if (data['estado'] == 'borrador'){
               this.getBoton('fin_registro').enable();
@@ -710,6 +721,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('edit').disable();
 			  this.getBoton('del').disable();
 			  this.getBoton('btnRendicion').disable();
+			  this.getBoton('diagrama_gantt').enable();
 			  //this.getBoton('btnReciboEntrega').disable();
 			  //this.getBoton('btnRendicionEfectivo').disable();
           }
@@ -894,6 +906,19 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
             });
            
      },
+
+	diagramGantt : function (){
+		var data=this.sm.getSelected().data.id_proceso_wf;
+		Phx.CP.loadingShow();
+		Ext.Ajax.request({
+			url: '../../sis_workflow/control/ProcesoWf/diagramaGanttTramite',
+			params: { 'id_proceso_wf': data },
+			success: this.successExport,
+			failure: this.conexionFailure,
+			timeout: this.timeout,
+			scope: this
+		});
+	},
 	 
 	 successEstadoSinc:function(resp){
         Phx.CP.loadingHide();

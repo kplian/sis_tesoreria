@@ -600,7 +600,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
      },
 	 
 	 preparaMenu:function(n){
-		  Phx.vista.SolicitudEfectivoDet.superclass.preparaMenu.call(this);
+		  Phx.vista.SolicitudRendicionDet.superclass.preparaMenu.call(this);
 		  if (this.estado=='finalizado'){
 			  this.getBoton('edit').disable();
 		  }else{

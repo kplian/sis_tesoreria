@@ -1,4 +1,4 @@
-﻿--------------- SQL ---------------
+--------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION tes.ft_solicitud_efectivo_sel (
   p_administrador integer,
@@ -39,42 +39,49 @@ DECLARE
     v_id_depto			integer;
     v_id_gestion		integer;
     v_id_proceso_caja	integer;
-			    
+    v_historico			varchar;
+
 BEGIN
 
 	v_nombre_funcion = 'tes.ft_solicitud_efectivo_sel';
     v_parametros = pxp.f_get_record(p_tabla);
 
-	/*********************************    
+	/*********************************
  	#TRANSACCION:  'TES_SOLEFE_SEL'
  	#DESCRIPCION:	Consulta de datos
- 	#AUTOR:		gsarmiento	
+ 	#AUTOR:		gsarmiento
  	#FECHA:		24-11-2015 12:59:51
 	***********************************/
 
 	if(p_transaccion='TES_SOLEFE_SEL')then
-     				
+
     	begin
         	v_filtro='';
             v_inner='';
-            
+
             IF (v_parametros.id_funcionario_usu is null) then
-              	
+
                 v_parametros.id_funcionario_usu = -1;
-            
+
             END IF;
             v_saldo = 'solefe.monto';
-            
+
+            IF  pxp.f_existe_parametro(p_tabla,'historico') THEN
+               v_historico =  v_parametros.historico;
+            ELSE
+               v_historico = 'no';
+            END IF;
+
             IF  lower(v_parametros.tipo_interfaz) in ('condetalle','sindetalle','efectivocaja') THEN
-                
+
             	select id_tipo_solicitud into v_id_tipo_solicitud
                 from tes.ttipo_solicitud
                 where codigo='SOLEFE';
-                                
+
                  v_saldo = 'case when solefe.estado in (''entregado'',''finalizado'') then solefe.monto - COALESCE((select sum(monto)
                                         from tes.tsolicitud_efectivo
                                         where id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo
-                                        and estado=''rendido''), 0.00) 
+                                        and estado=''rendido''), 0.00)
                                         - COALESCE((select sum(monto)
                                         from tes.tsolicitud_efectivo
                                         where id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo
@@ -84,60 +91,60 @@ BEGIN
                                         where id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo
                                         and estado=''repuesto''), 0.00)
                  			else 0.00 end as saldo';
-                
+
                 IF p_administrador !=1 THEN
                    v_filtro = '(solefe.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or solefe.id_usuario_reg='||p_id_usuario||' or solefe.id_usuario_mod='||p_id_usuario||') and solefe.id_tipo_solicitud = '||v_id_tipo_solicitud||' and ';
                 ELSE
                   --   v_filtro = '(pc.estado = ''solicitado'') and ';
                    v_filtro = 'solefe.id_tipo_solicitud = '||v_id_tipo_solicitud||' and ';
-                END IF;                
-                
+                END IF;
+
             END IF;
             IF lower(v_parametros.tipo_interfaz) in ('vbsolicitudefectivo') THEN
             	/*select id_tipo_solicitud into v_id_tipo_solicitud
                 from tes.ttipo_solicitud
                 where codigo in ('SOLEFE','DEVEFE','REPEFE');*/
-                
-                
+
+
                 v_saldo = 'solefe.monto - COALESCE((select sum(monto)
                                         from tes.tsolicitud_efectivo
                                         where id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo
                                         and estado=''finalizado''), 0) as saldo';
-                
+
             	v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = solefe.id_estado_wf';
             	IF p_administrador !=1 THEN
                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (solefe.estado in (''vbjefe'',''vbcajero'')) and  solefe.id_tipo_solicitud in (select id_tipo_solicitud from tes.ttipo_solicitud where codigo in (''SOLEFE'')) and ';
                  ELSE
-                     v_filtro = '(solefe.estado in (''vbjefe'',''vbcajero'')) and 
+                     v_filtro = '(solefe.estado in (''vbjefe'',''vbcajero'')) and
                      solefe.id_tipo_solicitud in (select id_tipo_solicitud from tes.ttipo_solicitud where codigo in (''SOLEFE'')) and ';
-                END IF;                
+                END IF;
             END IF;
-            
+
             IF lower(v_parametros.tipo_interfaz) in ('devolucionreposicionefectivovb') THEN
             	/*select id_tipo_solicitud into v_id_tipo_solicitud
                 from tes.ttipo_solicitud
                 where codigo in ('SOLEFE','DEVEFE','REPEFE');*/
-                
-                
+
+
                 v_saldo = 'solefe.monto - COALESCE((select sum(monto)
                                         from tes.tsolicitud_efectivo
                                         where id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo
                                         and estado=''finalizado''), 0) as saldo';
-                
+
             	v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = solefe.id_estado_wf';
             	IF p_administrador !=1 THEN
                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (solefe.estado = ''vbcajero'') and  solefe.id_tipo_solicitud in (select id_tipo_solicitud from tes.ttipo_solicitud where codigo in (''DEVEFE'',''REPEFE'')) and ';
                  ELSE
-                     v_filtro = '(solefe.estado = ''vbcajero'') and 
+                     v_filtro = '(solefe.estado = ''vbcajero'') and
                      solefe.id_tipo_solicitud in (select id_tipo_solicitud from tes.ttipo_solicitud where codigo in (''DEVEFE'',''REPEFE'')) and ';
-                END IF;                
+                END IF;
             END IF;
-            
+
             IF lower(v_parametros.tipo_interfaz) in ('rendicionefectivo') THEN
             	select id_tipo_solicitud into v_id_tipo_solicitud
                 from tes.ttipo_solicitud
                 where codigo='RENEFE';
-                
+
                 v_saldo = 'solpri.monto - COALESCE((
                                  select sum(monto)
                                  from tes.tsolicitud_efectivo
@@ -151,13 +158,26 @@ BEGIN
                                                              solpri.id_solicitud_efectivo and
                                                                  estado in  (''repuesto'')
                                  ), 0) - solefe.monto as saldo';
-                
-            	v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = solefe.id_estado_wf';
-            	IF p_administrador !=1 THEN
-                   v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (solefe.estado in (''revision'',''vbjefedevsol'')) and  solefe.id_tipo_solicitud = ' || v_id_tipo_solicitud|| ' and ';
-                 ELSE
-                     v_filtro = '(solefe.estado in (''revision'',''vbjefedevsol'')) and solefe.id_tipo_solicitud=' ||v_id_tipo_solicitud||' and ';
-                END IF;                
+
+                IF v_historico = 'si' THEN
+                	v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = solefe.id_proceso_wf ';
+
+                    IF p_administrador !=1 THEN
+                       v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (solefe.estado in (''rendido'')) and  solefe.id_tipo_solicitud = ' || v_id_tipo_solicitud|| ' and ';
+                    ELSE
+                         v_filtro = '(solefe.estado in (''rendido'')) and solefe.id_tipo_solicitud=' ||v_id_tipo_solicitud||' and ';
+                    END IF;
+                ELSE
+            		v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = solefe.id_estado_wf';
+
+                    IF p_administrador !=1 THEN
+                       v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (solefe.estado in (''revision'',''vbjefedevsol'')) and  solefe.id_tipo_solicitud = ' || v_id_tipo_solicitud|| ' and ';
+                    ELSE
+                         v_filtro = '(solefe.estado in (''revision'',''vbjefedevsol'')) and solefe.id_tipo_solicitud=' ||v_id_tipo_solicitud||' and ';
+                    END IF;
+
+                END IF;
+
             END IF;
             
             IF lower(v_parametros.tipo_interfaz) in ('devolucionreposicion') THEN            	 

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
 *@package pXP
 *@file SolicitudEfectivoVb.php
@@ -36,6 +36,16 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
 			}
 		);
+
+		this.addButton('diagrama_gantt',
+            {
+                text:'Gant',
+                iconCls: 'bgantt',
+                disabled:true,
+                handler: this.diagramGantt,
+                tooltip: '<b>Diagrama Gantt de Solicitud de Efectivo</b>'
+            }
+        );
 				
 		this.iniciarEventos();
 		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:'vbSolicitudEfectivo'}})
@@ -428,7 +438,8 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
           var data = this.getSelectedData();
           var tb =this.tbar;          
           		  
-          Phx.vista.SolicitudEfectivoVb.superclass.preparaMenu.call(this,n); 
+          Phx.vista.SolicitudEfectivoVb.superclass.preparaMenu.call(this,n);
+          this.getBoton('diagrama_gantt').enable();
           if (data['estado']!= 'borrador'){    
               this.getBoton('fin_registro').enable();
 			  this.getBoton('ant_estado').enable();
@@ -535,6 +546,19 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 			resp.argument.wizard.panel.destroy()
 			this.reload();
 		 },
+
+    diagramGantt : function (){
+        var data=this.sm.getSelected().data.id_proceso_wf;
+        Phx.CP.loadingShow();
+        Ext.Ajax.request({
+            url: '../../sis_workflow/control/ProcesoWf/diagramaGanttTramite',
+            params: { 'id_proceso_wf': data },
+            success: this.successExport,
+            failure: this.conexionFailure,
+            timeout: this.timeout,
+            scope: this
+        });
+    },
 	
 	tabsouth:[
             { 

@@ -21,7 +21,8 @@ class MODSolicitudEfectivo extends MODbase{
 		
 		$this->setParametro('id_funcionario_usu','id_funcionario_usu','int4');
 		$this->setParametro('tipo_interfaz','tipo_interfaz','varchar');
-				
+		$this->setParametro('historico','historico','varchar');
+
 		//Definicion de la lista del resultado del query
 		$this->captura('id_solicitud_efectivo','int4');
 		$this->captura('id_caja','int4');

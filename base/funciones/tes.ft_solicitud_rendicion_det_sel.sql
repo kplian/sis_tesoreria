@@ -85,7 +85,7 @@ BEGIN
                         caja.id_depto	
 						from tes.tsolicitud_rendicion_det rend
                         inner join tes.tsolicitud_efectivo solren on solren.id_solicitud_efectivo = rend.id_solicitud_efectivo
-                        inner join tes.tsolicitud_efectivo solefe on solefe.id_solicitud_efectivo=solren.fk_id_solicitud_efectivo
+                        inner join tes.tsolicitud_efectivo solefe on solefe.id_solicitud_efectivo=solren.id_solicitud_efectivo_fk
                         inner join tes.tcaja caja on caja.id_caja=solefe.id_caja
                         left join conta.tdoc_compra_venta dc on dc.id_doc_compra_venta=rend.id_documento_respaldo
                         left join param.tplantilla pla on pla.id_plantilla = dc.id_plantilla
@@ -93,20 +93,20 @@ BEGIN
 						inner join segu.tusuario usu1 on usu1.id_usuario = rend.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = rend.id_usuario_mod
 				        where  ';
-			
+
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 
 			--Devuelve la respuesta
 			return v_consulta;
-						
+
 		end;
 
-	/*********************************    
+	/*********************************
  	#TRANSACCION:  'TES_REND_CONT'
  	#DESCRIPCION:	Conteo de registros
- 	#AUTOR:		gsarmiento	
+ 	#AUTOR:		gsarmiento
  	#FECHA:		16-12-2015 15:14:01
 	***********************************/
 
@@ -114,10 +114,11 @@ BEGIN
 
 		begin
 			--Sentencia de la consulta de conteo de registros
-			v_consulta:='select count(id_solicitud_rendicion_det)
+			v_consulta:='select count(id_solicitud_rendicion_det),
+            			sum(rend.monto) as monto_total
 					    from tes.tsolicitud_rendicion_det rend
                         inner join tes.tsolicitud_efectivo solren on solren.id_solicitud_efectivo = rend.id_solicitud_efectivo
-                        inner join tes.tsolicitud_efectivo solefe on solefe.id_solicitud_efectivo=solren.fk_id_solicitud_efectivo
+                        inner join tes.tsolicitud_efectivo solefe on solefe.id_solicitud_efectivo=solren.id_solicitud_efectivo_fk
                         inner join tes.tcaja caja on caja.id_caja=solefe.id_caja
                         left join conta.tdoc_compra_venta dc on dc.id_doc_compra_venta=rend.id_documento_respaldo
                         left join param.tplantilla pla on pla.id_plantilla = dc.id_plantilla
