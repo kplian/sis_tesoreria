@@ -117,7 +117,7 @@ BEGIN
              
              
          update tes.tplan_pago
-         set conformidad = 'SIN OBSERVACIONES',
+         set conformidad = (case when conformidad is null then 'SIN OBSERVACIONES' else conformidad end),
          fecha_conformidad = now()
          where id_proceso_wf  = p_id_proceso_wf;
                  
@@ -167,7 +167,7 @@ BEGIN
             	end if;
                 
                 update tes.tplan_pago
-               set conformidad = 'SIN OBSERVACIONES',
+               set conformidad = (case when conformidad is null then 'SIN OBSERVACIONES' else conformidad end),
                fecha_conformidad = now()
                where id_plan_pago = v_registros.id_plan_pago;
                
