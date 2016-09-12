@@ -1,4 +1,4 @@
-﻿--------------- SQL ---------------
+--------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION tes.f_generar_cheque (
   p_id_usuario integer,
@@ -52,7 +52,7 @@ BEGIN
 		inner join tes.tobligacion_pago op on op.id_obligacion_pago=pp.id_obligacion_pago
         where cbte.id_int_comprobante=p_id_int_comprobante and tra.forma_pago='cheque';*/
         
-        select cbte.beneficiario, cbte.id_depto_libro,
+       select COALESCE(tra.nombre_cheque_trans,cbte.beneficiario) as beneficiario, cbte.id_depto_libro,
        cbte.glosa1 as glosa, tra.importe_haber, tra.id_cuenta_bancaria, 
        substr(depto.codigo, 4) as origen, cbte.nro_tramite, tra.id_cuenta_bancaria_mov as id_libro_bancos_deposito
        into v_datos_cheque

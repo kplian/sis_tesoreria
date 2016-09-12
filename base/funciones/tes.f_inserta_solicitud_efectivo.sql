@@ -43,6 +43,8 @@ DECLARE
     v_saldo_caja			numeric;
     v_id_cajero				integer;
     v_importe_maximo_solicitud	numeric;
+    v_estado				varchar;
+    v_monto_rendicion		numeric;
 
 BEGIN
             v_nombre_funcion = 'f_inserta_solicitud_efectivo';
@@ -66,6 +68,15 @@ BEGIN
             	v_tipo = 'RENEFE';
             ELSIF (p_hstore->'tipo_solicitud')::varchar = 'devolucion' THEN
             	v_tipo = 'DEVEFE';
+
+            	select sol.estado, sol.monto into v_estado, v_monto_rendicion
+				      from tes.tsolicitud_efectivo sol
+				      where sol.id_solicitud_efectivo_fk=(p_hstore->'id_solicitud_efectivo_fk')::integer;
+
+              IF v_monto_rendicion > 0.00 AND v_estado not in ('rendido') THEN
+                	raise exception 'No puede realizar una devolucion mientras tenga rendiciones pendientes';
+              END IF;
+
             ELSIF (p_hstore->'tipo_solicitud')::varchar = 'reposicion' THEN
                 v_tipo = 'REPEFE';
             ELSIF (p_hstore->'tipo_solicitud')::varchar = 'solicitud' THEN

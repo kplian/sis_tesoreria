@@ -689,12 +689,14 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('edit').enable();
 			  this.getBoton('del').enable();
 			  this.getBoton('btnRendicion').disable();
+			  this.getBoton('diagrama_gantt').enable();
 			  //this.getBoton('btnReciboEntrega').disable();
 			  //this.getBoton('btnRendicionEfectivo').disable();
           }else if (data['estado'] == 'entregado'){
               this.getBoton('fin_registro').enable();
 			  this.getBoton('edit').disable();
 			  this.getBoton('del').disable();
+			  this.getBoton('diagrama_gantt').enable();
 			  //this.getBoton('btnRendicionEfectivo').enable();
 			  if(dias < 0)
 				this.getBoton('btnRendicion').disable();
@@ -707,6 +709,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('edit').disable();
 			  this.getBoton('del').disable();
 			  this.getBoton('btnRendicion').disable();
+              this.getBoton('diagrama_gantt').enable();
 			  //this.getBoton('btnReciboEntrega').enable();
 			  //this.getBoton('btnRendicionEfectivo').enable();
 		  }else if(data['estado'] == 'vbjefe'){
@@ -714,7 +717,8 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('edit').disable();
 			  this.getBoton('del').disable();
 			  this.getBoton('btnRendicion').disable();
-			  //this.getBoton('btnReciboEntrega').disable();					
+			  this.getBoton('diagrama_gantt').enable();
+			  //this.getBoton('btnReciboEntrega').disable();
 			  //this.getBoton('btnRendicionEfectivo').disable();
 		  }else{
               this.getBoton('fin_registro').enable();
