@@ -393,6 +393,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 		{name:'razon_social', type: 'string'},
 		{name:'nro_autorizacion', type: 'string'},
 		{name:'nro_documento', type: 'string'},
+		{name:'codigo_control', type: 'string'},
 		{name:'nro_dui', type: 'string'},
 		{name:'obs', type: 'string'},
 		{name:'importe_doc', type: 'string'},

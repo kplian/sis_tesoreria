@@ -60,6 +60,7 @@ BEGIN
                         dc.razon_social,
                         dc.nro_autorizacion,
                         dc.nro_documento,
+                        dc.codigo_control,
                         dc.nro_dui,
                         dc.obs,
                         dc.importe_doc,

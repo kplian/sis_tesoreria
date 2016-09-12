@@ -36,6 +36,7 @@ class MODSolicitudRendicionDet extends MODbase{
 		$this->captura('razon_social','varchar');
 		$this->captura('nro_autorizacion','varchar');
 		$this->captura('nro_documento','varchar');
+		$this->captura('codigo_control','varchar');
 		$this->captura('nro_dui','varchar');
 		$this->captura('obs','varchar');
 		$this->captura('importe_doc','numeric');
