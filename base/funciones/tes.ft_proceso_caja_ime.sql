@@ -887,7 +887,46 @@ BEGIN
             return v_resp;
 
 		end;
-        
+
+    /*********************************
+ 	#	TRANSACCION:  'TES_ELIRELDEP_INS'
+ 	#	DESCRIPCION:	Quitar relacion de depositos de fondo
+ 	#	AUTOR:		gsarmiento
+ 	#	FECHA:		12-10-2016 20:15:22
+	***********************************/
+    elsif(p_transaccion='TES_ELIRELDEP_INS')then
+    	begin
+
+            IF NOT EXISTS (SELECT 1
+            			   FROM tes.tts_libro_bancos
+            			   WHERE id_libro_bancos=v_parametros.id_libro_bancos)THEN
+            	raise exception 'No existe el registro que desea quitar la relacion en libro_bancos';
+            END IF;
+
+            IF NOT EXISTS (SELECT 1
+            			   FROM cd.tdeposito_cd
+            			   WHERE id_libro_bancos=v_parametros.id_libro_bancos)THEN
+            	raise exception 'No existe el registro que desea quitar la relacion en deposito_cd';
+            END IF;
+
+            UPDATE tes.tts_libro_bancos
+            SET tabla = NULL,
+            columna_pk = NULL,
+            columna_pk_valor = NULL
+            WHERE id_libro_bancos = v_parametros.id_libro_bancos;
+
+            DELETE FROM cd.tdeposito_cd
+            WHERE id_libro_bancos = v_parametros.id_libro_bancos;
+
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se quito la relacion del Deposito');
+            v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_parametros.id_libro_bancos::varchar);
+
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;
+
     elsif(p_transaccion='TES_IMPDEP_IME')then
     	begin
             
