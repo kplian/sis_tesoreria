@@ -1,4 +1,4 @@
-﻿--------------- SQL ---------------
+--------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION tes.f_inserta_libro_bancos (
   p_administrador integer,
@@ -377,13 +377,16 @@ BEGIN
                   )RETURNING id_libro_bancos into v_id_libro_bancos;
     		
             END IF;
+            
             	
-                 -- inserta documentos en estado borrador si estan configurados
+                -- inserta documentos en estado borrador si estan configurados
                 v_resp_doc =  wf.f_inserta_documento_wf(p_id_usuario, v_id_proceso_wf, v_id_estado_wf);
-                -- verificar documentos
-                v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_wf);
                 
+                -- verificar documentos
+                v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_wf); 
+                               
              	v_resp = v_id_libro_bancos; 
+                
             	--Devuelve la respuesta
             	return v_resp;
 	
