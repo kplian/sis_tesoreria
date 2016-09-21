@@ -889,7 +889,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			console.log(data);
 			//window.open('http://sms.obairlines.bo/ReportesPXP/Home/MemorandumFondosEnAvance?'+data);				
 			//window.open('http://localhost:22021/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
-			window.open('http://sms.obairlines.bo/ReportesPXP/Home/ReporteConsolidadoRendicionesCajaChica?'+data);							
+			window.open('http://sms.obairlines.bo/ReportesPXP2/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
 		}
 		else
 		{
@@ -911,7 +911,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			console.log(data);
 			//window.open('http://sms.obairlines.bo/ReportesPXP/Home/MemorandumFondosEnAvance?'+data);				
 			//window.open('http://localhost:22021/Home/ReporteConsolidadoRendicionesCajaChica?'+data);				
-			window.open('http://sms.obairlines.bo/ReportesPXP/Home/ReporteConsolidadoRendicionesCajaChica?'+data);				
+			window.open('http://sms.obairlines.bo/ReportesPXP2/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
 		}
 		else
 		{
