@@ -26,6 +26,15 @@ header("content-type: text/javascript; charset=UTF-8");
 					tooltip: '<b>Relacionar Depósito</b><p>Relacionar Deposito</p>'
 				}
 			);
+
+			this.addButton('quitar_relacion_deposito',
+					{	text:'Quitar Relacion Depósito',
+						iconCls: 'bbajar',
+						disabled:false,
+						handler:this.quitarRelacionDeposito,
+						tooltip: '<b>Quitar Relacionar Depósito</b><p>Quitar Relacionar Deposito</p>'
+					}
+			);
 			
 			this.addButton('corregir_importe_contable',
 				{	text:'Corregir Importe Contable',
@@ -555,7 +564,32 @@ header("content-type: text/javascript; charset=UTF-8");
 			   scope:this
 			 })								   
 		},
-		
+
+		quitarRelacionDeposito:function(){
+			var rec=this.sm.getSelected();
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+				url:'../../sis_tesoreria/control/ProcesoCaja/quitarRelacionDeposito',
+				params:{
+					id_libro_bancos:rec.data.id_libro_bancos				 },
+				success:this.successSinc,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});
+		},
+
+		successSinc:function(resp){
+			Phx.CP.loadingHide();
+			var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+			console.log(reg.ROOT.datos);
+			if(reg.ROOT.datos.resultado!='falla'){
+				this.reload();
+			}else{
+				alert(reg.ROOT.datos.mensaje)
+			}
+		},
+
 		transferir:function(wizard,resp){
 			var me=this;
 			Phx.CP.loadingShow();

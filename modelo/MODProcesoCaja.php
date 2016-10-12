@@ -284,7 +284,24 @@ class MODProcesoCaja extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+
+	function quitarRelacionDeposito(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_proceso_caja_ime';
+		$this->transaccion='TES_ELIRELDEP_INS';
+		$this->tipo_procedimiento='IME';
+
+		//Define los parametros para la funcion
+		$this->setParametro('id_libro_bancos','id_libro_bancos','int4');
 		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
 	function importeContableDeposito(){
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.ft_proceso_caja_ime';
