@@ -1102,6 +1102,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             },
             type:'Field',
             filters:{pfiltro:'funwf.desc_funcionario1',type:'string'},
+            bottom_filter: true,
             id_grupo:1,
             grid:true,
             form:false
