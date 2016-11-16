@@ -1057,7 +1057,9 @@ BEGIN
                    where c.id_contrato = v_registros.id_contrato;
                
                    IF v_sw_retenciones = 'si' and  v_registros.monto_retgar_mo = 0 THEN
-                      raise exception 'Según contrato este pago debe tener retenciones de garantia';
+                      IF v_registros.monto != v_registros.descuento_inter_serv THEN
+                        raise exception 'Según contrato este pago debe tener retenciones de garantia';
+                      END IF;
                    END IF;
                
                END IF;
