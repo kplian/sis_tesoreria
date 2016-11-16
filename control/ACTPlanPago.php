@@ -11,6 +11,7 @@ require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
 require_once(dirname(__FILE__).'/../reportes/RSolicitudPlanPago.php');
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
 require_once(dirname(__FILE__).'/../reportes/RConformidad.php');
+require_once(dirname(__FILE__).'/../reportes/RProcesoConRetencionXLS.php');
 
 class ACTPlanPago extends ACTbase{    
 			
@@ -383,7 +384,38 @@ class ACTPlanPago extends ACTbase{
 		$this->res=$this->objFunc->getConfigPago($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	function reporteProcesoConRetencion()
+    {
 
+        //$this->objParam->getParametro('fecha_ini');
+        //$this->objParam->getParametro('fecha_fin');
+
+        $this->objFunc = $this->create('MODPlanPago');
+        $this->res = $this->objFunc->listarProcesoConRetencion($this->objParam);
+        //var_dump( $this->res);exit;
+        //obtener titulo de reporte
+        $titulo = 'Proceso Con Retencion';
+        //Genera el nombre del archivo (aleatorio + titulo)
+        $nombreArchivo = uniqid(md5(session_id()) . $titulo);
+
+        $nombreArchivo .= '.xls';
+        $this->objParam->addParametro('nombre_archivo', $nombreArchivo);
+        $this->objParam->addParametro('datos', $this->res->datos);
+        //Instancia la clase de excel
+        $this->objReporteFormato = new RProcesoConRetencionXLS($this->objParam);
+        $this->objReporteFormato->generarDatos();
+        $this->objReporteFormato->generarReporte();
+
+
+
+        $this->mensajeExito = new Mensaje();
+        $this->mensajeExito->setMensaje('EXITO', 'Reporte.php', 'Reporte generado',
+            'Se generó con éxito el reporte: ' . $nombreArchivo, 'control');
+        $this->mensajeExito->setArchivoGenerado($nombreArchivo);
+        $this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+
+
+    }
 			
 }
 
