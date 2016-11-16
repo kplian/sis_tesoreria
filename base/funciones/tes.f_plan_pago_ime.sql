@@ -613,7 +613,7 @@ BEGIN
               raise exception  'Este documento necesita especificar un monto excento no negativo';
            END IF;
            
-           IF COALESCE(v_monto_excento,0) >= COALESCE(v_monto_ejecutar_total_mo,0) and v_registros_pp.tipo not in ('ant_parcial','anticipo','dev_garantia','especial') THEN
+           IF COALESCE(v_monto_excento,0) > COALESCE(v_monto_ejecutar_total_mo,0) and v_registros_pp.tipo not in ('ant_parcial','anticipo','dev_garantia','especial') THEN
              raise exception 'El monto excento (%) debe ser menor que el total a ejecutar(%)',v_monto_excento, v_monto_ejecutar_total_mo  ;
            END IF;
            

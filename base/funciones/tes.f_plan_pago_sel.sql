@@ -14,13 +14,13 @@ $body$
  DESCRIPCION:   Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'tes.tplan_pago'
  AUTOR: 		 (admin)
  FECHA:	        10-04-2013 15:43:23
- COMENTARIOS:	
+ COMENTARIOS:
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
 
- DESCRIPCION:	
- AUTOR:			
- FECHA:		
+ DESCRIPCION:
+ AUTOR:
+ FECHA:
 ***************************************************************************/
 
 DECLARE
@@ -30,131 +30,131 @@ DECLARE
 	v_nombre_funcion   	text;
 	v_resp				varchar;
     v_filtro			varchar;
-    
+
     v_historico        varchar;
     v_inner            varchar;
     v_strg_pp         varchar;
     v_strg_obs         varchar;
     va_id_depto        integer[];
-    
-  
+
+
 BEGIN
 
 	v_nombre_funcion = 'tes.f_plan_pago_sel';
     v_parametros = pxp.f_get_record(p_tabla);
 
-	/*********************************    
+	/*********************************
  	#TRANSACCION:  'TES_PLAPA_SEL'
  	#DESCRIPCION:	Consulta de datos
- 	#AUTOR:		admin	
+ 	#AUTOR:		admin
  	#FECHA:		10-04-2013 15:43:23
 	***********************************/
 
 	if(p_transaccion='TES_PLAPA_SEL')then
-     				
+
     	begin
-        
-            
+
+
             -- obtiene los departamentos del usuario
-            select  
+            select
                 pxp.aggarray(depu.id_depto)
-            into 
+            into
                 va_id_depto
-            from param.tdepto_usuario depu 
-            where depu.id_usuario =  p_id_usuario; 
-        
-        
-       
-        
+            from param.tdepto_usuario depu
+            where depu.id_usuario =  p_id_usuario;
+
+
+
+
             v_filtro='';
-            
+
             IF (v_parametros.id_funcionario_usu is null) then
-              	
+
                 v_parametros.id_funcionario_usu = -1;
-            
+
             END IF;
-            
-            
-            
+
+
+
             IF  lower(v_parametros.tipo_interfaz) = 'planpagovb' THEN
-                
+
                 IF p_administrador !=1 THEN
                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))    ) and  (lower(plapa.estado)!=''borrador'') and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'' and lower(plapa.estado)!=''anticipado'' and lower(plapa.estado)!=''aplicado'' and lower(plapa.estado)!=''anulado'' and lower(plapa.estado)!=''devuelto'' and ';
                  ELSE
                      v_filtro = ' (lower(plapa.estado)!=''borrador''  and lower(plapa.estado)!=''pendiente''  and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'' and lower(plapa.estado)!=''anticipado'' and lower(plapa.estado)!=''aplicado'' and lower(plapa.estado)!=''anulado'' and lower(plapa.estado)!=''devuelto'') and ';
                 END IF;
-                
-                
-            END IF; 
-            
+
+
+            END IF;
+
             IF  pxp.f_existe_parametro(p_tabla,'historico') THEN
              v_historico =  v_parametros.historico;
             ELSE
                v_historico = 'no';
             END IF;
-            
-            
+
+
             IF  lower(v_parametros.tipo_interfaz) = 'planpagovbasistente' and v_historico != 'si'  THEN
               	v_filtro = ' (ew.id_funcionario  IN (select * FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date,'||p_id_usuario||') AS (id_funcionario INTEGER))) and ';
             	v_filtro = v_filtro || ' (lower(plapa.estado)=''vbgerente'') and ';
             END IF;
-            
+
             IF  lower(v_parametros.tipo_interfaz) = 'planpagoconformidadpendiente'  THEN
             	IF p_administrador !=1 THEN
               		v_filtro = ' (op.id_funcionario  = ' || v_parametros.id_funcionario_usu::varchar || ' or op.id_usuario_reg = ' || p_id_usuario||' ) and ';
                 END IF;
             	v_filtro = v_filtro || ' lower(plapa.tipo) in (''devengado'',''devengado_pagado'',''devengado_pagado_1c'') and plapa.fecha_conformidad is null and  ';
             END IF;
-            
+
             IF  lower(v_parametros.tipo_interfaz) = 'planpagoconformidadrealizada'  THEN
               	IF p_administrador !=1 THEN
               		v_filtro = ' (op.id_funcionario  = ' || v_parametros.id_funcionario_usu::varchar || ' or op.id_usuario_reg = ' || p_id_usuario||' ) and ';
                 END IF;
             	v_filtro = v_filtro || ' lower(plapa.tipo) in (''devengado'',''devengado_pagado'',''devengado_pagado_1c'') and plapa.fecha_conformidad is not null and  ';
             END IF;
-            
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
+
             IF v_historico =  'si' THEN
-            
-              
+
+
                 v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = plapa.id_proceso_wf ';
                 v_strg_pp = 'DISTINCT(plapa.id_plan_pago)';
-                v_strg_obs = '''---''::text  as obs_wf'; 
-              
+                v_strg_obs = '''---''::text  as obs_wf';
+
                IF  lower(v_parametros.tipo_interfaz) != 'planpagovbasistente'  THEN
-                      IF p_administrador !=1 THEN                    
+                      IF p_administrador !=1 THEN
                             --v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  ';
                        v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))    ) and  ';
-                     ELSE 
+                     ELSE
                         v_filtro = '';
                      END IF;
                ELSE
                   --historico para interface de asistentes
                   v_filtro = ' (ew.id_funcionario  IN (select * FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date,'||p_id_usuario||') AS (id_funcionario INTEGER))) and ';
-            	
+
                END IF;
-               
-            
+
+
             ELSE
-            
+
                v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = plapa.id_estado_wf';
                v_strg_pp = 'plapa.id_plan_pago';
-               v_strg_obs = 'ew.obs as obs_wf'; 
-               
-               
+               v_strg_obs = 'ew.obs as obs_wf';
+
+
              END IF;
-        
-        
-        
-        
+
+
+
+
     		--Sentencia de la consulta
 			v_consulta:='select
-						'||v_strg_pp||', 
+						'||v_strg_pp||',
 						plapa.estado_reg,
 						plapa.nro_cuota,
 						plapa.monto_ejecutar_total_mb,
@@ -196,15 +196,15 @@ BEGIN
                         pla.desc_plantilla,
                         plapa.liquido_pagable,
                         plapa.total_prorrateado,
-                        plapa.total_pagado ,                       
+                        plapa.total_pagado ,
 						coalesce(cb.nombre_institucion,''S/N'') ||'' (''||coalesce(cb.nro_cuenta,''S/C'')||'')'' as desc_cuenta_bancaria ,
                         plapa.sinc_presupuesto ,
                         plapa.monto_retgar_mb,
                         plapa.monto_retgar_mo,
-                        descuento_ley, 
-                        obs_descuentos_ley , 
-                        descuento_ley_mb, 
-                        porc_descuento_ley, 
+                        descuento_ley,
+                        obs_descuentos_ley ,
+                        descuento_ley_mb,
+                        porc_descuento_ley,
                         plapa.nro_cheque,
                         plapa.nro_cuenta_bancaria,
                         plapa.id_cuenta_bancaria_mov,
@@ -243,12 +243,12 @@ BEGIN
                              from unnest(pwf.id_tipo_estado_wfs) elemento
                              where elemento = ew.id_tipo_estado) as contador_estados,
                         depto.prioridad as prioridad_lp
-                                                 
+
                         from tes.tplan_pago plapa
-                        inner join wf.tproceso_wf pwf on pwf.id_proceso_wf = plapa.id_proceso_wf 
+                        inner join wf.tproceso_wf pwf on pwf.id_proceso_wf = plapa.id_proceso_wf
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
                         inner join param.tmoneda mon on mon.id_moneda = op.id_moneda
-                        '||v_inner||'  
+                        '||v_inner||'
                         left join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
                         inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
                         left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = plapa.id_cuenta_bancaria
@@ -261,38 +261,38 @@ BEGIN
                         left join tes.tts_libro_bancos lb on plapa.id_int_comprobante = lb.id_int_comprobante
                         left join param.tdepto depc on depc.id_depto = plapa.id_depto_conta
                        where  plapa.estado_reg=''activo''  and '||v_filtro;
-			
+
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
-                
+
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ', nro_cuota ASC limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 
              raise notice '%',v_consulta;
 
 			--Devuelve la respuesta
 			return v_consulta;
-						
+
 		end;
-        
-   /*********************************    
+
+   /*********************************
  	#TRANSACCION:  'TES_PLAPA_CONT'
  	#DESCRIPCION:	Conteo de registros
- 	#AUTOR:		admin	
+ 	#AUTOR:		admin
  	#FECHA:		10-04-2013 15:43:23
 	***********************************/
 
 	elsif(p_transaccion='TES_PLAPA_CONT')then
 
 		begin
-        
-        
+
+
         v_filtro='';
-            
+
             IF (v_parametros.id_funcionario_usu is null) then
               	v_parametros.id_funcionario_usu = -1;
             END IF;
-            
-            
+
+
             IF  lower(v_parametros.tipo_interfaz) = 'planpagovb' THEN
                  IF p_administrador !=1 THEN
                     v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (lower(plapa.estado)!=''borrador'') and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'' and lower(plapa.estado)!=''anticipado'' and lower(plapa.estado)!=''aplicado''  and ';
@@ -300,45 +300,45 @@ BEGIN
                       v_filtro = ' (lower(plapa.estado)!=''borrador''  and lower(plapa.estado)!=''pendiente''  and lower(plapa.estado)!=''pagado'' and lower(plapa.estado)!=''devengado'' and lower(plapa.estado)!=''anticipado'' and lower(plapa.estado)!=''aplicado'' and lower(plapa.estado)!=''anulado'') and ';
                 END IF;
             END IF;
-            
+
             IF  lower(v_parametros.tipo_interfaz) = 'planpagovbasistente' THEN
               v_filtro = ' (ew.id_funcionario  IN (select * FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date,'||p_id_usuario||') AS (id_funcionario INTEGER))) and ';
             END IF;
-            
-            
+
+
             IF  pxp.f_existe_parametro(p_tabla,'historico') THEN
                 v_historico =  v_parametros.historico;
             ELSE
                v_historico = 'no';
             END IF;
-            
+
             IF v_historico =  'si' THEN
-            
+
                v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = plapa.id_proceso_wf';
-               v_strg_pp = 'DISTINCT(plapa.id_plan_pago)'; 
-              
+               v_strg_pp = 'DISTINCT(plapa.id_plan_pago)';
+
                 IF p_administrador =1 THEN
-                
+
                        --v_filtro = ' (lower(plapa.estado)!=''borrador'' ) and ';
-                
+
                END IF;
-            
+
             ELSE
-            
+
                v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = plapa.id_estado_wf';
                v_strg_pp = 'plapa.id_plan_pago';
-               
-               
+
+
              END IF;
-        
-         
-        
+
+
+
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count('||v_strg_pp||')
 						from tes.tplan_pago plapa
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago = plapa.id_obligacion_pago
                         inner join param.tmoneda mon on mon.id_moneda = op.id_moneda
-                        '||v_inner||'  
+                        '||v_inner||'
                         left join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
                         inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
                         left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = plapa.id_cuenta_bancaria
@@ -350,30 +350,30 @@ BEGIN
                         left join param.tdepto depto on depto.id_depto = plapa.id_depto_lb
                         left join tes.tts_libro_bancos lb on plapa.id_int_comprobante = lb.id_int_comprobante
                       where  plapa.estado_reg=''activo''   and '||v_filtro;
-			
-			--Definicion de la respuesta		    
+
+			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
-         
+
             raise notice '% .',v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 
 		end;
-		     
-        
 
-	/*********************************    
+
+
+	/*********************************
  	#TRANSACCION:  'TES_PLAPAOB_SEL'
  	#DESCRIPCION:	Consulta de datos
- 	#AUTOR:		Gonzalo Sarmiento Sejas	
+ 	#AUTOR:		Gonzalo Sarmiento Sejas
  	#FECHA:		18-07-2013 15:43:23
 	***********************************/
 
 	elsif(p_transaccion='TES_PLAPAOB_SEL')then
-     				
+
     	begin
-        
-        
+
+
     		--Sentencia de la consulta
 			v_consulta:='select
 						plapa.id_plan_pago,
@@ -405,18 +405,18 @@ BEGIN
                         pla.desc_plantilla,
                         plapa.liquido_pagable,
                         plapa.total_prorrateado,
-                        plapa.total_pagado ,                       
+                        plapa.total_pagado ,
 						cb.nombre_institucion ||'' (''||cb.nro_cuenta||'')'' as desc_cuenta_bancaria ,
                         plapa.sinc_presupuesto ,
                         plapa.monto_retgar_mb,
-                        plapa.monto_retgar_mo                                             
+                        plapa.monto_retgar_mo
 						from tes.tplan_pago plapa
                         left join param.tplantilla pla on pla.id_plantilla = plapa.id_plantilla
 						inner join segu.tusuario usu1 on usu1.id_usuario = plapa.id_usuario_reg
                         left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = plapa.id_cuenta_bancaria
                         left join segu.tusuario usu2 on usu2.id_usuario = plapa.id_usuario_mod
                        where  plapa.estado_reg=''activo''  and plapa.id_obligacion_pago='||v_parametros.id_obligacion_pago||' and ';
-			
+
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
@@ -425,22 +425,22 @@ BEGIN
 
 			--Devuelve la respuesta
 			return v_consulta;
-						
+
 		end;
-        
-   	/*********************************    
+
+   	/*********************************
  	#TRANSACCION:  'TES_PLAPAREP_SEL'
  	#DESCRIPCION:	Consulta para reporte plan de pagos
- 	#AUTOR:		Gonzalo Sarmiento Sejas	
+ 	#AUTOR:		Gonzalo Sarmiento Sejas
  	#FECHA:		19-07-2013 15:43:23
 	***********************************/
 
 	elsif(p_transaccion='TES_PLAPAREP_SEL')then
-     				
+
     	begin
-        
+
     		  --  Sentencia de la consulta
-              v_consulta:='select 
+              v_consulta:='select
                                	  pg.estado,
                                   op.numero as numero_oc,
                                   pv.desc_proveedor as proveedor,
@@ -464,26 +464,26 @@ BEGIN
                                   pg.fecha_reg,
                                   op.total_pago,
                                   pg.tipo,
-                                  pg.monto_excento     
+                                  pg.monto_excento
                         from tes.tplan_pago pg
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago=pg.id_obligacion_pago
                         inner join param.vproveedor pv on pv.id_proveedor=op.id_proveedor
                         left join tes.tcuenta_bancaria cta on cta.id_cuenta_bancaria=pg.id_cuenta_bancaria
-                        inner join param.tmoneda mon on mon.id_moneda=op.id_moneda  
+                        inner join param.tmoneda mon on mon.id_moneda=op.id_moneda
                         where pg.id_plan_pago='||v_parametros.id_plan_pago||' and ';
-			
+
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 
 			--Devuelve la respuesta
 			return v_consulta;
-						
+
 		end;
-    
-	
-		
-	/*********************************    
+
+
+
+	/*********************************
  	#TRANSACCION:  'TES_VERDIS_SEL'
  	#DESCRIPCION:	Consulta para verificar la disponibilidad presupuestaria de toda la cuota
  	#AUTOR:			RCM
@@ -491,9 +491,9 @@ BEGIN
 	***********************************/
 
 	elsif(p_transaccion='TES_VERDIS_SEL')then
-     				
+
     	begin
-        
+
     		--Sentencia de la consulta
               v_consulta:='select
               				id_partida,  id_presupuesto, id_moneda, importe,
@@ -504,27 +504,27 @@ BEGIN
 							presupuesto varchar,
 							desc_partida text, desc_presupuesto text)
 							where ';
-			
+
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
-			
+
 			--Devuelve la respuesta
 			return v_consulta;
-						
+
 		end;
-    
-	/*********************************    
+
+	/*********************************
  	#TRANSACCION:  'TES_VERDIS_CONT'
  	#DESCRIPCION:	Conteo de registros
- 	#AUTOR:			RCM	
+ 	#AUTOR:			RCM
  	#FECHA:			15/12/2013
 	***********************************/
 
 	elsif(p_transaccion='TES_VERDIS_CONT')then
 
 		begin
-        
+
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(id_partida)
 						from
@@ -533,31 +533,31 @@ BEGIN
 						presupuesto varchar,
 						desc_partida text, desc_presupuesto text)
                         where ';
-			
+
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
-            
+
             raise notice '%',v_consulta;
-			
+
 			--Devuelve la respuesta
 			return v_consulta;
 
 		end;
-	
-	/*********************************    
+
+	/*********************************
  	#TRANSACCION:  'TES_ACTCONFPP_SEL'
  	#DESCRIPCION:	Acta de Conformidad Maestro Plan de Pago
- 	#AUTOR:			JRR	
+ 	#AUTOR:			JRR
  	#FECHA:			30/09/2014
 	***********************************/
 
 	elsif(p_transaccion='TES_ACTCONFPP_SEL')then
 
 		begin
-        
+
 			--Sentencia de la consulta de conteo de registros
-			v_consulta:='select fun.desc_funcionario1, prov.desc_proveedor, 
-            			to_char( pp.fecha_conformidad,''DD/MM/YYYY''),pp.conformidad, 
+			v_consulta:='select fun.desc_funcionario1, prov.desc_proveedor,
+            			to_char( pp.fecha_conformidad,''DD/MM/YYYY''),pp.conformidad,
                         cot.numero_oc,op.numero, pp.nro_cuota,op.num_tramite::varchar,
                          pxp.html_rows(''<td>'' || ci.desc_ingas || ''</td><td>'' || od.descripcion|| ''</td>'')::text,
                          (case when (pxp.list_unique(ci.tipo)) is null THEN
@@ -568,7 +568,7 @@ BEGIN
 						from tes.tplan_pago pp
 						inner join tes.tobligacion_pago op
 							on pp.id_obligacion_pago = op.id_obligacion_pago
-						inner join param.vproveedor prov 
+						inner join param.vproveedor prov
 							on prov.id_proveedor = op.id_proveedor
 						inner join orga.vfuncionario fun
 							on fun.id_funcionario = op.id_funcionario
@@ -576,48 +576,48 @@ BEGIN
 							on cot.id_obligacion_pago = op.id_obligacion_pago
                         inner join tes.tobligacion_det od
                             on od.id_obligacion_pago = op.id_obligacion_pago
-                        inner join param.tconcepto_ingas ci 
+                        inner join param.tconcepto_ingas ci
                             on ci.id_concepto_ingas = od.id_concepto_ingas
 						where ';
-			
+
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
             v_consulta:=v_consulta||' group by fun.desc_funcionario1, prov.desc_proveedor, pp.fecha_conformidad,pp.conformidad, cot.numero_oc,op.numero, pp.nro_cuota,op.num_tramite';
             raise notice '%',v_consulta;
-			
+
 			--Devuelve la respuesta
 			return v_consulta;
 
 		end;
-    
-    /*********************************    
+
+    /*********************************
  	#TRANSACCION:  'TES_PAXCIG_SEL'
  	#DESCRIPCION:	Listado de pagos por concepto
- 	#AUTOR:			JRR	
+ 	#AUTOR:			JRR
  	#FECHA:			15/12/2013
 	***********************************/
 
 	elsif(p_transaccion='TES_PAXCIG_SEL')then
 
 		begin
-        
+
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='WITH obligacion_pago_concepto AS(
 						    SELECT
 						        pxp.aggarray(od.id_obligacion_det) as id_obligacion_det,
 						        od.id_obligacion_pago,
-						        pxp.list(ot.desc_orden) as desc_orden      
+						        pxp.list(ot.desc_orden) as desc_orden
 						    FROM tes.tobligacion_det od
 						    left join conta.torden_trabajo ot on ot.id_orden_trabajo = od.id_orden_trabajo
 						    where od.id_concepto_ingas = ' || v_parametros.id_concepto || ' and od.estado_reg = ''activo''
 						    group by od.id_obligacion_pago
 						)
-						
+
 						SELECT pp.id_plan_pago,
-                        		(case when ot.id_orden_trabajo is not null then 
+                        		(case when ot.id_orden_trabajo is not null then
 								ot.desc_orden
 						        ELSE
-						        opc.desc_orden 
+						        opc.desc_orden
 						        end) as orden_trabajo, op.num_tramite,pp.nro_cuota,prov.rotulo_comercial as proveedor,pp.estado,
 						        (case when com.fecha is null THEN
 						        pp.fecha_tentativa else
@@ -625,79 +625,79 @@ BEGIN
 						        end) as fecha
 						        ,mon.moneda,pp.monto,pro.monto_ejecutar_mo,
                                 od.id_centro_costo, pp.fecha_costo_ini, pp.fecha_costo_fin
-						    
+
 						FROM tes.tobligacion_pago op
 						inner join obligacion_pago_concepto opc on op.id_obligacion_pago = opc.id_obligacion_pago
 						inner join tes.tplan_pago pp on op.id_obligacion_pago = pp.id_obligacion_pago and pp.estado_reg = ''activo''
 						left join tes.tprorrateo pro on pro.id_plan_pago = pp.id_plan_pago and  pro.id_obligacion_det = ANY(opc.id_obligacion_det) and pro.estado_reg = ''activo''
 						left join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det
 						left join conta.torden_trabajo ot on od.id_orden_trabajo = ot.id_orden_trabajo
-						inner join param.vproveedor prov on prov.id_proveedor = op.id_proveedor 
+						inner join param.vproveedor prov on prov.id_proveedor = op.id_proveedor
 						inner join param.tmoneda mon on op.id_moneda = mon.id_moneda
 						left join conta.tint_comprobante com on com.id_int_comprobante = pp.id_int_comprobante
 						where pp.tipo = ''devengado_pagado''  and  op.estado_reg = ''activo'' and '||v_parametros.filtro ||
 						'order by pp.fecha_costo_ini,op.num_tramite,pp.nro_cuota, opc.desc_orden limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
-			
-						
+
+
 			--Devuelve la respuesta
 			return v_consulta;
 
 		end;
-	
-	/*********************************    
+
+	/*********************************
  	#TRANSACCION:  'TES_PAXCIG_CONT'
  	#DESCRIPCION:	Conteo de pagos por concepto
- 	#AUTOR:			JRR	
+ 	#AUTOR:			JRR
  	#FECHA:			15/12/2013
 	***********************************/
 
 	elsif(p_transaccion='TES_PAXCIG_CONT')then
 
 		begin
-        
+
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='WITH obligacion_pago_concepto AS(
 						    SELECT
 						        pxp.aggarray(od.id_obligacion_det) as id_obligacion_det,
 						        od.id_obligacion_pago,
-						        pxp.list(ot.desc_orden) as desc_orden      
+						        pxp.list(ot.desc_orden) as desc_orden
 						    FROM tes.tobligacion_det od
 						    left join conta.torden_trabajo ot on ot.id_orden_trabajo = od.id_orden_trabajo
 						    where od.id_concepto_ingas = ' || v_parametros.id_concepto || ' and od.estado_reg = ''activo''
 						    group by od.id_obligacion_pago
 						)
-						
+
 						SELECT count(pp.id_plan_pago)
-						    
+
 						FROM tes.tobligacion_pago op
 						inner join obligacion_pago_concepto opc on op.id_obligacion_pago = opc.id_obligacion_pago
 						inner join tes.tplan_pago pp on op.id_obligacion_pago = pp.id_obligacion_pago and pp.estado_reg = ''activo''
 						left join tes.tprorrateo pro on pro.id_plan_pago = pp.id_plan_pago and  pro.id_obligacion_det = ANY(opc.id_obligacion_det) and pro.estado_reg = ''activo''
 						left join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det
 						left join conta.torden_trabajo ot on od.id_orden_trabajo = ot.id_orden_trabajo
-						inner join param.vproveedor prov on prov.id_proveedor = op.id_proveedor 
+						inner join param.vproveedor prov on prov.id_proveedor = op.id_proveedor
 						inner join param.tmoneda mon on op.id_moneda = mon.id_moneda
 						left join conta.tint_comprobante com on com.id_int_comprobante = pp.id_int_comprobante
 						where pp.tipo = ''devengado_pagado''  and  op.estado_reg = ''activo'' and '||v_parametros.filtro;
-			
-						
+
+
 			--Devuelve la respuesta
 			return v_consulta;
 
 		end;
-	/*********************************    
+	/*********************************
  	#TRANSACCION:  'TES_PAGOS_SEL'
  	#DESCRIPCION:	Consulta para reporte de pagos
- 	#AUTOR:		rac	
+ 	#AUTOR:		rac
  	#FECHA:		22-12-2014 15:43:23
 	***********************************/
 
 	ELSIF(p_transaccion='TES_PAGOS_SEL')then
-     				
+
     	begin
-        
+
             --Sentencia de la consulta
-			v_consulta:='SELECT 
+			v_consulta:='SELECT
                             id_plan_pago,
                             id_gestion,
                             gestion,
@@ -732,10 +732,10 @@ BEGIN
                             monto_presupuestado,
                             desc_contrato,
                             desc_funcionario1
-                          FROM 
-                            tes.vpago_x_proveedor 
+                          FROM
+                            tes.vpago_x_proveedor
 							WHERE  ';
-			
+
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ', nro_cuota ASC limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
@@ -744,24 +744,24 @@ BEGIN
 
 			--Devuelve la respuesta
 			return v_consulta;
-						
+
 		end;
-        
-   /*********************************    
+
+   /*********************************
  	#TRANSACCION:  'TES_PAGOS_CONT'
  	#DESCRIPCION:	Conteo de registros para el reporte de  pagos
- 	#AUTOR:		rac	
+ 	#AUTOR:		rac
  	#FECHA:		22-12-2014 15:43:23
 	***********************************/
 
 	elsif(p_transaccion='TES_PAGOS_CONT')then
 
 		begin
-        
-        
+
+
         v_filtro='';
             /*
-           
+
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='SELECT count(id_plan_pago),
                                 sum(monto_cuota) as monto_cuota,
@@ -772,61 +772,61 @@ BEGIN
                                 sum(monto_ajuste_siguiente_pago) as monto_ajuste_siguiente_pago,
                                 sum(liquido_pagable) as liquido_pagable,
                                 sum(monto_presupuestado) as monto_presupuestado
-						 FROM  tes.vpago_x_proveedor  
+						 FROM  tes.vpago_x_proveedor
                          WHERE ';*/
-			
-            
+
+
             v_consulta:='SELECT count(id_plan_pago)
-						 FROM  tes.vpago_x_proveedor  
+						 FROM  tes.vpago_x_proveedor
                          WHERE ';
-            
-			--Definicion de la respuesta		    
+
+			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
-         
+
             raise notice '% .',v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 
-		end;				
-	
-    /*********************************    
+		end;
+
+    /*********************************
  	#TRANSACCION:  'TES_REPPAGOS_SEL'
  	#DESCRIPCION:	Reporte de pagos relacionados
- 	#AUTOR:		rac	
+ 	#AUTOR:		rac
  	#FECHA:		22-12-2014 15:43:23
 	***********************************/
 
 	ELSIF(p_transaccion='TES_REPPAGOS_SEL')then
-     				
+
     	begin
-        
+
            v_filtro = ' ';
-           
+
             --filtro de proveedores
            IF  pxp.f_existe_parametro(p_tabla,'id_proveedors')  THEN
              IF v_parametros.id_proveedors is not null and v_parametros.id_proveedors != '' THEN
                 v_filtro = ' id_proveedor in ('||v_parametros.id_proveedors||') and ';
              END IF;
            END IF;
-           
+
             --filtro de conceptos
            IF  pxp.f_existe_parametro(p_tabla,'id_concepto_ingas')  THEN
              IF v_parametros.id_concepto_ingas is not null and v_parametros.id_concepto_ingas != '' THEN
                 v_filtro = v_filtro||' id_concepto_ingas &&  string_to_array('''||v_parametros.id_concepto_ingas||''','','') and ';
              END IF;
            END IF;
-           
+
             --filtro de ordenes de trabajo
            IF  pxp.f_existe_parametro(p_tabla,'id_orden_trabajos')  THEN
              IF v_parametros.id_orden_trabajos is not null and v_parametros.id_orden_trabajos != '' THEN
                 v_filtro = v_filtro||' id_orden_trabajos && string_to_array('''||v_parametros.id_orden_trabajos||''','','') and ';
              END IF;
            END IF;
-        
-        
-       
+
+
+
             --Sentencia de la consulta
-			v_consulta:='SELECT 
+			v_consulta:='SELECT
                           id_plan_pago,
                           desc_proveedor,
                           num_tramite,
@@ -842,10 +842,10 @@ BEGIN
                           id_proveedor,
                           obs,
                           tipo
-                        FROM 
-                          tes.vpagos_relacionados 
+                        FROM
+                          tes.vpagos_relacionados
                         WHERE '||v_filtro;
-			
+
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
@@ -854,73 +854,76 @@ BEGIN
 
 			--Devuelve la respuesta
 			return v_consulta;
-						
+
 		end;
-        
-   /*********************************    
+
+   /*********************************
  	#TRANSACCION:  'TES_REPPAGOS_CONT'
  	#DESCRIPCION:	Conteo de registros para el reporte de  pagos
- 	#AUTOR:		rac	
+ 	#AUTOR:		rac
  	#FECHA:		22-12-2014 15:43:23
 	***********************************/
 
 	elsif(p_transaccion='TES_REPPAGOS_CONT')then
 
 		begin
-        
-        
+
+
            v_filtro = ' ';
-           
+
             --filtro de proveedores
            IF  pxp.f_existe_parametro(p_tabla,'id_proveedors')  THEN
              IF v_parametros.id_proveedors is not null and v_parametros.id_proveedors != '' THEN
                 v_filtro = ' id_proveedor in ('||v_parametros.id_proveedors||') and ';
              END IF;
            END IF;
-           
+
             --filtro de conceptos
            IF  pxp.f_existe_parametro(p_tabla,'id_concepto_ingas')  THEN
              IF v_parametros.id_concepto_ingas is not null and v_parametros.id_concepto_ingas != '' THEN
                 v_filtro = v_filtro||' id_concepto_ingas &&  string_to_array('''||v_parametros.id_concepto_ingas||''','','') and ';
              END IF;
            END IF;
-           
+
             --filtro de ordenes de trabajo
            IF  pxp.f_existe_parametro(p_tabla,'id_orden_trabajos')  THEN
              IF v_parametros.id_orden_trabajos is not null and v_parametros.id_orden_trabajos != '' THEN
                 v_filtro = v_filtro||' id_orden_trabajos && string_to_array('''||v_parametros.id_orden_trabajos||''','','') and ';
              END IF;
            END IF;
-            
-			
-            
+
+
+
             v_consulta:='SELECT count(id_plan_pago)
-						 FROM 
-                          tes.vpagos_relacionados 
+						 FROM
+                          tes.vpagos_relacionados
                         WHERE '||v_filtro;
-            
-			--Definicion de la respuesta		    
+
+			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
-         
+
             --raise notice '% .',v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 
 		end;
-   
-   /*********************************    
+
+
+
+
+   /*********************************
  	#TRANSACCION:  'TES_PAGOSB_SEL'
  	#DESCRIPCION:	Consulta para reporte de pagos
- 	#AUTOR:		rac	
+ 	#AUTOR:		rac
  	#FECHA:		22-12-2014 15:43:23
 	***********************************/
 
 	ELSIF(p_transaccion='TES_PAGOSB_SEL')then
-     				
+
     	begin
-        
+
             --Sentencia de la consulta
-			v_consulta:='SELECT 
+			v_consulta:='SELECT
                                 id_plan_pago,
                                 id_gestion,
                                 gestion,
@@ -959,10 +962,10 @@ BEGIN
                                 id_plantilla,
                                 desc_plantilla,
                                 tipo_informe
-                            FROM 
-                                tes.vpagos 
+                            FROM
+                                tes.vpagos
 							WHERE  ';
-			
+
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ', nro_cuota ASC limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
@@ -971,46 +974,90 @@ BEGIN
 
 			--Devuelve la respuesta
 			return v_consulta;
-						
+
 		end;
-        
-   /*********************************    
+
+   /*********************************
  	#TRANSACCION:  'TES_PAGOSB_CONT'
  	#DESCRIPCION:	Conteo de registros para el reporte de  pagos
- 	#AUTOR:		rac	
+ 	#AUTOR:		rac
  	#FECHA:		22-12-2014 15:43:23
 	***********************************/
 
 	elsif(p_transaccion='TES_PAGOSB_CONT')then
 
 		begin
-        
-        
+
+
         v_filtro='';
-            
+
 			v_consulta:='SELECT count(id_plan_pago)
-						 FROM  tes.vpagos  
+						 FROM  tes.vpagos
                          WHERE ';
-            
-			--Definicion de la respuesta		    
+
+			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
-         
+
+            raise notice '% .',v_consulta;
+			--Devuelve la respuesta
+			return v_consulta;
+
+		end;
+
+
+  /*********************************
+ 	#TRANSACCION:  'TES_PROCRE_SEL'
+ 	#DESCRIPCION:	Proceso con retencion 7%
+ 	#AUTOR:		MAM
+ 	#FECHA:		22-12-2014 15:43:23
+	***********************************/
+
+	elsif(p_transaccion='TES_PROCRE_SEL')then
+
+		begin
+
+			v_consulta:='SELECT
+                                obli.id_proveedor,
+                                obli.id_moneda,
+                                obli.id_funcionario,
+                                obli.num_tramite,
+                                pro.desc_proveedor as proveedor,
+                                pla.tipo,
+                                pla.estado,
+                                pla.monto,
+                                pla.fecha_dev,
+                                pla.nro_cuota,
+                                pla.monto_retgar_mo,
+                                mo.moneda,
+                                pla.liquido_pagable,
+                                com.c31
+                                FROM tes.tobligacion_pago obli
+                                inner join tes.tplan_pago pla on pla.id_obligacion_pago = obli.id_obligacion_pago
+                                inner join param.vproveedor pro on pro.id_proveedor = obli.id_proveedor
+                                inner join param.tmoneda mo on mo.id_moneda = obli.id_moneda
+                                inner join conta.tint_comprobante com on com.id_int_comprobante = pla.id_int_comprobante
+                                 WHERE pla.fecha_dev >= '''||v_parametros.fecha_ini||''' and pla.fecha_dev <= '''||v_parametros.fecha_fin||''' and pla.estado in (''devengado'',''pagado'')';
+
+			--Definicion de la respuesta
+            --v_consulta:=v_consulta||v_parametros.filtro;
+			 v_consulta:=v_consulta||'ORDER BY proveedor, obli.num_tramite, pla.nro_cuota ASC';
+
             raise notice '% .',v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 
 		end; 
-    
-    
-    
     else
-					     
+
+
 		raise exception 'Transaccion inexistente';
-					         
+
 	end if;
-					
+
+
+
 EXCEPTION
-					
+
 	WHEN OTHERS THEN
 			v_resp='';
 			v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);

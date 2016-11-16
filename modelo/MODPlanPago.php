@@ -114,19 +114,6 @@ class MODPlanPago extends MODbase{
 		$this->captura('contador_estados','bigint');
 		$this->captura('prioridad_lp','integer');
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
@@ -887,17 +874,7 @@ function listarPagos(){
 		  $this->captura('id_plantilla', 'integer');
           $this->captura('desc_plantilla', 'VARCHAR');
           $this->captura('tipo_informe', 'VARCHAR');
-		  
-		  
-		  
-		  
-		
-                            
-                              
-                               
-		  
-				
-		
+
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
@@ -905,6 +882,43 @@ function listarPagos(){
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+	//Reporte de proceso con retencion
+
+    function listarProcesoConRetencion()
+{
+    //Definicion de variables para ejecucion del procedimientp
+        $this->procedimiento='tes.f_plan_pago_sel';
+        $this->transaccion='TES_PROCRE_SEL';
+        $this->tipo_procedimiento='SEL';//tipo de transaccion
+
+        $this->setParametro('fecha_ini','fecha_ini','date');
+        $this->setParametro('fecha_fin','fecha_fin','date');
+        $this->setCount(false);
+
+        $this->captura('id_proveedor', 'integer');
+        $this->captura('id_moneda', 'integer');
+        $this->captura('id_funcionario', 'integer');
+        $this->captura('num_tramite', 'varchar');
+        $this->captura('proveedor', 'varchar');
+        $this->captura('tipo', 'varchar');
+        $this->captura('estado', 'varchar');
+        $this->captura('monto', 'NUMERIC');
+        $this->captura('fecha_dev', 'DATE');
+        $this->captura('nro_cuota', 'NUMERIC');
+        $this->captura('monto_retgar_mo', 'NUMERIC');
+        $this->captura('moneda', 'varchar');
+        $this->captura('liquido_pagable', 'NUMERIC');
+        $this->captura('c31', 'varchar');
+
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+       // var_dump($this->respuesta);exit;
+       //Devuelve la respuesta
+        return $this->respuesta;
+
+
+}
 
 
 

@@ -1683,3 +1683,8 @@ select param.f_import_tdocumento ('insert','MEMO','Memorandum de Asginacion de F
 select param.f_import_tdocumento ('insert','SOLEFE','Solicitud Efectivo','TES','tabla','gestion',NULL,'codtabla-coddoc-correlativo-gestion');
 
 /***********************************F-DAT-GSS-TES-0-30/06/2016*****************************************/
+
+/***********************************I-DAT-MAM-TES-0-11/11/2016*****************************************/
+select pxp.f_insert_tgui ('Proceso Con Retencion 7%', 'Proceso Con Retencion 7%', 'PRCRE', 'si', 8, 'sis_tesoreria/vista/reporte_proceso_con_retencion/ProcesoConRetencion.php', 3, '', 'ProcesoConRetencion', 'TES');
+select pxp.f_insert_testructura_gui ('PRCRE', 'TES');
+/***********************************F-DAT-MAM-TES-0-11/11/2016*****************************************/

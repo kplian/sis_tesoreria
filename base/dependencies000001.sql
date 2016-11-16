@@ -9445,3 +9445,197 @@ AS
   ORDER BY lban.fecha DESC;
 
 /***********************************F-DEP-GSS-TES-0-28/06/2016****************************************/
+
+/***********************************I-DEP-JRR-TES-0-08/11/2016****************************************/
+CREATE OR REPLACE VIEW tes.vobligacion_pago(
+    id_usuario_reg,
+    id_usuario_mod,
+    fecha_reg,
+    fecha_mod,
+    estado_reg,
+    id_usuario_ai,
+    usuario_ai,
+    id_obligacion_pago,
+    id_proveedor,
+    id_funcionario,
+    id_subsistema,
+    id_moneda,
+    id_depto,
+    id_estado_wf,
+    id_proceso_wf,
+    id_gestion,
+    fecha,
+    numero,
+    estado,
+    obs,
+    porc_anticipo,
+    porc_retgar,
+    tipo_cambio_conv,
+    num_tramite,
+    tipo_obligacion,
+    comprometido,
+    pago_variable,
+    nro_cuota_vigente,
+    total_pago,
+    id_depto_conta,
+    total_nro_cuota,
+    id_plantilla,
+    fecha_pp_ini,
+    rotacion,
+    ultima_cuota_pp,
+    ultimo_estado_pp,
+    tipo_anticipo,
+    id_categoria_compra,
+    tipo_solicitud,
+    tipo_concepto_solicitud,
+    id_funcionario_gerente,
+    ajuste_anticipo,
+    ajuste_aplicado,
+    id_obligacion_pago_extendida,
+    monto_estimado_sg,
+    monto_ajuste_ret_garantia_ga,
+    monto_ajuste_ret_anticipo_par_ga,
+    id_contrato,
+    obs_presupuestos,
+    ultima_cuota_dev,
+    codigo_poa,
+    obs_poa,
+    uo_ex,
+    detalle)
+AS
+  SELECT op.id_usuario_reg,
+    op.id_usuario_mod,
+    op.fecha_reg,
+    op.fecha_mod,
+    op.estado_reg,
+    op.id_usuario_ai,
+    op.usuario_ai,
+    op.id_obligacion_pago,
+    op.id_proveedor,
+    op.id_funcionario,
+    op.id_subsistema,
+    op.id_moneda,
+    op.id_depto,
+    op.id_estado_wf,
+    op.id_proceso_wf,
+    op.id_gestion,
+    op.fecha,
+    op.numero,
+    op.estado,
+    op.obs,
+    op.porc_anticipo,
+    op.porc_retgar,
+    op.tipo_cambio_conv,
+    op.num_tramite,
+    op.tipo_obligacion,
+    op.comprometido,
+    op.pago_variable,
+    op.nro_cuota_vigente,
+    op.total_pago,
+    op.id_depto_conta,
+    op.total_nro_cuota,
+    op.id_plantilla,
+    op.fecha_pp_ini,
+    op.rotacion,
+    op.ultima_cuota_pp,
+    op.ultimo_estado_pp,
+    op.tipo_anticipo,
+    op.id_categoria_compra,
+    op.tipo_solicitud,
+    op.tipo_concepto_solicitud,
+    op.id_funcionario_gerente,
+    op.ajuste_anticipo,
+    op.ajuste_aplicado,
+    op.id_obligacion_pago_extendida,
+    op.monto_estimado_sg,
+    op.monto_ajuste_ret_garantia_ga,
+    op.monto_ajuste_ret_anticipo_par_ga,
+    op.id_contrato,
+    op.obs_presupuestos,
+    op.ultima_cuota_dev,
+    op.codigo_poa,
+    op.obs_poa,
+    op.uo_ex,
+    ((('<table border="1"><TR>
+   <TH>Concepto</TH>
+   <TH>Detalle</TH>
+   <TH>Importe ('::text || mon.codigo::text) || ')</TH>'::text) || pxp.html_rows
+    (((((((((('<td>'::text || ci.desc_ingas::text) || '</td> <td>'::text) ||
+            '<font hdden=true>'::text) || od.id_obligacion_det::character varying::text
+          ) || '</font>'::text) || od.descripcion) || '</td> <td>'::text) ||
+       od.monto_pago_mo::text) || '</td>'::text)::character varying)::text) ||
+    '</table>'::text AS detalle
+  FROM tes.tobligacion_pago op
+    JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
+    JOIN param.tdepto dep ON dep.id_depto = op.id_depto
+    LEFT JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
+    LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
+                                           op.id_categoria_compra
+    LEFT JOIN adq.tcotizacion cot ON op.id_obligacion_pago =
+                                     cot.id_obligacion_pago
+    LEFT JOIN adq.tproceso_compra pro ON pro.id_proceso_compra =
+                                         cot.id_proceso_compra
+    LEFT JOIN adq.tsolicitud sol ON sol.id_solicitud = pro.id_solicitud
+    LEFT JOIN segu.vusuario ususol ON ususol.id_usuario = sol.id_usuario_reg
+    JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
+                                   op.id_obligacion_pago AND od.estado_reg::text = 'activo'::text
+    JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas =
+                                     od.id_concepto_ingas
+    JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario =
+                                        op.id_funcionario AND fun.estado_reg_asi::text = 'activo'::text
+    JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
+  GROUP BY op.id_usuario_reg,
+    op.id_usuario_mod,
+    op.fecha_reg,
+    op.fecha_mod,
+    op.estado_reg,
+    op.id_usuario_ai,
+    op.usuario_ai,
+    op.id_obligacion_pago,
+    op.id_proveedor,
+    op.id_funcionario,
+    op.id_subsistema,
+    op.id_moneda,
+    op.id_depto,
+    op.id_estado_wf,
+    op.id_proceso_wf,
+    op.id_gestion,
+    op.fecha,
+    op.numero,
+    op.estado,
+    op.obs,
+    op.porc_anticipo,
+    op.porc_retgar,
+    op.tipo_cambio_conv,
+    op.num_tramite,
+    op.tipo_obligacion,
+    op.comprometido,
+    op.pago_variable,
+    op.nro_cuota_vigente,
+    op.total_pago,
+    op.id_depto_conta,
+    op.total_nro_cuota,
+    op.id_plantilla,
+    op.fecha_pp_ini,
+    op.rotacion,
+    op.ultima_cuota_pp,
+    op.ultimo_estado_pp,
+    op.tipo_anticipo,
+    op.id_categoria_compra,
+    op.tipo_solicitud,
+    op.tipo_concepto_solicitud,
+    op.id_funcionario_gerente,
+    op.ajuste_anticipo,
+    op.ajuste_aplicado,
+    op.id_obligacion_pago_extendida,
+    op.monto_estimado_sg,
+    op.monto_ajuste_ret_garantia_ga,
+    op.monto_ajuste_ret_anticipo_par_ga,
+    op.id_contrato,
+    op.obs_presupuestos,
+    op.ultima_cuota_dev,
+    op.codigo_poa,
+    op.obs_poa,
+    op.uo_ex,
+    mon.codigo;
+/***********************************F-DEP-JRR-TES-0-08/11/2016****************************************/

@@ -1660,3 +1660,28 @@ ALTER TABLE tes.tts_libro_bancos
   ADD COLUMN nro_deposito INTEGER UNIQUE;
   
 /*****************************F-SCP-GSS-TES-0-23/06/2016*************/
+
+
+/*****************************I-SCP-GSS-TES-0-22/08/2016*************/
+
+CREATE TABLE cd.tdeposito_cd (
+  id_deposito_cd SERIAL, 
+  id_cuenta_doc INTEGER, 
+  id_libro_bancos INTEGER, 
+  importe_contable_deposito NUMERIC(20,2), 
+  CONSTRAINT tdeposito_cd_pkey PRIMARY KEY(id_deposito_cd), 
+  CONSTRAINT fk_tdeposito_cd__id_cuenta_doc FOREIGN KEY (id_cuenta_doc)
+    REFERENCES cd.tcuenta_doc(id_cuenta_doc)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE, 
+  CONSTRAINT fk_tdeposito_cd__id_libro_bancos FOREIGN KEY (id_libro_bancos)
+    REFERENCES tes.tts_libro_bancos(id_libro_bancos)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE
+) INHERITS (pxp.tbase)
+
+WITH (oids = false);
+
+/*****************************F-SCP-GSS-TES-0-22/08/2016*************/
