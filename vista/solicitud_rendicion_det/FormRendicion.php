@@ -17,6 +17,7 @@ Phx.vista.FormRendicion = {
 	requireclase:'Phx.vista.FormCompraVenta',
 	mostrarFormaPago : false,
 	autorizacion: 'caja_chica',
+	autorizacion_nulos: 'no',
 		
 	constructor: function(config) {		
 	   Phx.vista.FormRendicion.superclass.constructor.call(this,config);	   
@@ -92,26 +93,14 @@ Phx.vista.FormRendicion = {
 	},
 	successSave:function(resp)
     {
-		/*
-		console.log(Phx.CP.getPagina(this.idContenedor));
-		console.log(Phx.CP.getPagina(this.idContenedorPadre));
-		var contenedorPadre = Phx.CP.getPagina(this.idContenedorPadre);
-		console.log(contenedorPadre.store.data.items[0].data);
-        if(Phx.CP.getPagina(this.idContenedor).mycls =='SolicitudRendicionDet'){
-			Phx.CP.getPagina(this.idContenedorPadre).id_estado_workflow = contenedorPadre.store.data.items[0].data.id_estado_wf;
-			Phx.CP.getPagina(this.idContenedorPadre).id_proceso_workflow = contenedorPadre.store.data.items[0].data.id_proceso_wf;
-			console.log(Phx.CP.getPagina(this.idContenedor).id_estado_workflow); 
-		}
-		*/
-		
 		Phx.CP.loadingHide();
 		//if(typeof(Phx.CP.getPagina(this.idContenedorPadre).onReloadPadre) !='undefined'){
-		//	Phx.CP.getPagina(this.idContenedorPadre).onReloadPadre();	
+		//	Phx.CP.getPagina(this.idContenedorPadre).onReloadPadre();
 		//}
 		//else{
 		Phx.CP.getPagina(this.idContenedorPadre).reload();
-		//}	
-		
+		//}
+
 		if(Phx.CP.getPagina(this.idContenedorPadre).cls =='AprobacionFacturas'){
 			//console.log(Phx.CP.getPagina(this.idContenedorPadre));
 			Phx.CP.getPagina(this.idContenedorPadre).onReloadPadre();	
