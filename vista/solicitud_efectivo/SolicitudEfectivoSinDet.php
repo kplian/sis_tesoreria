@@ -22,7 +22,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		
     	if(this.finCons){
     		 this.store.baseParams.pes_estado = name;
-    	     this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.vista}});
+    	     this.load({params:{start:0, limit:this.tam_pag}});
     	   }
     },
 	
@@ -77,7 +77,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		this.addButton('fin_registro',
 			{	text:'Siguiente',
 				iconCls: 'badelante',
-				grupo:[0,1],
+				grupo:[0],
 				disabled:false,
 				handler:this.sigEstado,
 				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
@@ -162,6 +162,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		*/
 		this.init();
 		this.store.baseParams.pes_estado = 'borrador';
+		this.store.baseParams.tipo_interfaz = this.vista;
 		
 		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:this.vista}})
 		
@@ -611,7 +612,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 				form:false
 		}
 	],
-	tam_pag:50,	
+	tam_pag:50,
 	title:'Solicitud Efectivo Sin Detalle',
 	ActSave:'../../sis_tesoreria/control/SolicitudEfectivo/insertarSolicitudEfectivo',
 	ActDel:'../../sis_tesoreria/control/SolicitudEfectivo/eliminarSolicitudEfectivo',
