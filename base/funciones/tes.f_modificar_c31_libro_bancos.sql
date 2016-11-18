@@ -8,7 +8,7 @@ $body$
 /*
 	Autor: GSS
     Fecha: 06-05-2016
-    Descripción: Función que se encarga de cambiar numero de c31.
+    DescripciÃ³n: FunciÃ³n que se encarga de cambiar numero de c31.
 */
 DECLARE
 	v_nombre_funcion 		varchar;
