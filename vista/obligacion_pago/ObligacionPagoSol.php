@@ -188,7 +188,7 @@ Phx.vista.ObligacionPagoSol = {
 			this.Cmp.id_contrato.enable();
 			this.Cmp.id_contrato.reset();
 			this.Cmp.id_contrato.store.baseParams.filter = "[{\"type\":\"numeric\",\"comparison\":\"eq\", \"value\":\""+cmb.getValue()+"\",\"field\":\"CON.id_proveedor\"}]";
-			this.Cmp.id_contrato.store.baseParams.filtro_directo = "((CON.fecha_fin is null) or ((con.fecha_fin %2B interval ''3 month'')::date >= now()::date))";
+			this.Cmp.id_contrato.store.baseParams.filtro_directo = "((CON.fecha_fin is null) or ((con.fecha_fin + interval ''3 month'')::date >= now()::date))";
 			this.Cmp.id_contrato.modificado = true;
 		}, this);
 		
