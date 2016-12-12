@@ -738,7 +738,7 @@ class MODObligacionPago extends MODbase{
 	function  listarProcesosPendientes()
     {
         $this->procedimiento = 'tes.ft_obligacion_pago_sel';
-        $this->transaccion = 'TES_COMEJEPAG_PRO_PE_SEL';
+        $this->transaccion = 'TES_PROCP_SEL';
         $this->tipo_procedimiento = 'SEL';
         $this->setCount(false);
 
