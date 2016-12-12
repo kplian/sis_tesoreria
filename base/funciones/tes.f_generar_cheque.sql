@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_generar_cheque (
   p_id_usuario integer,
   p_id_int_comprobante integer,
@@ -28,11 +26,11 @@ DECLARE
     v_sistema_origen				varchar;
 BEGIN
 
- 
+
 
      v_nombre_funcion:='tes.f_generar_cheque';
-     
-     --si el origen es endesis 
+
+     --si el origen es endesis
     if p_origen  = 'nacional' then
     	v_sistema_origen = 'KERP';
     ELSE
@@ -40,8 +38,8 @@ BEGIN
     end if;
 		/*
         select cbte.id_depto, cbte.beneficiario, cbte.momento_pagado,cbte.manual, cbte.nro_tramite,
-        cbte.id_depto_libro, op.numero || ' - INGRESO PARA PAGO A ' || pp.nombre_pago || ',' || COALESCE(op.obs,'')  as glosa, 
-        tra.importe_haber,tra.id_cuenta_bancaria, 
+        cbte.id_depto_libro, op.numero || ' - INGRESO PARA PAGO A ' || pp.nombre_pago || ',' || COALESCE(op.obs,'')  as glosa,
+        tra.importe_haber,tra.id_cuenta_bancaria,
         tra.nro_cheque, tra.nombre_cheque_trans, tra.forma_pago, substr(depto.codigo,4) as origen,
         cbte.id_cuenta_bancaria_mov as id_libro_bancos_deposito
         into v_datos_cheque
@@ -51,14 +49,15 @@ BEGIN
         inner join tes.tplan_pago pp on pp.id_int_comprobante=cbte.id_int_comprobante
 		inner join tes.tobligacion_pago op on op.id_obligacion_pago=pp.id_obligacion_pago
         where cbte.id_int_comprobante=p_id_int_comprobante and tra.forma_pago='cheque';*/
-        
-       select COALESCE(tra.nombre_cheque_trans,cbte.beneficiario) as beneficiario, cbte.id_depto_libro,
-       cbte.glosa1 as glosa, tra.importe_haber, tra.id_cuenta_bancaria, 
+
+       select COALESCE(tra.nombre_cheque_trans,cbte.beneficiario) as beneficiario, dpcb.id_depto as id_depto_libro,
+       cbte.glosa1 as glosa, tra.importe_haber, tra.id_cuenta_bancaria,
        substr(depto.codigo, 4) as origen, cbte.nro_tramite, tra.id_cuenta_bancaria_mov as id_libro_bancos_deposito
        into v_datos_cheque
        from conta.tint_comprobante cbte
        inner join conta.tint_transaccion tra on tra.id_int_comprobante = cbte.id_int_comprobante
-       left join param.tdepto depto on depto.id_depto = cbte.id_depto_libro
+       left join tes.tdepto_cuenta_bancaria dpcb on dpcb.id_cuenta_bancaria = tra.id_cuenta_bancaria
+       left join param.tdepto depto on depto.id_depto=dpcb.id_depto
         where cbte.id_int_comprobante = p_id_int_comprobante and tra.forma_pago = 'cheque';
 
 		if(v_datos_cheque.id_cuenta_bancaria is null)then

@@ -1688,3 +1688,8 @@ select param.f_import_tdocumento ('insert','SOLEFE','Solicitud Efectivo','TES','
 select pxp.f_insert_tgui ('Proceso Con Retencion 7%', 'Proceso Con Retencion 7%', 'PRCRE', 'si', 8, 'sis_tesoreria/vista/reporte_proceso_con_retencion/ProcesoConRetencion.php', 3, '', 'ProcesoConRetencion', 'TES');
 select pxp.f_insert_testructura_gui ('PRCRE', 'TES');
 /***********************************F-DAT-MAM-TES-0-11/11/2016*****************************************/
+
+/***********************************I-DAT-MAM-TES-0-08/12/2016*****************************************/
+select pxp.f_insert_tgui ('Procesos Pendientes', 'PP', 'PP', 'si', 9, 'sis_tesoreria/vista/reporte_procesos_pendientes/ProcesosPendientes.php', 3, '', 'ProcesosPendientes', 'TES');
+select pxp.f_insert_testructura_gui ('PP', 'TES');
+/***********************************F-DAT-MAM-TES-0-08/12/2016*****************************************/

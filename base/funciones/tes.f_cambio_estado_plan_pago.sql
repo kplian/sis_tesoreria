@@ -134,14 +134,19 @@ BEGIN
         
         END IF;
         
-             IF   va_codigo_estado_pro[1] in('vbgerente','vbdeposito')   THEN
+             IF   va_codigo_estado_pro[1] in('vbgerente','vbdeposito','vb_jefe_trafico')   THEN
                   
                   v_acceso_directo = '../../../sis_tesoreria/vista/plan_pago/PlanPagoVb.php';
                   v_clase = 'PlanPagoVb';
                   v_parametros_ad = '{filtro_directo:{campo:"plapa.id_proceso_wf",valor:"'||v_registros.id_proceso_wf::varchar||'"}}';
                   v_tipo_noti = 'notificacion';
                   v_titulo  = 'Visto Bueno';
-             
+             ELSE
+                  v_acceso_directo = '';
+                  v_clase = '';
+                  v_parametros_ad = '';
+                  v_tipo_noti = 'notificacion';
+                  v_titulo  = 'Visto Bueno';
              END IF;
                 
                  -- registra estado siguiente para la obligacion de pago

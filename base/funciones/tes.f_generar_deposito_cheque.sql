@@ -1,5 +1,3 @@
-﻿--------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_generar_deposito_cheque (
   p_id_usuario integer,
   p_id_int_comprobante integer,
@@ -29,11 +27,11 @@ DECLARE
     v_sistema_origen				varchar;
 BEGIN
 
- 
+
 
      v_nombre_funcion:='tes.f_generar_deposito_cheque';
 
-     --si el origen es endesis 
+     --si el origen es endesis
     if p_origen  = 'nacional' then
     	v_sistema_origen = 'KERP';
     ELSE
@@ -45,21 +43,22 @@ BEGIN
 			from conta.tint_comprobante cbte
      		inner join tes.tplan_pago pp on pp.id_int_comprobante = cbte.id_int_comprobante
 			where cbte.id_int_comprobante = any(p_id_int_comprobante))LOOP
-        	    
+
             v_leyenda_cuota =  v_leyenda_cuota || ' Cuota Nro ' || v_nro_cuotas;
-      	END LOOP;	
+      	END LOOP;
     	*/
-        select cbte.beneficiario, cbte.id_depto_libro,
-       cbte.glosa1 as glosa, tra.importe_haber, tra.id_cuenta_bancaria, 
+        select cbte.beneficiario, dpcb.id_depto as id_depto_libro,
+       cbte.glosa1 as glosa, tra.importe_haber, tra.id_cuenta_bancaria,
        substr(depto.codigo, 4) as origen, cbte.nro_tramite
        into v_datos_deposito_cheque
        from conta.tint_comprobante cbte
        inner join conta.tint_transaccion tra on tra.id_int_comprobante = cbte.id_int_comprobante
-       left join param.tdepto depto on depto.id_depto = cbte.id_depto_libro
-        where cbte.id_int_comprobante = p_id_int_comprobante and tra.forma_pago = 'cheque';    
-		        
+       left join tes.tdepto_cuenta_bancaria dpcb on dpcb.id_cuenta_bancaria = tra.id_cuenta_bancaria
+       left join param.tdepto depto on depto.id_depto=dpcb.id_depto
+        where cbte.id_int_comprobante = p_id_int_comprobante and tra.forma_pago = 'cheque';
+
         if(v_datos_deposito_cheque.id_depto_libro is null)then
-        	raise exception 'El comprobante % no cuenta con el id_depto_libro ',p_id_cbte_endesis;
+        	raise exception 'El comprobante % no cuenta con el id_depto_libro ',p_id_int_comprobante;
         end if;
         
         v_resp = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  *@package pXP
  *@file    GenerarLibroBancos.php
@@ -258,6 +258,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		}],
 		title : 'Reporte Libro Bancos',		
 		ActSave : '../../sis_tesoreria/control/TsLibroBancos/reporteLibroBancos',
+		timeout : 1500000,
 		
 		topBar : true,
 		botones : false,

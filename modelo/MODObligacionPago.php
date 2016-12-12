@@ -606,8 +606,7 @@ class MODObligacionPago extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
-	
-	  		
+
 	function insertarObligacionCompleta(){
 		
 		//Abre conexion con PDO
@@ -735,6 +734,40 @@ class MODObligacionPago extends MODbase{
 	    
 	    return $this->respuesta;
 	}
+
+	function  listarProcesosPendientes()
+    {
+        $this->procedimiento = 'tes.ft_obligacion_pago_sel';
+        $this->transaccion = 'TES_COMEJEPAG_PRO_PE_SEL';
+        $this->tipo_procedimiento = 'SEL';
+        $this->setCount(false);
+
+        $this->setParametro('fecha_ini','fecha_ini','date');
+        $this->setParametro('fecha_fin','fecha_fin','date');
+
+        $this->captura('num_tramite', 'varchar');
+        $this->captura('id_obligacion_pago', 'integer');
+        $this->captura('estado', 'varchar');
+        $this->captura('fecha', 'text');
+        $this->captura('desc_funcionario1', 'text');
+        $this->captura('desc_proveedor', 'varchar');
+        $this->captura('total_pago', 'numeric');
+        $this->captura('moneda', 'varchar');
+        $this->captura('estado_pago', 'varchar');
+        $this->captura('nro_cuota', 'numeric');
+        $this->captura('liquido_pagable', 'numeric');
+        $this->captura('obs', 'varchar');
+        $this->captura('fecha_tentativa', 'text');
+        $this->captura('nombre', 'text');
+
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+        //var_dump($this->respuesta);exit;
+        //Devuelve la respuesta
+        return $this->respuesta;
+
+    }
 
 }
 ?>
