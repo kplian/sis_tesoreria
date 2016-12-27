@@ -11,6 +11,7 @@ require_once(dirname(__FILE__).'/../reportes/RComEjePag.php');
 require_once(dirname(__FILE__).'/../reportes/RPlanesPago.php');
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
 require_once(dirname(__FILE__).'/../reportes/RProcesosPendientesXLS.php');
+require_once(dirname(__FILE__).'/../reportes/RProcesoPendienteContabilidad.php');
 
 
 class ACTObligacionPago extends ACTbase{    
@@ -406,8 +407,32 @@ class ACTObligacionPago extends ACTbase{
             'Se generó con éxito el reporte: ' . $nombreArchivo, 'control');
         $this->mensajeExito->setArchivoGenerado($nombreArchivo);
         $this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+    }
+
+    function reporteProcesosPenContabilidad()
+    {
+        $this->objFunc = $this->create('MODObligacionPago');
+        $this->res = $this->objFunc->listarProcesosPendientes($this->objParam);
+        //var_dump( $this->res);exit;
+        //obtener titulo de reporte
+        $titulo = 'Procesos Pendientes';
+        //Genera el nombre del archivo (aleatorio + titulo)
+        $nombreArchivo = uniqid(md5(session_id()) . $titulo);
+
+        $nombreArchivo .= '.xls';
+        $this->objParam->addParametro('nombre_archivo', $nombreArchivo);
+        $this->objParam->addParametro('datos', $this->res->datos);
+        //Instancia la clase de excel
+        $this->objReporteFormato = new RProcesoPendienteContabilidad($this->objParam);
+        $this->objReporteFormato->generarDatos();
+        $this->objReporteFormato->generarReporte();
 
 
+        $this->mensajeExito = new Mensaje();
+        $this->mensajeExito->setMensaje('EXITO', 'Reporte.php', 'Reporte generado',
+            'Se generó con éxito el reporte: ' . $nombreArchivo, 'control');
+        $this->mensajeExito->setArchivoGenerado($nombreArchivo);
+        $this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
     }
 	
 	

@@ -1,5 +1,5 @@
 <?php
-class RProcesosPendientesXLS
+class RProcesoPendienteContabilidad
 {
     private $docexcel;
     private $objWriter;
@@ -194,7 +194,12 @@ class RProcesosPendientesXLS
 
         foreach ( $datos  as $value)
         {
-            if($value['estado_pago'] != 'devengado' && $value['estado_pago'] != 'pagado') {
+            if($value['estado_pago'] != 'devengado' && $value['estado_pago'] != 'andticipado' && $value['estado_pago'] != 'anticipado'
+                && $value['estado_pago'] != 'aplicado' && $value['estado_pago'] != 'contabilizado' && $value['estado_pago'] != 'devuelto'
+                && $value['estado_pago'] != 'pagado'  && $value['estado_pago'] != 'pendiente'  && $value['estado_pago'] != 'supconta'
+                && $value['estado_pago'] != 'vbconta' && $value['estado_pago'] != 'vbcostos' && $value['estado_pago'] != 'vbdeposito'
+                && $value['estado_pago'] != 'vbfin' && $value['estado_pago'] != 'vbgerente' && $value['estado_pago'] != 'vbsolicitante') {
+
                 $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(0, $fila, $this->numero);
                 $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(1, $fila, $value['num_tramite']);
                 $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(2, $fila, $value['desc_proveedor']);
@@ -220,8 +225,8 @@ class RProcesosPendientesXLS
                 $this->docexcel->getActiveSheet()->getStyle("N$fila:N$fila")->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat :: FORMAT_NUMBER_COMMA_SEPARATED1);
 
                 $this->numero++;
-            }
 
+            }
         }
 
     }
