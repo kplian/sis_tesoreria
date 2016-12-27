@@ -122,7 +122,7 @@ class RProcesosPendientesXLS
 
         //titulos
 
-        $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(0,2,'PROCESOS PENDIENTES' );
+        $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(0,2,'PROCESOS PENDIENTES CONTABILIDAD' );
         $this->docexcel->getActiveSheet()->getStyle('A2:N2')->applyFromArray($styleTitulos1);
         $this->docexcel->getActiveSheet()->mergeCells('A2:N2');
         $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(0,4,'Del: '.  $this->objParam->getParametro('fecha_ini').'   Al: '.  $this->objParam->getParametro('fecha_fin') );
@@ -194,7 +194,8 @@ class RProcesosPendientesXLS
 
         foreach ( $datos  as $value)
         {
-            if($value['estado_pago'] != 'devengado' && $value['estado_pago'] != 'pagado') {
+            if($value['estado_pago'] != 'devengado' && $value['estado_pago'] != 'pagado'&&
+                $value['estado_pago'] != '' && $value['estado_pago'] != 'pago_exterior') {
                 $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(0, $fila, $this->numero);
                 $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(1, $fila, $value['num_tramite']);
                 $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(2, $fila, $value['desc_proveedor']);

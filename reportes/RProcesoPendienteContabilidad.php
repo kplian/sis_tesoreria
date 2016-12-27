@@ -122,7 +122,7 @@ class RProcesoPendienteContabilidad
 
         //titulos
 
-        $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(0,2,'PROCESOS PENDIENTES' );
+        $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(0,2,'PROCESOS PENDIENTES ADQUISICIONES' );
         $this->docexcel->getActiveSheet()->getStyle('A2:N2')->applyFromArray($styleTitulos1);
         $this->docexcel->getActiveSheet()->mergeCells('A2:N2');
         $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(0,4,'Del: '.  $this->objParam->getParametro('fecha_ini').'   Al: '.  $this->objParam->getParametro('fecha_fin') );
@@ -130,12 +130,12 @@ class RProcesoPendienteContabilidad
         $this->docexcel->getActiveSheet()->mergeCells('A4:N4');
 
         $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(0,5,'OBLIGACIONES DE PAGO' );
-        $this->docexcel->getActiveSheet()->getStyle('A5:K5')->applyFromArray($styleTitulos2);
-        $this->docexcel->getActiveSheet()->mergeCells('A5:K5');
+        $this->docexcel->getActiveSheet()->getStyle('A5:L5')->applyFromArray($styleTitulos2);
+        $this->docexcel->getActiveSheet()->mergeCells('A5:L5');
 
-        $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(11,5,'PLAN DE PAGO' );
-        $this->docexcel->getActiveSheet()->getStyle('L5:O5')->applyFromArray($styleTitulos4);
-        $this->docexcel->getActiveSheet()->mergeCells('L5:O5');
+        $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(12,5,'PLAN DE PAGO' );
+        $this->docexcel->getActiveSheet()->getStyle('M5:Q5')->applyFromArray($styleTitulos4);
+        $this->docexcel->getActiveSheet()->mergeCells('M5:Q5');
 
         $this->docexcel->getActiveSheet()->getColumnDimension('B')->setWidth(20);
         $this->docexcel->getActiveSheet()->getColumnDimension('C')->setWidth(45);
@@ -147,16 +147,18 @@ class RProcesoPendienteContabilidad
         $this->docexcel->getActiveSheet()->getColumnDimension('I')->setWidth(20);
         $this->docexcel->getActiveSheet()->getColumnDimension('J')->setWidth(45);
         $this->docexcel->getActiveSheet()->getColumnDimension('K')->setWidth(45);
-        $this->docexcel->getActiveSheet()->getColumnDimension('L')->setWidth(19);
+        $this->docexcel->getActiveSheet()->getColumnDimension('L')->setWidth(35);
         $this->docexcel->getActiveSheet()->getColumnDimension('M')->setWidth(23);
         $this->docexcel->getActiveSheet()->getColumnDimension('N')->setWidth(25);
         $this->docexcel->getActiveSheet()->getColumnDimension('O')->setWidth(25);
+        $this->docexcel->getActiveSheet()->getColumnDimension('P')->setWidth(25);
+        $this->docexcel->getActiveSheet()->getColumnDimension('Q')->setWidth(25);
 
 
 
         $this->docexcel->getActiveSheet()->getStyle('A6:N6')->getAlignment()->setWrapText(true);
-        $this->docexcel->getActiveSheet()->getStyle('A6:K6')->applyFromArray($styleTitulos2);
-        $this->docexcel->getActiveSheet()->getStyle('L6:O6')->applyFromArray($styleTitulos4);
+        $this->docexcel->getActiveSheet()->getStyle('A6:L6')->applyFromArray($styleTitulos2);
+        $this->docexcel->getActiveSheet()->getStyle('M6:Q6')->applyFromArray($styleTitulos4);
 
 
 
@@ -169,13 +171,15 @@ class RProcesoPendienteContabilidad
         $this->docexcel->getActiveSheet()->setCellValue('F6','TOTAL');
         $this->docexcel->getActiveSheet()->setCellValue('G6','MONEDA');
         $this->docexcel->getActiveSheet()->setCellValue('H6','FECHA');
-        $this->docexcel->getActiveSheet()->setCellValue('I6','ESTADO');
-        $this->docexcel->getActiveSheet()->setCellValue('J6','USUARIO REGISTRO');
-        $this->docexcel->getActiveSheet()->setCellValue('K6','DEPARTAMENTO');
-        $this->docexcel->getActiveSheet()->setCellValue('L6','N° CUOTA');
-        $this->docexcel->getActiveSheet()->setCellValue('M6','ESTADO PLAN DE PAGO');
-        $this->docexcel->getActiveSheet()->setCellValue('N6','LIQUIDO PAGABLE');
-        $this->docexcel->getActiveSheet()->setCellValue('O6','FECHA TENTATIVA DE PAGO');
+        $this->docexcel->getActiveSheet()->setCellValue('I6','PAGO VARIABLE');
+        $this->docexcel->getActiveSheet()->setCellValue('J6','ESTADO');
+        $this->docexcel->getActiveSheet()->setCellValue('K6','USUARIO REGISTRO');
+        $this->docexcel->getActiveSheet()->setCellValue('L6','DEPARTAMENTO');
+        $this->docexcel->getActiveSheet()->setCellValue('M6','N° CUOTA');
+        $this->docexcel->getActiveSheet()->setCellValue('N6','TIPO CUOTA');
+        $this->docexcel->getActiveSheet()->setCellValue('O6','ESTADO PLAN DE PAGO');
+        $this->docexcel->getActiveSheet()->setCellValue('P6','LIQUIDO PAGABLE');
+        $this->docexcel->getActiveSheet()->setCellValue('Q6','FECHA TENTATIVA DE PAGO');
 
 
     }
@@ -194,39 +198,46 @@ class RProcesoPendienteContabilidad
 
         foreach ( $datos  as $value)
         {
-            if($value['estado_pago'] != 'devengado' && $value['estado_pago'] != 'andticipado' && $value['estado_pago'] != 'anticipado'
-                && $value['estado_pago'] != 'aplicado' && $value['estado_pago'] != 'contabilizado' && $value['estado_pago'] != 'devuelto'
-                && $value['estado_pago'] != 'pagado'  && $value['estado_pago'] != 'pendiente'  && $value['estado_pago'] != 'supconta'
-                && $value['estado_pago'] != 'vbconta' && $value['estado_pago'] != 'vbcostos' && $value['estado_pago'] != 'vbdeposito'
-                && $value['estado_pago'] != 'vbfin' && $value['estado_pago'] != 'vbgerente' && $value['estado_pago'] != 'vbsolicitante') {
 
-                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(0, $fila, $this->numero);
-                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(1, $fila, $value['num_tramite']);
-                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(2, $fila, $value['desc_proveedor']);
-                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(3, $fila, $value['desc_funcionario1']);
-                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(4, $fila, $value['obs']);
-                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(5, $fila, $value['total_pago']);
-                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(6, $fila, $value['moneda']);
-                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(7, $fila, $value['fecha']);
-                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(8, $fila, $value['estado']);
-                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(9, $fila, $value['nombre']);
-                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(10, $fila, $value['nombre_depto']);
-                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(11, $fila, $value['nro_cuota']);
-                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(12, $fila, $value['estado_pago']);
-                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(13, $fila, $value['liquido_pagable']);
-                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(14, $fila, $value['fecha_tentativa']);
-                $this->docexcel->getActiveSheet()->getStyle("H$fila:H$fila")->applyFromArray($styleTitulos3);
-                $this->docexcel->getActiveSheet()->getStyle("M$fila:M$fila")->applyFromArray($styleTitulos3);
-                $this->docexcel->getActiveSheet()->getStyle("O$fila:O$fila")->applyFromArray($styleTitulos3);
+                if ($value['estado_pago'] != 'devengado' && $value['estado_pago'] != 'andticipado' && $value['estado_pago'] != 'anticipado'
+                    && $value['estado_pago'] != 'aplicado' && $value['estado_pago'] != 'contabilizado' && $value['estado_pago'] != 'devuelto'
+                    && $value['estado_pago'] != 'pagado' && $value['estado_pago'] != 'pendiente' && $value['estado_pago'] != 'supconta'
+                    && $value['estado_pago'] != 'vbconta' && $value['estado_pago'] != 'vbcostos' && $value['estado_pago'] != 'vbdeposito'
+                    && $value['estado_pago'] != 'vbfin' && $value['estado_pago'] != 'vbgerente' && $value['estado_pago'] != 'vbsolicitante' && $value['pago_variable'] !='no') {
 
-                $fila++;
+                    $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(0, $fila, $this->numero);
+                    $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(1, $fila, $value['num_tramite']);
+                    $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(2, $fila, $value['desc_proveedor']);
+                    $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(3, $fila, $value['desc_funcionario1']);
+                    $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(4, $fila, $value['obs']);
+                    $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(5, $fila, $value['total_pago']);
+                    $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(6, $fila, $value['moneda']);
+                    $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(7, $fila, $value['fecha']);
+                    $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(8, $fila, $value['pago_variable']);
 
-                $this->docexcel->getActiveSheet()->getStyle("F$fila:F$fila")->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat :: FORMAT_NUMBER_COMMA_SEPARATED1);
-                $this->docexcel->getActiveSheet()->getStyle("N$fila:N$fila")->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat :: FORMAT_NUMBER_COMMA_SEPARATED1);
+                    $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(9, $fila, $value['estado']);
+                    $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(10, $fila, $value['nombre']);
+                    $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(11, $fila, $value['nombre_depto']);
+                    $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(12, $fila, $value['nro_cuota']);
+                    $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(13, $fila, $value['tipo']);
 
-                $this->numero++;
+                    $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(14, $fila, $value['estado_pago']);
+                    $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(15, $fila, $value['liquido_pagable']);
+                    $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(16, $fila, $value['fecha_tentativa']);
+                    $this->docexcel->getActiveSheet()->getStyle("H$fila:H$fila")->applyFromArray($styleTitulos3);
+                    $this->docexcel->getActiveSheet()->getStyle("M$fila:M$fila")->applyFromArray($styleTitulos3);
+                    $this->docexcel->getActiveSheet()->getStyle("O$fila:O$fila")->applyFromArray($styleTitulos3);
+                    $this->docexcel->getActiveSheet()->getStyle("Q$fila:Q$fila")->applyFromArray($styleTitulos3);
 
-            }
+                    $fila++;
+
+                    $this->docexcel->getActiveSheet()->getStyle("F$fila:F$fila")->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat :: FORMAT_NUMBER_COMMA_SEPARATED1);
+                    $this->docexcel->getActiveSheet()->getStyle("P$fila:P$fila")->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat :: FORMAT_NUMBER_COMMA_SEPARATED1);
+
+                    $this->numero++;
+
+                }
+
         }
 
     }
