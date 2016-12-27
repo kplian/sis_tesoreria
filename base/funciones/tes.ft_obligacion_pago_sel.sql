@@ -648,10 +648,10 @@ BEGIN
 
     	begin
     		--Sentencia de la consulta
-			v_consulta:='with estadoPlanPago as (select op.num_tramite,p.nro_cuota,p.liquido_pagable, p.estado, op.id_obligacion_pago, p.fecha_tentativa
+			v_consulta:='with estadoPlanPago as (select op.num_tramite,p.nro_cuota,p.liquido_pagable, p.estado, op.id_obligacion_pago, p.fecha_tentativa, p.tipo
 						from tes.tobligacion_pago op
 						left join tes.tplan_pago p on p.id_obligacion_pago = op.id_obligacion_pago and p.estado_reg = ''activo''
-						and p.estado != ''anulado'' )
+						and p.estado != ''anulado'')
 					SELECT
                     obl.num_tramite,
                     obl.id_obligacion_pago,
@@ -666,7 +666,10 @@ BEGIN
                     es.liquido_pagable,
                     obl.obs,
                     to_char(es.fecha_tentativa,''DD/MM/YYYY'') as fecha_tentativa ,
-                    per.nombre_completo1 as nombre
+                    per.nombre_completo1 as nombre,
+                    de.nombre as nombre_depto,
+                    obl.pago_variable,
+                    es.tipo
                     from tes.tobligacion_pago obl
                     inner join segu.tusuario usu1 on usu1.id_usuario = obl.id_usuario_reg
                     inner join segu.vpersona per on per.id_persona = usu1.id_persona
@@ -674,6 +677,8 @@ BEGIN
                     inner join param.vproveedor pr on pr.id_proveedor = obl.id_proveedor
                     inner join param.tmoneda m on m.id_moneda = obl.id_moneda
                     left join estadoPlanPago es on es.id_obligacion_pago = obl.id_obligacion_pago
+                    inner join param.tdepto de on de.id_depto = obl.id_depto
+                    inner join param.tproveedor pro on pro.id_proveedor = obl.id_proveedor
                     where  obl.fecha >= '''||v_parametros.fecha_ini||''' and obl.fecha <= '''||v_parametros.fecha_fin||'''
                     and obl.estado IN(''borrador'',''registrado'',''en_pago'',''anulado'')';
                     v_consulta:=v_consulta||'ORDER BY num_tramite, obl.num_tramite, es.nro_cuota ASC';

@@ -759,6 +759,9 @@ class MODObligacionPago extends MODbase{
         $this->captura('obs', 'varchar');
         $this->captura('fecha_tentativa', 'text');
         $this->captura('nombre', 'text');
+        $this->captura('nombre_depto', 'varchar');
+        $this->captura('pago_variable', 'varchar');
+        $this->captura('tipo', 'varchar');
 
         //Ejecuta la instruccion
         $this->armarConsulta();

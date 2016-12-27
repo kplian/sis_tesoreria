@@ -1693,3 +1693,8 @@ select pxp.f_insert_testructura_gui ('PRCRE', 'TES');
 select pxp.f_insert_tgui ('Procesos Pendientes', 'PP', 'PP', 'si', 9, 'sis_tesoreria/vista/reporte_procesos_pendientes/ProcesosPendientes.php', 3, '', 'ProcesosPendientes', 'TES');
 select pxp.f_insert_testructura_gui ('PP', 'TES');
 /***********************************F-DAT-MAM-TES-0-08/12/2016*****************************************/
+
+/***********************************I-DAT-MAM-TES-0-27/12/2016*****************************************/
+select pxp.f_insert_tgui ('Procesos Pendientes Contabilidad', 'Procesos Pendientes Contabilidad', 'PPC', 'si', 10, 'sis_tesoreria/vista/reporte_procesos_pendientes/ProcesoPendienteContabilidad.php', 3, '', 'ProcesoPendienteContabilidad', 'TES');
+select pxp.f_insert_testructura_gui ('PPC', 'TES');
+/***********************************F-DAT-MAM-TES-0-27/12/2016*****************************************/
