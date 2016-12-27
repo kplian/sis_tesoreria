@@ -10,8 +10,8 @@ require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
 require_once(dirname(__FILE__).'/../reportes/RComEjePag.php');
 require_once(dirname(__FILE__).'/../reportes/RPlanesPago.php');
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
-require_once(dirname(__FILE__).'/../reportes/RProcesosPendientesXLS.php');
-require_once(dirname(__FILE__).'/../reportes/RProcesoPendienteContabilidad.php');
+require_once(dirname(__FILE__).'/../reportes/RProcesosPendientesAdquisiciones.php');
+require_once(dirname(__FILE__).'/../reportes/RProcesosPendientesContabilidad.php');
 
 
 class ACTObligacionPago extends ACTbase{    
@@ -397,7 +397,7 @@ class ACTObligacionPago extends ACTbase{
         $this->objParam->addParametro('nombre_archivo', $nombreArchivo);
         $this->objParam->addParametro('datos', $this->res->datos);
         //Instancia la clase de excel
-        $this->objReporteFormato = new RProcesosPendientesXLS($this->objParam);
+        $this->objReporteFormato = new RProcesosPendientesAdquisiciones($this->objParam);
         $this->objReporteFormato->generarDatos();
         $this->objReporteFormato->generarReporte();
 
@@ -423,7 +423,7 @@ class ACTObligacionPago extends ACTbase{
         $this->objParam->addParametro('nombre_archivo', $nombreArchivo);
         $this->objParam->addParametro('datos', $this->res->datos);
         //Instancia la clase de excel
-        $this->objReporteFormato = new RProcesoPendienteContabilidad($this->objParam);
+        $this->objReporteFormato = new RProcesosPendientesContabilidad($this->objParam);
         $this->objReporteFormato->generarDatos();
         $this->objReporteFormato->generarReporte();
 
