@@ -203,7 +203,8 @@ class RProcesosPendientesAdquisiciones
                     && $value['estado_pago'] != 'aplicado' && $value['estado_pago'] != 'contabilizado' && $value['estado_pago'] != 'devuelto'
                     && $value['estado_pago'] != 'pagado' && $value['estado_pago'] != 'pendiente' && $value['estado_pago'] != 'supconta'
                     && $value['estado_pago'] != 'vbconta' && $value['estado_pago'] != 'vbcostos' && $value['estado_pago'] != 'vbdeposito'
-                    && $value['estado_pago'] != 'vbfin' && $value['estado_pago'] != 'vbgerente' && $value['estado_pago'] != 'vbsolicitante' && $value['pago_variable'] != 'no'
+                    && $value['estado_pago'] != 'vbfin' && $value['estado_pago'] != 'vbgerente' && $value['estado_pago'] != 'vbsolicitante'
+                    && $value['estado_pago'] != 'supcostos' && $value['estado_pago'] != 'pago_exterior'
                 ) {
 
                     $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(0, $fila, $this->numero);
