@@ -594,7 +594,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 	  var rec=this.sm.getSelected();
 	  var configExtra = [];
 
-	  if(rec.data.tipo != 'SOLREN') {
+	  if(rec.data.tipo == 'SOLREP' || rec.data.tipo=='REPO') {
 		  if (rec.data.estado == 'vbconta' || rec.data.estado == 'revision' || rec.data.estado == 'vbfondos') {
 			  configExtra = [
 				  {
