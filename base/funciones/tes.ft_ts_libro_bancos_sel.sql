@@ -1,4 +1,4 @@
-﻿--------------- SQL ---------------
+--------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_sel (
   p_administrador integer,
@@ -157,6 +157,7 @@ BEGIN
             v_consulta := 'SELECT LBRBAN.id_libro_bancos,
             			   LBRBAN.fecha,
                            LBRBAN.a_favor,
+                           LBRBAN.detalle,
                            LBRBAN.observaciones,
                            LBRBAN.importe_deposito,
                            CASE

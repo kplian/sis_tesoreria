@@ -78,6 +78,7 @@ class MODTsLibroBancos extends MODbase{
 		$this->captura('id_libro_bancos','int4');
 		$this->captura('fecha','date');
 		$this->captura('a_favor','varchar');
+		$this->captura('detalle','text');
 		$this->captura('observaciones','text');
 		$this->captura('importe_deposito','numeric');
 		$this->captura('saldo','numeric');
@@ -123,7 +124,7 @@ class MODTsLibroBancos extends MODbase{
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
-		
+
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
