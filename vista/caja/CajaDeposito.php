@@ -39,12 +39,12 @@ Phx.vista.CajaDeposito = {
     liberaMenu:function(){
         var tb = Phx.vista.CajaDeposito.superclass.liberaMenu.call(this);
 		if(this.maestro.tipo ==  'RENYCER' || this.maestro.tipo == 'CIERRE'){                 		
-			this.getBoton('del').enable();
-			this.getBoton('new').enable();  
+			//this.getBoton('del').enable();
+			//this.getBoton('new').enable();
 		 } 
 		 else{                              
-			this.getBoton('del').disable();
-			this.getBoton('new').disable();   
+			//this.getBoton('del').disable();
+			//this.getBoton('new').disable();
 		 }
 		 
        return tb
