@@ -425,7 +425,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 gwidth: 150,
                 },
             type:'ComboBox',
-            filters:{pfiltro:'tipo',type:'string'},
+            filters:{pfiltro:'plapa.tipo',type:'string'},
             id_grupo:0,
             grid:true,
             form:true
