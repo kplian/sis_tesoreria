@@ -76,7 +76,7 @@ Phx.vista.FormObligacionEspecial=Ext.extend(Phx.frmInterfaz,{
 						                    msgTarget: 'title',
 						                    origen:'CENTROCOSTO',
 						                    fieldLabel: 'Centro de Costos',
-						                    url: '../../sis_parametros/control/CentroCosto/listarCentroCostoCombo',
+						                    url: '../../sis_parametros/control/CentroCosto/listarCentroCostoFiltradoXDepto',
 						                    emptyText : 'Centro Costo...',
 						                    allowBlank: false,
 						                    baseParams:{filtrar:'grupo_ep'}
