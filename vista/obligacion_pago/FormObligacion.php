@@ -602,7 +602,7 @@ Phx.vista.FormObligacion=Ext.extend(Phx.frmInterfaz,{
                     totalProperty:'total',
                     fields: ['id_plantilla','nro_linea','desc_plantilla','tipo','sw_tesoro', 'sw_compro'],
                     remoteSort: true,
-                    baseParams:{par_filtro:'plt.desc_plantilla',sw_compro:'si',sw_tesoro:'si',sw_monto_excento:'no' }
+                    baseParams:{par_filtro:'plt.desc_plantilla',sw_compro:'si',sw_tesoro:'si' }
                 }),
                 tpl:'<tpl for="."><div class="x-combo-list-item"><p>{desc_plantilla}</p></div></tpl>',
                 valueField: 'id_plantilla',
