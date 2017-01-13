@@ -1655,9 +1655,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
          this.Cmp.tipo.store.loadData(this.arrayStore.TODOS) ;
          this.ocultarGrupo(2); //ocultar el grupo de ajustes
          //segun el tipo define los campo visibles y no visibles
-         console.log('tipo....', data.tipo)
-         this.setTipoPago[data.tipo](this, data);
-         
+         this.setTipoPago[data.tipo](this, data);         
          this.tmp_porc_monto_excento_var = undefined;
          
          if(data.tipo == 'pagado'){
@@ -1673,12 +1671,14 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
          }
         
         Phx.vista.PlanPago.superclass.onButtonEdit.call(this); 
-        this.getPlantilla(this.Cmp.id_plantilla.getValue());
+        if(this.Cmp.id_plantilla.getValue()){
+        	this.getPlantilla(this.Cmp.id_plantilla.getValue());
+        }
+        
     },
-    
+
     getPlantilla: function(id_plantilla){
-    	Phx.CP.loadingShow();
-           
+    	   Phx.CP.loadingShow();
            Ext.Ajax.request({
                 // form:this.form.getForm().getEl(),
                 url: '../../sis_parametros/control/Plantilla/listarPlantilla',
