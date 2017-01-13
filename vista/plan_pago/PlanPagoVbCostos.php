@@ -19,7 +19,7 @@ Phx.vista.PlanPagoVbCostos = {
     require:'../../../sis_tesoreria/vista/plan_pago/PlanPago.php',
     requireclase:'Phx.vista.PlanPago',
     title:'Plan de Pagos',
-    nombreVista: 'planpagoVb',
+    nombreVista: 'planpagoVbCostos',
     
     gruposBarraTareas:[{name:'nacional',title:'<H1 align="center"><i class="fa fa-paper-plane"></i> Nacionales</h1>',grupo:0,height:0},
                        {name:'internacional',title:'<H1 align="center"><i class="fa fa-paper-plane-o"></i> Internacionales</h1>',grupo:1,height:0}],
