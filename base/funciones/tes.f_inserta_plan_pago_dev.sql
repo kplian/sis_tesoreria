@@ -307,7 +307,7 @@ BEGIN
          END IF;
          
          /*jrr(10/10/2014): El monto puede ser 0 en pagos variables*/ 
-         IF v_monto_excento >=  v_monto_ejecutar_total_mo and v_monto_ejecutar_total_mo != 0 THEN
+         IF v_monto_excento >  v_monto_ejecutar_total_mo and v_monto_ejecutar_total_mo != 0 THEN
            raise exception 'El monto excento (%) debe ser menor que el total a ejecutar(%)',v_monto_excento, v_monto_ejecutar_total_mo  ;
          END IF;
          
