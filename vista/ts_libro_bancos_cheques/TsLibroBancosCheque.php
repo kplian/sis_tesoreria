@@ -49,7 +49,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				}
 			);
 			
-			this.addButton('btnMemoramdum',
+			/*this.addButton('btnMemoramdum',
 				{
 					text: 'Memo',
 					iconCls: 'bword',
@@ -57,7 +57,7 @@ header("content-type: text/javascript; charset=UTF-8");
 					handler: this.memoramdum,
 					tooltip: '<b>Memo</b><br/>Imprimir memoramdum de asignacion de fondo'
 				}
-			);
+			);*/
 			
 			this.addButton('btnNotificacion',
 				{
@@ -768,7 +768,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				  this.getBoton('btnChequeoDocumentosWf').enable();
 				  this.getBoton('diagrama_gantt').enable();
 				  if(data['estado']=='borrador'){
-					this.getBoton('btnMemoramdum').disable();
+					//this.getBoton('btnMemoramdum').disable();
 					this.getBoton('btnNotificacion').disable();				  
 					this.getBoton('btnCheque').disable();
 					this.getBoton('btnCheque2').disable();				
@@ -795,19 +795,19 @@ header("content-type: text/javascript; charset=UTF-8");
 					} 
 					//if(data['observaciones']=='FONDOS_AVANCE'){						
 					if(data['num_tramite'].search('REP-') >= 0 || data['num_tramite'].search('FA-') >= 0 || data['sistema_origen'] == 'FONDOS_AVANCE'){						
-						this.getBoton('btnMemoramdum').enable();
+						//this.getBoton('btnMemoramdum').enable();
 						if(data['notificado']=='no')
 							this.getBoton('btnNotificacion').enable();
 						else
 							this.getBoton('btnNotificacion').disable();
 					}else{
-						this.getBoton('btnMemoramdum').disable();
+						//this.getBoton('btnMemoramdum').disable();
 						this.getBoton('btnNotificacion').disable();
 					}
 				  }
 				  
 			  }else{
-				  this.getBoton('btnMemoramdum').disable();
+				  //this.getBoton('btnMemoramdum').disable();
 				  this.getBoton('btnNotificacion').disable();				  
 				  this.getBoton('btnCheque').disable();
 				  this.getBoton('btnCheque2').disable();				
@@ -839,7 +839,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		  }else{
 				this.getBoton('btnChequeoDocumentosWf').disable();
 				this.getBoton('fin_registro').disable();
-				this.getBoton('btnMemoramdum').disable();
+				//this.getBoton('btnMemoramdum').disable();
 				this.getBoton('btnNotificacion').disable();
 				this.getBoton('ant_estado').disable();
 				this.getBoton('btnCheque').disable();
