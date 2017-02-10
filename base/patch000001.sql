@@ -1680,4 +1680,24 @@ CREATE TABLE cd.tdeposito_cd (
 
 WITH (oids = false);
 
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN fondo_devolucion_retencion VARCHAR(2);
+  
+  --------------- SQL ---------------
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN columna_pk VARCHAR(100);
+  
+  
+  --------------- SQL ---------------
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN columna_pk_valor INTEGER;
+
+
+
 /*****************************F-SCP-GSS-TES-0-22/08/2016*************/
