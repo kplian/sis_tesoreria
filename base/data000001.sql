@@ -1716,4 +1716,21 @@ select pxp.f_insert_testructura_gui ('PP', 'TES');
 /***********************************I-DAT-MAM-TES-0-27/12/2016*****************************************/
 select pxp.f_insert_tgui ('Procesos Pendientes Contabilidad', 'Procesos Pendientes Contabilidad', 'PPC', 'si', 10, 'sis_tesoreria/vista/reporte_procesos_pendientes/ProcesoPendienteContabilidad.php', 3, '', 'ProcesoPendienteContabilidad', 'TES');
 select pxp.f_insert_testructura_gui ('PPC', 'TES');
+
+
+
 /***********************************F-DAT-MAM-TES-0-27/12/2016*****************************************/
+
+
+
+/***********************************I-DAT-RAC-TES-0-20/02/2017*****************************************/
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES 
+  (E'tes_integrar_lb_pagado', E'no', E'por defecto no, al validar un pago inserta un cheque, si o no');
+  
+ /***********************************F-DAT-RAC-TES-0-20/02/2017*****************************************/
+  
+
+
+

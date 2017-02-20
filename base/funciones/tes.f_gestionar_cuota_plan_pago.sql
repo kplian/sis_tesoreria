@@ -56,6 +56,7 @@ DECLARE
 	 --gonzalo
      v_id_finalidad		integer;
      v_respuesta_libro_bancos varchar;
+     v_tes_integrar_lb_pagado	varchar;
     
 BEGIN
 
@@ -213,7 +214,7 @@ BEGIN
                            usuario_ai = p_usuario_ai
                          where id_plan_pago  = v_registros.id_plan_pago; 
     
-     
+
            ---------------------------------------------------------
            -- 3.1)  si es tipo es devengado_pago  , se genera automaticamente un plan de PAGO relacionado por el total
            --------------------------------------------
@@ -229,11 +230,11 @@ BEGIN
                      raise exception 'Error al validar el pagado';                          
                 END IF;  
            END IF;
-           
+
            IF   (v_registros.tipo = 'devengado_pagado' and v_registros.temporal = 'no' ) THEN
            
                           --determinar el numero de cuota
-                          
+
                             v_nro_cuota = (((v_registros.nro_cuota::INTEGER)::varchar)||'.01'):: numeric;
                        
                             --recupera el tipo plan pago para el codigo = pagado
@@ -468,21 +469,28 @@ BEGIN
            
     
             END IF;
-			/*
-			--gonzalo insercion de cheque en libro bancos
-            IF v_registros.tipo = 'pagado' THEN
-                select fin.id_finalidad into v_id_finalidad
-                from tes.tfinalidad fin
-                where fin.nombre_finalidad ilike 'proveedores';
-                
-                if(v_registros.prioridad_conta =0 and v_registros.prioridad_libro != 0)then                        		
-                    v_respuesta_libro_bancos = tes.f_generar_deposito_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','endesis');	
-                elseif(v_registros.prioridad_conta!=0 and v_registros.prioridad_libro!=0)then	
-                    v_respuesta_libro_bancos = tes.f_generar_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','endesis');
-                end if;
-                       
-            END IF;*/
-
+            
+            
+            v_tes_integrar_lb_pagado = pxp.f_get_variable_global('tes_integrar_lb_pagado');
+			
+            
+            IF v_tes_integrar_lb_pagado = 'si' THEN
+                --gonzalo insercion de cheque en libro bancos
+                IF v_registros.tipo = 'pagado' THEN
+                    select fin.id_finalidad into v_id_finalidad
+                    from tes.tfinalidad fin
+                    where fin.nombre_finalidad ilike 'proveedores';
+                    
+                    if(v_registros.prioridad_conta =0 and v_registros.prioridad_libro != 0)then                        		
+                        v_respuesta_libro_bancos = tes.f_generar_deposito_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','endesis');	
+                    elseif(v_registros.prioridad_conta!=0 and v_registros.prioridad_libro!=0)then	
+                        v_respuesta_libro_bancos = tes.f_generar_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','endesis');
+                    end if;
+                           
+                END IF;
+            END IF;
+			
+		
 
   
 RETURN  TRUE;
