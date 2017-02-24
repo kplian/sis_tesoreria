@@ -15,6 +15,7 @@ DECLARE
     v_conexion			varchar;
     v_sinc				boolean;
     v_cantidad_lugares	integer;
+    v_consulta_aux		varchar;
 BEGIN
   	v_nombre_funcion = 'informix.f_migra_pais';
 	
@@ -49,6 +50,13 @@ BEGIN
             --update al pais en endesis
             if (pxp.f_get_variable_global('sincronizar') = 'true') then
             	v_conexion = migra.f_crear_conexion();
+                v_consulta_aux = 'UPDATE 
+  					sss.tsg_lugar
+                    SET 
+                      nombre = trim(both '' '' from ''' || v_registros.nombre ||''')
+                    WHERE 
+                      codigo = TRIM(both '' '' from ''' || v_registros.pais||''') AND
+                    nivel = 0;';
                 perform dblink_exec(v_conexion, 'UPDATE 
   					sss.tsg_lugar
                     SET 
@@ -79,7 +87,9 @@ BEGIN
                 select * FROM dblink(v_conexion, 
                 'select nextval(''sss.tsg_lugar_id_lugar_seq'')',TRUE)AS t1(resp integer)
             	into v_id_lugar; 
-                
+                v_consulta_aux = 'INSERT INTO  
+  					sss.tsg_lugar (id_lugar, fk_id_lugar, nivel, codigo, nombre)
+                    values( ' || v_id_lugar || ', ' || v_id_lugar || ',0, trim(both '' '' from ''' || v_registros.pais ||'''), trim(both '' '' from ''' || v_registros.nombre ||'''));';
                 perform dblink_exec(v_conexion, 'INSERT INTO  
   					sss.tsg_lugar (id_lugar, fk_id_lugar, nivel, codigo, nombre)
                     values( ' || v_id_lugar || ', ' || v_id_lugar || ',0, trim(both '' '' from ''' || v_registros.pais ||'''), trim(both '' '' from ''' || v_registros.nombre ||'''));', true);
@@ -117,11 +127,11 @@ EXCEPTION
 	WHEN OTHERS THEN
 			--update a la tabla informix.migracion
             
-            v_resp = 'Ha ocurrido un error en la funcion '||v_nombre_funcion || '. El mensaje es : ' || SQLERRM ||'. Pais: '||v_registros.nombre;
+            v_resp = 'Ha ocurrido un error en la funcion '||v_nombre_funcion || '. El mensaje es : ' || SQLERRM ||'. Pais: '||v_registros.nombre|| ' xxx: '||v_consulta_aux;
             
             return v_resp;
             
-			
+		
 END;
 $body$
 LANGUAGE 'plpgsql'

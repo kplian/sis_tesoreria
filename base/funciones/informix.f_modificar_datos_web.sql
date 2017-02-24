@@ -1,8 +1,8 @@
 CREATE OR REPLACE FUNCTION informix.f_modificar_datos_web (
   p_billete varchar
 )
-  RETURNS void AS
-  $body$
+RETURNS void AS
+$body$
 DECLARE
   v_consulta    		varchar;
 	v_registros  		record;
@@ -26,6 +26,9 @@ DECLARE
     v_id_alarma			integer;
     v_factura_antigua	record;
     v_marcar_procesado	varchar;
+    v_agt				varchar;
+    v_numero_tarjeta	varchar;
+    v_tarjeta			varchar;
     
 BEGIN
 	v_marcar_procesado = 'si';
@@ -173,9 +176,11 @@ BEGIN
       client_locale ''en_US.utf8'',
       informixserver ''sai1'');');
     
-    select id_boleto into v_id_boleto 
+    select b.id_boleto,b.agt,fp.numero_tarjeta,fp.tarjeta into v_id_boleto,v_agt,v_numero_tarjeta,v_tarjeta 
     from obingresos.tboleto b 
-    where b.nro_boleto = p_billete and estado_reg = 'activo';
+    inner join obingresos.tboleto_forma_pago fp on fp.id_boleto = b.id_boleto
+    where b.nro_boleto = p_billete and b.estado_reg = 'activo'
+    offset 0 limit 1;
     
     select * into v_detalle
     from obingresos.tdetalle_boletos_web d
@@ -203,6 +208,18 @@ BEGIN
     v_fpago = (case when v_detalle.moneda = 'USD' then 'U' else '' end);
     if (v_detalle.medio_pago != 'COMPLETAR-CC')  then
         if (v_estado = '1') then
+        
+        	if (v_agt != '56991266') then
+                v_error = 'CONTROLADO - No se puede procesar la modificacion de ventas web porque la agencia del boleto ' || p_billete_original || ' no correponde a las agencia de  ventas  web';
+                v_id_alarma = (select param.f_inserta_alarma_dblink (1,'Error al procesar modificaciones de venta web',v_error,'jaime.rivera@boa.bo,aldo.zeballos@boa.bo'));
+                raise exception '%',v_error; 
+            end if;
+            
+            if (v_tarjeta != 'VI' or v_numero_tarjeta not like '%00005555') then
+                v_error = 'CONTROLADO - No se puede procesar la modificacion de ventas web porque la forma de pago del boleto ' || p_billete_original || ' no es tarjeta  visa con numero *00005555';
+                v_id_alarma = (select param.f_inserta_alarma_dblink (1,'Error al procesar modificaciones de venta web',v_error,'jaime.rivera@boa.bo,aldo.zeballos@boa.bo'));
+                raise exception '%',v_error; 
+            end if;
         
             select bfp.*,m.codigo_internacional into v_forma_pago
             from obingresos.tboleto_forma_pago bfp 
