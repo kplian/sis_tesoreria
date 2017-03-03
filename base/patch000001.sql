@@ -1631,11 +1631,7 @@ ALTER TABLE tes.tcaja
 
 /*****************************I-SCP-GSS-TES-0-15/06/2016*************/
 
-ALTER TABLE tes.tproceso_caja
-  ADD COLUMN id_tipo_proceso_caja INTEGER;
   
-ALTER TABLE tes.tproceso_caja
-  ADD COLUMN id_cuenta_bancaria_mov INTEGER;
   
 CREATE TABLE tes.ttipo_proceso_caja (
   id_tipo_proceso_caja SERIAL, 
@@ -1683,5 +1679,25 @@ CREATE TABLE cd.tdeposito_cd (
 ) INHERITS (pxp.tbase)
 
 WITH (oids = false);
+
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN fondo_devolucion_retencion VARCHAR(2);
+  
+  --------------- SQL ---------------
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN columna_pk VARCHAR(100);
+  
+  
+  --------------- SQL ---------------
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN columna_pk_valor INTEGER;
+
+
 
 /*****************************F-SCP-GSS-TES-0-22/08/2016*************/

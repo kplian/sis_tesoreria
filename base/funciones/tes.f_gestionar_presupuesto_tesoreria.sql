@@ -358,7 +358,7 @@ BEGIN
                                     va_columna_relacion[v_i]= 'id_obligacion_pago';
                                     va_fk_llave[v_i] = v_registros_pro.id_obligacion_pago;
                                     va_id_obligacion_det[v_i]= v_registros_pro.id_obligacion_det;
-                                    va_nro_tramite[v_i]=v_reg_op.num_tramite;
+                                    va_nro_tramite[v_i]=v_registros_pro.num_tramite;
                                     
                                     --si la el año de pago es mayor que el año del devengado , el pago va con fecha de 31 de diciembre del año del devengado
                                     va_fecha[v_i]=now()::date;

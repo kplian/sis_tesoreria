@@ -1191,7 +1191,7 @@ select pxp.f_insert_testructura_gui ('VBOPOA', 'TES');
 
 
 select pxp.f_insert_tgui ('Excepciones de conceptos', 'Ecepciones de concepto de gasto', 'CONEX', 'si', 2, 'sis_tesoreria/vista/concepto_excepcion/ConceptoExcepcion.php', 3, '', 'ConceptoExcepcion', 'TES');
-select pxp.f_insert_testructura_gui ('CONEX', 'DG');
+select pxp.f_insert_testructura_gui ('CONEX', 'TES');
 
 /***********************************F-DAT-RAC-TES-0-30/06/2015*****************************************/
 
@@ -1672,6 +1672,25 @@ select wf.f_import_ttipo_documento_estado ('delete','ENTEFE','SOLEFE','borrador'
 select wf.f_import_ttipo_documento_estado ('insert','ENTEFE','SOLEFE','entregado','SOLEFE','crear','superior','');
 select wf.f_import_ttipo_documento_estado ('insert','SOLEFE','SOLEFE','borrador','SOLEFE','crear','superior','');
 
+
+
+
+select pxp.f_insert_tprocedimiento ('TES_TIPO_SEL', 'Consulta de datos', 'si', '', '', 'tes.ft_tipo_prorrateo_sel');
+select pxp.f_insert_tprocedimiento ('TES_PPANTPAR_INS', 'Inserta cuotas del tipo anticipo parcial , o
+                    anticipo total  o dev_garantia (todas no  tienen prorrateo por que no ejecutan presupuesto)', 'si', '', '', 'tes.f_plan_pago_ime');
+select pxp.f_insert_tprocedimiento ('TES_TIPO_INS', 'Insercion de registros', 'si', '', '', 'tes.ft_tipo_prorrateo_ime');
+select pxp.f_insert_tprocedimiento ('TES_TIPO_MOD', 'Modificacion de registros', 'si', '', '', 'tes.ft_tipo_prorrateo_ime');
+select pxp.f_insert_tprocedimiento ('TES_TIPO_ELI', 'Eliminacion de registros', 'si', '', '', 'tes.ft_tipo_prorrateo_ime');
+
+
+select pxp.f_insert_tprocedimiento_gui ('TES_PPANTPAR_INS', 'OBPG.8', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PPANTPAR_INS', 'OBPG.3', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PPANTPAR_INS', 'VBDP', 'no');
+select pxp.f_insert_tprocedimiento_gui ('PM_DEPFILUSU_SEL', 'SOLPD', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PPANTPAR_INS', 'SOLPD.2', 'no');
+select pxp.f_insert_tprocedimiento_gui ('TES_PPANTPAR_INS', 'SOLPD.4', 'no');
+
+
 /***********************************F-DAT-GSS-TES-0-22/06/2016*****************************************/
 
 /***********************************I-DAT-GSS-TES-0-30/06/2016*****************************************/
@@ -1697,4 +1716,21 @@ select pxp.f_insert_testructura_gui ('PP', 'TES');
 /***********************************I-DAT-MAM-TES-0-27/12/2016*****************************************/
 select pxp.f_insert_tgui ('Procesos Pendientes Contabilidad', 'Procesos Pendientes Contabilidad', 'PPC', 'si', 10, 'sis_tesoreria/vista/reporte_procesos_pendientes/ProcesoPendienteContabilidad.php', 3, '', 'ProcesoPendienteContabilidad', 'TES');
 select pxp.f_insert_testructura_gui ('PPC', 'TES');
+
+
+
 /***********************************F-DAT-MAM-TES-0-27/12/2016*****************************************/
+
+
+
+/***********************************I-DAT-RAC-TES-0-20/02/2017*****************************************/
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES 
+  (E'tes_integrar_lb_pagado', E'no', E'por defecto no, al validar un pago inserta un cheque, si o no');
+  
+ /***********************************F-DAT-RAC-TES-0-20/02/2017*****************************************/
+  
+
+
+
