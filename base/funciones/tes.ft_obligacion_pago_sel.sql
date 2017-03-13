@@ -710,7 +710,7 @@ BEGIN
 						inner join conta.tint_comprobante dev on dev.id_int_comprobante = ANY(pago.id_int_comprobante_fks)
         				and dev.id_clase_comprobante = 3
 					    and conta.f_recuperar_nro_documento_facturas_comprobante(dev.id_int_comprobante) is  null
-						where pago.id_clase_comprobante ='|| v_id_clase_comprobante ||' and
+						where dev.id_clase_comprobante ='|| v_id_clase_comprobante ||' and
 		      			pago.fecha between '''||v_parametros.fecha_ini||''' and
       					'''||v_parametros.fecha_fin||''' and
       					pago.estado_reg = ''validado'' and
