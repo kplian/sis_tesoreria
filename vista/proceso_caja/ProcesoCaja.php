@@ -19,6 +19,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
     	//llama al constructor de la clase padre
 		Phx.vista.ProcesoCaja.superclass.constructor.call(this,config);
 		this.init();
+		/*
 		this.addButton('fin_registro',
 			{	text:'Siguiente',
 				iconCls: 'badelante',
@@ -26,7 +27,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				handler:this.sigEstado,
 				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
 			}
-		);
+		);*/
 		/*
 		this.addButton('relacionar_deposito',
 			{	text:'Relacionar Depósito',
@@ -37,7 +38,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			}
 		);
 		*/
-		this.addButton('chkpresupuesto',
+		/*this.addButton('chkpresupuesto',
 			{	text:'Chk Presupuesto',
 				iconCls: 'blist',
 				disabled:false,
@@ -45,8 +46,8 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				handler:this.checkPresupuesto,
 				tooltip: '<b>Revisar Presupuesto</b><p>Revisar estado de ejecución presupeustaria para el tramite</p>'
 			}
-		);
-		
+		);*/
+		/*
 		this.addButton('consolidado_rendicion',
 			{	text:'Reporte Rendicion',
 				iconCls: 'blist',
@@ -55,8 +56,8 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				handler:this.consolidado_rendicion,
 				tooltip: '<b>Consolidado Rendicion</b><p>Consolidado por Rendicion</p>'
 			}
-		);
-		
+		);*/
+		/*
 		this.addButton('consolidado_reposicion',
 			{	text:'Reporte Reposicion',
 				iconCls: 'blist',
@@ -65,12 +66,13 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				handler:this.consolidado_reposicion,
 				tooltip: '<b>Consolidado Reposicion</b><p>Consolidado por Reposicion</p>'
 			}
-		);
+		);*/
 		
 		//carga de grilla
+		/*
 		if(this.nombreVista == 'ProcesoCaja'){
 			this.load({params:{start:0, limit: this.tam_pag, tipo_interfaz:this.nombreVista, id_caja:this.id_caja}});
-		}
+		}*/
 
 	},
 
@@ -134,11 +136,12 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Nro Tramite',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 130,
+				gwidth: 150,
 				maxLength:50
 			},
 				type:'TextField',
 				filters:{pfiltro:'ren.nro_tramite',type:'string'},
+				bottom_filter: true,
 				id_grupo:1,
 				grid:true,
 				form:false
@@ -223,6 +226,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			type:'ComboBox',
 			id_grupo:1,
 			filters:{pfiltro:'ren.tipo',type:'string'},
+			bottom_filter: true,
 			grid:true,
 			form:true
 		},
@@ -576,7 +580,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 	bedit:false,
 	bsave:true,
 
-	onButtonNew: function(){
+	/*onButtonNew: function(){
     	Phx.vista.ProcesoCaja.superclass.onButtonNew.call(this);
         this.Cmp.id_caja.setValue(this.id_caja);
 
@@ -588,8 +592,8 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			this.ocultarComponente(this.Cmp.fecha_inicio);
 			this.ocultarComponente(this.Cmp.fecha_fin);
 		}
-	},
-
+	},*/
+	/*
 	sigEstado:function(){
 	  var rec=this.sm.getSelected();
 	  var configExtra = [];
@@ -725,6 +729,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 								scope:this
 							 });
 	 },
+	*/
 	 /*	
 	 relacionarDeposito:function(){ 
 		var rec=this.sm.getSelected();
@@ -755,7 +760,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		}
 							   
 	},
-	
+
 	transferir:function(wizard,resp){
 		Phx.CP.loadingShow();
 		Ext.Ajax.request({
@@ -775,7 +780,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		});
 	   
 	},*/
-
+	/*
 	 checkPresupuesto:function(){
 	  var rec=this.sm.getSelected();
 	  var configExtra = [];
@@ -799,8 +804,8 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 								 });
 
 	 },
-
-
+	*/
+	/*
 	 onSaveWizard:function(wizard,resp){
 			Phx.CP.loadingShow();
 			Ext.Ajax.request({
@@ -824,7 +829,8 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				scope:this
 			});
 		},
-	
+	*/
+	/*
 	enableTabDepositos:function(){
      	if(this.TabPanelSouth.get(1)){
      		      this.TabPanelSouth.get(1).enable();	
@@ -839,12 +845,13 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		          
 		}
      },
-
+	*/
 	preparaMenu:function(n){
           var data = this.getSelectedData();
           var tb =this.tbar;
 		
           Phx.vista.ProcesoCaja.superclass.preparaMenu.call(this,n);
+          /*
           if (data['estado']== 'borrador'){
               this.getBoton('fin_registro').enable();
 			  this.getBoton('del').enable();
@@ -852,8 +859,8 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
           else{
               this.getBoton('fin_registro').disable();
 			  this.getBoton('del').disable();
-          }
-		  
+          }*/
+		  /*
 		  if(data['tipo']=='CIERRE'){
 			  //habilitar pestaña depositos
 			  this.enableTabDepositos();
@@ -861,8 +868,8 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			  //deshabilitar pestaña depositos
 			  this.disableTabDepositos();
 		  }
-		  	
-          this.getBoton('chkpresupuesto').enable();
+		  */
+          //this.getBoton('chkpresupuesto').enable();
 
      },
 
@@ -871,15 +878,16 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
           var tb =this.tbar;
 
           Phx.vista.ProcesoCaja.superclass.liberaMenu.call(this,n);
-          this.getBoton('chkpresupuesto').disable();
+          //this.getBoton('chkpresupuesto').disable();
      },
-
+	/*
 	successWizard:function(resp){
 			Phx.CP.loadingHide();
 			resp.argument.wizard.panel.destroy()
 			this.reload();
 		 },
-		 
+		 */
+	/*
 	consolidado_rendicion : function() {
 		var rec = this.getSelectedData();
 		var NumSelect=this.sm.getCount();
@@ -901,7 +909,8 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
 		}
 	},
-	
+	*/
+	/*
 	consolidado_reposicion : function() {
 		var rec = this.getSelectedData();
 		var NumSelect=this.sm.getCount();
@@ -923,7 +932,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
 		}
 	},
-
+	*/
 	tabsouth:[
             {
              url:'../../../sis_tesoreria/vista/solicitud_rendicion_det/RendicionProcesoCaja.php',

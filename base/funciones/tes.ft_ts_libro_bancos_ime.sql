@@ -1,4 +1,4 @@
-﻿--------------- SQL ---------------
+--------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_ime (
   p_administrador integer,
@@ -940,7 +940,7 @@ BEGIN
           
           IF EXISTS (select 1 from tes.tts_libro_bancos 
           			 where id_libro_bancos_fk=v_id_libro_bancos
-                     and estado not in ('borrador'))THEN
+                     and estado not in ('borrador','transferido'))THEN
           	raise exception 'No puede retroceder tiene registros que no se encuentran en borrador';
           END IF;
                     

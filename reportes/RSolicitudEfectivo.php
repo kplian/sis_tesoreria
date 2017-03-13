@@ -37,7 +37,7 @@ require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
 }
 
 
-Class RSolicitudEfectivo extends Report {
+Class RSolicitudEfectivo extends CustomReport {
 	var $objParam;
 	function __construct(CTParametro $objParam) {
 		$this->objParam = $objParam;
@@ -130,15 +130,38 @@ Class RSolicitudEfectivo extends Report {
         $pdf->Ln();        
         $pdf->Ln();        
 		$pdf->Ln();
-    
-		
-		$pdf->SetFont('', 'B');       
+
+        $style = array(
+            'border' => 2,
+            'vpadding' => 'auto',
+            'hpadding' => 'auto',
+            'fgcolor' => array(0,0,0),
+            'bgcolor' => false, //array(255,255,255)
+            'module_width' => 1, // width of a single module in points
+            'module_height' => 1 // height of a single module in points
+        );
+
+        $x = 40;
+        $y = 120;
+        $pdf->write2DBarcode($this->getDataSource()->getParameter('desc_funcionario'), 'QRCODE,L',$x, $y, 25, 25, $style, 'T');
+        $pdf->write2DBarcode($this->getDataSource()->getParameter('vbjefe'), 'QRCODE,L',$x+55, $y, 25, 25, $style, 'T');
+        $pdf->write2DBarcode($this->getDataSource()->getParameter('vbfinanzas'), 'QRCODE,L',$x+110, $y, 25, 25, $style, 'T');
+        $pdf->setY(140);
+        $pdf->Ln();
+        $pdf->SetFont('', 'B');
+        $pdf->Cell($width2, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+        $pdf->Cell($width3, $height, $this->getDataSource()->getParameter('desc_funcionario'), 0, 0, 'L', false, '', 1, false, 'T', 'C');
+        $pdf->Cell($width2, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+        $pdf->Cell($width3, $height, $this->getDataSource()->getParameter('vbjefe'), 0, 0, 'L', false, '', 1, false, 'T', 'C');
+        $pdf->Cell($width2, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+        $pdf->Cell($width3, $height, $this->getDataSource()->getParameter('vbfinanzas'), 0, 0, 'L', false, '', 1, false, 'T', 'C');
+        $pdf->Ln();
 		$pdf->Cell($width2, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
-        $pdf->Cell($width3, $height, 'SOLICITANTE', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+        $pdf->Cell($width3, $height, 'SOLICITANTE', 0, 0, 'C', false, '', 0, false, 'T', 'C');
         $pdf->Cell($width2, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
-        $pdf->Cell($width3, $height, 'VB CAJERO', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+        $pdf->Cell($width3, $height, 'VB JEFE DE AREA', 0, 0, 'C', false, '', 0, false, 'T', 'C');
         $pdf->Cell($width2, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
-        $pdf->Cell($width3, $height, 'VB JEFE DE AREA', 0, 0, 'L', false, '', 0, false, 'T', 'C');                                 
+        $pdf->Cell($width3, $height, 'AUTORIZACION FINANZAS', 0, 0, 'C', false, '', 0, false, 'T', 'C');
         $pdf->Ln();
 		
 		$pdf->Output($pdf->url_archivo, 'F');			

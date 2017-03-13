@@ -15,8 +15,9 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 	vista:'SinDetalle',
 	
 	gruposBarraTareas:[{name:'borrador',title:'<H1 align="center"><i class="fa fa-thumbs-o-down"></i> Borradores</h1>',grupo:0,height:0},
-                       {name:'entregado',title:'<H1 align="center"><i class="fa fa-eye"></i> Iniciados</h1>',grupo:1,height:0},
-                       {name:'finalizado',title:'<H1 align="center"><i class="fa fa-thumbs-o-up"></i> Finalizados</h1>',grupo:2,height:0}],
+                       {name:'iniciado',title:'<H1 align="center"><i class="fa fa-eye"></i> Iniciados</h1>',grupo:1,height:0},
+					   {name:'entregado',title:'<H1 align="center"><i class="fa fa-file-o"></i> Entregados</h1>',grupo:2,height:0},
+                       {name:'finalizado',title:'<H1 align="center"><i class="fa fa-thumbs-o-up"></i> Finalizados</h1>',grupo:3,height:0}],
 	
 	actualizarSegunTab: function(name, indice){
 		
@@ -28,9 +29,9 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 	
 	beditGroups: [0],
     bdelGroups:  [0],
-    bactGroups:  [0,1,2],
+    bactGroups:  [0,1,2,3],
     btestGroups: [0],
-    bexcelGroups: [0,1,2],
+    bexcelGroups: [0,1,2,3],
 	
 	constructor:function(config){
 		this.maestro=config.maestro;
@@ -77,7 +78,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		this.addButton('fin_registro',
 			{	text:'Siguiente',
 				iconCls: 'badelante',
-				grupo:[0,1],
+				grupo:[0,2],
 				disabled:false,
 				handler:this.sigEstado,
 				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
@@ -87,7 +88,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		this.addButton('btnRendicion', {
 			text : 'Rendicion Efectivo',
 			iconCls : 'bballot',
-			grupo:[1],
+			grupo:[2],
 			disabled : false,
 			handler : this.onBtnRendicion,
 			tooltip : '<b>Rendicion</b>'
@@ -96,7 +97,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		this.addButton('btnDevol', {
 			text : 'Devolucion Efectivo',
 			iconCls : 'bballot',
-			grupo:[1],
+			grupo:[2],
 			disabled : true,
 			handler : this.onBtnDevolucion,
 			tooltip : '<b>Devolucion Sin Añadir Facturas</b>'
@@ -106,7 +107,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			{
 				text: 'Documentos',
 				iconCls: 'bchecklist',
-				grupo:[0,1,2],
+				grupo:[0,1,2,3],
 				disabled: false,
 				handler: this.loadCheckDocumentosSolWf,
 				tooltip: '<b>Documentos de la Solicitud</b><br/>Los documetos de la solicitud seleccionada.'
@@ -118,7 +119,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 				argument: {estado: 'anterior'},
 				iconCls: 'batras',
 				disabled:true,
-				grupo:[2],
+				grupo:[3],
 				handler:this.antEstado,
 				tooltip: '<b>Anterior</b><p>Pasa al anterior estado</p>'
 			}
@@ -126,7 +127,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 
 		this.addButton('diagrama_gantt',
             {
-                grupo:[0,1,2],
+                grupo:[0,1,2,3],
                 text:'Gant',
                 iconCls: 'bgantt',
                 disabled:true,
@@ -221,7 +222,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 				pageSize: 15,
 				queryDelay: 1000,
 				anchor: '80%',
-				gwidth: 80,
+				gwidth: 100,
 				minChars: 2,
 				tpl: '<tpl for="."><div class="x-combo-list-item"><p><b>{codigo}</b></p><p>CAJERO: {cajero}</p></div></tpl>',
 				renderer : function(value, p, record) {
@@ -722,7 +723,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			  //this.getBoton('btnReciboEntrega').disable();
 			  //this.getBoton('btnRendicionEfectivo').disable();
 		  }else{
-              this.getBoton('fin_registro').enable();
+              this.getBoton('fin_registro').disable();
 			  this.getBoton('edit').disable();
 			  this.getBoton('del').disable();
 			  this.getBoton('btnRendicion').disable();

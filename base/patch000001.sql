@@ -1681,7 +1681,6 @@ CREATE TABLE cd.tdeposito_cd (
 WITH (oids = false);
 
 
-
 --------------- SQL ---------------
 
 ALTER TABLE tes.tts_libro_bancos
@@ -1701,3 +1700,17 @@ ALTER TABLE tes.tts_libro_bancos
 
 
 /*****************************F-SCP-GSS-TES-0-22/08/2016*************/
+
+/*****************************I-SCP-GSS-TES-0-16/12/2016*************/
+
+CREATE TABLE tes.tdeposito_proceso_caja (
+  id_deposito_proceso_caja SERIAL,
+  id_proceso_caja INTEGER,
+  id_libro_bancos INTEGER,
+  importe_contable_deposito NUMERIC(20,2),
+  CONSTRAINT tdeposito_proceso_caja_pkey PRIMARY KEY(id_deposito_proceso_caja)
+) INHERITS (pxp.tbase)
+
+WITH (oids = false);
+
+/*****************************F-SCP-GSS-TES-0-16/12/2016*************/

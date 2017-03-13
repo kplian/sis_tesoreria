@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
 *@package pXP
 *@file CajaVB.php
@@ -50,25 +50,42 @@ Phx.vista.CajaCajero = {
 	
 	onBtnRendicion : function() {
 		var rec = this.sm.getSelected();
-		Phx.CP.loadWindows('../../../sis_tesoreria/vista/proceso_caja/ProcesoCaja.php', 'Proceso Caja', {
+		Phx.CP.loadWindows('../../../sis_tesoreria/vista/proceso_caja/ProcesoCajaCajero.php', 'Proceso Caja', {
 			modal : true,
 			width : '95%',
 			height : '95%',
-		}, rec.data, this.idContenedor, 'ProcesoCaja');
+		}, rec.data, this.idContenedor, 'ProcesoCajaCajero');
 	},
 	
 	preparaMenu:function(n){
          var data = this.getSelectedData();
          		 
-		 /*if(data.estado == 'abierto'){  
-		    this.getBoton('btnRendicion').enable();
+		 if(data.estado == 'abierto'){
+             this.enableTabCajero();
          }
 		 else{
-			 this.getBoton('btnRendicion').disable();
+             this.disableTabCajero();
 		 }	
-		*/	
+
 		this.getBoton('diagrama_gantt').enable();	 
-     }
+     },
+
+    enableTabCajero:function(){
+        if(this.TabPanelSouth.get(1)){
+            this.TabPanelSouth.get(0).disable();
+            this.TabPanelSouth.get(1).enable();
+            this.TabPanelSouth.setActiveTab(1)
+        }
+    },
+
+    disableTabCajero:function(){
+        if(this.TabPanelSouth.get(1)){
+            this.TabPanelSouth.get(0).enable();
+            this.TabPanelSouth.get(1).disable();
+            this.TabPanelSouth.setActiveTab(0)
+
+        }
+    },
     
 };
 </script>

@@ -386,7 +386,7 @@ Phx.vista.PlanPagoVbCostos = {
 	                           this.getBoton('ini_estado').enable();
 	                           //si la prioridad de lb es internacional ...  3 interancional, 2 nacional 0 central
 	                           if(data['prioridad_lp']== 3){
-	                               this.getBoton('sig_estado').disable();
+	                               this.getBoton('sig_estado').enable();
 		                           this.getBoton('SolDevPag').enable();
 	                           }
 	                           else{

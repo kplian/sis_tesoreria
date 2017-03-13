@@ -43,7 +43,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
-				maxLength:20
+				maxLength:30
 			},
 			type:'TextField',
 			filters:{pfiltro:'caja.codigo',type:'string'},
@@ -207,6 +207,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 				maxLength:1179650
 			},
 			type:'NumberField',
+			valorInicial: 5000,
 			filters:{pfiltro:'caja.importe_maximo_caja',type:'numeric'},
 			id_grupo:1,
 			grid:true,
@@ -222,6 +223,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 				maxLength:393218
 			},
 			type:'NumberField',
+			valorInicial: 1000,
 			filters:{pfiltro:'caja.importe_maximo_item',type:'numeric'},
 			id_grupo:1,
 			grid:true,
@@ -238,6 +240,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 				maxLength:393218
 			},
 			type:'NumberField',
+			valorInicial: 2,
 			filters:{pfiltro:'caja.dias_maximo_rendicion',type:'numeric'},
 			id_grupo:1,
 			grid:true,
@@ -532,10 +535,10 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
         this.menuAdqGantt = new Ext.Toolbar.SplitButton({
 		            id: 'b-diagrama_gantt-' + this.idContenedor,
 		            text: 'Gantt',
-		            disabled: true,
+		            disabled: false,
 		            grupo:[0,1,2,3],
 		            iconCls : 'bgantt',
-		            handler:this.diagramGanttDinamico,
+		            handler:this.diagramGantt,
 		            scope: this,
 		            menu:{
 		            items: [{
@@ -575,7 +578,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
    liberaMenu:function(){
         var tb = Phx.vista.Caja.superclass.liberaMenu.call(this);
         if(tb){
-           this.getBoton('diagrama_gantt').disable();
+           this.getBoton('diagrama_gantt').enable();
         }
         return tb
     },

@@ -336,7 +336,7 @@ BEGIN
              IF   v_codigo_estado_siguiente in('vbcajero')   THEN
                   v_acceso_directo = '../../../sis_tesoreria/vista/solicitud_efectivo/SolicitudEfectivoVb.php';
                   v_clase = 'SolicitudEfectivoVb';
-                  v_parametros_ad = '{filtro_directo:{campo:"lb.id_proceso_wf",valor:"'||v_id_proceso_wf::varchar||'"}}';
+                  v_parametros_ad = '{filtro_directo:{campo:"solefe.id_proceso_wf",valor:"'||v_id_proceso_wf::varchar||'"}}';
                   v_tipo_noti = 'notificacion';
                   v_titulo  = 'Visto Bueno Solicitud Efectivo';
              

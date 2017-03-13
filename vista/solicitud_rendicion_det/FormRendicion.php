@@ -20,7 +20,8 @@ Phx.vista.FormRendicion = {
 	autorizacion_nulos: 'no',
 		
 	constructor: function(config) {		
-	   Phx.vista.FormRendicion.superclass.constructor.call(this,config);	   
+	   Phx.vista.FormRendicion.superclass.constructor.call(this,config);
+	   this.addEvents('aftersave');
     },
     
 	onNew: function(){    	
@@ -107,6 +108,7 @@ Phx.vista.FormRendicion = {
 		}
 		
         this.panel.close();
+		this.fireEvent('aftersave',this,this.getValues());
     },	
 };
 </script>

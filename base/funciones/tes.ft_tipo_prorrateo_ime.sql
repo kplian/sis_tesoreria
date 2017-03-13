@@ -38,6 +38,8 @@ DECLARE
     v_fin_campos		varchar;
     v_fin_valores		varchar;
     v_query				text;
+    v_id_partida		integer;
+    v_id_centro_costo_aux	integer;
 			    
 BEGIN
 
@@ -193,10 +195,35 @@ BEGIN
                 	v_fin_campos = '';
                     v_fin_valores = '';
                 end if;
+                v_id_partida = null;
+                
+                select p.id_partida into v_id_partida 
+                from pre.tpartida p
+                inner join pre.tconcepto_partida cp on cp.id_partida = p.id_partida                                
+                inner join pre.tpresup_partida pp on pp.id_partida = p.id_partida
+                where  p.id_gestion = v_periodo.id_gestion and cp.id_concepto_ingas = v_parametros.id_concepto_ingas
+                and pp.id_presupuesto = v_registros.id_centro_costo and pp.estado_reg = 'activo';
+                if (v_registros.id_centro_costo is null) then
+                	raise exception 'llega';
+                end if;
+                if (v_id_partida is null) then
+                	v_id_centro_costo_aux = NULL;
+                	v_id_centro_costo_aux = tes.f_get_uo_presupuesta_prorrateo(v_parametros.id_concepto_ingas,v_registros.id_centro_costo);
+                    
+                    if (v_id_centro_costo_aux is null) then
+                    	raise exception 'No existe un centro de  costo: % relacionado a la partida',v_registros.id_centro_costo;
+                    else
+                    	v_registros.id_centro_costo = v_id_centro_costo_aux;
+                    end if;                    
+                end if;
+                
+                
                         
             	SELECT * into v_parametrizacion 
                 FROM conta.f_get_config_relacion_contable('CUECOMP', v_periodo.id_gestion,
                 v_parametros.id_concepto_ingas, v_registros.id_centro_costo);
+                
+                
                 
                 EXECUTE '
                 INSERT INTO 
@@ -228,6 +255,8 @@ BEGIN
                     ' || v_registros.monto || v_fin_valores || '
                     
                   )';
+                  
+                  
                   
                   if (pxp.f_existe_parametro(p_tabla,'nombre_funcion_ejecutar')) then
                   		v_query = 'select ' || v_parametros.nombre_funcion_ejecutar ||

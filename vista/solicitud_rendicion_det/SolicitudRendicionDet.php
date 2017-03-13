@@ -29,6 +29,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 		);
 		
 		this.load({params:{start:0, limit:this.tam_pag, id_solicitud_efectivo:this.id_solicitud_efectivo}, me : this, callback:function(r,o,s){
+			console.log('entra');
 			this.me.id_estado_workflow = r[0].data.id_estado_wf;
 			this.me.id_proceso_workflow = r[0].data.id_proceso_wf;
 		} });
@@ -509,8 +510,22 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 									id_moneda_defecto : me.id_moneda
 								}, 
 								this.idContenedor,
-								'FormRendicion');         
+								'FormRendicion',
+							    {
+								   config:[{
+									   event:'aftersave',
+									   delegate: this.loadWorkFlow,
+
+								   }],
+								   scope:this
+							    });
     },
+
+	loadWorkflow : function(){
+		var rec=this.sm.getSelected();
+		console.log('gonzalo');
+		console.log(rec);
+	},
 	/*
 	abrirFormulario: function(tipo, record){
 	                                { data: { 
@@ -633,6 +648,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 		successWizard:function(resp){
 			Phx.CP.loadingHide();
 			resp.argument.wizard.panel.destroy()
+
 			this.reload();
 		 },
 

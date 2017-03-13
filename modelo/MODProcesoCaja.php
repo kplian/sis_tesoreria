@@ -320,5 +320,74 @@ class MODProcesoCaja extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+
+	function reporteCabeceraProcesoCaja(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.ft_proceso_caja_sel';
+		$this->transaccion='TES_REPCCAJA_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this->setCount(false);
+
+		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');
+
+		$this->captura('id_cuenta_doc','INTEGER');
+		$this->captura('id_tipo_cuenta_doc','INTEGER');
+		$this->captura('id_proceso_wf','INTEGER');
+		$this->captura('id_caja','INTEGER');
+		$this->captura('nombre_cheque','VARCHAR');
+		$this->captura('id_uo','INTEGER');
+		$this->captura('id_funcionario','INTEGER');
+		$this->captura('tipo_pago','VARCHAR');
+		$this->captura('id_depto','INTEGER');
+		$this->captura('id_cuenta_doc_fk','INTEGER');
+		$this->captura('nro_tramite','VARCHAR');
+		$this->captura('motivo','VARCHAR');
+		$this->captura('fecha','DATE');
+		$this->captura('id_moneda','INTEGER');
+		$this->captura('estado','VARCHAR');
+		$this->captura('estado_reg','VARCHAR');
+		$this->captura('id_estado_wf','INTEGER');
+		$this->captura('id_usuario_ai','INTEGER');
+		$this->captura('usuario_ai','VARCHAR');
+		$this->captura('fecha_reg','TIMESTAMP');
+		$this->captura('id_usuario_reg','INTEGER');
+		$this->captura('fecha_mod','TIMESTAMP');
+		$this->captura('id_usuario_mod','INTEGER');
+		$this->captura('usr_reg','VARCHAR');
+		$this->captura('usr_mod','VARCHAR');
+		$this->captura('desc_moneda','VARCHAR');
+		$this->captura('desc_depto','VARCHAR');
+		$this->captura('obs','TEXT');
+		$this->captura('desc_funcionario','TEXT');
+		$this->captura('importe','numeric');
+		$this->captura('desc_funcionario_cuenta_bancaria','varchar');
+		$this->captura('id_funcionario_cuenta_bancaria','integer');
+		$this->captura('id_depto_lb','integer');
+		$this->captura('id_depto_conta','integer');
+		$this->captura('desc_tipo_cuenta_doc','VARCHAR');
+		$this->captura('sw_solicitud','VARCHAR');
+		$this->captura('lugar','VARCHAR');
+		$this->captura('cargo_funcionario','varchar');
+		$this->captura('nombre_unidad','VARCHAR');
+		$this->captura('importe_literal','VARCHAR');
+		$this->captura('motivo_ori','VARCHAR');
+		$this->captura('gerente_financiero','VARCHAR');
+		$this->captura('cargo_gerente_financiero','VARCHAR');
+
+		$this->captura('aprobador','TEXT');
+		$this->captura('cargo_aprobador','TEXT');
+
+		$this->captura('nro_cbte','VARCHAR');
+		$this->captura('num_memo','VARCHAR');
+		$this->captura('num_rendicion','VARCHAR');
+		$this->captura('nro_cheque','integer');
+		$this->captura('importe_solicitado','numeric');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
 }
 ?>

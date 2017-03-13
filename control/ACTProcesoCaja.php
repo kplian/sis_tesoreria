@@ -7,6 +7,8 @@
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
 */
 
+require_once(dirname(__FILE__).'/../reportes/RMemoCajaChica.php');
+
 class ACTProcesoCaja extends ACTbase{
 
 	function listarProcesoCaja(){
@@ -17,6 +19,10 @@ class ACTProcesoCaja extends ACTbase{
 		if($this->objParam->getParametro('id_caja')!='')
 		{
 			$this->objParam-> addFiltro('ren.id_caja ='.$this->objParam->getParametro('id_caja'));
+		}
+
+		if($this->objParam->getParametro('filtro_campo')!=''){
+			$this->objParam->addFiltro($this->objParam->getParametro('filtro_campo')." = ".$this->objParam->getParametro('filtro_valor'));
 		}
 		
 		if($this->objParam->getParametro('pes_estado')!='')
@@ -121,6 +127,37 @@ class ACTProcesoCaja extends ACTbase{
 		$this->objFunc=$this->create('MODProcesoCaja');
 		$this->res=$this->objFunc->importeContableDeposito($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+
+	function recuperarSolicitudFondosCaja(){
+
+		$this->objFunc = $this->create('MODProcesoCaja');
+		$cbteHeader = $this->objFunc->reporteCabeceraProcesoCaja($this->objParam);
+		if($cbteHeader->getTipo() == 'EXITO'){
+			return $cbteHeader;
+		}
+		else{
+			$cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+			exit;
+		}
+	}
+
+	function reporteMemoCajaChica(){
+
+		$dataSource = $this->recuperarSolicitudFondosCaja();
+		$nombreArchivo = uniqid(md5(session_id()).'MemoAsignaciónCaja').'.docx';
+		$reporte = new RMemoCajaChica($this->objParam);
+
+
+		$reporte->datosHeader($dataSource->getDatos());
+
+		$reporte->write(dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo);
+
+		$this->mensajeExito=new Mensaje();
+		$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se generó con éxito el reporte: '.$nombreArchivo,'control');
+		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+
 	}
 }
 

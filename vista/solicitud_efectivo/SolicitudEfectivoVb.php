@@ -37,6 +37,16 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 			}
 		);
 
+		this.addButton('btnChequeoDocumentosWf',
+				{
+					text: 'Documentos',
+					iconCls: 'bchecklist',
+					disabled: false,
+					handler: this.loadCheckDocumentosSolWf,
+					tooltip: '<b>Documentos de la Solicitud</b><br/>Los documetos de la solicitud seleccionada.'
+				}
+		);
+
 		this.addButton('diagrama_gantt',
             {
                 text:'Gant',
@@ -48,6 +58,12 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
         );
 				
 		this.iniciarEventos();
+
+		if(config.filtro_directo){
+			this.store.baseParams.filtro_valor = config.filtro_directo.valor;
+			this.store.baseParams.filtro_campo = config.filtro_directo.campo;
+		}
+
 		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:'vbSolicitudEfectivo'}})
 	},
 			
@@ -546,6 +562,21 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 			resp.argument.wizard.panel.destroy()
 			this.reload();
 		 },
+
+	loadCheckDocumentosSolWf:function() {
+		var rec=this.sm.getSelected();
+		rec.data.nombreVista = this.nombreVista;
+		Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
+				'Chequear documento del WF',
+				{
+					width:'90%',
+					height:500
+				},
+				rec.data,
+				this.idContenedor,
+				'DocumentoWf'
+		)
+	},
 
     diagramGantt : function (){
         var data=this.sm.getSelected().data.id_proceso_wf;
