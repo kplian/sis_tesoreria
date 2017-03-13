@@ -14,24 +14,24 @@ $body$
  SISTEMA ENDESIS - SISTEMA DE ...
 ***************************************************************************
  SCRIPT: 		tes.f_lista_funcionario_jefe_efectivo_wf_sel
- DESCRIPCIÓN: 	Lista el funcionario que aprobo la solicitud de efectivo
+ DESCRIPCIï¿½N: 	Lista el funcionario que aprobo la solicitud de efectivo
  AUTOR: 		Gonzalo Sarmiento Sejas
  FECHA:			29/04/2016
  COMENTARIOS:	
 ***************************************************************************
  HISTORIA DE MODIFICACIONES:
 
- DESCRIPCIÓN:
+ DESCRIPCIï¿½N:
  AUTOR:       
  FECHA:      
 
 ***************************************************************************/
 
 -------------------------
--- CUERPO DE LA FUNCIÓN --
+-- CUERPO DE LA FUNCIï¿½N --
 --------------------------
 
--- PARÁMETROS FIJOS
+-- PARï¿½METROS FIJOS
 /*
 
 

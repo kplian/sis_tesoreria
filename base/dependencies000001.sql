@@ -161,307 +161,17 @@ CREATE INDEX tobligacion_pago_idx1 ON tes.tobligacion_pago
   
   --------------- SQL ---------------
 
-CREATE OR REPLACE VIEW tes.vcuenta_bancaria(
-    id_cuenta_bancaria,
-    estado_reg,
-    fecha_baja,
-    nro_cuenta,
-    fecha_alta,
-    id_institucion,
-    nombre_institucion,
-    fecha_reg,
-    id_usuario_reg,
-    fecha_mod,
-    id_usuario_mod,
-    id_moneda,
-    codigo_moneda)
-AS
-  SELECT ctaban.id_cuenta_bancaria,
-         ctaban.estado_reg,
-         ctaban.fecha_baja,
-         ctaban.nro_cuenta,
-         ctaban.fecha_alta,
-         ctaban.id_institucion,
-         inst.nombre AS nombre_institucion,
-         ctaban.fecha_reg,
-         ctaban.id_usuario_reg,
-         ctaban.fecha_mod,
-         ctaban.id_usuario_mod,
-         mon.id_moneda,
-         mon.codigo AS codigo_moneda
-  FROM tes.tcuenta_bancaria ctaban
-       JOIN param.tinstitucion inst ON inst.id_institucion =
-        ctaban.id_institucion
-       JOIN param.tmoneda mon ON mon.id_moneda = ctaban.id_moneda;
+
 /***********************************F-DEP-RAC-TES-19-24/06/2013****************************************/
 
 
 
-/***********************************I-DEP-RAC-TES-19-20/08/2013****************************************/
-
---------------- SQL ---------------
-
---------------- SQL ---------------
-
- --------------- SQL ---------------
-
- -- object recreation
-
-
-CREATE VIEW tes.vcomp_devtesprov_plan_pago(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    
-    tipo,
-    id_gestion_cuentas)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-        
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-        op.id_obligacion_pago
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor;
-       
-/***********************************F-DEP-RAC-TES-19-20/08/2013****************************************/
-
-
- /***********************************I-DEP-RAC-TES-0-1/09/2013***************************************/
-
-  CREATE OR REPLACE VIEW tes.vcomp_devtesprov_det_plan_pago(
-    id_concepto_ingas,
-    id_partida,
-    id_partida_ejecucion_com,
-    monto_pago_mb,
-    monto_pago_mo,
-    id_centro_costo,
-    descripcion,
-    id_plan_pago)
-AS
-  SELECT od.id_concepto_ingas,
-         od.id_partida,
-         od.id_partida_ejecucion_com,
-         od.monto_pago_mb,
-         od.monto_pago_mo,
-         od.id_centro_costo,
-         od.descripcion,
-         pro.id_plan_pago
-  FROM tes.tprorrateo pro
-       JOIN tes.tobligacion_det od ON od.id_obligacion_det =
-        pro.id_obligacion_det;
-        
-        
- /***********************************F-DEP-RAC-TES-0-1/09/2013***************************************/
-
- /***********************************I-DEP-RAC-TES-0-18/09/2013***************************************/
-
---------------- SQL ---------------
-
- -- object recreation
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-   
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-      
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-        op.id_obligacion_pago
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor;
-
-
---------------- SQL ---------------
-
---------------- SQL ---------------
 
 
 
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_det_plan_pago(
-    id_concepto_ingas,
-    id_partida,
-    id_partida_ejecucion_com,
-    monto_pago_mb,
-    monto_pago_mo,
-    id_centro_costo,
-    descripcion,
-    id_plan_pago,
-    id_prorrateo,
-    id_int_transaccion)
-AS
-  SELECT od.id_concepto_ingas,
-         od.id_partida,
-         od.id_partida_ejecucion_com,
-         pro.monto_ejecutar_mo AS monto_pago_mb,
-         pro.monto_ejecutar_mb AS monto_pago_mo,
-         od.id_centro_costo,
-         od.descripcion,
-         pro.id_plan_pago,
-         pro.id_prorrateo,
-         pro.id_int_transaccion
-  FROM tes.tprorrateo pro
-       JOIN tes.tobligacion_det od ON od.id_obligacion_det =
-        pro.id_obligacion_det;
-
-
- /***********************************F-DEP-RAC-TES-0-18/09/2013***************************************/
-
- /***********************************I-DEP-RAC-TES-0-18/11/2013***************************************/
-
---------------- SQL ---------------
-
-  -- object recreation
-DROP VIEW tes.vcomp_devtesprov_plan_pago;
-
-CREATE VIEW tes.vcomp_devtesprov_plan_pago(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    id_cuenta_bancaria_mov,
-    nro_cheque)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-        op.id_obligacion_pago
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor;
-       
-/***********************************F-DEP-RAC-TES-0-16/12/2013***************************************/
+ 
+ 
+ 
 
 /***********************************I-DEP-RCM-TES-0-16/01/2014***************************************/
 ALTER TABLE tes.tcuenta_bancaria
@@ -475,40 +185,6 @@ ALTER TABLE tes.tcuenta_bancaria
 
 
 
-
-/***********************************I-DEP-RAC-TES-0-28/01/2014****************************************/
-
---------------- SQL ---------------
-
-DROP VIEW tes.vcomp_devtesprov_det_plan_pago;
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_det_plan_pago(
-    id_concepto_ingas,
-    id_partida,
-    id_partida_ejecucion_com,
-    monto_pago_mo,
-    monto_pago_mb,
-    id_centro_costo,
-    descripcion,
-    id_plan_pago,
-    id_prorrateo,
-    id_int_transaccion)
-AS
-  SELECT od.id_concepto_ingas,
-         od.id_partida,
-         od.id_partida_ejecucion_com,
-         pro.monto_ejecutar_mo AS monto_pago_mo,
-         pro.monto_ejecutar_mb AS monto_pago_mb,
-         od.id_centro_costo,
-         od.descripcion,
-         pro.id_plan_pago,
-         pro.id_prorrateo,
-         pro.id_int_transaccion
-  FROM tes.tprorrateo pro
-       JOIN tes.tobligacion_det od ON od.id_obligacion_det =
-        pro.id_obligacion_det;
-
-/***********************************F-DEP-RAC-TES-0-28/01/2014****************************************/
 
 
 
@@ -740,60 +416,6 @@ ALTER TABLE tes.tobligacion_pago
 /***********************************F-DEP-RAC-TES-0-05/02/2014****************************************/
 
 
-/***********************************I-DEP-RAC-TES-0-08/02/2014****************************************/
-
---------------- SQL ---------------
-
- -- object recreation
-DROP VIEW tes.vcomp_devtesprov_plan_pago;
-
-CREATE VIEW tes.vcomp_devtesprov_plan_pago (
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var)
-AS
-SELECT pp.id_plan_pago, op.id_proveedor, p.desc_proveedor, op.id_moneda,
-    pp.id_depto_conta, op.numero, now() AS fecha_actual, pp.estado,
-    pp.monto_ejecutar_total_mb, pp.monto_ejecutar_total_mo, pp.monto,
-    pp.monto_mb, pp.monto_retgar_mb, pp.monto_retgar_mo, pp.monto_no_pagado,
-    pp.monto_no_pagado_mb, pp.otros_descuentos, pp.otros_descuentos_mb,
-    pp.id_plantilla, pp.id_cuenta_bancaria, pp.id_cuenta_bancaria_mov,
-    pp.nro_cheque, pp.nro_cuenta_bancaria, op.num_tramite, pp.tipo,
-    op.id_gestion AS id_gestion_cuentas, pp.id_int_comprobante,
-    pp.liquido_pagable, pp.liquido_pagable_mb, pp.nombre_pago, pp.porc_monto_excento_var
-FROM tes.tplan_pago pp
-   JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago = op.id_obligacion_pago
-   JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor;
-
-/***********************************F-DEP-RAC-TES-0-08/02/2014****************************************/
 
 /***********************************I-DEP-JRR-TES-0-24/04/2014*****************************************/
 
@@ -1689,84 +1311,6 @@ CREATE TRIGGER trig_actualiza_informacion_estado_pp
 
 /***********************************I-DEP-RAC-TES-0-11/06/2014*****************************************/
 
---------------- SQL ---------------
---------------- SQL ---------------
-
---------------- SQL ---------------
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, '' ::character varying) ::text || ' ' ::text) ||
-          COALESCE(pp.obs_monto_no_pagado, '' ::text)) ::character varying AS
-           obs_pp
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-        op.id_obligacion_pago
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor;
-
 
 select pxp.f_insert_testructura_gui ('SOLPD', 'TES');
 select pxp.f_insert_testructura_gui ('OBPG.8.4', 'OBPG.8');
@@ -1805,7 +1349,6 @@ select pxp.f_insert_testructura_gui ('SOLPD.7.2.1', 'SOLPD.7.2');
 select pxp.f_insert_testructura_gui ('SOLPD.7.3.1', 'SOLPD.7.3');
 select pxp.f_insert_testructura_gui ('SOLPD.7.3.1.1', 'SOLPD.7.3.1');
 select pxp.f_insert_tprocedimiento_gui ('TES_OBPGSOL_SEL', 'OBPG', 'no');
-select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'OBPG.8', 'no');
 select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'OBPG.8.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'OBPG.8.5', 'no');
 select pxp.f_insert_tprocedimiento_gui ('WF_VERSIGPRO_IME', 'OBPG.8.5', 'no');
@@ -1814,7 +1357,6 @@ select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'OBPG.8.5', 'no');
 select pxp.f_insert_tprocedimiento_gui ('WF_FUNTIPES_SEL', 'OBPG.8.5', 'no');
 select pxp.f_insert_tprocedimiento_gui ('WF_DEPTIPES_SEL', 'OBPG.8.5', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_OBPGSOL_SEL', 'OBPG.2', 'no');
-select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'OBPG.3', 'no');
 select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'OBPG.3.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'OBPG.3.5', 'no');
 select pxp.f_insert_tprocedimiento_gui ('WF_VERSIGPRO_IME', 'OBPG.3.5', 'no');
@@ -1822,11 +1364,8 @@ select pxp.f_insert_tprocedimiento_gui ('WF_CHKSTA_IME', 'OBPG.3.5', 'no');
 select pxp.f_insert_tprocedimiento_gui ('WF_TIPES_SEL', 'OBPG.3.5', 'no');
 select pxp.f_insert_tprocedimiento_gui ('WF_FUNTIPES_SEL', 'OBPG.3.5', 'no');
 select pxp.f_insert_tprocedimiento_gui ('WF_DEPTIPES_SEL', 'OBPG.3.5', 'no');
-select pxp.f_insert_tprocedimiento_gui ('MIG_LBAN_INS', 'CTABANE.1', 'no');
-select pxp.f_insert_tprocedimiento_gui ('MIG_LBAN_MOD', 'CTABANE.1', 'no');
-select pxp.f_insert_tprocedimiento_gui ('MIG_LBAN_ELI', 'CTABANE.1', 'no');
-select pxp.f_insert_tprocedimiento_gui ('MIG_LBAN_SEL', 'CTABANE.1', 'no');
-select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'VBDP', 'no');
+
+
 select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'VBDP.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('WF_DOCWFAR_MOD', 'VBDP.5', 'no');
 select pxp.f_insert_tprocedimiento_gui ('WF_VERSIGPRO_IME', 'VBDP.5', 'no');
@@ -1883,7 +1422,6 @@ select pxp.f_insert_tprocedimiento_gui ('TES_PAFPP_IME', 'SOLPD.2', 'no');
 select pxp.f_insert_tprocedimiento_gui ('CONTA_GETDEC_IME', 'SOLPD.2', 'no');
 select pxp.f_insert_tprocedimiento_gui ('PM_PLT_SEL', 'SOLPD.2', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_CTABAN_SEL', 'SOLPD.2', 'no');
-select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'SOLPD.2', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAPA_INS', 'SOLPD.2', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_INS', 'SOLPD.2', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_MOD', 'SOLPD.2', 'no');
@@ -1922,7 +1460,6 @@ select pxp.f_insert_tprocedimiento_gui ('TES_PAFPP_IME', 'SOLPD.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('CONTA_GETDEC_IME', 'SOLPD.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('PM_PLT_SEL', 'SOLPD.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_CTABAN_SEL', 'SOLPD.4', 'no');
-select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'SOLPD.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAPA_INS', 'SOLPD.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_INS', 'SOLPD.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_MOD', 'SOLPD.4', 'no');
@@ -2146,7 +1683,6 @@ select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas',
 select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'CONTA_GETDEC_IME', 'SOLPD.4');
 select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_PLT_SEL', 'SOLPD.4');
 select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_CTABAN_SEL', 'SOLPD.4');
-select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'MIG_CBANESIS_SEL', 'SOLPD.4');
 select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPAPA_INS', 'SOLPD.4');
 select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPA_INS', 'SOLPD.4');
 select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPA_MOD', 'SOLPD.4');
@@ -2189,7 +1725,6 @@ select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas',
 select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'CONTA_GETDEC_IME', 'SOLPD.2');
 select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_PLT_SEL', 'SOLPD.2');
 select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_CTABAN_SEL', 'SOLPD.2');
-select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'MIG_CBANESIS_SEL', 'SOLPD.2');
 select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPAPA_INS', 'SOLPD.2');
 select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPA_INS', 'SOLPD.2');
 select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PLAPA_MOD', 'SOLPD.2');
@@ -2239,320 +1774,6 @@ select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas',
 /***********************************F-DEP-RAC-TES-0-11/06/2014*****************************************/
 
 
-/***********************************I-DEP-RAC-TES-0-16/07/2014*****************************************/
-
---------------- SQL ---------------
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, '' ::character varying) ::text || ' ' ::text) ||
-          COALESCE(pp.obs_monto_no_pagado, '' ::text)) ::character varying AS  obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv 
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-        op.id_obligacion_pago
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor;
-
-/***********************************F-DEP-RAC-TES-0-16/07/2014*****************************************/
-
-
-
-/***********************************I-DEP-RAC-TES-0-01/08/2014*****************************************/
-
---------------- SQL ---------------
-
- --------------- SQL ---------------
-
- -- object recreation
-DROP VIEW tes.vcomp_devtesprov_plan_pago;
-
-CREATE VIEW tes.vcomp_devtesprov_plan_pago
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, '' ::character varying) ::text || ' ' ::text) ||
-          COALESCE(pp.obs_monto_no_pagado, '' ::text)) ::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, '' ::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, '' ::character varying) AS nombre_categoria,
-         pp.id_proceso_wf
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-        op.id_obligacion_pago
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-        op.id_categoria_compra;
-
-ALTER TABLE tes.vcomp_devtesprov_plan_pago
-  OWNER TO postgres;
-  
-/***********************************F-DEP-RAC-TES-0-01/08/2014*****************************************/
-
-
-/***********************************I-DEP-RAC-TES-0-19/08/2014*****************************************/
-
-DROP VIEW IF EXIST tes.vcomp_devtesprov_plan_pago_2;
-
---------------- SQL ---------------
---------------- SQL ---------------
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    detalle,
-    codigo_moneda,
-    nro_cuota,
-    tipo_pago,
-    tipo_solicitud,
-    tipo_concepto_solicitud,
-    total_monto_op_mb,
-    total_monto_op_mo,
-    total_pago)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, '' ::character varying) ::text || ' ' ::text) ||
-          COALESCE(pp.obs_monto_no_pagado, '' ::text)) ::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, '' ::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, '' ::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         ('<table>' ::text || pxp.html_rows((((('<td>' ::text ||
-          ci.desc_ingas::text) || '<br/>' ::text) || od.descripcion) || '</td>'
-           ::text) ::character varying) ::text) || '</table>' ::text AS detalle,
-         mon.codigo AS codigo_moneda,
-         pp.nro_cuota,
-         pp.tipo_pago,
-         op.tipo_solicitud,
-         op.tipo_concepto_solicitud,
-         sum(od.monto_pago_mb) AS total_monto_op_mb,
-         sum(od.monto_pago_mo) AS total_monto_op_mo,
-         op.total_pago
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-        op.id_obligacion_pago
-       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-        op.id_categoria_compra
-       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
-        op.id_obligacion_pago
-       JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas =
-        od.id_concepto_ingas
-  GROUP BY pp.id_plan_pago,
-           op.id_proveedor,
-           p.desc_proveedor,
-           op.id_moneda,
-           pp.id_depto_conta,
-           op.numero,
-           pp.estado,
-           pp.monto_ejecutar_total_mb,
-           pp.monto_ejecutar_total_mo,
-           pp.monto,
-           pp.monto_mb,
-           pp.monto_retgar_mb,
-           pp.monto_retgar_mo,
-           pp.monto_no_pagado,
-           pp.monto_no_pagado_mb,
-           pp.otros_descuentos,
-           pp.otros_descuentos_mb,
-           pp.id_plantilla,
-           pp.id_cuenta_bancaria,
-           pp.id_cuenta_bancaria_mov,
-           pp.nro_cheque,
-           pp.nro_cuenta_bancaria,
-           op.num_tramite,
-           pp.tipo,
-           op.id_gestion,
-           pp.id_int_comprobante,
-           pp.liquido_pagable,
-           pp.liquido_pagable_mb,
-           pp.nombre_pago,
-           pp.porc_monto_excento_var,
-           pp.obs_monto_no_pagado,
-           pp.descuento_anticipo,
-           pp.descuento_inter_serv,
-           op.tipo_obligacion,
-           op.id_categoria_compra,
-           cac.codigo,
-           cac.nombre,
-           pp.id_proceso_wf,
-           mon.codigo,
-           pp.nro_cuota,
-           pp.tipo_pago,
-           op.total_pago,
-           op.tipo_solicitud,
-           op.tipo_concepto_solicitud;
-
-
-/***********************************F-DEP-RAC-TES-0-19/08/2014*****************************************/
 
 
 
@@ -2570,1418 +1791,9 @@ ALTER TABLE tes.tobligacion_det
 /***********************************F-DEP-RAC-TES-0-01/09/2014*****************************************/
 
 
-/***********************************I-DEP-RAC-TES-0-04/09/2014*****************************************/
-
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_det_plan_pago(
-    id_concepto_ingas,
-    id_partida,
-    id_partida_ejecucion_com,
-    monto_pago_mo,
-    monto_pago_mb,
-    id_centro_costo,
-    descripcion,
-    id_plan_pago,
-    id_prorrateo,
-    id_int_transaccion,
-    id_orden_trabajo)
-AS
-  SELECT od.id_concepto_ingas,
-         od.id_partida,
-         od.id_partida_ejecucion_com,
-         pro.monto_ejecutar_mo AS monto_pago_mo,
-         pro.monto_ejecutar_mb AS monto_pago_mb,
-         od.id_centro_costo,
-         od.descripcion,
-         pro.id_plan_pago,
-         pro.id_prorrateo,
-         pro.id_int_transaccion,
-         od.id_orden_trabajo
-  FROM tes.tprorrateo pro
-       JOIN tes.tobligacion_det od ON od.id_obligacion_det =
-         pro.id_obligacion_det;
-         
-/***********************************F-DEP-RAC-TES-0-04/09/2014*****************************************/
-
-
-/***********************************I-DEP-JRR-TES-1-10/09/2014*****************************************/
---RAC, le pongo left join al vbfuncionario_Cargo, ...por que no siempre se tiene este dato
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    detalle,
-    codigo_moneda,
-    nro_cuota,
-    tipo_pago,
-    tipo_solicitud,
-    tipo_concepto_solicitud,
-    total_monto_op_mb,
-    total_monto_op_mo,
-    total_pago,
-    fecha_tentativa,
-    desc_funcionario,
-    email_empresa,
-    desc_usuario)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, '' ::character varying) ::text || ' ' ::text) ||
-          COALESCE(pp.obs_monto_no_pagado, '' ::text)) ::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, '' ::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, '' ::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         ('<table>' ::text || pxp.html_rows((((('<td>' ::text ||
-          ci.desc_ingas::text) || '<br/>' ::text) || od.descripcion) || '</td>'
-           ::text) ::character varying) ::text) || '</table>' ::text AS detalle,
-         mon.codigo AS codigo_moneda,
-         pp.nro_cuota,
-         pp.tipo_pago,
-         op.tipo_solicitud,
-         op.tipo_concepto_solicitud,
-         sum(od.monto_pago_mb) AS total_monto_op_mb,
-         sum(od.monto_pago_mo) AS total_monto_op_mo,
-         op.total_pago,
-         pp.fecha_tentativa,
-         fun.desc_funcionario1 AS desc_funcionario,
-         fun.email_empresa,
-         usu.desc_persona AS desc_usuario
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-        op.id_obligacion_pago
-       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-        op.id_categoria_compra
-       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
-        op.id_obligacion_pago
-       JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas =
-        od.id_concepto_ingas
-       JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario =
-        op.id_funcionario AND fun.estado_reg_asi::text = 'activo' ::text
-       JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
-  GROUP BY pp.id_plan_pago,
-           op.id_proveedor,
-           p.desc_proveedor,
-           op.id_moneda,
-           pp.id_depto_conta,
-           op.numero,
-           pp.estado,
-           pp.monto_ejecutar_total_mb,
-           pp.monto_ejecutar_total_mo,
-           pp.monto,
-           pp.monto_mb,
-           pp.monto_retgar_mb,
-           pp.monto_retgar_mo,
-           pp.monto_no_pagado,
-           pp.monto_no_pagado_mb,
-           pp.otros_descuentos,
-           pp.otros_descuentos_mb,
-           pp.id_plantilla,
-           pp.id_cuenta_bancaria,
-           pp.id_cuenta_bancaria_mov,
-           pp.nro_cheque,
-           pp.nro_cuenta_bancaria,
-           op.num_tramite,
-           pp.tipo,
-           op.id_gestion,
-           pp.id_int_comprobante,
-           pp.liquido_pagable,
-           pp.liquido_pagable_mb,
-           pp.nombre_pago,
-           pp.porc_monto_excento_var,
-           pp.obs_monto_no_pagado,
-           pp.descuento_anticipo,
-           pp.descuento_inter_serv,
-           op.tipo_obligacion,
-           op.id_categoria_compra,
-           cac.codigo,
-           cac.nombre,
-           pp.id_proceso_wf,
-           mon.codigo,
-           pp.nro_cuota,
-           pp.tipo_pago,
-           op.total_pago,
-           op.tipo_solicitud,
-           op.tipo_concepto_solicitud,
-           pp.fecha_tentativa,
-           fun.desc_funcionario1,
-           fun.email_empresa,
-           usu.desc_persona;
-
-
-/***********************************F-DEP-JRR-TES-1-10/09/2014*****************************************/
 
 
 
-/***********************************I-DEP-RAC-TES-0-12/09/2014*****************************************/
-
-DROP VIEW tes.vcomp_devtesprov_plan_pago_2;
-
-CREATE VIEW tes.vcomp_devtesprov_plan_pago_2 (
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    detalle,
-    codigo_moneda,
-    nro_cuota,
-    tipo_pago,
-    tipo_solicitud,
-    tipo_concepto_solicitud,
-    total_monto_op_mb,
-    total_monto_op_mo,
-    total_pago,
-    fecha_tentativa,
-    desc_funcionario,
-    email_empresa,
-    desc_usuario,
-    id_funcionario_gerente)
-AS
-SELECT pp.id_plan_pago,
-    op.id_proveedor,
-    p.desc_proveedor,
-    op.id_moneda,
-    pp.id_depto_conta,
-    op.numero,
-    now() AS fecha_actual,
-    pp.estado,
-    pp.monto_ejecutar_total_mb,
-    pp.monto_ejecutar_total_mo,
-    pp.monto,
-    pp.monto_mb,
-    pp.monto_retgar_mb,
-    pp.monto_retgar_mo,
-    pp.monto_no_pagado,
-    pp.monto_no_pagado_mb,
-    pp.otros_descuentos,
-    pp.otros_descuentos_mb,
-    pp.id_plantilla,
-    pp.id_cuenta_bancaria,
-    pp.id_cuenta_bancaria_mov,
-    pp.nro_cheque,
-    pp.nro_cuenta_bancaria,
-    op.num_tramite,
-    pp.tipo,
-    op.id_gestion AS id_gestion_cuentas,
-    pp.id_int_comprobante,
-    pp.liquido_pagable,
-    pp.liquido_pagable_mb,
-    pp.nombre_pago,
-    pp.porc_monto_excento_var,
-    ((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
-        COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS obs_pp,
-    pp.descuento_anticipo,
-    pp.descuento_inter_serv,
-    op.tipo_obligacion,
-    op.id_categoria_compra,
-    COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-    COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
-    pp.id_proceso_wf,
-    ('<table>'::text || pxp.html_rows((((('<td>'::text || ci.desc_ingas::text)
-        || '<br/>'::text) || od.descripcion) || '</td>'::text)::character varying)::text) || '</table>'::text AS detalle,
-    mon.codigo AS codigo_moneda,
-    pp.nro_cuota,
-    pp.tipo_pago,
-    op.tipo_solicitud,
-    op.tipo_concepto_solicitud,
-    sum(od.monto_pago_mb) AS total_monto_op_mb,
-    sum(od.monto_pago_mo) AS total_monto_op_mo,
-    op.total_pago,
-    pp.fecha_tentativa,
-    fun.desc_funcionario1 AS desc_funcionario,
-    fun.email_empresa,
-    usu.desc_persona AS desc_usuario,
-    COALESCE(op.id_funcionario_gerente, 0) AS id_funcionario_gerente
-FROM tes.tplan_pago pp
-   JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago = op.id_obligacion_pago
-   JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-   JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-   LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-       op.id_categoria_compra
-   JOIN tes.tobligacion_det od ON od.id_obligacion_pago = op.id_obligacion_pago
-   JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas = od.id_concepto_ingas
-   JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario = op.id_funcionario
-       AND fun.estado_reg_asi::text = 'activo'::text
-   JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
-GROUP BY pp.id_plan_pago, op.id_proveedor, p.desc_proveedor, op.id_moneda,
-    pp.id_depto_conta, op.numero, pp.estado, pp.monto_ejecutar_total_mb, pp.monto_ejecutar_total_mo, pp.monto, pp.monto_mb, pp.monto_retgar_mb, pp.monto_retgar_mo, pp.monto_no_pagado, pp.monto_no_pagado_mb, pp.otros_descuentos, pp.otros_descuentos_mb, pp.id_plantilla, pp.id_cuenta_bancaria, pp.id_cuenta_bancaria_mov, pp.nro_cheque, pp.nro_cuenta_bancaria, op.num_tramite, pp.tipo, op.id_gestion, pp.id_int_comprobante, pp.liquido_pagable, pp.liquido_pagable_mb, pp.nombre_pago, pp.porc_monto_excento_var, pp.obs_monto_no_pagado, pp.descuento_anticipo, pp.descuento_inter_serv, op.tipo_obligacion, op.id_categoria_compra, cac.codigo, cac.nombre, pp.id_proceso_wf, mon.codigo, pp.nro_cuota, pp.tipo_pago, op.total_pago, op.tipo_solicitud, op.tipo_concepto_solicitud, pp.fecha_tentativa, fun.desc_funcionario1, fun.email_empresa, usu.desc_persona, op.id_funcionario_gerente;
-
-
-/***********************************F-DEP-RAC-TES-0-12/09/2014*****************************************/
-
-
-
-
-/***********************************I-DEP-RAC-TES-0-16/09/2014*****************************************/
-
-
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    detalle,
-    codigo_moneda,
-    nro_cuota,
-    tipo_pago,
-    tipo_solicitud,
-    tipo_concepto_solicitud,
-    total_monto_op_mb,
-    total_monto_op_mo,
-    total_pago,
-    fecha_tentativa,
-    desc_funcionario,
-    email_empresa,
-    desc_usuario,
-    id_funcionario_gerente)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
-           COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         ('<table>'::text || pxp.html_rows((((('<td>'::text || ci.desc_ingas::
-           text) || '<br/>'::text) || od.descripcion) || '</td>'::text)::
-           character varying)::text) || '</table>'::text AS detalle,
-         mon.codigo AS codigo_moneda,
-         pp.nro_cuota,
-         pp.tipo_pago,
-         op.tipo_solicitud,
-         op.tipo_concepto_solicitud,
-         sum(od.monto_pago_mb) AS total_monto_op_mb,
-         sum(od.monto_pago_mo) AS total_monto_op_mo,
-         op.total_pago,
-         pp.fecha_tentativa,
-         fun.desc_funcionario1 AS desc_funcionario,
-         fun.email_empresa,
-         usu.desc_persona AS desc_usuario,
-         COALESCE(op.id_funcionario_gerente, 0) AS id_funcionario_gerente
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-         op.id_obligacion_pago
-       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-         op.id_categoria_compra
-       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
-         op.id_obligacion_pago
-       JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas =
-         od.id_concepto_ingas
-       LEFT JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario =
-         op.id_funcionario AND fun.estado_reg_asi::text = 'activo'::text
-       JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
-  GROUP BY pp.id_plan_pago,
-           op.id_proveedor,
-           p.desc_proveedor,
-           op.id_moneda,
-           pp.id_depto_conta,
-           op.numero,
-           pp.estado,
-           pp.monto_ejecutar_total_mb,
-           pp.monto_ejecutar_total_mo,
-           pp.monto,
-           pp.monto_mb,
-           pp.monto_retgar_mb,
-           pp.monto_retgar_mo,
-           pp.monto_no_pagado,
-           pp.monto_no_pagado_mb,
-           pp.otros_descuentos,
-           pp.otros_descuentos_mb,
-           pp.id_plantilla,
-           pp.id_cuenta_bancaria,
-           pp.id_cuenta_bancaria_mov,
-           pp.nro_cheque,
-           pp.nro_cuenta_bancaria,
-           op.num_tramite,
-           pp.tipo,
-           op.id_gestion,
-           pp.id_int_comprobante,
-           pp.liquido_pagable,
-           pp.liquido_pagable_mb,
-           pp.nombre_pago,
-           pp.porc_monto_excento_var,
-           pp.obs_monto_no_pagado,
-           pp.descuento_anticipo,
-           pp.descuento_inter_serv,
-           op.tipo_obligacion,
-           op.id_categoria_compra,
-           cac.codigo,
-           cac.nombre,
-           pp.id_proceso_wf,
-           mon.codigo,
-           pp.nro_cuota,
-           pp.tipo_pago,
-           op.total_pago,
-           op.tipo_solicitud,
-           op.tipo_concepto_solicitud,
-           pp.fecha_tentativa,
-           fun.desc_funcionario1,
-           fun.email_empresa,
-           usu.desc_persona,
-           op.id_funcionario_gerente;
-
-
-/***********************************F-DEP-RAC-TES-0-16/09/2014*****************************************/
-
-
-/***********************************I-DEP-RAC-TES-0-25/09/2014*****************************************/
-
-
-DROP VIEW tes.vcomp_devtesprov_plan_pago_2;
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    detalle,
-    codigo_moneda,
-    nro_cuota,
-    tipo_pago,
-    tipo_solicitud,
-    tipo_concepto_solicitud,
-    total_monto_op_mb,
-    total_monto_op_mo,
-    total_pago,
-    fecha_tentativa,
-    desc_funcionario,
-    email_empresa,
-    desc_usuario,
-    id_funcionario_gerente)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
-           COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         ('<table>'::text || pxp.html_rows((((('<td>'::text || ci.desc_ingas::
-           text) || '<br/>'::text) || od.descripcion) || '</td>'::text)::
-           character varying)::text) || '</table>'::text AS detalle,
-         mon.codigo AS codigo_moneda,
-         pp.nro_cuota,
-         pp.tipo_pago,
-         op.tipo_solicitud,
-         op.tipo_concepto_solicitud,
-         sum(od.monto_pago_mb) AS total_monto_op_mb,
-         sum(od.monto_pago_mo) AS total_monto_op_mo,
-         op.total_pago,
-         pp.fecha_tentativa,
-         fun.desc_funcionario1 AS desc_funcionario,
-         fun.email_empresa,
-         usu.desc_persona AS desc_usuario,
-         COALESCE(op.id_funcionario_gerente, 0) AS id_funcionario_gerente
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-         op.id_obligacion_pago
-       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-         op.id_categoria_compra
-       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
-         op.id_obligacion_pago
-       JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas =
-         od.id_concepto_ingas
-       JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario =
-         op.id_funcionario AND fun.estado_reg_asi::text = 'activo'::text
-       JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
-  GROUP BY pp.id_plan_pago,
-           op.id_proveedor,
-           p.desc_proveedor,
-           op.id_moneda,
-           pp.id_depto_conta,
-           op.numero,
-           pp.estado,
-           pp.monto_ejecutar_total_mb,
-           pp.monto_ejecutar_total_mo,
-           pp.monto,
-           pp.monto_mb,
-           pp.monto_retgar_mb,
-           pp.monto_retgar_mo,
-           pp.monto_no_pagado,
-           pp.monto_no_pagado_mb,
-           pp.otros_descuentos,
-           pp.otros_descuentos_mb,
-           pp.id_plantilla,
-           pp.id_cuenta_bancaria,
-           pp.id_cuenta_bancaria_mov,
-           pp.nro_cheque,
-           pp.nro_cuenta_bancaria,
-           op.num_tramite,
-           pp.tipo,
-           op.id_gestion,
-           pp.id_int_comprobante,
-           pp.liquido_pagable,
-           pp.liquido_pagable_mb,
-           pp.nombre_pago,
-           pp.porc_monto_excento_var,
-           pp.obs_monto_no_pagado,
-           pp.descuento_anticipo,
-           pp.descuento_inter_serv,
-           op.tipo_obligacion,
-           op.id_categoria_compra,
-           cac.codigo,
-           cac.nombre,
-           pp.id_proceso_wf,
-           mon.codigo,
-           pp.nro_cuota,
-           pp.tipo_pago,
-           op.total_pago,
-           op.tipo_solicitud,
-           op.tipo_concepto_solicitud,
-           pp.fecha_tentativa,
-           fun.desc_funcionario1,
-           fun.email_empresa,
-           usu.desc_persona,
-           op.id_funcionario_gerente;
-
-
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
-           COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
-         pp.id_proceso_wf
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-         op.id_obligacion_pago
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-         op.id_categoria_compra;
-
-
-/***********************************F-DEP-RAC-TES-0-25/09/2014*****************************************/
-
-
-/***********************************I-DEP-RAC-TES-0-02/10/2014*****************************************/
-
---------------- SQL ---------------
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
-           COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         pp.forma_pago
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-         op.id_obligacion_pago
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-         op.id_categoria_compra;
-
-
-/***********************************F-DEP-RAC-TES-0-02/10/2014*****************************************/
-
-
-
-/***********************************I-DEP-RAC-TES-0-03/10/2014*****************************************/
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    detalle,
-    codigo_moneda,
-    nro_cuota,
-    tipo_pago,
-    tipo_solicitud,
-    tipo_concepto_solicitud,
-    total_monto_op_mb,
-    total_monto_op_mo,
-    total_pago,
-    fecha_tentativa,
-    desc_funcionario,
-    email_empresa,
-    desc_usuario,
-    id_funcionario_gerente)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
-           COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         ('<table>'::text || pxp.html_rows((((('<td>'::text || ci.desc_ingas::
-           text) || '<br/>'::text) || od.descripcion) || '</td>'::text)::
-           character varying)::text) || '</table>'::text AS detalle,
-         mon.codigo AS codigo_moneda,
-         pp.nro_cuota,
-         pp.tipo_pago,
-         op.tipo_solicitud,
-         op.tipo_concepto_solicitud,
-         COALESCE(sum(od.monto_pago_mb), 0::numeric) AS total_monto_op_mb,
-         COALESCE(sum(od.monto_pago_mo), 0::numeric) AS total_monto_op_mo,
-         op.total_pago,
-         pp.fecha_tentativa,
-         fun.desc_funcionario1 AS desc_funcionario,
-         fun.email_empresa,
-         usu.desc_persona AS desc_usuario,
-         COALESCE(op.id_funcionario_gerente, 0) AS id_funcionario_gerente
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-         op.id_obligacion_pago
-       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-         op.id_categoria_compra
-       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
-         op.id_obligacion_pago AND od.estado_reg::text = 'activo'::text
-       JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas =
-         od.id_concepto_ingas
-       JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario =
-         op.id_funcionario AND fun.estado_reg_asi::text = 'activo'::text
-       JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
-  GROUP BY pp.id_plan_pago,
-           op.id_proveedor,
-           p.desc_proveedor,
-           op.id_moneda,
-           pp.id_depto_conta,
-           op.numero,
-           pp.estado,
-           pp.monto_ejecutar_total_mb,
-           pp.monto_ejecutar_total_mo,
-           pp.monto,
-           pp.monto_mb,
-           pp.monto_retgar_mb,
-           pp.monto_retgar_mo,
-           pp.monto_no_pagado,
-           pp.monto_no_pagado_mb,
-           pp.otros_descuentos,
-           pp.otros_descuentos_mb,
-           pp.id_plantilla,
-           pp.id_cuenta_bancaria,
-           pp.id_cuenta_bancaria_mov,
-           pp.nro_cheque,
-           pp.nro_cuenta_bancaria,
-           op.num_tramite,
-           pp.tipo,
-           op.id_gestion,
-           pp.id_int_comprobante,
-           pp.liquido_pagable,
-           pp.liquido_pagable_mb,
-           pp.nombre_pago,
-           pp.porc_monto_excento_var,
-           pp.obs_monto_no_pagado,
-           pp.descuento_anticipo,
-           pp.descuento_inter_serv,
-           op.tipo_obligacion,
-           op.id_categoria_compra,
-           cac.codigo,
-           cac.nombre,
-           pp.id_proceso_wf,
-           mon.codigo,
-           pp.nro_cuota,
-           pp.tipo_pago,
-           op.total_pago,
-           op.tipo_solicitud,
-           op.tipo_concepto_solicitud,
-           pp.fecha_tentativa,
-           fun.desc_funcionario1,
-           fun.email_empresa,
-           usu.desc_persona,
-           op.id_funcionario_gerente;
-           
-/**********************************F-DEP-RAC-TES-0-03/10/2014*****************************************/
-
-
-/**********************************I-DEP-RAC-TES-0-10/10/2014*****************************************/
-
-CREATE OR REPLACE VIEW tes.vpago_pendientes_al_dia(
-    id_plan_pago,
-    fecha_tentativa,
-    id_estado_wf,
-    id_proceso_wf,
-    monto,
-    liquido_pagable,
-    monto_retgar_mo,
-    monto_ejecutar_total_mo,
-    estado,
-    list,
-    list_unique,
-    desc_funcionario_solicitante,
-    email_empresa_fun_sol,
-    email_empresa_usu_reg,
-    desc_funcionario_usu_reg,
-    tipo,
-    tipo_pago,
-    tipo_obligacion,
-    tipo_solicitud,
-    tipo_concepto_solicitud,
-    pago_variable,
-    tipo_anticipo,
-    estado_reg)
-AS
-  SELECT pp.id_plan_pago,
-         pp.fecha_tentativa,
-         pp.id_estado_wf,
-         pp.id_proceso_wf,
-         pp.monto,
-         pp.liquido_pagable,
-         pp.monto_retgar_mo,
-         pp.monto_ejecutar_total_mo,
-         pp.estado,
-         pxp.list(od.id_obligacion_det::text) AS list,
-         pxp.list_unique(cig.pago_automatico::text) AS list_unique,
-         fun.desc_funcionario1 AS desc_funcionario_solicitante,
-         fun.email_empresa AS email_empresa_fun_sol,
-         freg.email_empresa AS email_empresa_usu_reg,
-         freg.desc_funcionario1 AS desc_funcionario_usu_reg,
-         pp.tipo,
-         pp.tipo_pago,
-         op.tipo_obligacion,
-         op.tipo_solicitud,
-         op.tipo_concepto_solicitud,
-         op.pago_variable,
-         op.tipo_anticipo,
-         pp.estado_reg
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON op.id_obligacion_pago =
-         pp.id_obligacion_pago
-       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
-         op.id_obligacion_pago
-       JOIN param.tconcepto_ingas cig ON cig.id_concepto_ingas =
-         od.id_concepto_ingas
-       JOIN segu.tusuario usu ON usu.id_usuario = pp.id_usuario_reg
-       JOIN orga.vfuncionario_persona freg ON freg.id_persona = usu.id_persona
-       LEFT JOIN orga.vfuncionario_persona fun ON op.id_funcionario =
-         fun.id_funcionario
-  WHERE (pp.estado::text = ANY (ARRAY [ 'borrador'::character varying::text,
-    'vbsolicitante'::character varying::text ])) AND
-        pp.fecha_tentativa <= now()::date AND
-        pp.monto_ejecutar_total_mo > 0::numeric AND
-        (pp.tipo::text = ANY (ARRAY [ 'devengado_pagado'::character varying::
-          text, 'devengado_pagado_1c'::character varying::text, 'ant_aplicado'::
-          character varying::text ])) AND
-        (op.tipo_obligacion::text = ANY (ARRAY [ 'adquisiciones'::character
-          varying::text, 'pago_directo'::character varying::text ])) AND
-        pp.estado_reg::text = 'activo'::text
-  GROUP BY pp.id_plan_pago,
-           pp.fecha_tentativa,
-           pp.id_estado_wf,
-           pp.id_proceso_wf,
-           pp.monto,
-           pp.liquido_pagable,
-           pp.monto_retgar_mo,
-           pp.monto_ejecutar_total_mo,
-           pp.estado,
-           fun.desc_funcionario1,
-           fun.email_empresa,
-           freg.email_empresa,
-           freg.desc_funcionario1,
-           pp.tipo,
-           pp.tipo_pago,
-           op.tipo_obligacion,
-           op.tipo_solicitud,
-           op.tipo_concepto_solicitud,
-           op.pago_variable,
-           op.tipo_anticipo;
-           
-/**********************************F-DEP-RAC-TES-0-10/10/2014*****************************************/
-
-
-/**********************************I-DEP-RAC-TES-0-13/10/2014*****************************************/
-
-
---------------- SQL ---------------
-
-CREATE OR REPLACE VIEW tes.vpago_pendientes_al_dia(
-    id_plan_pago,
-    fecha_tentativa,
-    id_estado_wf,
-    id_proceso_wf,
-    monto,
-    liquido_pagable,
-    monto_retgar_mo,
-    monto_ejecutar_total_mo,
-    estado,
-    id_obligacion_dets,
-    pagos_automaticos,
-    desc_funcionario_solicitante,
-    email_empresa_fun_sol,
-    email_empresa_usu_reg,
-    desc_funcionario_usu_reg,
-    tipo,
-    tipo_pago,
-    tipo_obligacion,
-    tipo_solicitud,
-    tipo_concepto_solicitud,
-    pago_variable,
-    tipo_anticipo,
-    estado_reg,
-    num_tramite,
-    nro_cuota,
-    nombre_pago,
-    obs,
-    codigo_moneda,
-    id_funcionario_solicitante,
-    id_funcionario_registro,
-    id_proceso_wf_op,
-    estado_op)
-AS
-  SELECT pp.id_plan_pago,
-         pp.fecha_tentativa,
-         pp.id_estado_wf,
-         pp.id_proceso_wf,
-         pp.monto,
-         pp.liquido_pagable,
-         pp.monto_retgar_mo,
-         pp.monto_ejecutar_total_mo,
-         pp.estado,
-         pxp.list(od.id_obligacion_det::text) AS id_obligacion_dets,
-         pxp.list_unique(cig.pago_automatico::text) AS pagos_automaticos,
-         fun.desc_funcionario1 AS desc_funcionario_solicitante,
-         fun.email_empresa AS email_empresa_fun_sol,
-         freg.email_empresa AS email_empresa_usu_reg,
-         freg.desc_funcionario1 AS desc_funcionario_usu_reg,
-         pp.tipo,
-         pp.tipo_pago,
-         op.tipo_obligacion,
-         op.tipo_solicitud,
-         op.tipo_concepto_solicitud,
-         op.pago_variable,
-         op.tipo_anticipo,
-         pp.estado_reg,
-         op.num_tramite,
-         pp.nro_cuota,
-         pp.nombre_pago,
-         op.obs,
-         mon.codigo AS codigo_moneda,
-         fun.id_funcionario AS id_funcionario_solicitante,
-         freg.id_funcionario AS id_funcionario_registro,
-         op.id_proceso_wf AS id_proceso_wf_op,
-         op.estado AS estado_op
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON op.id_obligacion_pago =
-         pp.id_obligacion_pago
-       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
-         op.id_obligacion_pago
-       JOIN param.tconcepto_ingas cig ON cig.id_concepto_ingas =
-         od.id_concepto_ingas
-       JOIN segu.tusuario usu ON usu.id_usuario = pp.id_usuario_reg
-       JOIN orga.vfuncionario_persona freg ON freg.id_persona = usu.id_persona
-       LEFT JOIN orga.vfuncionario_persona fun ON op.id_funcionario =
-         fun.id_funcionario
-  WHERE (pp.estado::text = ANY (ARRAY [ 'borrador'::character varying::text,
-    'vbsolicitante'::character varying::text ])) AND
-        pp.fecha_tentativa <= now()::date AND
-        pp.monto_ejecutar_total_mo > 0::numeric AND
-        (pp.tipo::text = ANY (ARRAY [ 'devengado_pagado'::character varying::
-          text, 'devengado_pagado_1c'::character varying::text, 'ant_aplicado'::
-          character varying::text ])) AND
-        (op.tipo_obligacion::text = ANY (ARRAY [ 'adquisiciones'::character
-          varying::text, 'pago_directo'::character varying::text ])) AND
-        pp.estado_reg::text = 'activo'::text 
-  GROUP BY pp.id_plan_pago,
-           pp.fecha_tentativa,
-           pp.id_estado_wf,
-           pp.id_proceso_wf,
-           pp.monto,
-           pp.liquido_pagable,
-           pp.monto_retgar_mo,
-           pp.monto_ejecutar_total_mo,
-           pp.estado,
-           fun.desc_funcionario1,
-           fun.email_empresa,
-           freg.email_empresa,
-           freg.desc_funcionario1,
-           pp.tipo,
-           pp.tipo_pago,
-           op.tipo_obligacion,
-           op.tipo_solicitud,
-           op.tipo_concepto_solicitud,
-           op.pago_variable,
-           op.tipo_anticipo,
-           op.num_tramite,
-           pp.nro_cuota,
-           pp.nombre_pago,
-           op.obs,
-           mon.codigo,
-           fun.id_funcionario,
-           freg.id_funcionario,
-           op.id_proceso_wf,
-           op.estado;
-/**********************************F-DEP-RAC-TES-0-13/10/2014*****************************************/
-
-
-
-
-
-/**********************************I-DEP-RAC-TES-0-28/10/2014*****************************************/
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    forma_pago,
-    monto_ajuste_ag,
-    monto_ajuste_siguiente_pago,
-    monto_anticipo)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
-           COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         pp.forma_pago,
-         pp.monto_ajuste_ag,
-         pp.monto_ajuste_siguiente_pago,
-         pp.monto_anticipo
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-         op.id_obligacion_pago
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-         op.id_categoria_compra;
-         
-/**********************************F-DEP-RAC-TES-0-28/10/2014*****************************************/
 
 /**********************************I-DEP-JRR-TES-0-18/11/2014*****************************************/
 
@@ -3993,185 +1805,7 @@ ALTER TABLE tes.tobligacion_pago
 
 /**********************************F-DEP-JRR-TES-0-18/11/2014*****************************************/
 
-/**********************************I-DEP-JRR-TES-0-24/11/2014*****************************************/
 
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    detalle,
-    codigo_moneda,
-    nro_cuota,
-    tipo_pago,
-    tipo_solicitud,
-    tipo_concepto_solicitud,
-    total_monto_op_mb,
-    total_monto_op_mo,
-    total_pago,
-    fecha_tentativa,
-    desc_funcionario,
-    email_empresa,
-    desc_usuario,
-    id_funcionario_gerente)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, '' ::character varying) ::text || ' ' ::text) ||
-          COALESCE(pp.obs_monto_no_pagado, '' ::text)) ::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, '' ::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, '' ::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         ('<table>' ::text || pxp.html_rows((((('<td>' ::text ||
-          ci.desc_ingas::text) || '<br/>' ::text) || od.descripcion) || '</td>'
-           ::text) ::character varying) ::text) || '</table>' ::text AS detalle,
-         mon.codigo AS codigo_moneda,
-         pp.nro_cuota,
-         pp.tipo_pago,
-         op.tipo_solicitud,
-         op.tipo_concepto_solicitud,
-         COALESCE(sum(od.monto_pago_mb), 0::numeric) AS total_monto_op_mb,
-         COALESCE(sum(od.monto_pago_mo), 0::numeric) AS total_monto_op_mo,
-         op.total_pago,
-         pp.fecha_tentativa,
-         fun.desc_funcionario1 AS desc_funcionario,
-         fun.email_empresa,
-         usu.desc_persona AS desc_usuario,
-         COALESCE(op.id_funcionario_gerente, 0) AS id_funcionario_gerente
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-        op.id_obligacion_pago
-       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-       LEFT JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-        op.id_categoria_compra
-       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
-        op.id_obligacion_pago AND od.estado_reg::text = 'activo' ::text
-       JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas =
-        od.id_concepto_ingas
-       JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario =
-        op.id_funcionario AND fun.estado_reg_asi::text = 'activo' ::text
-       JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
-  GROUP BY pp.id_plan_pago,
-           op.id_proveedor,
-           p.desc_proveedor,
-           op.id_moneda,
-           pp.id_depto_conta,
-           op.numero,
-           pp.estado,
-           pp.monto_ejecutar_total_mb,
-           pp.monto_ejecutar_total_mo,
-           pp.monto,
-           pp.monto_mb,
-           pp.monto_retgar_mb,
-           pp.monto_retgar_mo,
-           pp.monto_no_pagado,
-           pp.monto_no_pagado_mb,
-           pp.otros_descuentos,
-           pp.otros_descuentos_mb,
-           pp.id_plantilla,
-           pp.id_cuenta_bancaria,
-           pp.id_cuenta_bancaria_mov,
-           pp.nro_cheque,
-           pp.nro_cuenta_bancaria,
-           op.num_tramite,
-           pp.tipo,
-           op.id_gestion,
-           pp.id_int_comprobante,
-           pp.liquido_pagable,
-           pp.liquido_pagable_mb,
-           pp.nombre_pago,
-           pp.porc_monto_excento_var,
-           pp.obs_monto_no_pagado,
-           pp.descuento_anticipo,
-           pp.descuento_inter_serv,
-           op.tipo_obligacion,
-           op.id_categoria_compra,
-           cac.codigo,
-           cac.nombre,
-           pp.id_proceso_wf,
-           mon.codigo,
-           pp.nro_cuota,
-           pp.tipo_pago,
-           op.total_pago,
-           op.tipo_solicitud,
-           op.tipo_concepto_solicitud,
-           pp.fecha_tentativa,
-           fun.desc_funcionario1,
-           fun.email_empresa,
-           usu.desc_persona,
-           op.id_funcionario_gerente;
-           
-/**********************************F-DEP-JRR-TES-0-24/11/2014*****************************************/
 
 /***********************************I-DEP-GSS-TES-0-27/11/2014****************************************/
 
@@ -4310,7 +1944,6 @@ select pxp.f_insert_tprocedimiento_gui ('ADQ_COTPROC_SEL', 'REVBPP', 'no');
 select pxp.f_insert_tprocedimiento_gui ('ADQ_COTRPC_SEL', 'REVBPP', 'no');
 select pxp.f_insert_tprocedimiento_gui ('PM_PLT_SEL', 'REVBPP', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_CTABAN_SEL', 'REVBPP', 'no');
-select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'REVBPP', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_INS', 'REVBPP', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAPA_INS', 'REVBPP', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PPANTPAR_INS', 'REVBPP', 'no');
@@ -4441,7 +2074,6 @@ select pxp.f_insert_tprocedimiento_gui ('TES_PAFPP_IME', 'VBOP.2', 'no');
 select pxp.f_insert_tprocedimiento_gui ('CONTA_GETDEC_IME', 'VBOP.2', 'no');
 select pxp.f_insert_tprocedimiento_gui ('PM_PLT_SEL', 'VBOP.2', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_CTABAN_SEL', 'VBOP.2', 'no');
-select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'VBOP.2', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_INS', 'VBOP.2', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAPA_INS', 'VBOP.2', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PPANTPAR_INS', 'VBOP.2', 'no');
@@ -4481,7 +2113,6 @@ select pxp.f_insert_tprocedimiento_gui ('TES_PAFPP_IME', 'VBOP.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('CONTA_GETDEC_IME', 'VBOP.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('PM_PLT_SEL', 'VBOP.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_CTABAN_SEL', 'VBOP.4', 'no');
-select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'VBOP.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_INS', 'VBOP.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAPA_INS', 'VBOP.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PPANTPAR_INS', 'VBOP.4', 'no');
@@ -4657,7 +2288,6 @@ select pxp.f_insert_tprocedimiento_gui ('TES_PAFPP_IME', 'VBDP.6.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('CONTA_GETDEC_IME', 'VBDP.6.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('PM_PLT_SEL', 'VBDP.6.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_CTABAN_SEL', 'VBDP.6.4', 'no');
-select pxp.f_insert_tprocedimiento_gui ('MIG_CBANESIS_SEL', 'VBDP.6.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PLAPA_INS', 'VBDP.6.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PLAPAPA_INS', 'VBDP.6.4', 'no');
 select pxp.f_insert_tprocedimiento_gui ('TES_PPANTPAR_INS', 'VBDP.6.4', 'no');
@@ -4869,7 +2499,6 @@ select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'WF_DES_E
 select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_SEL', 'OBPG.4.2');
 select pxp.f_delete_trol_procedimiento_gui ('OP - Pagos Directos de Servicios', 'WF_DES_SEL', 'OBPG.4.2');
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_PPANTPAR_INS', 'VBDP');
-select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'MIG_CBANESIS_SEL', 'VBDP');
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_TIPES_SEL', 'VBDP');
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_FUNTIPES_SEL', 'VBDP');
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'TES_SINPRE_IME', 'VBDP');
@@ -4965,7 +2594,6 @@ select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_DES
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_DES_ELI', 'VBDP.3.2');
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - Solicitud de Compra', 'WF_DES_SEL', 'VBDP.3.2');
 select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PPANTPAR_INS', 'VBDP');
-select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'MIG_CBANESIS_SEL', 'VBDP');
 select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_TIPES_SEL', 'VBDP');
 select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'WF_FUNTIPES_SEL', 'VBDP');
 select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_SINPRE_IME', 'VBDP');
@@ -5076,7 +2704,6 @@ select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'AD
 select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'ADQ_COTRPC_SEL', 'REVBPP');
 select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'PM_PLT_SEL', 'REVBPP');
 select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_CTABAN_SEL', 'REVBPP');
-select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'MIG_CBANESIS_SEL', 'REVBPP');
 select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_PLAPA_INS', 'REVBPP');
 select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_PLAPAPA_INS', 'REVBPP');
 select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_PPANTPAR_INS', 'REVBPP');
@@ -5231,7 +2858,6 @@ select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PAFP
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'CONTA_GETDEC_IME', 'VBOP.4');
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_PLT_SEL', 'VBOP.4');
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_CTABAN_SEL', 'VBOP.4');
-select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'MIG_CBANESIS_SEL', 'VBOP.4');
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PLAPA_INS', 'VBOP.4');
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PLAPAPA_INS', 'VBOP.4');
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PPANTPAR_INS', 'VBOP.4');
@@ -5274,7 +2900,6 @@ select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PAFP
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'CONTA_GETDEC_IME', 'VBOP.2');
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'PM_PLT_SEL', 'VBOP.2');
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_CTABAN_SEL', 'VBOP.2');
-select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'MIG_CBANESIS_SEL', 'VBOP.2');
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PLAPA_INS', 'VBOP.2');
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PLAPAPA_INS', 'VBOP.2');
 select pxp.f_delete_trol_procedimiento_gui ('ADQ - VoBo Presupuestos', 'TES_PPANTPAR_INS', 'VBOP.2');
@@ -5355,7 +2980,6 @@ select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'WF_T
 select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'WF_TIPES_SEL', 'VBDP.3.2');
 select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'WF_DES_SEL', 'VBDP.3.2');
 select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'WF_DWF_SEL', 'VBDP.3');
-select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'MIG_CBANESIS_SEL', 'VBDP');
 select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'WF_TIPES_SEL', 'VBDP');
 select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'WF_FUNTIPES_SEL', 'VBDP');
 select pxp.f_insert_trol_procedimiento_gui ('OP - Plan de Pagos Consulta', 'TES_PLAPAREP_SEL', 'VBDP');
@@ -5400,7 +3024,6 @@ select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas',
 select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'PM_CONIGPAR_SEL', 'SOLPD.1');
 select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_GENCONF_IME', 'SOLPD.2');
 select pxp.f_insert_trol_procedimiento_gui ('OP - Solicitudes de Pago Directas', 'TES_PPANTPAR_INS', 'SOLPD.2');
-select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'MIG_CBANESIS_SEL', 'VBDP');
 select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'TES_PPANTPAR_INS', 'VBDP');
 select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Plan de Pagos', 'TES_GENCONF_IME', 'VBDP');
 select pxp.f_insert_trol_procedimiento_gui ('OP - VoBo Ppagos (Asistentes)', 'TES_GENCONF_IME', 'REVBPP');
@@ -5491,7 +3114,6 @@ select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_
 select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'CONTA_GETDEC_IME', 'VBDP.6.4');
 select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'PM_PLT_SEL', 'VBDP.6.4');
 select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_CTABAN_SEL', 'VBDP.6.4');
-select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'MIG_CBANESIS_SEL', 'VBDP.6.4');
 select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PLAPA_INS', 'VBDP.6.4');
 select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PLAPAPA_INS', 'VBDP.6.4');
 select pxp.f_delete_trol_procedimiento_gui ('OP - VoBo Pago Contabilidad', 'TES_PPANTPAR_INS', 'VBDP.6.4');
@@ -5586,951 +3208,413 @@ select pxp.f_insert_trol_procedimiento_gui ('OP - Reporte Pagos X Concepto', 'TE
 
 
 
-/***********************************I-DEP-RAC-TES-0-22/12/2014****************************************/
-CREATE VIEW tes.vpago_x_proveedor (
-    id_plan_pago,
-    id_gestion,
-    gestion,
-    id_obligacion_pago,
-    num_tramite,
-    orden_compra,
-    tipo_obligacion,
-    pago_variable,
-    desc_proveedor,
-    estado,
-    usuario_reg,
-    fecha,
-    fecha_reg,
-    ob_obligacion_pago,
-    fecha_tentativa_de_pago,
-    nro_cuota,
-    tipo_plan_pago,
-    estado_plan_pago,
-    obs_descuento_inter_serv,
-    obs_descuentos_anticipo,
-    obs_descuentos_ley,
-    obs_monto_no_pagado,
-    obs_otros_descuentos,
-    codigo,
-    monto_cuota,
-    monto_anticipo,
-    monto_excento,
-    monto_retgar_mo,
-    monto_ajuste_ag,
-    monto_ajuste_siguiente_pago,
-    liquido_pagable,
-    monto_presupuestado)
-AS
-SELECT ppp.id_plan_pago,
-    op.id_gestion,
-    ges.gestion,
-    op.id_obligacion_pago,
-    op.num_tramite,
-    cot.numero_oc AS orden_compra,
-    op.tipo_obligacion,
-    op.pago_variable,
-    pro.desc_proveedor,
-    op.estado,
-    usu.cuenta AS usuario_reg,
-    op.fecha,
-    op.fecha_reg,
-    op.obs AS ob_obligacion_pago,
-    ppp.fecha_tentativa AS fecha_tentativa_de_pago,
-    ppp.nro_cuota,
-    ppp.tipo AS tipo_plan_pago,
-    ppp.estado AS estado_plan_pago,
-    ppp.obs_descuento_inter_serv,
-    ppp.obs_descuentos_anticipo,
-    ppp.obs_descuentos_ley,
-    ppp.obs_monto_no_pagado,
-    ppp.obs_otros_descuentos,
-    mon.codigo,
-    ppp.monto AS monto_cuota,
-    ppp.monto_anticipo,
-    ppp.monto_excento,
-    ppp.monto_retgar_mo,
-    ppp.monto_ajuste_ag,
-    ppp.monto_ajuste_siguiente_pago,
-    ppp.liquido_pagable,
-    (
-    SELECT sum(od.monto_pago_mo) AS monto_presupuestado
-    FROM tes.tobligacion_det od
-    WHERE od.id_obligacion_pago = op.id_obligacion_pago AND od.estado_reg::text
-        = 'activo'::text
-    ) AS monto_presupuestado
-FROM tes.tobligacion_pago op
-   JOIN param.tgestion ges ON ges.id_gestion = op.id_gestion
-   LEFT JOIN adq.tcotizacion cot ON cot.id_obligacion_pago = op.id_obligacion_pago
-   JOIN param.vproveedor pro ON pro.id_proveedor = op.id_proveedor
-   JOIN segu.tusuario usu ON usu.id_usuario = op.id_usuario_reg
-   JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-   JOIN tes.tplan_pago ppp ON ppp.id_obligacion_pago = op.id_obligacion_pago
-       AND ppp.estado_reg::text = 'activo'::text;
-       
-/***********************************F-DEP-RAC-TES-0-22/12/2014****************************************/
 
-/***********************************I-DEP-GSS-TES-0-19/01/2015****************************************/
-CREATE OR REPLACE VIEW tes.vlibro_bancos (
-    id_libro_bancos,
-    num_tramite,
+
+/***********************************I-DEP-JRR-TES-10/08/2015****************************************/
+
+ALTER TABLE tes.tcaja
+  ADD CONSTRAINT tcaja__id_depto FOREIGN KEY (id_depto)
+    REFERENCES param.tdepto(id_depto)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tcaja
+  ADD CONSTRAINT tcaja__id_moneda FOREIGN KEY (id_moneda)
+    REFERENCES param.tmoneda(id_moneda)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tcajero
+  ADD CONSTRAINT tcaja__id_caja FOREIGN KEY (id_caja)
+    REFERENCES tes.tcaja(id_caja)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+    
+ALTER TABLE tes.tcajero
+  ADD CONSTRAINT tcaja__id_funcionario FOREIGN KEY (id_funcionario)
+    REFERENCES orga.tfuncionario(id_funcionario)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+    
+/***********************************F-DEP-JRR-TES-10/08/2015****************************************/  
+
+
+
+/***********************************I-DEP-JRR-TES-0-25/08/2015****************************************/
+
+ALTER TABLE tes.testacion
+  ADD CONSTRAINT testacion__id_depto_lb FOREIGN KEY (id_depto_lb)
+    REFERENCES param.tdepto(id_depto)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.testacion_tipo_pago
+  ADD CONSTRAINT testacion_tipo_pago__id_estacion FOREIGN KEY (id_estacion)
+    REFERENCES tes.testacion(id_estacion)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+    
+ALTER TABLE tes.testacion_tipo_pago
+  ADD CONSTRAINT testacion_tipo_pago__id_tipo_plan_pago FOREIGN KEY (id_tipo_plan_pago)
+    REFERENCES tes.ttipo_plan_pago(id_tipo_plan_pago)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+
+/***********************************F-DEP-JRR-TES-0-25/08/2015****************************************/ 
+
+
+
+
+
+
+
+/***********************************I-DEP-GSS-TES-0-20/01/2016****************************************/ 
+ALTER TABLE tes.tsolicitud_rendicion_det
+  ADD CONSTRAINT fk_tsolicitud_rendicion_det__id_proceso_caja FOREIGN KEY (id_proceso_caja)
+    REFERENCES tes.tproceso_caja(id_proceso_caja)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE; 
+	
+ALTER TABLE tes.tsolicitud_rendicion_det
+	ADD CONSTRAINT fk_tsolicitud_rendicion_det__id_solicitud_efectivo FOREIGN KEY (id_solicitud_efectivo)
+    REFERENCES tes.tsolicitud_efectivo(id_solicitud_efectivo)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+	
+ALTER TABLE tes.tproceso_caja
+  ADD CONSTRAINT tproceso_caja__id_caja FOREIGN KEY (id_caja)
+    REFERENCES tes.tcaja(id_caja)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tproceso_caja
+  ADD CONSTRAINT tproceso_caja__id_proceso_wf FOREIGN KEY (id_proceso_wf)
+    REFERENCES wf.tproceso_wf(id_proceso_wf)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+/***********************************F-DEP-GSS-TES-0-20/01/2016****************************************/ 
+
+/***********************************I-DEP-GSS-TES-0-08/03/2016****************************************/ 
+
+ALTER TABLE tes.tsolicitud_efectivo_det
+  ADD CONSTRAINT fk_tsolicitud_efectivo_det__id_solicitud_efectivo FOREIGN KEY (id_solicitud_efectivo)
+    REFERENCES tes.tsolicitud_efectivo(id_solicitud_efectivo)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_efectivo_det
+  ADD CONSTRAINT fk_tsolicitud_efectivo_det__id_concepto_ingas FOREIGN KEY (id_concepto_ingas)
+    REFERENCES param.tconcepto_ingas(id_concepto_ingas)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_efectivo_det
+  ADD CONSTRAINT fk_tsolicitud_efectivo_det__id_cc FOREIGN KEY (id_cc)
+    REFERENCES param.tcentro_costo(id_centro_costo)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD CONSTRAINT fk_tsolicitud_efectivo__id_solicitud_efectiivo FOREIGN KEY (id_solicitud_efectivo_fk)
+    REFERENCES tes.tsolicitud_efectivo(id_solicitud_efectivo)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD CONSTRAINT fk_tsolicitud_efectivo__id_caja FOREIGN KEY (id_caja)
+    REFERENCES tes.tcaja(id_caja)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD CONSTRAINT fk_tsolicitud_efectivo__id_tipo_solicitud FOREIGN KEY (id_tipo_solicitud)
+    REFERENCES tes.ttipo_solicitud(id_tipo_solicitud)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD CONSTRAINT fk_tsolicitud_efectivo__id_gestion FOREIGN KEY (id_gestion)
+    REFERENCES param.tgestion(id_gestion)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tcaja
+  ADD CONSTRAINT fk_tcaja__id_cuenta_bancaria FOREIGN KEY (id_cuenta_bancaria)
+    REFERENCES tes.tcuenta_bancaria(id_cuenta_bancaria)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_rendicion_det
+  ADD CONSTRAINT fk_tsolicitud_rendicion_det__id_documento_respaldo FOREIGN KEY (id_documento_respaldo)
+    REFERENCES conta.tdoc_compra_venta(id_doc_compra_venta)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+	
+/***********************************F-DEP-GSS-TES-0-08/03/2016****************************************/
+
+
+
+
+/***********************************I-DEP-RAC-TES-0-23/03/2016****************************************/
+
+
+--------------- SQL ---------------
+
+CREATE INDEX tplan_pago_idx ON tes.tplan_pago
+  USING btree (id_plan_pago_fk);
+
+
+--------------- SQL ---------------
+
+CREATE INDEX tplan_pago_idx1 ON tes.tplan_pago
+  USING btree (id_plantilla);
+  
+  
+--------------- SQL ---------------
+
+CREATE INDEX tplan_pago_id_obligacion_pago ON tes.tplan_pago
+  USING btree (id_obligacion_pago);
+  
+--------------- SQL ---------------
+
+CREATE INDEX tplan_pago_id_int_comprobante ON tes.tplan_pago
+  USING btree (id_int_comprobante);
+  
+--------------- SQL ---------------
+
+CREATE INDEX tobligacion_pago_id_contrato ON tes.tobligacion_pago
+  USING btree (id_contrato);
+
+
+--------------- SQL ---------------
+
+CREATE INDEX tobligacion_pago_id_moneda ON tes.tobligacion_pago
+  USING btree (id_moneda);
+  
+--------------- SQL ---------------
+
+CREATE INDEX tobligacion_pago_id_gestion ON tes.tobligacion_pago
+  USING btree (id_gestion);
+  
+   
+
+/***********************************F-DEP-RAC-TES-0-23/03/2016****************************************/
+
+
+
+
+
+/***********************************I-DEP-JRR-TES-0-08/11/2016****************************************/
+
+
+
+
+CREATE OR REPLACE VIEW tes.vcuenta_bancaria(
     id_cuenta_bancaria,
-    fecha,
-    a_favor,
-    nro_cheque,
-    importe_deposito,
-    nro_liquidacion,
-    detalle,
-    origen,
-    observaciones,
-    importe_cheque,
-    id_libro_bancos_fk,
-    estado,
-    nro_comprobante,
-    indice,
     estado_reg,
-    tipo,
+    fecha_baja,
+    nro_cuenta,
+    fecha_alta,
+    id_institucion,
+    nombre_institucion,
     fecha_reg,
     id_usuario_reg,
     fecha_mod,
     id_usuario_mod,
-    usr_reg,
-    usr_mod,
-    id_depto,
-    nombre_depto,
-    id_proceso_wf,
+    id_moneda,
+    codigo_moneda)
+AS
+  SELECT ctaban.id_cuenta_bancaria,
+         ctaban.estado_reg,
+         ctaban.fecha_baja,
+         ctaban.nro_cuenta,
+         ctaban.fecha_alta,
+         ctaban.id_institucion,
+         inst.nombre AS nombre_institucion,
+         ctaban.fecha_reg,
+         ctaban.id_usuario_reg,
+         ctaban.fecha_mod,
+         ctaban.id_usuario_mod,
+         mon.id_moneda,
+         mon.codigo AS codigo_moneda
+  FROM tes.tcuenta_bancaria ctaban
+       JOIN param.tinstitucion inst ON inst.id_institucion =
+        ctaban.id_institucion
+       JOIN param.tmoneda mon ON mon.id_moneda = ctaban.id_moneda;
+
+---------------
+
+CREATE OR REPLACE VIEW tes.vcomp_devtesprov_det_plan_pago(
+	    id_concepto_ingas,
+	    id_partida,
+	    id_partida_ejecucion_com,
+	    monto_pago_mo,
+	    monto_pago_mb,
+	    id_centro_costo,
+	    descripcion,
+	    id_plan_pago,
+	    id_prorrateo,
+	    id_int_transaccion,
+	    id_orden_trabajo)
+	AS
+	  SELECT od.id_concepto_ingas,
+	         od.id_partida,
+	         od.id_partida_ejecucion_com,
+	         pro.monto_ejecutar_mo AS monto_pago_mo,
+	         pro.monto_ejecutar_mb AS monto_pago_mb,
+	         od.id_centro_costo,
+	         od.descripcion,
+	         pro.id_plan_pago,
+	         pro.id_prorrateo,
+	         pro.id_int_transaccion,
+	         od.id_orden_trabajo
+	  FROM tes.tprorrateo pro
+	       JOIN tes.tobligacion_det od ON od.id_obligacion_det =
+	         pro.id_obligacion_det;
+
+
+
+--------------- SQL ---------------
+
+CREATE OR REPLACE VIEW tes.vpago_pendientes_al_dia(
+    id_plan_pago,
+    fecha_tentativa,
     id_estado_wf,
-    fecha_cheque_literal,
-    id_finalidad,
-    nombre_finalidad,
-    color,
-    saldo_deposito,
-    nombre_regional,
-    sistema_origen,
-    comprobante_sigma,
-    notificado)
-AS
-SELECT lban.id_libro_bancos,
-    lban.num_tramite,
-    lban.id_cuenta_bancaria,
-    lban.fecha,
-    lban.a_favor,
-    lban.nro_cheque,
-    lban.importe_deposito,
-    lban.nro_liquidacion,
-    lban.detalle,
-    lban.origen,
-    lban.observaciones,
-    lban.importe_cheque,
-    lban.id_libro_bancos_fk,
-    lban.estado,
-    lban.nro_comprobante,
-    lban.indice,
-    lban.estado_reg,
-    lban.tipo,
-    lban.fecha_reg,
-    lban.id_usuario_reg,
-    lban.fecha_mod,
-    lban.id_usuario_mod,
-    usu1.cuenta AS usr_reg,
-    usu2.cuenta AS usr_mod,
-    lban.id_depto,
-    depto.nombre AS nombre_depto,
-    lban.id_proceso_wf,
-    lban.id_estado_wf,
-    upper(pxp.f_fecha_literal(lban.fecha)) AS fecha_cheque_literal,
-    lban.id_finalidad,
-    fin.nombre_finalidad,
-    fin.color,
-        CASE
-            WHEN lban.tipo::text = 'deposito'::text THEN lban.importe_deposito
-                - COALESCE((
-    SELECT COALESCE(sum(lb.importe_cheque), 0::numeric) AS "coalesce"
-    FROM tes.tts_libro_bancos lb
-    WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos AND (lb.tipo::text <>
-        ALL (ARRAY['deposito'::character varying::text, 'transf_interna_haber'::character varying::text]))
-    ), 0::numeric) + COALESCE((
-    SELECT COALESCE(sum(lb.importe_deposito), 0::numeric) AS "coalesce"
-    FROM tes.tts_libro_bancos lb
-    WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos AND (lb.tipo::text = ANY
-        (ARRAY['deposito'::character varying::text, 'transf_interna_haber'::character varying::text]))
-    ), 0::numeric)
-            WHEN (lban.tipo::text = ANY (ARRAY['cheque'::character
-                varying::text, 'debito_automatico'::character varying::text, 'transferencia_carta'::character varying::text, 'transf_interna_debe'::character varying::text])) AND lban.id_libro_bancos_fk IS NOT NULL THEN ((
-    SELECT COALESCE(lb.importe_deposito, 0::numeric) AS "coalesce"
-    FROM tes.tts_libro_bancos lb
-    WHERE lb.id_libro_bancos = lban.id_libro_bancos_fk
-    )) + ((
-    SELECT COALESCE(sum(lb.importe_deposito), 0::numeric) AS "coalesce"
-    FROM tes.tts_libro_bancos lb
-    WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos_fk AND (lb.tipo::text =
-        ANY (ARRAY['deposito'::character varying::text, 'transf_interna_haber'::character varying::text]))
-    )) - ((
-    SELECT sum(lb2.importe_cheque) AS sum
-    FROM tes.tts_libro_bancos lb2
-    WHERE lb2.id_libro_bancos <= lban.id_libro_bancos AND
-        lb2.id_libro_bancos_fk = lban.id_libro_bancos_fk AND (lb2.tipo::text <> ALL (ARRAY['deposito'::character varying::text, 'transf_interna_haber'::character varying::text]))
-    ))
-            ELSE 0::numeric
-        END AS saldo_deposito,
-    reg.nombre_regional,
-    lban.sistema_origen,
-    lban.comprobante_sigma,
-    lban.notificado
-FROM tes.tts_libro_bancos lban
-   JOIN segu.tusuario usu1 ON usu1.id_usuario = lban.id_usuario_reg
-   LEFT JOIN param.tdepto depto ON depto.id_depto = lban.id_depto
-   LEFT JOIN segu.tusuario usu2 ON usu2.id_usuario = lban.id_usuario_mod
-   JOIN tes.tfinalidad fin ON fin.id_finalidad = lban.id_finalidad
-   LEFT JOIN param.tregional reg ON reg.codigo_regional::text = lban.origen::text;
-   
-/***********************************F-DEP-GSS-TES-0-19/01/2015****************************************/
-
-/***********************************I-DEP-JRR-TES-0-23/01/2015****************************************/
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
     id_proceso_wf,
-    detalle,
-    codigo_moneda,
-    nro_cuota,
+    monto,
+    liquido_pagable,
+    monto_retgar_mo,
+    monto_ejecutar_total_mo,
+    estado,
+    id_obligacion_dets,
+    pagos_automaticos,
+    desc_funcionario_solicitante,
+    email_empresa_fun_sol,
+    email_empresa_usu_reg,
+    desc_funcionario_usu_reg,
+    tipo,
     tipo_pago,
+    tipo_obligacion,
     tipo_solicitud,
     tipo_concepto_solicitud,
-    total_monto_op_mb,
-    total_monto_op_mo,
-    total_pago,
-    fecha_tentativa,
-    desc_funcionario,
-    email_empresa,
-    desc_usuario,
-    id_funcionario_gerente)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         COALESCE(p.desc_proveedor, '' ::character varying) AS desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, '' ::character varying) ::text || ' ' ::text) ||
-          COALESCE(pp.obs_monto_no_pagado, '' ::text)) ::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, '' ::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, '' ::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         ('<table>' ::text || pxp.html_rows((((('<td>' ::text ||
-          ci.desc_ingas::text) || '<br/>' ::text) || od.descripcion) || '</td>'
-           ::text) ::character varying) ::text) || '</table>' ::text AS detalle,
-         mon.codigo AS codigo_moneda,
-         pp.nro_cuota,
-         pp.tipo_pago,
-         op.tipo_solicitud,
-         op.tipo_concepto_solicitud,
-         COALESCE(sum(od.monto_pago_mb), 0::numeric) AS total_monto_op_mb,
-         COALESCE(sum(od.monto_pago_mo), 0::numeric) AS total_monto_op_mo,
-         op.total_pago,
-         pp.fecha_tentativa,
-         fun.desc_funcionario1 AS desc_funcionario,
-         fun.email_empresa,
-         usu.desc_persona AS desc_usuario,
-         COALESCE(op.id_funcionario_gerente, 0) AS id_funcionario_gerente
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-        op.id_obligacion_pago
-       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-       LEFT JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-        op.id_categoria_compra
-       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
-        op.id_obligacion_pago AND od.estado_reg::text = 'activo' ::text
-       JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas =
-        od.id_concepto_ingas
-       JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario =
-        op.id_funcionario AND fun.estado_reg_asi::text = 'activo' ::text
-       JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
-  GROUP BY pp.id_plan_pago,
-           op.id_proveedor,
-           p.desc_proveedor,
-           op.id_moneda,
-           pp.id_depto_conta,
-           op.numero,
-           pp.estado,
-           pp.monto_ejecutar_total_mb,
-           pp.monto_ejecutar_total_mo,
-           pp.monto,
-           pp.monto_mb,
-           pp.monto_retgar_mb,
-           pp.monto_retgar_mo,
-           pp.monto_no_pagado,
-           pp.monto_no_pagado_mb,
-           pp.otros_descuentos,
-           pp.otros_descuentos_mb,
-           pp.id_plantilla,
-           pp.id_cuenta_bancaria,
-           pp.id_cuenta_bancaria_mov,
-           pp.nro_cheque,
-           pp.nro_cuenta_bancaria,
-           op.num_tramite,
-           pp.tipo,
-           op.id_gestion,
-           pp.id_int_comprobante,
-           pp.liquido_pagable,
-           pp.liquido_pagable_mb,
-           pp.nombre_pago,
-           pp.porc_monto_excento_var,
-           pp.obs_monto_no_pagado,
-           pp.descuento_anticipo,
-           pp.descuento_inter_serv,
-           op.tipo_obligacion,
-           op.id_categoria_compra,
-           cac.codigo,
-           cac.nombre,
-           pp.id_proceso_wf,
-           mon.codigo,
-           pp.nro_cuota,
-           pp.tipo_pago,
-           op.total_pago,
-           op.tipo_solicitud,
-           op.tipo_concepto_solicitud,
-           pp.fecha_tentativa,
-           fun.desc_funcionario1,
-           fun.email_empresa,
-           usu.desc_persona,
-           op.id_funcionario_gerente;  
-
-/***********************************F-DEP-JRR-TES-0-23/01/2015****************************************/
-
-/***********************************I-DEP-JRR-TES-0-04/02/2015****************************************/
-
-
-/***********************************F-DEP-JRR-TES-0-04/02/2015****************************************/
-
-/***********************************I-DEP-JRR-TES-0-11/02/2015****************************************/
-
-/***********************************F-DEP-JRR-TES-0-11/02/2015****************************************/
-
-/***********************************I-DEP-JRR-TES-0-13/02/2015****************************************/
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    detalle,
-    codigo_moneda,
-    nro_cuota,
-    tipo_pago,
-    tipo_solicitud,
-    tipo_concepto_solicitud,
-    total_monto_op_mb,
-    total_monto_op_mo,
-    total_pago,
-    fecha_tentativa,
-    desc_funcionario,
-    email_empresa,
-    desc_usuario,
-    id_funcionario_gerente,
-    correo_usuario,
-    sw_conformidad)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         COALESCE(p.desc_proveedor, '' ::character varying) AS desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, '' ::character varying) ::text || ' ' ::text) ||
-          COALESCE(pp.obs_monto_no_pagado, '' ::text)) ::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, '' ::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, '' ::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         ('<table>' ::text || pxp.html_rows((((('<td>' ::text ||
-          ci.desc_ingas::text) || '<br/>' ::text) || od.descripcion) || '</td>'
-           ::text) ::character varying) ::text) || '</table>' ::text AS detalle,
-         mon.codigo AS codigo_moneda,
-         pp.nro_cuota,
-         pp.tipo_pago,
-         op.tipo_solicitud,
-         op.tipo_concepto_solicitud,
-         COALESCE(sum(od.monto_pago_mb), 0::numeric) AS total_monto_op_mb,
-         COALESCE(sum(od.monto_pago_mo), 0::numeric) AS total_monto_op_mo,
-         op.total_pago,
-         pp.fecha_tentativa,
-         fun.desc_funcionario1 AS desc_funcionario,
-         fun.email_empresa,
-         usu.desc_persona AS desc_usuario,
-         COALESCE(op.id_funcionario_gerente, 0) AS id_funcionario_gerente,
-         ususol.correo AS correo_usuario,
-         CASE
-           WHEN pp.fecha_conformidad IS NULL THEN 'no' ::text
-           ELSE 'si' ::text
-         END AS sw_conformidad
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-        op.id_obligacion_pago
-       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-       LEFT JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-        op.id_categoria_compra
-       LEFT JOIN adq.tcotizacion cot ON op.id_obligacion_pago =
-        cot.id_obligacion_pago
-       LEFT JOIN adq.tproceso_compra pro ON pro.id_proceso_compra =
-        cot.id_proceso_compra
-       LEFT JOIN adq.tsolicitud sol ON sol.id_solicitud = pro.id_solicitud
-       LEFT JOIN segu.vusuario ususol ON ususol.id_usuario = sol.id_usuario_reg
-       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
-        op.id_obligacion_pago AND od.estado_reg::text = 'activo' ::text
-       JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas =
-        od.id_concepto_ingas
-       JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario =
-        op.id_funcionario AND fun.estado_reg_asi::text = 'activo' ::text
-       JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
-  GROUP BY pp.id_plan_pago,
-           op.id_proveedor,
-           p.desc_proveedor,
-           op.id_moneda,
-           pp.id_depto_conta,
-           op.numero,
-           pp.estado,
-           pp.monto_ejecutar_total_mb,
-           pp.monto_ejecutar_total_mo,
-           pp.monto,
-           pp.monto_mb,
-           pp.monto_retgar_mb,
-           pp.monto_retgar_mo,
-           pp.monto_no_pagado,
-           pp.monto_no_pagado_mb,
-           pp.otros_descuentos,
-           pp.otros_descuentos_mb,
-           pp.id_plantilla,
-           pp.id_cuenta_bancaria,
-           pp.id_cuenta_bancaria_mov,
-           pp.nro_cheque,
-           pp.nro_cuenta_bancaria,
-           op.num_tramite,
-           pp.tipo,
-           op.id_gestion,
-           pp.id_int_comprobante,
-           pp.liquido_pagable,
-           pp.liquido_pagable_mb,
-           pp.nombre_pago,
-           pp.porc_monto_excento_var,
-           pp.obs_monto_no_pagado,
-           pp.descuento_anticipo,
-           pp.descuento_inter_serv,
-           op.tipo_obligacion,
-           op.id_categoria_compra,
-           cac.codigo,
-           cac.nombre,
-           pp.id_proceso_wf,
-           mon.codigo,
-           pp.nro_cuota,
-           pp.tipo_pago,
-           op.total_pago,
-           op.tipo_solicitud,
-           op.tipo_concepto_solicitud,
-           pp.fecha_tentativa,
-           fun.desc_funcionario1,
-           fun.email_empresa,
-           usu.desc_persona,
-           op.id_funcionario_gerente,
-           ususol.correo;
-
-           
-/***********************************F-DEP-JRR-TES-0-13/02/2015****************************************/
-
-
-
-
-
-
-
-           
-/***********************************I-DEP-RAC-TES-0-27/02/2015****************************************/
---------------- SQL ---------------
-
-CREATE OR REPLACE VIEW tes.vpago_x_proveedor(
-    id_plan_pago,
-    id_gestion,
-    gestion,
-    id_obligacion_pago,
-    num_tramite,
-    orden_compra,
-    tipo_obligacion,
     pago_variable,
-    desc_proveedor,
-    estado,
-    usuario_reg,
-    fecha,
-    fecha_reg,
-    ob_obligacion_pago,
-    fecha_tentativa_de_pago,
+    tipo_anticipo,
+    estado_reg,
+    num_tramite,
     nro_cuota,
-    tipo_plan_pago,
-    estado_plan_pago,
-    obs_descuento_inter_serv,
-    obs_descuentos_anticipo,
-    obs_descuentos_ley,
-    obs_monto_no_pagado,
-    obs_otros_descuentos,
-    codigo,
-    monto_cuota,
-    monto_anticipo,
-    monto_excento,
-    monto_retgar_mo,
-    monto_ajuste_ag,
-    monto_ajuste_siguiente_pago,
-    liquido_pagable,
-    monto_presupuestado)
-AS
-  SELECT ppp.id_plan_pago,
-         op.id_gestion,
-         ges.gestion,
-         op.id_obligacion_pago,
-         op.num_tramite,
-         cot.numero_oc AS orden_compra,
-         op.tipo_obligacion,
-         op.pago_variable,
-         pro.desc_proveedor,
-         op.estado,
-         usu.cuenta AS usuario_reg,
-         op.fecha,
-         op.fecha_reg,
-         op.obs AS ob_obligacion_pago,
-         ppp.fecha_tentativa AS fecha_tentativa_de_pago,
-         ppp.nro_cuota,
-         ppp.tipo AS tipo_plan_pago,
-         ppp.estado AS estado_plan_pago,
-         ppp.obs_descuento_inter_serv,
-         ppp.obs_descuentos_anticipo,
-         ppp.obs_descuentos_ley,
-         ppp.obs_monto_no_pagado,
-         ppp.obs_otros_descuentos,
-         mon.codigo,
-         ppp.monto AS monto_cuota,
-         ppp.monto_anticipo,
-         ppp.monto_excento,
-         ppp.monto_retgar_mo,
-         ppp.monto_ajuste_ag,
-         ppp.monto_ajuste_siguiente_pago,
-         ppp.liquido_pagable,
-         (
-           SELECT sum(od.monto_pago_mo) AS monto_presupuestado
-           FROM tes.tobligacion_det od
-           WHERE od.id_obligacion_pago = op.id_obligacion_pago AND
-                 od.estado_reg = 'activo'
-         ) AS monto_presupuestado,
-         con.id_contrato,
-          '(id:'||con.id_contrato||') Nro: '||con.numero as desc_contrato
-  FROM tes.tobligacion_pago op
-       JOIN param.tgestion ges ON ges.id_gestion = op.id_gestion
-    
-       JOIN param.vproveedor pro ON pro.id_proveedor = op.id_proveedor
-       JOIN segu.tusuario usu ON usu.id_usuario = op.id_usuario_reg
-       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-       JOIN tes.tplan_pago ppp ON ppp.id_obligacion_pago = op.id_obligacion_pago
-         AND ppp.estado_reg= 'activo'
-       LEFT JOIN adq.tcotizacion cot ON cot.id_obligacion_pago =
-         op.id_obligacion_pago
-       LEFT JOIN  leg.tcontrato con ON con.id_contrato = op.id_contrato;
-       
-/***********************************F-DEP-RAC-TES-0-27/02/2015****************************************/
-
-
-
-/***********************************I-DEP-RAC-TES-0-25/03/2015****************************************/
-
-
---------------- SQL ---------------
-
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2
+    nombre_pago,
+    obs,
+    codigo_moneda,
+    id_funcionario_solicitante,
+    id_funcionario_registro,
+    id_proceso_wf_op,
+    estado_op)
 AS
   SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         COALESCE(p.desc_proveedor, ''::character varying) AS desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
-           COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
+         pp.fecha_tentativa,
+         pp.id_estado_wf,
          pp.id_proceso_wf,
-         ('<table>'::text || pxp.html_rows((((('<td>'::text || ci.desc_ingas::
-           text) || '<br/>'::text) || od.descripcion) || '</td>'::text)::
-           character varying)::text) || '</table>'::text AS detalle,
-         mon.codigo AS codigo_moneda,
-         pp.nro_cuota,
+         pp.monto,
+         pp.liquido_pagable,
+         pp.monto_retgar_mo,
+         pp.monto_ejecutar_total_mo,
+         pp.estado,
+         pxp.list(od.id_obligacion_det::text) AS id_obligacion_dets,
+         pxp.list_unique(cig.pago_automatico::text) AS pagos_automaticos,
+         fun.desc_funcionario1 AS desc_funcionario_solicitante,
+         fun.email_empresa AS email_empresa_fun_sol,
+         freg.email_empresa AS email_empresa_usu_reg,
+         freg.desc_funcionario1 AS desc_funcionario_usu_reg,
+         pp.tipo,
          pp.tipo_pago,
+         op.tipo_obligacion,
          op.tipo_solicitud,
          op.tipo_concepto_solicitud,
-         COALESCE(sum(od.monto_pago_mb), 0::numeric) AS total_monto_op_mb,
-         COALESCE(sum(od.monto_pago_mo), 0::numeric) AS total_monto_op_mo,
-         op.total_pago,
-         pp.fecha_tentativa,
-         fun.desc_funcionario1 AS desc_funcionario,
-         fun.email_empresa,
-         usu.desc_persona AS desc_usuario,
-         COALESCE(op.id_funcionario_gerente, 0) AS id_funcionario_gerente,
-         ususol.correo AS correo_usuario,
-         CASE
-           WHEN pp.fecha_conformidad IS NULL THEN 'no'::text
-           ELSE 'si'::text
-         END AS sw_conformidad,
-         op.ultima_cuota_pp,
-         op.ultima_cuota_dev,
-         pp.tiene_form500
+         op.pago_variable,
+         op.tipo_anticipo,
+         pp.estado_reg,
+         op.num_tramite,
+         pp.nro_cuota,
+         pp.nombre_pago,
+         op.obs,
+         mon.codigo AS codigo_moneda,
+         fun.id_funcionario AS id_funcionario_solicitante,
+         freg.id_funcionario AS id_funcionario_registro,
+         op.id_proceso_wf AS id_proceso_wf_op,
+         op.estado AS estado_op
   FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-         op.id_obligacion_pago
+       JOIN tes.tobligacion_pago op ON op.id_obligacion_pago =
+         pp.id_obligacion_pago
        JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-       LEFT JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-         op.id_categoria_compra
-       LEFT JOIN adq.tcotizacion cot ON op.id_obligacion_pago =
-         cot.id_obligacion_pago
-       LEFT JOIN adq.tproceso_compra pro ON pro.id_proceso_compra =
-         cot.id_proceso_compra
-       LEFT JOIN adq.tsolicitud sol ON sol.id_solicitud = pro.id_solicitud
-       LEFT JOIN segu.vusuario ususol ON ususol.id_usuario = sol.id_usuario_reg
        JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
-         op.id_obligacion_pago AND od.estado_reg::text = 'activo'::text
-       JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas =
+         op.id_obligacion_pago
+       JOIN param.tconcepto_ingas cig ON cig.id_concepto_ingas =
          od.id_concepto_ingas
-       JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario =
-         op.id_funcionario AND fun.estado_reg_asi::text = 'activo'::text
-       JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
+       JOIN segu.tusuario usu ON usu.id_usuario = pp.id_usuario_reg
+       JOIN orga.vfuncionario_persona freg ON freg.id_persona = usu.id_persona
+       LEFT JOIN orga.vfuncionario_persona fun ON op.id_funcionario =
+         fun.id_funcionario
+  WHERE (pp.estado::text = ANY (ARRAY [ 'borrador'::character varying::text,
+    'vbsolicitante'::character varying::text ])) AND
+        pp.fecha_tentativa <= now()::date AND
+        pp.monto_ejecutar_total_mo > 0::numeric AND
+        (pp.tipo::text = ANY (ARRAY [ 'devengado_pagado'::character varying::
+          text, 'devengado_pagado_1c'::character varying::text, 'ant_aplicado'::
+          character varying::text ])) AND
+        (op.tipo_obligacion::text = ANY (ARRAY [ 'adquisiciones'::character
+          varying::text, 'pago_directo'::character varying::text ])) AND
+        pp.estado_reg::text = 'activo'::text 
   GROUP BY pp.id_plan_pago,
-           op.id_proveedor,
-           p.desc_proveedor,
-           op.id_moneda,
-           pp.id_depto_conta,
-           op.numero,
-           pp.estado,
-           pp.monto_ejecutar_total_mb,
-           pp.monto_ejecutar_total_mo,
-           pp.monto,
-           pp.monto_mb,
-           pp.monto_retgar_mb,
-           pp.monto_retgar_mo,
-           pp.monto_no_pagado,
-           pp.monto_no_pagado_mb,
-           pp.otros_descuentos,
-           pp.otros_descuentos_mb,
-           pp.id_plantilla,
-           pp.id_cuenta_bancaria,
-           pp.id_cuenta_bancaria_mov,
-           pp.nro_cheque,
-           pp.nro_cuenta_bancaria,
-           op.num_tramite,
-           pp.tipo,
-           op.id_gestion,
-           pp.id_int_comprobante,
-           pp.liquido_pagable,
-           pp.liquido_pagable_mb,
-           pp.nombre_pago,
-           pp.porc_monto_excento_var,
-           pp.obs_monto_no_pagado,
-           pp.descuento_anticipo,
-           pp.descuento_inter_serv,
-           op.tipo_obligacion,
-           op.id_categoria_compra,
-           cac.codigo,
-           cac.nombre,
-           pp.id_proceso_wf,
-           mon.codigo,
-           pp.nro_cuota,
-           pp.tipo_pago,
-           op.total_pago,
-           op.tipo_solicitud,
-           op.tipo_concepto_solicitud,
            pp.fecha_tentativa,
+           pp.id_estado_wf,
+           pp.id_proceso_wf,
+           pp.monto,
+           pp.liquido_pagable,
+           pp.monto_retgar_mo,
+           pp.monto_ejecutar_total_mo,
+           pp.estado,
            fun.desc_funcionario1,
            fun.email_empresa,
-           usu.desc_persona,
-           op.id_funcionario_gerente,
-           ususol.correo,
-           op.ultima_cuota_pp,
-         op.ultima_cuota_dev,
-         pp.tiene_form500;
-
-ALTER TABLE tes.vcomp_devtesprov_plan_pago_2
-  OWNER TO postgres;
-  
-/***********************************F-DEP-RAC-TES-0-25/03/2015****************************************/
-
-
-/***********************************I-DEP-RAC-TES-0-31/03/2015****************************************/
-
-
---------------- SQL ---------------
-
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago (
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    forma_pago,
-    monto_ajuste_ag,
-    monto_ajuste_siguiente_pago,
-    monto_anticipo,
-    tipo_cambio_conv)
-AS
-SELECT pp.id_plan_pago,
-    op.id_proveedor,
-    p.desc_proveedor,
-    op.id_moneda,
-    pp.id_depto_conta,
-    op.numero,
-    now() AS fecha_actual,
-    pp.estado,
-    pp.monto_ejecutar_total_mb,
-    pp.monto_ejecutar_total_mo,
-    pp.monto,
-    pp.monto_mb,
-    pp.monto_retgar_mb,
-    pp.monto_retgar_mo,
-    pp.monto_no_pagado,
-    pp.monto_no_pagado_mb,
-    pp.otros_descuentos,
-    pp.otros_descuentos_mb,
-    pp.id_plantilla,
-    pp.id_cuenta_bancaria,
-    pp.id_cuenta_bancaria_mov,
-    pp.nro_cheque,
-    pp.nro_cuenta_bancaria,
-    op.num_tramite,
-    pp.tipo,
-    op.id_gestion AS id_gestion_cuentas,
-    pp.id_int_comprobante,
-    pp.liquido_pagable,
-    pp.liquido_pagable_mb,
-    pp.nombre_pago,
-    pp.porc_monto_excento_var,
-    ((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
-        COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS obs_pp,
-    pp.descuento_anticipo,
-    pp.descuento_inter_serv,
-    op.tipo_obligacion,
-    op.id_categoria_compra,
-    COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-    COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
-    pp.id_proceso_wf,
-    pp.forma_pago,
-    pp.monto_ajuste_ag,
-    pp.monto_ajuste_siguiente_pago,
-    pp.monto_anticipo,
-    op.tipo_cambio_conv
-FROM tes.tplan_pago pp
-   JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago = op.id_obligacion_pago
-   JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-   LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-       op.id_categoria_compra;
-       
-/***********************************F-DEP-RAC-TES-0-31/03/2015****************************************/
-
-
-
-
-
-/***********************************I-DEP-RAC-TES-0-09/04/2015****************************************/
+           freg.email_empresa,
+           freg.desc_funcionario1,
+           pp.tipo,
+           pp.tipo_pago,
+           op.tipo_obligacion,
+           op.tipo_solicitud,
+           op.tipo_concepto_solicitud,
+           op.pago_variable,
+           op.tipo_anticipo,
+           op.num_tramite,
+           pp.nro_cuota,
+           pp.nombre_pago,
+           op.obs,
+           mon.codigo,
+           fun.id_funcionario,
+           freg.id_funcionario,
+           op.id_proceso_wf,
+           op.estado;
+-------
 CREATE OR REPLACE VIEW tes.vobligaciones_contrato_20000(
     fecha,
     num_tramite,
@@ -6582,870 +3666,7 @@ AS
   HAVING sum(od.monto_pago_mb) >= 20000::numeric
   ORDER BY op.fecha DESC;
 
-/***********************************F-DEP-RAC-TES-0-09/04/2015****************************************/
-
-
-
-/***********************************I-DEP-RAC-TES-0-21/04/2015****************************************/
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2 (
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    detalle,
-    codigo_moneda,
-    nro_cuota,
-    tipo_pago,
-    tipo_solicitud,
-    tipo_concepto_solicitud,
-    total_monto_op_mb,
-    total_monto_op_mo,
-    total_pago,
-    fecha_tentativa,
-    desc_funcionario,
-    email_empresa,
-    desc_usuario,
-    id_funcionario_gerente,
-    correo_usuario,
-    sw_conformidad,
-    ultima_cuota_pp,
-    ultima_cuota_dev,
-    tiene_form500,
-    prioridad_op,
-    prioridad_lb,
-    id_depto_lb)
-AS
- SELECT pp.id_plan_pago,
-    op.id_proveedor,
-    COALESCE(p.desc_proveedor, ''::character varying) AS desc_proveedor,
-    op.id_moneda,
-    pp.id_depto_conta,
-    op.numero,
-    now() AS fecha_actual,
-    pp.estado,
-    pp.monto_ejecutar_total_mb,
-    pp.monto_ejecutar_total_mo,
-    pp.monto,
-    pp.monto_mb,
-    pp.monto_retgar_mb,
-    pp.monto_retgar_mo,
-    pp.monto_no_pagado,
-    pp.monto_no_pagado_mb,
-    pp.otros_descuentos,
-    pp.otros_descuentos_mb,
-    pp.id_plantilla,
-    pp.id_cuenta_bancaria,
-    pp.id_cuenta_bancaria_mov,
-    pp.nro_cheque,
-    pp.nro_cuenta_bancaria,
-    op.num_tramite,
-    pp.tipo,
-    op.id_gestion AS id_gestion_cuentas,
-    pp.id_int_comprobante,
-    pp.liquido_pagable,
-    pp.liquido_pagable_mb,
-    pp.nombre_pago,
-    pp.porc_monto_excento_var,
-    ((COALESCE(op.numero, ''::character varying)::text || ' '::text) || COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS obs_pp,
-    pp.descuento_anticipo,
-    pp.descuento_inter_serv,
-    op.tipo_obligacion,
-    op.id_categoria_compra,
-    COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-    COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
-    pp.id_proceso_wf,
-    ('<table>'::text || pxp.html_rows((((('<td>'::text || ci.desc_ingas::text) || '<br/>'::text) || od.descripcion) || '</td>'::text)::character varying)::text) || '</table>'::text AS detalle,
-    mon.codigo AS codigo_moneda,
-    pp.nro_cuota,
-    pp.tipo_pago,
-    op.tipo_solicitud,
-    op.tipo_concepto_solicitud,
-    COALESCE(sum(od.monto_pago_mb), 0::numeric) AS total_monto_op_mb,
-    COALESCE(sum(od.monto_pago_mo), 0::numeric) AS total_monto_op_mo,
-    op.total_pago,
-    pp.fecha_tentativa,
-    fun.desc_funcionario1 AS desc_funcionario,
-    fun.email_empresa,
-    usu.desc_persona AS desc_usuario,
-    COALESCE(op.id_funcionario_gerente, 0) AS id_funcionario_gerente,
-    ususol.correo AS correo_usuario,
-        CASE
-            WHEN pp.fecha_conformidad IS NULL THEN 'no'::text
-            ELSE 'si'::text
-        END AS sw_conformidad,
-    op.ultima_cuota_pp,
-    op.ultima_cuota_dev,
-    pp.tiene_form500,
-    dep.prioridad AS prioridad_op,
-    COALESCE(deplb.prioridad, (-1)) AS prioridad_lb,
-    pp.id_depto_lb
-   FROM tes.tplan_pago pp
-   JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago = op.id_obligacion_pago
-   JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-   JOIN param.tdepto dep ON dep.id_depto = op.id_depto
-   LEFT JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-   LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra = op.id_categoria_compra
-   LEFT JOIN adq.tcotizacion cot ON op.id_obligacion_pago = cot.id_obligacion_pago
-   LEFT JOIN adq.tproceso_compra pro ON pro.id_proceso_compra = cot.id_proceso_compra
-   LEFT JOIN adq.tsolicitud sol ON sol.id_solicitud = pro.id_solicitud
-   LEFT JOIN segu.vusuario ususol ON ususol.id_usuario = sol.id_usuario_reg
-   LEFT JOIN param.tdepto deplb ON deplb.id_depto = pp.id_depto_lb
-   JOIN tes.tobligacion_det od ON od.id_obligacion_pago = op.id_obligacion_pago AND od.estado_reg::text = 'activo'::text
-   JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas = od.id_concepto_ingas
-   JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario = op.id_funcionario AND fun.estado_reg_asi::text = 'activo'::text
-   JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
-  GROUP BY pp.id_plan_pago, op.id_proveedor, p.desc_proveedor, op.id_moneda, pp.id_depto_conta, op.numero, pp.estado, pp.monto_ejecutar_total_mb, pp.monto_ejecutar_total_mo, pp.monto, pp.monto_mb, pp.monto_retgar_mb, pp.monto_retgar_mo, pp.monto_no_pagado, pp.monto_no_pagado_mb, pp.otros_descuentos, pp.otros_descuentos_mb, pp.id_plantilla, pp.id_cuenta_bancaria, pp.id_cuenta_bancaria_mov, pp.nro_cheque, pp.nro_cuenta_bancaria, op.num_tramite, pp.tipo, op.id_gestion, pp.id_int_comprobante, pp.liquido_pagable, pp.liquido_pagable_mb, pp.nombre_pago, pp.porc_monto_excento_var, pp.obs_monto_no_pagado, pp.descuento_anticipo, pp.descuento_inter_serv, op.tipo_obligacion, op.id_categoria_compra, cac.codigo, cac.nombre, pp.id_proceso_wf, mon.codigo, pp.nro_cuota, pp.tipo_pago, op.total_pago, op.tipo_solicitud, op.tipo_concepto_solicitud, pp.fecha_tentativa, fun.desc_funcionario1, fun.email_empresa, usu.desc_persona, op.id_funcionario_gerente, ususol.correo, op.ultima_cuota_pp, op.ultima_cuota_dev, pp.tiene_form500, dep.prioridad, deplb.prioridad;
-           
-/***********************************F-DEP-RAC-TES-0-21/04/2015****************************************/
-
-
-
-
-/***********************************I-DEP-RAC-TES-0-08/05/2015****************************************/
-
-
---------------- SQL ---------------
-
-CREATE or REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2 (
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    detalle,
-    codigo_moneda,
-    nro_cuota,
-    tipo_pago,
-    tipo_solicitud,
-    tipo_concepto_solicitud,
-    total_monto_op_mb,
-    total_monto_op_mo,
-    total_pago,
-    fecha_tentativa,
-    desc_funcionario,
-    email_empresa,
-    desc_usuario,
-    id_funcionario_gerente,
-    correo_usuario,
-    sw_conformidad,
-    ultima_cuota_pp,
-    ultima_cuota_dev,
-    tiene_form500,
-    prioridad_op,
-    prioridad_lb,
-    id_depto_lb)
-AS
-SELECT pp.id_plan_pago,
-    op.id_proveedor,
-    COALESCE(p.desc_proveedor, ''::character varying) AS desc_proveedor,
-    op.id_moneda,
-    pp.id_depto_conta,
-    op.numero,
-    now() AS fecha_actual,
-    pp.estado,
-    pp.monto_ejecutar_total_mb,
-    pp.monto_ejecutar_total_mo,
-    pp.monto,
-    pp.monto_mb,
-    pp.monto_retgar_mb,
-    pp.monto_retgar_mo,
-    pp.monto_no_pagado,
-    pp.monto_no_pagado_mb,
-    pp.otros_descuentos,
-    pp.otros_descuentos_mb,
-    pp.id_plantilla,
-    pp.id_cuenta_bancaria,
-    pp.id_cuenta_bancaria_mov,
-    pp.nro_cheque,
-    pp.nro_cuenta_bancaria,
-    op.num_tramite,
-    pp.tipo,
-    op.id_gestion AS id_gestion_cuentas,
-    pp.id_int_comprobante,
-    pp.liquido_pagable,
-    pp.liquido_pagable_mb,
-    pp.nombre_pago,
-    pp.porc_monto_excento_var,
-    ((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
-        COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS obs_pp,
-    pp.descuento_anticipo,
-    pp.descuento_inter_serv,
-    op.tipo_obligacion,
-    op.id_categoria_compra,
-    COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-    COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
-    pp.id_proceso_wf,
-    ('<table>'::text || pxp.html_rows((((('<td>'::text || ci.desc_ingas::text)
-        || '<br/>'::text) || od.descripcion) || '</td>'::text)::character varying)::text) || '</table>'::text AS detalle,
-    mon.codigo AS codigo_moneda,
-    pp.nro_cuota,
-    pp.tipo_pago,
-    op.tipo_solicitud,
-    op.tipo_concepto_solicitud,
-    COALESCE(sum(od.monto_pago_mb), 0::numeric) AS total_monto_op_mb,
-    COALESCE(sum(od.monto_pago_mo), 0::numeric) AS total_monto_op_mo,
-    op.total_pago,
-    pp.fecha_tentativa,
-    fun.desc_funcionario1 AS desc_funcionario,
-    fun.email_empresa,
-    usu.desc_persona AS desc_usuario,
-    COALESCE(op.id_funcionario_gerente, 0) AS id_funcionario_gerente,
-    ususol.correo AS correo_usuario,
-        CASE
-            WHEN pp.fecha_conformidad IS NULL THEN 'no'::text
-            ELSE 'si'::text
-        END AS sw_conformidad,
-    op.ultima_cuota_pp,
-    op.ultima_cuota_dev,
-    pp.tiene_form500,
-    dep.prioridad AS prioridad_op,
-    COALESCE(deplb.prioridad, (-1)) AS prioridad_lb,
-    pp.id_depto_lb
-FROM tes.tplan_pago pp
-   JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago = op.id_obligacion_pago
-   JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-   JOIN param.tdepto dep ON dep.id_depto = op.id_depto
-   LEFT JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-   LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-       op.id_categoria_compra
-   LEFT JOIN adq.tcotizacion cot ON op.id_obligacion_pago = cot.id_obligacion_pago
-   LEFT JOIN adq.tproceso_compra pro ON pro.id_proceso_compra = cot.id_proceso_compra
-   LEFT JOIN adq.tsolicitud sol ON sol.id_solicitud = pro.id_solicitud
-   LEFT JOIN segu.vusuario ususol ON ususol.id_usuario = sol.id_usuario_reg
-   LEFT JOIN param.tdepto deplb ON deplb.id_depto = pp.id_depto_lb
-   JOIN tes.tobligacion_det od ON od.id_obligacion_pago = op.id_obligacion_pago
-       AND od.estado_reg::text = 'activo'::text
-   JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas = od.id_concepto_ingas
-   JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario = op.id_funcionario
-       AND fun.estado_reg_asi::text = 'activo'::text
-   JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
-GROUP BY pp.id_plan_pago, op.id_proveedor, p.desc_proveedor, op.id_moneda,
-    pp.id_depto_conta, op.numero, pp.estado, pp.monto_ejecutar_total_mb, pp.monto_ejecutar_total_mo, pp.monto, pp.monto_mb, pp.monto_retgar_mb, pp.monto_retgar_mo, pp.monto_no_pagado, pp.monto_no_pagado_mb, pp.otros_descuentos, pp.otros_descuentos_mb, pp.id_plantilla, pp.id_cuenta_bancaria, pp.id_cuenta_bancaria_mov, pp.nro_cheque, pp.nro_cuenta_bancaria, op.num_tramite, pp.tipo, op.id_gestion, pp.id_int_comprobante, pp.liquido_pagable, pp.liquido_pagable_mb, pp.nombre_pago, pp.porc_monto_excento_var, pp.obs_monto_no_pagado, pp.descuento_anticipo, pp.descuento_inter_serv, op.tipo_obligacion, op.id_categoria_compra, cac.codigo, cac.nombre, pp.id_proceso_wf, mon.codigo, pp.nro_cuota, pp.tipo_pago, op.total_pago, op.tipo_solicitud, op.tipo_concepto_solicitud, pp.fecha_tentativa, fun.desc_funcionario1, fun.email_empresa, usu.desc_persona, op.id_funcionario_gerente, ususol.correo, op.ultima_cuota_pp, op.ultima_cuota_dev, pp.tiene_form500, dep.prioridad, deplb.prioridad;
-    
-/***********************************F-DEP-RAC-TES-0-08/05/2015****************************************/
-
-
-/***********************************I-DEP-RAC-TES-0-12/05/2015****************************************/
-
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    detalle,
-    codigo_moneda,
-    nro_cuota,
-    tipo_pago,
-    tipo_solicitud,
-    tipo_concepto_solicitud,
-    total_monto_op_mb,
-    total_monto_op_mo,
-    total_pago,
-    fecha_tentativa,
-    desc_funcionario,
-    email_empresa,
-    desc_usuario,
-    id_funcionario_gerente,
-    correo_usuario,
-    sw_conformidad,
-    ultima_cuota_pp,
-    ultima_cuota_dev,
-    tiene_form500,
-    prioridad_op,
-    prioridad_lb,
-    id_depto_lb)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         COALESCE(p.desc_proveedor, ''::character varying) AS desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
-           COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         ((('<table border="1"><TR> 
-   <TH>Concepto</TH> 
-   <TH>Detalle</TH> 
-   <TH>Importe ('::text || mon.codigo::text) || ')</TH>'::text) || pxp.html_rows
-     ((((((('<td>'::text || ci.desc_ingas::text) || '</td> <td>'::text) ||
-     od.descripcion) || '</td> <td>'::text) || od.monto_pago_mo::text) ||
-     '</td>'::text)::character varying)::text) || '</table>'::text AS detalle,
-         mon.codigo AS codigo_moneda,
-         pp.nro_cuota,
-         pp.tipo_pago,
-         op.tipo_solicitud,
-         op.tipo_concepto_solicitud,
-         COALESCE(sum(od.monto_pago_mb), 0::numeric) AS total_monto_op_mb,
-         COALESCE(sum(od.monto_pago_mo), 0::numeric) AS total_monto_op_mo,
-         op.total_pago,
-         pp.fecha_tentativa,
-         fun.desc_funcionario1 AS desc_funcionario,
-         fun.email_empresa,
-         usu.desc_persona AS desc_usuario,
-         COALESCE(op.id_funcionario_gerente, 0) AS id_funcionario_gerente,
-         ususol.correo AS correo_usuario,
-         CASE
-           WHEN pp.fecha_conformidad IS NULL THEN 'no'::text
-           ELSE 'si'::text
-         END AS sw_conformidad,
-         op.ultima_cuota_pp,
-         op.ultima_cuota_dev,
-         pp.tiene_form500,
-         dep.prioridad AS prioridad_op,
-         COALESCE(deplb.prioridad, (- 1)) AS prioridad_lb,
-         pp.id_depto_lb
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-         op.id_obligacion_pago
-       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-       JOIN param.tdepto dep ON dep.id_depto = op.id_depto
-       LEFT JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-         op.id_categoria_compra
-       LEFT JOIN adq.tcotizacion cot ON op.id_obligacion_pago =
-         cot.id_obligacion_pago
-       LEFT JOIN adq.tproceso_compra pro ON pro.id_proceso_compra =
-         cot.id_proceso_compra
-       LEFT JOIN adq.tsolicitud sol ON sol.id_solicitud = pro.id_solicitud
-       LEFT JOIN segu.vusuario ususol ON ususol.id_usuario = sol.id_usuario_reg
-       LEFT JOIN param.tdepto deplb ON deplb.id_depto = pp.id_depto_lb
-       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
-         op.id_obligacion_pago AND od.estado_reg::text = 'activo'::text
-       JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas =
-         od.id_concepto_ingas
-       JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario =
-         op.id_funcionario AND fun.estado_reg_asi::text = 'activo'::text
-       JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
-  GROUP BY pp.id_plan_pago,
-           op.id_proveedor,
-           p.desc_proveedor,
-           op.id_moneda,
-           pp.id_depto_conta,
-           op.numero,
-           pp.estado,
-           pp.monto_ejecutar_total_mb,
-           pp.monto_ejecutar_total_mo,
-           pp.monto,
-           pp.monto_mb,
-           pp.monto_retgar_mb,
-           pp.monto_retgar_mo,
-           pp.monto_no_pagado,
-           pp.monto_no_pagado_mb,
-           pp.otros_descuentos,
-           pp.otros_descuentos_mb,
-           pp.id_plantilla,
-           pp.id_cuenta_bancaria,
-           pp.id_cuenta_bancaria_mov,
-           pp.nro_cheque,
-           pp.nro_cuenta_bancaria,
-           op.num_tramite,
-           pp.tipo,
-           op.id_gestion,
-           pp.id_int_comprobante,
-           pp.liquido_pagable,
-           pp.liquido_pagable_mb,
-           pp.nombre_pago,
-           pp.porc_monto_excento_var,
-           pp.obs_monto_no_pagado,
-           pp.descuento_anticipo,
-           pp.descuento_inter_serv,
-           op.tipo_obligacion,
-           op.id_categoria_compra,
-           cac.codigo,
-           cac.nombre,
-           pp.id_proceso_wf,
-           mon.codigo,
-           pp.nro_cuota,
-           pp.tipo_pago,
-           op.total_pago,
-           op.tipo_solicitud,
-           op.tipo_concepto_solicitud,
-           pp.fecha_tentativa,
-           fun.desc_funcionario1,
-           fun.email_empresa,
-           usu.desc_persona,
-           op.id_funcionario_gerente,
-           ususol.correo,
-           op.ultima_cuota_pp,
-           op.ultima_cuota_dev,
-           pp.tiene_form500,
-           dep.prioridad,
-           deplb.prioridad;
-           
-/***********************************F-DEP-RAC-TES-0-12/05/2015****************************************/
-
-/***********************************I-DEP-JRR-TES-0-15/05/2015****************************************/
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    detalle,
-    codigo_moneda,
-    nro_cuota,
-    tipo_pago,
-    tipo_solicitud,
-    tipo_concepto_solicitud,
-    total_monto_op_mb,
-    total_monto_op_mo,
-    total_pago,
-    fecha_tentativa,
-    desc_funcionario,
-    email_empresa,
-    desc_usuario,
-    id_funcionario_gerente,
-    correo_usuario,
-    sw_conformidad,
-    ultima_cuota_pp,
-    ultima_cuota_dev,
-    tiene_form500,
-    prioridad_op,
-    prioridad_lb,
-    id_depto_lb)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         COALESCE(p.desc_proveedor, '' ::character varying) AS desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, '' ::character varying) ::text || ' ' ::text) ||
-          COALESCE(pp.obs_monto_no_pagado, '' ::text)) ::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, '' ::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, '' ::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         ((('<table border="1"><TR> 
-   <TH>Concepto</TH> 
-   <TH>Detalle</TH> 
-   <TH>Importe (' ::text || mon.codigo::text) || ')</TH>' ::text) ||
-    pxp.html_rows((((((('<td>' ::text || ci.desc_ingas::text) || '</td> <td>'
-     ::text) || od.descripcion) || '</td> <td>' ::text) ||
-      od.monto_pago_mo::text) || '</td>' ::text) ::character varying) ::text) ||
-       '</table>' ::text AS detalle,
-         mon.codigo AS codigo_moneda,
-         pp.nro_cuota,
-         pp.tipo_pago,
-         op.tipo_solicitud,
-         op.tipo_concepto_solicitud,
-         COALESCE(sum(od.monto_pago_mb), 0::numeric) AS total_monto_op_mb,
-         COALESCE(sum(od.monto_pago_mo), 0::numeric) AS total_monto_op_mo,
-         op.total_pago,
-         pp.fecha_tentativa,
-         fun.desc_funcionario1 AS desc_funcionario,
-         fun.email_empresa,
-         usu.desc_persona AS desc_usuario,
-         COALESCE(op.id_funcionario_gerente, 0) AS id_funcionario_gerente,
-         ususol.correo AS correo_usuario,
-         CASE
-           WHEN pp.fecha_conformidad IS NULL THEN 'no' ::text
-           ELSE 'si' ::text
-         END AS sw_conformidad,
-         op.ultima_cuota_pp,
-         op.ultima_cuota_dev,
-         pp.tiene_form500,
-         dep.prioridad AS prioridad_op,
-         COALESCE(deplb.prioridad, (- 1)) AS prioridad_lb,
-         pp.id_depto_lb
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-        op.id_obligacion_pago
-       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-       JOIN param.tdepto dep ON dep.id_depto = op.id_depto
-       LEFT JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-        op.id_categoria_compra
-       LEFT JOIN adq.tcotizacion cot ON op.id_obligacion_pago =
-        cot.id_obligacion_pago
-       LEFT JOIN adq.tproceso_compra pro ON pro.id_proceso_compra =
-        cot.id_proceso_compra
-       LEFT JOIN adq.tsolicitud sol ON sol.id_solicitud = pro.id_solicitud
-       LEFT JOIN segu.vusuario ususol ON ususol.id_usuario = sol.id_usuario_reg
-       LEFT JOIN param.tdepto deplb ON deplb.id_depto = pp.id_depto_lb
-       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
-        op.id_obligacion_pago AND od.estado_reg::text = 'activo' ::text
-       JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas =
-        od.id_concepto_ingas
-       JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario =
-        op.id_funcionario AND fun.estado_reg_asi::text = 'activo' ::text
-       JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
-  GROUP BY pp.id_plan_pago,
-           op.id_proveedor,
-           p.desc_proveedor,
-           op.id_moneda,
-           pp.id_depto_conta,
-           op.numero,
-           pp.estado,
-           pp.monto_ejecutar_total_mb,
-           pp.monto_ejecutar_total_mo,
-           pp.monto,
-           pp.monto_mb,
-           pp.monto_retgar_mb,
-           pp.monto_retgar_mo,
-           pp.monto_no_pagado,
-           pp.monto_no_pagado_mb,
-           pp.otros_descuentos,
-           pp.otros_descuentos_mb,
-           pp.id_plantilla,
-           pp.id_cuenta_bancaria,
-           pp.id_cuenta_bancaria_mov,
-           pp.nro_cheque,
-           pp.nro_cuenta_bancaria,
-           op.num_tramite,
-           pp.tipo,
-           op.id_gestion,
-           pp.id_int_comprobante,
-           pp.liquido_pagable,
-           pp.liquido_pagable_mb,
-           pp.nombre_pago,
-           pp.porc_monto_excento_var,
-           pp.obs_monto_no_pagado,
-           pp.descuento_anticipo,
-           pp.descuento_inter_serv,
-           op.tipo_obligacion,
-           op.id_categoria_compra,
-           cac.codigo,
-           cac.nombre,
-           pp.id_proceso_wf,
-           mon.codigo,
-           pp.nro_cuota,
-           pp.tipo_pago,
-           op.total_pago,
-           op.tipo_solicitud,
-           op.tipo_concepto_solicitud,
-           pp.fecha_tentativa,
-           fun.desc_funcionario1,
-           fun.email_empresa,
-           usu.desc_persona,
-           op.id_funcionario_gerente,
-           ususol.correo,
-           op.ultima_cuota_pp,
-           op.ultima_cuota_dev,
-           pp.tiene_form500,
-           dep.prioridad,
-           deplb.prioridad;
-
-/***********************************F-DEP-JRR-TES-0-15/05/2015****************************************/
-
-
-
-/***********************************I-DEP-RAC-TES-0-18/05/2015****************************************/
-
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    forma_pago,
-    monto_ajuste_ag,
-    monto_ajuste_siguiente_pago,
-    monto_anticipo,
-    tipo_cambio_conv,
-    id_depto_libro,
-    fecha_costo_ini,
-    fecha_costo_fin)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
-           COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         pp.forma_pago,
-         pp.monto_ajuste_ag,
-         pp.monto_ajuste_siguiente_pago,
-         pp.monto_anticipo,
-         op.tipo_cambio_conv,
-         pp.id_depto_lb AS id_depto_libro,
-         pp.fecha_costo_ini,
-         COALESCE(pp.fecha_costo_fin, now()::date) AS fecha_costo_fin
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-         op.id_obligacion_pago
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-         op.id_categoria_compra;
-         
-/***********************************F-DEP-RAC-TES-0-18/05/2015****************************************/
-
-
-
-/***********************************I-DEP-RAC-TES-0-27/05/2015****************************************/
-
+---------------------
 CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
     id_plan_pago,
     id_proveedor,
@@ -7660,10 +3881,9 @@ AS
            pp.tiene_form500,
            dep.prioridad,
            deplb.prioridad;
-        
-/***********************************F-DEP-RAC-TES-0-27/05/2015****************************************/
 
-/***********************************I-DEP-RAC-TES-0-31/07/2015****************************************/
+---------
+
 CREATE OR REPLACE VIEW tes.vpago_x_proveedor (
     id_plan_pago,
     id_gestion,
@@ -7752,194 +3972,6 @@ FROM tes.tobligacion_pago op
    LEFT JOIN adq.tcotizacion cot ON cot.id_obligacion_pago = op.id_obligacion_pago
    LEFT JOIN leg.tcontrato con ON con.id_contrato = op.id_contrato
    JOIN orga.vfuncionario fun ON fun.id_funcionario = op.id_funcionario;
- 
-/***********************************F-DEP-RAC-TES-0-31/07/2015****************************************/
-
-/***********************************I-DEP-JRR-TES-10/08/2015****************************************/
-
-ALTER TABLE tes.tcaja
-  ADD CONSTRAINT tcaja__id_depto FOREIGN KEY (id_depto)
-    REFERENCES param.tdepto(id_depto)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.tcaja
-  ADD CONSTRAINT tcaja__id_moneda FOREIGN KEY (id_moneda)
-    REFERENCES param.tmoneda(id_moneda)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.tcajero
-  ADD CONSTRAINT tcaja__id_caja FOREIGN KEY (id_caja)
-    REFERENCES tes.tcaja(id_caja)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-    
-ALTER TABLE tes.tcajero
-  ADD CONSTRAINT tcaja__id_funcionario FOREIGN KEY (id_funcionario)
-    REFERENCES orga.tfuncionario(id_funcionario)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-    
-/***********************************F-DEP-JRR-TES-10/08/2015****************************************/  
-
-
-
-
-/***********************************I-DEP-RAC-TES-18/08/2015****************************************/  
-
---------------- SQL ---------------
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    forma_pago,
-    monto_ajuste_ag,
-    monto_ajuste_siguiente_pago,
-    monto_anticipo,
-    tipo_cambio_conv,
-    id_depto_libro,
-    fecha_costo_ini,
-    fecha_costo_fin,
-    id_obligacion_pago)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         op.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
-           COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         pp.forma_pago,
-         pp.monto_ajuste_ag,
-         pp.monto_ajuste_siguiente_pago,
-         pp.monto_anticipo,
-         op.tipo_cambio_conv,
-         pp.id_depto_lb AS id_depto_libro,
-         CASE 
-             WHEN pp.fecha_costo_ini is null THEN 
-                  now()::date 
-             WHEN pp.fecha_costo_ini > now() THEN 
-                  now()::date        
-             ELSE  
-               pp.fecha_costo_ini 
-          END as fecha_costo_ini,
-
-         COALESCE(pp.fecha_costo_fin, now()::date) AS fecha_costo_fin,
-         op.id_obligacion_pago
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-         op.id_obligacion_pago
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-         op.id_categoria_compra;
-/***********************************F-DEP-RAC-TES-18/08/2015****************************************/ 
-
-/***********************************I-DEP-JRR-TES-0-25/08/2015****************************************/
-
-ALTER TABLE tes.testacion
-  ADD CONSTRAINT testacion__id_depto_lb FOREIGN KEY (id_depto_lb)
-    REFERENCES param.tdepto(id_depto)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.testacion_tipo_pago
-  ADD CONSTRAINT testacion_tipo_pago__id_estacion FOREIGN KEY (id_estacion)
-    REFERENCES tes.testacion(id_estacion)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-    
-ALTER TABLE tes.testacion_tipo_pago
-  ADD CONSTRAINT testacion_tipo_pago__id_tipo_plan_pago FOREIGN KEY (id_tipo_plan_pago)
-    REFERENCES tes.ttipo_plan_pago(id_tipo_plan_pago)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-
-/***********************************F-DEP-JRR-TES-0-25/08/2015****************************************/ 
-
-
-
-/***********************************I-DEP-RAC-TES-0-27/08/2015****************************************/ 
-
 
 --------------- SQL ---------------
 
@@ -8035,9 +4067,9 @@ group by
          op.obs,
          con.id_contrato ;
 
---------------- SQL ---------------
 
 
+--------
 CREATE OR REPLACE VIEW tes.vpagos_relacionados(
     desc_proveedor,
     num_tramite,
@@ -8101,488 +4133,7 @@ WITH detalle AS(
           (pp.estado::text <> ALL (ARRAY [ 'borrador'::character varying::text,
             'anulado'::character varying::text, 'vbsolicitante'::character
             varying::text ]));
-/***********************************F-DEP-RAC-TES-0-27/08/2015****************************************/ 
-
-
-
-
-
-
-
-
-/***********************************I-DEP-RAC-TES-0-03/09/2015****************************************/ 
-
-
-
-
---------------- SQL ---------------
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    forma_pago,
-    monto_ajuste_ag,
-    monto_ajuste_siguiente_pago,
-    monto_anticipo,
-    tipo_cambio_conv,
-    id_depto_libro,
-    fecha_costo_ini,
-    fecha_costo_fin,
-    id_obligacion_pago)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         op.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         (((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
-           COALESCE(op.obs, ''::text::character varying)::text) || COALESCE(
-           pp.obs_monto_no_pagado, ''::text))::character varying AS obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         pp.forma_pago,
-         pp.monto_ajuste_ag,
-         pp.monto_ajuste_siguiente_pago,
-         pp.monto_anticipo,
-         op.tipo_cambio_conv,
-         pp.id_depto_lb AS id_depto_libro,
-         CASE
-           WHEN pp.fecha_costo_ini IS NULL THEN now()::date
-           WHEN pp.fecha_costo_ini > now() THEN now()::date
-           ELSE pp.fecha_costo_ini
-         END AS fecha_costo_ini,
-         COALESCE(pp.fecha_costo_fin, now()::date) AS fecha_costo_fin,
-         op.id_obligacion_pago
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-         op.id_obligacion_pago
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-         op.id_categoria_compra;
-         
-         
-         
-
-/***********************************F-DEP-RAC-TES-0-03/09/2015****************************************/ 
-
-
-
-
-
-/***********************************I-DEP-RAC-TES-0-03/12/2015****************************************/ 
-
-
-
-
-
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    forma_pago,
-    monto_ajuste_ag,
-    monto_ajuste_siguiente_pago,
-    monto_anticipo,
-    tipo_cambio_conv,
-    id_depto_libro,
-    fecha_costo_ini,
-    fecha_costo_fin,
-    id_obligacion_pago,
-    fecha_tentativa)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         op.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         (((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
-           COALESCE(op.obs, ''::text::character varying)::text) || COALESCE(
-           pp.obs_monto_no_pagado, ''::text))::character varying AS obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         pp.forma_pago,
-         pp.monto_ajuste_ag,
-         pp.monto_ajuste_siguiente_pago,
-         pp.monto_anticipo,
-         op.tipo_cambio_conv,
-         pp.id_depto_lb AS id_depto_libro,
-         CASE
-           WHEN pp.fecha_costo_ini IS NULL THEN now()::date
-           WHEN pp.fecha_costo_ini > now() THEN now()::date
-           ELSE pp.fecha_costo_ini
-         END AS fecha_costo_ini,
-         COALESCE(pp.fecha_costo_fin, now()::date) AS fecha_costo_fin,
-         op.id_obligacion_pago,
-         pp.fecha_tentativa
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-         op.id_obligacion_pago
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-         op.id_categoria_compra;
-         
-
-/***********************************F-DEP-RAC-TES-0-03/12/2015****************************************/ 
-
-
-
-
-/***********************************I-DEP-RAC-TES-0-08/12/2015****************************************/ 
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    forma_pago,
-    monto_ajuste_ag,
-    monto_ajuste_siguiente_pago,
-    monto_anticipo,
-    tipo_cambio_conv,
-    id_depto_libro,
-    fecha_costo_ini,
-    fecha_costo_fin,
-    id_obligacion_pago,
-    fecha_tentativa)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         op.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         (((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
-           COALESCE(op.obs, ''::text::character varying)::text) || COALESCE(
-           pp.obs_monto_no_pagado, ''::text))::character varying AS obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         pp.forma_pago,
-         pp.monto_ajuste_ag,
-         pp.monto_ajuste_siguiente_pago,
-         pp.monto_anticipo,
-         op.tipo_cambio_conv,
-         pp.id_depto_lb AS id_depto_libro,
-         CASE
-           WHEN pp.fecha_costo_ini IS NULL THEN now()::date
-           WHEN pp.fecha_costo_ini > now() THEN now()::date
-           ELSE pp.fecha_costo_ini
-         END AS fecha_costo_ini,
-         COALESCE(pp.fecha_costo_fin, now()::date) AS fecha_costo_fin,
-         op.id_obligacion_pago,
-         pp.fecha_tentativa
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-         op.id_obligacion_pago
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-         op.id_categoria_compra;
-       
-       
-    
-/***********************************F-DEP-RAC-TES-0-08/12/2015****************************************/ 
-
-/***********************************I-DEP-GSS-TES-0-20/01/2016****************************************/ 
-ALTER TABLE tes.tsolicitud_rendicion_det
-  ADD CONSTRAINT fk_tsolicitud_rendicion_det__id_proceso_caja FOREIGN KEY (id_proceso_caja)
-    REFERENCES tes.tproceso_caja(id_proceso_caja)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE; 
-	
-ALTER TABLE tes.tsolicitud_rendicion_det
-	ADD CONSTRAINT fk_tsolicitud_rendicion_det__id_solicitud_efectivo FOREIGN KEY (id_solicitud_efectivo)
-    REFERENCES tes.tsolicitud_efectivo(id_solicitud_efectivo)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-	
-ALTER TABLE tes.tproceso_caja
-  ADD CONSTRAINT tproceso_caja__id_caja FOREIGN KEY (id_caja)
-    REFERENCES tes.tcaja(id_caja)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.tproceso_caja
-  ADD CONSTRAINT tproceso_caja__id_proceso_wf FOREIGN KEY (id_proceso_wf)
-    REFERENCES wf.tproceso_wf(id_proceso_wf)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-/***********************************F-DEP-GSS-TES-0-20/01/2016****************************************/ 
-
-/***********************************I-DEP-GSS-TES-0-08/03/2016****************************************/ 
-
-ALTER TABLE tes.tsolicitud_efectivo_det
-  ADD CONSTRAINT fk_tsolicitud_efectivo_det__id_solicitud_efectivo FOREIGN KEY (id_solicitud_efectivo)
-    REFERENCES tes.tsolicitud_efectivo(id_solicitud_efectivo)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.tsolicitud_efectivo_det
-  ADD CONSTRAINT fk_tsolicitud_efectivo_det__id_concepto_ingas FOREIGN KEY (id_concepto_ingas)
-    REFERENCES param.tconcepto_ingas(id_concepto_ingas)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.tsolicitud_efectivo_det
-  ADD CONSTRAINT fk_tsolicitud_efectivo_det__id_cc FOREIGN KEY (id_cc)
-    REFERENCES param.tcentro_costo(id_centro_costo)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.tsolicitud_efectivo
-  ADD CONSTRAINT fk_tsolicitud_efectivo__id_solicitud_efectiivo FOREIGN KEY (id_solicitud_efectivo_fk)
-    REFERENCES tes.tsolicitud_efectivo(id_solicitud_efectivo)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.tsolicitud_efectivo
-  ADD CONSTRAINT fk_tsolicitud_efectivo__id_caja FOREIGN KEY (id_caja)
-    REFERENCES tes.tcaja(id_caja)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.tsolicitud_efectivo
-  ADD CONSTRAINT fk_tsolicitud_efectivo__id_tipo_solicitud FOREIGN KEY (id_tipo_solicitud)
-    REFERENCES tes.ttipo_solicitud(id_tipo_solicitud)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.tsolicitud_efectivo
-  ADD CONSTRAINT fk_tsolicitud_efectivo__id_gestion FOREIGN KEY (id_gestion)
-    REFERENCES param.tgestion(id_gestion)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.tcaja
-  ADD CONSTRAINT fk_tcaja__id_cuenta_bancaria FOREIGN KEY (id_cuenta_bancaria)
-    REFERENCES tes.tcuenta_bancaria(id_cuenta_bancaria)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.tsolicitud_rendicion_det
-  ADD CONSTRAINT fk_tsolicitud_rendicion_det__id_documento_respaldo FOREIGN KEY (id_documento_respaldo)
-    REFERENCES conta.tdoc_compra_venta(id_doc_compra_venta)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-	
-/***********************************F-DEP-GSS-TES-0-08/03/2016****************************************/
-
-
-/***********************************I-DEP-RAC-TES-0-22/03/2016****************************************/
-
-
+-----
 
 CREATE OR REPLACE VIEW tes.vproceso_caja (
     id_proceso_caja,
@@ -8624,7 +4175,8 @@ AS
    JOIN orga.vfuncionario f ON f.id_funcionario = c.id_funcionario
   WHERE pc.fecha >= c.fecha_inicio AND pc.fecha <= c.fecha_fin OR pc.fecha >= c.fecha_inicio AND c.fecha_fin IS NULL;
   
-  
+
+-----
 
 CREATE OR REPLACE VIEW tes.vsrd_doc_compra_venta(
     id_solicitud_rendicion_det,
@@ -8707,98 +4259,7 @@ AS
 
 
 
-CREATE OR REPLACE VIEW tes.vsrd_doc_compra_venta_det(
-    id_solicitud_rendicion_det,
-    id_proceso_caja,
-    id_moneda,
-    id_int_comprobante,
-    id_plantilla,
-    importe_doc,
-    importe_excento,
-    importe_total_excento,
-    importe_descuento,
-    importe_descuento_ley,
-    importe_ice,
-    importe_it,
-    importe_iva,
-    importe_pago_liquido,
-    nro_documento,
-    nro_dui,
-    nro_autorizacion,
-    razon_social,
-    revisado,
-    manual,
-    obs,
-    nit,
-    fecha,
-    codigo_control,
-    sw_contabilizar,
-    tipo,
-    id_doc_compra_venta,
-    id_concepto_ingas,
-    id_centro_costo,
-    id_orden_trabajo,
-    precio_total,
-    id_doc_concepto,
-    desc_ingas,
-    descripcion,
-    importe_neto,
-    importe_anticipo,
-    importe_pendiente,
-    importe_retgar,
-    precio_total_final)
-AS
-  SELECT srd.id_solicitud_rendicion_det,
-         srd.id_proceso_caja,
-         dcv.id_moneda,
-         dcv.id_int_comprobante,
-         dcv.id_plantilla,
-         dcv.importe_doc,
-         dcv.importe_excento,
-         COALESCE(dcv.importe_excento, 0::numeric) + COALESCE(dcv.importe_ice, 0
-           ::numeric) AS importe_total_excento,
-         dcv.importe_descuento,
-         dcv.importe_descuento_ley,
-         dcv.importe_ice,
-         dcv.importe_it,
-         dcv.importe_iva,
-         dcv.importe_pago_liquido,
-         dcv.nro_documento,
-         dcv.nro_dui,
-         dcv.nro_autorizacion,
-         dcv.razon_social,
-         dcv.revisado,
-         dcv.manual,
-         dcv.obs,
-         dcv.nit,
-         dcv.fecha,
-         dcv.codigo_control,
-         dcv.sw_contabilizar,
-         dcv.tipo,
-         dcv.id_doc_compra_venta,
-         dco.id_concepto_ingas,
-         dco.id_centro_costo,
-         dco.id_orden_trabajo,
-         dco.precio_total,
-         dco.id_doc_concepto,
-         cig.desc_ingas,
-         (((((dcv.razon_social::text || ' - '::text) || cig.desc_ingas::text) ||
-           ' ( '::text) || dco.descripcion) || ' ) Nro Doc: '::text) || COALESCE
-           (dcv.nro_documento)::text AS descripcion,
-         dcv.importe_neto,
-         dcv.importe_anticipo,
-         dcv.importe_pendiente,
-         dcv.importe_retgar,
-         dco.precio_total_final
-  FROM tes.tsolicitud_rendicion_det srd
-       JOIN conta.tdoc_compra_venta dcv ON srd.id_documento_respaldo =
-         dcv.id_doc_compra_venta
-       JOIN conta.tdoc_concepto dco ON dco.id_doc_compra_venta =
-         dcv.id_doc_compra_venta
-       JOIN param.tconcepto_ingas cig ON cig.id_concepto_ingas =
-         dco.id_concepto_ingas;
-         
-         
+---------
 CREATE OR REPLACE VIEW tes.vpagos(
     id_plan_pago,
     id_gestion,
@@ -8889,191 +4350,9 @@ AS
        JOIN param.tplantilla plt ON plt.id_plantilla = ppp.id_plantilla
        LEFT JOIN leg.tcontrato con ON con.id_contrato = op.id_contrato AND
          con.id_gestion = ges.id_gestion
-       JOIN orga.vfuncionario fun ON fun.id_funcionario = op.id_funcionario;         
-         
+       JOIN orga.vfuncionario fun ON fun.id_funcionario = op.id_funcionario;     
 
-
-/***********************************F-DEP-RAC-TES-0-22/03/2016****************************************/
-
-
-/***********************************I-DEP-RAC-TES-0-23/03/2016****************************************/
-
-
---------------- SQL ---------------
-
-CREATE INDEX tplan_pago_idx ON tes.tplan_pago
-  USING btree (id_plan_pago_fk);
-
-
---------------- SQL ---------------
-
-CREATE INDEX tplan_pago_idx1 ON tes.tplan_pago
-  USING btree (id_plantilla);
-  
-  
---------------- SQL ---------------
-
-CREATE INDEX tplan_pago_id_obligacion_pago ON tes.tplan_pago
-  USING btree (id_obligacion_pago);
-  
---------------- SQL ---------------
-
-CREATE INDEX tplan_pago_id_int_comprobante ON tes.tplan_pago
-  USING btree (id_int_comprobante);
-  
---------------- SQL ---------------
-
-CREATE INDEX tobligacion_pago_id_contrato ON tes.tobligacion_pago
-  USING btree (id_contrato);
-
-
---------------- SQL ---------------
-
-CREATE INDEX tobligacion_pago_id_moneda ON tes.tobligacion_pago
-  USING btree (id_moneda);
-  
---------------- SQL ---------------
-
-CREATE INDEX tobligacion_pago_id_gestion ON tes.tobligacion_pago
-  USING btree (id_gestion);
-  
-   
-
-/***********************************F-DEP-RAC-TES-0-23/03/2016****************************************/
-
-
-
-
-/***********************************I-DEP-RAC-TES-0-05/04/2016****************************************/
-
-
-
-
---------------- SQL ---------------
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    forma_pago,
-    monto_ajuste_ag,
-    monto_ajuste_siguiente_pago,
-    monto_anticipo,
-    tipo_cambio_conv,
-    id_depto_libro,
-    fecha_costo_ini,
-    fecha_costo_fin,
-    id_obligacion_pago,
-    fecha_tentativa)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         op.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         (((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
-           COALESCE(op.obs, ''::text::character varying)::text) || COALESCE(
-           pp.obs_monto_no_pagado, ''::text))::character varying AS obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         pp.forma_pago,
-         pp.monto_ajuste_ag,
-         pp.monto_ajuste_siguiente_pago,
-         pp.monto_anticipo,
-         op.tipo_cambio_conv,
-         pp.id_depto_lb AS id_depto_libro,
-         CASE
-           WHEN pp.fecha_costo_ini IS NULL THEN now()::date
-           WHEN pp.fecha_costo_ini > now() THEN now()::date
-           ELSE pp.fecha_costo_ini
-         END AS fecha_costo_ini,
-         COALESCE(pp.fecha_costo_fin, now()::date) AS fecha_costo_fin,
-         op.id_obligacion_pago,
-         pp.fecha_tentativa
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-         op.id_obligacion_pago
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-         op.id_categoria_compra;
-         
-         
-/***********************************F-DEP-RAC-TES-0-05/04/2016****************************************/
-
-       
-
-/***********************************I-DEP-GSS-TES-0-29/04/2016****************************************/
-
---------------- SQL ---------------
-
-DROP VIEW IF EXISTS tes.vcomp_devtesprov_plan_pago;
+-----------
 
 CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
     id_plan_pago,
@@ -9186,15 +4465,8 @@ AS
        JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
        LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
          op.id_categoria_compra;
-         
-         
-/***********************************F-DEP-GSS-TES-0-29/04/2016****************************************/
 
-
-
-/***********************************I-DEP-RAC-TES-0-20/05/2016****************************************/
-
-
+----------
 
 CREATE OR REPLACE VIEW tes.vsrd_doc_compra_venta_det(
     id_solicitud_rendicion_det,
@@ -9289,11 +4561,9 @@ AS
          dcv.id_doc_compra_venta
        JOIN param.tconcepto_ingas cig ON cig.id_concepto_ingas =
          dco.id_concepto_ingas;
-         
-/***********************************F-DEP-RAC-TES-0-20/05/2016****************************************/
 
 
-/***********************************I-DEP-GSS-TES-0-28/06/2016****************************************/
+-----------
 
 CREATE OR REPLACE VIEW tes.vlibro_bancos(
     id_libro_bancos,
@@ -9444,9 +4714,11 @@ AS
          lban.origen::text
   ORDER BY lban.fecha DESC;
 
-/***********************************F-DEP-GSS-TES-0-28/06/2016****************************************/
 
-/***********************************I-DEP-JRR-TES-0-08/11/2016****************************************/
+---------------------------------------------
+
+
+
 CREATE OR REPLACE VIEW tes.vobligacion_pago(
     id_usuario_reg,
     id_usuario_mod,
@@ -9638,4 +4910,7 @@ AS
     op.obs_poa,
     op.uo_ex,
     mon.codigo;
+
+
+
 /***********************************F-DEP-JRR-TES-0-08/11/2016****************************************/
