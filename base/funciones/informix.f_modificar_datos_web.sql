@@ -210,13 +210,13 @@ BEGIN
         if (v_estado = '1') then
         
         	if (v_agt != '56991266') then
-                v_error = 'CONTROLADO - No se puede procesar la modificacion de ventas web porque la agencia del boleto ' || p_billete_original || ' no correponde a las agencia de  ventas  web';
+                v_error = 'CONTROLADO - No se puede procesar la modificacion de ventas web porque la agencia del boleto ' || p_billete || ' no correponde a las agencia de  ventas  web';
                 v_id_alarma = (select param.f_inserta_alarma_dblink (1,'Error al procesar modificaciones de venta web',v_error,'jaime.rivera@boa.bo,aldo.zeballos@boa.bo'));
                 raise exception '%',v_error; 
             end if;
             
             if (v_tarjeta != 'VI' or v_numero_tarjeta not like '%00005555') then
-                v_error = 'CONTROLADO - No se puede procesar la modificacion de ventas web porque la forma de pago del boleto ' || p_billete_original || ' no es tarjeta  visa con numero *00005555';
+                v_error = 'CONTROLADO - No se puede procesar la modificacion de ventas web porque la forma de pago del boleto ' || p_billete || ' no es tarjeta  visa con numero *00005555';
                 v_id_alarma = (select param.f_inserta_alarma_dblink (1,'Error al procesar modificaciones de venta web',v_error,'jaime.rivera@boa.bo,aldo.zeballos@boa.bo'));
                 raise exception '%',v_error; 
             end if;
