@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_cuenta_bancaria_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -53,24 +55,24 @@ BEGIN
     	begin
     		--Sentencia de la consulta
 			v_consulta:='select DISTINCT
-						ctaban.id_cuenta_bancaria,
-						ctaban.estado_reg,
-						ctaban.fecha_baja,
-						ctaban.nro_cuenta,
-						ctaban.fecha_alta,
-						ctaban.id_institucion,
-                        inst.nombre as nombre_institucion,
-                        inst.doc_id,
-						ctaban.fecha_reg,
-						ctaban.id_usuario_reg,
-						ctaban.fecha_mod,
-						ctaban.id_usuario_mod,
-						usu1.cuenta as usr_reg,
-						usu2.cuenta as usr_mod,
-                        mon.id_moneda,	
-                        mon.codigo as codigo_moneda,
-                        ctaban.denominacion,
-                        ctaban.centro
+                          ctaban.id_cuenta_bancaria,
+                          ctaban.estado_reg,
+                          ctaban.fecha_baja,
+                          ctaban.nro_cuenta,
+                          ctaban.fecha_alta,
+                          ctaban.id_institucion,
+                          inst.nombre as nombre_institucion,
+                          inst.doc_id,
+                          ctaban.fecha_reg,
+                          ctaban.id_usuario_reg,
+                          ctaban.fecha_mod,
+                          ctaban.id_usuario_mod,
+                          usu1.cuenta as usr_reg,
+                          usu2.cuenta as usr_mod,
+                          mon.id_moneda,	
+                          mon.codigo as codigo_moneda,
+                          ctaban.denominacion,
+                          ctaban.centro
 						from tes.tcuenta_bancaria ctaban
                         inner join param.tinstitucion inst on inst.id_institucion = ctaban.id_institucion
                         left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda
@@ -134,23 +136,24 @@ BEGIN
                            
             --if(v_id_usuario!=1)then
 				v_consulta:='select DISTINCT
-						ctaban.id_cuenta_bancaria,
-						ctaban.estado_reg,
-						ctaban.fecha_baja,
-						ctaban.nro_cuenta,
-						ctaban.fecha_alta,
-						ctaban.id_institucion,
-                        inst.nombre as nombre_institucion,
-						ctaban.fecha_reg,
-						ctaban.id_usuario_reg,
-						ctaban.fecha_mod,
-						ctaban.id_usuario_mod,
-						usu1.cuenta as usr_reg,
-						usu2.cuenta as usr_mod,
-                        mon.id_moneda,	
-                        mon.codigo as codigo_moneda,
-                        ctaban.denominacion,
-                        ctaban.centro
+                                ctaban.id_cuenta_bancaria,
+                                ctaban.estado_reg,
+                                ctaban.fecha_baja,
+                                ctaban.nro_cuenta,
+                                ctaban.fecha_alta,
+                                ctaban.id_institucion,
+                                inst.nombre as nombre_institucion,
+                                ctaban.fecha_reg,
+                                ctaban.id_usuario_reg,
+                                ctaban.fecha_mod,
+                                ctaban.id_usuario_mod,
+                                usu1.cuenta as usr_reg,
+                                usu2.cuenta as usr_mod,
+                                mon.id_moneda,	
+                                mon.codigo as codigo_moneda,
+                                ctaban.denominacion,
+                                ctaban.centro,
+                                array_to_string( ctaban.id_finalidad,'','',''null'')::varchar as id_finalidads
 						from tes.tcuenta_bancaria ctaban
                         inner join param.tinstitucion inst on inst.id_institucion = ctaban.id_institucion
                         inner join tes.tdepto_cuenta_bancaria deptctab on deptctab.id_cuenta_bancaria=ctaban.id_cuenta_bancaria

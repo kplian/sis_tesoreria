@@ -289,7 +289,7 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
        					id: 'id_finalidad',
        					root: 'datos',
        					sortInfo:{
-       						field: 'rol',
+       						field: 'nombre_finalidad',
        						direction: 'ASC'
        					},
        					totalProperty: 'total',

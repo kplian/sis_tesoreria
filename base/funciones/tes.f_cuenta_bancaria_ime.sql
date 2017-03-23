@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_cuenta_bancaria_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -78,31 +80,33 @@ BEGIN
         
         	--Sentencia de la insercion
         	insert into tes.tcuenta_bancaria(
-			estado_reg,
-		    fecha_baja,
-			nro_cuenta,
-			fecha_alta,
-		    id_institucion,
-			fecha_reg,
-			id_usuario_reg,
-			fecha_mod,
-			id_usuario_mod,
-            id_moneda,
-            denominacion,
-            centro
+                estado_reg,
+                fecha_baja,
+                nro_cuenta,
+                fecha_alta,
+                id_institucion,
+                fecha_reg,
+                id_usuario_reg,
+                fecha_mod,
+                id_usuario_mod,
+                id_moneda,
+                denominacion,
+                centro,
+                id_finalidad
           	) values(
-			'activo',
-		    v_parametros.fecha_baja,
-			v_parametros.nro_cuenta,
-			v_parametros.fecha_alta,
-			v_parametros.id_institucion,
-			now(),
-			p_id_usuario,
-			null,
-			null,
-            v_parametros.id_moneda,
-            v_parametros.denominacion,
-            v_parametros.centro
+                'activo',
+                v_parametros.fecha_baja,
+                v_parametros.nro_cuenta,
+                v_parametros.fecha_alta,
+                v_parametros.id_institucion,
+                now(),
+                p_id_usuario,
+                null,
+                null,
+                v_parametros.id_moneda,
+                v_parametros.denominacion,
+                v_parametros.centro,
+                id_finalidad = string_to_array(v_parametros.id_finalidads,',')::varchar[]
 							
 			)RETURNING id_cuenta_bancaria into v_id_cuenta_bancaria;
 
@@ -163,15 +167,16 @@ BEGIN
         
 			--Sentencia de la modificacion
 			update tes.tcuenta_bancaria set
-			fecha_baja = v_parametros.fecha_baja,
-			nro_cuenta = v_parametros.nro_cuenta,
-			fecha_alta = v_parametros.fecha_alta,
-            centro = v_parametros.centro,
-			id_institucion = v_parametros.id_institucion,
-			fecha_mod = now(),
-			id_usuario_mod = p_id_usuario,
-            id_moneda = v_parametros.id_moneda,
-            denominacion = v_parametros.denominacion
+                fecha_baja = v_parametros.fecha_baja,
+                nro_cuenta = v_parametros.nro_cuenta,
+                fecha_alta = v_parametros.fecha_alta,
+                centro = v_parametros.centro,
+                id_institucion = v_parametros.id_institucion,
+                fecha_mod = now(),
+                id_usuario_mod = p_id_usuario,
+                id_moneda = v_parametros.id_moneda,
+                denominacion = v_parametros.denominacion,
+                id_finalidad = string_to_array(v_parametros.id_finalidads,',')::varchar[]
 			where id_cuenta_bancaria=v_parametros.id_cuenta_bancaria;
                
 			--Definicion de la respuesta
