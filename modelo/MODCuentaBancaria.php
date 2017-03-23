@@ -74,6 +74,10 @@ class MODCuentaBancaria extends MODbase{
 		$this->captura('codigo_moneda','varchar');
 		$this->captura('denominacion','varchar');
 		$this->captura('centro','varchar');
+		$this->captura('id_finalidads','varchar');
+		
+		
+		
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -99,6 +103,10 @@ class MODCuentaBancaria extends MODbase{
 		$this->setParametro('denominacion','denominacion','varchar');
 		$this->setParametro('centro','centro','varchar');
 		$this->setParametro('id_depto_lb','id_depto_lb','int4');
+		
+		$this->setParametro('id_finalidads','id_finalidads','varchar');
+		
+		
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -124,6 +132,8 @@ class MODCuentaBancaria extends MODbase{
 		$this->setParametro('id_moneda','id_moneda','int4');
 		$this->setParametro('denominacion','denominacion','varchar');
 		$this->setParametro('centro','centro','varchar');
+		
+		$this->setParametro('id_finalidads','id_finalidads','varchar');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
