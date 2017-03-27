@@ -361,12 +361,19 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 		this.Cmp.nro_cuenta.enable();
 	},
 		
-	south:{
-        url:'../../../sis_tesoreria/vista/cuenta_bancaria_periodo/CuentaBancariaPeriodo.php',
-        title:'Periodos por Cuenta Bancaria',
-        height : '50%',
-        cls:'CuentaBancariaPeriodo'
-    }
+	tabsouth:[{
+          url:'../../../sis_tesoreria/vista/cuenta_bancaria_periodo/CuentaBancariaPeriodo.php',
+          title:'Periodos por Cuenta Bancaria',
+          height : '50%',
+          cls:'CuentaBancariaPeriodo'
+        },
+        {
+          url:'../../../sis_tesoreria/vista/usuario_cuenta_banc/UsuarioCuentaBanc.php',
+          title:'Usuarios',
+          height : '50%',
+          cls:'UsuarioCuentaBanc'
+        }
+     ]
    
 })	
 </script>

@@ -106,7 +106,7 @@ BEGIN
                 v_parametros.id_moneda,
                 v_parametros.denominacion,
                 v_parametros.centro,
-                id_finalidad = string_to_array(v_parametros.id_finalidads,',')::varchar[]
+                string_to_array(v_parametros.id_finalidads,',')::integer[]
 							
 			)RETURNING id_cuenta_bancaria into v_id_cuenta_bancaria;
 
@@ -176,7 +176,7 @@ BEGIN
                 id_usuario_mod = p_id_usuario,
                 id_moneda = v_parametros.id_moneda,
                 denominacion = v_parametros.denominacion,
-                id_finalidad = string_to_array(v_parametros.id_finalidads,',')::varchar[]
+                id_finalidad = string_to_array(v_parametros.id_finalidads,',')::integer[]
 			where id_cuenta_bancaria=v_parametros.id_cuenta_bancaria;
                
 			--Definicion de la respuesta
