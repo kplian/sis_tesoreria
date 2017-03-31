@@ -104,11 +104,18 @@ Phx.vista.FormRendicion = {
 
 		if(Phx.CP.getPagina(this.idContenedorPadre).cls =='AprobacionFacturas'){
 			//console.log(Phx.CP.getPagina(this.idContenedorPadre));
-			Phx.CP.getPagina(this.idContenedorPadre).onReloadPadre();	
+			Phx.CP.getPagina(this.idContenedorPadre).onReloadPadre();
+			console.log('gonzalo');
+			console.log(Phx.CP.getPagina(this.idContenedorPadre));
 		}
-		
+		//console.log('jose');
+		//var padre = Phx.CP.getPagina(this.idContenedorPadre);
+		//padre.reload();
+		//padre.onReloadPadre();
+		//console.log(Phx.CP.getPagina(this.idContenedorPadre));
+		//console.log(Phx.CP.getPagina(this.idContenedorPadre));
         this.panel.close();
-		this.fireEvent('aftersave',this,this.getValues());
+		//this.fireEvent('beforesave',this);
     },	
 };
 </script>

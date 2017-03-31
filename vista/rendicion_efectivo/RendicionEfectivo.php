@@ -44,7 +44,7 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 		this.addButton('fin_registro',
 			{	text:'Siguiente',
 				iconCls: 'badelante',
-				disabled:false,
+				disabled:true,
 				handler:this.sigEstado,
 				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
 			}
@@ -450,8 +450,7 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 	},
 
 	desBotoneshistorico: function(){
-		this.getBoton('fin_registro').disable();
-		//this.getBoton('bdel').disable();
+		console.log(this);
 		this.liberaMenu();
 	},
 	
@@ -713,6 +712,15 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 			  else {
 				  this.getBoton('fin_registro').disable();
 			  }
+		  }else{
+			  this.bloquearMenusHijo();
+			  console.log(Phx.CP.getPagina(this.idContenedor+'-south-0'));
+
+			  this.getBoton('fin_registro').disable();
+			  this.getBoton('del').disable();
+			  Phx.CP.getPagina(this.idContenedor+'-south-0').getBoton('dev_factura').disable();
+			  var boton = Phx.CP.getPagina(this.idContenedor+'-south-0').getBoton('dev_factura');
+			  boton.disable();
 		  }
      },
 		

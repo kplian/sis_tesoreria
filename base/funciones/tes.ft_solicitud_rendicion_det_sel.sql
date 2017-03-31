@@ -66,10 +66,10 @@ BEGIN
                         dc.importe_doc,
                         dc.importe_pago_liquido,
                         dc.importe_iva,
-                        dc.importe_descuento,
+                        COALESCE(dc.importe_descuento,0.00),
                         dc.importe_descuento_ley,
                         dc.importe_excento,
-                        dc.importe_ice,
+                        COALESCE(dc.importe_ice,0.00),
 						rend.estado_reg,
 						rend.monto,
 						rend.id_usuario_reg,
@@ -83,7 +83,7 @@ BEGIN
                         solefe.nro_tramite,
                         solren.id_proceso_wf,
 				        solren.id_estado_wf,
-                        caja.id_depto	
+                        caja.id_depto
 						from tes.tsolicitud_rendicion_det rend
                         inner join tes.tsolicitud_efectivo solren on solren.id_solicitud_efectivo = rend.id_solicitud_efectivo
                         inner join tes.tsolicitud_efectivo solefe on solefe.id_solicitud_efectivo=solren.id_solicitud_efectivo_fk

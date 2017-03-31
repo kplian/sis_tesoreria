@@ -71,12 +71,12 @@ Phx.vista.ProcesoCajaVbFondos = {
 		{
 			var data ='id_proceso_caja='+ rec.id_proceso_caja;
 			data += '&nro_tramite=' + rec.nro_tramite;
-			data += '&fecha_inicio=' + rec.fecha_inicio.format('d-m-Y');
-			data += '&fecha_fin=' + rec.fecha_fin.format('d-m-Y');
+			//data += '&fecha_inicio=' + rec.fecha_inicio.format('d-m-Y');
+			//data += '&fecha_fin=' + rec.fecha_fin.format('d-m-Y');
 			data += '&reporte=reposicion';
 			console.log(data);
-			//window.open('http://sms.obairlines.bo/ReportesPXP/Home/MemorandumFondosEnAvance?'+data);
-			//window.open('http://localhost:22021/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
+			
+			//window.open('http://localhost:14659/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
 			window.open('http://sms.obairlines.bo/ReportesPXP2/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
 		}
 		else

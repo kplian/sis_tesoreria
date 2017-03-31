@@ -492,6 +492,21 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 	onReloadPadre : function(){
 		Phx.CP.getPagina(this.idContenedorPadre).reload();
 	},
+
+	preparaMenu:function(n){
+		var data = this.getSelectedData();
+		var tb =this.tbar;
+		Phx.vista.AprobacionFacturas.superclass.preparaMenu.call(this,n);
+		if(this.maestro.estado != 'rendido' ){
+
+			this.getBoton('edit').enable();
+			this.getBoton('dev_factura').enable();
+		}
+		else{
+			this.getBoton('edit').disable();
+			this.getBoton('dev_factura').disable();
+		}
+	},
 	
 	bdel:false,
 	bsave:false,

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
 *@package pXP
 *@file gen-Cajero.php
@@ -113,7 +113,7 @@ Phx.vista.Cajero=Ext.extend(Phx.gridInterfaz,{
 			    config:{
 				    name: 'fecha_inicio',
 				    fieldLabel: 'Fecha inicio',
-				    allowBlank: true,
+				    allowBlank: false,
 				    anchor: '80%',
 				    gwidth: 100,
 				    format: 'd/m/Y', 
@@ -261,8 +261,30 @@ Phx.vista.Cajero=Ext.extend(Phx.gridInterfaz,{
 	iniciarEventos : function(){		 
 		this.cmpFuncionario=this.getComponente('id_funcionario');
 		this.cmpFuncionario.store.baseParams.fecha = new Date();
-	 }
-	
+		if(Phx.CP.getPagina(this.idContenedorPadre).nombreVista == 'cajaCajero'){
+			this.getBoton('save').setVisible(false);
+			this.getBoton('new').setVisible(false);
+			this.getBoton('edit').setVisible(false);
+			this.getBoton('del').setVisible(false);
+		}else {
+			this.getBoton('save').setVisible(true);
+			this.getBoton('new').setVisible(true);
+			this.getBoton('edit').setVisible(true);
+			this.getBoton('del').setVisible(true);
+		}
+	 },
+
+	preparaMenu : function(){
+		Phx.vista.Cajero.superclass.preparaMenu.call();
+		console.log(this);
+		if (this.maestro.estado_proceso == 'aprobado' || this.maestro.estado_proceso == 'anulado'){
+			this.getBoton('del').disable();
+			this.getBoton('edit').disable();
+		}else{
+			this.getBoton('del').enable();
+			this.getBoton('edit').enable();
+		}
+	}
 }
 )
 </script>

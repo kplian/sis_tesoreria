@@ -30,7 +30,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.addButton('quitar_relacion_deposito',
 					{	text:'Quitar Relacion Depósito',
 						iconCls: 'bbajar',
-						disabled:false,
+						disabled:true,
 						handler:this.quitarRelacionDeposito,
 						tooltip: '<b>Quitar Relacionar Depósito</b><p>Quitar Relacionar Deposito</p>'
 					}
@@ -39,7 +39,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.addButton('corregir_importe_contable',
 				{	text:'Corregir Importe Contable',
 					iconCls: 'bedit',
-					disabled:false,
+					disabled:true,
 					handler:this.corregir_importe_contable,
 					tooltip: '<b>Corregir Importe Contable</b><p>Corregir Importe Contable Deposito</p>'
 				}
@@ -535,7 +535,8 @@ header("content-type: text/javascript; charset=UTF-8");
 				url:'../../sis_tesoreria/control/ProcesoCaja/corregirImporteContable',
 				params:{
 						importe_contable_deposito:resp.importe_contable_deposito,
-						id_cuenta_doc: resp.id_cuenta_doc,						
+						id_cuenta_doc: resp.id_cuenta_doc,
+						id_proceso_caja: resp.id_proceso_caja,
 						id_libro_bancos:resp.id_libro_bancos				 },
 				argument:{wizard:wizard},  
 				success:this.successWizard,

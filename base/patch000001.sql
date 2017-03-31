@@ -1714,3 +1714,16 @@ CREATE TABLE tes.tdeposito_proceso_caja (
 WITH (oids = false);
 
 /*****************************F-SCP-GSS-TES-0-16/12/2016*************/
+
+/*****************************I-SCP-GSS-TES-0-15/03/2017*************/
+
+CREATE TABLE tes.tcaja_funcionario (
+  id_caja_funcionario SERIAL,
+  id_caja INTEGER NOT NULL,
+  id_funcionario INTEGER NOT NULL,
+  CONSTRAINT tcaja_funcionario_pkey PRIMARY KEY(id_caja_funcionario)
+) INHERITS (pxp.tbase)
+
+WITH (oids = false);
+
+/*****************************F-SCP-GSS-TES-0-15/03/2017*************/

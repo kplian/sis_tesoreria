@@ -28,7 +28,7 @@ Phx.vista.CajaCajero = {
 	   this.addButton('btnRendicion', {
 			text : 'Procesos Caja',
 			iconCls : 'bballot',
-			disabled : false,
+			disabled : true,
 			handler : this.onBtnRendicion,
 			tooltip : '<b>Procesos Caja</b>'
 	   });
@@ -68,20 +68,23 @@ Phx.vista.CajaCajero = {
 		 }	
 
 		this.getBoton('diagrama_gantt').enable();	 
+		this.getBoton('btnRendicion').enable();
      },
 
     enableTabCajero:function(){
-        if(this.TabPanelSouth.get(1)){
+        if(this.TabPanelSouth.get(1) && this.TabPanelSouth.get(2)){
             this.TabPanelSouth.get(0).disable();
             this.TabPanelSouth.get(1).enable();
-            this.TabPanelSouth.setActiveTab(1)
+            this.TabPanelSouth.get(2).enable();
+            this.TabPanelSouth.setActiveTab(2)
         }
     },
 
     disableTabCajero:function(){
-        if(this.TabPanelSouth.get(1)){
+        if(this.TabPanelSouth.get(1) && this.TabPanelSouth.get(2)){
             this.TabPanelSouth.get(0).enable();
             this.TabPanelSouth.get(1).disable();
+            this.TabPanelSouth.get(2).disable();
             this.TabPanelSouth.setActiveTab(0)
 
         }

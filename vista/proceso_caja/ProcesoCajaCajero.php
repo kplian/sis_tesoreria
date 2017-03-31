@@ -33,7 +33,7 @@ header("content-type: text/javascript; charset=UTF-8");
             this.addButton('fin_registro',
                 {	text:'Siguiente',
                     iconCls: 'badelante',
-                    disabled:false,
+                    disabled:true,
                     handler:this.sigEstado,
                     tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
                 }
@@ -42,20 +42,10 @@ header("content-type: text/javascript; charset=UTF-8");
             this.addButton('consolidado_rendicion',
                 {	text:'Reporte Rendicion',
                     iconCls: 'blist',
-                    disabled:false,
+                    disabled:true,
                     grupo:[0,1],
                     handler:this.consolidado_rendicion,
                     tooltip: '<b>Consolidado Rendicion</b><p>Consolidado por Rendicion</p>'
-                }
-            );
-
-            this.addButton('chkpresupuesto',
-                {	text:'Chk Presupuesto',
-                    iconCls: 'blist',
-                    disabled:false,
-                    grupo:[0,1],
-                    handler:this.checkPresupuesto,
-                    tooltip: '<b>Revisar Presupuesto</b><p>Revisar estado de ejecución presupeustaria para el tramite</p>'
                 }
             );
 
@@ -75,13 +65,13 @@ header("content-type: text/javascript; charset=UTF-8");
                 this.ocultarComponente(this.Cmp.fecha_fin);
             }
         },
-        /*
+
         sigEstado:function() {
             var rec = this.sm.getSelected();
             var configExtra = [];
 
-            if (rec.data.tipo == 'SOLREP' || rec.data.tipo == 'REPO') {
-                if (rec.data.estado == 'vbconta' || rec.data.estado == 'revision' || rec.data.estado == 'vbfondos') {
+            if (rec.data.tipo == 'REPO') {
+                if (rec.data.estado == 'vbfondos') {
                     configExtra = [
                         {
                             config: {
@@ -190,8 +180,61 @@ header("content-type: text/javascript; charset=UTF-8");
 
                     };
                 }
+            }
+            this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+                'Estado de Wf',
+                {
+                    modal: true,
+                    width: 700,
+                    height: 450
+                }, {
+                    configExtra: configExtra,
+                    eventosExtra: this.eventosExtra,
+                    data: {
+                        id_estado_wf: rec.data.id_estado_wf,
+                        id_proceso_wf: rec.data.id_proceso_wf
+                    }
+                }, this.idContenedor, 'FormEstadoWf',
+                {
+                    config: [{
+                        event: 'beforesave',
+                        delegate: this.onSaveWizard
+                    }],
+
+                    scope: this
+                });
         },
-        */
+
+        onSaveWizard:function(wizard,resp){
+            Phx.CP.loadingShow();
+            Ext.Ajax.request({
+                url:'../../sis_tesoreria/control/ProcesoCaja/siguienteEstadoProcesoCaja',
+                params:{
+
+                    id_proceso_wf_act:  resp.id_proceso_wf_act,
+                    id_estado_wf_act:   resp.id_estado_wf_act,
+                    id_tipo_estado:     resp.id_tipo_estado,
+                    id_funcionario_wf:  resp.id_funcionario_wf,
+                    id_depto_wf:        resp.id_depto_wf,
+                    obs:                resp.obs,
+                    id_cuenta_bancaria:	resp.id_cuenta_bancaria,
+                    id_cuenta_bancaria_mov : resp.id_cuenta_bancaria_mov,
+                    json_procesos:      Ext.util.JSON.encode(resp.procesos)
+                },
+                success:this.successWizard,
+                failure: this.conexionFailure,
+                argument:{wizard:wizard},
+                timeout:this.timeout,
+                scope:this
+            });
+        },
+
+        successWizard:function(resp){
+            Phx.CP.loadingHide();
+            resp.argument.wizard.panel.destroy()
+            this.reload();
+        },
+
         preparaMenu:function(n){
             var data = this.getSelectedData();
             var tb =this.tbar;
@@ -208,15 +251,15 @@ header("content-type: text/javascript; charset=UTF-8");
 
             if(data['tipo']=='SOLREN'){
                 this.getBoton('consolidado_rendicion').enable();
-                this.getBoton('chkpresupuesto').enable();
+                //this.getBoton('chkpresupuesto').enable();
                 //this.getBoton('consolidado_reposicion').disable();
             }else if(data['tipo']=='SOLREP'){
                 this.getBoton('consolidado_rendicion').disable();
-                this.getBoton('chkpresupuesto').disable();
+                //this.getBoton('chkpresupuesto').disable();
                 //this.getBoton('consolidado_reposicion').enable();
             }else{
                 this.getBoton('consolidado_rendicion').disable();
-                this.getBoton('chkpresupuesto').disable();
+                //this.getBoton('chkpresupuesto').disable();
                 //this.getBoton('consolidado_reposicion').disable();
             }
 
@@ -245,6 +288,8 @@ header("content-type: text/javascript; charset=UTF-8");
             }
         },
 
+
+
         antEstado:function(res){
             var rec=this.sm.getSelected();
             Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/AntFormEstadoWf.php',
@@ -263,6 +308,25 @@ header("content-type: text/javascript; charset=UTF-8");
                     scope:this
                 })
         },
+
+         consolidado_rendicion : function() {
+             var rec = this.getSelectedData();
+             var NumSelect=this.sm.getCount();
+
+             if(NumSelect != 0)
+             {
+             var data ='id_proceso_caja='+ rec.id_proceso_caja;
+             data += '&nro_tramite=' + rec.nro_tramite;
+             data += '&reporte=rendicion';
+             console.log(data);
+             //window.open('http://localhost:22021/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
+             window.open('http://sms.obairlines.bo/ReportesPXP2/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
+             }
+             else
+             {
+             Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
+             }
+         },
 
         onAntEstado: function(wizard,resp){
             Phx.CP.loadingShow();

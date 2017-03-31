@@ -33,7 +33,7 @@ Phx.vista.ProcesoCajaVbPresup = {
 		this.addButton('consolidado_rendicion',
 				{	text:'Reporte Rendicion',
 					iconCls: 'blist',
-					disabled:false,
+					disabled:true,
 					grupo:[0,1],
 					handler:this.consolidado_rendicion,
 					tooltip: '<b>Consolidado Rendicion</b><p>Consolidado por Rendicion</p>'
@@ -43,7 +43,7 @@ Phx.vista.ProcesoCajaVbPresup = {
 		this.addButton('chkpresupuesto',
 				{	text:'Chk Presupuesto',
 					iconCls: 'blist',
-					disabled:false,
+					disabled:true,
 					grupo:[0,1],
 					handler:this.checkPresupuesto,
 					tooltip: '<b>Revisar Presupuesto</b><p>Revisar estado de ejecución presupeustaria para el tramite</p>'
@@ -58,7 +58,10 @@ Phx.vista.ProcesoCajaVbPresup = {
 	  
 	   Phx.vista.ProcesoCajaVbPresup.superclass.preparaMenu.call(this);
 		var data = this.getSelectedData();
-		console.log(data);
+
+		this.getBoton('consolidado_rendicion').enable();
+		this.getBoton('chkpresupuesto').enable();
+
 		if(data['tipo']=='SOLREN'){
 			//this.getBoton('consolidado_reposicion').disable();
 		}else if(data['tipo']=='SOLREP'){
@@ -68,34 +71,49 @@ Phx.vista.ProcesoCajaVbPresup = {
 		}
 	   //this.getBoton('relacionar_deposito').disable();
 
-     }
-	/*
-	preparaMenu:function(n){
-		var data = this.getSelectedData();
-		var tb =this.tbar;
-		//Phx.vista.ProcesoCajaVb.superclass.preparaMenu.call(this,n);
+     },
 
-		if (data['estado']!= 'pendiente' && data['estado']!= 'contabilizado' && data['estado']!= 'cerrado' && data['estado']!= 'rendido'){
-			this.getBoton('fin_registro').enable();
-			this.getBoton('ant_estado').enable();
-		}
-		else{
-			this.getBoton('fin_registro').disable();
-			this.getBoton('ant_estado').disable();
-		}
+	consolidado_rendicion : function() {
+		var rec = this.getSelectedData();
+		var NumSelect=this.sm.getCount();
 
-		if(data['tipo']=='SOLREN'){
-			//this.getBoton('consolidado_rendicion').enable();
-			//this.getBoton('consolidado_reposicion').disable();
-		}else if(data['tipo']=='SOLREP'){
-			//this.getBoton('consolidado_rendicion').disable();
-			//this.getBoton('consolidado_reposicion').enable();
-		}else{
-			//this.getBoton('consolidado_rendicion').disable();
-			//this.getBoton('consolidado_reposicion').disable();
+		if(NumSelect != 0)
+		{
+			var data ='id_proceso_caja='+ rec.id_proceso_caja;
+			data += '&nro_tramite=' + rec.nro_tramite;
+			data += '&reporte=rendicion';
+			
+			//window.open('http://localhost:14659/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
+			window.open('http://sms.obairlines.bo/ReportesPXP2/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
 		}
+		else
+		{
+			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
+		}
+	},
 
-		//this.getBoton('chkpresupuesto').enable();
-	}*/
+	checkPresupuesto:function(){
+		var rec=this.sm.getSelected();
+		var configExtra = [];
+		this.objChkPres = Phx.CP.loadWindows('../../../sis_presupuestos/vista/presup_partida/ChkPresupuestoRendicion.php',
+				'Estado del Presupuesto',
+				{
+					modal:true,
+					width:700,
+					height:450
+				}, {
+					data:{
+						nro_tramite: rec.data.nro_tramite
+					}}, this.idContenedor,'ChkPresupuesto',
+				{
+					config:[{
+						event:'onclose',
+						delegate: this.onCloseChk
+					}],
+
+					scope:this
+				});
+
+	}
 };
 </script>

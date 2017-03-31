@@ -1,4 +1,4 @@
-﻿--------------- SQL ---------------
+--------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION tes.ft_solicitud_rendicion_det_ime (
   p_administrador integer,
@@ -35,49 +35,52 @@ DECLARE
     v_id_documento_respaldo	integer;
     v_solicitud_efectivo	record;
     v_id_solicitud_efectivo_rend	integer;
+    v_rendicion				varchar[];
     v_total_rendiciones		numeric;
     v_tipo					varchar;
     v_id_proceso_caja		integer;
     v_importe_maximo		numeric;
-    
-			    
+
+
 BEGIN
 
     v_nombre_funcion = 'tes.ft_solicitud_rendicion_det_ime';
     v_parametros = pxp.f_get_record(p_tabla);
 
-	/*********************************    
+	/*********************************
  	#TRANSACCION:  'TES_REND_INS'
  	#DESCRIPCION:	Insercion de registros
- 	#AUTOR:		gsarmiento	
+ 	#AUTOR:		gsarmiento
  	#FECHA:		16-12-2015 15:14:01
 	***********************************/
 
 	if(p_transaccion='TES_REND_INS')then
-					
+
         begin
-             
-             select sol.id_solicitud_efectivo, cj.importe_maximo_item 
-             into v_id_solicitud_efectivo_rend, v_importe_maximo 
+
+             select sol.id_solicitud_efectivo, cj.importe_maximo_item
+             into v_id_solicitud_efectivo_rend, v_importe_maximo
              from tes.tsolicitud_efectivo sol
              inner join tes.ttipo_solicitud tp on tp.id_tipo_solicitud=sol.id_tipo_solicitud
              inner join tes.tcaja cj on cj.id_caja=sol.id_caja
              where sol.id_solicitud_efectivo_fk= v_parametros.id_solicitud_efectivo_fk
              and sol.estado='borrador' and tp.codigo='RENEFE';
-             
+
              IF v_importe_maximo < v_parametros.monto THEN
              	raise exception 'El importe no puede ser mayor al importe maximo item de la caja';
              END IF;
-             
+
              IF v_id_solicitud_efectivo_rend is null THEN
-               
+
                select id_caja, id_funcionario into v_solicitud_efectivo
                from tes.tsolicitud_efectivo
                where id_solicitud_efectivo=v_parametros.id_solicitud_efectivo_fk;
 
                v_resp = tes.f_inserta_solicitud_efectivo(p_administrador, p_id_usuario,hstore(v_parametros)||hstore(v_solicitud_efectivo));
-             
-               v_id_solicitud_efectivo_rend = v_resp;
+
+               v_rendicion = pxp.f_recupera_clave(v_resp,'id_solicitud_efectivo');
+
+               v_id_solicitud_efectivo_rend = v_rendicion[1]::integer;
 
              END IF;
 
@@ -105,22 +108,22 @@ BEGIN
 			null,
 			null
 			)RETURNING id_solicitud_rendicion_det into v_id_solicitud_rendicion_det;
-            
+
             UPDATE conta.tdoc_compra_venta
             SET tabla_origen='tes.tsolicitud_rendicion_det',
             id_origen=v_id_solicitud_rendicion_det
             WHERE id_doc_compra_venta=v_parametros.id_documento_respaldo;
-			            
+
             select sum(rend.monto) into v_total_rendiciones
             from tes.tsolicitud_rendicion_det rend
             where rend.id_solicitud_efectivo=v_id_solicitud_efectivo_rend;
-             
+
             UPDATE tes.tsolicitud_efectivo
             SET monto=v_total_rendiciones
             WHERE id_solicitud_efectivo=v_id_solicitud_efectivo_rend;
-            
+
 			--Definicion de la respuesta
-			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion almacenado(a) con exito (id_solicitud_rendicion_det'||v_id_solicitud_rendicion_det||')'); 
+			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion almacenado(a) con exito (id_solicitud_rendicion_det'||v_id_solicitud_rendicion_det||')');
             v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_rendicion_det',v_id_solicitud_rendicion_det::varchar);
 
             --Devuelve la respuesta
@@ -128,27 +131,27 @@ BEGIN
 
 		end;
 
-	/*********************************    
+	/*********************************
  	#TRANSACCION:  'TES_REND_MOD'
  	#DESCRIPCION:	Modificacion de registros
- 	#AUTOR:		gsarmiento	
+ 	#AUTOR:		gsarmiento
  	#FECHA:		16-12-2015 15:14:01
 	***********************************/
 
 	elsif(p_transaccion='TES_REND_MOD')then
 
 		begin
-        	select det.id_solicitud_efectivo,cj.importe_maximo_item 
+        	select det.id_solicitud_efectivo,cj.importe_maximo_item
             into v_id_solicitud_efectivo_rend, v_importe_maximo
             from tes.tsolicitud_rendicion_det det
             inner join tes.tsolicitud_efectivo sol on sol.id_solicitud_efectivo=det.id_solicitud_efectivo
             inner join tes.tcaja cj on cj.id_caja=sol.id_caja
             where id_documento_respaldo=v_parametros.id_documento_respaldo;
-            
+
         	IF v_importe_maximo < v_parametros.monto THEN
              	raise exception 'El importe no puede ser mayor al importe maximo item de la caja';
              END IF;
-             
+
 			--Sentencia de la modificacion
 			update tes.tsolicitud_rendicion_det set
 			--id_solicitud_efectivo = v_parametros.id_solicitud_efectivo,
@@ -159,26 +162,26 @@ BEGIN
 			id_usuario_ai = v_parametros._id_usuario_ai,
 			usuario_ai = v_parametros._nombre_usuario_ai
 			where id_documento_respaldo=v_parametros.id_documento_respaldo;
-                        
+
             UPDATE tes.tsolicitud_efectivo
             SET monto=(select sum(monto)
               		   from tes.tsolicitud_rendicion_det
             		   where id_solicitud_efectivo=v_id_solicitud_efectivo_rend)
             WHERE id_solicitud_efectivo=v_id_solicitud_efectivo_rend;
-               
+
 			--Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion modificado(a)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion modificado(a)');
             v_resp = pxp.f_agrega_clave(v_resp,'id_documento_respaldo',v_parametros.id_documento_respaldo::varchar);
-               
+
             --Devuelve la respuesta
             return v_resp;
-            
+
 		end;
 
-	/*********************************    
+	/*********************************
  	#TRANSACCION:  'TES_REND_ELI'
  	#DESCRIPCION:	Eliminacion de registros
- 	#AUTOR:		gsarmiento	
+ 	#AUTOR:		gsarmiento
  	#FECHA:		16-12-2015 15:14:01
 	***********************************/
 
@@ -186,48 +189,56 @@ BEGIN
 
 		begin
 			--Sentencia de la eliminacion
-            select id_documento_respaldo into v_id_documento_respaldo
+            select id_documento_respaldo, id_solicitud_efectivo
+            into v_id_documento_respaldo, v_id_solicitud_efectivo_rend
             from tes.tsolicitud_rendicion_det
             where id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
-            
+
 			delete from tes.tsolicitud_rendicion_det
             where id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
-            
+
             delete from conta.tdoc_compra_venta
             where id_doc_compra_venta=v_id_documento_respaldo;
-               
+
+            IF NOT EXISTS (select 1 from tes.tsolicitud_rendicion_det
+            	where id_solicitud_efectivo=v_id_solicitud_efectivo_rend) THEN
+                delete from tes.tsolicitud_efectivo where id_solicitud_efectivo=v_id_solicitud_efectivo_rend;
+            END IF;
+
             --Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion eliminado(a)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion eliminado(a)');
             v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_rendicion_det',v_parametros.id_solicitud_rendicion_det::varchar);
-              
+
             --Devuelve la respuesta
             return v_resp;
 
 		end;
-        
+
     elsif(p_transaccion='TES_RENDEVFAC_IME')then
     	begin
-        	--recuperamos el id de la solicitud de efectivo             
-        	 select sol.id_caja, sol.id_funcionario, ren.monto, 
-             sol.id_solicitud_efectivo_fk as id_solicitud_efectivo_fk, 
+        	--recuperamos el id de la solicitud de efectivo
+        	 select sol.id_caja, sol.id_funcionario, ren.monto,
+             sol.id_solicitud_efectivo_fk as id_solicitud_efectivo_fk,
              sol.id_solicitud_efectivo as id_solicitud_efectivo_rendicion
              into v_solicitud_efectivo
              from tes.tsolicitud_efectivo sol
              inner join tes.tsolicitud_rendicion_det ren on ren.id_solicitud_efectivo=sol.id_solicitud_efectivo
              where ren.id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
-                 
-             select sol.id_solicitud_efectivo into v_id_solicitud_efectivo_rend 
+
+             select sol.id_solicitud_efectivo into v_id_solicitud_efectivo_rend
              from tes.tsolicitud_efectivo sol
              inner join tes.ttipo_solicitud tp on tp.id_tipo_solicitud=sol.id_tipo_solicitud
              where sol.id_solicitud_efectivo_fk= v_solicitud_efectivo.id_solicitud_efectivo_fk
              and sol.estado='borrador' and tp.codigo='RENEFE';
-             
+
              --verificamos si existe alguna rendicion activa
              IF v_id_solicitud_efectivo_rend is null THEN
-               
+
                v_resp = tes.f_inserta_solicitud_efectivo(p_administrador, p_id_usuario,hstore(v_parametros)||hstore(v_solicitud_efectivo));
-             
-               v_id_solicitud_efectivo_rend = v_resp;
+
+               v_rendicion = pxp.f_recupera_clave(v_resp,'id_solicitud_efectivo');
+
+               v_id_solicitud_efectivo_rend = v_rendicion[1]::integer;
 
              END IF;
              

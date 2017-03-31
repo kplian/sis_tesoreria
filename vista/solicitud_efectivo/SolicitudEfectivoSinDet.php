@@ -79,7 +79,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			{	text:'Siguiente',
 				iconCls: 'badelante',
 				grupo:[0,2],
-				disabled:false,
+				disabled:true,
 				handler:this.sigEstado,
 				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
 			}
@@ -89,11 +89,11 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			text : 'Rendicion Efectivo',
 			iconCls : 'bballot',
 			grupo:[2],
-			disabled : false,
+			disabled : true,
 			handler : this.onBtnRendicion,
 			tooltip : '<b>Rendicion</b>'
 		});
-		
+
 		this.addButton('btnDevol', {
 			text : 'Devolucion Efectivo',
 			iconCls : 'bballot',
@@ -108,7 +108,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 				text: 'Documentos',
 				iconCls: 'bchecklist',
 				grupo:[0,1,2,3],
-				disabled: false,
+				disabled: true,
 				handler: this.loadCheckDocumentosSolWf,
 				tooltip: '<b>Documentos de la Solicitud</b><br/>Los documetos de la solicitud seleccionada.'
 			}
@@ -684,7 +684,8 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
           var tb =this.tbar;
 
 		  var dias = parseFloat(data.dias_maximo_rendicion) - parseFloat(data.dias_no_rendido);
-          this.getBoton('diagrama_gantt').disable();
+          //this.getBoton('diagrama_gantt').disable();
+          this.getBoton('btnChequeoDocumentosWf').enable();
           Phx.vista.SolicitudEfectivoSinDet.superclass.preparaMenu.call(this,n);
           if (data['estado'] == 'borrador'){
               this.getBoton('fin_registro').enable();
@@ -700,9 +701,9 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('del').disable();
 			  this.getBoton('diagrama_gantt').enable();
 			  //this.getBoton('btnRendicionEfectivo').enable();
-			  if(dias < 0)
-				this.getBoton('btnRendicion').disable();
-			  else
+			  //if(dias < 0)
+				//this.getBoton('btnRendicion').disable();
+			  //else
 				this.getBoton('btnRendicion').enable();
 			  //this.getBoton('btnReciboEntrega').enable();
 			  
@@ -712,8 +713,6 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('del').disable();
 			  this.getBoton('btnRendicion').disable();
               this.getBoton('diagrama_gantt').enable();
-			  //this.getBoton('btnReciboEntrega').enable();
-			  //this.getBoton('btnRendicionEfectivo').enable();
 		  }else if(data['estado'] == 'vbjefe'){
 			  this.getBoton('fin_registro').disable();
 			  this.getBoton('edit').disable();
@@ -734,10 +733,23 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 
 		  if(data['saldo'] == 0.00){
 			  this.getBoton('btnDevol').disable();
+			  this.getBoton('btnRendicion').disable();
 		  }else{
 			  this.getBoton('btnDevol').enable();
+			  this.getBoton('btnRendicion').enable();
 		  }
      },
+
+	liberaMenu:function(){
+		var tb = Phx.vista.SolicitudEfectivoSinDet.superclass.liberaMenu.call(this);
+		if(tb) {
+			this.getBoton('btnChequeoDocumentosWf').disable();
+			this.getBoton('diagrama_gantt').disable();
+			this.getBoton('fin_registro').disable();
+			this.getBoton('btnRendicion').disable();
+			this.getBoton('btnDevol').disable();
+		}
+	},
 	 
 	 iniciarEventos : function(){		 
 		this.cmpFecha=this.getComponente('fecha');
@@ -764,7 +776,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			height : '95%',
 		}, rec.data, this.idContenedor, 'SolicitudRendicionDet');
 	},
-	
+
 	onBtnDevolucion : function() {
 		var rec=this.sm.getSelected();
 

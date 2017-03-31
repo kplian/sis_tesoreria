@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
 *@package pXP
 *@file SolicitudEfectivoCaja.php
@@ -135,7 +135,7 @@ Phx.vista.SolicitudEfectivoCaja=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Num Tramite',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 170,
+				gwidth: 200,
 				maxLength:50
 			},
 				type:'TextField',

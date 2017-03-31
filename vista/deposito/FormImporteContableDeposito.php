@@ -62,6 +62,7 @@ Phx.vista.FormImporteContableDeposito=Ext.extend(Phx.frmInterfaz,{
         var resp = {
 				   importe_contable_deposito:this.Cmp.importe_contable_deposito.getValue(),
 				   id_cuenta_doc: me.data.id_cuenta_doc,
+                   id_proceso_caja: me.data.id_proceso_caja,
 				   id_libro_bancos: me.rec.id_libro_bancos
             }   
          return resp;   

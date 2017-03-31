@@ -34,7 +34,7 @@ Phx.vista.ProcesoCajaVb = {
 			{	text:'Anterior',
 				argument: {estado: 'anterior'},
 				iconCls: 'batras',
-				disabled:false,
+				disabled:true,
 				handler:this.antEstado,
 				tooltip: '<b>Anterior</b><p>Pasa al anterior estado</p>'
 			}
@@ -43,15 +43,13 @@ Phx.vista.ProcesoCajaVb = {
         this.addButton('fin_registro',
             {	text:'Siguiente',
                 iconCls: 'badelante',
-                disabled:false,
+                disabled:true,
                 handler:this.sigEstado,
                 tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
             }
         );
 
 		  this.store.baseParams={tipo_interfaz:this.nombreVista};
-
-      //this.load({params:{start:0, limit:this.tam_pag}})
     },
 
 

@@ -4914,3 +4914,44 @@ AS
 
 
 /***********************************F-DEP-JRR-TES-0-08/11/2016****************************************/
+
+/***********************************I-DEP-GSS-TES-0-15/12/2016****************************************/
+
+CREATE VIEW tes.vlibro_bancos_deposito_pc (
+    id_proceso_caja,
+    importe_deposito,
+    id_cuenta_bancaria,
+    id_depto_conta,
+    id_libro_bancos)
+AS
+SELECT pc.id_proceso_caja,
+    COALESCE(dppc.importe_contable_deposito, lb.importe_deposito,
+        0::numeric(20,2)) AS importe_deposito,
+    lb.id_cuenta_bancaria,
+    pc.id_depto_conta,
+    lb.id_libro_bancos
+FROM tes.tts_libro_bancos lb
+     LEFT JOIN tes.tdeposito_proceso_caja dppc ON dppc.id_libro_bancos =
+         lb.id_libro_bancos
+     JOIN tes.tproceso_caja pc ON pc.id_proceso_caja = lb.columna_pk_valor AND
+         lb.tabla::text = 'tes.tproceso_caja'::text AND lb.columna_pk::text = 'id_proceso_caja'::text;
+
+/***********************************F-DEP-GSS-TES-0-15/12/2016****************************************/
+
+/***********************************I-DEP-GSS-TES-0-13/03/2017****************************************/
+
+ALTER TABLE tes.tcaja_funcionario
+  ADD CONSTRAINT fk_tcaja_funcionario__id_caja FOREIGN KEY (id_caja)
+    REFERENCES tes.tcaja(id_caja)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tcaja_funcionario
+  ADD CONSTRAINT fk_tcaja_funcionario__id_funcionario FOREIGN KEY (id_funcionario)
+    REFERENCES orga.tfuncionario(id_funcionario)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+/***********************************F-DEP-GSS-TES-0-13/03/2017****************************************/

@@ -185,7 +185,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 				url: '../../sis_parametros/control/Depto/listarDepto',
 				emptyText : 'Departamento Libro Bancos...',
 				allowBlank:false,
-				gdisplayField:'desc_depto',//mapea al store del grid
+				gdisplayField : 'desc_depto_lb',//mapea al store del grid
 				gwidth:200,
 				anchor: '80%',
 				baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'LB'},
@@ -454,12 +454,13 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		 }		 
      },
 	 
-	 
+
 	 disableTabSolicitud:function(){
      	if(this.TabPanelSouth.get(1)){
      		      this.TabPanelSouth.get(1).disable();	
+     		      this.TabPanelSouth.get(2).disable();
 		          this.TabPanelSouth.setActiveTab(0)
-		          
+
 		}
      },
     
@@ -523,7 +524,13 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
              height:'50%',
              cls:'Cajero'
             },
-            {
+			{
+				url:'../../../sis_tesoreria/vista/caja_funcionario/CajaFuncionario.php',
+				title:'Funcionario',
+				height:'50%',
+				cls:'CajaFuncionario'
+			},
+			{
               url:'../../../sis_tesoreria/vista/solicitud_efectivo/SolicitudEfectivoCaja.php',
               title:'Solicitud Efectivo', 
               height:'50%',

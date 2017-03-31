@@ -872,7 +872,7 @@ BEGIN
                      from tes.tts_libro_bancos lb
                      inner join cd.tcuenta_doc cd on cd.id_int_comprobante=lb.id_int_comprobante
                      where lb.id_libro_bancos=v_id_libro_bancos) THEN
-          	if(v_codigo_estado_siguiente='entregado')then
+          	if(v_codigo_estado_siguiente in ('entregado','cobrado'))then
           		UPDATE cd.tcuenta_doc
                 SET fecha_entrega= current_date
                 WHERE id_int_comprobante=(select id_int_comprobante

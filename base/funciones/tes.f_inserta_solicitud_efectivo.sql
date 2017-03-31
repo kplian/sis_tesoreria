@@ -63,39 +63,39 @@ BEGIN
 			select pv.codigo into v_codigo_tabla
          	from tes.tcaja pv
          	where pv.id_caja = (p_hstore->'id_caja')::integer;
-            
+
         	IF (p_hstore->'tipo_solicitud')::varchar = 'rendicion' THEN
             	v_tipo = 'RENEFE';
             ELSIF (p_hstore->'tipo_solicitud')::varchar = 'devolucion' THEN
             	v_tipo = 'DEVEFE';
 
-            	select sol.estado, sol.monto into v_estado, v_monto_rendicion
-				      from tes.tsolicitud_efectivo sol
-				      where sol.id_solicitud_efectivo_fk=(p_hstore->'id_solicitud_efectivo_fk')::integer;
+                select sol.estado, sol.monto into v_estado, v_monto_rendicion
+				from tes.tsolicitud_efectivo sol
+				where sol.id_solicitud_efectivo_fk=(p_hstore->'id_solicitud_efectivo_fk')::integer;
 
-              IF v_monto_rendicion > 0.00 AND v_estado not in ('rendido') THEN
+                IF v_monto_rendicion > 0.00 AND v_estado not in ('rendido') THEN
                 	raise exception 'No puede realizar una devolucion mientras tenga rendiciones pendientes';
-              END IF;
+                END IF;
 
             ELSIF (p_hstore->'tipo_solicitud')::varchar = 'reposicion' THEN
                 v_tipo = 'REPEFE';
             ELSIF (p_hstore->'tipo_solicitud')::varchar = 'solicitud' THEN
 				v_tipo='SOLEFE';
-                
+
                 v_saldo_caja = tes.f_calcular_saldo_caja((p_hstore->'id_caja')::integer);
-                
+
                 IF v_saldo_caja < (p_hstore->'monto')::numeric THEN
 					raise exception 'El monto que esta intentando solicitar excede el saldo de la caja';
                 END IF;
-                
+
                 select importe_maximo_item into v_importe_maximo_solicitud
                 from tes.tcaja
                 where id_caja=(p_hstore->'id_caja')::integer;
-                
+
                 IF v_importe_maximo_solicitud < (p_hstore->'monto')::numeric THEN
                 	raise exception 'El monto que esta intentando solicitar excede el importe maximo de gasto';
                 END IF;
-                
+
             ELSIF (p_hstore->'tipo_solicitud')::varchar = 'apertura_caja' THEN
                 v_tipo = 'APECAJ';
             ELSIF (p_hstore->'tipo_solicitud')::varchar = 'ingreso_caja' THEN
@@ -104,68 +104,68 @@ BEGIN
 				v_tipo='SALEFE';
             ELSE
             	raise exception 'Tipo de solicitud '' % '', no definido', (p_hstore->'tipo_solicitud')::varchar;
-			END IF;            
+			END IF;
 
             IF v_tipo = 'SOLEFE' THEN
               -- obtener correlativo
               v_num_sol_efe =  param.f_obtener_correlativo(
-                     v_tipo, 
-                     NULL,-- par_id, 
-                     NULL, --id_uo 
+                     v_tipo,
+                     NULL,-- par_id,
+                     NULL, --id_uo
                      NULL,    -- id_depto
-                     p_id_usuario, 
-                     'TES', 
+                     p_id_usuario,
+                     'TES',
                      NULL,
                      0,
                      0,
                      'tes.tcaja',
                      (p_hstore->'id_caja')::integer,
-                     v_codigo_tabla                   
+                     v_codigo_tabla
                      );
                 --fin obtener correlativo
               IF (v_num_sol_efe is NULL or v_num_sol_efe ='') THEN
                  raise exception 'No se pudo obtener un numero correlativo para la solicitud efectivo caja consulte con el administrador';
               END IF;
             ELSE
-              
+
               select sol.nro_tramite, cajero.id_funcionario into v_num_sol_efe, v_id_cajero
               from tes.tsolicitud_efectivo sol
               inner join tes.tcajero cajero on cajero.id_caja=sol.id_caja and cajero.estado='activo'
               where sol.id_solicitud_efectivo = (p_hstore->'id_solicitud_efectivo_fk')::integer;
 
             END IF;
-                   
+
               select tp.codigo, t.id_tipo_solicitud into v_codigo_tipo_proceso, v_id_tipo_solicitud
             from tes.ttipo_solicitud t
             inner join wf.ttipo_proceso tp on tp.codigo_llave=t.codigo_proceso_llave_wf
             where t.codigo=v_tipo;
 
-            select 
+            select
              ges.id_gestion
-            into 
+            into
               v_id_gestion
             from param.tgestion ges
             where ges.gestion = (date_part('year', current_date))::integer
             limit 1 offset 0;
-                         
+
             -- inciar el tramite en el sistema de WF
-             SELECT 
+             SELECT
                    ps_num_tramite ,
                    ps_id_proceso_wf ,
                    ps_id_estado_wf ,
-                   ps_codigo_estado 
+                   ps_codigo_estado
                 into
                    v_num_tramite,
                    v_id_proceso_wf,
                    v_id_estado_wf,
-                   v_codigo_estado   
-                      
+                   v_codigo_estado
+
               FROM wf.f_inicia_tramite(
                    p_id_usuario,
                    NULL,
                    NULL,
-                   v_id_gestion, 
-                   v_codigo_tipo_proceso, 
+                   v_id_gestion,
+                   v_codigo_tipo_proceso,
                    v_id_cajero,--id_funcionario
                    --v_parametros.id_depto,
                    NULL,
@@ -180,10 +180,10 @@ BEGIN
 
             IF (p_hstore->'id_solicitud_efectivo_fk') IS NOT NULL THEN
             	v_id_solicitud_efectivo_fk = (p_hstore->'id_solicitud_efectivo_fk')::integer;
-            ELSE	
+            ELSE
             	v_id_solicitud_efectivo_fk = NULL;
             END IF;
-            
+
             --Sentencia de la insercion
             insert into tes.tsolicitud_efectivo(
                 id_caja,
@@ -224,10 +224,11 @@ BEGIN
                 null,
                 v_id_tipo_solicitud,
                 v_id_solicitud_efectivo_fk,
-                v_id_gestion			
+                v_id_gestion
             )RETURNING id_solicitud_efectivo into v_id_solicitud_efectivo;
 
-             v_resp = v_id_solicitud_efectivo::varchar;
+			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Solicitud Efectivo almacenado(a) con exito (id_solicitud_efectivo'||v_id_solicitud_efectivo||')');
+			v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_efectivo', v_id_solicitud_efectivo::varchar);
 
             --Devuelve la respuesta
             return v_resp;

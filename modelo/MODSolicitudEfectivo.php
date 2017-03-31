@@ -256,9 +256,10 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->captura('motivo','text');
 		$this->captura('monto','numeric');
 		$this->captura('fecha_rendicion','date');
-		
+
 		//Ejecuta la instruccion
 		$this->armarConsulta();
+		//var_dump($this->consulta); exit;
 		$this->ejecutarConsulta();
 		//Devuelve la respuesta
 		return $this->respuesta;
@@ -311,7 +312,6 @@ class MODSolicitudEfectivo extends MODbase{
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
-		//var_dump($this->consulta); exit;
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}

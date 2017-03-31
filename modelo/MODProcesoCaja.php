@@ -35,7 +35,7 @@ class MODProcesoCaja extends MODbase{
 		$this->captura('id_depto_lb','int4');
 		$this->captura('fecha','date');
 		$this->captura('id_proceso_wf','int4');
-		$this->captura('monto_reposicion','numeric');
+		$this->captura('monto','numeric');
 		$this->captura('id_estado_wf','int4');
 		$this->captura('fecha_inicio','date');
 		$this->captura('fecha_reg','timestamp');
@@ -74,7 +74,7 @@ class MODProcesoCaja extends MODbase{
 		$this->setParametro('id_caja','id_caja','int4');
 		$this->setParametro('fecha','fecha','date');
 		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');
-		$this->setParametro('monto_reposicion','monto_reposicion','numeric');
+		$this->setParametro('monto','monto','numeric');
 		$this->setParametro('id_comprobante_pago','id_comprobante_pago','int4');
 		$this->setParametro('id_estado_wf','id_estado_wf','int4');
 		$this->setParametro('fecha_inicio','fecha_inicio','date');
@@ -105,7 +105,7 @@ class MODProcesoCaja extends MODbase{
 		$this->setParametro('id_caja','id_caja','int4');
 		$this->setParametro('fecha','fecha','date');
 		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');
-		$this->setParametro('monto_reposicion','monto_reposicion','numeric');
+		$this->setParametro('monto','monto','numeric');
 		$this->setParametro('id_comprobante_pago','id_comprobante_pago','int4');
 		$this->setParametro('id_estado_wf','id_estado_wf','int4');
 		$this->setParametro('fecha_inicio','fecha_inicio','date');
@@ -311,6 +311,7 @@ class MODProcesoCaja extends MODbase{
 		//Define los parametros para la funcion
 		$this->setParametro('importe_contable_deposito','importe_contable_deposito','numeric');
 		$this->setParametro('id_cuenta_doc','id_cuenta_doc','integer');
+		$this->setParametro('id_proceso_caja','id_proceso_caja','integer');
 		$this->setParametro('id_libro_bancos','id_libro_bancos','integer');
 
 		//Ejecuta la instruccion

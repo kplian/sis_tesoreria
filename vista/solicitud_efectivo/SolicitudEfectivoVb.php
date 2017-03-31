@@ -22,7 +22,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 			{	text:'Anterior',
 				argument: {estado: 'anterior'},
 				iconCls: 'batras',
-				disabled:false,
+				disabled:true,
 				handler:this.antEstado,
 				tooltip: '<b>Anterior</b><p>Pasa al anterior estado</p>'
 			}
@@ -31,7 +31,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 		this.addButton('fin_registro',
 			{	text:'Siguiente',
 				iconCls: 'badelante',
-				disabled:false,
+				disabled:true,
 				handler:this.sigEstado,
 				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
 			}
@@ -41,7 +41,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				{
 					text: 'Documentos',
 					iconCls: 'bchecklist',
-					disabled: false,
+					disabled: true,
 					handler: this.loadCheckDocumentosSolWf,
 					tooltip: '<b>Documentos de la Solicitud</b><br/>Los documetos de la solicitud seleccionada.'
 				}
@@ -459,12 +459,23 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
           if (data['estado']!= 'borrador'){    
               this.getBoton('fin_registro').enable();
 			  this.getBoton('ant_estado').enable();
+			  this.getBoton('btnChequeoDocumentosWf').enable();
           }
           else{            
               this.getBoton('fin_registro').disable();
 			  this.getBoton('ant_estado').disable();
           }
      },
+
+	liberaMenu:function() {
+		var tb = Phx.vista.SolicitudEfectivoVb.superclass.liberaMenu.call(this);
+		if (tb) {
+			this.getBoton('fin_registro').disable();
+			this.getBoton('ant_estado').disable();
+			this.getBoton('btnChequeoDocumentosWf').disable();
+			this.getBoton('diagrama_gantt').disable();
+		}
+	},
 	
 	antEstado:function(res){
          var rec=this.sm.getSelected();
