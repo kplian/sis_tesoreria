@@ -352,7 +352,7 @@ BEGIN
                          and ren.estado = ''rendido''
                          inner join tes.tcaja cj on cj.id_caja=sol.id_caja
                          inner join tes.tcajero cjr on cjr.id_caja=cj.id_caja
-                         and cjr.tipo=''responsable'' and current_date between cjr.fecha_inicio and COALESCE(cjr.fecha_fin,current_date)
+                         and cjr.tipo=''responsable'' and sol.fecha_entrega between cjr.fecha_inicio and COALESCE(cjr.fecha_fin,current_date)
                          inner join orga.vfuncionario fun on fun.id_funcionario=cjr.id_funcionario
                          inner join param.tmoneda m on m.id_moneda=cj.id_moneda
                          inner join orga.vfuncionario_cargo slct on slct.id_funcionario=sol.id_funcionario

@@ -200,6 +200,9 @@ BEGIN
             delete from conta.tdoc_compra_venta
             where id_doc_compra_venta=v_id_documento_respaldo;
 
+            delete from conta.tdoc_concepto
+            where id_doc_compra_venta=v_id_documento_respaldo;
+
             IF NOT EXISTS (select 1 from tes.tsolicitud_rendicion_det
             	where id_solicitud_efectivo=v_id_solicitud_efectivo_rend) THEN
                 delete from tes.tsolicitud_efectivo where id_solicitud_efectivo=v_id_solicitud_efectivo_rend;
