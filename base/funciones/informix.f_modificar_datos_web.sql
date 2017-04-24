@@ -132,7 +132,7 @@ BEGIN
     OPTIONS ( table ''facturas'',
     database ''ingresos'',
       informixdir ''/opt/informix'',
-      client_locale ''en_US.utf8'',
+      client_locale ''es_ES.utf8'',
       informixserver ''sai1'');');
       
     
@@ -182,7 +182,7 @@ BEGIN
     where b.nro_boleto = p_billete and b.estado_reg = 'activo'
     offset 0 limit 1;
     
-    select * into v_detalle
+    select *,translate(d.razon_social,'àèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜçÇ','aeiouAEIOUaeiouyAEIOUYaeiouAEIOUanoANOaeiouyAEIOUcC')::varchar as razon_social2 into v_detalle
     from obingresos.tdetalle_boletos_web d
     where d.billete = p_billete;
     
@@ -209,7 +209,7 @@ BEGIN
     if (v_detalle.medio_pago != 'COMPLETAR-CC')  then
         if (v_estado = '1') then
         
-        	if (v_agt != '56991266') then
+        	if (v_agt != '56991266' and v_agt != '56999960') then
                 v_error = 'CONTROLADO - No se puede procesar la modificacion de ventas web porque la agencia del boleto ' || p_billete || ' no correponde a las agencia de  ventas  web';
                 v_id_alarma = (select param.f_inserta_alarma_dblink (1,'Error al procesar modificaciones de venta web',v_error,'jaime.rivera@boa.bo,aldo.zeballos@boa.bo'));
                 raise exception '%',v_error; 
@@ -268,13 +268,13 @@ BEGIN
                 obingresos.tboleto
                 set endoso = v_detalle.endoso,
                 nit = (case when v_detalle.nit is null then nit else v_detalle.nit::bigint end),
-                razon = (case when v_detalle.razon_social is null then razon else v_detalle.razon_social end)
+                razon = (case when v_detalle.razon_social2 is null then razon else v_detalle.razon_social2 end)
                 where id_boleto = v_id_boleto;
                 
                 
                 update informix.boletos_facturas_modificacion
                 set nit = (case when v_detalle.nit is null then nit else v_detalle.nit::numeric end),
-                razon =  (case when v_detalle.razon_social is null then razon else v_detalle.razon_social end)
+                razon =  (case when v_detalle.razon_social2 is null then razon else v_detalle.razon_social2 end)
                 
                 where billete = p_billete::numeric;
             ELSE
@@ -306,14 +306,14 @@ BEGIN
     	if (v_estado = '1') then
             update informix.boletos_facturas_modificacion
             set nit = (case when v_detalle.nit is null then nit else v_detalle.nit::numeric end),
-            razon =  (case when v_detalle.razon_social is null then razon else v_detalle.razon_social end)
+            razon =  (case when v_detalle.razon_social2 is null then razon else v_detalle.razon_social2 end)
             where billete = p_billete::numeric;
             
             update
             obingresos.tboleto
             set endoso = v_detalle.endoso,
             nit = (case when v_detalle.nit is null then nit else v_detalle.nit::bigint end),
-            razon = (case when v_detalle.razon_social is null then razon else v_detalle.razon_social end)
+            razon = (case when v_detalle.razon_social2 is null then razon else v_detalle.razon_social2 end)
             where id_boleto = v_id_boleto;
         end if;       
         
