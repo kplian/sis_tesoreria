@@ -44,7 +44,7 @@ header("content-type: text/javascript; charset=UTF-8");
             form:true
             }],
 
-            title : 'Pagos Sin Facturas Asociadas',
+            title : 'Proceso con retencion del 7% ',
             ActSave : '../../sis_tesoreria/control/PlanPago/reporteProcesoConRetencion',
 
             topBar : true,
@@ -63,7 +63,7 @@ header("content-type: text/javascript; charset=UTF-8");
             this.cmpFechaFin = this.getComponente('fecha_fin');
             },
             tipo : 'reporte',
-            clsSubmit : 'bprint',
+            clsSubmit : 'bprint'
 
 })
 </script>

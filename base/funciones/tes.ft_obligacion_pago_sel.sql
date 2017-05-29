@@ -35,6 +35,7 @@ DECLARE
     v_inner 			varchar;
     v_historico         varchar;
     v_strg_sol			varchar;
+    v_id_clase_comprobante	integer;
 
 BEGIN
 
@@ -134,7 +135,7 @@ BEGIN
                      where depu.id_usuario =  p_id_usuario and depu.cargo = 'responsable';
 
 
-                     v_filadd='( (pc.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))   or   pc.id_usuario_auxiliar = '||p_id_usuario::varchar ||' ) and ';
+                     v_filadd='( (pc.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||'))   or   pc.id_usuario_auxiliar = '||p_id_usuario::varchar ||' or obpg.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and ';
               END IF;
 
 
@@ -684,6 +685,38 @@ BEGIN
                     v_consulta:=v_consulta||'ORDER BY num_tramite, obl.num_tramite, es.nro_cuota ASC';
 
             raise notice '% .',v_consulta;
+			--Devuelve la respuesta
+			return v_consulta;
+
+		end;
+
+    /*********************************
+ 	#TRANSACCION:  'TES_PAGSINDOC_SEL'
+ 	#DESCRIPCION:	Reporte de pagos sin documentos relacionados
+ 	#AUTOR:		Gonzalo Sarmiento
+ 	#FECHA:		03-03-2017 16:01:32
+	***********************************/
+
+    elsif(p_transaccion='TES_PAGSINDOC_SEL')then
+
+    	begin
+        	select cla.id_clase_comprobante into v_id_clase_comprobante
+			from conta.tclase_comprobante cla
+			where cla.codigo='DIARIO';
+
+    		--Sentencia de la consulta
+			v_consulta:='select dev.id_int_comprobante, dev.nro_tramite, dev.c31, dev.beneficiario, dev.glosa1
+						from conta.tint_comprobante pago
+						inner join conta.tint_comprobante dev on dev.id_int_comprobante = ANY(pago.id_int_comprobante_fks)
+        				and dev.id_clase_comprobante = 3
+					    and conta.f_recuperar_nro_documento_facturas_comprobante(dev.id_int_comprobante) is  null
+						where dev.id_clase_comprobante ='|| v_id_clase_comprobante ||' and
+		      			pago.fecha between '''||v_parametros.fecha_ini||''' and
+      					'''||v_parametros.fecha_fin||''' and
+      					pago.estado_reg = ''validado'' and
+      					pago.id_moneda = (select id_moneda from param.tmoneda where tipo_moneda=''base'')';
+
+            raise notice '% ',v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 

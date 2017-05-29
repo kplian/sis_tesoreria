@@ -772,5 +772,28 @@ class MODObligacionPago extends MODbase{
 
     }
 
+	function  recuperarPagoSinDocumento()
+	{
+		$this->procedimiento = 'tes.ft_obligacion_pago_sel';
+		$this->transaccion = 'TES_PAGSINDOC_SEL';
+		$this->tipo_procedimiento = 'SEL';
+		$this->setCount(false);
+
+		$this->setParametro('fecha_ini','fecha_ini','date');
+		$this->setParametro('fecha_fin','fecha_fin','date');
+
+		$this->captura('id_int_comprobante', 'integer');
+		$this->captura('nro_tramite', 'varchar');
+		$this->captura('c31', 'varchar');
+		$this->captura('beneficiario', 'varchar');
+		$this->captura('glosa1', 'varchar');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+
+	}
 }
 ?>

@@ -50,7 +50,7 @@ Phx.vista.DeptoCuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 					id: 'id_cuenta_bancaria',
 					root: 'datos',
 					sortInfo: {
-						field: 'nombre',
+						field: 'nombre_institucion',
 						direction: 'ASC'
 					},
 					totalProperty: 'total',

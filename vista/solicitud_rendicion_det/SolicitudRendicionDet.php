@@ -15,23 +15,35 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 	id_estado_workflow : 0,
 	id_proceso_workflow : 0,
 	constructor:function(config){
+
 		this.maestro=config.maestro;
     	//llama al constructor de la clase padre
 		Phx.vista.SolicitudRendicionDet.superclass.constructor.call(this,config);
+
 		this.init();
 		this.addButton('fin_registro',
 			{	text:'Mandar Revision',
 				iconCls: 'badelante',
-				disabled:false,
+				disabled:true,
 				handler:this.sigEstado,
 				tooltip: '<b>Mandar Revision</b><p>Mandar a revision facturas</p>'
 			}
 		);
-		
+
 		this.load({params:{start:0, limit:this.tam_pag, id_solicitud_efectivo:this.id_solicitud_efectivo}, me : this, callback:function(r,o,s){
-			this.me.id_estado_workflow = r[0].data.id_estado_wf;
-			this.me.id_proceso_workflow = r[0].data.id_proceso_wf;
+			console.log('entra');
+			if(r[0].data.id_estado_wf != '' && r[0].data.id_proceso_wf) {
+				o.me.getBoton('fin_registro').enable();
+				o.me.id_estado_workflow = r[0].data.id_estado_wf;
+				o.me.id_proceso_workflow = r[0].data.id_proceso_wf;
+			}
 		} });
+
+		var dias = parseFloat(this.dias_maximo_rendicion) - parseFloat(this.dias_no_rendido);
+		if (dias < 0){
+			this.getBoton('edit').setVisible(false);
+			this.getBoton('new').setVisible(false);
+		}
 	},
 			
 	Atributos:[
@@ -509,8 +521,9 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 									id_moneda_defecto : me.id_moneda
 								}, 
 								this.idContenedor,
-								'FormRendicion');         
+								'FormRendicion');
     },
+
 	/*
 	abrirFormulario: function(tipo, record){
 	                                { data: { 
@@ -590,13 +603,13 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('new').disable();
 			  this.getBoton('edit').disable();
 			  this.getBoton('del').disable();
-			  this.getBoton('fin_registro').disable();
 		  }else{
 			  this.getBoton('new').enable();
-			  this.getBoton('edit').enable();
-			  this.getBoton('del').enable();
-			  this.getBoton('fin_registro').enable();
+			  //this.getBoton('edit').enable();
+			  //this.getBoton('del').enable();
+
 		  }
+		  this.getBoton('fin_registro').disable();
      },
 	 
 	 preparaMenu:function(n){
@@ -606,6 +619,13 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 		  }else{
 			  this.getBoton('edit').enable();
 		  }
+		 var data = this.getSelectedData();
+
+		 if (data.id_estado_wf != '' && data.id_proceso_wf != ''){
+			 this.getBoton('fin_registro').enable();
+			 this.id_estado_workflow = data.id_estado_wf;
+			 this.id_proceso_workflow = data.id_proceso_wf;
+		 }
      },
 	 
 	 onSaveWizard:function(wizard,resp){
@@ -633,6 +653,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 		successWizard:function(resp){
 			Phx.CP.loadingHide();
 			resp.argument.wizard.panel.destroy()
+
 			this.reload();
 		 },
 

@@ -1,4 +1,4 @@
-﻿CREATE OR REPLACE FUNCTION tes.f_lista_funcionario_cajero_caja_chica_wf_sel (
+CREATE OR REPLACE FUNCTION tes.f_lista_funcionario_cajero_caja_chica_wf_sel (
   p_id_usuario integer,
   p_id_tipo_estado integer,
   p_fecha date = now(),
@@ -80,7 +80,7 @@ BEGIN
       v_id_funcionario_cajero
     from tes.tsolicitud_efectivo se
     inner join tes.tcajero caje on caje.id_caja=se.id_caja and caje.tipo='responsable' 
-    and now()::date between caje.fecha_inicio and caje.fecha_fin
+    and now()::date between caje.fecha_inicio and COALESCE(caje.fecha_fin,now())
     where se.id_estado_wf = p_id_estado_wf;
     
     

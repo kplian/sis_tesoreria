@@ -16,8 +16,8 @@ Phx.vista.ProcesoCajaVbConta = {
     bnew:false,
     bsave:false,
     bdel:false,
-	require:'../../../sis_tesoreria/vista/proceso_caja/ProcesoCajaVb.php',
-	requireclase:'Phx.vista.ProcesoCajaVb',
+	require:'../../../sis_tesoreria/vista/proceso_caja/ProcesoCajaVbPresup.php',
+	requireclase:'Phx.vista.ProcesoCajaVbPresup',
 	title:'Visto Bueno Rendiciones Caja Contabilidad',
 	nombreVista: 'ProcesoCajaVbConta',
 	/*
@@ -42,8 +42,9 @@ Phx.vista.ProcesoCajaVbConta = {
 	constructor: function(config) {
 
 	   this.finCons = true;
-	   Phx.vista.ProcesoCajaVbConta.superclass.constructor.call(this,config);	   
-	   
+
+	   Phx.vista.ProcesoCajaVbConta.superclass.constructor.call(this,config);
+
     },
 	
 	preparaMenu:function(){
@@ -55,7 +56,59 @@ Phx.vista.ProcesoCajaVbConta = {
 		  }else{
 			  //deshabilitar pestaña depositos
 			  this.disableTabDepositos();
-		  }		
+		  }
+		if(data['nombre'] == 'Solo Rendir'){
+			this.getBoton('chkpresupuesto').enable();
+			this.getBoton('consolidado_rendicion').enable();
+		}else{
+			this.getBoton('chkpresupuesto').disable();
+			this.getBoton('consolidado_rendicion').disable();
+		}
+	},
+
+	checkPresupuesto:function(){
+		var rec=this.sm.getSelected();
+		var configExtra = [];
+		if (rec.data.estado == 'rendido') {
+			this.objChkPres = Phx.CP.loadWindows('../../../sis_presupuestos/vista/presup_partida/ChkPresupuesto.php',
+					'Estado del Presupuesto',
+					{
+						modal: true,
+						width: 700,
+						height: 450
+					}, {
+						data: {
+							nro_tramite: rec.data.nro_tramite
+						}
+					}, this.idContenedor, 'ChkPresupuesto',
+					{
+						config: [{
+							event: 'onclose',
+							delegate: this.onCloseChk
+						}],
+
+						scope: this
+					});
+		}else{
+			this.objChkPres = Phx.CP.loadWindows('../../../sis_presupuestos/vista/presup_partida/ChkPresupuestoRendicion.php',
+					'Estado del Presupuesto',
+					{
+						modal:true,
+						width:700,
+						height:450
+					}, {
+						data:{
+							nro_tramite: rec.data.nro_tramite
+						}}, this.idContenedor,'ChkPresupuesto',
+					{
+						config:[{
+							event:'onclose',
+							delegate: this.onCloseChk
+						}],
+
+						scope:this
+					});
+		}
 	}
 };
 </script>

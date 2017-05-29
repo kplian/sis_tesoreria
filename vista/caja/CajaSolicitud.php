@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
 *@package pXP
 *@file CajaSolicitud.php
@@ -39,7 +39,7 @@ Phx.vista.CajaSolicitud = {
       
        Phx.vista.CajaSolicitud.superclass.constructor.call(this,config);
           
-	   
+	   /*
 	   this.addButton('diagrama_gantt',
 						{text:'Gantt',
 						grupo:[0,1,2],
@@ -47,7 +47,7 @@ Phx.vista.CajaSolicitud = {
 						disabled:false,
 						handler:diagramGantt,
 						tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
-						
+		*/
        this.addButton('btnAbrirCerrar',
 			{
 				text: 'Crear',
@@ -58,7 +58,7 @@ Phx.vista.CajaSolicitud = {
 			}
 		);
 		
-		function diagramGantt(){            
+		/*function diagramGantt(){
             var data=this.sm.getSelected().data.id_proceso_wf;
             Phx.CP.loadingShow();
             Ext.Ajax.request({
@@ -69,7 +69,7 @@ Phx.vista.CajaSolicitud = {
                 timeout:this.timeout,
                 scope:this
             });         
-        }
+        }*/
 		
 		this.store.baseParams.pes_estado = 'borrador';
 		
@@ -97,7 +97,7 @@ Phx.vista.CajaSolicitud = {
 			 else
 				this.getBoton('btnAbrirCerrar').disable();
 		 }
-		 this.getBoton('diagrama_gantt').enable();		 
+		 //this.getBoton('diagrama_gantt').enable();
      },
 	     
 	 abrirCerrarCaja:function(){

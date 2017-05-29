@@ -12,6 +12,7 @@ require_once(dirname(__FILE__).'/../reportes/RPlanesPago.php');
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
 require_once(dirname(__FILE__).'/../reportes/RProcesosPendientesAdquisiciones.php');
 require_once(dirname(__FILE__).'/../reportes/RProcesosPendientesContabilidad.php');
+require_once(dirname(__FILE__).'/../reportes/RPagosSinDocumentosXls.php');
 
 
 class ACTObligacionPago extends ACTbase{    
@@ -434,9 +435,46 @@ class ACTObligacionPago extends ACTbase{
         $this->mensajeExito->setArchivoGenerado($nombreArchivo);
         $this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
     }
-	
-	
-	
+
+    function recuperarPagoSinDocumento(){
+        $this->objFunc = $this->create('MODObligacionPago');
+        $cbteHeader = $this->objFunc->recuperarPagoSinDocumento($this->objParam);
+        if($cbteHeader->getTipo() == 'EXITO'){
+            return $cbteHeader;
+        }
+        else{
+            $cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+            exit;
+        }
+
+    }
+
+    function reportePagoSinDocumento(){
+
+        $nombreArchivo = 'PagosSinDocumentos'.uniqid(md5(session_id())).'.xls';
+
+        $dataSource = $this->recuperarPagoSinDocumento();
+
+        //parametros basicos
+        $tamano = 'LETTER';
+        $orientacion = 'L';
+        $titulo = 'Consolidado';
+
+        $this->objParam->addParametro('orientacion',$orientacion);
+        $this->objParam->addParametro('tamano',$tamano);
+        $this->objParam->addParametro('titulo_archivo',$titulo);
+        $this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+
+        $reporte = new RPagosSinDocumentosXls($this->objParam);
+        $reporte->datosHeader($dataSource->getDatos());
+        $reporte->generarReporte();
+
+        $this->mensajeExito=new Mensaje();
+        $this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se generó con éxito el reporte: '.$nombreArchivo,'control');
+        $this->mensajeExito->setArchivoGenerado($nombreArchivo);
+        $this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+
+    }
 
 }
 

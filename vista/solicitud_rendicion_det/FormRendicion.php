@@ -20,7 +20,8 @@ Phx.vista.FormRendicion = {
 	autorizacion_nulos: 'no',
 		
 	constructor: function(config) {		
-	   Phx.vista.FormRendicion.superclass.constructor.call(this,config);	   
+	   Phx.vista.FormRendicion.superclass.constructor.call(this,config);
+	   this.addEvents('aftersave');
     },
     
 	onNew: function(){    	
@@ -103,10 +104,18 @@ Phx.vista.FormRendicion = {
 
 		if(Phx.CP.getPagina(this.idContenedorPadre).cls =='AprobacionFacturas'){
 			//console.log(Phx.CP.getPagina(this.idContenedorPadre));
-			Phx.CP.getPagina(this.idContenedorPadre).onReloadPadre();	
+			Phx.CP.getPagina(this.idContenedorPadre).onReloadPadre();
+			console.log('gonzalo');
+			console.log(Phx.CP.getPagina(this.idContenedorPadre));
 		}
-		
+		//console.log('jose');
+		//var padre = Phx.CP.getPagina(this.idContenedorPadre);
+		//padre.reload();
+		//padre.onReloadPadre();
+		//console.log(Phx.CP.getPagina(this.idContenedorPadre));
+		//console.log(Phx.CP.getPagina(this.idContenedorPadre));
         this.panel.close();
+		//this.fireEvent('beforesave',this);
     },	
 };
 </script>

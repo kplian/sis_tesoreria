@@ -59,7 +59,7 @@ BEGIN
                 ca.id_depto ,
                 pc.id_cuenta_bancaria ,
                 pc.fecha,
-                pc.monto_reposicion,
+                pc.monto,
                 pc.id_depto_conta,
                 tpc.codigo_plantilla_cbte,
                 ca.id_depto_lb,
@@ -77,8 +77,7 @@ BEGIN
                 pc.motivo,
                 pc.fecha_fin,
                 pc.fecha_inicio,
-                pc.id_gestion,
-                pc.monto_reposicion
+                pc.id_gestion
           into
                 v_registros
           

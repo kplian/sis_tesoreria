@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
 *@package pXP
 *@file RendicionProcesoCaja.php
@@ -18,6 +18,7 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		Phx.vista.RendicionProcesoCaja.superclass.constructor.call(this,config);
 		this.init();
 		
+		/*
 		this.addButton('excluir',
 			{	text:'Excluir',
 				iconCls: 'bengineremove',
@@ -26,6 +27,8 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Excluir</b><p>Excluir Factura de Rendicion</p>'
 			}
 		);
+		*/
+		this.iniciarEventos();
 		//this.load({params:{start:0, limit:this.tam_pag}})
 	},
 			
@@ -446,7 +449,8 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		this.store.baseParams={id_proceso_caja:this.maestro.id_proceso_caja};
 		this.load({params:{start:0, limit:this.tam_pag}});			
 	},
-	
+
+	/*
 	excluir:function(res,eve)
 	{                   
 		var d= this.sm.getSelected().data;
@@ -462,7 +466,8 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			scope:this
 		});     
 	},
-	
+	*/
+	/*
 	successSinc:function(resp){
 		Phx.CP.loadingHide();
 		var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
@@ -474,19 +479,28 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			alert(reg.ROOT.datos.mensaje)
 		}
 	},
-	
+	*/
 	preparaMenu:function(n){
          
-         Phx.vista.RendicionProcesoCaja.superclass.preparaMenu.call(this,n); 
-         var padre = Phx.CP.getPagina(this.idContenedorPadre).nombreVista;
-		 
-         if(padre == 'ProcesoCaja'){
-               this.getBoton('excluir').disable();
-         }
-         else{             
-             	this.getBoton('excluir').enable();                            
-         }
+         Phx.vista.RendicionProcesoCaja.superclass.preparaMenu.call(this,n);
+
+		 if(this.maestro.estado == 'rendido'){
+			 this.getBoton('excluir').disable();
+		 }else{
+			 this.getBoton('excluir').enable();
+		 }
      },
+
+	iniciarEventos:function(){
+		var vistaPadre = Phx.CP.getPagina(this.idContenedorPadre).nombreVista;
+		/*
+		if(vistaPadre == 'ProcesoCajaCajero' || vistaPadre == 'ProcesoCajaVbFondos'){
+			this.getBoton('excluir').setVisible(false);
+		}else{
+			this.getBoton('excluir').setVisible(true);
+		}*/
+
+	},
 	
 	bnew:false,
 	bedit:false,

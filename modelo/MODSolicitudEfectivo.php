@@ -229,7 +229,9 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->captura('motivo','text');
 		$this->captura('desc_funcionario','text');
 		$this->captura('fecha','date');
-		
+		$this->captura('vbjefe','text');
+		$this->captura('vbfinanzas','text');
+
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
@@ -254,9 +256,10 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->captura('motivo','text');
 		$this->captura('monto','numeric');
 		$this->captura('fecha_rendicion','date');
-		
+
 		//Ejecuta la instruccion
 		$this->armarConsulta();
+		//var_dump($this->consulta); exit;
 		$this->ejecutarConsulta();
 		//Devuelve la respuesta
 		return $this->respuesta;
@@ -269,7 +272,9 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
 		$this->setCount(false);		
 		
-		$this->setParametro('id_libro_bancos','id_libro_bancos','int4');
+		//$this->setParametro('id_libro_bancos','id_libro_bancos','int4');
+		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');
+
 		//Definicion de la lista del resultado del query
 		$this->captura('fecha','date');
 		$this->captura('nro_cheque','int4');		
@@ -307,7 +312,6 @@ class MODSolicitudEfectivo extends MODbase{
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
-		//var_dump($this->consulta); exit;
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}

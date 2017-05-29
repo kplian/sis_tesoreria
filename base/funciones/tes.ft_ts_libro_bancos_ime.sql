@@ -1,4 +1,4 @@
-﻿--------------- SQL ---------------
+--------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_ime (
   p_administrador integer,
@@ -872,7 +872,7 @@ BEGIN
                      from tes.tts_libro_bancos lb
                      inner join cd.tcuenta_doc cd on cd.id_int_comprobante=lb.id_int_comprobante
                      where lb.id_libro_bancos=v_id_libro_bancos) THEN
-          	if(v_codigo_estado_siguiente='entregado')then
+          	if(v_codigo_estado_siguiente in ('entregado','cobrado'))then
           		UPDATE cd.tcuenta_doc
                 SET fecha_entrega= current_date
                 WHERE id_int_comprobante=(select id_int_comprobante
@@ -940,7 +940,7 @@ BEGIN
           
           IF EXISTS (select 1 from tes.tts_libro_bancos 
           			 where id_libro_bancos_fk=v_id_libro_bancos
-                     and estado not in ('borrador'))THEN
+                     and estado not in ('borrador','transferido'))THEN
           	raise exception 'No puede retroceder tiene registros que no se encuentran en borrador';
           END IF;
                     

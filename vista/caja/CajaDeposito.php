@@ -38,13 +38,15 @@ Phx.vista.CajaDeposito = {
    
     liberaMenu:function(){
         var tb = Phx.vista.CajaDeposito.superclass.liberaMenu.call(this);
-		if(this.maestro.tipo ==  'RENYCER' || this.maestro.tipo == 'CIERRE'){                 		
-			//this.getBoton('del').enable();
-			//this.getBoton('new').enable();
+		if(this.maestro.estado ==  'pendiente'){
+			this.getBoton('relacionar_deposito').disable();
+			this.getBoton('quitar_relacion_deposito').disable();
+			this.getBoton('corregir_importe_contable').disable();
 		 } 
-		 else{                              
-			//this.getBoton('del').disable();
-			//this.getBoton('new').disable();
+		 else{
+			this.getBoton('relacionar_deposito').enable();
+			//this.getBoton('quitar_relacion_deposito').enable();
+			//this.getBoton('corregir_importe_contable').enable();
 		 }
 		 
        return tb

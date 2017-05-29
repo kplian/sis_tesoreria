@@ -75,6 +75,16 @@ BEGIN
             END IF;
 
 
+            IF  lower(v_parametros.tipo_interfaz) = 'planpagovbcostos' THEN
+
+                IF p_administrador !=1 THEN
+                   v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and ((lower(plapa.estado)=''supcostos'')  or  (lower(plapa.estado)=''vbcostos''))  and ';
+                 ELSE
+                     v_filtro = ' ((lower(plapa.estado)=''supcostos'')  or  (lower(plapa.estado)=''vbcostos'')) and ';
+                END IF;
+
+
+            END IF;
 
             IF  lower(v_parametros.tipo_interfaz) = 'planpagovb' THEN
 
@@ -292,6 +302,16 @@ BEGIN
               	v_parametros.id_funcionario_usu = -1;
             END IF;
 
+            IF  lower(v_parametros.tipo_interfaz) = 'planpagovbcostos' THEN
+
+                IF p_administrador !=1 THEN
+                   v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and ((lower(plapa.estado)=''supcostos'')  or  (lower(plapa.estado)=''vbcostos''))  and ';
+                 ELSE
+                     v_filtro = ' ((lower(plapa.estado)=''supcostos'')  or  (lower(plapa.estado)=''vbcostos'')) and ';
+                END IF;
+
+
+            END IF;
 
             IF  lower(v_parametros.tipo_interfaz) = 'planpagovb' THEN
                  IF p_administrador !=1 THEN
@@ -1005,7 +1025,7 @@ BEGIN
 		end;
 
 
-  /*********************************
+    /*********************************
  	#TRANSACCION:  'TES_PROCRE_SEL'
  	#DESCRIPCION:	Proceso con retencion 7%
  	#AUTOR:		MAM
@@ -1046,7 +1066,7 @@ BEGIN
 			--Devuelve la respuesta
 			return v_consulta;
 
-		end; 
+		end;
     else
 
 

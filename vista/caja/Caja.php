@@ -43,7 +43,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
-				maxLength:20
+				maxLength:30
 			},
 			type:'TextField',
 			filters:{pfiltro:'caja.codigo',type:'string'},
@@ -185,7 +185,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 				url: '../../sis_parametros/control/Depto/listarDepto',
 				emptyText : 'Departamento Libro Bancos...',
 				allowBlank:false,
-				gdisplayField:'desc_depto',//mapea al store del grid
+				gdisplayField : 'desc_depto_lb',//mapea al store del grid
 				gwidth:200,
 				anchor: '80%',
 				baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'LB'},
@@ -207,6 +207,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 				maxLength:1179650
 			},
 			type:'NumberField',
+			valorInicial: 5000,
 			filters:{pfiltro:'caja.importe_maximo_caja',type:'numeric'},
 			id_grupo:1,
 			grid:true,
@@ -222,6 +223,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 				maxLength:393218
 			},
 			type:'NumberField',
+			valorInicial: 1000,
 			filters:{pfiltro:'caja.importe_maximo_item',type:'numeric'},
 			id_grupo:1,
 			grid:true,
@@ -238,6 +240,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 				maxLength:393218
 			},
 			type:'NumberField',
+			valorInicial: 2,
 			filters:{pfiltro:'caja.dias_maximo_rendicion',type:'numeric'},
 			id_grupo:1,
 			grid:true,
@@ -451,12 +454,13 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		 }		 
      },
 	 
-	 
+
 	 disableTabSolicitud:function(){
      	if(this.TabPanelSouth.get(1)){
      		      this.TabPanelSouth.get(1).disable();	
+     		      this.TabPanelSouth.get(2).disable();
 		          this.TabPanelSouth.setActiveTab(0)
-		          
+
 		}
      },
     
@@ -520,7 +524,13 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
              height:'50%',
              cls:'Cajero'
             },
-            {
+			{
+				url:'../../../sis_tesoreria/vista/caja_funcionario/CajaFuncionario.php',
+				title:'Funcionario',
+				height:'50%',
+				cls:'CajaFuncionario'
+			},
+			{
               url:'../../../sis_tesoreria/vista/solicitud_efectivo/SolicitudEfectivoCaja.php',
               title:'Solicitud Efectivo', 
               height:'50%',
@@ -532,10 +542,10 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
         this.menuAdqGantt = new Ext.Toolbar.SplitButton({
 		            id: 'b-diagrama_gantt-' + this.idContenedor,
 		            text: 'Gantt',
-		            disabled: true,
+		            disabled: false,
 		            grupo:[0,1,2,3],
 		            iconCls : 'bgantt',
-		            handler:this.diagramGanttDinamico,
+		            handler:this.diagramGantt,
 		            scope: this,
 		            menu:{
 		            items: [{
@@ -575,7 +585,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
    liberaMenu:function(){
         var tb = Phx.vista.Caja.superclass.liberaMenu.call(this);
         if(tb){
-           this.getBoton('diagrama_gantt').disable();
+           this.getBoton('diagrama_gantt').enable();
         }
         return tb
     },

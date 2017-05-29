@@ -398,7 +398,6 @@ class ACTTsLibroBancos extends ACTbase{
 		if($resultMemoCajaChica->getTipo()=='EXITO'){
 			
 			$datosMemoCajaChica = $resultMemoCajaChica->getDatos();
-			
 			$newDate = date("d-m-Y", strtotime($datosMemoCajaChica[0]['fecha']));
 			
 			//armamos el array parametros y metemos ahi los data sets de las otras tablas

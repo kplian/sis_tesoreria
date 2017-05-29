@@ -4,7 +4,7 @@
  *@file    PagosSinFacturasAsociadas.php
  *@author  Gonzalo Sarmiento Sejas
  *@date    05-05-2016
- *@description Archivo con la interfaz para generación de reporte
+ *@description Archivo con la interfaz para generaciï¿½n de reporte
  */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -45,7 +45,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			form:true
 		}],
 		title : 'Pagos Sin Facturas Asociadas',		
-		ActSave : '../../sis_tesoreria/control/TsLibroBancos/pagosSinFacturasAsociadas',
+		ActSave : '../../sis_tesoreria/control/ObligacionPago/reportePagoSinDocumento',
 		
 		topBar : true,
 		botones : false,
@@ -64,12 +64,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		},
 		
 		onSubmit:function(o){
-			var data = 'fecha_inicio=' + this.cmpFechaIni.getValue().format('m-d-Y');
-			data = data + '&fecha_fin=' + this.cmpFechaFin.getValue().format('m-d-Y');
-			
-			console.log(data);
-			window.open('http://sms.obairlines.bo/ReporteContabilidadEndesis/Home/ReportePagosSinFacturasAsociadas?'+data);
-			//window.open('http://localhost:22021/Home/ReportePagosSinFacturasAsociadas?'+data);				
+			Phx.vista.PagosSinFacturasAsociadas.superclass.onSubmit.call(this,o);
 		},
 		
 		tipo : 'reporte',

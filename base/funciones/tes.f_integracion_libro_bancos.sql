@@ -27,7 +27,7 @@ BEGIN
   from conta.tint_comprobante cp
   inner join conta.tint_transaccion tra on tra.id_int_comprobante=cp.id_int_comprobante and tra.forma_pago is not null
   left join param.tdepto dpc on dpc.id_depto = cp.id_depto
-  left join tes.tdepto_cuenta_bancaria dpcb on dpcb.id_cuenta_bancaria=tra.id_cuenta_bancaria
+  left join tes.tdepto_cuenta_bancaria dpcb on dpcb.id_cuenta_bancaria=tra.id_cuenta_bancaria and dpcb.id_depto=cp.id_depto_libro
   left join param.tdepto dpl on dpl.id_depto =dpcb.id_depto
   --left join param.tdepto dpl on dpl.id_depto = cp.id_depto_libro
   inner join conta.tplantilla_comprobante pla on pla.id_plantilla_comprobante=cp.id_plantilla_comprobante

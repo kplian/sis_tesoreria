@@ -30,8 +30,11 @@ class ACTSolicitudEfectivo extends ACTbase{
 			if($this->objParam->getParametro('pes_estado')=='borrador'){
 				 $this->objParam->addFiltro("solefe.estado in (''borrador'')");
 			}
+			if($this->objParam->getParametro('pes_estado')=='iniciado'){
+				$this->objParam->addFiltro("solefe.estado in (''vbjefe'',''vbcajero'',''vbfin'')");
+			}
 			if($this->objParam->getParametro('pes_estado')=='entregado'){
-				 $this->objParam->addFiltro("solefe.estado in (''vbjefe'',''vbcajero'',''entregado'')");
+				 $this->objParam->addFiltro("solefe.estado in (''entregado'')");
 			}
 			if($this->objParam->getParametro('pes_estado')=='finalizado'){
 				 $this->objParam->addFiltro("solefe.estado in (''finalizado'')");
@@ -51,6 +54,10 @@ class ACTSolicitudEfectivo extends ACTbase{
 		if($this->objParam->getParametro('id_solicitud_efectivo')!='')
 		{
 			$this->objParam-> addFiltro('solefe.fk_id_solicitud_efectivo ='.$this->objParam->getParametro('id_solicitud_efectivo'));
+		}
+
+		if($this->objParam->getParametro('filtro_campo')!=''){
+			$this->objParam->addFiltro($this->objParam->getParametro('filtro_campo')." = ".$this->objParam->getParametro('filtro_valor'));
 		}
 
 		$this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]);
@@ -149,6 +156,8 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$dataSource->putParameter('desc_funcionario', $datosSolicitud[0]['desc_funcionario']);
 		$dataSource->putParameter('motivo', $datosSolicitud[0]['motivo']);
 		$dataSource->putParameter('fecha', $datosSolicitud[0]['fecha']);
+		$dataSource->putParameter('vbjefe', $datosSolicitud[0]['vbjefe']);
+		$dataSource->putParameter('vbfinanzas', $datosSolicitud[0]['vbfinanzas']);
 
 		//get detalle
     //Reset all extra params:
@@ -236,7 +245,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$resultSolicitud = $this->objFunc->reporteReciboEntrega();
 
 		$datosSolicitud = $resultSolicitud->getDatos();		
-		
+
 		//armamos el array parametros y metemos ahi los data sets de las otras tablas
 		$dataSource->putParameter('fecha_entrega', $datosSolicitud[0]['fecha_entrega']);
 		$dataSource->putParameter('moneda', $datosSolicitud[0]['moneda']);
@@ -298,12 +307,11 @@ class ACTSolicitudEfectivo extends ACTbase{
 			$fecha_firma = '';
 			$usuario_firma = '';
 		}
-		/*
+
 		if($this->objParam->getParametro('id_proceso_wf')!='')
 		{
 			$this->objParam-> addFiltro('sol.id_proceso_wf ='.$this->objParam->getParametro('id_proceso_wf'));
 		}
-		*/
 
 		$this->objParam->addParametroConsulta('ordenacion','sol.id_solicitud_efectivo');
 		$this->objParam->addParametroConsulta('dir_ordenacion','ASC');

@@ -31,65 +31,84 @@ DECLARE
 	v_resp				varchar;
     v_filtro			varchar;
     v_inner				varchar;
-			    
+    v_cajas				record;
+    v_i					integer;
+    v_id_caja			integer[];
+
 BEGIN
 
 	v_nombre_funcion = 'tes.ft_caja_sel';
     v_parametros = pxp.f_get_record(p_tabla);
 
-	/*********************************    
+	/*********************************
  	#TRANSACCION:  'TES_CAJA_SEL'
  	#DESCRIPCION:	Consulta de datos
- 	#AUTOR:		admin	
+ 	#AUTOR:		admin
  	#FECHA:		16-12-2013 20:43:44
 	***********************************/
 
 	if(p_transaccion='TES_CAJA_SEL')then
-     				
+
     	begin
-        
+
         	v_filtro='';
             v_inner='';
-            
+
             IF (v_parametros.id_funcionario_usu is null) then
-              	
+
                 v_parametros.id_funcionario_usu = -1;
-            
+
             END IF;
-             
-            
+
+
             IF  lower(v_parametros.tipo_interfaz) = 'caja' THEN
-                
+
                 IF p_administrador !=1 THEN
                    --v_filtro = '(caja.id_usuario_reg='||p_id_usuario||' ) and  pc.estado in (''borrador'',''abierto'',''cerrado'',''anulado'',''rechazado'') and  ';
-                   v_filtro = '(caja.id_usuario_reg='||p_id_usuario||' ) and ';  
+                   v_filtro = '(caja.id_usuario_reg='||p_id_usuario||' ) and ';
                    --pc.estado in (''borrador'',''anulado'',''rechazado'') and  ';
                  ELSE
                      --v_filtro = '(caja.id_usuario_reg='||p_id_usuario||' ) and  pc.estado in (''borrador'',''abierto'',''cerrado'',''anulado'',''rechazado'') and  ';
 					 --v_filtro = 'pc.estado in (''borrador'',''anulado'',''rechazado'') and  ';
-                END IF;                
-                
-            END IF;                       
-            
+                END IF;
+
+            END IF;
+
             IF  lower(v_parametros.tipo_interfaz) = 'cajavb' THEN
-                
+
 				v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = pc.id_proceso_wf';
-                
+
                 IF p_administrador !=1 THEN
                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') and  (pc.estado = ''solicitado'') and  ';
                  ELSE
                      v_filtro = '(pc.estado = ''solicitado'') and ';
-                END IF;                
-                
+                END IF;
+
             END IF;
-            
+
             IF  lower(v_parametros.tipo_interfaz) = 'cajaabierto' THEN
-                
-                --IF p_administrador !=1 THEN
-                --   v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (pc.estado = ''abierto'') and  ';
-                -- ELSE
-                     v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and ';
-               -- END IF;                
+
+                IF p_administrador !=1 THEN
+                	v_i = 1;
+                	FOR v_cajas in (select id_caja
+                    				from tes.tcajero
+                    				where id_funcionario=v_parametros.id_funcionario_usu
+				                    and tipo='responsable')LOOP
+                    	v_id_caja[v_i] = v_cajas.id_caja;
+                        v_i = v_i + 1;
+                    END LOOP;
+
+                    IF v_i > 1 THEN
+                    	v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and caja.id_caja in('||array_to_string(v_id_caja,',')||') and ';
+                    ELSE
+                    	v_inner = ' left join tes.tcaja_funcionario cjusu on cjusu.id_caja=caja.id_caja ';
+                    	v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and cjusu.id_funcionario='||v_parametros.id_funcionario_usu::integer||' and ';
+                    END IF;
+
+
+                ELSE
+	                 v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and ';
+               END IF;
                 
             END IF;
             
