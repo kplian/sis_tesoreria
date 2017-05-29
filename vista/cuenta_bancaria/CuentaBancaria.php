@@ -277,7 +277,47 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 			id_grupo:1,
 			grid:true,
 			form:false
-		}
+		},
+		{
+       			config:{
+       				name:'id_finalidads',
+       				fieldLabel:'Finalidades',
+       				allowBlank:true,
+       				emptyText:'Roles...',
+       				store: new Ext.data.JsonStore({
+              			url: '../../sis_tesoreria/control/Finalidad/listarFinalidad',
+       					id: 'id_finalidad',
+       					root: 'datos',
+       					sortInfo:{
+       						field: 'nombre_finalidad',
+       						direction: 'ASC'
+       					},
+       					totalProperty: 'total',
+       					fields: ['id_finalidad','nombre_finalidad'],
+       					// turn on remote sorting
+       					remoteSort: true,
+       					baseParams:{par_filtro:'nombre_finalidad'}
+       					
+       				}),
+       				valueField: 'id_finalidad',
+       				displayField: 'nombre_finalidad',
+       				forceSelection:true,
+       				typeAhead: true,
+           			triggerAction: 'all',
+           			lazyRender:true,
+       				mode:'remote',
+       				pageSize:10,
+       				queryDelay:1000,
+       				width:250,
+       				minChars:2,
+	       			enableMultiSelect:true
+
+       			},
+       			type:'AwesomeCombo',
+       			id_grupo:0,
+       			grid:false,
+       			form:true
+       	}
 	],
 	
 	title:'Cuenta Bancaria',
@@ -300,7 +340,7 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'usr_reg', type: 'string'},
-		{name:'usr_mod', type: 'string'},'id_moneda','codigo_moneda'
+		{name:'usr_mod', type: 'string'},'id_moneda','codigo_moneda','id_finalidads'
 		
 	],
 				
@@ -321,12 +361,19 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
 		this.Cmp.nro_cuenta.enable();
 	},
 		
-	south:{
-        url:'../../../sis_tesoreria/vista/cuenta_bancaria_periodo/CuentaBancariaPeriodo.php',
-        title:'Periodos por Cuenta Bancaria',
-        height : '50%',
-        cls:'CuentaBancariaPeriodo'
-    }
+	tabsouth:[{
+          url:'../../../sis_tesoreria/vista/cuenta_bancaria_periodo/CuentaBancariaPeriodo.php',
+          title:'Periodos por Cuenta Bancaria',
+          height : '50%',
+          cls:'CuentaBancariaPeriodo'
+        },
+        {
+          url:'../../../sis_tesoreria/vista/usuario_cuenta_banc/UsuarioCuentaBanc.php',
+          title:'Usuarios',
+          height : '50%',
+          cls:'UsuarioCuentaBanc'
+        }
+     ]
    
 })	
 </script>
