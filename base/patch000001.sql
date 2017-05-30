@@ -4,8 +4,8 @@
 
 CREATE TABLE tes.tobligacion_pago (
   id_obligacion_pago SERIAL, 
-  id_proveedor INTEGER NOT NULL, 
-  id_funcionario INTEGER, 
+  id_proveedor INTEGER NOT NULL,
+  id_funcionario INTEGER,
   id_subsistema INTEGER, 
   id_moneda INTEGER, 
   id_depto INTEGER, 

@@ -95,6 +95,7 @@ Phx.vista.FormObligacion=Ext.extend(Phx.frmInterfaz,{
 										msgTarget: 'title',
 										fieldLabel: 'descripcion',
 										allowBlank: false,
+										maskRe: /[^<^>]/,
 										anchor: '80%',
 										maxLength:1200
 								}),
@@ -184,8 +185,7 @@ Phx.vista.FormObligacion=Ext.extend(Phx.frmInterfaz,{
      	var i = 0;
     	sw = true
     	while( i < this.Componentes.length) {
-    		
-    		if(!this.Componentes[i].isValid()){
+            if(!this.Componentes[i].isValid()){
     		   sw = false;
     		   //i = this.Componentes.length;
     		}

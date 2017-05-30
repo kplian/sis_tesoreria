@@ -584,7 +584,13 @@ BEGIN
                             ''Servicio''
                          ELSE
                             pxp.list_unique(ci.tipo)
-                         END)::varchar as tipo
+                         END)::varchar as tipo,
+
+                         pp.fecha_costo_ini,
+                         pp.fecha_costo_fin,
+                         pp.observaciones_pago,
+                         op.total_nro_cuota,
+                         op.obs
 						from tes.tplan_pago pp
 						inner join tes.tobligacion_pago op
 							on pp.id_obligacion_pago = op.id_obligacion_pago

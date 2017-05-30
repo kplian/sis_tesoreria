@@ -110,6 +110,8 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Vista Previa Cheque</b><br/>Vista Previa Cheque'
 			}
 		);
+
+		this.addButton('diagrama_gantt',{text:'',iconCls: 'bgantt',disabled:true,handler:this.diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
 		
 		this.addButton('btnChequesAsociados',
 		{
@@ -795,6 +797,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				  }else{
 					this.getBoton('del').disable();
 					this.getBoton('fin_registro').disable();
+
 					if(data['estado']=='transferido'){
 						this.getBoton('edit').disable();
 						this.getBoton('ant_estado').disable();
@@ -802,6 +805,10 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 						this.getBoton('edit').enable();
 						this.getBoton('ant_estado').enable();
 					}
+
+				  	if(data['estado']=='sigep_swift'){
+					  	this.getBoton('fin_registro').enable();
+				  	}
 				  }
 			  }
 			  
@@ -899,6 +906,19 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			scope:this
 		});     
 	},
+
+	diagramGantt:function (){
+		var data=this.sm.getSelected().data.id_proceso_wf;
+		Phx.CP.loadingShow();
+		Ext.Ajax.request({
+			url:'../../sis_workflow/control/ProcesoWf/diagramaGanttTramite',
+			params:{'id_proceso_wf':data},
+			success:this.successExport,
+			failure: this.conexionFailure,
+			timeout:this.timeout,
+			scope:this
+		});
+	},
 	
 	sigEstado:function(){                   
 	  var rec=this.sm.getSelected();
@@ -923,8 +943,8 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 									scope:this
 								 });        
 			   
-	 },	   
-	
+	 },
+
 	onSaveWizard:function(wizard,resp){
 		Phx.CP.loadingShow();
 		
