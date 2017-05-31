@@ -14,13 +14,13 @@ $body$
  DESCRIPCION:   Funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'tes.tsolicitud_rendicion_det'
  AUTOR: 		 (gsarmiento)
  FECHA:	        16-12-2015 15:14:01
- COMENTARIOS:	
+ COMENTARIOS:
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
 
- DESCRIPCION:	
- AUTOR:			
- FECHA:		
+ DESCRIPCION:
+ AUTOR:
+ FECHA:
 ***************************************************************************/
 
 DECLARE
@@ -40,7 +40,8 @@ DECLARE
     v_tipo					varchar;
     v_id_proceso_caja		integer;
     v_importe_maximo		numeric;
-
+    v_fecha_solicitud		date;
+    v_fecha_documento		date;
 
 BEGIN
 
@@ -58,16 +59,25 @@ BEGIN
 
         begin
 
-             select sol.id_solicitud_efectivo, cj.importe_maximo_item
-             into v_id_solicitud_efectivo_rend, v_importe_maximo
-             from tes.tsolicitud_efectivo sol
-             inner join tes.ttipo_solicitud tp on tp.id_tipo_solicitud=sol.id_tipo_solicitud
-             inner join tes.tcaja cj on cj.id_caja=sol.id_caja
-             where sol.id_solicitud_efectivo_fk= v_parametros.id_solicitud_efectivo_fk
-             and sol.estado='borrador' and tp.codigo='RENEFE';
+             select ren.id_solicitud_efectivo, cj.importe_maximo_item, sol.fecha
+             into v_id_solicitud_efectivo_rend, v_importe_maximo, v_fecha_solicitud
+             from tes.tsolicitud_efectivo ren
+             inner join tes.ttipo_solicitud tp on tp.id_tipo_solicitud=ren.id_tipo_solicitud
+             inner join tes.tsolicitud_efectivo sol on sol.id_solicitud_efectivo=ren.id_solicitud_efectivo_fk
+             inner join tes.tcaja cj on cj.id_caja=ren.id_caja
+             where ren.id_solicitud_efectivo_fk= v_parametros.id_solicitud_efectivo_fk
+             and ren.estado='borrador' and tp.codigo='RENEFE';
 
              IF v_importe_maximo < v_parametros.monto THEN
              	raise exception 'El importe no puede ser mayor al importe maximo item de la caja';
+             END IF;
+
+             select fecha into v_fecha_documento
+             from conta.tdoc_compra_venta
+             where id_doc_compra_venta=v_parametros.id_documento_respaldo;
+
+             IF v_fecha_documento > v_fecha_solicitud + 3 THEN
+             	raise exception 'No es posible registrar documentos con fecha mayor a 3 dias de la fecha de solicitud %',v_fecha_solicitud;
              END IF;
 
              IF v_id_solicitud_efectivo_rend is null THEN
@@ -141,16 +151,25 @@ BEGIN
 	elsif(p_transaccion='TES_REND_MOD')then
 
 		begin
-        	select det.id_solicitud_efectivo,cj.importe_maximo_item
-            into v_id_solicitud_efectivo_rend, v_importe_maximo
+        	select det.id_solicitud_efectivo,cj.importe_maximo_item, sol.fecha
+            into v_id_solicitud_efectivo_rend, v_importe_maximo, v_fecha_solicitud
             from tes.tsolicitud_rendicion_det det
-            inner join tes.tsolicitud_efectivo sol on sol.id_solicitud_efectivo=det.id_solicitud_efectivo
+            inner join tes.tsolicitud_efectivo ren on ren.id_solicitud_efectivo=det.id_solicitud_efectivo
+            inner join tes.tsolicitud_efectivo sol on sol.id_solicitud_efectivo=ren.id_solicitud_efectivo_fk
             inner join tes.tcaja cj on cj.id_caja=sol.id_caja
             where id_documento_respaldo=v_parametros.id_documento_respaldo;
 
         	IF v_importe_maximo < v_parametros.monto THEN
              	raise exception 'El importe no puede ser mayor al importe maximo item de la caja';
              END IF;
+
+            select fecha into v_fecha_documento
+            from conta.tdoc_compra_venta
+            where id_doc_compra_venta=v_parametros.id_documento_respaldo;
+
+            IF v_fecha_documento > v_fecha_solicitud + 3 THEN
+             	raise exception 'No es posible registrar documentos con fecha mayor a 3 dias de la fecha de solicitud %',v_fecha_solicitud;
+            END IF;
 
 			--Sentencia de la modificacion
 			update tes.tsolicitud_rendicion_det set
@@ -197,10 +216,10 @@ BEGIN
 			delete from tes.tsolicitud_rendicion_det
             where id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
 
-            delete from conta.tdoc_compra_venta
+            delete from conta.tdoc_concepto
             where id_doc_compra_venta=v_id_documento_respaldo;
 
-            delete from conta.tdoc_concepto
+            delete from conta.tdoc_compra_venta
             where id_doc_compra_venta=v_id_documento_respaldo;
 
             IF NOT EXISTS (select 1 from tes.tsolicitud_rendicion_det
@@ -244,7 +263,7 @@ BEGIN
                v_id_solicitud_efectivo_rend = v_rendicion[1]::integer;
 
              END IF;
-             
+
              UPDATE tes.tsolicitud_rendicion_det
              SET id_solicitud_efectivo=v_id_solicitud_efectivo_rend
              WHERE id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
@@ -253,75 +272,75 @@ BEGIN
              select sum(rend.monto) into v_total_rendiciones
              from tes.tsolicitud_rendicion_det rend
              where rend.id_solicitud_efectivo=v_solicitud_efectivo.id_solicitud_efectivo_rendicion;
-             
+
              UPDATE tes.tsolicitud_efectivo
              SET monto=COALESCE(v_total_rendiciones,0)
              WHERE id_solicitud_efectivo=v_solicitud_efectivo.id_solicitud_efectivo_rendicion;
-             
+
              --actualizamos el monto total de la nueva rendicion
              select sum(rend.monto) into v_total_rendiciones
              from tes.tsolicitud_rendicion_det rend
              where rend.id_solicitud_efectivo=v_id_solicitud_efectivo_rend;
-             
+
              UPDATE tes.tsolicitud_efectivo
              SET monto=COALESCE(v_total_rendiciones,0)
-             WHERE id_solicitud_efectivo=v_id_solicitud_efectivo_rend;             
-             
+             WHERE id_solicitud_efectivo=v_id_solicitud_efectivo_rend;
+
              --Definicion de la respuesta
-			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion Factura devuelta a la solicitud de efectivo con exito (id_solicitud_rendicion_det'||v_id_solicitud_rendicion_det||')'); 
+			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion Factura devuelta a la solicitud de efectivo con exito (id_solicitud_rendicion_det'||v_id_solicitud_rendicion_det||')');
             v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_rendicion_det',v_id_solicitud_rendicion_det::varchar);
 
             --Devuelve la respuesta
             return v_resp;
-             
-        end;         
-        
+
+        end;
+
     elsif(p_transaccion='TES_RENEXCFAC_IME')then
     	begin
-        	--recuperamos el id de la solicitud de efectivo             
+        	--recuperamos el id de la solicitud de efectivo
         	 SELECT pc.tipo, pc.id_proceso_caja into v_tipo, v_id_proceso_caja
              FROM tes.tsolicitud_rendicion_det ren
              INNER JOIN tes.tproceso_caja pc on pc.id_proceso_caja=ren.id_proceso_caja
              WHERE ren.id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
-             
+
              IF v_tipo IS NULL THEN
              	raise exception 'No existe una factura seleccionada';
              END IF;
-             
+
              UPDATE tes.tsolicitud_rendicion_det
              SET id_proceso_caja = NULL
              WHERE id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
-             
-             IF v_tipo in ('RENYREP','RENYCER') THEN                 
+
+             IF v_tipo in ('RENYREP','RENYCER') THEN
              	--actualizamos el monto reposicion
                 UPDATE tes.tproceso_caja
-                SET monto_reposicion = (SELECT sum(monto) FROM tes.tsolicitud_rendicion_det WHERE id_proceso_caja=v_id_proceso_caja) 
+                SET monto_reposicion = (SELECT sum(monto) FROM tes.tsolicitud_rendicion_det WHERE id_proceso_caja=v_id_proceso_caja)
                 WHERE id_proceso_caja=v_id_proceso_caja;
              END IF;
-                                       
+
              --Definicion de la respuesta
-			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion Factura devuelta a la solicitud de efectivo con exito (id_solicitud_rendicion_det'||v_id_solicitud_rendicion_det||')'); 
+			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion Factura devuelta a la solicitud de efectivo con exito (id_solicitud_rendicion_det'||v_id_solicitud_rendicion_det||')');
             v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_rendicion_det',v_id_solicitud_rendicion_det::varchar);
 
             --Devuelve la respuesta
             return v_resp;
-             
-        end;         
+
+        end;
 	else
-     
+
     	raise exception 'Transaccion inexistente: %',p_transaccion;
 
 	end if;
 
 EXCEPTION
-				
+
 	WHEN OTHERS THEN
 		v_resp='';
 		v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
 		v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
 		v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
 		raise exception '%',v_resp;
-				        
+
 END;
 $body$
 LANGUAGE 'plpgsql'

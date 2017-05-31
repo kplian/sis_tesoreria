@@ -114,7 +114,7 @@ BEGIN
                         cj.id_depto_lb,
 						ren.fecha,
 						ren.id_proceso_wf,
-						ren.monto_reposicion,
+						ren.monto,
 						ren.id_estado_wf,
 						ren.fecha_inicio,
 						ren.fecha_reg,
