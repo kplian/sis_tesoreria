@@ -9,20 +9,21 @@ DECLARE
  v_id_finalidad		integer;
  v_respuesta_libro_bancos varchar;
  v_resp				varchar;
- v_nombre_funcion   varchar;   
+ v_nombre_funcion   varchar;
  v_centro			varchar;
 BEGIN
 
 
   v_resp = 'false';
-  raise notice 'integra lb id_int_comprobante %',p_id_int_comprobante; 
+  raise notice 'integra lb id_int_comprobante %',p_id_int_comprobante;
   --gonzalo insercion de cheque en libro bancos
   select dpc.prioridad as prioridad_conta,
   		 dpl.prioridad as prioridad_libro,
          tra.forma_pago,
          pla.codigo,
          cta.centro,
-         cp.manual
+         cp.manual,
+         cp.c31
   into v_registros
   from conta.tint_comprobante cp
   inner join conta.tint_transaccion tra on tra.id_int_comprobante=cp.id_int_comprobante and tra.forma_pago is not null
@@ -40,7 +41,8 @@ BEGIN
 
   IF v_registros.forma_pago is not null THEN
 
-  IF v_registros.centro != 'otro' AND v_registros.manual !='si' THEN	-- inicio verifica cuenta bancaria
+  	IF v_registros.manual !='si' THEN	-- inicio verifica cuenta bancaria
+  --IF v_registros.centro != 'otro' AND v_registros.manual !='si' THEN	-- inicio verifica cuenta bancaria
 
     IF v_registros.prioridad_libro is null THEN
       raise exception 'El comprobante no cuenta con id_depto libro de bancos';
@@ -59,16 +61,18 @@ BEGIN
               from tes.tfinalidad fin
               where fin.nombre_finalidad ilike 'Fondo Rotativo';
 
-              v_respuesta_libro_bancos = tes.f_generar_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','nacional');
+              v_respuesta_libro_bancos = tes.f_generar_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,COALESCE(v_registros.c31,''),'nacional');
            ELSE
-          	v_respuesta_libro_bancos = tes.f_generar_deposito_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','nacional');
+              v_respuesta_libro_bancos = tes.f_generar_deposito_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,COALESCE(v_registros.c31,''),'nacional');
           	v_resp= 'true';
           END IF;
       elseif(v_registros.prioridad_conta = 2 and v_registros.prioridad_libro =2 )then
-          v_respuesta_libro_bancos = tes.f_generar_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','nacional');
+          raise notice 'Cheque desde conta regional hacia cuenta bancaria de la regional';
+          v_respuesta_libro_bancos = tes.f_generar_deposito_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,COALESCE(v_registros.c31,''),'nacional');
           v_resp= 'true';
-      elseif(v_registros.prioridad_conta in (0,1) and v_registros.prioridad_libro =2 )then
-          v_respuesta_libro_bancos = tes.f_generar_deposito_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','nacional');
+      elseif(v_registros.prioridad_conta in (0,1) and v_registros.prioridad_libro =2)then
+          raise notice 'Cheque desde conta central hacia cuenta bancaria de la regional';
+          v_respuesta_libro_bancos = tes.f_generar_deposito_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,COALESCE(v_registros.c31,''),'nacional');
           v_resp= 'true';
       elseif(v_registros.prioridad_conta = 3 and v_registros.prioridad_libro =3 )then
           --v_respuesta_libro_bancos = tes.f_generar_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','internacional');
@@ -86,17 +90,24 @@ BEGIN
 
            v_resp = 'true';
 
-      elsif(v_registros.prioridad_conta= 2 and v_registros.prioridad_libro in (0,1))then	--analizar este caso
-          v_resp = 'true';
+      elsif(v_registros.prioridad_conta= 2 and v_registros.prioridad_libro=1 )then	--analizar este caso
+      	  IF v_registros.centro = 'esp' THEN
+              raise notice 'Cheque desde conta regional hacia cuenta bancaria 1-6024446 de la central';
+              v_respuesta_libro_bancos = tes.f_generar_deposito_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,COALESCE(v_registros.c31,''),'nacional');
+              v_resp = 'true';
+          END IF;
       end if;
     ELSIF(v_registros.forma_pago = 'transferencia') THEN
       if(v_registros.prioridad_conta in (0,1) and v_registros.prioridad_libro in (0,1))then
           v_respuesta_libro_bancos = tes.f_generar_transferencia(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','nacional');
           v_resp= 'true';
       elsif(v_registros.prioridad_conta in (2,3) and v_registros.prioridad_libro in (2,3) )then
-          raise exception 'No se puede realizar transferencias desde una regional';
+          v_respuesta_libro_bancos = tes.f_generar_transferencia(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','nacional');
+          v_resp= 'true';
+          --raise exception 'No se puede realizar transferencias desde una cuenta bancaria regional';
       elsif(v_registros.prioridad_conta in (1) and v_registros.prioridad_libro in (2) )then
-          raise exception 'No se puede realizar transferencias desde la central a una regional';
+          raise exception 'No se puede realizar transferencias desde un departamento de contabilidad central a una
+          					cuenta bancaria regional';
       elsif(v_registros.prioridad_conta = 3 and v_registros.prioridad_libro =3 )then
           --v_respuesta_libro_bancos = tes.f_generar_transferencia(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','internacional');
           v_resp= 'true';
@@ -108,8 +119,8 @@ BEGIN
   END IF;			--fin verifica cuenta bancaria
 
   END IF; 		-- fin forma de pago
-  
-  return v_resp; 
+
+  return v_resp;
 EXCEPTION
 WHEN OTHERS THEN
   v_resp='';

@@ -714,7 +714,7 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 			  }
 		  }else{
 			  this.bloquearMenusHijo();
-			  console.log(Phx.CP.getPagina(this.idContenedor+'-south-0'));
+			  //console.log(Phx.CP.getPagina(this.idContenedor+'-south-0'));
 
 			  this.getBoton('fin_registro').disable();
 			  this.getBoton('del').disable();

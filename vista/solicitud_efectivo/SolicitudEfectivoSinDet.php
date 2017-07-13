@@ -11,7 +11,7 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
-	
+
 	vista:'SinDetalle',
 	
 	gruposBarraTareas:[{name:'borrador',title:'<H1 align="center"><i class="fa fa-thumbs-o-down"></i> Borradores</h1>',grupo:0,height:0},
@@ -50,19 +50,18 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 					}
 			};
 		
-		this.Atributos[this.getIndAtributo('tiempo_rendicion')].config.renderer = function(value, p, record) {			
-				    var dias = parseFloat(record.data.dias_maximo_rendicion) - parseFloat(record.data.dias_no_rendido);
+		this.Atributos[this.getIndAtributo('tiempo_rendicion')].config.renderer = function(value, p, record) {
 					
 					if (record.data.estado == 'entregado' || record.data.estado == 'finalizado') {
-						if(dias < 0){
+						if(record.data.dias_no_rendido < 0){
 							return String.format("<font color = 'red'>Dias máximo rendir: {0}</font><br>"+
 											 "<font color = 'red' >Dias restantes:{1}</font><br>"											 
-											 ,record.data.dias_maximo_rendicion, dias											 
+											 ,record.data.dias_maximo_rendicion, record.data.dias_no_rendido
 											 );
 						}else{
 							return String.format("<font color = 'green'>Dias máximo rendir: {0}</font><br>"+
 											 "<font color = 'green' >Dias restantes:{1}</font><br>"											 
-											 ,record.data.dias_maximo_rendicion, dias											 
+											 ,record.data.dias_maximo_rendicion, record.data.estado == 'finalizado'?0:record.data.dias_no_rendido
 											 );
 						}
 					} 
@@ -102,7 +101,16 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			handler : this.onBtnDevolucion,
 			tooltip : '<b>Devolucion Sin Añadir Facturas</b>'
 		});
-		
+
+		this.addButton('btnRendiciones', {
+			text : 'Rendiciones Enviadas',
+			iconCls : 'bballot',
+			grupo:[2,3],
+			disabled : true,
+			handler : this.onBtnRendiciones,
+			tooltip : '<b>Rendiciones</b>'
+		});
+
 		this.addButton('btnChequeoDocumentosWf',
 			{
 				text: 'Documentos',
@@ -655,36 +663,11 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		field: 'solefe.id_solicitud_efectivo',
 		direction: 'DESC'
 	},
-	
-	/*
-	preparaMenu:function(n){
-          var data = this.getSelectedData();
-          var tb =this.tbar;          
-          
-          Phx.vista.SolicitudEfectivoSinDet.superclass.preparaMenu.call(this,n); 
-          if (data['estado']== 'borrador'){    
-              this.getBoton('fin_registro').enable();
-			  this.getBoton('edit').enable();
-			  this.getBoton('del').enable();			  
-          }
-          else{            
-              this.getBoton('fin_registro').disable();
-			  this.getBoton('edit').disable();			  
-			  this.getBoton('del').disable();
-          }
-		  if (data['estado']== 'entregado'){			  
-			  this.getBoton('btnRendicion').enable();
-		  }else{
-			  this.getBoton('btnRendicion').disable();
-		  }
-     },*/
-	 
+		 
 	 preparaMenu:function(n){
           var data = this.getSelectedData();
           var tb =this.tbar;
 
-		  var dias = parseFloat(data.dias_maximo_rendicion) - parseFloat(data.dias_no_rendido);
-          //this.getBoton('diagrama_gantt').disable();
           this.getBoton('btnChequeoDocumentosWf').enable();
           Phx.vista.SolicitudEfectivoSinDet.superclass.preparaMenu.call(this,n);
           if (data['estado'] == 'borrador'){
@@ -700,8 +683,9 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('edit').disable();
 			  this.getBoton('del').disable();
 			  this.getBoton('diagrama_gantt').enable();
+			  this.getBoton('btnRendiciones').enable();
 			  //this.getBoton('btnRendicionEfectivo').enable();
-			  //if(dias < 0)
+			  if(data.dias_no_rendido < 0)
 				//this.getBoton('btnRendicion').disable();
 			  //else
 				this.getBoton('btnRendicion').enable();
@@ -712,6 +696,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('edit').disable();
 			  this.getBoton('del').disable();
 			  this.getBoton('btnRendicion').disable();
+			  this.getBoton('btnRendiciones').enable();
               this.getBoton('diagrama_gantt').enable();
 		  }else if(data['estado'] == 'vbjefe'){
 			  this.getBoton('fin_registro').disable();
@@ -747,6 +732,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			this.getBoton('diagrama_gantt').disable();
 			this.getBoton('fin_registro').disable();
 			this.getBoton('btnRendicion').disable();
+			this.getBoton('btnRendiciones').disable();
 			this.getBoton('btnDevol').disable();
 		}
 	},
@@ -810,7 +796,16 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		   icon: Ext.MessageBox.WARNING
 		}, this);
 	},
-	
+
+	onBtnRendiciones : function() {
+		var rec = this.sm.getSelected();
+		Phx.CP.loadWindows('../../../sis_tesoreria/vista/rendicion_efectivo/RendicionEfectivoSolicitante.php', 'RendicionEfectivoSolicitante', {
+			modal : true,
+			width : '95%',
+			height : '95%',
+		}, rec.data, this.idContenedor, 'RendicionEfectivoSolicitante');
+	},
+
 	loadCheckDocumentosSolWf:function() {
 			var rec=this.sm.getSelected();
 			rec.data.nombreVista = this.nombreVista;

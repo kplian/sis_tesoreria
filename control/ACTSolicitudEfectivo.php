@@ -56,6 +56,11 @@ class ACTSolicitudEfectivo extends ACTbase{
 			$this->objParam-> addFiltro('solefe.fk_id_solicitud_efectivo ='.$this->objParam->getParametro('id_solicitud_efectivo'));
 		}
 
+		if($this->objParam->getParametro('id_solicitud_efectivo_fk')!='')
+		{
+			$this->objParam-> addFiltro('solefe.id_solicitud_efectivo_fk ='.$this->objParam->getParametro('id_solicitud_efectivo_fk'));
+		}
+
 		if($this->objParam->getParametro('filtro_campo')!=''){
 			$this->objParam->addFiltro($this->objParam->getParametro('filtro_campo')." = ".$this->objParam->getParametro('filtro_valor'));
 		}
@@ -113,6 +118,12 @@ class ACTSolicitudEfectivo extends ACTbase{
 	function devolucionSolicitudEfectivo(){
 		$this->objFunc=$this->create('MODSolicitudEfectivo');
 		$this->res=$this->objFunc->devolucionSolicitudEfectivo($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+
+	function ampliarDiasRendicion(){
+		$this->objFunc=$this->create('MODSolicitudEfectivo');
+		$this->res=$this->objFunc->ampliarDiasRendicion($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 
@@ -391,7 +402,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 
 			}
 	}
-	
+
 	function groupArray($array,$groupkey,$groupkeyTwo,$id_moneda,$estado_sol, $onlyData){
 	 if (count($array)>0)
 	 {

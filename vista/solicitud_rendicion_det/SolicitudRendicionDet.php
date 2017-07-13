@@ -31,7 +31,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 		);
 
 		this.load({params:{start:0, limit:this.tam_pag, id_solicitud_efectivo:this.id_solicitud_efectivo}, me : this, callback:function(r,o,s){
-			console.log('entra');
+
 			if(r[0].data.id_estado_wf != '' && r[0].data.id_proceso_wf) {
 				o.me.getBoton('fin_registro').enable();
 				o.me.id_estado_workflow = r[0].data.id_estado_wf;
@@ -39,8 +39,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 			}
 		} });
 
-		var dias = parseFloat(this.dias_maximo_rendicion) - parseFloat(this.dias_no_rendido);
-		if (dias < 0){
+		if (parseFloat(this.dias_no_rendido) < 0){
 			this.getBoton('edit').setVisible(false);
 			this.getBoton('new').setVisible(false);
 		}

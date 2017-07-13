@@ -692,7 +692,7 @@ BEGIN
             FROM tes.tts_libro_bancos
             WHERE id_libro_bancos=v_parametros.id_libro_bancos;
 
-            IF v_tabla = 'cd.tdeposito_cd' THEN
+            IF v_tabla = 'cd.tcuenta_doc' THEN
                 IF NOT EXISTS (SELECT 1
                                FROM cd.tdeposito_cd
                                WHERE id_libro_bancos=v_parametros.id_libro_bancos)THEN
@@ -712,7 +712,7 @@ BEGIN
             columna_pk_valor = NULL
             WHERE id_libro_bancos = v_parametros.id_libro_bancos;
 
-            IF v_tabla = 'cd.tdeposito_cd' THEN
+            IF v_tabla = 'cd.tcuenta_doc' THEN
                 DELETE FROM cd.tdeposito_cd
                 WHERE id_libro_bancos = v_parametros.id_libro_bancos;
             ELSE

@@ -159,7 +159,7 @@ Class RSolicitudEfectivo extends CustomReport {
 		$pdf->Cell($width2, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
         $pdf->Cell($width3, $height, 'SOLICITANTE', 0, 0, 'C', false, '', 0, false, 'T', 'C');
         $pdf->Cell($width2, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
-        $pdf->Cell($width3, $height, 'VB JEFE DE AREA', 0, 0, 'C', false, '', 0, false, 'T', 'C');
+        $pdf->Cell($width3, $height, 'VB JEFE DEPARTAMENTO/AREA', 0, 0, 'C', false, '', 0, false, 'T', 'C');
         $pdf->Cell($width2, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
         $pdf->Cell($width3, $height, 'AUTORIZACION FINANZAS', 0, 0, 'C', false, '', 0, false, 'T', 'C');
         $pdf->Ln();

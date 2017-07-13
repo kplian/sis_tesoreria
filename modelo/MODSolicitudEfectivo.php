@@ -137,6 +137,25 @@ class MODSolicitudEfectivo extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+
+	function ampliarDiasRendicion(){
+
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_solicitud_efectivo_ime';
+		$this->transaccion='TES_AMPREN_IME';
+		$this->tipo_procedimiento='IME';//tipo de transaccion
+
+		//Define los parametros para la funcion
+		$this->setParametro('id_solicitud_efectivo','id_solicitud_efectivo','int4');
+		$this->setParametro('dias_ampliado','dias_ampliado','int4');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
 	
 	function siguienteEstadoSolicitudEfectivo(){
         //Definicion de variables para ejecucion del procedimiento

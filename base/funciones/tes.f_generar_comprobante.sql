@@ -119,44 +119,39 @@ BEGIN
               END IF;
           
           
-          
           END IF;
-          
-         
-          
+
+
           -- obtener el estado de la cuota anterior
           --validar que no se salte el orden de los devengados
-                
-                IF  EXISTS (SELECT 1 
-                FROM tes.tplan_pago pp 
+
+                IF  EXISTS (SELECT 1
+                FROM tes.tplan_pago pp
                 WHERE pp.id_obligacion_pago = v_registros.id_obligacion_pago
                       and (pp.estado != 'devengado' and pp.estado != 'pagado' and pp.estado != 'anulado' and pp.estado != 'anticipado' and pp.estado != 'aplicado' and pp.estado != 'devuelto' and pp.estado!='pago_exterior')
                       and pp.estado_reg = 'activo'
                       and  pp.nro_cuota < v_registros.nro_cuota ) THEN
-                      
-                      
+
+
                     raise exception 'Antes de Continuar,  la cuotas anteriores tienes que estar finalizadas';
-                 
-                 
+
+
                  END IF;
-                 
-                 
-            
-          
-               
-          
+
+
+
           v_sw_verificacion = true;
           v_mensaje_verificacion ='';
           v_cont =1;
-          
-          
+
+
           IF v_registros.tipo in ('devengado_pagado','devengado','devengado_pagado_1c','ant_aplicado','rendicion') and  v_pre_integrar_presupuestos = 'true'  THEN
-                 
-           
+
+
            		--verifica si el presupuesto comprometido sobrante alcanza para pagar el monto de la cuota prorrateada correspondiente al pago
-                
-                  FOR  v_registros_pro in ( 
-                                 select  
+
+                  FOR  v_registros_pro in (
+                                 select
                                    pro.id_prorrateo,
                                    pro.monto_ejecutar_mb,
                                    pro.monto_ejecutar_mo,
@@ -164,47 +159,48 @@ BEGIN
                                    od.descripcion,
                                    od.id_concepto_ingas,
                                    par.sw_movimiento,
-                                   tp.movimiento                                   
+                                   tp.movimiento,
+                                   od.id_centro_costo
                                  from  tes.tprorrateo pro
                                  inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det
-                                 INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = od.id_centro_costo  
-   								 INNER JOIN pre.tpartida par on par.id_partida  = od.id_partida  
+                                 INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = od.id_centro_costo
+   								 INNER JOIN pre.tpartida par on par.id_partida  = od.id_partida
                                  INNER JOIN pre.ttipo_presupuesto tp on tp.codigo = p.tipo_pres
-                                 
-                                 
+
+
                                  where  pro.id_plan_pago = p_id_plan_pago
                                    and pro.estado_reg = 'activo') LOOP
-                
-                
+
+
                         v_comprometido=0;
                         v_ejecutado=0;
-                        
-                        IF v_registros_pro.sw_movimiento != 'flujo'  THEN                              
-                                    
-				          SELECT 
-                                   ps_comprometido, 
-                                   COALESCE(ps_ejecutado,0)  
-                               into 
+
+                        IF v_registros_pro.sw_movimiento != 'flujo'  THEN
+
+				          SELECT
+                                   ps_comprometido,
+                                   COALESCE(ps_ejecutado,0)
+                               into
                                    v_comprometido,
                                    v_ejecutado
                             FROM pre.f_verificar_com_eje_pag(v_registros_pro.id_partida_ejecucion_com, v_registros.id_moneda,p_conexion);
-                       
+
                         END IF;
-                   
+
                       --verifica si el presupuesto comprometido sobrante alcanza para devengar
                       IF  ( v_comprometido - v_ejecutado)  <  v_registros_pro.monto_ejecutar_mo  and v_registros_pro.sw_movimiento != 'flujo' THEN
-                         
+
                          -- raise EXCEPTION  '% - % = % < %',v_comprometido,v_ejecutado,v_comprometido - v_ejecutado, v_registros_pro.monto_ejecutar_mb;
-                    
-                         select 
+
+                         select
                           cig.desc_ingas
                          into
                           v_desc_ingas
-                         from  param.tconcepto_ingas cig 
+                         from  param.tconcepto_ingas cig
                          where cig.id_concepto_ingas  = v_registros_pro.id_concepto_ingas;
-                         
+
                           --sinc_presupuesto
-                          v_mensaje_verificacion =v_mensaje_verificacion ||v_cont::varchar||') '||v_desc_ingas||'('||  substr(v_registros_pro.descripcion, 0, 15)   ||'...)'||' monto faltante ' || (v_registros_pro.monto_ejecutar_mo - (v_comprometido - v_ejecutado))::varchar||' \n';
+                          v_mensaje_verificacion =v_mensaje_verificacion ||v_cont::varchar||') '||v_desc_ingas||'('||  substr(v_registros_pro.descripcion, 0, 15)   ||'...)'||' Presup. '||v_registros_pro.id_centro_costo||' monto faltante ' || (v_registros_pro.monto_ejecutar_mo - (v_comprometido - v_ejecutado))::varchar||' \n';
                           v_sw_verificacion=false;
                           v_cont = v_cont +1;
                      

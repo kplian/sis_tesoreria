@@ -231,7 +231,7 @@ BEGIN
                         solefe.fecha_entrega,
                         caja.dias_maximo_rendicion,
                         case when solefe.estado=''finalizado'' then caja.dias_maximo_rendicion
-                        else CURRENT_DATE -COALESCE(solefe.fecha_entrega,current_date) + pxp.f_get_weekend_days(COALESCE(solefe.fecha_entrega::date,current_date),current_date)::integer end as dias_no_rendidos,
+                        else caja.dias_maximo_rendicion - (CURRENT_DATE -COALESCE(solefe.fecha_entrega,current_date) - pxp.f_get_weekend_days(COALESCE(solefe.fecha_entrega::date,current_date),current_date))::integer end as dias_no_rendidos,
 						solefe.id_usuario_ai,
 						solefe.fecha_reg,
 						solefe.usuario_ai,
@@ -352,7 +352,7 @@ BEGIN
                          and ren.estado = ''rendido''
                          inner join tes.tcaja cj on cj.id_caja=sol.id_caja
                          inner join tes.tcajero cjr on cjr.id_caja=cj.id_caja
-                         and cjr.tipo=''responsable'' and current_date between cjr.fecha_inicio and COALESCE(cjr.fecha_fin,current_date)
+                         and cjr.tipo=''responsable'' and sol.fecha_entrega between cjr.fecha_inicio and COALESCE(cjr.fecha_fin,current_date)
                          inner join orga.vfuncionario fun on fun.id_funcionario=cjr.id_funcionario
                          inner join param.tmoneda m on m.id_moneda=cj.id_moneda
                          inner join orga.vfuncionario_cargo slct on slct.id_funcionario=sol.id_funcionario

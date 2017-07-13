@@ -80,7 +80,7 @@ BEGIN
       v_id_funcionario_cajero
     from tes.tsolicitud_efectivo se
     inner join tes.tcajero caje on caje.id_caja=se.id_caja and caje.tipo='responsable' 
-    and now()::date between caje.fecha_inicio and COALESCE(caje.fecha_fin,now())
+    and now()::date between caje.fecha_inicio and caje.fecha_fin
     where se.id_estado_wf = p_id_estado_wf;
     
     

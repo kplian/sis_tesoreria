@@ -131,7 +131,7 @@ BEGIN
                 
                  IF exists(select 1 from orga.tuo_funcionario uof 
                            inner join orga.tuo uo on uo.id_uo = uof.id_uo and uo.estado_reg = 'activo'
-                           inner join orga.tnivel_organizacional no on no.id_nivel_organizacional = uo.id_nivel_organizacional and no.numero_nivel in (1)
+                           inner join orga.tnivel_organizacional no on no.id_nivel_organizacional = uo.id_nivel_organizacional and no.numero_nivel in (3)
                            where  uof.estado_reg = 'activo' and  uof.id_funcionario = (p_hstore->'id_funcionario')::integer ) THEN
                   
                       va_id_funcionario_gerente[1] = (p_hstore->'id_funcionario')::integer;

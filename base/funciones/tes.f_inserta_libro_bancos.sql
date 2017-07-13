@@ -133,7 +133,7 @@ BEGIN
         --obtener id del proceso macro
         v_sistema_origen = COALESCE(p_hstore->'sistema_origen','PXP')::varchar;
 		--si es un ingreso independiente de otros sistemas
-		IF( v_sistema_origen != 'KERP' OR (v_sistema_origen = 'KERP' AND (p_hstore->'tipo') in ('deposito','transferencia_carta')))THEN
+		IF( v_sistema_origen != 'KERP' OR (v_sistema_origen = 'KERP' AND (p_hstore->'tipo') in ('deposito')))THEN
         
             select 
              pm.id_proceso_macro

@@ -66,7 +66,7 @@ Phx.vista.CajaFuncionario=Ext.extend(Phx.gridInterfaz,{
 			type:'ComboRec',
 			id_grupo:8,
 			filters:{
-				pfiltro:'cajusu.desc_funcionario1',
+				pfiltro:'fun.desc_funcionario1',
 				type:'string'
 			},
 			grid:true,
