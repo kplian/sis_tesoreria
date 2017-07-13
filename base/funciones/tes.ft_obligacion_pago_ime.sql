@@ -658,7 +658,7 @@ BEGIN
           --  Validamos que la solicitud tengan contenido
           --------------------------------------------------
          
-           IF  v_codigo_estado in ('borrador','vbpoa','vbpresupuestos' ) THEN
+           IF  v_codigo_estado in ('borrador','vbpoa','vbpresupuestos' ,'liberacion') THEN
                   --validamos que el detalle tenga por lo menos un item con valor
                    select 
                     sum(od.monto_pago_mo)
