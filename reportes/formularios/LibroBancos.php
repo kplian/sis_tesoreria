@@ -158,6 +158,7 @@ header("content-type: text/javascript; charset=UTF-8");
 						['pendiente','Pendiente'],
 	        			['impreso','Impreso'],
 						['entregado','Entregado'],
+						['sigep_swift','Sigep Swift'],
 						['cobrado','Cobrado'],
 						['anulado','Anulado'],
 						['reingresado','Reingresado'],

@@ -13,6 +13,7 @@ require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
 require_once(dirname(__FILE__).'/../reportes/RProcesosPendientesAdquisiciones.php');
 require_once(dirname(__FILE__).'/../reportes/RProcesosPendientesContabilidad.php');
 require_once(dirname(__FILE__).'/../reportes/RPagosSinDocumentosXls.php');
+require_once(dirname(__FILE__).'/../reportes/RCertificacionPresupuestaria.php');
 
 
 class ACTObligacionPago extends ACTbase{    
@@ -474,6 +475,29 @@ class ACTObligacionPago extends ACTbase{
         $this->mensajeExito->setArchivoGenerado($nombreArchivo);
         $this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
 
+    }
+
+    //Reporte Certificación Presupuestaria (F.E.A) 01/08/2017
+    function reporteCertificacionP (){
+        $this->objFunc=$this->create('MODObligacionPago');
+        $dataSource=$this->objFunc->reporteCertificacionP();
+        $this->dataSource=$dataSource->getDatos();
+
+        $nombreArchivo = uniqid(md5(session_id()).'[Reporte-CertificaciónPresupuestaria]').'.pdf';
+        $this->objParam->addParametro('orientacion','P');
+        $this->objParam->addParametro('tamano','LETTER');
+        $this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+
+        $this->objReporte = new RCertificacionPresupuestaria($this->objParam);
+        $this->objReporte->setDatos($this->dataSource);
+        $this->objReporte->generarReporte();
+        $this->objReporte->output($this->objReporte->url_archivo,'F');
+
+
+        $this->mensajeExito=new Mensaje();
+        $this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado', 'Se generó con éxito el reporte: '.$nombreArchivo,'control');
+        $this->mensajeExito->setArchivoGenerado($nombreArchivo);
+        $this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
     }
 
 }

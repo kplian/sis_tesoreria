@@ -4955,3 +4955,192 @@ ALTER TABLE tes.tcaja_funcionario
     NOT DEFERRABLE;
 
 /***********************************F-DEP-GSS-TES-0-13/03/2017****************************************/
+
+
+
+
+/***********************************I-DEP-RAC-TES-0-09/06/2017****************************************/
+
+
+--------------- SQL ---------------
+
+CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
+    id_plan_pago,
+    id_proveedor,
+    desc_proveedor,
+    id_moneda,
+    id_depto_conta,
+    numero,
+    fecha_actual,
+    estado,
+    monto_ejecutar_total_mb,
+    monto_ejecutar_total_mo,
+    monto,
+    monto_mb,
+    monto_retgar_mb,
+    monto_retgar_mo,
+    monto_no_pagado,
+    monto_no_pagado_mb,
+    otros_descuentos,
+    otros_descuentos_mb,
+    id_plantilla,
+    id_cuenta_bancaria,
+    id_cuenta_bancaria_mov,
+    nro_cheque,
+    nro_cuenta_bancaria,
+    num_tramite,
+    tipo,
+    id_gestion_cuentas,
+    id_int_comprobante,
+    liquido_pagable,
+    liquido_pagable_mb,
+    nombre_pago,
+    porc_monto_excento_var,
+    obs_pp,
+    descuento_anticipo,
+    descuento_inter_serv,
+    tipo_obligacion,
+    id_categoria_compra,
+    codigo_categoria,
+    nombre_categoria,
+    id_proceso_wf,
+    forma_pago,
+    monto_ajuste_ag,
+    monto_ajuste_siguiente_pago,
+    monto_anticipo,
+    tipo_cambio_conv,
+    id_depto_libro,
+    fecha_costo_ini,
+    fecha_costo_fin,
+    id_obligacion_pago,
+    fecha_tentativa)
+AS
+  SELECT pp.id_plan_pago,
+         op.id_proveedor,
+         p.desc_proveedor,
+         op.id_moneda,
+         op.id_depto_conta,
+         op.numero,
+         now() AS fecha_actual,
+         pp.estado,
+         pp.monto_ejecutar_total_mb,
+         pp.monto_ejecutar_total_mo,
+         pp.monto,
+         pp.monto_mb,
+         pp.monto_retgar_mb,
+         pp.monto_retgar_mo,
+         pp.monto_no_pagado,
+         pp.monto_no_pagado_mb,
+         pp.otros_descuentos,
+         pp.otros_descuentos_mb,
+         pp.id_plantilla,
+         pp.id_cuenta_bancaria,
+         pp.id_cuenta_bancaria_mov,
+         pp.nro_cheque,
+         pp.nro_cuenta_bancaria,
+         op.num_tramite,
+         pp.tipo,
+         op.id_gestion AS id_gestion_cuentas,
+         pp.id_int_comprobante,
+         pp.liquido_pagable,
+         pp.liquido_pagable_mb,
+         pp.nombre_pago,
+         pp.porc_monto_excento_var,
+         ((COALESCE(op.numero, ''::character varying)::text || ' '::text) ||
+           COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS
+           obs_pp,
+         pp.descuento_anticipo,
+         pp.descuento_inter_serv,
+         op.tipo_obligacion,
+         op.id_categoria_compra,
+         COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
+         COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
+         pp.id_proceso_wf,
+         pp.forma_pago,
+         pp.monto_ajuste_ag,
+         pp.monto_ajuste_siguiente_pago,
+         pp.monto_anticipo,
+         op.tipo_cambio_conv,
+         pp.id_depto_lb AS id_depto_libro,
+         CASE
+           WHEN pp.fecha_costo_ini IS NULL THEN now()::date
+           WHEN pp.fecha_costo_ini > now() THEN now()::date
+           ELSE pp.fecha_costo_ini
+         END AS fecha_costo_ini,
+         COALESCE(pp.fecha_costo_fin, now()::date) AS fecha_costo_fin,
+         op.id_obligacion_pago,
+         pp.fecha_tentativa,
+         pr.id_int_comprobante as id_int_comprobante_rel
+  FROM tes.tplan_pago pp
+       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
+         op.id_obligacion_pago
+       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
+       left join tes.tplan_pago pr on pr.id_plan_pago = pp.id_plan_pago_fk
+       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
+         op.id_categoria_compra;
+         
+/***********************************F-DEP-RAC-TES-0-09/06/2017****************************************/
+
+
+
+/***********************************I-DEP-RAC-TES-0-31/07/2017****************************************/
+
+CREATE OR REPLACE VIEW tes.vpagos_relacionados(
+    desc_proveedor,
+    num_tramite,
+    estado,
+    fecha_tentativa,
+    nro_cuota,
+    monto,
+    codigo,
+    conceptos,
+    ordenes,
+    id_orden_trabajos,
+    id_concepto_ingas,
+    id_plan_pago,
+    id_proceso_wf,
+    id_estado_wf,
+    id_proveedor,
+    obs,
+    tipo)
+AS
+WITH detalle AS(
+  SELECT op_1.id_obligacion_pago,
+         pxp.list(cig.desc_ingas::text) AS conceptos,
+         pxp.list(ot.desc_orden::text) AS ordenes,
+         pxp.aggarray(od.id_orden_trabajo::text) AS id_orden_trabajos,
+         pxp.aggarray(od.id_concepto_ingas::text) AS id_concepto_ingas
+  FROM tes.tobligacion_pago op_1
+       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
+         op_1.id_obligacion_pago
+       JOIN param.tconcepto_ingas cig ON cig.id_concepto_ingas =
+         od.id_concepto_ingas
+       LEFT JOIN conta.torden_trabajo ot ON ot.id_orden_trabajo =
+         od.id_orden_trabajo
+  GROUP BY op_1.id_obligacion_pago)
+    SELECT prov.desc_proveedor,
+           op.num_tramite,
+           pp.estado,
+           pp.fecha_tentativa,
+           pp.nro_cuota,
+           pp.monto,
+           mon.codigo,
+           det.conceptos,
+           det.ordenes,
+           det.id_orden_trabajos,
+           det.id_concepto_ingas,
+           pp.id_plan_pago,
+           pp.id_proceso_wf,
+           pp.id_estado_wf,
+           op.id_proveedor,
+           op.obs,
+           pp.tipo
+    FROM tes.tobligacion_pago op
+         JOIN param.vproveedor prov ON prov.id_proveedor = op.id_proveedor
+         JOIN tes.tplan_pago pp ON pp.id_obligacion_pago = op.id_obligacion_pago
+         JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
+         JOIN detalle det ON det.id_obligacion_pago = op.id_obligacion_pago;
+
+
+/***********************************F-DEP-RAC-TES-0-31/07/2017****************************************/
+

@@ -113,6 +113,8 @@ class MODPlanPago extends MODbase{
 		$this->captura('desc_depto_conta_pp','varchar');
 		$this->captura('contador_estados','bigint');
 		$this->captura('prioridad_lp','integer');
+		$this->captura('es_ultima_cuota','boolean');
+
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -195,7 +197,8 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('monto_anticipo','monto_anticipo','numeric');
 		$this->setParametro('fecha_costo_ini','fecha_costo_ini','date');
 		$this->setParametro('fecha_costo_fin','fecha_costo_fin','date');
-		
+		$this->setParametro('es_ultima_cuota','es_ultima_cuota','boolean');
+
 		
 
 
@@ -252,7 +255,8 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('fecha_costo_ini','fecha_costo_ini','date');
 		$this->setParametro('fecha_costo_fin','fecha_costo_fin','date');
 		$this->setParametro('id_depto_lb','id_depto_lb','int4');
-		
+		$this->setParametro('es_ultima_cuota','es_ultima_cuota','boolean');
+
 		
 
         
@@ -597,9 +601,16 @@ class MODPlanPago extends MODbase{
 		$this->captura('numero_tramite','varchar');	
 		$this->captura('detalle','text');
 		$this->captura('tipo','varchar');		
-		
+		$this->captura('fecha_costo_ini','date');
+		$this->captura('fecha_costo_fin','date');
+		$this->captura('obs_monto_no_pagado','text');
+		$this->captura('total_nro_cuota','integer');
+		$this->captura('obs','varchar');
+
+
 		//Ejecuta la instruccion
 		$this->armarConsulta();
+		//  var_dump($this->consulta);exit;
 		$this->ejecutarConsulta();
 		
 		
@@ -765,7 +776,7 @@ class MODPlanPago extends MODbase{
 	
 	function listadosPagosRelacionados(){
 		//Definicion de variables para ejecucion del procedimientp
-		$this->procedimiento='tes.f_plan_pago_sel';
+		$this->procedimiento='tes.f_plan_pago_rep_sel';
 		$this->transaccion='TES_REPPAGOS_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
 		
@@ -773,6 +784,12 @@ class MODPlanPago extends MODbase{
 		  $this->setParametro('id_proveedors','id_proveedors','VARCHAR');
 		  $this->setParametro('id_orden_trabajos','id_orden_trabajos','VARCHAR');
 		  $this->setParametro('id_concepto_ingas','id_concepto_ingas','VARCHAR');
+		  $this->setParametro('desde','desde','date');
+		  $this->setParametro('hasta','hasta','date');
+		  $this->setParametro('tipo_pago','tipo_pago','VARCHAR');
+		  $this->setParametro('estado','estado','VARCHAR');
+		  $this->setParametro('fuera_estado','fuera_estado','VARCHAR');
+		  
 		
 		  $this->captura('id_plan_pago', 'INTEGER');
 		  $this->captura('desc_proveedor', 'VARCHAR');
@@ -884,8 +901,7 @@ function listarPagos(){
 	}
 	//Reporte de proceso con retencion
 
-    function listarProcesoConRetencion()
-{
+    function listarProcesoConRetencion(){
     //Definicion de variables para ejecucion del procedimientp
         $this->procedimiento='tes.f_plan_pago_sel';
         $this->transaccion='TES_PROCRE_SEL';
@@ -918,7 +934,25 @@ function listarPagos(){
         return $this->respuesta;
 
 
-}
+	}
+
+	function setUltimaCuota(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.f_plan_pago_ime';
+		$this->transaccion='TES_SETULTCUO_IME';
+		$this->tipo_procedimiento='IME';
+
+		//Define los parametros para la funcion
+		$this->setParametro('id_plan_pago','id_plan_pago','int4');
+		$this->setParametro('es_ultima_cuota','es_ultima_cuota','boolean');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
 
 
 

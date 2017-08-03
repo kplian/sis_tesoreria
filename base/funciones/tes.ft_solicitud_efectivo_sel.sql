@@ -231,7 +231,7 @@ BEGIN
                         solefe.fecha_entrega,
                         caja.dias_maximo_rendicion,
                         case when solefe.estado=''finalizado'' then caja.dias_maximo_rendicion
-                        else CURRENT_DATE -COALESCE(solefe.fecha_entrega,current_date) + pxp.f_get_weekend_days(COALESCE(solefe.fecha_entrega::date,current_date),current_date)::integer end as dias_no_rendidos,
+                        else caja.dias_maximo_rendicion - (CURRENT_DATE -COALESCE(solefe.fecha_entrega,current_date) - pxp.f_get_weekend_days(COALESCE(solefe.fecha_entrega::date,current_date),current_date))::integer end as dias_no_rendidos,
 						solefe.id_usuario_ai,
 						solefe.fecha_reg,
 						solefe.usuario_ai,

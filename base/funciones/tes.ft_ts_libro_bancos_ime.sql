@@ -582,7 +582,8 @@ BEGIN
             lb.nro_cheque,
        		lb.tipo,
             lb.id_cuenta_bancaria,
-            lb.fecha
+            lb.fecha,
+            lb.indice
         into
             v_id_libro_bancos,
             v_id_proceso_wf,
@@ -591,7 +592,8 @@ BEGIN
             v_nro_cheque,
             v_tipo,
             v_id_cuenta_bancaria,
-            g_fecha
+            g_fecha,
+            g_indice
         from tes.tts_libro_bancos  lb
         --inner  join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
         where lb.id_proceso_wf  = v_parametros.id_proceso_wf_act;
@@ -755,7 +757,7 @@ BEGIN
 
           --VERIFICAMOS SI ES UN DEPOSITO, transferencia o debito automatico
          	IF(v_tipo in ('deposito','debito_automatico','transferencia_carta')) Then
-				if(v_codigo_estado_siguiente in ('depositado','cobrado'))then
+				if(v_codigo_estado_siguiente in ('depositado','cobrado') AND g_indice IS NULL)then
                     --Obtenemos el numero de indice que sera asignado al nuevo registro
                     Select max(lb.indice)
                     Into g_indice
