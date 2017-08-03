@@ -37,6 +37,21 @@ DECLARE
     v_strg_sol			varchar;
     v_id_clase_comprobante	integer;
 
+    --variables reporte certificacion presupuestaria
+    v_record_op					record;
+    v_index						integer;
+    v_record					record;
+    v_record_funcionario		record;
+    v_firmas					varchar[];
+    v_firma_fun					varchar;
+    v_nombre_entidad			varchar;
+    v_direccion_admin			varchar;
+    v_unidad_ejecutora			varchar;
+    v_cod_proceso				varchar;
+    v_cont						integer;
+    v_gerencia					varchar;
+    v_id_funcionario			integer;
+
 BEGIN
 
 	v_nombre_funcion = 'tes.ft_obligacion_pago_sel';
