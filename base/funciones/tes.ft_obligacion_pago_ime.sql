@@ -155,8 +155,9 @@ DECLARE
      v_codigo_estado_siguiente	varchar;
      v_registros_proc 			record;
      v_codigo_tipo_pro   		varchar;
-     v_pre_integrar_presupuestos	varchar;
-     va_num_tramite				VARCHAR[];
+     v_pre_integrar_presupuestos			varchar;
+     va_num_tramite							VARCHAR[];
+     v_adq_comprometer_presupuesto			varchar;
 
      
 			    
@@ -1084,30 +1085,61 @@ BEGIN
           -- COMPROMISO PRESUPUESTARIO
           -- cuando pasa al estado registrado y el presupeusto no esta comprometido
           ------------------------------------------------------------------------------
-          IF  v_codigo_estado_siguiente = 'registrado'  and  v_comprometido = 'no' and v_tipo_obligacion != 'adquisiciones' and v_tipo_obligacion != 'pago_especial' and   v_pre_integrar_presupuestos = 'true'  THEN
+         
+          
+          IF       v_codigo_estado_siguiente = 'registrado' 
+              and  v_comprometido = 'no'  
+              and v_tipo_obligacion != 'adquisiciones'  
+              and  v_tipo_obligacion != 'pago_especial'  
+              and  v_pre_integrar_presupuestos = 'true'  THEN
                
-          		--jrr: llamamos a la funcion que revierte de planillas en caso de que sea de recursos humanos
-                if (v_tipo_obligacion = 'rrhh') then
-                    IF NOT plani.f_generar_pago_tesoreria(p_administrador,p_id_usuario,v_parametros._id_usuario_ai,
-                              v_parametros._nombre_usuario_ai,v_parametros.id_obligacion_pago,v_obs) THEN                                                         
-                         raise exception 'Error al generar el pago de devengado';                          
-                      END IF;            	
-                end if;
-               --TODO aumentar capacidad de rollback
-               -- verficar presupuesto y comprometer
-               IF not tes.f_gestionar_presupuesto_tesoreria(v_parametros.id_obligacion_pago, p_id_usuario, 'comprometer')  THEN
-                   raise exception 'Error al comprometer el presupeusto';
-               END IF;
-               
-               v_comprometido = 'si';
-               --cambia la bandera del comprometido
-               update tes.tobligacion_pago  set 
-                 comprometido = v_comprometido
-               where id_obligacion_pago  = v_parametros.id_obligacion_pago;
-               
+                      --jrr: llamamos a la funcion que revierte de planillas en caso de que sea de recursos humanos
+                      if (v_tipo_obligacion = 'rrhh') then
+                           IF NOT plani.f_generar_pago_tesoreria(p_administrador,p_id_usuario,v_parametros._id_usuario_ai, v_parametros._nombre_usuario_ai,v_parametros.id_obligacion_pago,v_obs) THEN                                                         
+                               raise exception 'Error al generar el pago de devengado';                          
+                            END IF;            	
+                      end if;
+                     --TODO aumentar capacidad de rollback
+                     -- verficar presupuesto y comprometer
+                     IF not tes.f_gestionar_presupuesto_tesoreria(v_parametros.id_obligacion_pago, p_id_usuario, 'comprometer')  THEN
+                         raise exception 'Error al comprometer el presupeusto';
+                     END IF;
+                     
+                     v_comprometido = 'si';
+                     --cambia la bandera del comprometido
+                     update tes.tobligacion_pago  set 
+                       comprometido = v_comprometido
+                     where id_obligacion_pago  = v_parametros.id_obligacion_pago;
+                     
                
            
            END IF;
+           
+           --RAC 02/08/2017
+           --verifica si el presupeusto fue comprometido en adquisicioens o no
+          
+              v_adq_comprometer_presupuesto = pxp.f_get_variable_global('adq_comprometer_presupuesto');
+             
+           IF          v_codigo_estado_siguiente = 'registrado'  
+                  and  v_comprometido = 'no' 
+                  and  v_tipo_obligacion = 'adquisiciones' 
+                  and  v_adq_comprometer_presupuesto = 'no'
+                  and  v_pre_integrar_presupuestos = 'true'  THEN
+               
+                       -- verficar presupuesto y comprometer
+                       IF not tes.f_gestionar_presupuesto_tesoreria(v_parametros.id_obligacion_pago, p_id_usuario, 'comprometer')  THEN
+                           raise exception 'Error al comprometer el presupeusto';
+                       END IF;
+                       
+                       v_comprometido = 'si';
+                       --cambia la bandera del comprometido
+                       update tes.tobligacion_pago  set 
+                         comprometido = v_comprometido
+                       where id_obligacion_pago  = v_parametros.id_obligacion_pago;
+             
+           END IF;
+           
+           
            
            -- cuando viene de adquisiciones no es necesario comprometer pero dejamos la bancera de compromiso barcada
            --  ya que los montos se comprometiron en la solicitud de compra
@@ -1142,6 +1174,9 @@ BEGIN
 
 		begin
         
+        
+        
+        
         --recupera parametros
             select 
             op.id_estado_wf,
@@ -1162,7 +1197,7 @@ BEGIN
             where op.id_obligacion_pago = v_parametros.id_obligacion_pago; 
             
         
-        
+         
         --------------------------------------------------
         --Retrocede al estado inmediatamente anterior
         -------------------------------------------------
@@ -1254,9 +1289,7 @@ BEGIN
                          
                              --se revierte el presupeusto
                              IF not tes.f_gestionar_presupuesto_tesoreria(v_parametros.id_obligacion_pago, p_id_usuario, 'revertir')  THEN
-                                 
-                                   raise exception 'Error al revertir el presupeusto';
-                                 
+                                  raise exception 'Error al revertir el presupeusto';
                              END IF;
                             
                             --se modifica la bandera del comprometido
@@ -1265,6 +1298,34 @@ BEGIN
                             where id_obligacion_pago = v_parametros.id_obligacion_pago;                         
                          
                          END IF;
+                         
+                         
+                         
+                         --RAC 02/08/2017
+                         --verifica si el presupeusto fue comprometido en adquisicioens o no
+                        
+                         v_adq_comprometer_presupuesto = pxp.f_get_variable_global('adq_comprometer_presupuesto');
+                                                   
+                          IF (v_codigo_estado = 'borrador' or v_codigo_estado = 'vbpresupuestos') 
+                             and v_comprometido = 'si' 
+                             and  v_tipo_obligacion = 'adquisiciones' 
+                             and  v_adq_comprometer_presupuesto = 'no'
+                             and   v_pre_integrar_presupuestos = 'true'  THEN
+                                
+                             --se revierte el presupeusto
+                             IF not tes.f_gestionar_presupuesto_tesoreria(v_parametros.id_obligacion_pago, p_id_usuario, 'revertir')  THEN
+                                 raise exception 'Error al revertir el presupeusto';
+                             END IF;
+                            
+                            --se modifica la bandera del comprometido
+                            update tes.tobligacion_pago op set
+                              comprometido = 'no'
+                            where id_obligacion_pago = v_parametros.id_obligacion_pago;   
+                             
+                         END IF;
+                         
+                         
+                        
                          
                          
                           IF v_codigo_estado = 'borrador' THEN
