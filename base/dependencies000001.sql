@@ -4959,10 +4959,7 @@ ALTER TABLE tes.tcaja_funcionario
 
 
 
-/***********************************I-DEP-RAC-TES-0-09/06/2017****************************************/
-
-
---------------- SQL ---------------
+/***********************************I-DEP-RAC-TES-0-25/07/2017****************************************/
 
 CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
     id_plan_pago,
@@ -5013,7 +5010,8 @@ CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
     fecha_costo_ini,
     fecha_costo_fin,
     id_obligacion_pago,
-    fecha_tentativa)
+    fecha_tentativa,
+    id_int_comprobante_rel)
 AS
   SELECT pp.id_plan_pago,
          op.id_proveedor,
@@ -5070,16 +5068,15 @@ AS
          COALESCE(pp.fecha_costo_fin, now()::date) AS fecha_costo_fin,
          op.id_obligacion_pago,
          pp.fecha_tentativa,
-         pr.id_int_comprobante as id_int_comprobante_rel
+         pr.id_int_comprobante AS id_int_comprobante_rel
   FROM tes.tplan_pago pp
        JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
          op.id_obligacion_pago
        JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       left join tes.tplan_pago pr on pr.id_plan_pago = pp.id_plan_pago_fk
+       LEFT JOIN tes.tplan_pago pr ON pr.id_plan_pago = pp.id_plan_pago_fk
        LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
          op.id_categoria_compra;
-         
-/***********************************F-DEP-RAC-TES-0-09/06/2017****************************************/
+/***********************************F-DEP-RAC-TES-0-25/07/2017****************************************/
 
 
 
