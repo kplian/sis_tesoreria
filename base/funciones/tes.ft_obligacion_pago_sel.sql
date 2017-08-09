@@ -362,7 +362,7 @@ BEGIN
                         left join param.tplantilla pla on pla.id_plantilla = obpg.id_plantilla
                         '|| v_inner ||'
                         left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
-                        left join orga.vfuncionario fresp ON fresp.id_funcionario = obpg.funcionario_responsable
+                        left join orga.vfuncionario fresp ON fresp.id_funcionario = obpg.id_funcionario_responsable
                         where  '||v_filadd;
 
 			--Definicion de la respuesta
