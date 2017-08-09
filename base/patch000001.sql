@@ -1746,4 +1746,19 @@ ALTER TABLE tes.tobligacion_pago
 
 
 
+/*****************************I-SCP-RAC-TES-0-09/08/2017*************/
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN id_funcionario_responsable INTEGER;
+  
+ 
+/*****************************F-SCP-RAC-TES-0-09/08/2017*************/
+
+
+
+  
+  
 
