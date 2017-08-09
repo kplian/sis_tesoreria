@@ -187,9 +187,9 @@ BEGIN
      
            -- solo si el estado del cbte es borrador y no es un comprobante temporal
            -- desasociamos las transacciones del comprobante
+         
            
-           
-            IF v_registros.estadato_cbte = 'borrador' and v_registros.temporal = 'no' then
+            IF v_registros.estadato_cbte in ('borrador','eliminado') and v_registros.temporal = 'no' then
                --cheque si tiene prorrateo en tesoria (modulo de obligacion de pagos)
               for v_rec_cbte_trans in (select * 
                                        from conta.tint_transaccion
@@ -198,9 +198,13 @@ BEGIN
                     update tes.tprorrateo p set
                          id_int_transaccion = NULL
                     where p.id_int_transaccion = v_rec_cbte_trans.id_int_transaccion;
+                    
+                     
              
               END LOOP;
             END IF;
+            
+         
      
     
      -- 3.1)  si es tipo es devengado_pago
