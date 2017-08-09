@@ -388,7 +388,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 		{name:'tipo', type: 'string'},
 		{name:'id_plantilla', type: 'numeric'},
 		{name:'id_moneda', type: 'numeric'},
-		{name:'fecha', type: 'date'},
+		{name:'fecha', type: 'date',dateFormat:'Y-m-d'},
 		{name:'nit', type: 'string'},
 		{name:'razon_social', type: 'string'},
 		{name:'nro_autorizacion', type: 'string'},

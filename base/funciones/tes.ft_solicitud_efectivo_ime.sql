@@ -14,13 +14,13 @@ $body$
  DESCRIPCION:   Funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'tes.tsolicitud_efectivo'
  AUTOR: 		 (gsarmiento)
  FECHA:	        24-11-2015 12:59:51
- COMENTARIOS:	
+ COMENTARIOS:
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
 
- DESCRIPCION:	
- AUTOR:			
- FECHA:		
+ DESCRIPCION:
+ AUTOR:
+ FECHA:
 ***************************************************************************/
 
 DECLARE
@@ -70,28 +70,29 @@ DECLARE
     v_doc_compra_venta		record;
     v_saldo_caja			numeric;
     v_importe_maximo_solicitud	numeric;
-    		    
+    v_temp					interval;
+
 BEGIN
 
     v_nombre_funcion = 'tes.ft_solicitud_efectivo_ime';
     v_parametros = pxp.f_get_record(p_tabla);
 
-	/*********************************    
+	/*********************************
  	#TRANSACCION:  'TES_SOLEFE_INS'
  	#DESCRIPCION:	Insercion de registros
- 	#AUTOR:		gsarmiento	
+ 	#AUTOR:		gsarmiento
  	#FECHA:		24-11-2015 12:59:51
 	***********************************/
 
 	if(p_transaccion='TES_SOLEFE_INS')then
-					
+
         begin
             IF EXISTS (select 1
 					 from tes.tproceso_caja
 					 where tipo='CIERRE' and id_caja=v_parametros.id_caja)  THEN
             	raise exception 'No puede realizar solicitudes ni rendiciones, la caja se encuentra en proceso de cierre';
             END IF;
-            
+
         	v_resp=tes.f_inserta_solicitud_efectivo(p_administrador,p_id_usuario,hstore(v_parametros));
 
 			--Devuelve la respuesta
@@ -421,6 +422,11 @@ BEGIN
                   select id_caja, id_funcionario, current_date as fecha,
                   case when v_parametros.saldo > 0 then 'devolucion' else 'reposicion' end as tipo_solicitud,
                   case when v_parametros.saldo > 0 then v_parametros.saldo else v_parametros.saldo * (-1) end as monto,
+                  case when v_parametros.saldo > 0 then
+                  'Devolucion de dinero del solicitante al cajero'
+                  else
+                  'Solicitud de reposicion de dinero al solicitante, gasto excedido'
+                  end as motivo,
                   id_solicitud_efectivo_fk as id_solicitud_efectivo_fk,
                   id_estado_wf
                   into v_solicitud_efectivo
@@ -473,7 +479,8 @@ BEGIN
 					 'devolucion' as tipo_solicitud,
                      v_saldo as monto,
                      id_solicitud_efectivo as id_solicitud_efectivo_fk,
-                     nro_tramite
+                     nro_tramite,
+                     'Devolucion de dinero del solicitante al cajero' as motivo
               into v_solicitud_efectivo
               from tes.tsolicitud_efectivo
               where id_solicitud_efectivo=v_id_solicitud_efectivo;
@@ -544,12 +551,12 @@ BEGIN
             v_titulo  = 'Visto Bueno Solicitud Efectivo';
 
           END IF;
-             
+
           v_id_estado_actual = wf.f_registra_estado_wf(
-              v_id_tipo_estado, 
-              v_id_funcionario, 
-              v_parametros.id_estado_wf, 
-              v_id_proceso_wf, 
+              v_id_tipo_estado,
+              v_id_funcionario,
+              v_parametros.id_estado_wf,
+              v_id_proceso_wf,
               p_id_usuario,
               v_parametros._id_usuario_ai,
               v_parametros._nombre_usuario_ai,
@@ -560,42 +567,71 @@ BEGIN
               v_parametros_ad,
               v_tipo_noti,
               v_titulo);
-           
-           IF  NOT tes.f_fun_regreso_solicitud_efectivo_wf(p_id_usuario, 
-                                                   v_parametros._id_usuario_ai, 
-                                                   v_parametros._nombre_usuario_ai, 
-                                                   v_id_estado_actual, 
-                                                   v_parametros.id_proceso_wf, 
+
+           IF  NOT tes.f_fun_regreso_solicitud_efectivo_wf(p_id_usuario,
+                                                   v_parametros._id_usuario_ai,
+                                                   v_parametros._nombre_usuario_ai,
+                                                   v_id_estado_actual,
+                                                   v_parametros.id_proceso_wf,
                                                    v_codigo_estado) THEN
-            
+
                raise exception 'Error al retroceder estado';
-            
-            END IF;        
-                   
+
+            END IF;
+
          -- si hay mas de un estado disponible  preguntamos al usuario
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado)'); 
-            v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');                        
-                              
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado)');
+            v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
+
           --Devuelve la respuesta
             return v_resp;
-                        
+
         END;
-         
+
+    /*********************************
+ 	#TRANSACCION:  'TES_AMPREN_IME'
+ 	#DESCRIPCION:	Ampliar dias para rendir solicitud efectivo
+ 	#AUTOR:		Gonzalo Sarmiento
+ 	#FECHA:		10-04-2017
+	***********************************/
+
+	elsif(p_transaccion='TES_AMPREN_IME')then
+
+		begin
+             --raise exception '%',v_parametros.dias_ampliado::varchar;
+			v_temp = v_parametros.dias_ampliado::varchar||' days';
+
+			--Sentencia de la modificacion
+			update tes.tsolicitud_efectivo set
+                fecha_entrega = (fecha_entrega::Date +  v_temp)::date,
+                id_usuario_mod = p_id_usuario,
+                fecha_mod = now()
+            where id_solicitud_efectivo = v_parametros.id_solicitud_efectivo;
+
+			--Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Dias de rendicion ampliados)');
+            v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_efectivo',v_parametros.id_solicitud_efectivo::varchar);
+
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;
+
 	else
-     
+
     	raise exception 'Transaccion inexistente: %',p_transaccion;
 
 	end if;
 
 EXCEPTION
-				
+
 	WHEN OTHERS THEN
 		v_resp='';
 		v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
 		v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
 		v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
 		raise exception '%',v_resp;
-				        
+
 END;
 $body$
 LANGUAGE 'plpgsql'
