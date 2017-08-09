@@ -4956,6 +4956,9 @@ ALTER TABLE tes.tcaja_funcionario
 
 /***********************************F-DEP-GSS-TES-0-13/03/2017****************************************/
 
+
+
+
 /***********************************I-DEP-RAC-TES-0-25/07/2017****************************************/
 
 CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago(
@@ -5074,4 +5077,67 @@ AS
        LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
          op.id_categoria_compra;
 /***********************************F-DEP-RAC-TES-0-25/07/2017****************************************/
+
+
+
+/***********************************I-DEP-RAC-TES-0-31/07/2017****************************************/
+
+CREATE OR REPLACE VIEW tes.vpagos_relacionados(
+    desc_proveedor,
+    num_tramite,
+    estado,
+    fecha_tentativa,
+    nro_cuota,
+    monto,
+    codigo,
+    conceptos,
+    ordenes,
+    id_orden_trabajos,
+    id_concepto_ingas,
+    id_plan_pago,
+    id_proceso_wf,
+    id_estado_wf,
+    id_proveedor,
+    obs,
+    tipo)
+AS
+WITH detalle AS(
+  SELECT op_1.id_obligacion_pago,
+         pxp.list(cig.desc_ingas::text) AS conceptos,
+         pxp.list(ot.desc_orden::text) AS ordenes,
+         pxp.aggarray(od.id_orden_trabajo::text) AS id_orden_trabajos,
+         pxp.aggarray(od.id_concepto_ingas::text) AS id_concepto_ingas
+  FROM tes.tobligacion_pago op_1
+       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
+         op_1.id_obligacion_pago
+       JOIN param.tconcepto_ingas cig ON cig.id_concepto_ingas =
+         od.id_concepto_ingas
+       LEFT JOIN conta.torden_trabajo ot ON ot.id_orden_trabajo =
+         od.id_orden_trabajo
+  GROUP BY op_1.id_obligacion_pago)
+    SELECT prov.desc_proveedor,
+           op.num_tramite,
+           pp.estado,
+           pp.fecha_tentativa,
+           pp.nro_cuota,
+           pp.monto,
+           mon.codigo,
+           det.conceptos,
+           det.ordenes,
+           det.id_orden_trabajos,
+           det.id_concepto_ingas,
+           pp.id_plan_pago,
+           pp.id_proceso_wf,
+           pp.id_estado_wf,
+           op.id_proveedor,
+           op.obs,
+           pp.tipo
+    FROM tes.tobligacion_pago op
+         JOIN param.vproveedor prov ON prov.id_proveedor = op.id_proveedor
+         JOIN tes.tplan_pago pp ON pp.id_obligacion_pago = op.id_obligacion_pago
+         JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
+         JOIN detalle det ON det.id_obligacion_pago = op.id_obligacion_pago;
+
+
+/***********************************F-DEP-RAC-TES-0-31/07/2017****************************************/
 
