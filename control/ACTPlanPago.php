@@ -232,7 +232,7 @@ class ACTPlanPago extends ACTbase{
 		if ($this->objParam->getParametro('id_proceso_wf') != '') {
 			$this->objParam->addFiltro("pp.id_proceso_wf = ". $this->objParam->getParametro('id_proceso_wf'));
 		}
-		
+
 		if ($this->objParam->getParametro('firmar') == 'si') {
 	    	$firmar = 'si';
 			$fecha_firma = $this->objParam->getParametro('fecha_firma');
@@ -248,7 +248,6 @@ class ACTPlanPago extends ACTbase{
 		$this->objFunc=$this->create('MODPlanPago');	
 		
 		$this->res=$this->objFunc->listarActaMaestro($this->objParam);
-		
 		//obtener titulo del reporte
 		
 		//Genera el nombre del archivo (aleatorio + titulo)

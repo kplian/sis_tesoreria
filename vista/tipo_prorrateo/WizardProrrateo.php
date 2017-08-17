@@ -257,7 +257,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		},
 		
 		loadValoresIniciales : function() {
-			Phx.vista.WizardProrrateo.superclass.loadValoresIniciales.call(this, config);
+			Phx.vista.WizardProrrateo.superclass.loadValoresIniciales.call(this, this.config);
 			this.Cmp.id_oficina_cuenta.setDisabled(true);
 			this.Cmp.id_oficina_cuenta.allowBlank = true;
 			this.Cmp.id_lugar.setDisabled(true);
