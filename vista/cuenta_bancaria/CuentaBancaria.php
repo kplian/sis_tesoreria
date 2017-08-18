@@ -372,6 +372,12 @@ Phx.vista.CuentaBancaria=Ext.extend(Phx.gridInterfaz,{
           title:'Usuarios',
           height : '50%',
           cls:'UsuarioCuentaBanc'
+        },
+        {
+          url:'../../../sis_tesoreria/vista/tipo_cc_cuenta_libro/TipoCcCuentaLibro.php',
+          title:'Tipo de Centros Permitidos',
+          height : '50%',
+          cls:'TipoCcCuentaLibro'
         }
      ]
    
