@@ -55,6 +55,7 @@ BEGIN
                           from tes.ttipo_cc_cuenta_libro tcl
                           where tcl.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria
                           and tcl.id_depto = v_parametros.id_depto 
+                          and tcl.id_tipo_cc = v_parametros.id_tipo_cc
                           and tcl.estado_reg = 'activo') THEN
                raise exception 'El tipo de centro ya se encuentra parametrizado para esta cuenta';
             END IF;
@@ -114,6 +115,7 @@ BEGIN
                           where tcl.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria
                           and tcl.id_depto = v_parametros.id_depto 
                           and tcl.id_ttipo_cc_cuenta_libro != v_parametros.id_ttipo_cc_cuenta_libro
+                          and tcl.id_tipo_cc = v_parametros.id_tipo_cc
                           and tcl.estado_reg = 'activo') THEN
                raise exception 'El tipo de centro ya se encuentra parametrizado para esta cuenta';
             END IF;
