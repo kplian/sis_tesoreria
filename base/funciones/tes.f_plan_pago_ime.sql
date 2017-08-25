@@ -1075,7 +1075,7 @@ BEGIN
                                                       v_parametros.id_depto_conta,
                                                       v_nombre_conexion);
           
-          select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'exito'); 
+          --select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'exito'); 
           
           v_resp = '';
           
@@ -1700,10 +1700,9 @@ BEGIN
 EXCEPTION
 				
 	WHEN OTHERS THEN
-    	select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'error'); 
+    	
 		v_resp=''; 
-           
-		v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);        
+        v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);        
 		v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
 		v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
 		raise exception '%',v_resp;

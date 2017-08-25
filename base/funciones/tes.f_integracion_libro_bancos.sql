@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_integracion_libro_bancos (
   p_id_usuario integer,
   p_id_int_comprobante integer
@@ -11,6 +13,7 @@ DECLARE
  v_resp				varchar;
  v_nombre_funcion   varchar;
  v_centro			varchar;
+ v_tes_gen_cheque_depto_conta_lb_pri_cero		varchar;
 BEGIN
 
 
@@ -78,15 +81,15 @@ BEGIN
           --v_respuesta_libro_bancos = tes.f_generar_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','internacional');
           v_resp= 'true';
       elsif(v_registros.prioridad_conta in (0,1) and v_registros.prioridad_libro in (0,1))then
-           /*raise notice 'emtra';
-           IF v_registros.codigo in ('REPOCAJA','SOLFONDAV','CIERRE_CAJA') THEN
-
-              select fin.id_finalidad into v_id_finalidad
-              from tes.tfinalidad fin
-              where fin.nombre_finalidad ilike 'Fondo Rotativo';
-
-              v_respuesta_libro_bancos = tes.f_generar_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','nacional');
-           END IF;*/
+         
+           --RAC, 17/08/2017, agega varible global para que sea configurable 
+           --   la genracion de cheuqes para libros de bancos con prioridad 0 
+           v_tes_gen_cheque_depto_conta_lb_pri_cero = pxp.f_get_variable_global('tes_gen_cheque_depto_conta_lb_pri_cero');
+      
+           IF v_tes_gen_cheque_depto_conta_lb_pri_cero = 'si' THEN
+               v_respuesta_libro_bancos = tes.f_generar_cheque(p_id_usuario,p_id_int_comprobante, v_id_finalidad,NULL,'','nacional');
+           END IF;
+           
 
            v_resp = 'true';
 

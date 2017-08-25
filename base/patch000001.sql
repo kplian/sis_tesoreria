@@ -1727,3 +1727,62 @@ CREATE TABLE tes.tcaja_funcionario (
 WITH (oids = false);
 
 /*****************************F-SCP-GSS-TES-0-15/03/2017*************/
+
+
+
+/*****************************I-SCP-RAC-TES-0-26/07/2017*************/
+
+ -- object recreation
+ALTER TABLE tes.tobligacion_pago
+  DROP CONSTRAINT chk_tobligacion_pago__tipo_obligacion RESTRICT;
+
+ALTER TABLE tes.tobligacion_pago
+  ADD CONSTRAINT chk_tobligacion_pago__tipo_obligacion CHECK ((tipo_obligacion)::text = ANY (ARRAY[ ('adquisiciones'::character varying)::text, ('pago_unico'::character varying)::text, ('pago_especial'::character varying)::text, ('caja_chica'::character varying)::text, ('viaticos'::character varying)::text, ('fondos_en_avance'::character varying)::text, ('pago_directo'::character varying)::text, ('rrhh'::character varying)::text]));
+
+
+/*****************************F-SCP-RAC-TES-0-26/07/2017*************/
+
+
+
+
+
+/*****************************I-SCP-RAC-TES-0-09/08/2017*************/
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN id_funcionario_responsable INTEGER;
+  
+ 
+/*****************************F-SCP-RAC-TES-0-09/08/2017*************/
+
+
+
+
+/*****************************I-SCP-RAC-TES-0-18/08/2017*************/
+
+
+CREATE TABLE tes.ttipo_cc_cuenta_libro (
+  id_ttipo_cc_cuenta_libro SERIAL NOT NULL,
+  id_tipo_cc INTEGER,
+  id_cuenta_bancaria INTEGER,
+  id_depto INTEGER,
+  obs VARCHAR,
+  PRIMARY KEY(id_ttipo_cc_cuenta_libro)
+) INHERITS (pxp.tbase)
+WITH (oids = false);
+
+COMMENT ON TABLE tes.ttipo_cc_cuenta_libro
+IS 'Esta tabla permite parametriza que cuentas bacaria y que libro de bancos se utilizas por defectopara realizar los apgos';
+
+COMMENT ON COLUMN tes.ttipo_cc_cuenta_libro.id_depto
+IS 'depto de libro de bancos';
+
+
+
+/*****************************F-SCP-RAC-TES-0-18/08/2017*************/
+  
+  
+  
+

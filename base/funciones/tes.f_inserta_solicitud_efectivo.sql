@@ -1,4 +1,4 @@
----------------------------SQL-------------------------
+--------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION tes.f_inserta_solicitud_efectivo (
   p_administrador integer,
@@ -47,7 +47,7 @@ DECLARE
     v_monto_rendicion		numeric;
 
 BEGIN
-            v_nombre_funcion = 'f_inserta_solicitud_efectivo';
+            v_nombre_funcion = 'tes.f_inserta_solicitud_efectivo';
 
             /*
             HSTORE  PARAMETERS
@@ -106,9 +106,10 @@ BEGIN
             	raise exception 'Tipo de solicitud '' % '', no definido', (p_hstore->'tipo_solicitud')::varchar;
 			END IF;
 
-            IF v_tipo = 'SOLEFE' THEN
-              -- obtener correlativo
-              v_num_sol_efe =  param.f_obtener_correlativo(
+            IF v_tipo IN ('SOLEFE','APECAJ','INGEFE') THEN
+             
+                -- obtener correlativo
+                v_num_sol_efe =  param.f_obtener_correlativo(
                      v_tipo,
                      NULL,-- par_id,
                      NULL, --id_uo
@@ -122,10 +123,13 @@ BEGIN
                      (p_hstore->'id_caja')::integer,
                      v_codigo_tabla
                      );
+                     
                 --fin obtener correlativo
+                
               IF (v_num_sol_efe is NULL or v_num_sol_efe ='') THEN
                  raise exception 'No se pudo obtener un numero correlativo para la solicitud efectivo caja consulte con el administrador';
               END IF;
+              
             ELSE
 
               select sol.nro_tramite, cajero.id_funcionario into v_num_sol_efe, v_id_cajero
@@ -135,10 +139,14 @@ BEGIN
 
             END IF;
 
-              select tp.codigo, t.id_tipo_solicitud into v_codigo_tipo_proceso, v_id_tipo_solicitud
+            select tp.codigo, t.id_tipo_solicitud into v_codigo_tipo_proceso, v_id_tipo_solicitud
             from tes.ttipo_solicitud t
             inner join wf.ttipo_proceso tp on tp.codigo_llave=t.codigo_proceso_llave_wf
             where t.codigo=v_tipo;
+            
+            IF v_codigo_tipo_proceso is null THEN
+              raise exception 'No se encontro el codigo de proceso wf llave para %',v_tipo;
+            END IF;
 
             select
              ges.id_gestion
@@ -147,6 +155,11 @@ BEGIN
             from param.tgestion ges
             where ges.gestion = (date_part('year', current_date))::integer
             limit 1 offset 0;
+            
+            
+            IF v_num_sol_efe is null THEN
+               raise exception 'No se encontro un número de solicitud para % (%)',v_tipo, (p_hstore->'id_solicitud_efectivo_fk')::integer;
+            END IF;
 
             -- inciar el tramite en el sistema de WF
              SELECT
@@ -183,6 +196,8 @@ BEGIN
             ELSE
             	v_id_solicitud_efectivo_fk = NULL;
             END IF;
+            
+         
 
             --Sentencia de la insercion
             insert into tes.tsolicitud_efectivo(
