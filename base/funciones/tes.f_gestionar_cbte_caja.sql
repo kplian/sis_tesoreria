@@ -445,7 +445,7 @@ BEGIN
                            NULL, --id_uo
                            v_registros.id_depto,    -- id_depto
                            p_id_usuario,
-                           'CCH',
+                           'TES',
                            NULL);
 
                         update tes.tproceso_caja pc set
@@ -475,6 +475,7 @@ BEGIN
                                                 ]);
 
                 v_resp=tes.f_inserta_solicitud_efectivo(0,p_id_usuario,v_hstore_registros);
+                
                 v_id_solicitud_efectivo =  pxp.f_recupera_clave(v_resp, 'id_solicitud_efectivo');
                --guardamos la relacion
                update tes.tproceso_caja  set
