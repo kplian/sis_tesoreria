@@ -47,13 +47,13 @@ Phx.vista.FormRendicion = {
 			id: 'id_depto',
 			root: 'datos',
 			sortInfo: {
-				field: 'nombre',
+				field: 'ddes.nombre',
 				direction: 'ASC'
 			},
 			totalProperty: 'total',
 			fields: ['id_depto_depto', 'id_depto_destino'],
 			remoteSort: true,
-			baseParams: {id_depto: this.data.id_depto, id_subsistema : 10}
+			baseParams: {id_depto: this.data.id_depto, codigo_sis_des : 'CONTA'}
 		});
 		
 		this.Cmp.id_depto_conta.store.load({params:{start:0,limit:this.tam_pag}, 
