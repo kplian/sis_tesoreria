@@ -375,6 +375,21 @@ class ACTPlanPago extends ACTbase{
 			$this->objFunc=$this->create('MODPlanPago');
 			$this->res=$this->objFunc->listadosPagosRelacionados($this->objParam);
 		}
+		
+		if($this->objParam->getParametro('resumen')!='no'){
+			//adicionar una fila al resultado con el summario
+			$temp = Array();
+			$temp['monto_mb'] = $this->res->extraData['monto_mb'];
+			$temp['tipo_reg'] = 'summary';
+			$temp['id_plan_pago'] = 0;
+			
+			$this->res->total++;
+			
+			$this->res->addLastRecDatos($temp);
+		}
+		
+		
+		
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
    
