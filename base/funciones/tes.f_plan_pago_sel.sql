@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_plan_pago_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -574,10 +576,11 @@ BEGIN
 		begin
 
 			--Sentencia de la consulta de conteo de registros
-			v_consulta:='select fun.desc_funcionario1, prov.desc_proveedor,
+			v_consulta:='select 
+            			fun.desc_funcionario1, prov.desc_proveedor,
             			to_char( pp.fecha_conformidad,''DD/MM/YYYY''),pp.conformidad,
                         cot.numero_oc,op.numero, pp.nro_cuota,op.num_tramite::varchar,
-                         pxp.html_rows(''<td>'' || ci.desc_ingas || ''</td><td>'' || od.descripcion|| ''</td>'')::text,
+                         tes.f_get_detalle_html(op.id_obligacion_pago)::text,
                          (case when (pxp.list_unique(ci.tipo)) is null THEN
                             ''Servicio''
                          ELSE
@@ -606,8 +609,8 @@ BEGIN
 
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
-            v_consulta:=v_consulta||' group by fun.desc_funcionario1, prov.desc_proveedor, pp.fecha_conformidad,pp.conformidad, cot.numero_oc,op.numero, pp.nro_cuota,op.num_tramite
-            ,pp.fecha_costo_ini, pp.fecha_costo_fin, pp.observaciones_pago, op.total_nro_cuota, op.obs';
+            v_consulta:=v_consulta||' group by fun.desc_funcionario1, prov.desc_proveedor, pp.fecha_conformidad,pp.conformidad, cot.numero_oc,op.numero, pp.nro_cuota,op.num_tramite,
+                        pp.fecha_costo_ini, pp.fecha_costo_fin, pp.obs_monto_no_pagado, pp.observaciones_pago, op.total_nro_cuota, op.obs,op.id_obligacion_pago';
             raise notice '%',v_consulta;
 
 			--Devuelve la respuesta

@@ -49,8 +49,10 @@ Phx.vista.RepPlanPago=Ext.extend(Phx.gridInterfaz,{
                 anchor: '80%',
                 gwidth: 40,
                 scope: this,
-                renderer:function (value, p, record, rowIndex, colIndex){  
+                renderer:function (value, p, record, rowIndex, colIndex){ 
+                	if(record.data.tipo_reg != 'summary'){ 
                 	    return "<div style='text-align:center'><img border='0' style='-webkit-user-select:auto;cursor:pointer;' title='Documentos del pago' src = '../../../lib/imagenes/icono_awesome/awe_documents.png' align='center' width='30' height='30'></div>";
+                     }
                 }            
             },
             type:'Field',
@@ -167,10 +169,38 @@ Phx.vista.RepPlanPago=Ext.extend(Phx.gridInterfaz,{
                 fieldLabel: 'Monto a Pagar',
                 allowBlank: false,
                 gwidth: 100,
-                maxLength:1245186
+                maxLength:1245186,
+				renderer:function (value,p,record){
+					return  String.format('{0}', Ext.util.Format.number(value,'0,000.00'));
+				}
+						
             },
             type:'MoneyField',
             filters:{pfiltro:'monto',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
+        {
+            config:{
+                name: 'monto_mb',
+                currencyChar:' ',
+                allowNegative:false,
+                fieldLabel: 'Monto BS',
+                allowBlank: false,
+                gwidth: 100,
+                maxLength:1245186,
+				renderer:function (value,p,record){
+						if(record.data.tipo_reg != 'summary'){
+							return  String.format('{0}', Ext.util.Format.number(value,'0,000.00'));
+						}
+						else{
+							return  String.format('<b><font size=2 >{0}</font><b>', Ext.util.Format.number(value,'0,000.00'));
+						}
+				}
+            },
+            type:'MoneyField',
+            filters:{pfiltro:'monto_mb',type:'numeric'},
             id_grupo:1,
             grid:true,
             form:false
@@ -284,7 +314,7 @@ Phx.vista.RepPlanPago=Ext.extend(Phx.gridInterfaz,{
 	          'id_estado_wf',
 	          'id_proveedor',
 	          'obs',
-	          'tipo'],
+	          'tipo','monto_mb','tipo_reg'],
 
    arrayDefaultColumHidden:['obs','conceptos','ordenes'],
     
@@ -320,8 +350,10 @@ Phx.vista.RepPlanPago=Ext.extend(Phx.gridInterfaz,{
 		
 	    var record = this.store.getAt(rowIndex),
 	        fieldName = grid.getColumnModel().getDataIndex(columnIndex); // Get field name
+	        
+	      
 
-	    if (fieldName == 'id_plan_pago' ) {
+	    if (fieldName == 'id_plan_pago' && record.data.tipo_reg != 'summary' ) {
 	    	this.loadCheckDocumentosSolWf()
 	    		
 	    } 
