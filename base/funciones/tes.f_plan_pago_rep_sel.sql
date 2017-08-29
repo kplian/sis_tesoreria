@@ -119,6 +119,7 @@ BEGIN
                           fecha_tentativa,
                           nro_cuota,
                           monto,
+                          monto_mb,
                           codigo,
                           conceptos,
                           ordenes,
@@ -135,7 +136,8 @@ BEGIN
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 
-             --raise exception '%',v_consulta;
+            
+             raise notice '% .',v_consulta;
 
 			--Devuelve la respuesta
 			return v_consulta;
@@ -176,10 +178,42 @@ BEGIN
                 v_filtro = v_filtro||' id_orden_trabajos && string_to_array('''||v_parametros.id_orden_trabajos||''','','') and ';
              END IF;
            END IF;
+           
+           IF  pxp.f_existe_parametro(p_tabla,'desde')  THEN
+             IF v_parametros.desde is not null  THEN
+                v_filtro = v_filtro||' fecha_tentativa >= '''||v_parametros.desde||'''::date  and ';
+             END IF;
+           END IF;
+           
+           IF  pxp.f_existe_parametro(p_tabla,'hasta')  THEN
+             IF v_parametros.hasta is not null  THEN
+                v_filtro = v_filtro||' fecha_tentativa <= '''||v_parametros.hasta||'''::date  and ';
+             END IF;
+           END IF;
+           
+           IF  pxp.f_existe_parametro(p_tabla,'tipo_pago')  THEN
+             IF v_parametros.tipo_pago is not null and v_parametros.tipo_pago != '' THEN
+                v_filtro = v_filtro||' tipo = ANY(string_to_array('''||v_parametros.tipo_pago||''','','')) and ';
+             END IF;
+           END IF;
+           
+           IF  pxp.f_existe_parametro(p_tabla,'estado')  THEN
+             IF v_parametros.estado is not null and v_parametros.estado != '' THEN
+                v_filtro = v_filtro||' estado = ANY( string_to_array('''||v_parametros.estado||''','','')) and ';
+             END IF;
+           END IF;
+           
+           IF  pxp.f_existe_parametro(p_tabla,'fuera_estado')  THEN
+             IF v_parametros.fuera_estado is not null and v_parametros.fuera_estado != '' THEN
+                v_filtro = v_filtro||' NOT (estado = ANY (string_to_array('''||v_parametros.fuera_estado||''','',''))) and ';
+             END IF;
+           END IF;
 
 
 
-            v_consulta:='SELECT count(id_plan_pago)
+            v_consulta:='SELECT 
+                                   count(id_plan_pago),
+                                   sum(monto_mb) as monto_mb
 						 FROM
                           tes.vpagos_relacionados
                         WHERE '||v_filtro;
@@ -187,7 +221,7 @@ BEGIN
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 
-            --raise notice '% .',v_consulta;
+            
 			--Devuelve la respuesta
 			return v_consulta;
 

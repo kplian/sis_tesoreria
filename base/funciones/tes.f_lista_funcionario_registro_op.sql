@@ -72,10 +72,14 @@ DECLARE
     v_i       integer;
     v_id_usuario_reg  integer;
     v_id_funcionario integer;
+    
+    --funcionario que realiza la solicitud de obligacion de pago
+    v_fun_pago		INTEGER;
 
 BEGIN
     
     v_nombre_funcion ='tes.f_lista_funcionario_registro_op';
+
 	
   
     --FUNCIONARIO QUE REALIZA LA SOLICITUD DE OBLIGACION DE PAGO
@@ -83,6 +87,7 @@ BEGIN
     INTO v_id_funcionario
     FROM tes.tobligacion_pago op
     WHERE op.id_estado_wf = p_id_estado_wf;	
+
     --recuperamos la la opbligacion de pago a partir del is_estado_wf del la obligacion
     
     /*select 
@@ -102,7 +107,7 @@ BEGIN
     where u.id_usuario = v_id_usuario_reg;*/
    
     IF not p_count then
-    
+    		--v_id_funcionario
              v_consulta:='SELECT
                             fun.id_funcionario,
                             fun.desc_funcionario1 as desc_funcionario,

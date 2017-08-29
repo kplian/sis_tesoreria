@@ -610,7 +610,9 @@ BEGIN
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
             v_consulta:=v_consulta||' group by fun.desc_funcionario1, prov.desc_proveedor, pp.fecha_conformidad,pp.conformidad, cot.numero_oc,op.numero, pp.nro_cuota,op.num_tramite,
+
                         pp.fecha_costo_ini, pp.fecha_costo_fin, pp.obs_monto_no_pagado, pp.observaciones_pago, op.total_nro_cuota, op.obs,op.id_obligacion_pago';			
+
             raise notice '%',v_consulta;
 
 			--Devuelve la respuesta

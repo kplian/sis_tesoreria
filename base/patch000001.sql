@@ -1759,6 +1759,30 @@ ALTER TABLE tes.tobligacion_pago
 
 
 
+
+/*****************************I-SCP-RAC-TES-0-18/08/2017*************/
+
+
+CREATE TABLE tes.ttipo_cc_cuenta_libro (
+  id_ttipo_cc_cuenta_libro SERIAL NOT NULL,
+  id_tipo_cc INTEGER,
+  id_cuenta_bancaria INTEGER,
+  id_depto INTEGER,
+  obs VARCHAR,
+  PRIMARY KEY(id_ttipo_cc_cuenta_libro)
+) INHERITS (pxp.tbase)
+WITH (oids = false);
+
+COMMENT ON TABLE tes.ttipo_cc_cuenta_libro
+IS 'Esta tabla permite parametriza que cuentas bacaria y que libro de bancos se utilizas por defectopara realizar los apgos';
+
+COMMENT ON COLUMN tes.ttipo_cc_cuenta_libro.id_depto
+IS 'depto de libro de bancos';
+
+
+
+/*****************************F-SCP-RAC-TES-0-18/08/2017*************/
+  
   
   
 

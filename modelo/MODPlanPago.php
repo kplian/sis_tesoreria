@@ -790,6 +790,8 @@ class MODPlanPago extends MODbase{
 		  $this->setParametro('estado','estado','VARCHAR');
 		  $this->setParametro('fuera_estado','fuera_estado','VARCHAR');
 		  
+		  $this->capturaCount('monto_mb','numeric');
+		  
 		
 		  $this->captura('id_plan_pago', 'INTEGER');
 		  $this->captura('desc_proveedor', 'VARCHAR');
@@ -798,6 +800,7 @@ class MODPlanPago extends MODbase{
 		  $this->captura('fecha_tentativa', 'DATE');
 		  $this->captura('nro_cuota', 'NUMERIC');
 		  $this->captura('monto ','NUMERIC');
+		  $this->captura('monto_mb ','NUMERIC');		  
 		  $this->captura('codigo', 'VARCHAR');
 		  $this->captura('conceptos', 'TEXT');
 		  $this->captura('ordenes', 'TEXT');
