@@ -80,31 +80,31 @@ BEGIN
     
     v_nombre_funcion ='tes.f_lista_funcionario_registro_op';
 
-	--FUNCIONARIO QUE REALIZA LA SOLICITUD DE OBLIGACION DE PAGO
-	SELECT op.id_funcionario
-    INTO v_fun_pago
+	
+  
+    --FUNCIONARIO QUE REALIZA LA SOLICITUD DE OBLIGACION DE PAGO
+    SELECT op.id_funcionario
+    INTO v_id_funcionario
     FROM tes.tobligacion_pago op
-    WHERE op.id_estado_wf = p_id_estado_wf;
+    WHERE op.id_estado_wf = p_id_estado_wf;	
+
     --recuperamos la la opbligacion de pago a partir del is_estado_wf del la obligacion
     
-    select 
+    /*select 
       op.id_usuario_reg
     into
       v_id_usuario_reg
     from tes.tobligacion_pago op 
-    where op.id_estado_wf = p_id_estado_wf;
-    
-    
+    where op.id_estado_wf = p_id_estado_wf;*/
     --obtiene el funciono que registros la obligacion
-    
-    select
+    /*select
     f.id_funcionario
     into
     v_id_funcionario
     from segu.tusuario u 
     inner join segu.tpersona p on u.id_persona = p.id_persona
     inner join orga.tfuncionario f on f.id_persona = p.id_persona
-    where u.id_usuario = v_id_usuario_reg;
+    where u.id_usuario = v_id_usuario_reg;*/
    
     IF not p_count then
     		--v_id_funcionario
@@ -113,7 +113,7 @@ BEGIN
                             fun.desc_funcionario1 as desc_funcionario,
                             ''Gerente''::text  as desc_funcionario_cargo,
                             1 as prioridad
-                         FROM orga.vfuncionario fun WHERE fun.id_funcionario = '||COALESCE(v_fun_pago,0)::varchar||'
+                         FROM orga.vfuncionario fun WHERE fun.id_funcionario = '||COALESCE(v_id_funcionario,0)::varchar||'
                          and '||p_filtro||'
                          limit '|| p_limit::varchar||' offset '||p_start::varchar; 
      
