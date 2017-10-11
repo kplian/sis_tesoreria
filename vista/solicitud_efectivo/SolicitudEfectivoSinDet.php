@@ -126,7 +126,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			{	text:'Anterior',
 				argument: {estado: 'anterior'},
 				iconCls: 'batras',
-				disabled:true,
+				disabled:false,
 				grupo:[3],
 				handler:this.antEstado,
 				tooltip: '<b>Anterior</b><p>Pasa al anterior estado</p>'

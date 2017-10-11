@@ -359,7 +359,6 @@ class ACTTsLibroBancos extends ACTbase{
 		if($resultLibroBancos->getTipo()=='EXITO'){
 						
 			$datosLibroBancos = $resultLibroBancos->getDatos();
-			
 			$dataSource->setDataSet($datosLibroBancos);    
 			
 			$nombreArchivo = 'LibroBancos.pdf';

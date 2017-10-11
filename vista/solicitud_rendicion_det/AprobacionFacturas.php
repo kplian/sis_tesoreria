@@ -34,6 +34,15 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 			handler: this.showDoc,
 			tooltip: 'Muestra el detalle del documento'
 		});
+
+		this.addButton('btnCambiarApropiacion',
+				{
+					text: 'Cambiar Apropiacion',
+					iconCls: 'brenew',
+					disabled: false,
+					handler: this.cambiarApropiacion,
+					tooltip: 'Cambiar apropiacion de Centro de Costo'
+				});
 		//this.load({params:{start:0, limit:this.tam_pag, id_solicitud_efectivo:this.id_solicitud_efectivo}})
 	},
 			
@@ -506,6 +515,18 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 			this.getBoton('edit').disable();
 			this.getBoton('dev_factura').disable();
 		}
+	},
+
+	cambiarApropiacion : function() {
+		var rec = this.sm.getSelected();
+		Phx.CP.loadWindows('../../../sis_contabilidad/vista/doc_concepto/DocConceptoCtaDoc.php', 'DocConceptoCtaDoc', {
+			modal : true,
+			width : '95%',
+			height : '95%',
+		}, {
+			data : rec.data,
+			id_depto : 4
+		}, this.idContenedor, 'DocConceptoCtaDoc');
 	},
 	
 	bdel:false,

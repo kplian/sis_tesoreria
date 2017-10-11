@@ -26,6 +26,7 @@ BEGIN
          pla.codigo,
          cta.centro,
          cp.manual,
+         tra.banco,
          cp.c31
   into v_registros
   from conta.tint_comprobante cp
@@ -42,7 +43,7 @@ BEGIN
   from tes.tfinalidad fin
   where fin.nombre_finalidad ilike 'proveedores';
 
-  IF v_registros.forma_pago is not null THEN
+  IF v_registros.forma_pago is not null and v_registros.banco='si' THEN
 
   	IF v_registros.manual !='si' THEN	-- inicio verifica cuenta bancaria
   --IF v_registros.centro != 'otro' AND v_registros.manual !='si' THEN	-- inicio verifica cuenta bancaria
