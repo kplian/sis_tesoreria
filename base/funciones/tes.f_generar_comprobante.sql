@@ -11,7 +11,7 @@ CREATE OR REPLACE FUNCTION tes.f_generar_comprobante (
 RETURNS varchar [] AS
 $body$
 /* Autor:   RAC
-*  DESC:     Generar comprobantes de devengado o pago segun correponda al tipo de plan de pago
+*  DESC:     Generar comprobantes de devengado o pago segun corresponda al tipo de plan de pago
 *            y pasa al siguiente estado
 *  Fecha:   10/06/2013
 *
@@ -128,7 +128,7 @@ BEGIN
                 IF  EXISTS (SELECT 1
                 FROM tes.tplan_pago pp
                 WHERE pp.id_obligacion_pago = v_registros.id_obligacion_pago
-                      and (pp.estado != 'devengado' and pp.estado != 'pagado' and pp.estado != 'anulado' and pp.estado != 'anticipado' and pp.estado != 'aplicado' and pp.estado != 'devuelto' and pp.estado!='pago_exterior')
+                      and (pp.estado != 'devengado' and pp.estado != 'pagado' and pp.estado != 'anulado' and pp.estado != 'anticipado' and pp.estado != 'aplicado' and pp.estado != 'devuelto' and pp.estado!='pago_exterior' and pp.estado!='contabilizado')
                       and pp.estado_reg = 'activo'
                       and  pp.nro_cuota < v_registros.nro_cuota ) THEN
 

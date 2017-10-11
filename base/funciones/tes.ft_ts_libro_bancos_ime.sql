@@ -459,6 +459,12 @@ BEGIN
             observaciones = v_parametros.observaciones
             WHERE id_libro_bancos_fk=v_parametros.id_libro_bancos;
         END IF;
+        
+        if(pxp.f_existe_parametro(p_tabla,'nro_deposito')=TRUE) then
+        	UPDATE tes.tts_libro_bancos SET
+            nro_deposito = v_parametros.nro_deposito
+            WHERE id_libro_bancos=v_parametros.id_libro_bancos;
+        end if;
 
 			--Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Depósitos modificado(a)');
@@ -487,7 +493,7 @@ BEGIN
             where lb.id_libro_bancos=v_parametros.id_libro_bancos;
 
             IF g_id_int_comprobante is not null THEN
-            	raise exception 'No puede eliminar el cheque, esta relacionado al tramite %, debe crear otro cheque y relacionar a ese tramite', g_nro_tramite;
+            	--raise exception 'No puede eliminar el cheque, esta relacionado al tramite %, debe crear otro cheque y relacionar a ese tramite', g_nro_tramite;
             END IF;
 
             --eliminamos solo los que estan en estado borrador
