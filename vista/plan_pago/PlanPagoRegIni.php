@@ -311,7 +311,8 @@ Phx.vista.PlanPagoRegIni = {
              this.ocultarGrupo(2); //ocultar el grupo de ajustes
 		
 	        //(f.e.a)control de fechas de inicio y fin de costos
-		var anio = date.getFullYear();
+	        
+		var anio = this.Cmp.fecha_tentativa.getValue().getFullYear();
 		var fecha_inicio = new Date(anio+'/01/1');
 		var fecha_fin = new Date(anio+'/12/31');
 		this.Cmp.fecha_costo_ini.setMinValue(fecha_inicio);
