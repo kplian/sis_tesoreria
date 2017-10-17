@@ -144,6 +144,14 @@ Phx.vista.PlanPagoRegIni = {
              this.setTipoPago[rec.data.variable](this,data);
              this.unblockGroup(1);
              this.window.doLayout();
+	     
+	    //(f.e.a)control de fechas de inicio y fin de costos
+            var fecha = this.Cmp.fecha_tentativa.getValue();
+            var anio = fecha.getFullYear();
+            var fecha_inicio = new Date(anio+'/01/1');
+            var fecha_fin = new Date(anio+'/12/31');
+            this.Cmp.fecha_costo_ini.setMinValue(fecha_inicio);
+            this.Cmp.fecha_costo_fin.setMaxValue(fecha_fin);
              
              if(this.accionFormulario == 'NEW'){
                
@@ -309,15 +317,7 @@ Phx.vista.PlanPagoRegIni = {
              this.porc_ret_gar = 0; //resetea valor por defecto de retencion de garantia
              var data = this.getSelectedData();
              this.ocultarGrupo(2); //ocultar el grupo de ajustes
-		
-	        //(f.e.a)control de fechas de inicio y fin de costos
-	        
-		var anio = this.Cmp.fecha_tentativa.getValue().getFullYear();
-		var fecha_inicio = new Date(anio+'/01/1');
-		var fecha_fin = new Date(anio+'/12/31');
-		this.Cmp.fecha_costo_ini.setMinValue(fecha_inicio);
-		this.Cmp.fecha_costo_fin.setMaxValue(fecha_fin);
-
+	    
              //variables temporales
              this.tmp_porc_monto_excento_var = undefined;
              if(data){
