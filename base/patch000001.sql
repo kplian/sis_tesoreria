@@ -1659,4 +1659,18 @@ ALTER TABLE tes.tcaja
 ALTER TABLE tes.tts_libro_bancos
   ADD COLUMN nro_deposito INTEGER UNIQUE;
   
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN columna_pk VARCHAR(100);
+  
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN columna_pk_valor INTEGER;
+  
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN tabla VARCHAR(250);
+  
+  
+  
 /*****************************F-SCP-GSS-TES-0-23/06/2016*************/
+
+
+
