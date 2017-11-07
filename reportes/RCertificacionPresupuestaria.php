@@ -35,14 +35,29 @@ class RCertificacionPresupuestaria extends  ReportePDF{
 
         $firmas = explode(';',$this->datos[0]['firmas']);
         $firma_fecha = '';
-        foreach ($firmas as $fir){
-            if(strpos($fir, 'registrado')!==false){
-                $firma_fecha = explode(',',$fir);
+        $firma_elaborado = '';
+        $firma_aprobado = '';
+
+        if(count($firmas)>1) {
+            foreach ($firmas as $fir){
+                if(strpos($fir, 'registrado')!==false){
+                    $firma_fecha = explode(',',$fir);
+                }
             }
         }
-        $aprobado = explode(',',$firmas[0]);
-        $elaborado = explode(',',$firmas[1]);
-        //$firmas = explode(',',$firmas[2]);
+
+        foreach ($firmas as $fir){
+            if(strpos($fir, 'vbpresupuestos')!==false){
+                $firma_elaborado = explode(',',$fir);
+            }
+        }
+
+        foreach ($firmas as $fir){
+            if(strpos($fir, 'suppresu')!==false){
+                $firma_aprobado = explode(',',$fir);
+            }
+        }
+
         $fecha = date_format(date_create($firma_fecha[1]), 'd/m/Y');
 
 
@@ -205,18 +220,18 @@ class RCertificacionPresupuestaria extends  ReportePDF{
                     <td style="width: 70%">
                     <table cellspacing="0" cellpadding="1" border="1">
                         <tr>
-                            <td style="font-family: Calibri; font-size: 9px;"><b> Elaborado por:</b> <br> ' . $elaborado[2] . '</td>
-                            <td style="font-family: Calibri; font-size: 9px;"><b> Aprobado por:</b><br> ' . $aprobado[2] . '</td>
+                            <td style="font-family: Calibri; font-size: 9px;"><b> Elaborado por:</b> <br> ' . $firma_elaborado[2] . '</td>
+                            <td style="font-family: Calibri; font-size: 9px;"><b> Aprobado por:</b><br> ' . $firma_aprobado[2] . '</td>
                         </tr>
                         <tr>
                             <td align="center" > 
                                 <br><br>
-                                <img  style="width: 110px; height: 110px;" src="' . $this->generarImagen($elaborado[2], $elaborado[3],$elaborado[4]) . '" alt="Logo">
+                                <img  style="width: 110px; height: 110px;" src="' . $this->generarImagen($firma_elaborado[2], $firma_elaborado[3],$firma_elaborado[4]) . '" alt="Logo">
                                
                             </td>
                             <td align="center" >
                                 <br><br>
-                                <img  style="width: 110px; height: 110px;" src="' . $this->generarImagen($aprobado[2], $aprobado[3],$aprobado[4]) . '" alt="Logo">
+                                <img  style="width: 110px; height: 110px;" src="' . $this->generarImagen($firma_aprobado[2], $firma_aprobado[3],$firma_aprobado[4]) . '" alt="Logo">
                                   
                             </td>
                          </tr>
@@ -260,6 +275,68 @@ class RCertificacionPresupuestaria extends  ReportePDF{
                 ';
             $this->Ln(5);
             $this->writeHTML($tbl, true, false, false, false, '');
+        }
+
+        if($this->datos[0]['codigo_poa']!=''){
+            $tex ='Mediante la presente, en referencia a solicitud <b>'.$this->datos[0]['num_tramite'].'</b> de fecha <b>'.$this->datos[0]['fecha_soli'].'</b> 
+            acerca de: <b>'.$this->datos[0]['justificacion'].'</b>, certificar que el mismo se encuentra contemplado en el Plan Operativo gestion <b>'.$this->datos[0]['gestion'].'</b>, 
+            en la operacion <b>'.$this->datos[0]['codigo_descripcion'].'.</b>';
+
+            $this->SetFont('','B',12);
+            $this->Cell(0,5,"CERTIFICACIÓN POA",0,1,'C');
+            $this->ln(1);
+            $this->SetFont('','',12);
+
+            $tbl = '<table border="1">
+                    <tr>
+                        <td>
+                            <table border="0">
+                                <tr>
+                                    <td style="width: 0.5%"></td>
+                                    <td style="width: 97.5%; text-align: justify; font-family: Calibri; font-size: 10px;"><br><br>'.$tex.'<br></td>
+                                    <td style="width: 2%"> </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                    
+                ';
+            $this->writeHTML($tbl, true, false, false, false, '');
+            if($firma_elaborado[0]!='' || $firma_aprobado[0]!='') {
+                $firmas = explode(';',$this->datos[0]['firmas']);
+
+                $firma_poa = '';
+                foreach ($firmas as $fir){
+                    if(strpos($fir, 'vbpoa')!==false){
+                        $firma_poa = explode(',',$fir);
+                    }
+                }
+
+                $tbl = '<table>
+                        <tr>
+                        <td style="width: 35%"></td>
+                        <td style="width: 30%">
+                        <table cellspacing="0" cellpadding="1" border="1">
+                            <tr>
+                                <td style="font-family: Calibri; font-size: 9px;"><b> VoBo POA:</b> <br> ' . $firma_poa[2] . '</td>
+                            </tr>
+                            <tr>
+                                <td align="center" cellspacing="0" cellpadding="1"> 
+                                    <br>
+                                    <img  style="width: 110px; height: 110px;" src="' . $this->generarImagen($firma_poa[2], $firma_poa[3], $firma_poa[4]) . '" alt="Logo">
+                                   
+                                </td>
+                             </tr>
+                        </table>
+                        </td>
+                        <td style="width:35%;"></td>
+                        </tr>
+                   </table>
+                        
+                    ';
+                $this->writeHTML($tbl, true, false, false, false, '');
+            }
         }
 
     }
