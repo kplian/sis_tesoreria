@@ -1681,16 +1681,37 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 	
 	onBtnVerifPresup : function() {
         var rec = this.sm.getSelected();
-        //Se define el nombre de la columna de la llave primaria
-        rec.data.tabla_id = this.tabla_id;
-        rec.data.tabla = this.tabla;
-        
+        //Se define el nombre de la columna de la llave primaria        
         Phx.CP.loadWindows('../../../sis_presupuestos/vista/verificacion_presup/VerificacionPresup.php', 'Disponibilidad Presupuestaria', {
             modal : true,
             width : '80%',
             height : '50%',
-        }, rec.data, this.idContenedor, 'VerificacionPresup');
+        }, 
+        {
+		  tabla_id: rec.data.id_obligacion_pago,
+		  tabla: this.tabla								  
+		},this.idContenedor, 'VerificacionPresup');
     },
+    
+     checkVerPresupuesto:function(){                   
+			  var rec=this.sm.getSelected();
+			  var configExtra = [];
+			  this.objChkPres = Phx.CP.loadWindows('../../../sis_presupuestos/vista/verificacion_presup/VerificacionPresup.php',
+										'Verificación de disponibilidad del Presupuesto',
+										{
+											modal: true,
+											width: 700,
+											height: 450
+										}, {
+											  tabla_id: rec.data.id_int_comprobante,
+											  tabla: 'conta.tint_comprobante'								  
+											}, this.idContenedor,'VerificacionPresup');
+											
+											
+										
+			   
+	 },
+    
     
     onBtnCheckPresup : function() {
         var rec = this.sm.getSelected();

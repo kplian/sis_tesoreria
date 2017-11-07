@@ -18,7 +18,10 @@ Descripcion  Esta funcion gestiona los planes de pago de la siguiente manera
 
     Cuando un comprobante de devegado o pago es validado  ->   cambia el estado de la cuota.
 
-    
+   HISTORIAL DE MODIFICACIONES:
+   	
+ ISSUE            FECHA:		      AUTOR                 DESCRIPCION
+ #31, ETR       27/10/2017        RAC KPLIAN        Considerar si anticipos ejecutan presupeusto    
 
 */
 
@@ -126,19 +129,31 @@ BEGIN
 	  left join param.tdepto dpc on dpc.id_depto=pp.id_depto_conta
 	  left join param.tdepto dpl on dpl.id_depto=pp.id_depto_lb
       where  pp.id_int_comprobante = p_id_int_comprobante; 
-    
+      
+      
+      
+     
     
     --2) Validar que tenga un plan de pago
     
     
-     IF  v_registros.id_plan_pago is NULL  THEN
-     
-        raise exception 'El comprobante no esta relacionado con nigun plan de pagos';
-     
+     IF  v_registros.id_plan_pago is NULL  THEN     
+        raise exception 'El comprobante no esta relacionado con nigun plan de pagos';     
      END IF;
-    
-    
-    
+     
+     
+     --#31   RAC 27/10/2017
+     --SI es del tipo anticopo
+     --  Verificamos configuracion si Anticipo ejecuta presupuesto
+     --  llamaos a funcion de presupeustos apra ejecucion de anticipo
+     IF   v_registros.tipo in ( 'anticipo', 'ant_parcial') THEN
+        IF not  tes.f_gestionar_presupuesto_tesoreria(v_registros.id_obligacion_pago, p_id_usuario, 'ejecutar_anticipo',v_registros.id_plan_pago ) THEN
+           raise exception 'error ejecutando presupuesto del anticipo';
+        END IF;
+        --NOTA, este presupuesto se revertira en la prevalidacion del comprobante de aplciacion del anticipo
+     END IF; 
+     
+     
      -- 3)  Si es devengado_pagado o   devengado, se identifica  con id_plan_pago_fk = null
     
     

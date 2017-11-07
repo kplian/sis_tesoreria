@@ -19,9 +19,13 @@ $body$
                 adcionar comprometido
                 revertir sobrante
                 
- AUTOR: 		Rensi Arteaga Copari
- FECHA:	        04-07-2013
- COMENTARIOS:	
+
+    HISTORIAL DE MODIFICACIONES:
+   	
+ ISSUE            FECHA:		      AUTOR                 DESCRIPCION
+ #0             04-07-2013        RAC KPLIAN        validaciones
+ #31, ETR       27/10/2017        RAC KPLIAN        agregar operacion para ejecutar anticipos y para revertir anticipos en proporcion    
+ 
 ***************************************************************************/
 
 DECLARE
@@ -61,6 +65,14 @@ DECLARE
   v_resp_pre			varchar;
   v_mensage_error 		varchar;
   v_sw_error 			boolean;
+  v_total_op_mo			numeric;
+  v_monto_ejecutar		numeric;
+  v_monto_ejecutar_mb	numeric;
+  v_resultado_ges					numeric[];
+  v_mensaje_error					varchar;
+  v_sw_revertir_ant					boolean;
+  v_monto_a_revertir_mb				numeric;
+  v_tes_anticipo_ejecuta_pres    	varchar;  --#31, ++ 		
   
 
   
@@ -479,7 +491,7 @@ BEGIN
                               
                               
                               ELSE
-                                  v_resp_pre = pre.f_verificar_presupuesto_partida ( v_registros.id_presupuesto,
+                                    v_resp_pre = pre.f_verificar_presupuesto_partida ( v_registros.id_presupuesto,
                                                                         v_registros.id_partida,
                                                                         v_registros.id_moneda,
                                                                         v_registros.monto_pago_mo);
@@ -492,12 +504,7 @@ BEGIN
                               
                               END IF;
           
-                              
-                                                        
-                                                        
-                             
-             
-          
+                         
          
           
           END LOOP;
@@ -508,6 +515,232 @@ BEGIN
              raise exception 'No se tiene suficiente presupeusto para; <BR/>%', v_mensage_error;
          END IF;
              
+       --------------------------------------------------------------------------------------------
+       -- #31,  ejecutar anticipos 
+       --   Ejecuta el presupeusta (debe estar comprometido previamente en las partidas correpondecientes)
+       -----------------------------------------------------------------------------------------------------------
+       ELSEIF p_operacion = 'ejecutar_anticipo' THEN
+            
+           v_tes_anticipo_ejecuta_pres = pxp.f_get_variable_global('tes_anticipo_ejecuta_pres');
+           IF v_tes_anticipo_ejecuta_pres = 'si' THEN
+                  --recueprar el total del monto que se va anticipiar, es el total a ejecutar
+                   select 
+                     pp.monto_mb,
+                     pp.monto,               
+                     pp.estado,
+                     op.num_tramite,
+                     pp.id_int_comprobante,
+                     cbte.tipo_cambio,
+                     cbte.id_moneda,
+                     cbte.fecha,
+                     cbte.id_int_comprobante
+                     
+                   into
+                     v_registros
+                   from tes.tplan_pago pp 
+                   inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
+                   inner join conta.tint_comprobante cbte on cbte.id_int_comprobante = pp.id_int_comprobante
+                   where pp.id_plan_pago = p_id_plan_pago;
+                   
+                   
+                  --recuperar el total de la obligacion
+                   select 
+                     sum(od.monto_pago_mo)
+                    into
+                     v_total_op_mo
+                  from tes.tobligacion_det od
+                  where      od.id_obligacion_pago = p_id_obligacion_pago
+                         AND OD.estado_reg = 'activo' ; 
+                   
+                  IF v_total_op_mo <= 0 THEN
+                     raise exception 'El total de la obligacion es menor o igual a cero';
+                  END IF;
+                  --determianr el factor por centro de costo y por aprtida
+                  
+                  
+                 FOR v_registros_pro in (  
+                                        select 
+                                           od.id_centro_costo,
+                                           od.id_partida,
+                                           od.monto_pago_mo,
+                                           od.monto_pago_mb,
+                                           (od.monto_pago_mo / v_total_op_mo) as factor,
+                                           par.codigo as codigo_partida
+                                        from tes.tobligacion_det od
+                                        inner join pre.tpartida par on par.id_partida = od.id_partida
+                                        where      od.id_obligacion_pago = p_id_obligacion_pago
+                                               AND OD.estado_reg = 'activo') LOOP
+                                               
+                           
+                           -- ejecutar presupuesto en la proporcion determianda 
+                           v_monto_ejecutar =   v_registros.monto *  v_registros_pro.factor;
+                           v_monto_ejecutar_mb =   v_registros.monto_mb *  v_registros_pro.factor; 
+                           
+                           
+                           v_resultado_ges = pre.f_gestionar_presupuesto_individual(
+                                                    p_id_usuario,
+                                                    v_registros.tipo_cambio,
+                                                    v_registros_pro.id_centro_costo ,
+                                                    v_registros_pro.id_partida,
+                                                    v_registros.id_moneda,
+                                                    v_monto_ejecutar,
+                                                    v_registros.fecha,
+                                                    'ejecutado'::varchar, --traducido a varchar
+                                                    NULL,   --partida ejecucion
+                                                    'id_plan_pago',
+                                                    p_id_plan_pago,
+                                                    v_registros.num_tramite,
+                                                    v_registros.id_int_comprobante,
+                                                    v_monto_ejecutar_mb); 
+                                                    
+                                                    
+                             --  analizamos respuesta y retornamos error
+                               IF v_resultado_ges[1] = 0 THEN
+                                                         
+                                         --  recuperamos datos del presupuesto
+                                         v_mensaje_error = v_mensaje_error || conta.f_armar_error_presupuesto(v_resultado_ges, 
+                                                                               v_registros_pro.id_centro_costo, 
+                                                                               v_registros_pro.codigo_partida, 
+                                                                               v_registros.id_moneda, 
+                                                                               v_id_moneda_base, 
+                                                                               'ejecutado', 
+                                                                               v_monto_ejecutar_mb);
+                                         v_sw_error = true;
+                                                               
+                               END IF; --fin id de error                            
+                                               
+                                               
+                  END LOOP; 
+                  
+                  IF v_sw_error THEN
+                     raise exception 'Error al procesar presupuesto: %', v_mensaje_error;
+                  END IF;
+                  
+            END IF;
+       -----------------------------------------------------------------------    
+       -- #31,  revertir anticipos en proporcion 
+       --     revierte en proporcion del  decuento por anticipo an las partidas y centros correpodencientes
+       --     esta pensado para ejcutarce en la prevalizacion del comprobante de aplicacion
+       ---------------------------------------------------------------------------------------------
+       ELSEIF p_operacion = 'revertir_anticipo' THEN
+       
+           v_tes_anticipo_ejecuta_pres = pxp.f_get_variable_global('tes_anticipo_ejecuta_pres');
+           IF v_tes_anticipo_ejecuta_pres = 'si' THEN
+                  --recuperar el total del monto que se va anticipiar, es el total a ejecutar
+                   select 
+                     pp.monto_mb,
+                     pp.monto,               
+                     pp.estado,
+                     op.num_tramite,
+                     pp.id_int_comprobante,
+                     cbte.tipo_cambio,
+                     cbte.id_moneda,
+                     cbte.fecha,
+                     cbte.id_int_comprobante,
+                     pp.descuento_anticipo,
+                     pp.descuento_anticipo_mb,
+                     pp.tipo
+                     
+                   into
+                     v_registros
+                   from tes.tplan_pago pp 
+                   inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
+                   inner join conta.tint_comprobante cbte on cbte.id_int_comprobante = pp.id_int_comprobante
+                   where pp.id_plan_pago = p_id_plan_pago;
+                   
+                  --recuperar el total de la obligacion
+                   select 
+                     sum(od.monto_pago_mo)
+                    into
+                     v_total_op_mo
+                  from tes.tobligacion_det od
+                  where      od.id_obligacion_pago = p_id_obligacion_pago
+                         AND OD.estado_reg = 'activo' ; 
+             
+               
+             
+                --  indetifica el monto del anticipo a ser aplicado
+                 IF v_registros.tipo in('ant_aplicado','devengado_pagado','devengado_pagado_1c','devengado')  THEN
+                    v_sw_revertir_ant = true;
+                    
+                    --tenemos dos casos retencioanes parciales o plaicacion de anticopo segun el tipo de cuota
+                    IF v_registros.tipo in('ant_aplicado') THEN
+                       v_monto_a_revertir = v_registros.monto;
+                       v_monto_a_revertir_mb = v_registros.monto_mb;
+                    ELSE
+                       v_monto_a_revertir = v_registros.descuento_anticipo;
+                       v_monto_a_revertir_mb = v_registros.descuento_anticipo_mb;
+                    END IF;
+               
+                 ELSE
+                   v_sw_revertir_ant = false;
+                 END IF;
+               
+               
+               IF v_sw_revertir_ant THEN
+                     -- recuperar de la tabla prorrateo los factores
+                      FOR v_registros_pro in (  
+                                              select 
+                                                 od.id_centro_costo,
+                                                 od.id_partida,
+                                                 od.monto_pago_mo,
+                                                 od.monto_pago_mb,
+                                                 (od.monto_pago_mo / v_total_op_mo) as factor,
+                                                 par.codigo as codigo_partida
+                                              from tes.tobligacion_det od
+                                              inner join pre.tpartida par on par.id_partida = od.id_partida
+                                              where      od.id_obligacion_pago = p_id_obligacion_pago
+                                                     AND OD.estado_reg = 'activo') LOOP
+                                                     
+                                                     
+                                    -- ejecutar presupuesto en la proporcion determianda 
+                                    v_monto_ejecutar =   v_monto_a_revertir *  v_registros_pro.factor;
+                                    v_monto_ejecutar_mb =   v_monto_a_revertir_mb *  v_registros_pro.factor; 
+                                    
+                                    -- llamada para revertir presupuesto ejecutado                    
+                                                     
+                                    v_resultado_ges = pre.f_gestionar_presupuesto_individual(
+                                                          p_id_usuario,
+                                                          v_registros.tipo_cambio,
+                                                          v_registros_pro.id_centro_costo ,
+                                                          v_registros_pro.id_partida,
+                                                          v_registros.id_moneda,
+                                                          v_monto_ejecutar*-1,
+                                                          v_registros.fecha,
+                                                          'ejecutado'::varchar, --traducido a varchar
+                                                          NULL,   --partida ejecucion
+                                                          'id_plan_pago',
+                                                          p_id_plan_pago,
+                                                          v_registros.num_tramite,
+                                                          v_registros.id_int_comprobante,
+                                                          v_monto_ejecutar_mb*-1); 
+                                                          
+                                                          
+                                     --  analizamos respuesta y retornamos error
+                                     IF v_resultado_ges[1] = 0 THEN
+                                                               
+                                               --  recuperamos datos del presupuesto
+                                               v_mensaje_error = v_mensaje_error || conta.f_armar_error_presupuesto(v_resultado_ges, 
+                                                                                     v_registros_pro.id_centro_costo, 
+                                                                                     v_registros_pro.codigo_partida, 
+                                                                                     v_registros.id_moneda, 
+                                                                                     v_id_moneda_base, 
+                                                                                     'ejecutado', 
+                                                                                     v_monto_ejecutar_mb);
+                                               v_sw_error = true;
+                                                                     
+                                     END IF; --fin id de error                   
+                     
+                     
+                     
+                     END LOOP;
+                     
+                     IF v_sw_error THEN
+                       raise exception 'Error al procesar presupuesto: %', v_mensaje_error;
+                     END IF;
+                     
+                END IF;
+         END IF;
              
        ELSE
          raise exception 'Operación no implementada';

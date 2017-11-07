@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_gestionar_presupuesto_tesoreria_obligacion_pago_det (
   p_id_obligacion_pago integer,
   p_id_obligacion_pago_det integer,
@@ -70,6 +72,8 @@ BEGIN
   v_nombre_funcion = 'tes.f_gestionar_presupuesto_tesoreria_obligacion_pago_det';
 
   v_id_moneda_base =  param.f_get_moneda_base();
+  
+  raise exception 'Esta funcion parece duplicada, quiereo saber desde donde se llama RAC';
 
 
   SELECT

@@ -1750,4 +1750,14 @@ VALUES
   
 
 
+/***********************************I-DAT-RAC-TES-31-07/11/2017*****************************************/
+  
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES 
+  (E'tes_anticipo_ejecuta_pres', E'no', E'si o no, anticipos ejecutan presupeusto, mismo sin ejecucion contable');
+
+
+/***********************************F-DAT-RAC-TES-31-07/11/2017*****************************************/
+  
 
