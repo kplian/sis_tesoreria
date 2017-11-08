@@ -785,7 +785,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 	   			config:{
 				    name:'id_depto_lb',
 				    hiddenName: 'id_depto_lb',
-				    //url: '../../sis_parametros/control/Depto/listarDepto',
+				    url: '../../sis_parametros/control/Depto/listarDepto',
 	   				origen: 'DEPTO',
 	   				allowBlank: false,
 	   				fieldLabel: 'Libro de bancos destino',
