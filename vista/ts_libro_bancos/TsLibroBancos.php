@@ -52,6 +52,16 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			}
 		);
 		
+		this.addButton('btnCheque3',
+			{
+				text: 'Cheque 3',
+				iconCls: 'bprintcheck',
+				disabled: false,
+				handler: this.imprimirCheque3,
+				tooltip: '<b>Cheque</b><br/>Imprimir cheque en el tamaño nuevo'
+			}
+		);
+		
 		this.addButton('btnMemoramdum',
 			{
 				text: 'Memo',
@@ -1063,7 +1073,36 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			Ext.MessageBox.alert('Estado', 'Antes debe seleccionar un item.');
 		}
 	},
-	
+	//
+	imprimirCheque3 : function(){
+		var NumSelect=this.sm.getCount();		
+		if(NumSelect!=0)
+		{
+			if(confirm('¿Está seguro de imprimir el cheque?'))
+			{
+				var data=this.sm.getSelected().data;
+				Phx.CP.loadingShow();
+				Ext.Ajax.request({
+				url:'../../sis_tesoreria/control/TsLibroBancos/imprimirCheque3',
+				params:{
+					'a_favor':data.a_favor , 
+					'importe_cheque' : data.importe_cheque ,
+					'fecha_cheque_literal' : data.fecha_cheque_literal,
+					'nombre_regional' : data.nombre_regional
+				},
+				success:this.successExport,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});
+			}
+		}
+		else
+		{
+			Ext.MessageBox.alert('Estado', 'Antes debe seleccionar un item.');
+		}
+	},
+	//
 	onChequesAsociados:function() {
 			var rec=this.sm.getSelected();
 			rec.data.nombreVista = 'ChequesAsociados';
