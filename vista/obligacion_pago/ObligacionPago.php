@@ -79,15 +79,15 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                 tooltip : '<b>Verificación de la disponibilidad presupuestaria</b>'
             });
         
-        //RCM: reporte de verificacion presupeustaria
-        this.addButton('btnCheckPresupeusto', {
-                text : 'Rev. Pres.',
-                grupo:[0,1,2],
-                iconCls : 'bassign',
-                disabled : false,
-                handler : this.onBtnCheckPresup,
-                tooltip : '<b>Revertir  presupuestos,  permite ver la evolucón presupuestaria y revertir parcialmente</b>'
+          this.addButton('chkpresupuesto',   {
+	     	    grupo:[0,1,2,3,4],               
+                text: 'Presup',
+                iconCls: 'blist',
+                tooltip: '<b>Revisar Presupuesto</b><p>Revisar estado de ejecución presupeustaria para este  tramite</p>',
+                handler:this.checkPresupuesto,               
+                scope: this
             });
+	    
         
         //this.addButton('diagrama_gantt',{grupo:[0,1,2],text:'Gant', iconCls: 'bgantt', disabled:true, handler:diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
   
@@ -1168,11 +1168,8 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
               	this.getBoton('ajustes').disable();
               }
               
-              if(data['pago_variable'] != 'finalizado' &&  data['estado'] != 'anulado' ){
-              	this.getBoton('btnCheckPresupeusto').enable();
-              }
-              
-              
+              this.getBoton('chkpresupuesto').enable();
+             
               
               if(this.getBoton('edit')){
               	/*
@@ -1238,7 +1235,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 			this.getBoton('ajustes').disable();
 			this.getBoton('est_anticipo').disable();
 			this.getBoton('extenderop').disable();
-			this.getBoton('btnCheckPresupeusto').disable();
+			this.getBoton('chkpresupuesto').disable();
 			this.getBoton('btnObs').disable();
 			
 			//Inhabilita el reporte de disponibilidad
@@ -1724,6 +1721,25 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
             height : '70%',
         }, rec.data, this.idContenedor, 'CheckPresupuesto');
     },
+    
+    
+    checkPresupuesto:function(){                   
+			  var rec=this.sm.getSelected();
+			  var configExtra = [];
+			  this.objChkPres = Phx.CP.loadWindows('../../../sis_presupuestos/vista/presup_partida/ChkPresupuesto.php',
+										'Estado del Presupuesto',
+										{
+											modal:true,
+											width:700,
+											height:450
+										}, {
+											data:{
+											   nro_tramite: rec.data.num_tramite								  
+											}}, this.idContenedor,'ChkPresupuesto');
+			   
+	 },
+	
+    
     
     construyeVariablesContratos:function(){
     	Phx.CP.loadingShow();
