@@ -265,7 +265,7 @@ class ACTTsLibroBancos extends ACTbase{
 		$fp=fopen($fichero_salida,w);
 		
 		$funciones = new funciones();
-		
+		 
 		$contenido = "<body onLoad='window.print();'>";
 		$contenido = $contenido. "<table border=0 style='line-height: 10px;'>";
 		
