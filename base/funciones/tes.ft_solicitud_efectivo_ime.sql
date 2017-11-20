@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.ft_solicitud_efectivo_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -425,7 +423,9 @@ BEGIN
                   case when v_parametros.saldo > 0 then
                   'Devolucion de dinero del solicitante al cajero'
                   else
-                  'Solicitud de reposicion de dinero al solicitante, gasto excedido'
+
+                  'Solicitud de reposicion de dinero al solicitante, gasto excedido' 
+
                   end as motivo,
                   id_solicitud_efectivo_fk as id_solicitud_efectivo_fk,
                   id_estado_wf
@@ -588,12 +588,14 @@ BEGIN
 
         END;
 
-    /*********************************
- 	#TRANSACCION:  'TES_AMPREN_IME'
+        
+/*********************************    
+	#TRANSACCION:  'TES_AMPREN_IME'
  	#DESCRIPCION:	Ampliar dias para rendir solicitud efectivo
  	#AUTOR:		Gonzalo Sarmiento
  	#FECHA:		10-04-2017
 	***********************************/
+
 
 	elsif(p_transaccion='TES_AMPREN_IME')then
 
@@ -603,19 +605,22 @@ BEGIN
 
 			--Sentencia de la modificacion
 			update tes.tsolicitud_efectivo set
+
                 fecha_entrega = (fecha_entrega::Date +  v_temp)::date,
                 id_usuario_mod = p_id_usuario,
                 fecha_mod = now()
             where id_solicitud_efectivo = v_parametros.id_solicitud_efectivo;
 
+               
 			--Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Dias de rendicion ampliados)');
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Dias de rendicion ampliados)'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_efectivo',v_parametros.id_solicitud_efectivo::varchar);
-
+               
             --Devuelve la respuesta
             return v_resp;
-
-		end;
+            
+		end;     
+         
 
 	else
 

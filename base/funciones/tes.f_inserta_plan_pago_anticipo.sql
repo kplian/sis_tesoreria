@@ -488,6 +488,15 @@ BEGIN
                 (p_hstore->'fecha_costo_ini')::date, 
                 (p_hstore->'fecha_costo_fin')::date				
             )RETURNING id_plan_pago into v_id_plan_pago;
+            
+            
+            --RAC 22/08/2017, si no tenemos cuenta bancaria  busca segun configuracion predetermianda
+            -- para los centors de costos afectados
+            IF v_id_cuenta_bancaria is NULL THEN
+               IF  not tes.f_calcular_cuenta_bancaria_pp(v_id_plan_pago) THEN
+                  raise exception 'error al determinar cuentas bancarias predeterminadas';
+               END IF;
+            END IF;
           
             --actualiza la cuota vigente en la obligacion
             update tes.tobligacion_pago  p set 

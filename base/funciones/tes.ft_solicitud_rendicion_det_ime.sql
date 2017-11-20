@@ -77,7 +77,7 @@ BEGIN
              where id_doc_compra_venta=v_parametros.id_documento_respaldo;
 
              IF v_fecha_documento > v_fecha_solicitud + 3 THEN
-             	raise exception 'No es posible registrar documentos con fecha mayor a 3 dias de la fecha de solicitud %',v_fecha_solicitud;
+             	--raise exception 'No es posible registrar documentos con fecha mayor a 3 dias de la fecha de solicitud %',v_fecha_solicitud;
              END IF;
 
              IF v_id_solicitud_efectivo_rend is null THEN

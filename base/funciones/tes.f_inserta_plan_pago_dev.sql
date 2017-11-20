@@ -612,6 +612,15 @@ BEGIN
                      
 			END IF;
             
+            
+            --RAC 22/08/2017, si no tenemos cuenta bancaria  busca segun configuracion predetermianda
+            -- para los centors de costos afectados
+            IF v_id_cuenta_bancaria is NULL THEN
+               IF  not tes.f_calcular_cuenta_bancaria_pp(v_id_plan_pago) THEN
+                  raise exception 'error al determinar cuentas bancarias predeterminadas';
+               END IF;
+            END IF;
+            
             --si el salto esta habilitado cambiamos la cuota al siguiente estado 
             IF p_salta  and v_registros.pago_variable = 'no' THEN
                   IF not tes.f_cambio_estado_plan_pago(p_id_usuario, v_id_plan_pago) THEN

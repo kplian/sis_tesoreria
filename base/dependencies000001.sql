@@ -5141,3 +5141,59 @@ WITH detalle AS(
 
 /***********************************F-DEP-RAC-TES-0-31/07/2017****************************************/
 
+
+
+/***********************************I-DEP-RAC-TES-0-29/08/2017****************************************/
+
+
+
+--------------- SQL ---------------
+
+ -- object recreation
+DROP VIEW tes.vpagos_relacionados;
+
+CREATE VIEW tes.vpagos_relacionados
+AS
+WITH detalle AS(
+  SELECT op_1.id_obligacion_pago,
+         pxp.list(cig.desc_ingas::text) AS conceptos,
+         pxp.list(ot.desc_orden::text) AS ordenes,
+         pxp.aggarray(od.id_orden_trabajo::text) AS id_orden_trabajos,
+         pxp.aggarray(od.id_concepto_ingas::text) AS id_concepto_ingas
+  FROM tes.tobligacion_pago op_1
+       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
+         op_1.id_obligacion_pago
+       JOIN param.tconcepto_ingas cig ON cig.id_concepto_ingas =
+         od.id_concepto_ingas
+       LEFT JOIN conta.torden_trabajo ot ON ot.id_orden_trabajo =
+         od.id_orden_trabajo
+  GROUP BY op_1.id_obligacion_pago)
+    SELECT prov.desc_proveedor,
+           op.num_tramite,
+           pp.estado,
+           COALESCE(pp.fecha_tentativa, op.fecha) AS fecha_tentativa,
+           pp.nro_cuota,
+           pp.monto,
+           param.f_convertir_moneda(op.id_moneda, 1, pp.monto, op.fecha,'O',2) as monto_mb,
+
+           mon.codigo,
+           det.conceptos,
+           det.ordenes,
+           det.id_orden_trabajos,
+           det.id_concepto_ingas,
+           pp.id_plan_pago,
+           pp.id_proceso_wf,
+           pp.id_estado_wf,
+           op.id_proveedor,
+           op.obs,
+           pp.tipo
+    FROM tes.tobligacion_pago op
+         JOIN param.vproveedor prov ON prov.id_proveedor = op.id_proveedor
+         JOIN tes.tplan_pago pp ON pp.id_obligacion_pago = op.id_obligacion_pago
+         JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
+         JOIN detalle det ON det.id_obligacion_pago = op.id_obligacion_pago;
+
+
+/***********************************F-DEP-RAC-TES-0-29/08/2017****************************************/
+
+

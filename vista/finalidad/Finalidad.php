@@ -190,7 +190,7 @@ Phx.vista.Finalidad=Ext.extend(Phx.gridInterfaz,{
 	title:'Finalidad',
 	ActSave:'../../sis_tesoreria/control/Finalidad/insertarFinalidad',
 	ActDel:'../../sis_tesoreria/control/Finalidad/eliminarFinalidad',
-	ActList:'../../sis_tesoreria/control/Finalidad/listarFinalidadCuentaBancaria',
+	ActList:'../../sis_tesoreria/control/Finalidad/listarFinalidad',
 	id_store:'id_finalidad',
 	fields: [
 		{name:'id_finalidad', type: 'numeric'},
@@ -213,10 +213,10 @@ Phx.vista.Finalidad=Ext.extend(Phx.gridInterfaz,{
 		field: 'id_finalidad',
 		direction: 'ASC'
 	},
-	bdel:false,
+	bdel:true,
 	bsave:false,
-	bedit:false,
-	bnew:false,
+	bedit:true,
+	bnew:true,
 	/*
 	onReloadPage:function(m)
 	{

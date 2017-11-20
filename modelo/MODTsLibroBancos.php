@@ -191,7 +191,8 @@ class MODTsLibroBancos extends MODbase{
 		$this->setParametro('estado_reg','estado_reg','varchar');
 		$this->setParametro('tipo','tipo','varchar');
 		$this->setParametro('id_finalidad','id_finalidad','int4');
-		
+		$this->setParametro('nro_deposito','nro_deposito','int4');
+
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();

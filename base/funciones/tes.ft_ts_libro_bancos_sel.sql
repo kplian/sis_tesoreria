@@ -1,6 +1,6 @@
 --------------- SQL ---------------
 
-CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_sel (
+CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_sel (  
   p_administrador integer,
   p_id_usuario integer,
   p_tabla varchar,
@@ -505,7 +505,7 @@ BEGIN
 
               and
               case when ('||v_parametros.id_finalidad||'=0)
-              then   LB.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
+              then   0=0
               else LB.id_finalidad in ('||v_parametros.id_finalidad||')
               end
 

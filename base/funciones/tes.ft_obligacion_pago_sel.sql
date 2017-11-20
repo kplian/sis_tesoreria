@@ -833,7 +833,7 @@ BEGIN
 			return v_consulta;
 
 		end;
-	 /*********************************
+	/*********************************
  	#TRANSACCION:  'TES_REPCERPRE_SEL'
  	#DESCRIPCION:	Reporte Certificación Presupuestaria
  	#AUTOR:		FEA
@@ -876,6 +876,7 @@ BEGIN
             FROM tes.tobligacion_pago top
             WHERE top.id_proceso_wf = v_parametros.id_proceso_wf;
 
+
             SELECT tpo.nombre
             INTO v_cod_proceso
             FROM wf.tproceso_wf tpw
@@ -883,7 +884,7 @@ BEGIN
             INNER JOIN wf.tproceso_macro tpo ON tpo.id_proceso_macro = ttp.id_proceso_macro
             WHERE tpw.id_proceso_wf = v_parametros.id_proceso_wf;
 
-            IF(v_record_op.estado IN ('registrado', 'en_pago', 'finalizado'))THEN
+            IF(v_record_op.estado IN ('vbpresupuestos', 'suppresu', 'registrado', 'en_pago', 'finalizado'))THEN
               v_index = 1;
               FOR v_record IN (WITH RECURSIVE firmas(id_estado_fw, id_estado_anterior,fecha_reg, codigo, id_funcionario) AS (
                                 SELECT tew.id_estado_wf, tew.id_estado_anterior , tew.fecha_reg, te.codigo, tew.id_funcionario
@@ -898,9 +899,9 @@ BEGIN
                                 INNER JOIN firmas f ON f.id_estado_anterior = ter.id_estado_wf
                                 INNER JOIN wf.ttipo_estado te ON te.id_tipo_estado = ter.id_tipo_estado
                                 WHERE f.id_estado_anterior IS NOT NULL
-                            )SELECT * FROM firmas ORDER BY id_estado_fw ASC) LOOP
+                            )SELECT distinct on (codigo) codigo, fecha_reg , id_estado_fw, id_estado_anterior, id_funcionario FROM firmas ORDER BY codigo, fecha_reg DESC) LOOP
 
-                  IF(v_record.codigo = 'suppresu' OR v_record.codigo = 'vbpresupuestos' OR v_record.codigo = 'registrado')THEN
+                  IF(v_record.codigo = 'vbpoa' OR v_record.codigo = 'suppresu' OR v_record.codigo = 'vbpresupuestos' OR v_record.codigo = 'registrado')THEN
                     	SELECT vf.desc_funcionario1, vf.nombre_cargo, vf.oficina_nombre
                         INTO v_record_funcionario
                         FROM orga.vfuncionario_cargo_lugar vf
@@ -945,11 +946,21 @@ BEGIN
             --(uo.codigo||''-''||uo.nombre_unidad)::varchar as unidad_solicitante,
             '''||v_gerencia||'''::varchar AS unidad_solicitante,
             fun.desc_funcionario1::varchar as funcionario_solicitante,
-            '''||v_cod_proceso||'''::varchar AS codigo_proceso
+            '''||v_cod_proceso||'''::varchar AS codigo_proceso,
+
+            COALESCE(ts.fecha,null::date) AS fecha_soli,
+            COALESCE(tg.gestion, (extract(year from now()::date))::integer) AS gestion,
+            ts.codigo_poa,
+            (select  pxp.list(distinct ob.codigo|| '' ''||ob.descripcion||'' '')
+            from pre.tobjetivo ob
+            where ob.codigo = ANY (string_to_array(ts.codigo_poa,'',''))
+            )::varchar as codigo_descripcion
 
             FROM tes.tobligacion_pago ts
             INNER JOIN tes.tobligacion_det tsd ON tsd.id_obligacion_pago = ts.id_obligacion_pago
             INNER JOIN pre.tpartida tpar ON tpar.id_partida = tsd.id_partida
+
+            inner join param.tgestion tg on tg.id_gestion = ts.id_gestion
 
             INNER JOIN pre.tpresup_partida tpp ON tpp.id_partida = tpar.id_partida AND tpp.id_centro_costo = tsd.id_centro_costo
 
@@ -976,7 +987,7 @@ BEGIN
             ' GROUP BY vcp.id_categoria_programatica, tpar.codigo, ttc.codigo, vcp.codigo_programa,
             vcp.codigo_proyecto, vcp.codigo_actividad, vcp.codigo_fuente_fin, vcp.codigo_origen_fin,
     		tpar.nombre_partida, tcg.codigo, tcg.nombre, tmo.codigo, ts.num_tramite, tet.codigo,
-    		funcionario_solicitante ';
+    		funcionario_solicitante, ts.fecha, tg.gestion, ts.codigo_poa ';
 			v_consulta =  v_consulta || 'ORDER BY tpar.codigo, tcg.nombre, vcp.id_categoria_programatica, ttc.codigo asc  ';
 			--Devuelve la respuesta
             RAISE NOTICE 'v_consulta %',v_consulta;
