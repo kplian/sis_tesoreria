@@ -1073,7 +1073,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			Ext.MessageBox.alert('Estado', 'Antes debe seleccionar un item.');
 		}
 	},
-	// 
+	//
 	imprimirCheque3 : function(){
 		var NumSelect=this.sm.getCount();		
 		if(NumSelect!=0)
