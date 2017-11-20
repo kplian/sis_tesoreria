@@ -1089,7 +1089,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 					'importe_cheque' : data.importe_cheque ,
 					'fecha_cheque_literal' : data.fecha_cheque_literal,
 					'nombre_regional' : data.nombre_regional
-				},
+				}, 
 				success:this.successExport,
 				failure: this.conexionFailure,
 				timeout:this.timeout,
