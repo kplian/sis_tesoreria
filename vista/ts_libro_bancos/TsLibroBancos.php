@@ -1084,7 +1084,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				Phx.CP.loadingShow();
 				Ext.Ajax.request({
 				url:'../../sis_tesoreria/control/TsLibroBancos/imprimirCheque3',
-				params:{ 
+				params:{  
 					'a_favor':data.a_favor , 
 					'importe_cheque' : data.importe_cheque ,
 					'fecha_cheque_literal' : data.fecha_cheque_literal,
