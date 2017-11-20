@@ -1095,7 +1095,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				timeout:this.timeout,
 				scope:this
 			});
-			}
+			} 
 		}
 		else
 		{

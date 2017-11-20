@@ -261,7 +261,7 @@ class ACTTsLibroBancos extends ACTbase{
 		
 		$fichero= 'HTMLReporteCheque3.php';
 		$fichero_salida = dirname(__FILE__).'/../../reportes_generados/'.$fichero;
-		 
+		
 		$fp=fopen($fichero_salida,w);
 		
 		$funciones = new funciones();
