@@ -271,7 +271,7 @@ class ACTTsLibroBancos extends ACTbase{
 		
 		$contenido = $contenido. " <tr><td style='text-align: left;height:48px; font-size:8pt'></td></tr>";
 		
-		$contenido = $contenido. "<tr>"; 
+		$contenido = $contenido. "<tr>";  
 		$contenido = $contenido. "<td colspan='6'; style='text-align: left; width:25px; font-size:8pt'></td>";
 		$contenido = $contenido. "<td colspan='23'; style='text-align: left; width:25px; font-size:8pt'>".$nombre_lugar.", ".$fecha_cheque_literal."</td>";
 		$contenido = $contenido. "<td colspan='5'; style='text-align: left; width:25px; font-size:8pt'>".number_format($importe_cheque,2)."</td>";
