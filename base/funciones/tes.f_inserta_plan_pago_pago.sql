@@ -39,43 +39,33 @@ DECLARE
     v_fecha_tentativa				date;
     v_monto_total					numeric;
     v_liquido_pagable 				numeric;
-    v_monto_ejecutar_total_mo   	numeric;
-    va_id_tipo_estado_pro 			integer[];
-    va_codigo_estado_pro 			varchar[];
-    va_disparador_pro 				varchar[];
-    va_regla_pro 					varchar[];
-    va_prioridad_pro 				integer[];
-    
-    v_id_estado_actual 				integer;
-    
-    
-    v_id_proceso_wf 				integer;
-    v_id_estado_wf 					integer;
-    v_codigo_estado					varchar;
-    v_id_plan_pago					integer;
-    
-    v_monto_excento					numeric;
-    v_porc_monto_excento_var		numeric;
-    v_sw_me_plantilla               varchar;
-    
-    v_registros_tpp                 record;
-    v_porc_monto_retgar             numeric;
-    
-    v_monto_ant_parcial_descontado  numeric;
-    v_saldo_x_pagar  numeric; 
-    v_saldo_x_descontar   numeric; 
-    
-    v_resp_doc   boolean;
-    v_obligacion	record;
-    
-    v_monto_anticipo  numeric;
-    v_check_ant_mixto numeric;
-    			
-    
-    
-     v_count integer;  
-     v_codigo_proceso_llave_wf varchar; 
-     v_id_depto_lb  integer; 
+    v_monto_ejecutar_total_mo   		 numeric;
+    va_id_tipo_estado_pro 				 integer[];
+    va_codigo_estado_pro 				 varchar[];
+    va_disparador_pro 					 varchar[];
+    va_regla_pro 						 varchar[];
+    va_prioridad_pro 					 integer[];
+    v_id_estado_actual 					 integer;
+    v_id_proceso_wf 				     integer;
+    v_id_estado_wf 					     integer;
+    v_codigo_estado					     varchar;
+    v_id_plan_pago						 integer;    
+    v_monto_excento						 numeric;
+    v_porc_monto_excento_var			 numeric;
+    v_sw_me_plantilla               	 varchar;    
+    v_registros_tpp                 	 record;
+    v_porc_monto_retgar             	 numeric;    
+    v_monto_ant_parcial_descontado  	 numeric;
+    v_saldo_x_pagar  					 numeric; 
+    v_saldo_x_descontar   				 numeric;     
+    v_resp_doc   						 boolean;
+    v_obligacion						 record;    
+    v_monto_anticipo  					 numeric;
+    v_check_ant_mixto 					 numeric;
+    v_count 							 integer;  
+    v_codigo_proceso_llave_wf 			 varchar; 
+    v_id_depto_lb 						 integer; 
+    v_id_plantilla						 integer; 
      
  
      
@@ -144,23 +134,19 @@ BEGIN
            
            v_porc_monto_excento_var = (p_hstore->'porc_monto_excento_var')::numeric;
            v_monto_excento = (p_hstore->'monto_excento')::numeric;
+           
+           v_id_plantilla = (p_hstore->'id_plantilla')::integer;
               
           
-          
-          
-             --validamos que el monto a pagar sea mayor que cero
-             
-             IF  (p_hstore->'monto')::numeric = 0 THEN
-             
-                raise exception 'El monto a pagar no puede ser 0';
-             
-             END IF;
+            --validamos que el monto a pagar sea mayor que cero
+            IF  (p_hstore->'monto')::numeric = 0 THEN
+              raise exception 'El monto a pagar no puede ser 0';
+            END IF;
              
              
-             IF  (p_hstore->'id_plan_pago_fk')::integer is NULL   THEN
+            IF  (p_hstore->'id_plan_pago_fk')::integer is NULL   THEN
                raise exception 'El nuevo registro debe hacer referencia a una cuota de devengado o anticipo ';
-             
-             END IF;
+            END IF;
              
             --  obtiene datos de la obligacion
              
@@ -180,7 +166,8 @@ BEGIN
               pp.descuento_ley,
               pp.monto_retgar_mo,
               op.numero,
-              op.pago_variable
+              op.pago_variable,
+              pp.id_plantilla
               
             into v_registros  
              from tes.tplan_pago pp
@@ -257,12 +244,14 @@ BEGIN
                        IF (v_monto_total)  <  (p_hstore->'monto')::numeric  THEN
                          raise exception 'No puede exceder el total anticipado: %',v_monto_total;
                        END IF;
-                  
                   ELSE
                        v_monto_total= tes.f_determinar_total_faltante((p_hstore->'id_obligacion_pago')::integer, 'ant_aplicado_descontado_op_variable', (p_hstore->'id_plan_pago_fk')::integer);
-                       
-                  
                   END IF;
+                  
+                  
+                  --17/11/2017 si es un anticipo aplicado el id de plantilal es el mismo del anticipo original
+                  v_id_plantilla = v_registros.id_plantilla;
+                  
                   
            ELSE
               
@@ -340,13 +329,7 @@ BEGIN
                        v_registros.numero||'-N# '||v_nro_cuota
                        );     
           
-             -- raise exception '%, %', v_codigo_proceso_llave_wf,(p_hstore->'tipo');
-             
-             
-             
-             
-                
-                        
+                  
               --Sentencia de la insercion
               insert into tes.tplan_pago(
                   estado_reg,
@@ -405,18 +388,18 @@ BEGIN
                 (p_hstore->'obs_descuentos_anticipo')::varchar,
                 (p_hstore->'id_plan_pago_fk')::integer,
                 (p_hstore->'id_obligacion_pago')::integer,
-                (p_hstore->'id_plantilla')::integer,
-                (p_hstore->'descuento_anticipo')::numeric,
-                (p_hstore->'otros_descuentos')::numeric,
+                v_id_plantilla,
+                COALESCE((p_hstore->'descuento_anticipo')::numeric,0),
+                COALESCE((p_hstore->'otros_descuentos')::numeric,0),
                 (p_hstore->'tipo')::varchar,
                 (p_hstore->'obs_monto_no_pagado')::varchar,
                 (p_hstore->'obs_otros_descuentos')::varchar,
-                (p_hstore->'monto')::numeric,
+                COALESCE((p_hstore->'monto')::numeric,0),
                 (p_hstore->'nombre_pago')::varchar,
                 v_id_estado_wf,
                 v_id_cuenta_bancaria,
                 v_forma_pago,
-                (p_hstore->'monto_no_pagado')::numeric,
+                COALESCE((p_hstore->'monto_no_pagado')::numeric,0),
                 now(),
                 p_id_usuario,
                 null,
@@ -424,21 +407,24 @@ BEGIN
                 v_liquido_pagable,
                 (p_hstore->'fecha_tentativa')::date,
                 --v_parametros.tipo_cambio,
-                (p_hstore->'monto_retgar_mo')::numeric,
+                COALESCE((p_hstore->'monto_retgar_mo')::numeric,0),
                 (p_hstore->'descuento_ley')::numeric,
                 (p_hstore->'obs_descuentos_ley'),
-                (p_hstore->'porc_descuento_ley')::numeric,
+                COALESCE((p_hstore->'porc_descuento_ley')::numeric,0),
                 COALESCE(v_nro_cheque,0),
                 v_nro_cuenta_bancaria,
                 v_id_cuenta_bancaria_mov,
                 (p_hstore->'_id_usuario_ai')::integer,
                 (p_hstore->'_nombre_usuario_ai')::varchar,
-                (p_hstore->'porc_monto_retgar')::numeric,
-                (p_hstore->'monto_ajuste_ag')::numeric,
-                (p_hstore->'descuento_inter_serv')::numeric,
+                COALESCE((p_hstore->'porc_monto_retgar')::numeric,0),
+                COALESCE((p_hstore->'monto_ajuste_ag')::numeric,0),
+                COALESCE((p_hstore->'descuento_inter_serv')::numeric,0),
                 v_monto_excento,
                 v_porc_monto_excento_var	
           )RETURNING id_plan_pago into v_id_plan_pago;
+          
+          
+           
           
           
           -- actualiza el monto pagado en el plan_pago padre
