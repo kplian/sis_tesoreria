@@ -10,12 +10,15 @@ CREATE OR REPLACE FUNCTION tes.f_generar_comprobante (
 )
 RETURNS varchar [] AS
 $body$
-/* Autor:   RAC
-*  DESC:     Generar comprobantes de devengado o pago segun corresponda al tipo de plan de pago
-*            y pasa al siguiente estado
-*  Fecha:   10/06/2013
-*
-*/
+/* 
+ HISTORIAL DE MODIFICACIONES:
+   	
+ ISSUE            FECHA:		      AUTOR                 DESCRIPCION
+ #0             10/06/2013        RAC KPLIAN        Generar comprobantes de devengado o pago segun corresponda al tipo de plan de pago  y pasa al siguiente estado
+ #31, ETR       23/11/2017        RAC KPLIAN        al validar si el presupesuto alcanza apra generar el cbte considerar si el anticipo ejecuo presupeusto    
+ 
+***************************************************************************/
+
 
 DECLARE
 
@@ -50,6 +53,8 @@ DECLARE
     v_sincronizar_internacional   	varchar;
     v_prioridad_depto_conta		  	integer;
     v_codigo_plt_cbte				varchar;
+    v_tes_anticipo_ejecuta_pres	    varchar;
+    v_des_antipo_si_ejecuta			numeric;
 	
     
 BEGIN
@@ -80,15 +85,16 @@ BEGIN
              pp.tipo,
              tpp.codigo_plantilla_comprobante,
              pp.id_depto_lb,
-             pp.id_estado_wf
+             pp.id_estado_wf,
+             pp.descuento_anticipo
            into
               v_registros
            FROM tes.tplan_pago pp
            inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago and op.estado_reg = 'activo'
            inner join tes.ttipo_plan_pago tpp on tpp.codigo = pp.tipo and tpp.estado_reg = 'activo'
            where pp.id_plan_pago = p_id_plan_pago;
-        
-      
+           
+          
                     
           -- verifica el depto de conta, si no tiene lo modifica
           
@@ -186,9 +192,19 @@ BEGIN
                             FROM pre.f_verificar_com_eje_pag(v_registros_pro.id_partida_ejecucion_com, v_registros.id_moneda,p_conexion);
 
                         END IF;
+                        
+                        
+                      --31/11/2017,  si los anticipos ejecutas presupeusto se considera ese monto (SE RESTA EL DSECUENTO DE ANTICIPO)
+                      
+                      v_tes_anticipo_ejecuta_pres = pxp.f_get_variable_global('tes_anticipo_ejecuta_pres');
+                      v_des_antipo_si_ejecuta = 0;
+                      IF v_tes_anticipo_ejecuta_pres = 'si' and  v_registros.descuento_anticipo > 0  THEN                         
+                         v_des_antipo_si_ejecuta =  v_registros.descuento_anticipo;                         
+                      END IF;
+                        
 
                       --verifica si el presupuesto comprometido sobrante alcanza para devengar
-                      IF  ( v_comprometido - v_ejecutado)  <  v_registros_pro.monto_ejecutar_mo  and v_registros_pro.sw_movimiento != 'flujo' THEN
+                      IF  ( v_comprometido - (v_ejecutado - v_des_antipo_si_ejecuta ))  <  v_registros_pro.monto_ejecutar_mo  and v_registros_pro.sw_movimiento != 'flujo' THEN
 
                          -- raise EXCEPTION  '% - % = % < %',v_comprometido,v_ejecutado,v_comprometido - v_ejecutado, v_registros_pro.monto_ejecutar_mb;
 
