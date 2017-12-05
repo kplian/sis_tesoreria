@@ -643,7 +643,7 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 				   animEl: 'elId',
 				   icon: Ext.MessageBox.WARNING
 				}, this);
-			} else if(resp.estado == 'vbjefedevsol' && resp.saldo < 0 ){
+			} else if(resp.estado == 'revision' && resp.saldo < 0 ){
 				Ext.Msg.show({
 				   title:'Confirmación',
 				   scope: this,

@@ -1785,4 +1785,29 @@ IS 'depto de libro de bancos';
   
   
   
+  
+/*****************************I-SCP-RAC-TES-0-05/12/2017*************/
+  
+  --------------- SQL ---------------  esta columnas se aumenta para considerar en la reposicon los ignresos de caja extra
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD COLUMN ingreso_extra VARCHAR(4) DEFAULT 'no' NOT NULL;
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.ingreso_extra
+IS 'indica si es un ingreso extraa la reposicion de caja, sollo valido para solicitudes de  tipo INGEFE,  cuando el valor es si, significa que viene deviaticos o cuenta docuemntada, o por ajuste';
+
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD COLUMN id_proceso_caja_repo INTEGER;
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.id_proceso_caja_repo
+IS 'Indica el id_proceso_caja de tipo reposicion donde fue considerado el ingreso_extra = si, para solicitudes de  tipo INGEFE';
+
+  
+/*************************F-SCP-RAC-TES-0-05/12/2017*************/
+ 
+
+
 

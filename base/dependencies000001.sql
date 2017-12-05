@@ -5197,3 +5197,197 @@ WITH detalle AS(
 /***********************************F-DEP-RAC-TES-0-29/08/2017****************************************/
 
 
+
+/***********************************I-DEP-RAC-TES-0-27/11/2017****************************************/
+
+CREATE OR REPLACE VIEW tes.vcontratos_det(
+    desc_proveedor,
+    id_proveedor,
+    id_moenda_contrato,
+    id_contrato,
+    numero,
+    objeto,
+    monto_contrato,
+    monto_devengado,
+    monto_anticipo,
+    liquido_pagable_total,
+    anticipo_iquido_pagable,
+    descuento_anticipo,
+    anticipo_aplicado,
+    monto_retgar_mo,
+    dev_garantia_iquido_pagable)
+AS
+WITH contrato_lst AS(
+  SELECT con.id_contrato,
+         con.numero,
+         con.objeto,
+         con.monto AS monto_contrato,
+         con.id_moneda,
+         sum(pp.monto) AS monto,
+         sum(pp.monto_anticipo) AS monto_anticipo,
+         sum(pp.monto_retgar_mo) AS monto_retgar_mo,
+         sum(pp.liquido_pagable) AS liquido_pagable,
+         sum(pp.descuento_anticipo) AS descuento_anticipo,
+         pp.tipo
+  FROM leg.tcontrato con
+       JOIN tes.tobligacion_pago op ON op.id_contrato = con.id_contrato
+       JOIN tes.tplan_pago pp ON pp.id_obligacion_pago = op.id_obligacion_pago
+         AND pp.estado_reg::text = 'activo'::text
+  WHERE (pp.estado::text = ANY (ARRAY [ 'anticipado'::character varying::text,
+    'devengado'::character varying::text, 'pagado'::character varying::text,
+    'devuelto'::character varying::text, 'contabilizado'::character varying::
+    text, 'aplicado'::character varying::text ])) AND
+        pp.estado::text <> 'anulado'::text
+  GROUP BY con.id_contrato,
+           con.numero,
+           con.objeto,
+           con.monto,
+           con.id_moneda,
+           pp.tipo)
+    SELECT pro.desc_proveedor,
+           pro.id_proveedor,
+           c.id_moneda AS id_moenda_contrato,
+           c.id_contrato,
+           c.numero,
+           c.objeto,
+           c.monto AS monto_contrato,
+           sum(COALESCE(devengado_pagado.monto, 0::numeric)) + sum(COALESCE(
+             devengado.monto, 0::numeric)) + sum(COALESCE(
+             devengado_pagado_1c.monto, 0::numeric)) + sum(COALESCE(
+             ant_aplicado.monto, 0::numeric)) AS monto_devengado,
+           sum(COALESCE(devengado_pagado.monto_anticipo, 0::numeric)) + sum(
+             COALESCE(devengado.monto_anticipo, 0::numeric)) + sum(COALESCE(
+             devengado_pagado_1c.monto_anticipo, 0::numeric)) AS monto_anticipo,
+           sum(COALESCE(pagado.liquido_pagable, 0::numeric)) + sum(COALESCE(
+             devengado_pagado_1c.liquido_pagable, 0::numeric)) + sum(COALESCE(
+             anticipo.liquido_pagable, 0::numeric)) + sum(COALESCE(
+             ant_parcial.liquido_pagable, 0::numeric)) + sum(COALESCE(
+             dev_garantia.liquido_pagable, 0::numeric)) AS liquido_pagable_total
+  ,
+           sum(COALESCE(anticipo.liquido_pagable, 0::numeric)) + sum(COALESCE(
+             ant_parcial.liquido_pagable, 0::numeric)) AS
+             anticipo_iquido_pagable,
+           sum(COALESCE(devengado_pagado.descuento_anticipo, 0::numeric)) + sum(
+             COALESCE(devengado.descuento_anticipo, 0::numeric)) + sum(COALESCE(
+             devengado_pagado_1c.descuento_anticipo, 0::numeric)) AS
+             descuento_anticipo,
+           sum(COALESCE(ant_aplicado.monto, 0::numeric)) AS anticipo_aplicado,
+           sum(COALESCE(devengado_pagado.monto_retgar_mo, 0::numeric)) + sum(
+             COALESCE(devengado.monto_retgar_mo, 0::numeric)) + sum(COALESCE(
+             devengado_pagado_1c.monto_retgar_mo, 0::numeric)) AS
+             monto_retgar_mo,
+           sum(COALESCE(dev_garantia.liquido_pagable, 0::numeric)) AS
+             dev_garantia_iquido_pagable
+    FROM leg.tcontrato c
+         JOIN param.vproveedor pro ON pro.id_proveedor = c.id_proveedor
+         LEFT JOIN contrato_lst devengado_pagado ON devengado_pagado.id_contrato
+           = c.id_contrato AND devengado_pagado.tipo::text = 'devengado_pagado'
+           ::text
+         LEFT JOIN contrato_lst devengado ON devengado.id_contrato =
+           c.id_contrato AND devengado.tipo::text = 'devengado'::text
+         LEFT JOIN contrato_lst devengado_pagado_1c ON
+           devengado_pagado_1c.id_contrato = c.id_contrato AND
+           devengado_pagado_1c.tipo::text = 'devengado_pagado_1c'::text
+         LEFT JOIN contrato_lst anticipo ON anticipo.id_contrato = c.id_contrato
+           AND anticipo.tipo::text = 'anticipo'::text
+         LEFT JOIN contrato_lst ant_parcial ON ant_parcial.id_contrato =
+           c.id_contrato AND ant_parcial.tipo::text = 'ant_parcial'::text
+         LEFT JOIN contrato_lst dev_garantia ON dev_garantia.id_contrato =
+           c.id_contrato AND dev_garantia.tipo::text = 'dev_garantia'::text
+         LEFT JOIN contrato_lst ant_aplicado ON ant_aplicado.id_contrato =
+           c.id_contrato AND ant_aplicado.tipo::text = 'ant_aplicado'::text
+         LEFT JOIN contrato_lst pagado ON pagado.id_contrato = c.id_contrato AND
+           pagado.tipo::text = 'pagado'::text
+    GROUP BY pro.desc_proveedor,
+             pro.id_proveedor,
+             c.id_moneda,
+             c.id_contrato,
+             c.numero,
+             c.objeto,
+             c.monto;
+
+
+/***********************************F-DEP-RAC-TES-0-27/11/2017****************************************/
+
+
+
+/***********************************I-DEP-RAC-TES-0-29/11/2017****************************************/
+
+-- vista apra incluir vales provisorios en el cbte de rendicion de caja 
+
+CREATE OR REPLACE VIEW tes.vsrd_doc_compra_venta_efectivo_provisorio_det(
+    id_solicitud_rendicion_det,
+    id_proceso_caja,
+    id_moneda,
+    id_int_comprobante,
+    id_plantilla,
+    importe_doc,
+    importe_excento,
+    importe_total_excento,
+    importe_descuento,
+    importe_descuento_ley,
+    importe_ice,
+    importe_it,
+    importe_iva,
+    importe_pago_liquido,
+    nro_documento,
+    nro_dui,
+    nro_autorizacion,
+    razon_social,
+    revisado,
+    manual,
+    obs,
+    nit,
+    fecha,
+    codigo_control,
+    sw_contabilizar,
+    tipo,
+    id_doc_compra_venta,
+    descripcion,
+    importe_neto,
+    id_auxiliar)
+AS
+  SELECT srd.id_solicitud_rendicion_det,
+         srd.id_proceso_caja,
+         dcv.id_moneda,
+         dcv.id_int_comprobante,
+         dcv.id_plantilla,
+         dcv.importe_doc,
+         dcv.importe_excento,
+         COALESCE(dcv.importe_excento, 0::numeric) + COALESCE(dcv.importe_ice, 0
+           ::numeric) AS importe_total_excento,
+         dcv.importe_descuento,
+         dcv.importe_descuento_ley,
+         dcv.importe_ice,
+         dcv.importe_it,
+         dcv.importe_iva,
+         dcv.importe_pago_liquido,
+         dcv.nro_documento,
+         dcv.nro_dui,
+         dcv.nro_autorizacion,
+         dcv.razon_social,
+         dcv.revisado,
+         dcv.manual,
+         dcv.obs,
+         dcv.nit,
+         dcv.fecha,
+         dcv.codigo_control,
+         dcv.sw_contabilizar,
+         dcv.tipo,
+         dcv.id_doc_compra_venta,
+         (((dcv.razon_social::text || ' - '::text) || ' ( '::text) ||
+           ' ) Nro Doc: '::text) || COALESCE(dcv.nro_documento)::text AS
+           descripcion,
+         dcv.importe_neto,
+         dcv.id_auxiliar
+  FROM tes.tsolicitud_rendicion_det srd
+       JOIN conta.tdoc_compra_venta dcv ON srd.id_documento_respaldo =
+         dcv.id_doc_compra_venta
+       JOIN param.tplantilla pl ON pl.id_plantilla = dcv.id_plantilla
+  WHERE pl.tipo_informe::text = 'efectivo'::text;
+  
+  
+  
+/***********************************F-DEP-RAC-TES-0-29/11/2017****************************************/
+  
+  

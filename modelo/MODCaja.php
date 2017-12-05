@@ -201,5 +201,35 @@ class MODCaja extends MODbase{
         //Devuelve la respuesta
         return $this->respuesta;
     }
+	//
+	function listarRepCaja(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.ft_caja_sel';
+		$this->transaccion='TES_CAJA_REP_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		$this->setParametro('id_caja','id_caja','int4');
+		$this->setParametro('id_proceso_caja','id_proceso_caja','int4');			
+		//Definicion de la lista del resultado del query
+		$this->captura('id_proceso_caja','int4');
+		$this->captura('estado','varchar');
+		$this->captura('id_int_comprobante','int4');
+		$this->captura('nro_tramite','varchar');
+		$this->captura('tipo','varchar');
+		$this->captura('motivo','text');
+		$this->captura('estado_reg','varchar');	
+		$this->captura('id_caja','int4');
+		$this->captura('id_depto_lb','int4');		
+		$this->captura('id_proceso_wf','int4');
+		$this->captura('monto','numeric');
+		$this->captura('nombre','varchar');
+		$this->captura('id_moneda','int4');	
+		$this->captura('razon_social','varchar');
+		$this->captura('importe_pago_liquido','int4');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		return $this->respuesta;
+	}
 }
 ?>

@@ -119,11 +119,11 @@ BEGIN
 			update tes.tproceso_caja set
               estado = v_parametros.estado,
               --id_comprobante_diario = v_parametros.id_comprobante_diario,
-              nro_tramite = v_parametros.nro_tramite,
-              tipo = v_parametros.tipo,
+              --nro_tramite = v_parametros.nro_tramite,
+              --tipo = v_parametros.tipo,
               motivo = v_parametros.motivo,
               fecha_fin = v_parametros.fecha_fin,
-              id_caja = v_parametros.id_caja,
+              --id_caja = v_parametros.id_caja,
               fecha = v_parametros.fecha,
               --id_proceso_wf = v_parametros.id_proceso_wf,
               monto = v_parametros.monto,
@@ -155,12 +155,32 @@ BEGIN
 	elsif(p_transaccion='TES_REN_ELI')then
 
 		begin
+            
+        
+            --solo peude eliminar procesos en estado borrador
+            select 
+             p.estado
+            into
+              v_registros
+            from tes.tproceso_caja p
+            where p.id_proceso_caja = v_parametros.id_proceso_caja;
+        
+            IF  v_registros.estado != 'borrador' THEN
+                raise exception 'solo puede eliminar procesos en estado borrador';
+            END IF;
+        
+        
 			--Sentencia de la eliminacion
             UPDATE tes.tsolicitud_rendicion_det
             SET id_proceso_caja = NULL
             WHERE id_proceso_caja = v_parametros.id_proceso_caja;
 
             UPDATE tes.tproceso_caja
+            SET id_proceso_caja_repo = NULL
+            WHERE id_proceso_caja_repo = v_parametros.id_proceso_caja;
+            
+            --RAc, 05/12/2017,  apra desvincular solicitudes de ingreso extras
+            UPDATE tes.tsolicitud_efectivo
             SET id_proceso_caja_repo = NULL
             WHERE id_proceso_caja_repo = v_parametros.id_proceso_caja;
 

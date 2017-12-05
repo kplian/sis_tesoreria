@@ -78,6 +78,68 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 
+
+
+
+    function listarSolicitudIngreso(){
+		$this->objParam->defecto('ordenacion','id_solicitud_efectivo');
+		$this->objParam->defecto('dir_ordenacion','asc');
+		
+		if($this->objParam->getParametro('tipo_interfaz')=='ingreso_caja')
+		{
+			$this->objParam-> addFiltro("caja.tipo_ejecucion = ''sin_detalle''");
+			
+			if($this->objParam->getParametro('pes_estado')=='borrador'){
+				 $this->objParam->addFiltro("solefe.estado in (''borrador'')");
+			}
+			if($this->objParam->getParametro('pes_estado')=='iniciado'){
+				$this->objParam->addFiltro("solefe.estado in (''vbjefe'',''vbcajero'',''vbfin'')");
+			}
+			
+			if($this->objParam->getParametro('pes_estado')=='finalizado'){
+				 $this->objParam->addFiltro("solefe.estado in (''ingresado'')");
+			}
+		}
+
+		
+		if($this->objParam->getParametro('id_caja')!='')
+		{
+			if($this->objParam->getParametro('tipo_interfaz')=='efectivoCaja'){
+				$this->objParam-> addFiltro('solefe.id_caja ='.$this->objParam->getParametro('id_caja'));
+				$this->objParam-> addFiltro('solefe.id_solicitud_efectivo_fk is null');
+			}else{
+				$this->objParam-> addFiltro('ren.id_caja ='.$this->objParam->getParametro('id_caja'));
+			}
+		}
+
+		if($this->objParam->getParametro('id_solicitud_efectivo')!='')
+		{
+			$this->objParam-> addFiltro('solefe.fk_id_solicitud_efectivo ='.$this->objParam->getParametro('id_solicitud_efectivo'));
+		}
+
+		if($this->objParam->getParametro('id_solicitud_efectivo_fk')!='')
+		{
+			$this->objParam-> addFiltro('solefe.id_solicitud_efectivo_fk ='.$this->objParam->getParametro('id_solicitud_efectivo_fk'));
+		}
+
+		if($this->objParam->getParametro('filtro_campo')!=''){
+			$this->objParam->addFiltro($this->objParam->getParametro('filtro_campo')." = ".$this->objParam->getParametro('filtro_valor'));
+		}
+
+		$this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]);
+
+		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+			$this->objReporte = new Reporte($this->objParam,$this);
+			$this->res = $this->objReporte->generarReporteListado('MODSolicitudEfectivo','listarSolicitudIngreso');
+		} else{
+			$this->objFunc=$this->create('MODSolicitudEfectivo');
+
+			$this->res=$this->objFunc->listarSolicitudIngreso($this->objParam);
+		}
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+
+
 	function insertarSolicitudEfectivo(){
 		$this->objFunc=$this->create('MODSolicitudEfectivo');
 		if($this->objParam->insertar('id_solicitud_efectivo')){
@@ -254,6 +316,11 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$this->objFunc = $this->create('MODSolicitudEfectivo');
 
 		$resultSolicitud = $this->objFunc->reporteReciboEntrega();
+		
+		if($resultSolicitud->getTipo() != 'EXITO'){
+			$resultSolicitud->imprimirRespuesta($resultSolicitud->generarJson());
+			exit;
+		}
 
 		$datosSolicitud = $resultSolicitud->getDatos();		
 

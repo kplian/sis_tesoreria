@@ -72,8 +72,7 @@ Phx.vista.FormRendicion = {
 		       
 	},	
     
-	cargarPeriodo: function(obj){
-	//Busca en la base de datos la razon social en funci�n del NIT digitado. Si Razon social no esta vac�o, entonces no hace nada
+	cargarPeriodo: function(obj){	
 		if(this.getComponente('fecha').getValue()!=''){
 		Phx.CP.loadingShow();
 		Ext.Ajax.request({

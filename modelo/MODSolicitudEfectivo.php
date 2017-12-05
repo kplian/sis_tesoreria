@@ -62,6 +62,59 @@ class MODSolicitudEfectivo extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+
+   function listarSolicitudIngreso(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.ft_solicitud_efectivo_sel';
+		$this->transaccion='TES_INGRESOL_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		$this->setParametro('id_funcionario_usu','id_funcionario_usu','int4');
+		$this->setParametro('tipo_interfaz','tipo_interfaz','varchar');
+		$this->setParametro('historico','historico','varchar');
+
+		//Definicion de la lista del resultado del query
+		$this->captura('id_solicitud_efectivo','int4');
+		$this->captura('id_caja','int4');
+		$this->captura('codigo','varchar');		
+		$this->captura('id_depto','int4');
+		$this->captura('id_moneda','int4');
+		$this->captura('id_estado_wf','int4');
+		$this->captura('monto','numeric');
+		$this->captura('monto_rendido','numeric');
+		$this->captura('monto_devuelto','numeric');
+		$this->captura('monto_repuesto','numeric');
+		$this->captura('id_proceso_wf','int4');
+		$this->captura('nro_tramite','varchar');
+		$this->captura('estado','varchar');
+		$this->captura('estado_reg','varchar');
+		$this->captura('motivo','text');
+		$this->captura('id_funcionario','int4');
+		$this->captura('desc_funcionario','text');
+		$this->captura('fecha','date');
+		$this->captura('fecha_entrega','date');
+		$this->captura('dias_maximo_rendicion','int4');
+		$this->captura('dias_no_rendido','int4');
+		$this->captura('id_usuario_ai','int4');
+		$this->captura('fecha_reg','timestamp');
+		$this->captura('usuario_ai','varchar');
+		$this->captura('id_usuario_reg','int4');
+		$this->captura('id_usuario_mod','int4');
+		$this->captura('fecha_mod','timestamp');
+		$this->captura('usr_reg','varchar');
+		$this->captura('usr_mod','varchar');
+		$this->captura('solicitud_efectivo_padre','varchar');
+		$this->captura('saldo','numeric');
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
+
+
 			
 	function insertarSolicitudEfectivo(){
 		//Definicion de variables para ejecucion del procedimiento
@@ -263,6 +316,7 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->procedimiento='tes.ft_solicitud_efectivo_sel';
 		$this->transaccion='TES_SOLENT_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this->setCount(false);
 		
 		//Definicion de la lista del resultado del query
 		$this->captura('fecha_entrega','date');

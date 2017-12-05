@@ -6,7 +6,6 @@
 *@date 24-11-2015 12:59:51
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
 */
-
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
@@ -44,6 +43,17 @@ Phx.vista.SolicitudEfectivoCaja=Ext.extend(Phx.gridInterfaz,{
 					tooltip: '<b>Documentos de la Solicitud</b><br/>Subir los documetos requeridos en la solicitud seleccionada.'
 				}
 			);
+			
+		this.addButton('chkpresupuesto',
+				{
+					text: 'Presupuestos',
+					iconCls: 'blist',
+					disabled: true,
+					handler: this.checkPresupuesto,
+					tooltip: '<b>Revisar Presupuesto</b><p>Revisar estado de ejecución presupeustaria para este  tramite</p>',
+				}
+			);	
+			
 			
 		//recargar valores segunda pestaña
 		var dataPadre = Phx.CP.getPagina(this.idContenedorPadre).getSelectedData()			  
@@ -522,6 +532,28 @@ Phx.vista.SolicitudEfectivoCaja=Ext.extend(Phx.gridInterfaz,{
 					'DocumentoWf'
 		)
 	},
+	
+	   
+     checkPresupuesto:function(){                   
+			  var rec=this.sm.getSelected();
+			  if(rec){
+			  	  var configExtra = [];
+				  this.objChkPres = Phx.CP.loadWindows('../../../sis_presupuestos/vista/presup_partida/ChkPresupuesto.php',
+											'Estado del Presupuesto',
+											{
+												modal:true,
+												width:700,
+												height:450
+											}, {
+												data:{
+												   nro_tramite: rec.data.nro_tramite								  
+												}}, this.idContenedor,'ChkPresupuesto');
+			  	
+			  }
+			  
+			   
+	 },
+	 
 	
 	onReloadPage : function(m) {
 		this.maestro = m;

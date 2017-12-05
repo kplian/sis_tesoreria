@@ -1,4 +1,5 @@
------------------------------- SQL ----------------------
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_inserta_proceso_reposicion_rendicion_caja (
   p_administrador integer,
   p_id_usuario integer,
@@ -14,10 +15,13 @@ $body$
  FECHA:	        27-01-2017
  COMENTARIOS:
 ***************************************************************************
- HISTORIAL DE MODIFICACIONES:
- DESCRIPCION:
- AUTOR:
- FECHA:
+ 
+    HISTORIAL DE MODIFICACIONES:
+   	
+ ISSUE            FECHA:		      AUTOR                 DESCRIPCION
+   
+ #0        		 27-01-2017        Gonzalo Sarmiento       inserta procesos de Rendicion y de Reposicion de Caja Chica
+ #146 IC		 05/12/2017        RAC					   ajustar funcion de calculo de reposicion para considerar ingresos de efectiv en caja
 ***************************************************************************/
 
 DECLARE
@@ -39,6 +43,7 @@ v_resp					varchar;
 v_nombre_funcion		varchar;
 v_solicitudes			record;
 v_rendiciones			record;
+v_monto_ing_extra       numeric;
 
 BEGIN
 
@@ -158,16 +163,15 @@ BEGIN
          raise exception 'No se pudo obtener un numero correlativo para la rendicion de caja consulte con el administrador';
       END IF;
 
-     select tp.codigo, tpc.id_tipo_proceso_caja into v_registros_trendicion
-     from  wf.ttipo_proceso tp
-     inner join tes.ttipo_proceso_caja tpc on tpc.codigo_wf=tp.codigo
-     where tpc.codigo =  (p_hstore->'tipo')::varchar;
+      select tp.codigo, tpc.id_tipo_proceso_caja into v_registros_trendicion
+      from  wf.ttipo_proceso tp
+      inner join tes.ttipo_proceso_caja tpc on tpc.codigo_wf=tp.codigo
+      where tpc.codigo =  (p_hstore->'tipo')::varchar;
 
-     IF  v_registros_trendicion.codigo is NULL or v_registros_trendicion.codigo = '' THEN
-
+      IF  v_registros_trendicion.codigo is NULL or v_registros_trendicion.codigo = '' THEN
          raise exception 'La rendicion de tipo (%) no tiene un proceso de WF relacionado',(p_hstore->'tipo')::varchar;
-
-     END IF;
+      END IF;
+      
       --recupera datos de la caja y de su proceso caja de apertura
       select caj.id_proceso_wf, caj.id_estado_wf, c.id_depto, c.codigo, caj.nro_tramite, caj.estado, c.importe_maximo_caja
       into v_registros
@@ -213,15 +217,44 @@ BEGIN
               where r.id_proceso_caja is null and efe.id_caja=(p_hstore->'id_caja')::integer
               --and d.fecha BETWEEN (p_hstore->'fecha_inicio')::date and (p_hstore->'fecha_fin')::date
               and efe.estado='rendido';
+              
+             
+              
        END IF;
 
        IF (p_hstore->'tipo')::varchar = 'SOLREP' THEN
+       
+              
+              --RAC  05/12/2017, RAC considerar para el calculo de reposicion efectivo ingresado directamente en caja
+              
               select sum(det.monto) into v_monto
               from tes.tproceso_caja c
               inner join tes.tsolicitud_rendicion_det det on det.id_proceso_caja=c.id_proceso_caja
               where c.tipo='SOLREN' and c.id_caja=(p_hstore->'id_caja')::integer
               and c.estado ='rendido' and c.id_proceso_caja_repo is null;
+              
+              -- tenemso que restar los ingresos de efectivo sueltos
+              
+              select 
+                sum(se.monto) into v_monto_ing_extra
+              from tes.tsolicitud_efectivo se
+              inner join tes.ttipo_solicitud ts on ts.id_tipo_solicitud = se.id_tipo_solicitud
+              where 
+              
+                  se.id_caja = (p_hstore->'id_caja')::integer and 
+                  ts.codigo = 'INGEFE' and
+                  se.estado = 'ingresado' and
+                  se.ingreso_extra = 'si' and 
+                  se.id_proceso_caja_repo is null;
+                  
+              v_monto = COALESCE(v_monto,0) - COALESCE(v_monto_ing_extra,0);
+              
+              IF v_monto <= 0 THEN
+                  raise exception 'No  tiene saldo por reponer,  o tiene reposiciones en proceso, (Primero rinda si tiene facturas pendientes y Revise si tiene reposiciones en proceso ...) % ',(v_monto * -1);
+              END IF;
+              
        ELSIF (p_hstore->'tipo')::varchar = 'SOLREN' THEN
+       
        		select sum(r.monto) into v_monto
             from tes.tsolicitud_rendicion_det r
             inner join tes.tsolicitud_efectivo efe on efe.id_solicitud_efectivo=r.id_solicitud_efectivo
@@ -229,6 +262,7 @@ BEGIN
             where r.id_proceso_caja is null and efe.id_caja=(p_hstore->'id_caja')::integer
             --and d.fecha BETWEEN (p_hstore->'fecha_inicio')::date and (p_hstore->'fecha_fin')::date
             and efe.estado='rendido';
+            
        END IF;
 
        IF (p_hstore->'tipo')::varchar = 'REPO' THEN
@@ -238,6 +272,8 @@ BEGIN
        IF (p_hstore->'tipo')::varchar = 'CIERRE' THEN
               v_monto = tes.f_calcular_saldo_caja((p_hstore->'id_caja')::integer);
        END IF;
+       
+       
 
       --Sentencia de la insercion de la rendicion o reposicion de caja
       insert into tes.tproceso_caja(
@@ -289,6 +325,7 @@ BEGIN
       )RETURNING id_proceso_caja into v_id_proceso_caja;
 
       IF (p_hstore->'tipo')::varchar in ('SOLREN','RENYREP','RENYCER') THEN
+          
           --asocia las facturas con el proceso caja de la rendicion de caja
           UPDATE tes.tsolicitud_rendicion_det
           SET id_proceso_caja = v_id_proceso_caja
@@ -299,11 +336,28 @@ BEGIN
                                               where r.id_proceso_caja is null and efe.id_caja=(p_hstore->'id_caja')::integer
                                               --and d.fecha BETWEEN (p_hstore->'fecha_inicio')::date and (p_hstore->'fecha_fin')::date
                                               and efe.estado='rendido');
+      
       ELSIF (p_hstore->'tipo')::varchar = 'SOLREP' THEN
+          
           UPDATE tes.tproceso_caja
           SET id_proceso_caja_repo = v_id_proceso_caja
           WHERE tipo='SOLREN' and id_caja=(p_hstore->'id_caja')::integer
           and estado='rendido' and id_proceso_caja_repo is null;
+          
+          --RAC  05/12/2017, tenemos  que asociar los ingresos de efectivo sueltos
+          UPDATE tes.tsolicitud_efectivo  se SET 
+                id_proceso_caja_repo = v_id_proceso_caja
+          from tes.ttipo_solicitud ts
+          where 
+                  ts.id_tipo_solicitud = se.id_tipo_solicitud and 
+                  se.id_caja = (p_hstore->'id_caja')::integer and 
+                  ts.codigo = 'INGEFE' and
+                  se.estado = 'ingresado' and
+                  se.ingreso_extra = 'si' and 
+                  se.id_proceso_caja_repo is null;
+                  
+                  
+          
       END IF;
 
       --Definicion de la respuesta

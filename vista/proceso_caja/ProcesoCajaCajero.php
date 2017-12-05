@@ -308,24 +308,39 @@ header("content-type: text/javascript; charset=UTF-8");
                     scope:this
                 })
         },
-
-         consolidado_rendicion : function() {
-             var rec = this.getSelectedData();
-             var NumSelect=this.sm.getCount();
-
-             if(NumSelect != 0)
-             {
-             var data ='id_proceso_caja='+ rec.id_proceso_caja;
-             data += '&nro_tramite=' + rec.nro_tramite;
-             data += '&reporte=rendicion';
-             console.log(data);
-             //window.open('http://localhost:22021/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
-             window.open('http://sms.obairlines.bo/ReportesPXP2/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
-             }
-             else
-             {
-             Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
-             }
+	
+		consolidado_rendicion : function() {
+			var rec = this.getSelectedData();
+			var NumSelect=this.sm.getCount();
+			console.log(rec.id_proceso_caja,'**',rec.id_caja);
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+				url:'../../sis_tesoreria/control/Caja/impReporteProcesoCaja',
+				params:{
+					'id_caja':rec.id_caja,
+					'id_proceso_caja':rec.id_proceso_caja
+				},
+				//argument:{wizard:wizard},
+				success:this.successEstadoSinc,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});
+			/*var rec = this.getSelectedData();
+			var NumSelect=this.sm.getCount();			
+			if(NumSelect != 0)
+			{
+			var data ='id_proceso_caja='+ rec.id_proceso_caja;
+			data += '&nro_tramite=' + rec.nro_tramite;
+			data += '&reporte=rendicion';
+			console.log(data);
+			//window.open('http://localhost:22021/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
+			window.open('http://sms.obairlines.bo/ReportesPXP2/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
+			}
+			else
+			{
+			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
+			}*/
          },
 
         onAntEstado: function(wizard,resp){

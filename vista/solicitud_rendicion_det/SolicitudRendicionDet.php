@@ -493,17 +493,18 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
 		{name:'id_proceso_wf', type: 'numeric'},
-		{name:'id_estado_wf', type: 'numeric'}
+		{name:'id_estado_wf', type: 'numeric'},'codigo_control'
 	],
 	sortInfo:{
 		field: 'id_solicitud_rendicion_det',
 		direction: 'ASC'
 	},
 	
+	
+	
 	abrirFormulario:function(tipo, record){
         //abrir formulario de solicitud
-	   var me = this;
-	   
+	   var me = this;	   
 	   me.objSolForm = Phx.CP.loadWindows('../../../sis_tesoreria/vista/solicitud_rendicion_det/FormRendicion.php',
 								'Formulario de rendicion',
 								{
@@ -523,28 +524,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 								'FormRendicion');
     },
 
-	/*
-	abrirFormulario: function(tipo, record){
-	                                { data: { 
-	                                	 id_gestion: me.cmbGestion.getValue(),
-	                                	 id_periodo: me.cmbPeriodo.getValue(),
-	                                	 id_depto: me.cmbDepto.getValue(),
-	                                	 tmpPeriodo: me.tmpPeriodo,
-	                                	 tmpGestion: me.tmpGestion,
-	                                	}
-	                                }, 
-	                                this.idContenedor,
-	                                'FormCompraVenta',
-	                                {
-	                                    config:[{
-	                                              event:'successsave',
-	                                              delegate: this.onSaveForm,
-	                                              
-	                                            }],
-	                                    
-	                                    scope:this
-	                                 });  
-   },*/
+	
    
 	onButtonNew:function(){
 	    //abrir formulario de solicitud	       

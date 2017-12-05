@@ -1,4 +1,6 @@
-﻿CREATE OR REPLACE FUNCTION tes.f_finalizar_solicitud_efectivo (
+--------------- SQL ---------------
+
+CREATE OR REPLACE FUNCTION tes.f_finalizar_solicitud_efectivo (
   p_id_usuario integer,
   p_id_solicitud_efectivo integer
 )
@@ -50,6 +52,9 @@ BEGIN
 
 
                v_nombre_funcion = 'tes.f_finaliza_solicitud_efectivo';
+               
+               
+               --TODO RAC 30/11/2017  calcular saldo y realizar devolucion si tiene saldo positivo lanzar error si tiene saldo negativo
     
                --obtener datos de la solicitud de efectivo
    
@@ -156,8 +161,8 @@ BEGIN
         fecha_mod=now()                           
         where id_solicitud_efectivo = p_id_solicitud_efectivo;
            		
-            --Devuelve la respuesta
-          return TRUE;
+        --Devuelve la respuesta
+        return TRUE;
 
 
 

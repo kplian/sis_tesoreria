@@ -19,6 +19,13 @@ $body$
  AUTOR: 		Gonzalo Sarmiento Sejas
  FECHA:	        09-03-2016
  COMENTARIOS:	
+ 
+      HISTORIAL DE MODIFICACIONES:
+   	
+ ISSUE            FECHA:		      AUTOR                 DESCRIPCION
+   
+ #0        		 09-03-2016        Gonzalo Sarmiento       Esta funcion a partir del id Documento Compra Venta se encarga de gestionar el presupuesto,
+ #0       		 01/12/2017        Rensi Arteaga           Se cambia la logica de reversion de comprobantes de caja para que use el nro de tramite de la soclitud de efectivo donde se rindio
 ***************************************************************************/
 
 DECLARE
@@ -182,6 +189,12 @@ BEGIN
              END IF;
   
         ELSIF p_operacion = 'revertir' THEN
+        
+           -----------------------------------------------
+           -- 01/12/2017, Cambia la logica de reversion
+           -- para considerar nro de tramite de la solicitud de efectivo
+           -- revirtiendo uno por uno  
+           -----------------------------------------------
             
             v_i = 0;
             
@@ -201,12 +214,12 @@ BEGIN
                                          pc.fecha as fecha_reversion
                                   FROM conta.tdoc_compra_venta cv
                                   INNER JOIN conta.tdoc_concepto dc on dc.id_doc_compra_venta = cv.id_doc_compra_venta
-                                 
-                                 
                                   INNER JOIN tes.tsolicitud_rendicion_det rd on rd.id_documento_respaldo=cv.id_doc_compra_venta
                                   inner join tes.tsolicitud_efectivo sol on sol.id_solicitud_efectivo=rd.id_solicitud_efectivo
                                   inner join tes.tproceso_caja pc on pc.id_proceso_caja = rd.id_proceso_caja
-                                   WHERE rd.id_proceso_caja = p_id_proceso_caja
+                                  WHERE rd.id_proceso_caja = p_id_proceso_caja
+                                          and  rd.estado_reg = 'activo'
+                                          and  sol.estado_reg = 'activo'
                                           and  dc.estado_reg = 'activo') LOOP
                                         
                       IF(v_registros.id_partida_ejecucion is NULL) THEN
@@ -237,49 +250,32 @@ BEGIN
                        END IF;
                     END IF; 
                     
+                    --01/12/2017 , cambia la forma de gestionar presupesuto para que calcule saldo en tiepo real
+                    
                      --armamos los array para enviar a presupuestos          
                     IF v_comprometido - v_ejecutado > 0 THEN
                      
-                       	v_i = v_i +1;             
-                        va_id_presupuesto[v_i] = NULL;--v_registros.id_presupuesto;
-                        va_id_partida[v_i] = NULL;--v_registros.id_partida;
-                        va_momento[v_i]	= 2; --el momento 2 con signo negativo  es revertir
-                        va_monto[v_i]  =  (v_comprometido  - v_ejecutado)*-1;  -- considera la posibilidad de que a este item se le aya revertido algun monto
-                        va_id_moneda[v_i]  = v_registros.id_moneda;
-                        va_id_partida_ejecucion[v_i] = v_registros.id_partida_ejecucion;
-                        va_columna_relacion[v_i] = 'id_doc_concepto';
-                        va_fk_llave[v_i] = v_registros.id_doc_concepto;
-                        va_nro_tramite[v_i] = v_registros.nro_tramite;
-                        va_fecha[v_i] = v_fecha;
+                        va_resp_ges = pre.f_gestionar_presupuesto_individual(
+                                            p_id_usuario, 
+                                            NULL, 
+                                            NULL, 
+                                            NULL, 
+                                            v_registros.id_moneda, 
+                                            (v_comprometido  - v_ejecutado)*-1, 
+                                            v_fecha, 
+                                            'comprometido', --traducido a varchar
+                                            v_registros.id_partida_ejecucion, 
+                                            'id_doc_concepto', 
+                                            v_registros.id_doc_concepto, 
+                                            v_registros.nro_tramite, 
+                                            null);
+                                   
                         
                     END IF;                    
                                         
                                         
            END LOOP; 
-           
-         
-         --raise exception '>>  %',va_monto;
-           
-            --llamada a la funcion de  reversion
-           IF v_i > 0 THEN 
-                  va_resp_ges =  pre.f_gestionar_presupuesto(p_id_usuario,
-                    										 NULL, --tipo cambio
-                                                             va_id_presupuesto, 
-                                                             va_id_partida, 
-                                                             va_id_moneda, 
-                                                             va_monto, 
-                                                             va_fecha, --p_fecha
-                                                             va_momento, 
-                                                             va_id_partida_ejecucion,--  p_id_partida_ejecucion 
-                                                             va_columna_relacion, 
-                                                             va_fk_llave,
-                                                             va_nro_tramite,
-                                                             NULL,
-                                                             p_conexion
-                                                             );
-          END IF;
-             
-             
+          
           
         ELSE  
           raise exception 'Operación no implementada';

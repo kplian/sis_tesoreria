@@ -11,15 +11,11 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
-
-	vista:'ConDetalle',
-	
+	vista:'ConDetalle',	
 	gruposBarraTareas:[{name:'borrador',title:'<H1 align="center"><i class="fa fa-thumbs-o-down"></i> Borradores</h1>',grupo:0,height:0},
                        {name:'proceso',title:'<H1 align="center"><i class="fa fa-eye"></i> Iniciados</h1>',grupo:1,height:0},
-                       {name:'finalizados',title:'<H1 align="center"><i class="fa fa-thumbs-o-up"></i> Finalizados</h1>',grupo:2,height:0}],
-	
-	actualizarSegunTab: function(name, indice){
-		
+                       {name:'finalizados',title:'<H1 align="center"><i class="fa fa-thumbs-o-up"></i> Finalizados</h1>',grupo:2,height:0}],	
+	actualizarSegunTab: function(name, indice){		
     	if(this.finCons){
     		 this.store.baseParams.pes_estado = name;
     	     this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz: this.nombreVista}});
