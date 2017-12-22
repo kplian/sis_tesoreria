@@ -17,6 +17,12 @@ class ACTDeptoCuentaBancaria extends ACTbase{
 		if($this->objParam->getParametro('id_depto')!=''){
 			$this->objParam->addFiltro("dcb.id_depto = ".$this->objParam->getParametro('id_depto'));
 		}
+
+		if($this->objParam->getParametro('fondo_devolucion_retencion')!=''){
+			$this->objParam->addFiltro("dcb.id_cuenta_bancaria in (select id_cuenta_bancaria
+																	from tes.tts_libro_bancos
+																	where coalesce(fondo_devolucion_retencion,'''') ==''".$this->objParam->getParametro('fondo_devolucion_retencion')."'') ");
+		}
 		
 		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
 			$this->objReporte = new Reporte($this->objParam,$this);
@@ -44,7 +50,8 @@ class ACTDeptoCuentaBancaria extends ACTbase{
 		$this->res=$this->objFunc->eliminarDeptoCuentaBancaria($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
-			
+
+		
 }
 
 ?>

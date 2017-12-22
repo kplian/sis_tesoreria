@@ -112,10 +112,12 @@ BEGIN
 
             insert into tes.tdepto_cuenta_bancaria
             (id_depto,
-            id_cuenta_bancaria
+            id_cuenta_bancaria,
+            id_usuario_reg
             )VALUES(
             v_parametros.id_depto_lb,
-            v_id_cuenta_bancaria
+            v_id_cuenta_bancaria,
+            p_id_usuario
             );
             
 			--Definicion de la respuesta

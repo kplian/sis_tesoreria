@@ -134,7 +134,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				lazyRender:true,
 				mode: 'local',
 				valueField: 'estilo',
-				gwidth: 120,
+				gwidth: 140,
 
 				store: new Ext.data.JsonStore({
                          url: '../../sis_tesoreria/control/TipoProcesoCaja/listarTipoProcesoCaja',
@@ -164,8 +164,12 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
                 listWidth:300,
                 resizable:true,
                 anchor:'80%',
-                renderer : function(value, p, record) {
-					return String.format('{0}', record.data['nombre']);
+				renderer:function(value,p,record){
+					if (record.data['nombre'].match(/Apertura.*/)) {
+						return String.format('{0}', '<FONT COLOR="blue"><b>'+record.data['nombre']+'</b></FONT>');
+					}else{
+						return String.format('{0}', '<FONT COLOR="green"><b>'+record.data['nombre']+'</b></FONT>');
+					}
 				}
 			},
 			type:'ComboBox',

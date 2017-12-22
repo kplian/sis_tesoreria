@@ -619,49 +619,53 @@ BEGIN
                           --------------------------------------------------------------
                           --Cambia el estado de la cuenta documentada a 'contabilizado'
                           --------------------------------------------------------------
-                          select id_cuenta_doc, id_funcionario, id_estado_wf, id_proceso_wf
+                          ---Verificar si es cuenta documentada del tipo solicitud cambiar el estado a contabilizado, por else nada
+                          select cdo.id_cuenta_doc, cdo.id_funcionario, cdo.id_estado_wf, cdo.id_proceso_wf, tcdo.codigo as codigo_tipo_cuenta_doc, tcdo.sw_solicitud
                           into v_rec1
-                          from cd.tcuenta_doc
-                          where id_solicitud_efectivo = v_rec.id_solicitud_efectivo;
+                          from cd.tcuenta_doc cdo
+                          inner join cd.ttipo_cuenta_doc tcdo
+                          on tcdo.id_tipo_cuenta_doc = cdo.id_tipo_cuenta_doc
+                          where cdo.id_solicitud_efectivo = v_rec.id_solicitud_efectivo;
 
-                          select
-                          te.id_tipo_estado
-                          into v_id_tipo_estado
-                          from cd.tcuenta_doc cd
-                          inner join wf.tproceso_wf pw on pw.id_proceso_wf = cd.id_proceso_wf
-                          inner join wf.ttipo_proceso tp on pw.id_tipo_proceso = tp.id_tipo_proceso
-                          inner join wf.ttipo_estado te on te.id_tipo_proceso = tp.id_tipo_proceso and te.codigo = 'contabilizado'
-                          where cd.id_cuenta_doc = v_rec1.id_cuenta_doc;
+                          if v_rec1.sw_solicitud = 'si' then
+
+                              select
+                              te.id_tipo_estado
+                              into v_id_tipo_estado
+                              from cd.tcuenta_doc cd
+                              inner join wf.tproceso_wf pw on pw.id_proceso_wf = cd.id_proceso_wf
+                              inner join wf.ttipo_proceso tp on pw.id_tipo_proceso = tp.id_tipo_proceso
+                              inner join wf.ttipo_estado te on te.id_tipo_proceso = tp.id_tipo_proceso and te.codigo = 'contabilizado'
+                              where cd.id_cuenta_doc = v_rec1.id_cuenta_doc;
 
 
-                          if v_id_tipo_estado is null then
-                              raise exception 'El estado finalizado para la Cuenta Documentada no esta parametrizado en el workflow';
+                              if v_id_tipo_estado is null then
+                                  raise exception 'El estado finalizado para la Cuenta Documentada no esta parametrizado en el workflow';
+                              end if;
+
+                              v_id_estado_actual =  wf.f_registra_estado_wf(v_id_tipo_estado,
+                                                                              v_rec1.id_funcionario,
+                                                                              v_rec1.id_estado_wf,
+                                                                              v_rec1.id_proceso_wf,
+                                                                              p_id_usuario,
+                                                                              v_parametros._id_usuario_ai,
+                                                                              v_parametros._nombre_usuario_ai,
+                                                                              null,--id_depto
+                                                                              'Rendicion de solicitud de efectivo para Viatico finalizado');
+
+
+                              -- actualiza estado en solicitud de efectivo
+                              update cd.tcuenta_doc set
+                              id_estado_wf = v_id_estado_actual,
+                              estado = 'contabilizado',
+                              id_usuario_mod = p_id_usuario,
+                              fecha_mod = now(),
+                              id_usuario_ai = v_parametros._id_usuario_ai,
+                              usuario_ai = v_parametros._nombre_usuario_ai
+                              where id_cuenta_doc = v_rec1.id_cuenta_doc;
+
                           end if;
-
-                          v_id_estado_actual =  wf.f_registra_estado_wf(v_id_tipo_estado,
-                                                                          v_rec1.id_funcionario,
-                                                                          v_rec1.id_estado_wf,
-                                                                          v_rec1.id_proceso_wf,
-                                                                          p_id_usuario,
-                                                                          v_parametros._id_usuario_ai,
-                                                                          v_parametros._nombre_usuario_ai,
-                                                                          null,--id_depto
-                                                                          'Rendicion de solicitud de efectivo para Viatico finalizado');
-
-
-                          -- actualiza estado en solicitud de efectivo
-                          update cd.tcuenta_doc set
-                          id_estado_wf = v_id_estado_actual,
-                          estado = 'contabilizado',
-                          id_usuario_mod = p_id_usuario,
-                          fecha_mod = now(),
-                          id_usuario_ai = v_parametros._id_usuario_ai,
-                          usuario_ai = v_parametros._nombre_usuario_ai
-                          where id_cuenta_doc = v_rec1.id_cuenta_doc;
-                          
-                         
-                          
-                          
+                           
                           
                 end if; --RCM, FIN SIE ES VIATICO O CUENTA DOCUMENTADA
 

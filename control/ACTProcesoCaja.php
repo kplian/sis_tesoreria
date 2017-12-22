@@ -6,8 +6,10 @@
 *@date 21-12-2015 20:15:22
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
 */
-
+require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
+require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
 require_once(dirname(__FILE__).'/../reportes/RMemoCajaChica.php');
+require_once(dirname(__FILE__).'/../reportes/RVoBoRepoCaja.php');
 
 class ACTProcesoCaja extends ACTbase{
 
@@ -159,6 +161,59 @@ class ACTProcesoCaja extends ACTbase{
 		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
 
 	}
+		//
+	function VoBoRepoCaja(){		
+		if($this->objParam->getParametro('id_int_comprobante')!=''){
+			$this->objParam->addFiltro("transa.id_int_comprobante = ".$this->objParam->getParametro('id_int_comprobante'));	
+		}		
+		$this->objFunc=$this->create('MODProcesoCaja');		
+		$cbteHeader = $this->objFunc->listarReporte($this->objParam);			
+		if($cbteHeader->getTipo() == 'EXITO'){										
+			return $cbteHeader;			
+		}
+		else{
+			$cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+			exit;
+		}		
+	}
+	//
+	function VoBoRepoCajaRepo($create_file = false, $onlyData = false){
+		
+		$dataSource = new DataSource();
+		$dataSource->putParameter('id_proceso_wf', $this->objParam->getParametro('id_proceso_wf'));
+		$dataSource->putParameter('nro_tramite', $this->objParam->getParametro('nro_tramite'));
+		$dataSource->putParameter('fecha_inicio', $this->objParam->getParametro('fecha_inicio'));
+		$dataSource->putParameter('motivo', $this->objParam->getParametro('motivo'));
+		$dataSource->putParameter('tipo', $this->objParam->getParametro('tipo'));
+		$dataSource->putParameter('monto', $this->objParam->getParametro('monto'));
+		
+		if ($onlyData){
+			return $dataSource;
+		}
+		$nombreArchivo = uniqid(md5(session_id()).'gg') . '.pdf';
+		$this->objParam->addParametro('orientacion','P');
+		$this->objParam->addParametro('tamano','LETTER');
+		$this->objParam->addParametro('titulo_archivo','RECIBO DE ENTREGA');
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+		$this->objParam->addParametro('firmar',$firmar);
+		$this->objParam->addParametro('fecha_firma',$fecha_firma);
+		$this->objParam->addParametro('usuario_firma',$usuario_firma);
+		//build the report
+		$reporte = new RVoBoRepoCaja($this->objParam);
+		$reporte->setDataSource($dataSource);
+		$reporte->write();
+		if(!$create_file){
+			$mensajeExito = new Mensaje();
+			$mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se generó con éxito el reporte: '.$nombreArchivo,'control');
+			$mensajeExito->setArchivoGenerado($nombreArchivo);					
+			$this->res = $mensajeExito;
+			$this->res->imprimirRespuesta($this->res->generarJson());
+		}
+		else{
+			return dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo;
+		}		
+	}
+
 }
 
 ?>

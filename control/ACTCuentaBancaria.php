@@ -55,6 +55,13 @@ class ACTCuentaBancaria extends ACTbase{
 		if($this->objParam->getParametro('id_moneda')!=''){
 			$this->objParam->addFiltro("ctaban.id_moneda = ".$this->objParam->getParametro('id_moneda'));
 		}
+
+		if($this->objParam->getParametro('fondo_devolucion_retencion')!=''){
+			$this->objParam->addFiltro("ctaban.id_cuenta_bancaria in (select id_cuenta_bancaria
+																	from tes.tts_libro_bancos
+																	where coalesce(fondo_devolucion_retencion,'''') =''".$this->objParam->getParametro('fondo_devolucion_retencion')."'') ");
+		}
+
 		/*
 		if($this->objParam->getParametro('tipo_interfaz')!=''){
 			$this->objParam->addFiltro("''".$this->objParam->getParametro('tipo_interfaz')."''=ANY(fin.sw_tipo_interfaz)");

@@ -21,6 +21,8 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		this.grid.getBottomToolbar().disable();
 		this.iniciarEventos();
 		
+		this.addBotonesCheques();
+		
 		this.addButton('btnClonar',
 			{
 				text: 'Clonar',
@@ -48,6 +50,16 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				iconCls: 'bprintcheck',
 				disabled: false,
 				handler: this.imprimirCheque2,
+				tooltip: '<b>Cheque</b><br/>Imprimir cheque en el tamaño nuevo'
+			}
+		);
+		
+		this.addButton('btnCheque3',
+			{
+				text: 'Cheque 3',
+				iconCls: 'bprintcheck',
+				disabled: false,
+				handler: this.imprimirCheque3,
 				tooltip: '<b>Cheque</b><br/>Imprimir cheque en el tamaño nuevo'
 			}
 		);
@@ -1063,7 +1075,40 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			Ext.MessageBox.alert('Estado', 'Antes debe seleccionar un item.');
 		}
 	},
-	
+	//
+	imprimirCheque3 : function(){
+		var NumSelect=this.sm.getCount();		
+		if(NumSelect!=0)
+		{
+			if(confirm('¿Está seguro de imprimir el cheque?'))
+			{				
+				var data=this.sm.getSelected().data;
+				if(data.nro_cheque==null){
+					Ext.MessageBox.alert('Estado', 'Edite el registro, y agregue los datos faltantes');
+				}else{
+					Phx.CP.loadingShow();
+					Ext.Ajax.request({
+						url:'../../sis_tesoreria/control/TsLibroBancos/imprimirCheque3',
+						params:{
+							'a_favor':data.a_favor , 
+							'importe_cheque' : data.importe_cheque ,
+							'fecha_cheque_literal' : data.fecha_cheque_literal,
+							'nombre_regional' : data.nombre_regional
+						},
+						success:this.successExport,
+						failure: this.conexionFailure,
+						timeout:this.timeout,
+						scope:this
+					});
+				}		
+			}
+		}
+		else
+		{
+			Ext.MessageBox.alert('Estado', 'Antes debe seleccionar un item.');
+		}
+	},
+	//
 	onChequesAsociados:function() {
 			var rec=this.sm.getSelected();
 			rec.data.nombreVista = 'ChequesAsociados';
@@ -1213,7 +1258,45 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		this.cmpIdFinalidad.store.baseParams.id_cuenta_bancaria =this.maestro.id_cuenta_bancaria;		
 		this.store.baseParams={id_cuenta_bancaria:this.maestro.id_cuenta_bancaria, mycls:this.cls};
 		this.load({params:{start:0, limit:this.tam_pag}});			
-	}
+	},
+	//
+	diagramGanttDinamico: function (){			
+		var data=this.sm.getSelected().data.id_proceso_wf;
+		window.open('../../../sis_workflow/reportes/gantt/gantt_dinamico.html?id_proceso_wf='+data)		
+	}, 
+	//
+	addBotonesCheques: function() {
+		this.menuBanCheque = new Ext.Toolbar.SplitButton({
+			id: 'b-cheques-' + this.idContenedor,
+			text: 'Chequess',
+			disabled: true,
+			grupo:[0,1,2,3],
+			iconCls : 'bprintcheck',
+			scope: this,
+			menu:{
+				items: [{
+					id:'b-cheque1-' + this.idContenedor,
+					text: 'Cheque 1',
+					tooltip: '<b>Cheque del Banco 1</b>',
+					handler:this.imprimirCheque,
+					scope: this
+				}, {
+					id:'b-cheque2-' + this.idContenedor,
+					text: 'Cheque 2',
+					tooltip: '<b>Cheque del Banco 2</b>',
+					handler:this.imprimirCheque2,
+					scope: this
+				}, {
+					id:'b-cheque3-' + this.idContenedor,
+					text: 'Cheque 3',
+					tooltip: '<b>Cheque del Banco 3</b>',
+					handler:this.imprimirCheque3,
+					scope: this
+				}]
+			}
+		});
+		this.tbar.add(this.menuBanCheque);
+	},
 })
 </script>
 		

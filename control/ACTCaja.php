@@ -7,6 +7,8 @@
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
 */
 require_once(dirname(__FILE__).'/../reportes/RProcesoCaja.php');
+require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
+require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
 
 class ACTCaja extends ACTbase{    
 			
@@ -104,15 +106,10 @@ class ACTCaja extends ACTbase{
 	function listarRepCaja(){
 
 		if($this->objParam->getParametro('id_caja')!=''){
-			$this->objParam->addFiltro("caja.id_caja =".$this->objParam->getParametro('id_caja')." AND "."caja.id_proceso_caja =".$this->objParam->getParametro('id_proceso_caja'));    
+			$this->objParam->addFiltro("caja.id_caja =".$this->objParam->getParametro('id_caja')." AND "."ren.id_proceso_caja =".$this->objParam->getParametro('id_proceso_caja'));    
 		}
-		/*if($this->objParam->getParametro('id_proceso_caja')!=''){
-			$this->objParam->addFiltro("cc.id_proceso_caja =".$this->objParam->getParametro('id_proceso_caja'));    
-		}*/
-
 		$this->objFunc=$this->create('MODCaja');		
-		$cbteHeader = $this->objFunc->listarRepCaja($this->objParam);	
-				
+		$cbteHeader = $this->objFunc->listarRepCaja($this->objParam);					
 		if($cbteHeader->getTipo() == 'EXITO'){										
 			return $cbteHeader;			
 		}
@@ -122,9 +119,9 @@ class ACTCaja extends ACTbase{
 		}			
 	}
 	//
-	function impReporteProcesoCaja() {
-		//if($this->objParam->getParametro('tipo_formato')=='pdf') {
-			$nombreArchivo = uniqid(md5(session_id()).'LibroDiario').'.pdf';			
+	function impReporteProcesoCaja($create_file=false, $onlyData = false) {
+		/*if($this->objParam->getParametro('tipo_formato')=='pdf') {
+			$nombreArchivo = uniqid(md5(session_id()).'ProcesoCaja').'.pdf';			
 			$dataSource = $this->listarRepCaja();	
 			$dataEntidad = "";
 			$dataPeriodo = "";	
@@ -135,7 +132,7 @@ class ACTCaja extends ACTbase{
 			$this->objParam->addParametro('tamano',$tamano);		
 			$this->objParam->addParametro('titulo_archivo',$titulo);	
 			$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
-			$reporte = new RCaja($this->objParam);  
+			$reporte = new RProcesoCaja($this->objParam);  
 			$reporte->datosHeader($dataSource->getDatos(),$dataSource->extraData, '' , '');		
 			$reporte->generarReporte();
 			$reporte->output($reporte->url_archivo,'F');
@@ -143,7 +140,42 @@ class ACTCaja extends ACTbase{
 			$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se genera con exito el reporte: '.$nombreArchivo,'control');
 			$this->mensajeExito->setArchivoGenerado($nombreArchivo);
 			$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());		
-		//}				
+		}	
+		*/	
+		$dataSource = new DataSource();
+	
+		$this->objFunc = $this->create('MODCaja');
+		$resultSolicitud = $this->objFunc->listarRepCaja();
+		if($resultSolicitud->getTipo() != 'EXITO'){
+			$resultSolicitud->imprimirRespuesta($resultSolicitud->generarJson());
+			exit;
+		}
+		$datosSolicitud = $resultSolicitud->getDatos();	
+		$nombreArchivo = uniqid(md5(session_id()).'ProcesoCaja').'.pdf';
+		
+		$this->objParam->addParametro('orientacion','P');
+		$this->objParam->addParametro('tamano','LETTER');
+		$this->objParam->addParametro('titulo_archivo','RECIBO DE ENTREGA');
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+		$this->objParam->addParametro('firmar',$firmar);
+		$this->objParam->addParametro('fecha_firma',$fecha_firma);
+		$this->objParam->addParametro('usuario_firma',$usuario_firma);
+		
+		$reporte = new RProcesoCaja($this->objParam);
+		$reporte->setDataSource($dataSource);
+		$reporte->write();
+		if(!$create_file){
+			$mensajeExito = new Mensaje();
+			$mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
+											'Se generó con éxito el reporte: '.$nombreArchivo,'control');
+			$mensajeExito->setArchivoGenerado($nombreArchivo);						
+			$this->res = $mensajeExito;
+			$this->res->imprimirRespuesta($this->res->generarJson());
+		}
+		else{
+			return dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo;
+		}
+			
 	}
 }
 

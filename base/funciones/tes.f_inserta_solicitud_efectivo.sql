@@ -58,7 +58,8 @@ DECLARE
     v_id_funcionario_sol		integer;
     v_id_fun_wf					integer;
     v_ingreso_extra				varchar;
-    v_rec_se				      record;
+    v_rec_se				    record;
+    v_cod_proc					varchar;
 BEGIN
             v_nombre_funcion = 'tes.f_inserta_solicitud_efectivo';
 
@@ -150,7 +151,7 @@ BEGIN
             
             
 
-            IF v_tipo IN ('SOLEFE','APECAJ','INGEFE') THEN
+            IF v_tipo IN ('SOLEFE','APECAJ','INGEFE','SALEFE') THEN
              
                   -- obtener correlativo
                   v_num_sol_efe =  param.f_obtener_correlativo(
@@ -281,25 +282,31 @@ BEGIN
                 
                 END IF;
                        
-            ELSEIF   p_id_cuenta_doc is not  null  and (p_hstore->'tipo_solicitud')::varchar = 'solicitud' THEN
+            ELSEIF   p_id_cuenta_doc is not  null  and (p_hstore->'tipo_solicitud')::varchar in ('solicitud','ingreso') THEN
             
                    --29/11/2017 viene de viaticos o cuenta docuemnta, rescatamo el nro de tramite y datos del proceso disparador
                 
-                   --recuperar datos de viaticos
-                    select 
+                    --recuperar datos de viaticos
+                     select 
                        cdo.id_proceso_wf,
                        cdo.id_estado_wf,
                        cdo.nro_tramite,
                        cdo.id_funcionario
-                     into 
+                      into 
                        v_reg_cd
-                    from cd.tcuenta_doc cdo
-                    where cdo.id_cuenta_doc = p_id_cuenta_doc;
+                     from cd.tcuenta_doc cdo
+                     where cdo.id_cuenta_doc = p_id_cuenta_doc;
                     
-                    IF v_reg_cd is null THEN
+                     IF v_reg_cd is null THEN
                        raise exception 'Nose encontro la cuenta documentada dolicitada ID: %',p_id_cuenta_doc;
+                     END IF;
+                     
+                    IF (p_hstore->'tipo_solicitud')::varchar in ('solicitud') THEN
+                        v_cod_proc = 'SOLEFE';
+                    ELSE
+                       v_cod_proc = 'INGEFE';
                     END IF;
-                 
+                    
                     SELECT
                              ps_id_proceso_wf,ps_id_estado_wf, ps_codigo_estado, ps_nro_tramite
                        into
@@ -312,7 +319,7 @@ BEGIN
                                 v_reg_cd.id_funcionario,  --id_funcionario wf
                                 NULL, --id_depto
                                 'Solicitud de pago por caja - '||v_num_sol_efe,
-                                'SOLEFE', --dispara proceso del comprobante
+                                v_cod_proc, 
                                 v_reg_cd.nro_tramite); 
                                 
                                 
@@ -382,7 +389,7 @@ BEGIN
             
             --RAC, 29/11/2017, si la solictud  viene  de cuenta docuemntada 
             -- ya tuvo todas las aprobaciones pasa directo para entrega de efectivo
-            IF p_id_cuenta_doc is not  null  and (p_hstore->'tipo_solicitud')::varchar = 'solicitud' THEN
+            IF p_id_cuenta_doc is not  null  and (p_hstore->'tipo_solicitud')::varchar in ('solicitud','ingreso') THEN
             
                 
                   select
@@ -418,7 +425,7 @@ BEGIN
                                                              NULL,
                                                              NULL,
                                                              NULL,
-                                                             'Solicitud de Caja Anulada');
+                                                             'Solicitud de ingreso por Caja');
 
 
                      -- actualiza estado en solicitud de efectivo
@@ -474,8 +481,7 @@ BEGIN
                                                                     NULL,
                                                                     NULL,
                                                                     null,--id_depto
-                                                                    'Ingresado por reposicion de caja');
-
+                                                                    'Ingresado por reposicion de caja ');
 
                     -- actualiza estado en solicitud de efectivo
                     update tes.tsolicitud_efectivo set
@@ -483,7 +489,6 @@ BEGIN
                        estado = 'ingresado'
                     where id_solicitud_efectivo = v_id_solicitud_efectivo;
              
-                
              
              END IF;
 

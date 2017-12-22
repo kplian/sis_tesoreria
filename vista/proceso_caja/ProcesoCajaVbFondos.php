@@ -59,30 +59,27 @@ Phx.vista.ProcesoCajaVbFondos = {
 		}else{
 			this.getBoton('consolidado_reposicion').disable();
 		}
-		//this.getBoton('relacionar_deposito').disable();
-
 	},
 
 	consolidado_reposicion : function() {
-		var rec = this.getSelectedData();
-		var NumSelect=this.sm.getCount();
-
-		if(NumSelect != 0)
-		{
-			var data ='id_proceso_caja='+ rec.id_proceso_caja;
-			data += '&nro_tramite=' + rec.nro_tramite;
-			//data += '&fecha_inicio=' + rec.fecha_inicio.format('d-m-Y');
-			//data += '&fecha_fin=' + rec.fecha_fin.format('d-m-Y');
-			data += '&reporte=reposicion';
-			console.log(data);
-			
-			//window.open('http://localhost:14659/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
-			window.open('http://sms.obairlines.bo/ReportesPXP2/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
-		}
-		else
-		{
-			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
-		}
-	},
+		var data = this.getSelectedData();
+		console.log('=>'+data);
+		Phx.CP.loadingShow();
+		Ext.Ajax.request({
+			url:'../../sis_tesoreria/control/ProcesoCaja/VoBoRepoCajaRepo',
+			params:{
+				'id_proceso_caja':data.id_proceso_caja,
+				'nro_tramite':data.nro_tramite,
+				'fecha_inicio':data.fecha_inicio,
+				'motivo':data.motivo,
+				'tipo':data.tipo,
+				'monto':data.monto				
+			},
+			success:this.successExport,
+			failure: this.conexionFailure,
+			timeout:this.timeout,
+			scope:this
+		});	
+	}
 };
 </script>

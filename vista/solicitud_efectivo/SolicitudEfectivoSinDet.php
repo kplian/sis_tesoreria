@@ -377,7 +377,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-				maxLength:500
+				maxLength:500,				
 			},
 				type:'TextField',
 				filters:{pfiltro:'solefe.motivo',type:'string'},

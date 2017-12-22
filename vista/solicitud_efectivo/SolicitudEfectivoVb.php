@@ -302,7 +302,14 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-				maxLength:500
+				maxLength:500,
+				renderer:function(value,p,record){
+					if (record.data['motivo'].match(/Reposición.*/)) {
+						return String.format('{0}', '<FONT COLOR="blue"><b>'+value+'</b></FONT>');
+					}else{
+						return String.format('{0}', '<FONT COLOR="green"><b>'+value+'</b></FONT>');
+					}
+				}
 			},
 				type:'TextField',
 				filters:{pfiltro:'solefe.motivo',type:'string'},

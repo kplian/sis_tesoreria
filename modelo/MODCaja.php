@@ -207,7 +207,7 @@ class MODCaja extends MODbase{
 		$this->procedimiento='tes.ft_caja_sel';
 		$this->transaccion='TES_CAJA_REP_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
-		
+		$this-> setCount(false);
 		$this->setParametro('id_caja','id_caja','int4');
 		$this->setParametro('id_proceso_caja','id_proceso_caja','int4');			
 		//Definicion de la lista del resultado del query
@@ -225,7 +225,12 @@ class MODCaja extends MODbase{
 		$this->captura('nombre','varchar');
 		$this->captura('id_moneda','int4');	
 		$this->captura('razon_social','varchar');
-		$this->captura('importe_pago_liquido','int4');
+		$this->captura('importe_pago_liquido','numeric');
+		
+		$this->captura('tramites','varchar');
+		$this->captura('fecha','date');
+		$this->captura('nombre_fun','varchar');
+		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();

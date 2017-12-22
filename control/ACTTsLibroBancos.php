@@ -251,7 +251,58 @@ class ACTTsLibroBancos extends ACTbase{
 		$this->res = $mensajeExito;
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
-	
+	//
+	function imprimirCheque3(){
+		
+		$fecha_cheque_literal = $this->objParam->getParametro('fecha_cheque_literal');
+		$importe_cheque =$this->objParam->getParametro('importe_cheque');
+		$a_favor = $this->objParam->getParametro('a_favor');
+		$nombre_lugar = $this->objParam->getParametro('nombre_regional');
+		
+		$fichero= 'HTMLReporteCheque.php';
+		$fichero_salida = dirname(__FILE__).'/../../reportes_generados/'.$fichero;
+		
+		$fp=fopen($fichero_salida,w);
+		
+		$funciones = new funciones();
+		
+		$contenido = "<body onLoad='window.print();'>";
+		$contenido = $contenido. "<body>";
+		$contenido = $contenido. "<table border=0 style='line-height: 10px;'>";	
+					
+		$contenido = $contenido. "<tr height='45px'><td width: '1000px'; colspan='4';></td></tr>";
+		
+		$contenido = $contenido. "<tr style='height: 26px';>";
+		$contenido = $contenido. "<td width='50px'></td>";
+		$contenido = $contenido. "<td width='380px'; style='text-align: left; font-size:8pt'>".$nombre_lugar.", ".$fecha_cheque_literal."</td>";
+		$contenido = $contenido. "<td width='10px'></td>";
+		$contenido = $contenido. "<td width='100px'; style='text-align: left; font-size:8pt'>".number_format($importe_cheque,2)."</td>";
+		$contenido = $contenido. "</tr>";
+		$contenido = $contenido. "<tr><td width: '1000px'; colspan='4';></td></tr>";		
+		$contenido = $contenido. "<tr style='height: 29px';>";
+		$contenido = $contenido. "<td width='50px';></td>";
+		$contenido = $contenido. "<td width='950px'; style='text-align: left; font-size:8pt' colspan='4';>".$a_favor."</td>";
+		$contenido = $contenido. "</tr>";
+		
+		$contenido = $contenido. "<tr style='height: 23px';>";
+		$contenido = $contenido. "<td width='50px';></td>";
+		$contenido = $contenido. "<td width='950px'; style='text-align: left; font-size:8pt' colspan='4';>".$funciones->num2letrasCheque($importe_cheque).'-----'."</td>";
+		$contenido = $contenido. "</tr>";
+		
+		$contenido = $contenido. '</table>';
+		$contenido = $contenido. '</body>';
+		
+		fwrite($fp, $contenido);
+		fclose($fp);
+			
+		$mensajeExito = new Mensaje();
+		$mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
+										'Se generó con éxito el reporte: '.$fichero,'control');
+		$mensajeExito->setArchivoGenerado($fichero);
+		$this->res = $mensajeExito;
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	//
 	function vistaPrevia(){
 		
 		$fecha_cheque_literal = $this->objParam->getParametro('fecha_cheque_literal');

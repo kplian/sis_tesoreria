@@ -22,7 +22,7 @@ require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
 		$this->Cell(20, $height, '', 0, 0, 'C', false, '', 0, false, 'T', 'C');
 		
 		$this->SetFont('','B');        
-        $this->Cell(145, $height, 'RECIBO DE ENTREGA DE EFECTIVO', 0, 0, 'C', false, '', 1, false, 'T', 'C');								
+        $this->Cell(145, $height, 'RECIBO DE ENTREGA EN CAJA', 0, 0, 'C', false, '', 1, false, 'T', 'C');								
 		$this->SetFontSize(14);
 		
 		$x=$this->getX();
@@ -112,10 +112,12 @@ Class RReciboEntrega extends Report {
         $pdf->Ln();
     		
 		$pdf->SetFont('', 'B');       
-        $pdf->Cell($width3+31, $height*5, 'RECIBIDO POR:', 1, 0, 'C', false, '', 0, false, 'T', 'T');
-        $pdf->Cell($width3+31, $height*5, 'PAGADO POR:', 1, 0, 'C', false, '', 0, false, 'T', 'T');                               
+        $pdf->Cell($width3+31, $height*5, 'A FAVOR DE:', 1, 0, 'C', false, '', 0, false, 'T', 'T');
+        $pdf->Cell($width3+31, $height*5, 'PAGADO POR:', 1, 0, 'C', false, '', 0, false, 'T', 'T');
         $pdf->Ln();
-		
+		$pdf->Cell($width3+31, $height, $this->getDataSource()->getParameter('solicitante'),0,0,'C');
+		$pdf->Cell($width3+31, $height, $this->getDataSource()->getParameter('cajero'),0,0,'C');
+		//$this->Cell(145, $height, 'RECIBO DE ENTREGA DE EFECTIVO', 0, 0, 'C', false, '', 1, false, 'T', 'C');
 		$pdf->Output($pdf->url_archivo, 'F');			
     }
 }
