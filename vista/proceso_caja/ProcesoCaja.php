@@ -16,9 +16,19 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 
 	constructor:function(config){
 		this.maestro=config.maestro;
-    	//llama al constructor de la clase padre
+    	//llama al constructor de la clase padre    	
 		Phx.vista.ProcesoCaja.superclass.constructor.call(this,config);
 		this.init();
+		
+		this.addButton('diagrama_gantt',
+            {
+                text:'Gant',
+                iconCls: 'bgantt',
+                disabled:false,
+                handler: this.diagramGantt,
+                tooltip: '<b>Diagrama Gantt de Solicitud de Efectivo</b>'
+            }
+        );
 	},
 
 	Atributos:[
@@ -544,6 +554,21 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 
           Phx.vista.ProcesoCaja.superclass.liberaMenu.call(this,n);
      },
+     
+     diagramGantt : function (){
+        var data=this.sm.getSelected().data.id_proceso_wf;
+        if(data!=null){
+			Phx.CP.loadingShow();
+	        Ext.Ajax.request({
+	            url: '../../sis_workflow/control/ProcesoWf/diagramaGanttTramite',
+	            params: { 'id_proceso_wf': data },
+	            success: this.successExport,
+	            failure: this.conexionFailure,
+	            timeout: this.timeout,
+	            scope: this
+	        });
+        }
+    },
 
 	tabsouth:[
             {

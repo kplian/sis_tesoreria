@@ -1,6 +1,6 @@
 --------------- SQL ---------------
 
-CREATE OR REPLACE FUNCTION tes.ft_cajero_sel (
+CREATE OR REPLACE FUNCTION tes.ft_pagos_contrato_sel (
   p_administrador integer,
   p_id_usuario integer,
   p_tabla varchar,
@@ -10,10 +10,10 @@ RETURNS varchar AS
 $body$
 /**************************************************************************
  SISTEMA:		Sistema de Tesoreria
- FUNCION: 		tes.ft_cajero_sel
- DESCRIPCION:   Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'tes.tcajero'
- AUTOR: 		 (admin)
- FECHA:	        18-12-2013 19:39:02
+ FUNCION: 		tes.ft_pagos_contrato_sel
+ DESCRIPCION:   Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'tes.ttipo_prorrateo'
+ AUTOR: 		 (jrivera)
+ FECHA:	        31-07-2014 23:29:22
  COMENTARIOS:	
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
@@ -32,41 +32,41 @@ DECLARE
 			    
 BEGIN
 
-	v_nombre_funcion = 'tes.ft_cajero_sel';
+	v_nombre_funcion = 'tes.ft_pagos_contrato_sel';
     v_parametros = pxp.f_get_record(p_tabla);
 
 	/*********************************    
- 	#TRANSACCION:  'TES_CAJERO_SEL'
+ 	#TRANSACCION:  'TES_TIPOXX_SEL'
  	#DESCRIPCION:	Consulta de datos
- 	#AUTOR:		admin	
- 	#FECHA:		18-12-2013 19:39:02
+ 	#AUTOR:		jrivera	
+ 	#FECHA:		31-07-2014 23:29:22
 	***********************************/
 
-	if(p_transaccion='TES_CAJERO_SEL')then
+	if(p_transaccion='TES_TIPOXX_SEL')then
      				
     	begin
     		--Sentencia de la consulta
 			v_consulta:='select
-						cajero.id_cajero,
-						cajero.estado_reg,
-						cajero.tipo,
-						cajero.estado,
-						cajero.id_funcionario,
-						cajero.fecha_reg,
-						cajero.id_usuario_reg,
-						cajero.id_usuario_mod,
-						cajero.fecha_mod,
+						tipo.id_tipo_prorrateo,
+						tipo.estado_reg,
+						tipo.descripcion,
+						tipo.es_plantilla,
+						tipo.nombre,
+						tipo.codigo,
+						tipo.fecha_reg,
+						tipo.usuario_ai,
+						tipo.id_usuario_reg,
+						tipo.id_usuario_ai,
+						tipo.id_usuario_mod,
+						tipo.fecha_mod,
 						usu1.cuenta as usr_reg,
 						usu2.cuenta as usr_mod,
-					 fun.desc_funcionario1 as desc_funcionario,
-						cajero.id_caja,
-                        cajero.fecha_inicio,
-                        cajero.fecha_fin
-						from tes.tcajero cajero
-						inner join segu.tusuario usu1 on usu1.id_usuario = cajero.id_usuario_reg
-						left join segu.tusuario usu2 on usu2.id_usuario = cajero.id_usuario_mod
-                        inner join orga.vfuncionario fun on fun.id_funcionario = cajero.id_funcionario        
-				        where   cajero.estado_reg = ''activo'' and ';
+						tipo.tiene_cuenta,	
+						tipo.tiene_lugar
+						from tes.ttipo_prorrateo tipo
+						inner join segu.tusuario usu1 on usu1.id_usuario = tipo.id_usuario_reg
+						left join segu.tusuario usu2 on usu2.id_usuario = tipo.id_usuario_mod
+				        where  ';
 			
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
@@ -78,22 +78,21 @@ BEGIN
 		end;
 
 	/*********************************    
- 	#TRANSACCION:  'TES_CAJERO_CONT'
+ 	#TRANSACCION:  'TES_TIPOXX_CONT'
  	#DESCRIPCION:	Conteo de registros
- 	#AUTOR:		admin	
- 	#FECHA:		18-12-2013 19:39:02
+ 	#AUTOR:		jrivera	
+ 	#FECHA:		31-07-2014 23:29:22
 	***********************************/
 
-	elsif(p_transaccion='TES_CAJERO_CONT')then
+	elsif(p_transaccion='TES_TIPOXX_CONT')then
 
 		begin
 			--Sentencia de la consulta de conteo de registros
-			v_consulta:='select count(id_cajero)
-					    from tes.tcajero cajero
-					    inner join segu.tusuario usu1 on usu1.id_usuario = cajero.id_usuario_reg
-						left join segu.tusuario usu2 on usu2.id_usuario = cajero.id_usuario_mod
-                        inner join orga.vfuncionario fun on fun.id_funcionario = cajero.id_funcionario
-					    where cajero.estado_reg = ''activo'' and ';
+			v_consulta:='select count(id_tipo_prorrateo)
+					    from tes.ttipo_prorrateo tipo
+					    inner join segu.tusuario usu1 on usu1.id_usuario = tipo.id_usuario_reg
+						left join segu.tusuario usu2 on usu2.id_usuario = tipo.id_usuario_mod
+					    where ';
 			
 			--Definicion de la respuesta		    
 			v_consulta:=v_consulta||v_parametros.filtro;
@@ -103,7 +102,7 @@ BEGIN
 
 		end;
 					
-	 else
+	else
 					     
 		raise exception 'Transaccion inexistente';
 					         

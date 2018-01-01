@@ -18,6 +18,10 @@ class ACTDeptoCuentaBancaria extends ACTbase{
 			$this->objParam->addFiltro("dcb.id_depto = ".$this->objParam->getParametro('id_depto'));
 		}
 
+		if($this->objParam->getParametro('id_moneda')!=''){
+			$this->objParam->addFiltro("cb.id_moneda = ".$this->objParam->getParametro('id_moneda'));
+		}
+
 		if($this->objParam->getParametro('fondo_devolucion_retencion')!=''){
 			$this->objParam->addFiltro("dcb.id_cuenta_bancaria in (select id_cuenta_bancaria
 																	from tes.tts_libro_bancos

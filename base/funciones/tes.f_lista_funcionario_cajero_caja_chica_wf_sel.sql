@@ -13,11 +13,11 @@ $body$
 /**************************************************************************
  SISTEMA ENDESIS - SISTEMA DE ...
 ***************************************************************************
- SCRIPT: 		tes.f_lista_funcionario_cajero_caja_chica_wf_sel
- DESCRIPCIÓN: 	Lista los fucionarios cajeros de caja chica a partir del id_Estado_wf de la solicitud de efectivo
- AUTOR: 		Gonzalo Sarmiento Sejas
- FECHA:			10/12/2015
- COMENTARIOS:	
+ SCRIPT:    tes.f_lista_funcionario_cajero_caja_chica_wf_sel
+ DESCRIPCIÓN:   Lista los fucionarios cajeros de caja chica a partir del id_Estado_wf de la solicitud de efectivo
+ AUTOR:     Gonzalo Sarmiento Sejas
+ FECHA:     10/12/2015
+ COMENTARIOS: 
 ***************************************************************************
  HISTORIA DE MODIFICACIONES:
 
@@ -50,7 +50,7 @@ $body$
 */
 
 DECLARE
-	g_registros  		record;
+  g_registros     record;
     v_depto_asignacion    varchar;
     v_nombre_depto_func_list   varchar;
     
@@ -68,6 +68,7 @@ DECLARE
     v_uos_eps varchar;
     v_size    integer;
     v_i       integer;
+    v_rec_tmp record;
 
 BEGIN
   v_nombre_funcion ='tes.f_lista_funcionario_cajero_caja_chica_wf_sel';
@@ -75,14 +76,26 @@ BEGIN
     --recuperamos el cajero a partir del id_estado_wf en la solicitud de efectivo
     
     select 
-      caje.id_funcionario
+      se.fecha,se.id_caja
+    into
+      v_rec_tmp
+    from tes.tsolicitud_efectivo se
+     where se.id_estado_wf = p_id_estado_wf;
+     
+    --raise exception 'xxxx %',v_rec_tmp;
+    
+    select 
+      caja.id_funcionario
     into
       v_id_funcionario_cajero
-    from tes.tsolicitud_efectivo se
-    inner join tes.tcajero caje on caje.id_caja=se.id_caja and caje.tipo='responsable' 
-    and now()::date between caje.fecha_inicio and caje.fecha_fin
-    where se.id_estado_wf = p_id_estado_wf;
+    from tes.tcajero caja 
+     where caja.id_caja = v_rec_tmp.id_caja and caja.tipo='responsable' 
+           and (( v_rec_tmp.fecha::date between caja.fecha_inicio and caja.fecha_fin)   
+           or (caja.fecha_fin is null and caja.fecha_inicio <= v_rec_tmp.fecha::date));
     
+--    raise exception 'xxxx %', v_id_funcionario_cajero;
+    
+  
     
    
     IF not p_count then
@@ -117,15 +130,15 @@ BEGIN
         
        
 EXCEPTION
-					
-	WHEN OTHERS THEN
-			v_resp='';
-			v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
-			v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
-			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
-			raise exception '%',v_resp;
+          
+  WHEN OTHERS THEN
+      v_resp='';
+      v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+      v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
+      v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+      raise exception '%',v_resp;
 
-				        
+                
 END;
 $body$
 LANGUAGE 'plpgsql'

@@ -260,7 +260,7 @@ Phx.vista.AprobacionFacturas=Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
-				name: 'monto',
+				name: 'importe_pago_liquido',     //RAC 04/01/2018, ...esta import ede documento esto es un error no cosideraba el liquido pagable, name: 'monto',
 				fieldLabel: 'Liquido Pagable',
 				allowBlank: true,
 				anchor: '80%',

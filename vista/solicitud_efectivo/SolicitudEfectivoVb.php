@@ -29,7 +29,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 		);	
 		
 		this.addButton('fin_registro',
-			{	text:'Siguiente',
+			{	text:'Siguientes',
 				iconCls: 'badelante',
 				disabled:true,
 				handler:this.sigEstado,
@@ -441,7 +441,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_proceso_wf', type: 'numeric'},
 		{name:'nro_tramite', type: 'string'},
 		{name:'estado', type: 'string'},
-		{name:'estado_reg', type: 'string'},
+		{name:'estado_reg', type: 'string'},	
 		{name:'motivo', type: 'string'},
 		{name:'id_funcionario', type: 'numeric'},
 		{name:'desc_funcionario', type: 'string'},

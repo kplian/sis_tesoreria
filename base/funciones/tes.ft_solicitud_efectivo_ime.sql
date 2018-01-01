@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.ft_solicitud_efectivo_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -17,12 +15,12 @@ $body$
  COMENTARIOS:
 ***************************************************************************
      HISTORIAL DE MODIFICACIONES:
-   	
- ISSUE            FECHA:		      AUTOR                 DESCRIPCION
+    
+ ISSUE            FECHA:          AUTOR                 DESCRIPCION
    
- #0        		 10-02-2015        Gonzalo Sarmiento       Funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'tes.tsolicitud_efectivo'
- #0       		 30/11/2017        Rensi Arteaga           BUG, Restituciones queda en borrador ....
- #146 SC	     04/12/2017        RAC					   Validacion de vbcasjero para ingreso de caja, los pasa directoa finalizado
+ #0            10-02-2015        Gonzalo Sarmiento       Funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'tes.tsolicitud_efectivo'
+ #0            30/11/2017        Rensi Arteaga           BUG, Restituciones queda en borrador ....
+ #146 SC       04/12/2017        RAC             Validacion de vbcasjero para ingreso de caja, los pasa directoa finalizado
 ***************************************************************************/
 
 DECLARE
@@ -87,7 +85,7 @@ DECLARE
     v_total_rendiciones     numeric;
     v_id_cuenta_doc         integer;
     v_rec1                  record;
-    v_temp_rec					record;
+    v_temp_rec          record;
     v_id_solicitud_efectivo_tmp  varchar[];
     v_sw_finalilzar_automatica   BOOLEAN;
 
@@ -504,7 +502,7 @@ BEGIN
                           'compra' as tipo, -- (p_hstore->'tipo')::varchar; --'venta',--'tipo',
                           0 as importe_excento, -- (p_hstore->'importe_excento')::numeric; --coalesce(null as venta.excento::varchar,'0'),--'importe_excento',
                           v_rec.fecha as fecha, -- (p_hstore->'fecha')::date; --to_char(null as venta.fecha,'DD/MM/YYYY'),--'fecha',
-                          v_rec.nro_tramite as nro_documento, -- (p_hstore->'nro_documento')::varchar; --COALESCE(null as venta.nro_factura,'0')::varchar,--'nro_documento',
+                          v_rec.nro_tramite||'-DEV' as nro_documento, -- (p_hstore->'nro_documento')::varchar; --COALESCE(null as venta.nro_factura,'0')::varchar,--'nro_documento',
                           v_fun.ci as nit, -- (p_hstore->'nit')::varchar; --coalesce(null as venta.nit,''),--'nit',
                           0 as importe_ice, -- (p_hstore->'importe_ice')::numeric; --null as venta.total_venta_msuc::varchar,--'importe_ice',
                           '' as nro_autorizacion, -- (p_hstore->'nro_autorizacion')::varchar; --coalesce(null as venta.nroaut,''); --'nro_autorizacion',
@@ -884,6 +882,7 @@ BEGIN
                   
           END IF;
           
+          --raise exception 'llega';
          
           -- si hay mas de un estado disponible  preguntamos al usuario
           v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado de la solicitud de efectivo)');

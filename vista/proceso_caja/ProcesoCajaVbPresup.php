@@ -79,12 +79,18 @@ Phx.vista.ProcesoCajaVbPresup = {
 
 		if(NumSelect != 0)
 		{
-			var data ='id_proceso_caja='+ rec.id_proceso_caja;
-			data += '&nro_tramite=' + rec.nro_tramite;
-			data += '&reporte=rendicion';
-			
-			//window.open('http://localhost:14659/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
-			window.open('http://sms.obairlines.bo/ReportesPXP2/Home/ReporteConsolidadoRendicionesCajaChica?'+data);
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+				url:'../../sis_tesoreria/control/Caja/impReporteProcesoCaja',
+				params:{
+					'id_caja':rec.id_caja,
+					'id_proceso_caja':rec.id_proceso_caja
+				},
+				success:this.successExport,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});		
 		}
 		else
 		{

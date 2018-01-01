@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_generar_cheque (
   p_id_usuario integer,
   p_id_int_comprobante integer,
@@ -24,6 +26,8 @@ DECLARE
     v_id_deposito					varchar;
     v_respuesta						varchar;
     v_sistema_origen				varchar;
+    v_reg_banco						record;
+    v_importe_banco					numeric;
 BEGIN
 
 
@@ -50,15 +54,58 @@ BEGIN
 		inner join tes.tobligacion_pago op on op.id_obligacion_pago=pp.id_obligacion_pago
         where cbte.id_int_comprobante=p_id_int_comprobante and tra.forma_pago='cheque';*/
 
-       select COALESCE(tra.nombre_cheque_trans,cbte.beneficiario) as beneficiario, dpcb.id_depto as id_depto_libro,
-       cbte.glosa1 as glosa, tra.importe_haber, tra.id_cuenta_bancaria,
-       substr(depto.codigo, 4) as origen, cbte.nro_tramite, tra.id_cuenta_bancaria_mov as id_libro_bancos_deposito
+       select 
+       
+       COALESCE(tra.nombre_cheque_trans,cbte.beneficiario) as beneficiario, 
+       dpcb.id_depto as id_depto_libro,
+       cbte.glosa1 as glosa, 
+       tra.importe_haber, 
+       tra.importe_haber_mb,
+       tra.importe_haber_mt,
+       tra.id_moneda,
+       tra.id_cuenta_bancaria,
+       substr(depto.codigo, 4) as origen, 
+       cbte.nro_tramite, 
+       tra.id_cuenta_bancaria_mov as id_libro_bancos_deposito
+       
        into v_datos_cheque
        from conta.tint_comprobante cbte
        inner join conta.tint_transaccion tra on tra.id_int_comprobante = cbte.id_int_comprobante
        left join tes.tdepto_cuenta_bancaria dpcb on dpcb.id_cuenta_bancaria = tra.id_cuenta_bancaria
        left join param.tdepto depto on depto.id_depto=dpcb.id_depto
         where cbte.id_int_comprobante = p_id_int_comprobante and tra.forma_pago = 'cheque';
+        
+        ----------------------------------------------------------------------------------------------
+        --RAC 28/12/2017,    Revisa la coherencia entre el monto del cbte y la moneda de la cuenta
+        ---------------------------------------------------------------------------------------------
+        
+        select 
+           cb.id_moneda
+        into
+          v_reg_banco
+        from tes.tcuenta_bancaria cb
+        where cb.id_cuenta_bancaria = v_datos_cheque.id_cuenta_bancaria;
+        
+       
+       
+        IF v_reg_banco.id_moneda = param.f_get_moneda_base()  THEN 
+           -- 1)  la cuenta es moenda base, ....directamente usamos la monto_haber_mb        
+         v_importe_banco =v_datos_cheque.importe_haber_mb ;       
+        ELSEIF v_reg_banco.id_moneda =  param.f_get_moneda_triangulacion()  THEN
+           -- 2)   la cuenta es moenda de triangulación usa el monto_haber_mt
+           v_importe_banco =v_datos_cheque.importe_haber_mt;      
+        ELSEIF   v_reg_banco.id_moneda = v_datos_cheque.id_moneda   THEN
+           --4) es de la misma moneda que la transaccion
+           v_importe_banco = v_datos_cheque.importe_haber;
+        ELSE
+           --4)   la cuenta  es otra moenda diferente hay que convertir de doalres a la moenda correpondiente           
+          raise exception 'Caso de vonersion no contemplado'; 
+        END IF;
+        
+        
+       
+       
+        
 
 		if(v_datos_cheque.id_cuenta_bancaria is null)then
         	raise exception 'El comprobante % no cuenta con el id_cuenta_bancaria', p_id_int_comprobante;
@@ -71,13 +118,13 @@ BEGIN
         IF(v_datos_cheque.id_libro_bancos_deposito is null)THEN
         v_resp = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,
         			array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','sistema_origen','id_int_comprobante'],
-                    array[' 0 = 0 ','','','','','NULL','NULL',v_datos_cheque.id_cuenta_bancaria::varchar,v_datos_cheque.id_depto_libro::varchar,v_datos_cheque.beneficiario::varchar,'NULL','0','','PAGO A '||v_datos_cheque.glosa::varchar,v_datos_cheque.origen::varchar,v_datos_cheque.nro_tramite::varchar,v_datos_cheque.importe_haber::varchar,'NULL','','C31-'||p_c31,'cheque',p_id_finalidad::varchar,v_sistema_origen::varchar,''||p_id_int_comprobante::varchar||''],
+                    array[' 0 = 0 ','','','','','NULL','NULL',v_datos_cheque.id_cuenta_bancaria::varchar,v_datos_cheque.id_depto_libro::varchar,v_datos_cheque.beneficiario::varchar,'NULL','0','','PAGO A '||v_datos_cheque.glosa::varchar,v_datos_cheque.origen::varchar,v_datos_cheque.nro_tramite::varchar,v_importe_banco::varchar,'NULL','','C31-'||p_c31,'cheque',p_id_finalidad::varchar,v_sistema_origen::varchar,''||p_id_int_comprobante::varchar||''],
                     array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','varchar','varchar']
                     ,'',NULL,NULL);
         ELSE
         v_resp = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,
         			array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','sistema_origen','id_int_comprobante'],
-                    array[' 0 = 0 ','','','','','NULL','NULL',v_datos_cheque.id_cuenta_bancaria::varchar,v_datos_cheque.id_depto_libro::varchar,v_datos_cheque.beneficiario::varchar,'NULL','0','','PAGO A '||v_datos_cheque.glosa::varchar,v_datos_cheque.origen::varchar,v_datos_cheque.nro_tramite::varchar,v_datos_cheque.importe_haber::varchar,v_datos_cheque.id_libro_bancos_deposito::varchar,'','C31-'||p_c31,'cheque',p_id_finalidad::varchar,v_sistema_origen::varchar,''||p_id_int_comprobante::varchar||''],
+                    array[' 0 = 0 ','','','','','NULL','NULL',v_datos_cheque.id_cuenta_bancaria::varchar,v_datos_cheque.id_depto_libro::varchar,v_datos_cheque.beneficiario::varchar,'NULL','0','','PAGO A '||v_datos_cheque.glosa::varchar,v_datos_cheque.origen::varchar,v_datos_cheque.nro_tramite::varchar,v_importe_banco::varchar,v_datos_cheque.id_libro_bancos_deposito::varchar,'','C31-'||p_c31,'cheque',p_id_finalidad::varchar,v_sistema_origen::varchar,''||p_id_int_comprobante::varchar||''],
                     array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','varchar','varchar']
                     ,'',NULL,NULL);
         END IF;

@@ -216,7 +216,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 					totalProperty: 'total',
 					fields: ['id_caja', 'codigo', 'desc_moneda','cajero'],
 					remoteSort: true,
-					baseParams: {par_filtro: 'caja.codigo', tipo_interfaz:'cajaAbierto', con_detalle:'no'}
+					baseParams: {par_filtro: 'caja.codigo', tipo_interfaz:'solicitudcaja', con_detalle:'no'}
 				}),
 				valueField: 'id_caja',
 				displayField: 'codigo',

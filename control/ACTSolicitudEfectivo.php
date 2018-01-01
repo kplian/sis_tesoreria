@@ -391,6 +391,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 			$this->objParam-> addFiltro('sol.id_proceso_wf ='.$this->objParam->getParametro('id_proceso_wf'));
 		}
 
+
 		$this->objParam->addParametroConsulta('ordenacion','sol.id_solicitud_efectivo');
 		$this->objParam->addParametroConsulta('dir_ordenacion','ASC');
 		$this->objParam->addParametroConsulta('cantidad',1000);
@@ -439,7 +440,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$nombreArchivo = uniqid(md5(session_id()).'RendicionEfectivo') . '.pdf';
 		$this->objParam->addParametro('orientacion','P');
 		$this->objParam->addParametro('tamano','LETTER');
-		$this->objParam->addParametro('titulo_archivo','RECIBO DE ENTREGA');
+		$this->objParam->addParametro('titulo_archivo','REPORTE DE RENDICION');
 		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
 		$this->objParam->addParametro('firmar',$firmar);
 		$this->objParam->addParametro('fecha_firma',$fecha_firma);

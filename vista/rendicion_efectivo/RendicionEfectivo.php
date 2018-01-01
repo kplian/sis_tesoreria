@@ -49,6 +49,23 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
 			}
 		);
+		this.addButton('btnChequeoDocumentosWf',
+			{
+				text: 'Documentos',
+				iconCls: 'bchecklist',
+				disabled: false,
+				handler: this.loadCheckDocumentosSolWf,
+				tooltip: '<b>Documentos de la Solicitud</b><br/>Los documetos de la solicitud seleccionada.'
+			}
+		);
+		this.addButton('diagrama_gantt',{
+			grupo:[0],
+			text:'Gantt',
+			iconCls: 'bgantt',
+			disabled:false,
+			handler:this.diagramGantt,
+			tooltip: '<b>Diagrama Gantt de Solicitud de Efectivo</b>'
+		});
 		//carga de grilla
 		if(this.nombreVista == 'RendicionEfectivo'){
 			this.load({params:{start:0, limit: this.tam_pag, tipo_interfaz:this.nombreVista, id_caja:this.id_caja}});
@@ -723,6 +740,33 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 			  boton.disable();
 		  }
      },
+     
+     loadCheckDocumentosSolWf:function() {
+		var rec=this.sm.getSelected();
+		rec.data.nombreVista = this.nombreVista;
+		Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
+			'Chequear documento del WF',
+			{
+				width:'90%',
+				height:500
+			},
+			rec.data,
+			this.idContenedor,
+			'DocumentoWf'
+		)
+	},
+	diagramGantt : function (){
+		var data=this.sm.getSelected().data.id_proceso_wf;
+		Phx.CP.loadingShow();
+		Ext.Ajax.request({
+			url: '../../sis_workflow/control/ProcesoWf/diagramaGanttTramite',
+			params: { 'id_proceso_wf': data },
+			success: this.successExport,
+			failure: this.conexionFailure,
+			timeout: this.timeout,
+			scope: this
+		});
+	},
 		
 	successWizard:function(resp){
 			Phx.CP.loadingHide();

@@ -322,7 +322,7 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
-				name: 'monto',
+				name: 'importe_pago_liquido',     //RAC 04/01/2018, ...esta import ede documento esto es un error no cosideraba el liquido pagable
 				fieldLabel: 'Liquido Pagable',
 				allowBlank: true,
 				anchor: '80%',
@@ -538,42 +538,143 @@ Phx.vista.SolicitudRendicionDet=Ext.extend(Phx.gridInterfaz,{
 	sigEstado:function(){
 		var id_estado_workflow = this.id_estado_workflow;
 		var id_proceso_workflow = this.id_proceso_workflow;
+		var countData = this.countData;
 		
 		if(id_estado_workflow ==0 || id_proceso_workflow==0){
 			Ext.MessageBox.alert('Alerta','Debe tener al menos una factura registrada');
 		}else{
-			Ext.Msg.show({
-				   title:'Confirmación',
-				   scope: this,
-				   msg: 'Todas las facturas seran enviadas a rendicion? Para enviar presione el botón "Si"',
-				   buttons: Ext.Msg.YESNO,
-				   fn: function(id, value, opt) {			   		
-						if (id == 'yes') {
-							this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
-										'Estado de Wf',
-										{
-											modal:true,
-											width:700,
-											height:450
-										}, {data:{
-											   id_estado_wf:id_estado_workflow,
-											   id_proceso_wf:id_proceso_workflow									  
-											}}, this.idContenedor,'FormEstadoWf',
-										{
-											config:[{
-													  event:'beforesave',
-													  delegate: this.onSaveWizard												  
-													}],
-											
-											scope:this
-										 });        
-						} else {
-							opt.hide;
-						}
-				   },	
-				   animEl: 'elId',
-				   icon: Ext.MessageBox.WARNING
-				}, this);
+			//
+			Ext.Ajax.request({
+				url: '../../sis_tesoreria/control/SolicitudRendicionDet/obtener_item_monto',
+				params: 
+				{
+					id_proceso_workflow: id_proceso_workflow,
+					monto: this.monto				
+				},
+				argument: {},
+				success: function (resp) {
+					var reg = Ext.decode(Ext.util.Format.trim(resp.responseText));
+					if(this.monto >reg.datos[0].importe_maximo_item){
+						//
+						Ext.Msg.show({
+							title:'ALERTA',
+							scope: this,
+							msg: 'EL MONTO DE LA RENDICION '+ this.monto +', EXCEDE EL IMPORTE MAXIMO DE ITEM<br> ¿DESEA CONTINUAR CON LA RENDICION?<br>PARA CONTINUAR PRESIONE SI',
+							buttons: Ext.Msg.YESNO,
+							fn: function(id, value, opt) {			   		
+								if (id == 'yes') {
+										Ext.Msg.show({
+										title:'Confirmación',
+										scope: this,
+										msg: 'Todas las facturas seran enviadas a rendicion? Para enviar presione el botón "Si"',
+										buttons: Ext.Msg.YESNO,
+										fn: function(id, value, opt) {			   		
+											if (id == 'yes') {
+												this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+												'Estado de Wf',
+												{
+													modal:true,
+													width:700,
+													height:450
+												}, {data:{
+													   id_estado_wf:id_estado_workflow,
+													   id_proceso_wf:id_proceso_workflow									  
+													}}, this.idContenedor,'FormEstadoWf',
+												{
+													config:[{
+															  event:'beforesave',
+															  delegate: this.onSaveWizard												  
+															}],
+													
+													scope:this
+												 });
+											} else {
+												opt.hide;
+											}
+									   },	
+									   animEl: 'elId',
+									   icon: Ext.MessageBox.WARNING
+									}, this);
+								} else {
+									opt.hide;
+								}
+							},	
+							animEl: 'elId',
+							icon: Ext.MessageBox.WARNING
+						}, this);
+					}else{
+						Ext.Msg.show({
+							title:'Confirmación',
+							scope: this,
+							msg: 'Todas las facturas seran enviadas a rendicion? Para enviar presione el botón "Si"',
+							buttons: Ext.Msg.YESNO,
+							fn: function(id, value, opt) {			   		
+								if (id == 'yes') {
+									this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+									'Estado de Wf',
+									{
+										modal:true,
+										width:700,
+										height:450
+									}, {data:{
+										   id_estado_wf:id_estado_workflow,
+										   id_proceso_wf:id_proceso_workflow									  
+										}}, this.idContenedor,'FormEstadoWf',
+									{
+										config:[{
+												  event:'beforesave',
+												  delegate: this.onSaveWizard												  
+												}],
+										
+										scope:this
+									 });
+								} else {
+									opt.hide;
+								}
+						   },	
+						   animEl: 'elId',
+						   icon: Ext.MessageBox.WARNING
+						}, this);
+					}
+					Ext.Msg.show({
+							title:'Confirmación',
+							scope: this,
+							msg: 'Todas las facturas seran enviadas a rendicion? Para enviar presione el botón "Si"',
+							buttons: Ext.Msg.YESNO,
+							fn: function(id, value, opt) {			   		
+								if (id == 'yes') {
+									this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+									'Estado de Wf',
+									{
+										modal:true,
+										width:700,
+										height:450
+									}, {data:{
+										   id_estado_wf:id_estado_workflow,
+										   id_proceso_wf:id_proceso_workflow									  
+										}}, this.idContenedor,'FormEstadoWf',
+									{
+										config:[{
+												  event:'beforesave',
+												  delegate: this.onSaveWizard												  
+												}],
+										
+										scope:this
+									 });
+								} else {
+									opt.hide;
+								}
+						   },	
+						   animEl: 'elId',
+						   icon: Ext.MessageBox.WARNING
+						}, this);													
+				},
+				failure: this.conexionFailure,
+				timeout: this.timeout,
+				scope: this
+			});			
+			//			
+			
 		}
 	 },
 	 

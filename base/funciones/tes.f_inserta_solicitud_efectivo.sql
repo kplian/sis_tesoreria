@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_inserta_solicitud_efectivo (
   p_administrador integer,
   p_id_usuario integer,
@@ -9,57 +7,60 @@ CREATE OR REPLACE FUNCTION tes.f_inserta_solicitud_efectivo (
 RETURNS varchar AS
 $body$
 /**************************************************************************
- SISTEMA:		Obligaciones de Pago
- FUNCION: 		tes.f_inserta_solicitud_efectivo
+ SISTEMA:       Obligaciones de Pago
+ FUNCION:       tes.f_inserta_solicitud_efectivo
  DESCRIPCION:   Inserta registro de solicitud efectivo
- AUTOR: 		Gonzalo Sarmiento 
- FECHA:	        10-02-2015
- COMENTARIOS:	
+ AUTOR:         Gonzalo Sarmiento 
+ FECHA:         10-02-2015
+ COMENTARIOS:   
 ***************************************************************************
     
 
     HISTORIAL DE MODIFICACIONES:
-   	
- ISSUE            FECHA:		      AUTOR                 DESCRIPCION
+    
+ ISSUE            FECHA:              AUTOR                 DESCRIPCION
    
- #0        		 10-02-2015        Gonzalo Sarmiento       creacion de la funcion
- #0       		 30/11/2017        Rensi Arteaga           Ingreso de pasos por caja provinientes de cuenta documentada y viaticos
- #146 IC		 04/12/2017        RAC					   COnsiderar ingresos de efectivo en caja
+ #0              10-02-2015        Gonzalo Sarmiento       creacion de la funcion
+ #0              30/11/2017        Rensi Arteaga           Ingreso de pasos por caja provinientes de cuenta documentada y viaticos
+ #146 IC         04/12/2017        RAC                     COnsiderar ingresos de efectivo en caja
 ***************************************************************************/
 
 DECLARE
-	
-	v_id_solicitud_efectivo	integer;
-    v_codigo_tabla			varchar;
-    v_num_sol_efe			varchar;
-    v_id_gestion			integer;
-    v_codigo_tipo_proceso	varchar;
-    v_num_tramite			varchar;
-    v_id_proceso_wf			integer;
-    v_id_estado_wf			integer;
-    v_codigo_estado			varchar;
-    v_motivo				varchar;
-    v_tipo					varchar;
-    v_id_tipo_solicitud		integer;
-    v_id_solicitud_efectivo_fk	integer;
-    v_nombre_funcion		varchar;
-    v_resp					varchar;
-    v_codigo_proceso_llave_wf	varchar;
-    v_saldo_caja			numeric;
-    v_id_cajero				integer;
-    v_importe_maximo_solicitud	numeric;
-    v_estado				varchar;
-    v_monto_rendicion		numeric;
-    v_reg_cd				record;
-    v_id_tipo_estado		integer;
-    v_id_estado_actual		integer;
-    v_id_funcionario_cajero		integer;
-    v_reg_sol_efe				record;
-    v_id_funcionario_sol		integer;
-    v_id_fun_wf					integer;
-    v_ingreso_extra				varchar;
-    v_rec_se				    record;
-    v_cod_proc					varchar;
+    
+    v_id_solicitud_efectivo integer;
+    v_codigo_tabla          varchar;
+    v_num_sol_efe           varchar;
+    v_id_gestion            integer;
+    v_codigo_tipo_proceso   varchar;
+    v_num_tramite           varchar;
+    v_id_proceso_wf         integer;
+    v_id_estado_wf          integer;
+    v_codigo_estado         varchar;
+    v_motivo                varchar;
+    v_tipo                  varchar;
+    v_id_tipo_solicitud     integer;
+    v_id_solicitud_efectivo_fk  integer;
+    v_nombre_funcion        varchar;
+    v_resp                  varchar;
+    v_codigo_proceso_llave_wf   varchar;
+    v_saldo_caja            numeric;
+    v_id_cajero             integer;
+    v_importe_maximo_solicitud  numeric;
+    v_estado                varchar;
+    v_monto_rendicion       numeric;
+    v_reg_cd                record;
+    v_id_tipo_estado        integer;
+    v_id_estado_actual      integer;
+    v_id_funcionario_cajero     integer;
+    v_reg_sol_efe               record;
+    v_id_funcionario_sol        integer;
+    v_id_fun_wf                 integer;
+    v_ingreso_extra             varchar;
+    v_rec_se                    record;
+    v_cod_proc                  varchar;
+    v_codigo_caja           varchar;
+    v_reg_caja              record;
+    v_id_caja               integer;
 BEGIN
             v_nombre_funcion = 'tes.f_inserta_solicitud_efectivo';
 
@@ -70,21 +71,21 @@ BEGIN
                     (p_hstore->'id_funcionario')::integer
                     (p_hstore->'tipo')::varchar,
                     (p_hstore->'fecha')::date,
-					(p_hstore->'motivo')::varchar,
+                    (p_hstore->'motivo')::varchar,
                     (p_hstore->'id_solicitud_efectivo_fk')::integer                                
             */
             v_ingreso_extra = 'no'; --valor por defecto  
 
-			select pv.codigo into v_codigo_tabla
-         	from tes.tcaja pv
-         	where pv.id_caja = (p_hstore->'id_caja')::integer;
+            select pv.codigo into v_codigo_tabla
+            from tes.tcaja pv
+            where pv.id_caja = (p_hstore->'id_caja')::integer;
             
             ------------------------------------------------------------------------------
             --  RENDICION DE EFECTIVO
             ---------------------------------------------------------------------------  
 
-        	IF (p_hstore->'tipo_solicitud')::varchar = 'rendicion' THEN
-            	
+            IF (p_hstore->'tipo_solicitud')::varchar = 'rendicion' THEN
+                
                 v_tipo = 'RENEFE';
                 
             
@@ -93,15 +94,15 @@ BEGIN
             ---------------------------------------------------------------------------    
                 
             ELSIF (p_hstore->'tipo_solicitud')::varchar = 'devolucion' THEN
-            	
+                
                 v_tipo = 'DEVEFE';
 
                 select sol.estado, sol.monto into v_estado, v_monto_rendicion
-				from tes.tsolicitud_efectivo sol
-				where sol.id_solicitud_efectivo_fk=(p_hstore->'id_solicitud_efectivo_fk')::integer;
+                from tes.tsolicitud_efectivo sol
+                where sol.id_solicitud_efectivo_fk=(p_hstore->'id_solicitud_efectivo_fk')::integer;
 
                 IF v_monto_rendicion > 0.00 AND v_estado not in ('rendido') THEN
-                	raise exception 'No puede realizar una devolucion mientras tenga rendiciones pendientes';
+                    raise exception 'No puede realizar una devolucion mientras tenga rendiciones pendientes';
                 END IF;
                 
             ---------------------------------------------------------------------------------
@@ -116,12 +117,12 @@ BEGIN
             ELSIF (p_hstore->'tipo_solicitud')::varchar = 'solicitud' THEN
               
             
-				v_tipo='SOLEFE';
+                v_tipo='SOLEFE';
 
                 v_saldo_caja = tes.f_calcular_saldo_caja((p_hstore->'id_caja')::integer);
 
                 IF v_saldo_caja < (p_hstore->'monto')::numeric THEN
-					raise exception 'El monto que esta intentando solicitar excede el saldo de la caja';
+                    raise exception 'El monto que esta intentando solicitar excede el saldo de la caja';
                 END IF;
 
                 select importe_maximo_item into v_importe_maximo_solicitud
@@ -129,7 +130,7 @@ BEGIN
                 where id_caja=(p_hstore->'id_caja')::integer;
 
                 IF v_importe_maximo_solicitud < (p_hstore->'monto')::numeric THEN
-                	raise exception 'El monto que esta intentando solicitar excede el importe maximo de gasto';
+                    raise exception 'El monto que esta intentando solicitar excede el importe maximo de gasto';
                 END IF;
 
             ELSIF (p_hstore->'tipo_solicitud')::varchar = 'apertura_caja' THEN
@@ -144,10 +145,10 @@ BEGIN
                 
                 
             ELSIF (p_hstore->'tipo_solicitud')::varchar = 'salida_caja' THEN
-				v_tipo='SALEFE';
+                v_tipo='SALEFE';
             ELSE
                  raise exception 'Tipo de solicitud =  % , no definido', (p_hstore->'tipo_solicitud')::varchar;
-			END IF;
+            END IF;
             
             
 
@@ -328,15 +329,15 @@ BEGIN
             END IF;
 
             IF (p_hstore->'motivo') IS NOT NULL THEN
-            	v_motivo = (p_hstore->'motivo')::varchar;
+                v_motivo = (p_hstore->'motivo')::varchar;
             ELSE
-            	v_motivo = NULL;
+                v_motivo = NULL;
             END IF;
 
             IF (p_hstore->'id_solicitud_efectivo_fk') IS NOT NULL THEN
-            	v_id_solicitud_efectivo_fk = (p_hstore->'id_solicitud_efectivo_fk')::integer;
+                v_id_solicitud_efectivo_fk = (p_hstore->'id_solicitud_efectivo_fk')::integer;
             ELSE
-            	v_id_solicitud_efectivo_fk = NULL;
+                v_id_solicitud_efectivo_fk = NULL;
             END IF;
             
          
@@ -406,17 +407,52 @@ BEGIN
                  END IF;
 
                  --obtenemso funcionario cajero --
+                 /*   RAC 29/12/2017,  comentado por que aprantemete si viende decuatan docuemntada no tiene sentido usar id_solicitud_efectivo_fk ...
+                 
+                 
                   select 
                     caje.id_funcionario
                   into
                     v_id_funcionario_cajero
                   from tes.tsolicitud_efectivo se
                   inner join tes.tcajero caje on caje.id_caja=se.id_caja and caje.tipo='responsable' 
-                  and now()::date between caje.fecha_inicio and caje.fecha_fin
+                  and (   now()::date between caje.fecha_inicio and caje.fecha_fin) or (now()::date >= caje.fecha_inicio and caje.fecha_fin is null)
                   where se.id_solicitud_efectivo = v_id_solicitud_efectivo_fk;
+                  */
+                  
+                  --recupera la caja
+                  select 
+                    cud.id_caja,
+                    cud.id_caja_dev,
+                    cud.fecha
+                  INTO
+                    v_reg_caja 
+                  from cd.tcuenta_doc cud
+                  where cud.id_cuenta_doc = p_id_cuenta_doc;
+                  
+                  v_id_caja =  COALESCE(v_reg_caja.id_caja,v_reg_caja.id_caja_dev);
+                  
+                  IF v_id_caja is null THEN
+                     raise exception 'No se encontro caja para la cuenta documentada ID %',p_id_cuenta_doc ;
+                  END IF;
+                  
+                  
+                  select 
+                    caje.id_funcionario
+                  into
+                    v_id_funcionario_cajero
+                  from tes.tcajero caje 
+                  WHERE       caje.id_caja = v_id_caja and caje.tipo='responsable' 
+                         and  ((v_reg_caja.fecha::date between caje.fecha_inicio and caje.fecha_fin) or (v_reg_caja.fecha::date >= caje.fecha_inicio and caje.fecha_fin is null))
+                         and  caje.estado_reg = 'activo';
+                  
                 
+                  
+                  IF v_id_funcionario_cajero is null THEN
+                        raise exception 'no se encontro cajero para la caja par ala fecha %',v_reg_caja.fecha;
+                  END IF;
                  
-                 
+                
                  v_id_estado_actual =  wf.f_registra_estado_wf(v_id_tipo_estado,
                                                              v_id_funcionario_cajero,
                                                              v_id_estado_wf,
@@ -492,21 +528,21 @@ BEGIN
              
              END IF;
 
-			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Solicitud Efectivo almacenado(a) con exito (id_solicitud_efectivo'||v_id_solicitud_efectivo||')');
-			v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_efectivo', v_id_solicitud_efectivo::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Solicitud Efectivo almacenado(a) con exito (id_solicitud_efectivo'||v_id_solicitud_efectivo||')');
+            v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_efectivo', v_id_solicitud_efectivo::varchar);
 
             --Devuelve la respuesta
             return v_resp;
-			
+            
 EXCEPTION
-				
-	WHEN OTHERS THEN
-		v_resp='';
-		v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
-		v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
-		v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
-		raise exception '%',v_resp;
-				        
+                
+    WHEN OTHERS THEN
+        v_resp='';
+        v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+        v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
+        v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+        raise exception '%',v_resp;
+                        
 END;
 $body$
 LANGUAGE 'plpgsql'

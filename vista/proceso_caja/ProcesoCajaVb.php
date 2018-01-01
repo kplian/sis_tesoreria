@@ -11,6 +11,7 @@
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
+
 Phx.vista.ProcesoCajaVb = {
     bedit:false,
     bnew:false,
@@ -27,10 +28,8 @@ Phx.vista.ProcesoCajaVb = {
 	 * */
 
 	constructor: function(config) {
-
-	   Phx.vista.ProcesoCajaVb.superclass.constructor.call(this,config);
-
-	   this.addButton('ant_estado',
+		Phx.vista.ProcesoCajaVb.superclass.constructor.call(this,config);
+		this.addButton('ant_estado',
 			{	text:'Anterior',
 				argument: {estado: 'anterior'},
 				iconCls: 'batras',
@@ -38,109 +37,111 @@ Phx.vista.ProcesoCajaVb = {
 				handler:this.antEstado,
 				tooltip: '<b>Anterior</b><p>Pasa al anterior estado</p>'
 			}
+		);		
+		this.addButton('fin_registro',
+			{	
+				text:'Siguiente',
+				iconCls: 'badelante',
+				disabled:true,
+				handler:this.sigEstado,
+				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
+			}
 		);
-
-        this.addButton('fin_registro',
-            {	text:'Siguiente',
-                iconCls: 'badelante',
-                disabled:true,
-                handler:this.sigEstado,
-                tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
-            }
-        );
-
-		  this.store.baseParams={tipo_interfaz:this.nombreVista};
-    },
-
-
-   preparaMenu:function(n){
-          var data = this.getSelectedData();
-          var tb =this.tbar;
-          //Phx.vista.ProcesoCajaVb.superclass.preparaMenu.call(this,n);
-
-		  if (data['estado']!= 'pendiente' && data['estado']!= 'contabilizado' && data['estado']!= 'cerrado' && data['estado']!= 'rendido'){
-              this.getBoton('fin_registro').enable();
-              this.getBoton('ant_estado').enable();
-          }
-          else{
-              this.getBoton('fin_registro').disable();
-              this.getBoton('ant_estado').disable();
-          }
-		  		  
-		  if(data['tipo']=='SOLREN'){
-			//this.getBoton('consolidado_rendicion').enable();
-			//this.getBoton('consolidado_reposicion').disable();
-		  }else if(data['tipo']=='SOLREP'){
-			//this.getBoton('consolidado_rendicion').disable();
-			//this.getBoton('consolidado_reposicion').enable();
-		  }else{
-			//this.getBoton('consolidado_rendicion').disable();
-			//this.getBoton('consolidado_reposicion').disable();
-		  }
-
-       if(data['tipo']=='CIERRE'){
-           //habilitar pestaña depositos
-           this.enableTabDepositos();
-       }else{
-           //deshabilitar pestaña depositos
-           this.disableTabDepositos();
-       }
-		  
-        //this.getBoton('chkpresupuesto').enable();
+		this.addBotonesGantt();
+		/*this.addButton('btnChequeoDocumentosWf',
+			{
+				text: 'Documentos',
+				iconCls: 'bchecklist',
+				disabled: true,
+				handler: this.loadCheckDocumentosSolWf,
+				tooltip: '<b>Documentos de la Solicitud</b><br/>Subir los documetos requeridos en la solicitud seleccionada.'
+			}
+		);	*/	
+		this.store.baseParams={tipo_interfaz:this.nombreVista};
 	},
 
-    enableTabDepositos:function(){
-        if(this.TabPanelSouth.get(1)){
-            this.TabPanelSouth.get(1).enable();
-            this.TabPanelSouth.setActiveTab(1)
-        }
-    },
+	preparaMenu:function(n){
+		var data = this.getSelectedData();
+		var tb =this.tbar;
+		//Phx.vista.ProcesoCajaVb.superclass.preparaMenu.call(this,n);		
+		if (data['estado']!= 'pendiente' && data['estado']!= 'contabilizado' && data['estado']!= 'cerrado' && data['estado']!= 'rendido'){
+			this.getBoton('fin_registro').enable();
+			this.getBoton('ant_estado').enable();
+		}
+		else{
+			this.getBoton('fin_registro').disable();
+			this.getBoton('ant_estado').disable();
+		}
+		if(data['tipo']=='SOLREN'){
+		//this.getBoton('consolidado_rendicion').enable();
+		//this.getBoton('consolidado_reposicion').disable();
+		}else if(data['tipo']=='SOLREP'){
+		//this.getBoton('consolidado_rendicion').disable();
+		//this.getBoton('consolidado_reposicion').enable();
+		}else{
+		//this.getBoton('consolidado_rendicion').disable();
+		//this.getBoton('consolidado_reposicion').disable();
+		}		
+		if(data['tipo']=='CIERRE'){
+			//habilitar pestaña depositos
+			this.enableTabDepositos();
+		}else{
+			//deshabilitar pestaña depositos
+			this.disableTabDepositos();
+		}
+		//this.getBoton('btnChequeoDocumentosWf').enable();
+		//this.getBoton('chkpresupuesto').enable();
+	},
 
-    disableTabDepositos:function(){
-        if(this.TabPanelSouth.get(1)){
-            this.TabPanelSouth.get(1).disable();
-            this.TabPanelSouth.setActiveTab(0)
-
-        }
-    },
+	enableTabDepositos:function(){
+		if(this.TabPanelSouth.get(1)){
+			this.TabPanelSouth.get(1).enable();
+			this.TabPanelSouth.setActiveTab(1)
+		}
+	},
+	
+	disableTabDepositos:function(){
+		if(this.TabPanelSouth.get(1)){
+			this.TabPanelSouth.get(1).disable();
+			this.TabPanelSouth.setActiveTab(0)		
+		}
+	},
 
 	antEstado:function(res){
-         var rec=this.sm.getSelected();
-         Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/AntFormEstadoWf.php',
-            'Estado de Wf',
-            {
-                modal:true,
-                width:450,
-                height:250
-            }, { data:rec.data, estado_destino: res.argument.estado }, this.idContenedor,'AntFormEstadoWf',
-            {
-                config:[{
-                          event:'beforesave',
-                          delegate: this.onAntEstado,
-                        }
-                        ],
-               scope:this
-             })
-   },
+		var rec=this.sm.getSelected();
+		Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/AntFormEstadoWf.php',
+		'Estado de Wf',
+		{
+			modal:true,
+			width:450,
+			height:250
+		}, { data:rec.data, estado_destino: res.argument.estado }, this.idContenedor,'AntFormEstadoWf',
+		{
+			config:[{
+				event:'beforesave',
+				delegate: this.onAntEstado,
+			}],
+			scope:this
+		})
+	},
 
-   onAntEstado: function(wizard,resp){
-            Phx.CP.loadingShow();
-            Ext.Ajax.request({
-                url:'../../sis_tesoreria/control/ProcesoCaja/anteriorEstadoProcesoCaja',
-                params:{
-                        id_proceso_wf: resp.id_proceso_wf,
-                        id_estado_wf:  resp.id_estado_wf,
-                        obs: resp.obs,
-                        estado_destino: resp.estado_destino
-                 },
-                argument:{wizard:wizard},
-                success:this.successEstadoSinc,
-                failure: this.conexionFailure,
-                timeout:this.timeout,
-                scope:this
-            });
-
-     },
+	onAntEstado: function(wizard,resp){
+		Phx.CP.loadingShow();
+		Ext.Ajax.request({
+			url:'../../sis_tesoreria/control/ProcesoCaja/anteriorEstadoProcesoCaja',
+			params:{
+				id_proceso_wf: resp.id_proceso_wf,
+				id_estado_wf:  resp.id_estado_wf,
+				obs: resp.obs,
+				estado_destino: resp.estado_destino
+			},
+			argument:{wizard:wizard},
+			success:this.successEstadoSinc,
+			failure: this.conexionFailure,
+			timeout:this.timeout,
+			scope:this
+		});
+	},
 
    successEstadoSinc:function(resp){
         Phx.CP.loadingHide();
@@ -155,14 +156,13 @@ Phx.vista.ProcesoCajaVb = {
        return tb
     },
 
-    sigEstado:function(){
-        var rec=this.sm.getSelected();
-        var configExtra = [];
-
-        if(rec.data.tipo == 'SOLREP' || rec.data.tipo=='REPO') {
-            if (rec.data.estado == 'vbconta' || rec.data.estado == 'revision' || rec.data.estado == 'vbfondos') {
-                configExtra = [
-                    {
+	sigEstado:function(){
+		var rec=this.sm.getSelected();
+		var configExtra = [];
+		if(rec.data.tipo == 'SOLREP' || rec.data.tipo=='REPO') {
+			if (rec.data.estado == 'vbconta' || rec.data.estado == 'revision' || rec.data.estado == 'vbfondos') {
+				configExtra = [
+					{
                         config: {
                             name: 'id_cuenta_bancaria',
                             fieldLabel: 'Cuenta Bancaria',
@@ -210,12 +210,14 @@ Phx.vista.ProcesoCajaVb = {
                         grid: true,
                         form: true
                     },
+                    //25/12/2017, el combo se ocultara debido a que no se maneja en la empresa ende
                     {
                         config: {
                             name: 'id_cuenta_bancaria_mov',
                             fieldLabel: 'Fondo',
                             allowBlank: true,
                             emptyText: 'Fondo...',
+                            inputType:'hidden',
                             store: new Ext.data.JsonStore({
                                 url: '../../sis_tesoreria/control/TsLibroBancos/listarTsLibroBancosDepositosConSaldo',
                                 id: 'id_cuenta_bancaria_mov',
@@ -254,70 +256,135 @@ Phx.vista.ProcesoCajaVb = {
                         id_grupo: 1,
                         grid: true,
                         form: true
-                    }];
-
-                this.eventosExtra = function (obj) {
-                    //Evento para filtrar los depósitos a partir de la cuenta bancaria
-                    obj.Cmp.id_cuenta_bancaria.on('select', function (data, rec, ind) {
-                        //si es de una regional nacional
-                        this.Cmp.id_cuenta_bancaria_mov.reset();
-                        this.Cmp.id_cuenta_bancaria_mov.modificado = true;
-                        Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams, {id_cuenta_bancaria: rec.id});
-                    }, obj);
-
-                };
-            }
-        }
-        this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
-            'Estado de Wf',
-            {
-                modal:true,
-                width:700,
-                height:450
-            }, {
-                configExtra: configExtra,
-                eventosExtra: this.eventosExtra,
-                data:{
-                    id_estado_wf:rec.data.id_estado_wf,
-                    id_proceso_wf:rec.data.id_proceso_wf
-                }}, this.idContenedor,'FormEstadoWf',
-            {
-                config:[{
-                    event:'beforesave',
-                    delegate: this.onSaveWizard
-                }],
-
-                scope:this
-            });
-    },
-    onSaveWizard:function(wizard,resp){
-        Phx.CP.loadingShow();
-        Ext.Ajax.request({
-            url:'../../sis_tesoreria/control/ProcesoCaja/siguienteEstadoProcesoCaja',
-            params:{
-
-                id_proceso_wf_act:  resp.id_proceso_wf_act,
-                id_estado_wf_act:   resp.id_estado_wf_act,
-                id_tipo_estado:     resp.id_tipo_estado,
-                id_funcionario_wf:  resp.id_funcionario_wf,
-                id_depto_wf:        resp.id_depto_wf,
-                obs:                resp.obs,
-                id_cuenta_bancaria:	resp.id_cuenta_bancaria,
-                id_cuenta_bancaria_mov : resp.id_cuenta_bancaria_mov,
-                json_procesos:      Ext.util.JSON.encode(resp.procesos)
-            },
-            success:this.successWizard,
-            failure: this.conexionFailure,
-            argument:{wizard:wizard},
-            timeout:this.timeout,
-            scope:this
-        });
-    },
-
-    successWizard:function(resp){
-        Phx.CP.loadingHide();
-        resp.argument.wizard.panel.destroy()
-        this.reload();
-    }
+                    }];				
+				this.eventosExtra = function (obj) {
+					//Evento para filtrar los depósitos a partir de la cuenta bancaria
+					obj.Cmp.id_cuenta_bancaria.on('select', function (data, rec, ind) {
+					//si es de una regional nacional
+						this.Cmp.id_cuenta_bancaria_mov.reset();
+						this.Cmp.id_cuenta_bancaria_mov.modificado = true;
+						Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams, {id_cuenta_bancaria: rec.id});
+					},obj);				
+				};
+			}
+		}
+		this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+		'Estado de Wf',
+		{
+			modal:true,
+			width:700,
+			height:450
+		}, {
+			configExtra: configExtra,
+			eventosExtra: this.eventosExtra,
+			data:{
+				id_estado_wf:rec.data.id_estado_wf,
+				id_proceso_wf:rec.data.id_proceso_wf
+			}}, this.idContenedor,'FormEstadoWf',
+		{
+		    config:[{
+		        event:'beforesave',
+		        delegate: this.onSaveWizard
+		    }],
+		
+		    scope:this
+		});
+		
+	},
+	//
+	diagramGantt: function (){			
+		var data=this.sm.getSelected().data.id_proceso_wf;
+		Phx.CP.loadingShow();
+		Ext.Ajax.request({
+			url: '../../sis_workflow/control/ProcesoWf/diagramaGanttTramite',
+			params: { 'id_proceso_wf': data },
+			success: this.successExport,
+			failure: this.conexionFailure,
+			timeout: this.timeout,
+			scope: this
+		});			
+	},
+	//
+	addBotonesGantt: function() {
+		this.menuAdqGantt = new Ext.Toolbar.SplitButton({
+			id: 'b-diagrama_gantt-' + this.idContenedor,
+			text: 'Gantt',
+			disabled: false,
+			grupo:[0,1,2,3],
+			iconCls : 'bgantt',
+			handler:this.diagramGantt,
+			scope: this,
+			menu:{
+				items: [{
+					id:'b-gantti-' + this.idContenedor,
+					text: 'Gantt Imagen',
+					tooltip: '<b>Muestra un reporte gantt en formato de imagen</b>',
+					handler:this.diagramGantt,
+					scope: this
+				}, {
+					id:'b-ganttd-' + this.idContenedor,
+					text: 'Gantt Dinámico',
+					tooltip: '<b>Muestra el reporte gantt facil de entender</b>',
+					handler:this.diagramGanttDinamico,
+					scope: this
+				}]
+			}
+		});
+		this.tbar.add(this.menuAdqGantt);
+	},
+	//
+	diagramGanttDinamico: function (){			
+		var data=this.sm.getSelected().data.id_proceso_wf;
+		window.open('../../../sis_workflow/reportes/gantt/gantt_dinamico.html?id_proceso_wf='+data)		
+	},
+	//
+	onSaveWizard:function(wizard,resp){
+		Phx.CP.loadingShow();
+		Ext.Ajax.request({
+			url:'../../sis_tesoreria/control/ProcesoCaja/siguienteEstadoProcesoCaja',
+			params:{			
+				id_proceso_wf_act:  resp.id_proceso_wf_act,
+				id_estado_wf_act:   resp.id_estado_wf_act,
+				id_tipo_estado:     resp.id_tipo_estado,
+				id_funcionario_wf:  resp.id_funcionario_wf,
+				id_depto_wf:        resp.id_depto_wf,
+				obs:                resp.obs,
+				id_cuenta_bancaria:	resp.id_cuenta_bancaria,
+				id_cuenta_bancaria_mov : resp.id_cuenta_bancaria_mov,
+				json_procesos:      Ext.util.JSON.encode(resp.procesos)
+			},
+			success:this.successWizard,
+			failure: this.conexionFailure,
+			argument:{wizard:wizard},
+			timeout:this.timeout,
+			scope:this
+		});
+		Phx.vista.ProcesoCajaVbFondos.superclass.preparaMenu.call(this);
+		this.consolidado_reposicion();
+	},
+	//
+	successWizard:function(resp){
+		Phx.CP.loadingHide();
+		resp.argument.wizard.panel.destroy()
+		this.reload();
+	},
+	//
+	/*loadCheckDocumentosSolWf:function() {
+		var rec=this.sm.getSelected();
+		if(rec!=null){
+			rec.data.nombreVista = this.nombreVista;
+			Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
+				'Chequear documento del WF',
+				{
+					width:'90%',
+					height:500
+				},
+				rec.data,
+				this.idContenedor,
+				'DocumentoWf'
+			)
+		}
+		
+	}*/
 };
 </script>

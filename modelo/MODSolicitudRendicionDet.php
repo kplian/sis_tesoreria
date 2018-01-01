@@ -195,7 +195,7 @@ class MODSolicitudRendicionDet extends MODbase{
 			$this->setParametro('id_solicitud_efectivo_fk','id_solicitud_efectivo','int4');
 			$this->setParametro('id_documento_respaldo','id_documento_respaldo','int4');
 			$this->setParametro('estado_reg','estado_reg','varchar');
-			$this->setParametro('monto','importe_neto','numeric');
+			$this->setParametro('monto','importe_pago_liquido','numeric');     //RAC 04/01/2018, TODO revisar, importe_pago_liquido  ,importe_neto
 			$this->setParametro('tipo_solicitud','tipo_solicitud','varchar');			
 			
 			$this->armarConsulta();			
@@ -390,7 +390,7 @@ class MODSolicitudRendicionDet extends MODbase{
 			$this->setParametro('id_solicitud_efectivo_fk','id_solicitud_efectivo','int4');
 			$this->setParametro('id_documento_respaldo','id_documento_respaldo','int4');
 			$this->setParametro('estado_reg','estado_reg','varchar');
-			$this->setParametro('monto','importe_neto','numeric');
+			$this->setParametro('monto','importe_pago_liquido','numeric'); //RAC, TODO revision se cambia por importe liquido
 			
 			$this->armarConsulta();
 			$stmt = $link->prepare($this->consulta);		  
@@ -598,5 +598,23 @@ class MODSolicitudRendicionDet extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}	
+	//
+	function obtener_item_monto(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_solicitud_rendicion_det_sel';
+		$this->transaccion='TES_GET_MONTO';
+		$this->tipo_procedimiento='SEL';
+		$this->setCount(false);
+		//
+		$this->setParametro('id_proceso_workflow','id_proceso_workflow','int4');
+		$this->setParametro('monto','monto','numeric');
+		//
+		$this->captura('importe_maximo_item','numeric');	
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}		
 }
 ?>

@@ -60,12 +60,12 @@ Phx.vista.CajaCajero = {
 	preparaMenu:function(n){
          var data = this.getSelectedData();
          		 
-		 if(data.estado == 'abierto'){
+		 /*if(data.estado == 'abierto'){
              this.enableTabCajero();
          }
 		 else{
              this.disableTabCajero();
-		 }	
+		 }	*/
 
 		this.getBoton('diagrama_gantt').enable();	 
 		this.getBoton('btnRendicion').enable();

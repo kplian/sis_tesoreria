@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_det_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -9,30 +7,30 @@ CREATE OR REPLACE FUNCTION tes.ft_obligacion_det_ime (
 RETURNS varchar AS
 $body$
 /**************************************************************************
- SISTEMA:		Sistema de Tesoreria
- FUNCION: 		tes.ft_obligacion_det_ime
+ SISTEMA:   Sistema de Tesoreria
+ FUNCION:     tes.ft_obligacion_det_ime
  DESCRIPCION:   Funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'tes.tobligacion_det'
- AUTOR: 		Gonzalo Sarmiento Sejas
- FECHA:	        02-04-2013 20:27:35
- COMENTARIOS:	
+ AUTOR:     Gonzalo Sarmiento Sejas
+ FECHA:         02-04-2013 20:27:35
+ COMENTARIOS: 
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
 
- DESCRIPCION:	
- AUTOR:			
- FECHA:		
+ DESCRIPCION: 
+ AUTOR:     
+ FECHA:   
 ***************************************************************************/
 
 DECLARE
 
-	v_nro_requerimiento    	integer;
-	v_parametros           	record;
-	v_id_requerimiento     	integer;
-	v_resp		            varchar;
-	v_nombre_funcion        text;
-	v_mensaje_error         text;
-	v_id_obligacion_det	integer;
-    v_tipo_cambio_conv	   numeric;
+  v_nro_requerimiento     integer;
+  v_parametros            record;
+  v_id_requerimiento      integer;
+  v_resp                varchar;
+  v_nombre_funcion        text;
+  v_mensaje_error         text;
+  v_id_obligacion_det integer;
+    v_tipo_cambio_conv     numeric;
     v_monto_mb numeric;
     v_tipo_obligacion varchar;
     v_id_moneda integer;
@@ -40,16 +38,16 @@ DECLARE
     v_id_gestion integer;    
     v_id_obligacion integer;    
     v_id_partida_ejecucion integer;     
-    v_id_partida_anterior	integer;
-    v_id_cc_anterior		integer;   
-    v_monto					numeric;
-    v_res					boolean;
-    v_nombre_conexion		varchar;
-    v_comprometido			varchar;
-    v_monto_total_obligacion	numeric;
-    v_registros				record;
+    v_id_partida_anterior integer;
+    v_id_cc_anterior    integer;   
+    v_monto         numeric;
+    v_res         boolean;
+    v_nombre_conexion   varchar;
+    v_comprometido      varchar;
+    v_monto_total_obligacion  numeric;
+    v_registros       record;
     v_registros_cig         record;
-    v_relacion				varchar;
+    v_relacion        varchar;
     
       
     
@@ -58,15 +56,15 @@ BEGIN
     v_nombre_funcion = 'tes.ft_obligacion_det_ime';
     v_parametros = pxp.f_get_record(p_tabla);
 
-	/*********************************    
- 	#TRANSACCION:  'TES_OBDET_INS'
- 	#DESCRIPCION:	Insercion de registros
- 	#AUTOR:		Gonzalo Sarmiento Sejas	
- 	#FECHA:		02-04-2013 20:27:35
-	***********************************/
+  /*********************************    
+  #TRANSACCION:  'TES_OBDET_INS'
+  #DESCRIPCION: Insercion de registros
+  #AUTOR:   Gonzalo Sarmiento Sejas 
+  #FECHA:   02-04-2013 20:27:35
+  ***********************************/
 
-	if(p_transaccion='TES_OBDET_INS')then
-					
+  if(p_transaccion='TES_OBDET_INS')then
+          
         begin
         
            --calculo monto en moneda base
@@ -129,62 +127,62 @@ BEGIN
           END IF;
          
         
-        	--Sentencia de la insercion
+          --Sentencia de la insercion
           insert into tes.tobligacion_det(
-			estado_reg,
-			--id_cuenta,
-			id_partida,
-			--id_auxiliar,
-			id_concepto_ingas,
-			monto_pago_mo,
-			id_obligacion_pago,
-			id_centro_costo,
-			monto_pago_mb,
+      estado_reg,
+      --id_cuenta,
+      id_partida,
+      --id_auxiliar,
+      id_concepto_ingas,
+      monto_pago_mo,
+      id_obligacion_pago,
+      id_centro_costo,
+      monto_pago_mb,
             descripcion,
-			fecha_reg,
-			id_usuario_reg,
-			fecha_mod,
-			id_usuario_mod,
+      fecha_reg,
+      id_usuario_reg,
+      fecha_mod,
+      id_usuario_mod,
             id_orden_trabajo
           )
           values(
-			'activo',
-			--v_parametros.id_cuenta,
-			v_id_partida,
-			--v_parametros.id_auxiliar,
-			v_parametros.id_concepto_ingas,
-			v_parametros.monto_pago_mo,
-			v_parametros.id_obligacion_pago,
-			v_parametros.id_centro_costo,
-			v_monto_mb,
-            v_parametros.descripcion,		
-			now(),
-			p_id_usuario,
-			null,
-			null,
+      'activo',
+      --v_parametros.id_cuenta,
+      v_id_partida,
+      --v_parametros.id_auxiliar,
+      v_parametros.id_concepto_ingas,
+      v_parametros.monto_pago_mo,
+      v_parametros.id_obligacion_pago,
+      v_parametros.id_centro_costo,
+      v_monto_mb,
+            v_parametros.descripcion,   
+      now(),
+      p_id_usuario,
+      null,
+      null,
             v_parametros.id_orden_trabajo
-							
-			)RETURNING id_obligacion_det into v_id_obligacion_det;
-			
-			--Definicion de la respuesta
-			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Detalle almacenado(a) con exito (id_obligacion_det'||v_id_obligacion_det||')'); 
+              
+      )RETURNING id_obligacion_det into v_id_obligacion_det;
+      
+      --Definicion de la respuesta
+      v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Detalle almacenado(a) con exito (id_obligacion_det'||v_id_obligacion_det||')'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_det',v_id_obligacion_det::varchar);
 
             --Devuelve la respuesta
             return v_resp;
 
-		end;
+    end;
 
-	/*********************************    
- 	#TRANSACCION:  'TES_OBDET_MOD'
- 	#DESCRIPCION:	Modificacion de registros
- 	#AUTOR:		Gonzalo Sarmiento Sejas	
- 	#FECHA:		02-04-2013 20:27:35
-	***********************************/
+  /*********************************    
+  #TRANSACCION:  'TES_OBDET_MOD'
+  #DESCRIPCION: Modificacion de registros
+  #AUTOR:   Gonzalo Sarmiento Sejas 
+  #FECHA:   02-04-2013 20:27:35
+  ***********************************/
 
-	elsif(p_transaccion='TES_OBDET_MOD')then
+  elsif(p_transaccion='TES_OBDET_MOD')then
 
-		begin
+    begin
         
            --calculo monto en moneda base
            
@@ -228,48 +226,48 @@ BEGIN
            END IF;
         
         
-			--Sentencia de la modificacion
-			update tes.tobligacion_det set
-			--id_cuenta = v_parametros.id_cuenta,
-			id_partida = v_id_partida,
-			--id_auxiliar = v_parametros.id_auxiliar,
-			id_concepto_ingas = v_parametros.id_concepto_ingas,
-			monto_pago_mo = v_parametros.monto_pago_mo,
-			id_obligacion_pago = v_parametros.id_obligacion_pago,
-			id_centro_costo = v_parametros.id_centro_costo,
-			monto_pago_mb = v_monto_mb,
-		    fecha_mod = now(),
+      --Sentencia de la modificacion
+      update tes.tobligacion_det set
+      --id_cuenta = v_parametros.id_cuenta,
+      id_partida = v_id_partida,
+      --id_auxiliar = v_parametros.id_auxiliar,
+      id_concepto_ingas = v_parametros.id_concepto_ingas,
+      monto_pago_mo = v_parametros.monto_pago_mo,
+      id_obligacion_pago = v_parametros.id_obligacion_pago,
+      id_centro_costo = v_parametros.id_centro_costo,
+      monto_pago_mb = v_monto_mb,
+        fecha_mod = now(),
             descripcion=v_parametros.descripcion,
-			id_usuario_mod = p_id_usuario,
+      id_usuario_mod = p_id_usuario,
             id_orden_trabajo = v_parametros.id_orden_trabajo
-			where id_obligacion_det=v_parametros.id_obligacion_det;
+      where id_obligacion_det=v_parametros.id_obligacion_det;
                
-			--Definicion de la respuesta
+      --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Detalle modificado(a)'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_det',v_parametros.id_obligacion_det::varchar);
                
             --Devuelve la respuesta
             return v_resp;
             
-		end;
+    end;
 
-	/*********************************    
- 	#TRANSACCION:  'TES_OBDET_ELI'
- 	#DESCRIPCION:	Eliminacion de registros
- 	#AUTOR:		admin	
- 	#FECHA:		02-04-2013 20:27:35
-	***********************************/
+  /*********************************    
+  #TRANSACCION:  'TES_OBDET_ELI'
+  #DESCRIPCION: Eliminacion de registros
+  #AUTOR:   admin 
+  #FECHA:   02-04-2013 20:27:35
+  ***********************************/
 
-	elsif(p_transaccion='TES_OBDET_ELI')then
+  elsif(p_transaccion='TES_OBDET_ELI')then
 
-		begin
+    begin
            
         
             delete from tes.tprorrateo p 
             where  p.id_obligacion_det = v_parametros.id_obligacion_det;
             
             --Sentencia de la eliminacion
-			delete from tes.tobligacion_det
+      delete from tes.tobligacion_det
             where id_obligacion_det=v_parametros.id_obligacion_det;
                
             --Definicion de la respuesta
@@ -279,19 +277,19 @@ BEGIN
             --Devuelve la respuesta
             return v_resp;
 
-		end;
+    end;
         
     /*********************************    
- 	#TRANSACCION:  'TES_OBDETAPRO_MOD'
- 	#DESCRIPCION:	Cambio en la apropacion de un detalle de obligacion
- 	#AUTOR:		admin	
- 	#FECHA:		02-04-2013 20:27:35
-	***********************************/
+  #TRANSACCION:  'TES_OBDETAPRO_MOD'
+  #DESCRIPCION: Cambio en la apropacion de un detalle de obligacion
+  #AUTOR:   admin 
+  #FECHA:   02-04-2013 20:27:35
+  ***********************************/
 
-	elsif(p_transaccion='TES_OBDETAPRO_MOD')then
+  elsif(p_transaccion='TES_OBDETAPRO_MOD')then
 
-		begin
-        	
+    begin
+          
         
             /************************OBTENER DATOS**********************/
             select od.id_partida_ejecucion_com,od.id_obligacion_pago, od.id_partida,od.id_centro_costo,op.id_moneda,
@@ -301,15 +299,15 @@ BEGIN
             from tes.tobligacion_det od
             inner join tes.tobligacion_pago op on op.id_obligacion_pago = od.id_obligacion_pago
             where id_obligacion_det = v_parametros.id_obligacion_det;
-			
+      
             /*Validacion de que no haya ninguna cuota de tipo devengado y devengado_pago en estado devengado*/
             
-            if exists (	select 1 
-            			from tes.tplan_pago pp
+            if exists ( select 1 
+                  from tes.tplan_pago pp
                         where ((pp.tipo in ('devengado','devengado_pagado','devengado_pagado_1c') and pp.estado = 'devengado') OR
-                        	pp.tipo in ('ant_aplicado') and pp.estado = 'aplicado') and 
+                          pp.tipo in ('ant_aplicado') and pp.estado = 'aplicado') and 
                             pp.id_obligacion_pago = v_id_obligacion and pp.estado_reg != 'inactivo' ) then
-            	raise exception 'Existe un pago devengado para esta solicitud. Por lo que no es posible modificar la apropiacion';
+              raise exception 'Existe un pago devengado para esta solicitud. Por lo que no es posible modificar la apropiacion';
             end if;
             
                     
@@ -349,25 +347,25 @@ BEGIN
             id_partida = v_id_partida,
             id_centro_costo = v_parametros.id_centro_costo,
             id_orden_trabajo = v_parametros.id_orden_trabajo,
-            monto_pago_mo = v_parametros.monto_pago_mo,		
-			monto_pago_mb = v_monto_mb,
-		    fecha_mod = now(),
+            monto_pago_mo = v_parametros.monto_pago_mo,   
+      monto_pago_mb = v_monto_mb,
+        fecha_mod = now(),
             descripcion=v_parametros.descripcion,
-			id_usuario_mod = p_id_usuario
+      id_usuario_mod = p_id_usuario
             where id_obligacion_det = v_parametros.id_obligacion_det;
             
             /***********GENERAR PRORRATEOS**********/
             if ((select sum(od.monto_pago_mo) 
-            	from tes.tobligacion_det od 
+              from tes.tobligacion_det od 
                 where id_obligacion_pago = v_id_obligacion and estado_reg = 'activo') = v_monto_total_obligacion) THEN
                 v_resp = tes.f_calcular_factor_obligacion_det(v_id_obligacion);
                 for v_registros in (select id_plan_pago,op.pago_variable,pp.monto_ejecutar_total_mo,pp.id_plan_pago_fk 
-                					from tes.tplan_pago pp
+                          from tes.tplan_pago pp
                                     inner join tes.tobligacion_pago op on  op.id_obligacion_pago = pp.id_obligacion_pago
                                     where op.id_obligacion_pago = v_id_obligacion and pp.tipo in ('devengado','devengado_pagado','devengado_pagado_1c')
                                     and pp.estado != 'anulado' and pp.estado_reg = 'activo') loop
                                     
-            		 v_res = tes.f_prorrateo_plan_pago(v_registros.id_plan_pago, v_id_obligacion,
+                 v_res = tes.f_prorrateo_plan_pago(v_registros.id_plan_pago, v_id_obligacion,
                      v_registros.pago_variable, v_registros.monto_ejecutar_total_mo, p_id_usuario, NULL);
                 end loop;
             end if;
@@ -382,33 +380,33 @@ BEGIN
             return v_resp;  
             
         END;
-    	
+      
         /*********************************    
- 	#TRANSACCION:  'TES_OBDETAPRO_INS'
- 	#DESCRIPCION:	Cambio en la apropacion de un detalle de obligacion
- 	#AUTOR:		admin	
- 	#FECHA:		02-04-2013 20:27:35
-	***********************************/
+  #TRANSACCION:  'TES_OBDETAPRO_INS'
+  #DESCRIPCION: Cambio en la apropacion de un detalle de obligacion
+  #AUTOR:   admin 
+  #FECHA:   02-04-2013 20:27:35
+  ***********************************/
 
-	elsif(p_transaccion='TES_OBDETAPRO_INS')then
+  elsif(p_transaccion='TES_OBDETAPRO_INS')then
 
-		begin
-        	
+    begin
+          
         
             /************************OBTENER DATOS**********************/
             select op.id_obligacion_pago,op.id_moneda,op.id_gestion, comprometido,op.total_pago 
             into v_id_obligacion,v_id_moneda,v_id_gestion,v_comprometido,v_monto_total_obligacion
             from tes.tobligacion_pago op            
             where id_obligacion_pago = v_parametros.id_obligacion_pago;
-			
+      
             /*Validacion de que no haya ninguna cuota de tipo devengado y devengado_pago en estado devengado*/
             
-            if exists (	select 1 
-            			from tes.tplan_pago pp
+            if exists ( select 1 
+                  from tes.tplan_pago pp
                         where ((pp.tipo in ('devengado','devengado_pagado','devengado_pagado_1c') and pp.estado = 'devengado') OR
-                        	pp.tipo in ('ant_aplicado') and pp.estado = 'aplicado') and 
+                          pp.tipo in ('ant_aplicado') and pp.estado = 'aplicado') and 
                             pp.id_obligacion_pago = v_id_obligacion and pp.estado_reg != 'inactivo' ) then
-            	raise exception 'Existe un pago devengado para esta solicitud. Por lo que no es posible modificar la apropiacion';
+              raise exception 'Existe un pago devengado para esta solicitud. Por lo que no es posible modificar la apropiacion';
             end if;
             
                     
@@ -446,48 +444,48 @@ BEGIN
             /************************ACTUALIZAR DATOS EN TABLA OBPDET**********************/
             v_monto_mb = v_parametros.monto_pago_mo * v_tipo_cambio_conv;
             --Sentencia de la insercion
-        	insert into tes.tobligacion_det(
-			estado_reg,			
-			id_partida,			
-			id_concepto_ingas,
-			monto_pago_mo,
-			id_obligacion_pago,
-			id_centro_costo,
-			monto_pago_mb,
+          insert into tes.tobligacion_det(
+      estado_reg,     
+      id_partida,     
+      id_concepto_ingas,
+      monto_pago_mo,
+      id_obligacion_pago,
+      id_centro_costo,
+      monto_pago_mb,
             descripcion,
-			fecha_reg,
-			id_usuario_reg,
-			fecha_mod,
-			id_usuario_mod,
+      fecha_reg,
+      id_usuario_reg,
+      fecha_mod,
+      id_usuario_mod,
             id_orden_trabajo
-          	) values(
-			'activo',			
-			v_id_partida,			
-			v_parametros.id_concepto_ingas,
-			v_parametros.monto_pago_mo,
-			v_parametros.id_obligacion_pago,
-			v_parametros.id_centro_costo,
-			v_monto_mb,
-            v_parametros.descripcion,		
-			now(),
-			p_id_usuario,
-			null,
-			null,
+            ) values(
+      'activo',     
+      v_id_partida,     
+      v_parametros.id_concepto_ingas,
+      v_parametros.monto_pago_mo,
+      v_parametros.id_obligacion_pago,
+      v_parametros.id_centro_costo,
+      v_monto_mb,
+            v_parametros.descripcion,   
+      now(),
+      p_id_usuario,
+      null,
+      null,
             v_parametros.id_orden_trabajo
-							
-			)RETURNING id_obligacion_det into v_id_obligacion_det;
+              
+      )RETURNING id_obligacion_det into v_id_obligacion_det;
             
             /***********GENERAR PRORRATEOS**********/
             if ((select sum(od.monto_pago_mo) 
-            	from tes.tobligacion_det od 
+              from tes.tobligacion_det od 
                 where id_obligacion_pago = v_id_obligacion and estado_reg = 'activo') = v_monto_total_obligacion) THEN
                 v_resp = tes.f_calcular_factor_obligacion_det(v_id_obligacion);
                 for v_registros in (select id_plan_pago,op.pago_variable,pp.monto_ejecutar_total_mo,pp.id_plan_pago_fk 
-                					from tes.tplan_pago pp
+                          from tes.tplan_pago pp
                                     inner join tes.tobligacion_pago op on  op.id_obligacion_pago = pp.id_obligacion_pago
                                     where op.id_obligacion_pago = v_id_obligacion and pp.tipo in ('devengado','devengado_pagado','devengado_pagado_1c')
                                     and pp.estado != 'anulado' and pp.estado_reg = 'activo') loop
-            		 
+                 
                      v_res = tes.f_prorrateo_plan_pago(v_registros.id_plan_pago, v_id_obligacion,
                      v_registros.pago_variable, v_registros.monto_ejecutar_total_mo, p_id_usuario, NULL);
                 end loop;
@@ -505,16 +503,16 @@ BEGIN
         END;
     
     /*********************************    
- 	#TRANSACCION:  'TES_OBDETAPRO_ELI'
- 	#DESCRIPCION:	Cambio en la apropacion de un detalle de obligacion
- 	#AUTOR:		admin	
- 	#FECHA:		02-04-2013 20:27:35
-	***********************************/
+  #TRANSACCION:  'TES_OBDETAPRO_ELI'
+  #DESCRIPCION: Cambio en la apropacion de un detalle de obligacion
+  #AUTOR:   admin 
+  #FECHA:   02-04-2013 20:27:35
+  ***********************************/
 
-	elsif(p_transaccion='TES_OBDETAPRO_ELI')then
+  elsif(p_transaccion='TES_OBDETAPRO_ELI')then
 
-		begin
-        	
+    begin
+          
         
             /************************OBTENER DATOS**********************/
             select od.id_partida_ejecucion_com,od.id_obligacion_pago, od.id_partida,od.id_centro_costo,op.id_moneda,
@@ -524,15 +522,15 @@ BEGIN
             from tes.tobligacion_det od
             inner join tes.tobligacion_pago op on op.id_obligacion_pago = od.id_obligacion_pago
             where id_obligacion_det = v_parametros.id_obligacion_det;
-			
+      
             /*Validacion de que no haya ninguna cuota de tipo devengado y devengado_pago en estado devengado*/
             
-            if exists (	select 1 
-            			from tes.tplan_pago pp
+            if exists ( select 1 
+                  from tes.tplan_pago pp
                         where ((pp.tipo in ('devengado','devengado_pagado','devengado_pagado_1c') and pp.estado = 'devengado') OR
-                        	pp.tipo in ('ant_aplicado') and pp.estado = 'aplicado') and 
+                          pp.tipo in ('ant_aplicado') and pp.estado = 'aplicado') and 
                             pp.id_obligacion_pago = v_id_obligacion and pp.estado_reg != 'inactivo' ) then
-            	raise exception 'Existe un pago devengado para esta solicitud. Por lo que no es posible modificar la apropiacion';
+              raise exception 'Existe un pago devengado para esta solicitud. Por lo que no es posible modificar la apropiacion';
             end if;            
                     
            
@@ -558,15 +556,15 @@ BEGIN
             
             /***********GENERAR PRORRATEOS**********/
             if ((select sum(od.monto_pago_mo) 
-            	from tes.tobligacion_det od 
+              from tes.tobligacion_det od 
                 where id_obligacion_pago = v_id_obligacion and estado_reg = 'activo') = v_monto_total_obligacion) THEN
                 v_resp = tes.f_calcular_factor_obligacion_det(v_id_obligacion);
                 for v_registros in (select id_plan_pago,op.pago_variable,pp.monto_ejecutar_total_mo,pp.id_plan_pago_fk 
-                					from tes.tplan_pago pp
+                          from tes.tplan_pago pp
                                     inner join tes.tobligacion_pago op on  op.id_obligacion_pago = pp.id_obligacion_pago
                                     where op.id_obligacion_pago = v_id_obligacion and pp.tipo in ('devengado','devengado_pagado','devengado_pagado_1c')
                                     and pp.estado != 'anulado' and pp.estado_reg = 'activo') loop
-            		 v_res = tes.f_prorrateo_plan_pago(v_registros.id_plan_pago, v_id_obligacion,
+                 v_res = tes.f_prorrateo_plan_pago(v_registros.id_plan_pago, v_id_obligacion,
                      v_registros.pago_variable, v_registros.monto_ejecutar_total_mo, p_id_usuario, NULL);
                 end loop;
             end if;
@@ -583,22 +581,21 @@ BEGIN
             
         END;
          
-	else
+  else
      
-    	raise exception 'Transaccion inexistente: %',p_transaccion;
+      raise exception 'Transaccion inexistente: %',p_transaccion;
 
-	end if;
+  end if;
 
 EXCEPTION
-				
-	WHEN OTHERS THEN
-		select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'error'); 
+        
+  WHEN OTHERS THEN
         v_resp='';       
-		v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
-		v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
-		v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
-		raise exception '%',v_resp;
-				        
+    v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+    v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
+    v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+    raise exception '%',v_resp;
+                
 END;
 $body$
 LANGUAGE 'plpgsql'

@@ -11,6 +11,8 @@
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
+var monto=null;
+var fec=null;
 Phx.vista.ProcesoCajaVbFondos = {
     bedit:false,
     bnew:false,
@@ -27,59 +29,65 @@ Phx.vista.ProcesoCajaVbFondos = {
 	 * */
 
 	constructor: function(config) {
-
-	   Phx.vista.ProcesoCajaVbFondos.superclass.constructor.call(this,config);
-
+		Phx.vista.ProcesoCajaVbFondos.superclass.constructor.call(this,config);
 		this.addButton('consolidado_reposicion',
-				{	text:'Reporte Reposicion',
-					iconCls: 'blist',
-					disabled:false,
-					grupo:[0,1],
-					handler:this.consolidado_reposicion,
-					tooltip: '<b>Consolidado Reposicion</b><p>Consolidado por Reposicion</p>'
-				}
+			{	text:'Reporte Reposicion',
+				iconCls: 'blist',
+				disabled:true,
+				grupo:[0,1],
+				handler:this.consolidado_reposicion,
+				tooltip: '<b>Consolidado Reposicion</b><p>Consolidado por Reposicion</p>'
+			}
 		);
-
 		if(config.filtro_directo){
 			this.store.baseParams.filtro_valor = config.filtro_directo.valor;
 			this.store.baseParams.filtro_campo = config.filtro_directo.campo;
-		}
-		
-	   this.load({params:{start:0, limit:this.tam_pag}})
-    },
+		}		
+		this.load({params:{start:0, limit:this.tam_pag}})
+	},
 
 	preparaMenu:function(){
-
 		Phx.vista.ProcesoCajaVbFondos.superclass.preparaMenu.call(this);
-		var data = this.getSelectedData();
+		var data = this.getSelectedData();	
 		if(data['tipo']=='SOLREN'){
 			this.getBoton('consolidado_reposicion').disable();
 		}else if(data['tipo']=='SOLREP'){
 			this.getBoton('consolidado_reposicion').enable();
+		}else if(data['tipo']=='REPO'){
+			this.getBoton('consolidado_reposicion').enable();
 		}else{
-			this.getBoton('consolidado_reposicion').disable();
-		}
+			this.getBoton('consolidado_reposicion').disable();			
+		}		
 	},
-
+	
+	postReloadPage:function(data){
+		monto=data.monto;
+	},
+	
 	consolidado_reposicion : function() {
 		var data = this.getSelectedData();
-		console.log('=>'+data);
-		Phx.CP.loadingShow();
-		Ext.Ajax.request({
-			url:'../../sis_tesoreria/control/ProcesoCaja/VoBoRepoCajaRepo',
-			params:{
-				'id_proceso_caja':data.id_proceso_caja,
-				'nro_tramite':data.nro_tramite,
-				'fecha_inicio':data.fecha_inicio,
-				'motivo':data.motivo,
-				'tipo':data.tipo,
-				'monto':data.monto				
-			},
-			success:this.successExport,
-			failure: this.conexionFailure,
-			timeout:this.timeout,
-			scope:this
-		});	
+		if(data!=null){									
+			console.log('==>'+data);
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+				url:'../../sis_tesoreria/control/ProcesoCaja/VoBoRepoCajaRepo',
+				params:{
+					'id_proceso_caja':data.id_proceso_caja,
+					'nro_tramite':data.nro_tramite,
+					'fecha_inicio':data.fecha_inicio,
+					'motivo':data.motivo,
+					'tipo':data.tipo,
+					'monto':data.monto				
+				},
+				success:this.successExport,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});
+		}
+		else{
+			alert('Seleccione un registro');
+		}	
 	}
 };
 </script>

@@ -986,6 +986,7 @@ BEGIN
           end if;
           
           
+          
           IF  v_registros.tipo  in ('pagado' ,'devengado_pagado','devengado_pagado_1c','anticipo','ant_parcial') THEN
                 
                   IF v_registros.forma_pago = 'cheque' THEN
@@ -1043,7 +1044,7 @@ BEGIN
            END IF;
            
           
-           --si es un pago de vengado , revisar si tiene contrato
+           --si es un pago de devengado , revisar si tiene contrato
            --si tiene contrato con renteciones de garantia validar que la rentecion de garantia sea mayor a cero
            IF  v_registros.tipo in ('devengado','devengado_pagado','devengado_pagado_1c') THEN
                IF v_registros.id_contrato is not null THEN
@@ -1103,6 +1104,7 @@ BEGIN
             
             
             END IF;
+           
         end;
         
       

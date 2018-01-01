@@ -193,7 +193,7 @@ class ACTProcesoCaja extends ACTbase{
 		$nombreArchivo = uniqid(md5(session_id()).'gg') . '.pdf';
 		$this->objParam->addParametro('orientacion','P');
 		$this->objParam->addParametro('tamano','LETTER');
-		$this->objParam->addParametro('titulo_archivo','RECIBO DE ENTREGA');
+		$this->objParam->addParametro('titulo_archivo','REPOSCION DE CAJA');
 		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
 		$this->objParam->addParametro('firmar',$firmar);
 		$this->objParam->addParametro('fecha_firma',$fecha_firma);

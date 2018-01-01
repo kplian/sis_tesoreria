@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.ft_cajero_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -49,16 +47,26 @@ BEGIN
 	if(p_transaccion='TES_CAJERO_INS')then
 					
         begin
-        	select id_cajero into v_id_cajero
-            from tes.tcajero
-            where id_caja = v_parametros.id_caja and tipo='responsable' ;
+        	
             
-            IF v_id_cajero is not null THEN
-            	UPDATE tes.tcajero
-                SET estado_reg = 'inactivo',
-                estado = 'inactivo'
-                WHERE id_cajero=v_id_cajero;
+            IF  v_parametros.tipo  = 'resposanble ' THEN
+               
+               select id_cajero into v_id_cajero
+               from tes.tcajero c
+               where id_caja = v_parametros.id_caja and tipo='responsable' and c.estado_reg = 'activo' ;
+            
+                --raise exception '%',v_parametros.id_caja;
+               IF  v_id_cajero is not null THEN
+                  raise exception 'solo puede  existir un resposanble por cada caja';
+                END IF;   
+            
             END IF;
+            
+            
+            IF    exists(select 1 from  tes.tcajero c  where  c.id_caja = v_parametros.id_caja and c.id_funcionario = v_parametros.id_funcionario )   THEN
+               raise exception 'El funcionario ya esta registrado para esta caja';
+            END IF;
+            
             
         	--Sentencia de la insercion
         	insert into tes.tcajero(
@@ -106,6 +114,27 @@ BEGIN
 	elsif(p_transaccion='TES_CAJERO_MOD')then
 
 		begin
+        
+        
+           IF  v_parametros.tipo  = 'resposanble ' THEN
+               
+               select id_cajero into v_id_cajero
+               from tes.tcajero c
+               where id_caja = v_parametros.id_caja and tipo='responsable' and c.estado_reg = 'activo'  and   c.id_cajero !=  v_parametros.id_cajero;
+            
+                --raise exception '%',v_parametros.id_caja;
+               IF  v_id_cajero is not null THEN
+                  raise exception 'solo puede  existir un resposanble por cada caja';
+                END IF;   
+            
+            END IF;
+            
+            IF    exists(select 1 from  tes.tcajero c  where  c.id_caja = v_parametros.id_caja and c.id_funcionario = v_parametros.id_funcionario  and c.id_cajero !=  v_parametros.id_cajero)   THEN
+               raise exception 'El funcionario ya esta registrado para esta caja';
+            END IF;
+            
+            
+             
 			--Sentencia de la modificacion
 			update tes.tcajero set
 			tipo = v_parametros.tipo,

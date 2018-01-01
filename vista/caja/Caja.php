@@ -100,13 +100,17 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 				mode: 'local',
 				anchor: '80%',
 				gwidth: 100,
-				store:['fondo_rotativo','caja_chica']
+				//modificado por manuel guerra, 
+				//store:['fondo_rotativo','caja_chica']
+				store:['fondo_rotativo']
 			},
 			type:'ComboBox',
 			filters:{type: 'list',
 					 pfiltro:'caja.tipo',
-					 options: ['fondo_rotativo','caja_chica']},
+					 //options: ['fondo_rotativo','caja_chica']},
+					 options: ['fondo_rotativo']},
 			id_grupo:1,
+			valorInicial: 'fondo_rotativo',
 			grid:true,
 			form:true
 		},
@@ -121,14 +125,18 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 				lazyRender:true,
 				mode: 'local',
 				anchor: '80%',
-				gwidth: 100,
-				store:['con_detalle','sin_detalle']
+				gwidth: 100,				
+				//modificado por manuel guerra 
+				//store:['con_detalle','sin_detalle']
+				store:['sin_detalle']
 			},
 			type:'ComboBox',
 			filters:{pfiltro:'caja.tipo_ejecucion',
 					 type:'list',
-					 options: ['con_detalle','sin_detalle']},
+					 //options: ['con_detalle','sin_detalle']},
+					 options: ['sin_detalle']},
 			id_grupo:1,
+			valorInicial: 'sin_detalle',
 			grid:true,
 			form:true
 		},
@@ -199,6 +207,49 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
+				name: 'saldo',
+				fieldLabel: 'Saldo en caja',
+				anchor: '80%',
+				gwidth: 80,
+				maxLength:1179650,
+				renderer:function(value,p,record){
+					if (record.data['saldo']<=200) {
+						if(record.data['saldo']==0 || record.data['saldo']==0.00){
+							return String.format('{0}', '<FONT COLOR="red"><b>'+'0.00'+'</b></FONT>');	
+						}else{
+							return String.format('{0}', '<FONT COLOR="red"><b>'+record.data['saldo']+'</b></FONT>');	
+						}						
+					}else{
+						return String.format('{0}', '<FONT COLOR="green"><b>'+record.data['saldo']+'</b></FONT>');
+					}
+				}
+			},
+			type:'NumberField',
+			id_grupo:1,
+			grid:true,
+			form:false			
+		},
+		{
+			config:{
+				name:'id_moneda',
+				origen:'MONEDA',
+				fieldLabel: 'Moneda',
+				url: '../../sis_parametros/control/Moneda/listarMoneda',
+				emptyText : 'Moneda...',
+				allowBlank:false,
+				gdisplayField:'desc_moneda',//mapea al store del grid
+				gwidth:100,
+				anchor: '80%',
+				renderer:function (value, p, record){return String.format('{0}', record.data['desc_moneda']);}
+			},
+			type:'ComboRec',
+			id_grupo:0,
+			filters:{pfiltro:'mon.moneda',type:'string'},
+			grid:true,
+			form:true
+		},
+		{
+			config:{
 				name: 'importe_maximo_caja',
 				fieldLabel: 'Importe Máximo Caja',
 				allowBlank: false,
@@ -245,39 +296,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 			id_grupo:1,
 			grid:true,
 			form:true
-		},
-		{
-			config:{
-				name: 'saldo',
-				fieldLabel: 'Saldo',
-				anchor: '80%',
-				gwidth: 80,
-				maxLength:1179650
-			},
-			type:'NumberField',
-			id_grupo:1,
-			grid:true,
-			form:false
-		},
-		{
-			config:{
-				name:'id_moneda',
-				origen:'MONEDA',
-				fieldLabel: 'Moneda',
-				url: '../../sis_parametros/control/Moneda/listarMoneda',
-				emptyText : 'Moneda...',
-				allowBlank:false,
-				gdisplayField:'desc_moneda',//mapea al store del grid
-				gwidth:100,
-				anchor: '80%',
-				renderer:function (value, p, record){return String.format('{0}', record.data['desc_moneda']);}
-			},
-			type:'ComboRec',
-			id_grupo:0,
-			filters:{pfiltro:'mon.moneda',type:'string'},
-			grid:true,
-			form:true
-	    },    
+		},				
 		{
 			config:{
 				name: 'estado',
@@ -589,6 +608,11 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
         }
         return tb
     },
+    onButtonNew: function() {
+    	Phx.vista.Caja.superclass.onButtonNew.call(this);
+    	this.Cmp.tipo_ejecucion.store.setBaseParam('sin_detalle');
+		this.Cmp.tipo_ejecucion.modificado = true;				
+    }
 	
 })
 </script>		

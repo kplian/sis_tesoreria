@@ -21,7 +21,7 @@ class CustomReporte extends ReportePDFFormulario {
 		$this->Cell(20, $height, '', 0, 0, 'C', false, '', 0, false, 'T', 'C');
 		
 		$this->SetFont('','B');
-	    $this->Cell(145, $height, 'SOLICITUD', 0, 0, 'C', false, '', 1, false, 'T', 'C');								
+	    $this->Cell(145, $height, 'REPOSICION EN CAJA CHICA', 0, 0, 'C', false, '', 1, false, 'T', 'C');								
 		$this->SetFontSize(14);
 		
 		$x=$this->getX();
@@ -65,20 +65,20 @@ Class RVoBoRepoCaja extends Report {
 		$pdf->SetFont('', '');
 		$pdf->Cell($width4, $height, $this->getDataSource()->getParameter('nro_tramite'), 1, 1, 'L', false, '', 0, false, 'T', 'C');
 		$pdf->SetFont('', 'B');
-		$pdf->Cell($width2, $height, 'TIPO: ', 1, 0, 'L', false, '', 0, false, 'T', 'C');
-		$pdf->SetFont('', '');
-		$pdf->Cell($width4, $height, $this->getDataSource()->getParameter('tipo'), 1, 1, 'L', false, '', 0, false, 'T', 'C');
-		$pdf->SetFont('', 'B');
 		$pdf->Cell($width2, $height, 'IMPORTE ENTREGADO : ', 1, 0, 'L', false, '', 0, false, 'T', 'C');
-		$pdf->SetFont('', '');		
+		$pdf->SetFont('', '');
 		$pdf->Cell($width4, $height, $this->getDataSource()->getParameter('monto'), 1, 1, 'L', false, '', 0, false, 'T', 'C');
+		$pdf->SetFont('', 'B');
+		$pdf->Cell($width2, $height, 'MOTIVO : ', 1, 0, 'L', false, '', 0, false, 'T', 'C');
+		$pdf->SetFont('', '');		
+		$pdf->Cell($width4, $height, $this->getDataSource()->getParameter('motivo'), 1, 1, 'L', false, '', 0, false, 'T', 'C');
 		$pdf->SetFont('', 'B');		
 		
 		$pdf->Ln();
 		$pdf->Ln();
 			
-		$pdf->SetFont('', 'B');       
-		$pdf->Cell($width3+31, $height, 'MOTIVO:', 1, 0, 'C', false, '', 0, false, 'T', 'T');
+		$pdf->SetFont('', 'B');
+		$pdf->Cell($width3+31, $height, 'RESPONSABLE DE CAJA:', 1, 0, 'C', false, '', 0, false, 'T', 'T');
 		$pdf->Ln();
 		$pdf->Cell($width3+31, $height*5, $this->getDataSource()->getParameter('motivo'),1, 1, 'L', false, '', 0, false, 'T', 'C');		
 		$pdf->Output($pdf->url_archivo, 'F');

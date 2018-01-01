@@ -133,6 +133,12 @@ class ACTSolicitudRendicionDet extends ACTbase{
 			
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}*/
+	
+	function obtener_item_monto(){
+		$this->objFunc=$this->create('MODSolicitudRendicionDet');
+		$this->res=$this->objFunc->obtener_item_monto($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
 }
 
 ?>

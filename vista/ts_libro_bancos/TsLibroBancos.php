@@ -20,8 +20,8 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		this.grid.getTopToolbar().disable();
 		this.grid.getBottomToolbar().disable();
 		this.iniciarEventos();
-		
-		this.addBotonesCheques();
+		this.cmpOrigen.setValue('Cochabamba');
+		//this.addBotonesCheques();
 		
 		this.addButton('btnClonar',
 			{
@@ -56,7 +56,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		
 		this.addButton('btnCheque3',
 			{
-				text: 'Cheque 3',
+				text: 'Cheque Ende',
 				iconCls: 'bprintcheck',
 				disabled: false,
 				handler: this.imprimirCheque3,
@@ -123,7 +123,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			}
 		);
 
-		this.addButton('diagrama_gantt',{text:'',iconCls: 'bgantt',disabled:true,handler:this.diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
+		this.addButton('diagrama_gantt',{text:'Gannt',iconCls: 'bgantt',disabled:true,handler:this.diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
 		
 		this.addButton('btnChequesAsociados',
 		{
@@ -170,7 +170,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
                 gwidth: 100
             },
             type:'ComboRec',
-            filters:{pfiltro:'dep.nombre',type:'string'},
+            filters:{pfiltro:'dep.nombre',type:'string'},            
             id_grupo:1,
             grid:false,
             form:true
@@ -287,6 +287,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			config:{
 				name: 'comprobante_sigma',
 				fieldLabel: 'Comprobante Sigma',
+				inputType:'hidden',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 125,
@@ -399,23 +400,25 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			config:{
 				name:'origen',
 				fieldLabel:'Origen',
-				allowBlank:false,
-				emptyText:'Tipo...',
+				allowBlank:false,		
 				typeAhead: true,
 				triggerAction: 'all',
 				lazyRender:true,
 				mode: 'local',
 				valueField: 'estilo',
 				gwidth: 60,
-				store:['CBB','SRZ','LPB','TJA','SRE','CIJ','TDD','UYU','MIA','MAD']
+				//store:['Cochabamba','SRZ','PTS','BNI','LPB','TJA','ORU','SRE','CIJ','TDD','UYU','MIA','MAD']
+				store:['Cochabamba','Quillacollo','Santa Cruz','Potosi','Beni','La Paz','Tarija','Yacuiba','Oruro','Trinidad','San Borja','Uyuni','Miami','Madrid']
 			},
 			type:'ComboBox',
 			id_grupo:1,
-			filters:{	
-					 type: 'list',
-					  pfiltro:'lban.origen',
-					 options: ['CBB','SRZ','TJA','SRE','CIJ','TDD','UYU','ENDESIS','MIA','MAD'],	
-				},
+			valorInicial:'Cochabamba',
+			/*filters:{	
+					type: 'list',
+					pfiltro:'lban.origen',
+					options:['Cochabamba','Quillacollo','Santa Cruz','Potosi','Beni','La Paz','Tarija','Yacuiba','Oruro','Trinidad','San Borja','Uyuni','Miami','Madrid']
+					//options: ['Cochabamba','SRZ','PTS','BNI','ORU','TJA','SRE','CIJ','TDD','UYU','ENDESIS','MIA','MAD'],	
+				},*/
 			grid:true,
 			form:true
 		},
@@ -694,13 +697,47 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		Phx.vista.TsLibroBancos.superclass.loadValoresIniciales.call(this);
 		this.cmpIdCuentaBancaria.setValue(this.maestro.id_cuenta_bancaria);		
 	},
-	
-	onButtonNew:function(){
+	//
+	onButtonNew:function(){	
 		Phx.vista.TsLibroBancos.superclass.onButtonNew.call(this); 	    
 		this.cmpIdLibroBancosFk.setValue(this.maestro.id_libro_bancos);
 		this.cmpDepto.enable();
 		this.cmpFecha.enable();
 		this.cmpTipo.enable();
+	},
+	//
+	onButtonEdit:function(){
+		Phx.vista.TsLibroBancos.superclass.onButtonEdit.call(this);
+		//this.cmpTipo.disable();
+		var data = this.getSelectedData();			
+		//
+		if(data.tipo=='cheque'){
+			this.mostrarComponente(this.cmpNroCheque);
+			this.mostrarComponente(this.cmpImporteCheque);
+		}
+		else{
+			this.ocultarComponente(this.cmpNroCheque);
+			if(data.tipo=='deposito'){
+				this.mostrarComponente(this.cmpImporteDeposito);
+				this.ocultarComponente(this.cmpImporteCheque);
+			}
+			else{
+				this.mostrarComponente(this.cmpImporteCheque);
+				this.ocultarComponente(this.cmpImporteDeposito);
+			}
+		}
+		if(data.estado=='impreso' || data.estado=='entregado' || data.estado=='cobrado'|| data.estado=='depositado'){
+			this.cmpDepto.disable();
+			this.cmpFecha.disable();
+			this.cmpImporteCheque.disable();
+			this.cmpImporteDeposito.disable();
+			this.cmpNroCheque.disable();
+		}else{
+			this.cmpDepto.enable();
+			this.cmpFecha.enable();
+			this.cmpImporteCheque.enable();
+			this.cmpNroCheque.enable();
+		}
 	},
 		
 	clonar:function(){
@@ -837,40 +874,6 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				this.getBoton('del').disable();
 		  }		  
 	 },
-	 
-	 onButtonEdit:function(){
-		Phx.vista.TsLibroBancos.superclass.onButtonEdit.call(this);
-		//this.cmpTipo.disable();
-		var data = this.getSelectedData();			
-		
-		if(data.tipo=='cheque'){
-			this.mostrarComponente(this.cmpNroCheque);
-			this.mostrarComponente(this.cmpImporteCheque);
-		}
-		else{
-			this.ocultarComponente(this.cmpNroCheque);
-			if(data.tipo=='deposito'){
-				this.mostrarComponente(this.cmpImporteDeposito);
-				this.ocultarComponente(this.cmpImporteCheque);
-			}
-			else{
-				this.mostrarComponente(this.cmpImporteCheque);
-				this.ocultarComponente(this.cmpImporteDeposito);
-			}
-		}
-		if(data.estado=='impreso' || data.estado=='entregado' || data.estado=='cobrado'|| data.estado=='depositado'){
-			this.cmpDepto.disable();
-			this.cmpFecha.disable();
-			this.cmpImporteCheque.disable();
-			this.cmpImporteDeposito.disable();
-			this.cmpNroCheque.disable();
-		}else{
-			this.cmpDepto.enable();
-			this.cmpFecha.enable();
-			this.cmpImporteCheque.enable();
-			this.cmpNroCheque.enable();
-		}
-	},
 		
 	antEstado:function(res,eve)
 	{                   
@@ -1076,13 +1079,17 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		}
 	},
 	//
-	imprimirCheque3 : function(){
+	imprimirCheque3 : function(){		
+		
+		
 		var NumSelect=this.sm.getCount();		
 		if(NumSelect!=0)
 		{
 			if(confirm('¿Está seguro de imprimir el cheque?'))
 			{				
 				var data=this.sm.getSelected().data;
+				console.log(data);
+				
 				if(data.nro_cheque==null){
 					Ext.MessageBox.alert('Estado', 'Edite el registro, y agregue los datos faltantes');
 				}else{
@@ -1093,7 +1100,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 							'a_favor':data.a_favor , 
 							'importe_cheque' : data.importe_cheque ,
 							'fecha_cheque_literal' : data.fecha_cheque_literal,
-							'nombre_regional' : data.nombre_regional
+							'nombre_regional' : data.origen
 						},
 						success:this.successExport,
 						failure: this.conexionFailure,
@@ -1152,7 +1159,6 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 	},
 	
 	successImprimirCheque:function(resp){
-            
 		Phx.CP.loadingHide();
 		var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
 		if(!reg.ROOT.error){
@@ -1176,6 +1182,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		this.cmpIdCuentaBancaria = this.getComponente('id_cuenta_bancaria');
 		this.cmpDepto = this.getComponente('id_depto');
 		this.cmpFecha = this.getComponente('fecha');
+		this.cmpOrigen = this.getComponente('origen');
 		
 		this.ocultarComponente(this.cmpNroCheque);
 		this.ocultarComponente(this.cmpImporteDeposito);

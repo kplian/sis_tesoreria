@@ -55,12 +55,14 @@ class ACTCuentaBancaria extends ACTbase{
 		if($this->objParam->getParametro('id_moneda')!=''){
 			$this->objParam->addFiltro("ctaban.id_moneda = ".$this->objParam->getParametro('id_moneda'));
 		}
-
+        /* RAC 29/12/2017  --comentao apra qeu se peuda devolver sobre cualquiern cuenta de banco
+		 * TODO  analizar si es encesario habilitar neuvamente
+		 *
 		if($this->objParam->getParametro('fondo_devolucion_retencion')!=''){
 			$this->objParam->addFiltro("ctaban.id_cuenta_bancaria in (select id_cuenta_bancaria
 																	from tes.tts_libro_bancos
 																	where coalesce(fondo_devolucion_retencion,'''') =''".$this->objParam->getParametro('fondo_devolucion_retencion')."'') ");
-		}
+		}*/
 
 		/*
 		if($this->objParam->getParametro('tipo_interfaz')!=''){

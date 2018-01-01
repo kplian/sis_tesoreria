@@ -29,6 +29,8 @@ DECLARE
 	v_parametros  		record;
 	v_nombre_funcion   	text;
 	v_resp				varchar;
+    v_valor				varchar;
+    v_aux  record;
 			    
 BEGIN
 
@@ -98,12 +100,46 @@ BEGIN
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
-
+            
+            raise notice '.. % ..',v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 
 		end;
+	
+    /*********************************    
+ 	#TRANSACCION:  'TES_GET_MONTO'
+ 	#DESCRIPCION:	Obtener monto maximo de item
+ 	#AUTOR:		manuel guerra	
+ 	#FECHA:		05-12-2017 19:08:39
+	***********************************/
 
+	elsif(p_transaccion='TES_GET_MONTO')then
+
+		begin
+			--Sentencia de la consulta de conteo de registros
+			SELECT c.importe_maximo_item
+            INTO
+            v_aux
+            FROM tes.tsolicitud_efectivo s
+            JOIN tes.tcaja c on c.id_caja=s.id_caja
+            WHERE s.id_proceso_wf = v_parametros.id_proceso_workflow;
+             
+            v_consulta='select c.importe_maximo_item                        
+                        FROM tes.tsolicitud_efectivo s
+                        JOIN tes.tcaja c on c.id_caja=s.id_caja
+                        WHERE s.id_proceso_wf ='|| v_parametros.id_proceso_workflow;
+                          	
+            IF (v_parametros.monto > v_aux.importe_maximo_item)THen
+            	v_valor = pxp.f_get_variable_global('tes_verificar_importe_max');          	
+		        v_resp = pxp.f_agrega_clave(v_resp,'v_valor',COALESCE(v_valor,'si')::varchar);
+            END IF;
+			--Devuelve la respuesta
+            
+			return v_consulta;
+
+		end;        
+    
 	/*********************************
  	#TRANSACCION:  'TES_REND_CONT'
  	#DESCRIPCION:	Conteo de registros

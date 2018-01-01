@@ -30,13 +30,16 @@ class ACTCaja extends ACTbase{
 		}
 		
 		if($this->objParam->getParametro('pes_estado')=='borrador'){
-             $this->objParam->addFiltro("pc.estado in (''borrador'')");
+            $this->objParam->addFiltro("pc.estado in (''borrador'')");
         }
         if($this->objParam->getParametro('pes_estado')=='proceso'){
-             $this->objParam->addFiltro("pc.estado = ''solicitado''");
+            $this->objParam->addFiltro("pc.estado = ''solicitado''");
         }
         if($this->objParam->getParametro('pes_estado')=='finalizados'){
-             $this->objParam->addFiltro("pc.estado in (''aprobado'',''rechazado'',''anulado'')");
+            $this->objParam->addFiltro("pc.estado in (''aprobado'',''rechazado'',''anulado'')");
+        }
+        if($this->objParam->getParametro('id_moneda')!=''){
+            $this->objParam->addFiltro("caja.id_moneda = ".$this->objParam->getParametro('id_moneda'));
         }
 		
 		$this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]);
@@ -120,7 +123,7 @@ class ACTCaja extends ACTbase{
 	}
 	//
 	function impReporteProcesoCaja($create_file=false, $onlyData = false) {
-		/*if($this->objParam->getParametro('tipo_formato')=='pdf') {
+		//if($this->objParam->getParametro('tipo_formato')=='pdf') {
 			$nombreArchivo = uniqid(md5(session_id()).'ProcesoCaja').'.pdf';			
 			$dataSource = $this->listarRepCaja();	
 			$dataEntidad = "";
@@ -140,42 +143,7 @@ class ACTCaja extends ACTbase{
 			$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se genera con exito el reporte: '.$nombreArchivo,'control');
 			$this->mensajeExito->setArchivoGenerado($nombreArchivo);
 			$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());		
-		}	
-		*/	
-		$dataSource = new DataSource();
-	
-		$this->objFunc = $this->create('MODCaja');
-		$resultSolicitud = $this->objFunc->listarRepCaja();
-		if($resultSolicitud->getTipo() != 'EXITO'){
-			$resultSolicitud->imprimirRespuesta($resultSolicitud->generarJson());
-			exit;
-		}
-		$datosSolicitud = $resultSolicitud->getDatos();	
-		$nombreArchivo = uniqid(md5(session_id()).'ProcesoCaja').'.pdf';
-		
-		$this->objParam->addParametro('orientacion','P');
-		$this->objParam->addParametro('tamano','LETTER');
-		$this->objParam->addParametro('titulo_archivo','RECIBO DE ENTREGA');
-		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
-		$this->objParam->addParametro('firmar',$firmar);
-		$this->objParam->addParametro('fecha_firma',$fecha_firma);
-		$this->objParam->addParametro('usuario_firma',$usuario_firma);
-		
-		$reporte = new RProcesoCaja($this->objParam);
-		$reporte->setDataSource($dataSource);
-		$reporte->write();
-		if(!$create_file){
-			$mensajeExito = new Mensaje();
-			$mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
-											'Se generó con éxito el reporte: '.$nombreArchivo,'control');
-			$mensajeExito->setArchivoGenerado($nombreArchivo);						
-			$this->res = $mensajeExito;
-			$this->res->imprimirRespuesta($this->res->generarJson());
-		}
-		else{
-			return dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo;
-		}
-			
+		//}	
 	}
 }
 
