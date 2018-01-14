@@ -87,7 +87,7 @@ BEGIN
     INTO v_id_funcionario
     FROM tes.tobligacion_pago op
     WHERE op.id_estado_wf = p_id_estado_wf;	
-
+--raise exception 'id_funcionario: %', v_id_funcionario;
     --recuperamos la la opbligacion de pago a partir del is_estado_wf del la obligacion
     
     /*select 

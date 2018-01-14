@@ -333,7 +333,7 @@ BEGIN
              fecha_mod=now()
           where id_proceso_wf = v_parametros.id_proceso_wf_act;
 
-           IF v_codigo_estado_siguiente in ('supconta','vbfondos') THEN
+           IF v_codigo_estado_siguiente in ('supconta','vbfondos', 'vbconta') THEN
 
                 update tes.tproceso_caja  p set
                  id_depto_conta = v_id_depto

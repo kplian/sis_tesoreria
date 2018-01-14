@@ -336,7 +336,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			config:{
 				name: 'nro_cheque',
 				fieldLabel: 'Nro Cheque',
-				allowBlank: true,
+				allowBlank: false,
 				anchor: '80%',
 				gwidth: 80,
 				maxLength:6
@@ -413,12 +413,11 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			type:'ComboBox',
 			id_grupo:1,
 			valorInicial:'Cochabamba',
-			/*filters:{	
-					type: 'list',
-					pfiltro:'lban.origen',
-					options:['Cochabamba','Quillacollo','Santa Cruz','Potosi','Beni','La Paz','Tarija','Yacuiba','Oruro','Trinidad','San Borja','Uyuni','Miami','Madrid']
-					//options: ['Cochabamba','SRZ','PTS','BNI','ORU','TJA','SRE','CIJ','TDD','UYU','ENDESIS','MIA','MAD'],	
-				},*/
+			filters:{	
+				//pfiltro:'lban.origen',
+				type: 'list',
+				options:['Cochabamba','Quillacollo','Santa Cruz','Potosi','Beni','La Paz','Tarija','Yacuiba','Oruro','Trinidad','San Borja','Uyuni','Miami','Madrid']
+			},
 			grid:true,
 			form:true
 		},

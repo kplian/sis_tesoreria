@@ -36,6 +36,10 @@ class ACTObligacionPago extends ACTbase{
 		if($this->objParam->getParametro('pes_estado')=='pago_unico'){
              $this->objParam->addFiltro("obpg.tipo_obligacion  in (''pago_unico'')");
         }
+
+		if($this->objParam->getParametro('pago_simple')=='si'){
+             $this->objParam->addFiltro("obpg.estado  in (''registrado'',''en_pago'',''finalizado'')");
+        }
 		
 		
 		if($this->objParam->getParametro('filtro_campo')!=''){
