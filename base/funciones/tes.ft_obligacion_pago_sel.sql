@@ -994,6 +994,133 @@ BEGIN
 			return v_consulta;
 
         end;
+
+
+    /*********************************
+    #TRANSACCION:  'TES_OBPGPS_SEL'
+    #DESCRIPCION:   Consulta de datos para pagos simples
+    #AUTOR:         RCM
+    #FECHA:         14-01-2018
+    ***********************************/
+
+    elsif(p_transaccion='TES_OBPGPS_SEL')then
+
+        begin
+
+            --Sentencia de la consulta
+            v_consulta:='select
+                obpg.id_obligacion_pago,
+                obpg.id_proveedor,
+                pv.desc_proveedor,
+                obpg.estado,
+                obpg.tipo_obligacion,
+                obpg.id_moneda,
+                mn.moneda,
+                obpg.obs,
+                obpg.porc_retgar,
+                obpg.id_subsistema,
+                ss.nombre as nombre_subsistema,
+                obpg.id_funcionario,
+                fun.desc_funcionario1,
+                obpg.estado_reg,
+                obpg.porc_anticipo,
+                obpg.id_estado_wf,
+                obpg.id_depto,
+                dep.nombre as nombre_depto,
+                obpg.num_tramite,
+                obpg.id_proceso_wf,
+                obpg.fecha_reg,
+                obpg.id_usuario_reg,
+                obpg.fecha_mod,
+                obpg.id_usuario_mod,
+                usu1.cuenta as usr_reg,
+                usu2.cuenta as usr_mod,
+                obpg.fecha,
+                obpg.numero,
+                obpg.tipo_cambio_conv,
+                obpg.id_gestion,
+                obpg.comprometido,
+                obpg.nro_cuota_vigente,
+                mn.tipo_moneda,
+                obpg.total_pago,
+                obpg.pago_variable,
+                obpg.id_depto_conta,
+                obpg.total_nro_cuota,
+                obpg.fecha_pp_ini,
+                obpg.rotacion,
+                obpg.id_plantilla,
+                pla.desc_plantilla,
+                obpg.ultima_cuota_pp,
+                obpg.ultimo_estado_pp,
+                obpg.tipo_anticipo,
+                obpg.ajuste_anticipo,
+                obpg.ajuste_aplicado,
+                obpg.monto_estimado_sg,
+                obpg.id_obligacion_pago_extendida,
+                con.tipo||'' - ''||con.numero::varchar as desc_contrato,
+                con.id_contrato,
+                obpg.obs_presupuestos,
+                obpg.codigo_poa,
+                obpg.obs_poa,
+                obpg.uo_ex,
+                obpg.id_funcionario_responsable,
+                fresp.desc_funcionario1 AS desc_fun_responsable
+                from tes.tobligacion_pago obpg
+                inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
+                left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
+                inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
+                inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
+                inner join param.tdepto dep on dep.id_depto=obpg.id_depto
+                left join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
+                left join leg.tcontrato con on con.id_contrato = obpg.id_contrato
+                left join param.tplantilla pla on pla.id_plantilla = obpg.id_plantilla
+                left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
+                left join orga.vfuncionario fresp ON fresp.id_funcionario = obpg.id_funcionario_responsable
+                where ';
+
+            --Definicion de la respuesta
+            v_consulta:=v_consulta||v_parametros.filtro;
+            v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+
+            --Devuelve la respuesta
+            return v_consulta;
+
+        end;
+
+    /*********************************
+    #TRANSACCION:  'TES_OBPGPS_CONT'
+    #DESCRIPCION:   Consulta de datos para pagos simples
+    #AUTOR:         RCM
+    #FECHA:         14-01-2018
+    ***********************************/
+
+    elsif(p_transaccion='TES_OBPGPS_CONT')then
+
+        begin
+
+            --Sentencia de la consulta
+            v_consulta:='select count(1)
+                from tes.tobligacion_pago obpg
+                inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
+                left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
+                inner join param.tmoneda mn on mn.id_moneda=obpg.id_moneda
+                inner join segu.tsubsistema ss on ss.id_subsistema=obpg.id_subsistema
+                inner join param.tdepto dep on dep.id_depto=obpg.id_depto
+                left join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
+                left join leg.tcontrato con on con.id_contrato = obpg.id_contrato
+                left join param.tplantilla pla on pla.id_plantilla = obpg.id_plantilla
+                left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
+                left join orga.vfuncionario fresp ON fresp.id_funcionario = obpg.id_funcionario_responsable
+                where ';
+
+            --Definicion de la respuesta
+            v_consulta:=v_consulta||v_parametros.filtro;
+
+            --Devuelve la respuesta
+            return v_consulta;
+
+        end;
+
    else
 
 		raise exception 'Transaccion inexistente';

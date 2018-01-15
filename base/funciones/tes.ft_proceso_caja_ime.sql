@@ -81,6 +81,15 @@ DECLARE
     v_sistema_origen    varchar;
     v_importe       numeric;
     v_tabla         varchar;
+    v_id_solicitud_efectivo    integer[];
+    v_hstore_registros   hstore;
+    v_id_caja  integer;
+    
+    va_id_tipo_estado 				integer[];
+     va_codigo_estado 				varchar[];
+     va_disparador    				varchar[];
+     va_regla        				varchar[]; 
+     va_prioridad     				integer[];   
 
 BEGIN
 
@@ -224,7 +233,8 @@ BEGIN
             tpc.codigo_plantilla_cbte,
             tpc.codigo,
             pc.id_proceso_caja,
-            pc.monto
+            pc.monto,
+            pc.id_caja
         into
             v_id_proceso_caja,
             v_id_proceso_wf,
@@ -232,7 +242,8 @@ BEGIN
             v_codigo_plantilla_cbte,
             v_codigo_proceso,
             v_id_proceso_caja,
-            v_monto
+            v_monto,
+            v_id_caja
         from tes.tproceso_caja pc
         inner join tes.ttipo_proceso_caja tpc on tpc.id_tipo_proceso_caja = pc.id_tipo_proceso_caja
         where pc.id_proceso_wf = v_parametros.id_proceso_wf_act;
@@ -356,7 +367,92 @@ BEGIN
                   select * into v_nombre_conexion from migra.f_crear_conexion();
                 END IF;
 
+               -- RAC, 14/01/2018   condicion temporal para apretura de cajas 
+               
+                
+                IF 1=1  THEN         
+      
+                    
+                     --inmediatamente apsa al estado finalizado
+                     
+                            SELECT
+                               *
+                            into
+                              va_id_tipo_estado,
+                              va_codigo_estado,
+                              va_disparador,
+                              va_regla,
+                              va_prioridad
 
+                          FROM wf.f_obtener_estado_wf(v_id_proceso_wf, v_id_estado_actual,NULL,'siguiente');
+                          
+                          IF va_codigo_estado[2] is not null THEN
+                             raise exception 'El proceso de WF esta mal parametrizado,  solo admite un estado siguiente para el estado: %', v_registros.estado;
+                          END IF;
+
+                          IF va_codigo_estado[1] is  null THEN
+                             raise exception 'El proceso de WF esta mal parametrizado, no se encuentra el estado siguiente,  para el estado: %', v_registros.estado;
+                          END IF;
+
+                          -- estado siguiente
+                          v_id_estado_actual =  wf.f_registra_estado_wf(va_id_tipo_estado[1],
+                                                                         v_parametros.id_funcionario_wf,
+                                                                         v_id_estado_actual,
+                                                                         v_id_proceso_wf,
+                                                                         p_id_usuario,
+                                                                         NULL, -- id_usuario_ai
+                                                                         '', -- usuario_ai
+                                                                         v_id_depto,
+                                                                         'saldo inicial');
+                       -- actualiza estado del proceso
+                        
+                        update tes.tproceso_caja pc  set
+                                    id_estado_wf =  v_id_estado_actual,
+                                    estado = va_codigo_estado[1],
+                                    id_usuario_mod=p_id_usuario,
+                                    fecha_mod=now()
+                        where pc.id_proceso_caja  =v_id_proceso_caja; 
+                        
+                        
+                        --  registro de repoisicion para arqueos
+                       v_hstore_registros =   hstore(ARRAY[
+                                                      'id_caja', v_id_caja::varchar,
+                                                      'monto',  v_monto::varchar,
+                                                      'id_funcionario', v_parametros.id_funcionario_wf::varchar,
+                                                      'tipo_solicitud', 'apertura_caja'::varchar,
+                                                      'fecha','01/01/2018'::varchar,
+                                                      'motivo', 'Saldo inicial'::varchar
+                                                    ]);
+                                                    
+                          --   raise exception 'monto %',v_monto;                     
+
+                     v_resp=tes.f_inserta_solicitud_efectivo(0,p_id_usuario,v_hstore_registros);
+                    
+
+                     
+                     
+                    
+                     v_id_solicitud_efectivo =  pxp.f_recupera_clave(v_resp, 'id_solicitud_efectivo');
+                     
+                     
+                    
+                     --guardamos la relacion
+                     update tes.tproceso_caja  set
+                       id_solicitud_efectivo_rel = v_id_solicitud_efectivo[1]::integer
+                    where id_proceso_caja = v_id_proceso_caja;
+                        
+                        
+                       update tes.tcaja ca set
+                          estado = 'abierto',
+                          fecha_apertura = '01/01/2018'::date
+                       where ca.id_caja = v_id_caja;
+                       
+                       
+                       
+                     
+                
+                    
+                ELSE
                 --  Si NO  se contabiliza nacionalmente
                 v_id_int_comprobante =   conta.f_gen_comprobante (
                                                      v_id_proceso_caja ,
@@ -367,7 +463,7 @@ BEGIN
                                                      v_parametros._nombre_usuario_ai,
                                                      v_nombre_conexion);
 
-
+                END IF;
 
 
                 update tes.tproceso_caja  p set
@@ -382,7 +478,7 @@ BEGIN
           -- si hay mas de un estado disponible  preguntamos al usuario
           v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado del proceso caja)');
           v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
-
+         
 
           -- Devuelve la respuesta
           return v_resp;
