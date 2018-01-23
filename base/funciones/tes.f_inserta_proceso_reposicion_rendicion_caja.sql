@@ -101,6 +101,8 @@ BEGIN
       ELSIF (p_hstore->'tipo')::varchar = 'CIERRE' THEN
           v_codigo_documento = 'CIER';
 
+
+
           FOR v_solicitudes IN (select sol.nro_tramite, sol.estado , fun.desc_funcionario1
       	 					from tes.tsolicitud_efectivo sol
                             inner join orga.vfuncionario fun on fun.id_funcionario = sol.id_funcionario
@@ -250,7 +252,7 @@ BEGIN
               v_monto = COALESCE(v_monto,0) - COALESCE(v_monto_ing_extra,0);
               
               IF v_monto <= 0 THEN
-                  raise exception 'No  tiene saldo por reponer,  o tiene reposiciones en proceso, (Primero rinda si tiene facturas pendientes y Revise si tiene reposiciones en proceso ...) % ',(v_monto * -1);
+                 -- raise exception 'No  tiene saldo por reponer,  o tiene reposiciones en proceso, (Primero rinda si tiene facturas pendientes y Revise si tiene reposiciones en proceso ...) % ',(v_monto * -1);
               END IF;
               
        ELSIF (p_hstore->'tipo')::varchar = 'SOLREN' THEN
@@ -359,7 +361,7 @@ BEGIN
                   
           
       END IF;
-
+     
       --Definicion de la respuesta
       v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion Caja almacenado(a) con exito (id_proceso_caja'||v_id_proceso_caja||')');
       v_resp = pxp.f_agrega_clave(v_resp,'id_proceso_caja',v_id_proceso_caja::varchar);

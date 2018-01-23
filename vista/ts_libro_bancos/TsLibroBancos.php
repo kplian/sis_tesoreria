@@ -339,7 +339,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 80,
-				maxLength:6
+				maxLength:20
 			},
 				type:'NumberField',
 				filters:{pfiltro:'lban.nro_cheque',type:'numeric'},
@@ -408,7 +408,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				valueField: 'estilo',
 				gwidth: 60,
 				//store:['Cochabamba','SRZ','PTS','BNI','LPB','TJA','ORU','SRE','CIJ','TDD','UYU','MIA','MAD']
-				store:['Cochabamba','Quillacollo','Santa Cruz','Potosi','Beni','La Paz','Tarija','Yacuiba','Oruro','Trinidad','San Borja','Uyuni','Miami','Madrid']
+				store:['COCHABAMBA','QUILLACOLLO','SANTA CRUZ','POTOSI','BENI','LA PAZ','TARIJA','YACUIBA','ORURO','TRINIDAD','SAN BORJA','UYUNI','MIAMI','MADRID']
 			},
 			type:'ComboBox',
 			id_grupo:1,
@@ -416,7 +416,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			filters:{	
 				//pfiltro:'lban.origen',
 				type: 'list',
-				options:['Cochabamba','Quillacollo','Santa Cruz','Potosi','Beni','La Paz','Tarija','Yacuiba','Oruro','Trinidad','San Borja','Uyuni','Miami','Madrid']
+				options:['COCHABAMBA','QUILLACOLLO','SANTA CRUZ','POTOSI','BENI','LA PAZ','TARIJA','YACUIBA','ORURO','TRINIDAD','SAN BORJA','UYUNI','MIAMI','MADRID']
 			},
 			grid:true,
 			form:true
