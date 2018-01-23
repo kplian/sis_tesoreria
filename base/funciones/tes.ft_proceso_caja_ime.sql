@@ -369,8 +369,11 @@ BEGIN
 
                -- RAC, 14/01/2018   condicion temporal para apretura de cajas 
                
-                
-                IF 1=1  THEN         
+                ----------------------------------------------------------------------------------------------------
+                --   OJO PELIGRO SOLO PERMITIR ENTRAN EN ESTE IF, EN EL PRIMER COMPROBANTE DE REPOSICION, DEL AÑO
+                ----  EN CASO CONTRARIO LSO DATOS NO SERAN COHERENTES
+                ---------------------------------------------------------------------------------------------------
+                IF 0=1  THEN         
       
                     
                      --inmediatamente apsa al estado finalizado

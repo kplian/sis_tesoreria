@@ -162,7 +162,7 @@ BEGIN
   v_pre_integrar_presupuestos = pxp.f_get_variable_global(
     'pre_integrar_presupuestos');
   v_parametros = pxp.f_get_record(p_tabla);
-  v_preguntar = 'no';
+  v_preguntar = 'si';
 
   /*********************************    
      #TRANSACCION:  'TES_OBPG_INS'
@@ -571,8 +571,10 @@ BEGIN
       -- raise exception '... % ...', v_parametros.id_obligacion_pago;
 
       v_resp = tes.f_finalizar_obligacion_total(v_parametros.id_obligacion_pago,
-        p_id_usuario,v_parametros._id_usuario_ai,
-        v_parametros._nombre_usuario_ai,v_parametros.forzar_fin);
+                                                p_id_usuario,
+                                                v_parametros._id_usuario_ai,
+                                                v_parametros._nombre_usuario_ai,
+                                                v_parametros.forzar_fin);
 
       --Devuelve la respuesta
       return v_resp;
