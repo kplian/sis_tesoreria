@@ -386,14 +386,16 @@ BEGIN
                               va_regla,
                               va_prioridad
 
-                          FROM wf.f_obtener_estado_wf(v_id_proceso_wf, v_id_estado_actual,NULL,''siguiente'');
+
+                          FROM wf.f_obtener_estado_wf(v_id_proceso_wf, v_id_estado_actual,NULL,'siguiente');
                           
                           IF va_codigo_estado[2] is not null THEN
-                             raise exception ''El proceso de WF esta mal parametrizado,  solo admite un estado siguiente para el estado: %'', v_registros.estado;
+                             raise exception 'El proceso de WF esta mal parametrizado,  solo admite un estado siguiente para el estado: %', v_registros.estado;
                           END IF;
 
                           IF va_codigo_estado[1] is  null THEN
-                             raise exception ''El proceso de WF esta mal parametrizado, no se encuentra el estado siguiente,  para el estado: %'', v_registros.estado;
+                             raise exception 'El proceso de WF esta mal parametrizado, no se encuentra el estado siguiente,  para el estado: %', v_registros.estado;
+
                           END IF;
 
                           -- estado siguiente
@@ -403,9 +405,11 @@ BEGIN
                                                                          v_id_proceso_wf,
                                                                          p_id_usuario,
                                                                          NULL, -- id_usuario_ai
-                                                                         '''', -- usuario_ai
+
+                                                                         '', -- usuario_ai
                                                                          v_id_depto,
-                                                                         ''saldo inicial'');
+                                                                         'saldo inicial');
+
                        -- actualiza estado del proceso
                         
                         update tes.tproceso_caja pc  set
@@ -418,35 +422,34 @@ BEGIN
                         
                         --  registro de repoisicion para arqueos
                        v_hstore_registros =   hstore(ARRAY[
-                                                      ''id_caja'', v_id_caja::varchar,
-                                                      ''monto'',  v_monto::varchar,
-                                                      ''id_funcionario'', v_parametros.id_funcionario_wf::varchar,
-                                                      ''tipo_solicitud'', ''apertura_caja''::varchar,
-                                                      ''fecha'',''01/01/2018''::varchar,
-                                                      ''motivo'', ''Saldo inicial''::varchar
+
+                                                      'id_caja', v_id_caja::varchar,
+                                                      'monto',  v_monto::varchar,
+                                                      'id_funcionario', v_parametros.id_funcionario_wf::varchar,
+                                                      'tipo_solicitud', 'apertura_caja'::varchar,
+                                                      'fecha','01/01/2018'::varchar,
+                                                      'motivo', 'Saldo inicial'::varchar
                                                     ]);
                                                     
-                          --   raise exception ''monto %'',v_monto;                     
+                          --   raise exception 'monto %',v_monto;                     
+
 
                      v_resp=tes.f_inserta_solicitud_efectivo(0,p_id_usuario,v_hstore_registros);
                     
 
-                     
-                     
-                    
-                     v_id_solicitud_efectivo =  pxp.f_recupera_clave(v_resp, ''id_solicitud_efectivo'');
-                     
-                     
-                    
-                     --guardamos la relacion
+
+                     v_id_solicitud_efectivo =  pxp.f_recupera_clave(v_resp, 'id_solicitud_efectivo');
+   --guardamos la relacion
                      update tes.tproceso_caja  set
                        id_solicitud_efectivo_rel = v_id_solicitud_efectivo[1]::integer
                     where id_proceso_caja = v_id_proceso_caja;
                         
                         
                        update tes.tcaja ca set
-                          estado = ''abierto'',
-                          fecha_apertura = ''01/01/2018''::date
+
+                          estado = 'abierto',
+                          fecha_apertura = '01/01/2018'::date
+
                        where ca.id_caja = v_id_caja;
                        
                        
@@ -478,8 +481,10 @@ BEGIN
 
           END IF;
           -- si hay mas de un estado disponible  preguntamos al usuario
-          v_resp = pxp.f_agrega_clave(v_resp,''mensaje'',''Se realizo el cambio de estado del proceso caja)'');
-          v_resp = pxp.f_agrega_clave(v_resp,''operacion'',''cambio_exitoso'');
+
+          v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado del proceso caja)');
+          v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
+
          
 
           -- Devuelve la respuesta

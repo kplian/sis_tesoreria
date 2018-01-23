@@ -85,7 +85,7 @@ BEGIN
             ---------------------------------------------------------------------------  
 
             IF (p_hstore->'tipo_solicitud')::varchar = 'rendicion' THEN
-                
+                raise exception 'hola';
                 v_tipo = 'RENEFE';
                 
             

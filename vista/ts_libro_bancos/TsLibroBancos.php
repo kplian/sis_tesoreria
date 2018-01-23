@@ -1079,8 +1079,6 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 	},
 	//
 	imprimirCheque3 : function(){		
-		
-		
 		var NumSelect=this.sm.getCount();		
 		if(NumSelect!=0)
 		{
