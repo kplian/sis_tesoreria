@@ -126,7 +126,6 @@ class MODCaja extends MODbase{
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
-		//var_dump($this->armarConsulta());
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}

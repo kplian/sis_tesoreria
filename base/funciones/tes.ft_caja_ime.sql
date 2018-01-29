@@ -660,14 +660,14 @@ raise exception '%', v_depto;
 	elsif(p_transaccion='TES_CAJA_MOD_MONTO')then
 		begin
         
-        	IF v_parametros.estado=='borrador' THEN
-            	 update tes.tproceso_caja set
-                 monto = v_parametros.monto
-                 where id_proceso_caja=v_parametros.id_proceso_caja;       
-            else
+        	IF v_parametros.estado!='borrador' THEN            	     
             	raise exception 'La reposicion debe estar en estado Borrador';  	
-            end if;
+            END IF;
             
+            update tes.tproceso_caja set
+            monto = v_parametros.monto
+            where id_proceso_caja=v_parametros.id_proceso_caja; 
+              
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Monto modificado');         
             v_resp = pxp.f_agrega_clave(v_resp,'id_proceso_caja',v_parametros.id_proceso_caja::varchar);
 

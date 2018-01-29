@@ -36,7 +36,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			disabled: false, 
 			handler: this.agregarmonto, 
 			tooltip: '<b>Agregar monto</b>'
-		});
+		});		
 	},
 
 	Atributos:[
@@ -657,16 +657,16 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			url: '../../sis_tesoreria/control/Caja/editMonto',
 			params: {
 				id_caja:d.id_caja,
-				monto_rep: this.cmpAuto.getValue(),
+				monto: this.cmpAuto.getValue(),
 				estado:d.estado,
 				id_proceso_caja:d.id_proceso_caja		
 			},
-			success: this.successSinc,
+			success: this.successSave,
 			failure: this.conexionFailure,
 			timeout: this.timeout,
 			scope: this
 		});	
-		this.wAuto.hide();					
+		this.wAuto.hide();			
 	},
 	//
 	tabsouth:[
