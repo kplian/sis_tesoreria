@@ -1811,3 +1811,17 @@ IS 'Indica el id_proceso_caja de tipo reposicion donde fue considerado el ingres
 
 
 
+
+
+/*************************I-SCP-RAC-TES-0-25/01/2018*************/
+CREATE TABLE tes.tplan_pago_doc_compra (
+    id_plan_pago_doc_compra serial NOT NULL,
+    id_plan_pago integer NOT NULL,
+    id_doc_compra_venta integer,
+    CONSTRAINT tplan_pago_doc_compra_pkey PRIMARY KEY (tplan_pago_doc_compra)
+)
+    INHERITS (pxp.tbase)
+WITH (
+    OIDS = FALSE
+);
+/*************************F-SCP-RAC-TES-0-25/01/2018*************/

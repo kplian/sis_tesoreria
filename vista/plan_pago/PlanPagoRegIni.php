@@ -529,6 +529,12 @@ Phx.vista.PlanPagoRegIni = {
          // this.getBoton('btnVerifPresup').enable();
           this.getBoton('btnChequeoDocumentosWf').enable(); 
           this.getBoton('btnPagoRel').enable();  
+
+        //Deshabilita la pestaña de facturas si no tiene plantilla
+        this.TabPanelEast.getItem(this.idContenedor + '-east-1').setDisabled(true);
+        if(data.id_plantilla){
+            this.TabPanelEast.getItem(this.idContenedor + '-east-1').setDisabled(false);
+        }
      },
      
     liberaMenu:function(){
@@ -577,18 +583,20 @@ Phx.vista.PlanPagoRegIni = {
             height : '50%',
         }, rec.data, this.idContenedor, 'VerificacionPresup');
     },
-    
-    
-    
-    
-   
-    east:{
-          url:'../../../sis_tesoreria/vista/prorrateo/Prorrateo.php',
-          title:'Prorrateo', 
-          width:400,
-          cls:'Prorrateo'
-     },    
-	tabla_id: 'id_plan_pago',
-	tabla: 'tes.tplan_pago' 
+
+    tabeast: [{
+        url:'../../../sis_tesoreria/vista/prorrateo/Prorrateo.php',
+        title:'Prorrateo', 
+        width:400,
+        cls:'Prorrateo'
+     }, {
+        url:'../../../sis_tesoreria/vista/plan_pago_doc_compra/PlanPagoDocCompra.php',
+        title:'Facturas/Recibos', 
+        width:400,
+        cls:'PlanPagoDocCompra'
+     }],
+     
+	tabla_id: 'id_plan_pago_doc_compra',
+	tabla: 'tes.tplan_pago_doc_compra' 
 };
 </script>
