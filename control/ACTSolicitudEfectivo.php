@@ -325,6 +325,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$datosSolicitud = $resultSolicitud->getDatos();		
 
 		//armamos el array parametros y metemos ahi los data sets de las otras tablas
+		$dataSource->putParameter('codigo_proc', $datosSolicitud[0]['codigo_proc']);
 		$dataSource->putParameter('fecha_entrega', $datosSolicitud[0]['fecha_entrega']);
 		$dataSource->putParameter('moneda', $datosSolicitud[0]['moneda']);
 		$dataSource->putParameter('nro_tramite', $datosSolicitud[0]['nro_tramite']);
@@ -404,6 +405,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$datosReciboEntrega = $resultReciboEntrega->getDatos();		
 
 		//armamos el array parametros y metemos ahi los data sets de las otras tablas
+		$dataSource->putParameter('codigo_proc', $datosReciboEntrega[0]['codigo_proc']);
 		$dataSource->putParameter('fecha_entrega', $datosReciboEntrega[0]['fecha_entrega']);
 		$dataSource->putParameter('moneda', $datosReciboEntrega[0]['moneda']);
 		$dataSource->putParameter('nro_tramite', $datosReciboEntrega[0]['nro_tramite']);

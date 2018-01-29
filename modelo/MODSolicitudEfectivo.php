@@ -318,7 +318,8 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
 		$this->setCount(false);
 		
-		//Definicion de la lista del resultado del query
+		//Definicion de la lista del resultado del query		
+		$this->captura('codigo_proc','varchar');
 		$this->captura('fecha_entrega','date');
 		$this->captura('moneda','varchar');		
 		$this->captura('nro_tramite','varchar');

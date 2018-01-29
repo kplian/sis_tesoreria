@@ -81,6 +81,15 @@ Phx.vista.SolicitudIngreso = Ext.extend(Phx.gridInterfaz,{
                 tooltip: '<b>Diagrama Gantt de Solicitud de Efectivo</b>'
             }
 		);
+		
+		this.addButton('btnImprimir', {
+			    grupo:[0,1,2,3],
+				text : 'Imprimir',
+				iconCls : 'bprint',
+				disabled : true,
+				handler : this.imprimirCbte,
+				tooltip : '<b>Imprimir Comprobante de Caja</b><br/>Imprime el Comprobante en el formato oficial'
+			});
 
 		
 		this.init();
@@ -91,6 +100,26 @@ Phx.vista.SolicitudIngreso = Ext.extend(Phx.gridInterfaz,{
 		
 		this.finCons = true;
 	},
+	
+	imprimirCbte : function() {
+			var rec = this.sm.getSelected();
+			var data = rec.data;
+			if (data) {
+				Phx.CP.loadingShow();
+				Ext.Ajax.request({
+					url : '../../sis_tesoreria/control/SolicitudEfectivo/reporteReciboEntrega',
+					params : {
+						'id_proceso_wf' : data.id_proceso_wf
+					},
+					success : this.successExport,
+					failure : this.conexionFailure,
+					timeout : this.timeout,
+					scope : this
+				});
+			}
+
+	},
+	
 			
 	Atributos:[
 		{
@@ -598,6 +627,7 @@ Phx.vista.SolicitudIngreso = Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('del').disable();
 			  this.getBoton('diagrama_gantt').enable();
           }
+           this.getBoton('btnImprimir').enable();
 
 		 
      },
@@ -607,10 +637,13 @@ Phx.vista.SolicitudIngreso = Ext.extend(Phx.gridInterfaz,{
 		if(tb) {
 			this.getBoton('btnChequeoDocumentosWf').disable();
 			this.getBoton('diagrama_gantt').disable();
-			this.getBoton('fin_registro').disable();	
+			this.getBoton('fin_registro').disable();
+			this.getBoton('btnImprimir').disable();	
 		}
+		
 	},
 	 
+	
 	 iniciarEventos : function(){		 
 		this.cmpFecha=this.getComponente('fecha');
 		this.cmpFuncionario=this.getComponente('id_funcionario');
@@ -736,6 +769,9 @@ Phx.vista.SolicitudIngreso = Ext.extend(Phx.gridInterfaz,{
         resp.argument.wizard.panel.destroy()
         this.reload();
      }, 
+     
+     
+	
 	 
 	 onSaveWizard:function(wizard,resp){
 			Phx.CP.loadingShow();

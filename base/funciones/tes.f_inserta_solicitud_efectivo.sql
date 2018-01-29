@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_inserta_solicitud_efectivo (
   p_administrador integer,
   p_id_usuario integer,
@@ -85,7 +87,7 @@ BEGIN
             ---------------------------------------------------------------------------  
 
             IF (p_hstore->'tipo_solicitud')::varchar = 'rendicion' THEN
-                raise exception 'hola';
+                
                 v_tipo = 'RENEFE';
                 
             
