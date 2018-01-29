@@ -699,7 +699,7 @@ BEGIN
                     v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = solefe.id_proceso_wf ';
 
                     IF p_administrador !=1 THEN
-                       v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (solefe.estado in (''rendido'')) and  solefe.id_tipo_solicitud = ' || v_id_tipo_solicitud|| ' and ';
+                       v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or solefe.id_usuario_reg = '||p_id_usuario||' ) and  (solefe.estado in (''rendido'')) and  solefe.id_tipo_solicitud = ' || v_id_tipo_solicitud|| ' and ';
                     ELSE
                          v_filtro = '(solefe.estado in (''rendido'')) and solefe.id_tipo_solicitud=' ||v_id_tipo_solicitud||' and ';
                     END IF;
@@ -707,7 +707,7 @@ BEGIN
                     v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = solefe.id_estado_wf';
 
                     IF p_administrador !=1 THEN
-                       v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' )   and  solefe.id_tipo_solicitud = ' || v_id_tipo_solicitud|| ' and ';
+                       v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or solefe.id_usuario_reg = '||p_id_usuario||' )   and  solefe.id_tipo_solicitud = ' || v_id_tipo_solicitud|| ' and ';
                     ELSE
                          v_filtro = '  solefe.id_tipo_solicitud=' ||v_id_tipo_solicitud||' and ';
                     END IF;
@@ -830,7 +830,7 @@ BEGIN
                     v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = solefe.id_proceso_wf ';
 
                     IF p_administrador !=1 THEN
-                       v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (solefe.estado in (''rendido'')) and  solefe.id_tipo_solicitud = ' || v_id_tipo_solicitud|| ' and ';
+                       v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or solefe.id_usuario_reg = '||p_id_usuario||' ) and  (solefe.estado in (''rendido'')) and  solefe.id_tipo_solicitud = ' || v_id_tipo_solicitud|| ' and ';
                     ELSE
                          v_filtro = '(solefe.estado in (''rendido'')) and solefe.id_tipo_solicitud=' ||v_id_tipo_solicitud||' and ';
                     END IF;
@@ -838,7 +838,7 @@ BEGIN
                     v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = solefe.id_estado_wf';
 
                     IF p_administrador !=1 THEN
-                       v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (solefe.estado in (''revision'',''vbjefedevsol'')) and  solefe.id_tipo_solicitud = ' || v_id_tipo_solicitud|| ' and ';
+                       v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or solefe.id_usuario_reg = '||p_id_usuario||' ) and  (solefe.estado in (''revision'',''vbjefedevsol'')) and  solefe.id_tipo_solicitud = ' || v_id_tipo_solicitud|| ' and ';
                     ELSE
                          v_filtro = '(solefe.estado in (''revision'',''vbjefedevsol'')) and solefe.id_tipo_solicitud=' ||v_id_tipo_solicitud||' and ';
                     END IF;

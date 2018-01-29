@@ -26,6 +26,7 @@ DECLARE
 	 v_nombre_funcion   				text;
 	 v_resp							varchar;
      v_registros 					record;
+     v_registros_cbte				record;
      v_id_estado_actual  			integer;
      va_id_tipo_estado 				integer[];
      va_codigo_estado 				varchar[];
@@ -42,44 +43,124 @@ DECLARE
      v_verficacion2 				varchar[];     
      v_id_tipo_estado  				integer;
      v_codigo_proceso_llave_wf   	varchar;
+     v_tes_anticipo_ejecuta_pres   	varchar;
+     
+     v_importe						numeric;
+     v_importe_mb				    numeric;
+     v_total_importe_gasto 	        integer;
+     v_total_importe_recurso 	    integer;
+     v_factor	                    numeric;
     
 BEGIN
 
         v_nombre_funcion = 'tes.f_gestionar_reversion_anticipo_prevalidacion';
+        v_tes_anticipo_ejecuta_pres = pxp.f_get_variable_global('tes_anticipo_ejecuta_pres');
      
        -- 1) con el id_comprobante identificar el plan de pago
         select 
            pp.id_obligacion_pago,
            pp.id_plan_pago,
            pp.tipo,
-           pp.estado
+           pp.estado,
+           pp.descuento_anticipo
+           
          into
-          v_registros  
+          v_registros_cbte  
         from tes.tplan_pago pp
         where pp.id_int_comprobante = p_id_int_comprobante;
          
         
        --2) Validar que se tenga un pla de pagos
         
-         IF  v_registros.id_plan_pago is NULL  THEN
+         IF  v_registros_cbte.id_plan_pago is NULL  THEN
             raise exception 'El comprobante no esta relacionado con plan de pagos';
          END IF;
-    
-    
-       --3) -- revertir el presupuesto de las facturas rendidas
-                     
-       IF not  tes.f_gestionar_presupuesto_tesoreria(
-                         v_registros.id_obligacion_pago, 
-                         p_id_usuario, 
-                         'revertir_anticipo',
-                         v_registros.id_plan_pago ) THEN
-                                       
-           raise exception 'error al revertir presupuesto del anticipo';
-        END IF;
          
+        --  llenar los datos de presupeusto no ejecutado        
+        IF v_tes_anticipo_ejecuta_pres = 'si' and  COALESCE(v_registros_cbte.descuento_anticipo  ,0) > 0 THEN
         
-      
-  
+                
+                --calculat el total a ejecutar
+                
+                 select
+                                         
+                             sum(COALESCE(it.importe_gasto,0)) as total_importe_gasto,
+                             sum(COALESCE(it.importe_recurso,0)) as total_importe_recurso                                         
+                            
+                    into 
+                       v_total_importe_gasto ,
+                       v_total_importe_recurso                    
+                  from conta.tint_transaccion it
+                  inner join pre.tpartida par on par.id_partida = it.id_partida
+                  inner join pre.tpresupuesto pr on pr.id_centro_costo = 
+                  it.id_centro_costo
+                  where it.id_int_comprobante = p_id_int_comprobante
+                        and it.estado_reg = 'activo'
+                        and par.sw_movimiento = 'presupuestaria';
+                        
+                        
+                IF  v_total_importe_gasto > 0 THEN
+                     v_factor = v_registros_cbte.descuento_anticipo/v_total_importe_gasto;
+                ELSE 
+                    v_factor = v_registros_cbte.descuento_anticipo/v_total_importe_recurso;
+                END IF;
+                
+                
+        
+                --listado de las transacciones con partidas presupuestaria
+                FOR v_registros in (
+                                      select
+                                         it.id_int_transaccion,
+                                         it.id_partida,
+                                         it.id_partida_ejecucion,
+                                         it.id_partida_ejecucion_dev,
+                                         
+                                         it.importe_gasto,
+                                         it.importe_recurso,                                         
+                                         it.importe_gasto_mb,
+                                         it.importe_recurso_mb,
+                                         it.id_centro_costo,
+                                         par.sw_movimiento,  --  presupuestaria o  flujo
+                                         par.sw_transaccional,  --titular o movimiento
+                                         par.tipo,                -- recurso o gasto
+                                         pr.id_presupuesto,
+                                         it.importe_reversion,
+                                         it.factor_reversion,
+                                         par.codigo as codigo_partida,
+                                         it.actualizacion
+                                      from conta.tint_transaccion it
+                                      inner join pre.tpartida par on par.id_partida = it.id_partida
+                                      inner join pre.tpresupuesto pr on pr.id_centro_costo = 
+                                      it.id_centro_costo
+                                      where it.id_int_comprobante = p_id_int_comprobante
+                                            and it.estado_reg = 'activo'
+                                            and par.sw_movimiento = 'presupuestaria' )  LOOP
+                                            
+                            --selecciona la moneda de trabajo
+                            IF v_registros.importe_gasto > 0 THEN 
+                               v_importe = v_registros.importe_gasto;
+                               v_importe_mb =  v_registros.importe_gasto_mb;
+                            ELSE
+                               v_importe = v_registros.importe_recurso;
+                               v_importe_mb =  v_registros.importe_recurso_mb;
+                            END IF;
+                            
+                            --cacular monto no ejecutado
+                            
+                            update conta.tint_transaccion tr set
+                              monto_no_ejecutado =   v_importe*v_factor,
+                              monto_no_ejecutado_mb = v_importe_mb*v_factor
+                            where tr.id_int_transaccion   = v_registros.id_int_transaccion ;
+                                   
+                  END LOOP;
+                     
+                     
+                
+         END IF;
+        
+        
+    
+    
 RETURN  TRUE;
 
 

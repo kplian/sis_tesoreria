@@ -147,13 +147,18 @@ BEGIN
      --  Verificamos configuracion si Anticipo ejecuta presupuesto
      --  llamaos a funcion de presupeustos apra ejecucion de anticipo
      IF   v_registros.tipo in ( 'anticipo', 'ant_parcial') THEN
-        IF not  tes.f_gestionar_presupuesto_tesoreria(v_registros.id_obligacion_pago, p_id_usuario, 'ejecutar_anticipo',v_registros.id_plan_pago ) THEN
+        IF not  tes.f_gestionar_presupuesto_tesoreria(
+                                                      v_registros.id_obligacion_pago, 
+                                                      p_id_usuario, 
+                                                      'ejecutar_anticipo',
+                                                      v_registros.id_plan_pago,
+                                                      NULL ) THEN
            raise exception 'error ejecutando presupuesto del anticipo';
         END IF;
-        --NOTA, este presupuesto se revertira en la prevalidacion del comprobante de aplciacion del anticipo
+        --NOTA, el presupeusto retenido no ejecutra presupesuto
      END IF; 
      
-     
+     --raise exception 'entra';
      -- 3)  Si es devengado_pagado o   devengado, se identifica  con id_plan_pago_fk = null
     
     
@@ -506,7 +511,7 @@ BEGIN
             END IF;
 			
 		
-
+--raise exception '123';
   
 RETURN  TRUE;
 

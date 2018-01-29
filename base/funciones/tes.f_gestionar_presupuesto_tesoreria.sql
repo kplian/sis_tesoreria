@@ -520,8 +520,9 @@ BEGIN
        --   Ejecuta el presupeusta (debe estar comprometido previamente en las partidas correpondecientes)
        -----------------------------------------------------------------------------------------------------------
        ELSEIF p_operacion = 'ejecutar_anticipo' THEN
-            
+           
            v_tes_anticipo_ejecuta_pres = pxp.f_get_variable_global('tes_anticipo_ejecuta_pres');
+           
            IF v_tes_anticipo_ejecuta_pres = 'si' THEN
                   --recueprar el total del monto que se va anticipiar, es el total a ejecutar
                    select 
@@ -542,6 +543,7 @@ BEGIN
                    inner join conta.tint_comprobante cbte on cbte.id_int_comprobante = pp.id_int_comprobante
                    where pp.id_plan_pago = p_id_plan_pago;
                    
+                 
                    
                   --recuperar el total de la obligacion
                    select 
@@ -591,7 +593,9 @@ BEGIN
                                                     p_id_plan_pago,
                                                     v_registros.num_tramite,
                                                     v_registros.id_int_comprobante,
-                                                    v_monto_ejecutar_mb); 
+                                                    NULL); 
+                                                    
+                               --   raise exception 'entra... %', v_resultado_ges;                     
                                                     
                                                     
                              --  analizamos respuesta y retornamos error
@@ -713,7 +717,7 @@ BEGIN
                                                           p_id_plan_pago,
                                                           v_registros.num_tramite,
                                                           v_registros.id_int_comprobante,
-                                                          v_monto_ejecutar_mb*-1); 
+                                                          NULL); 
                                                           
                                                           
                                      --  analizamos respuesta y retornamos error
