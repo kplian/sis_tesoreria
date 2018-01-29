@@ -16,6 +16,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
     nombreVista: 'obligacionPago',
 	constructor: function(config){
 		this.maestro = config;
+		this.crearFormAuto();
     	//llama al constructor de la clase padre
 		Phx.vista.ObligacionPago.superclass.constructor.call(this,config);
 		this.init();
@@ -35,6 +36,15 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 		//crear venta de ajuste para pagos variable           
 		this.crearFormAjustes();  
 		this.iniciarEventos();
+		this.addButton('anti_ret',{
+         	  grupo:[0,1,2],
+              text: 'Anticipo/Retencion',
+              iconCls: 'bmoney',
+              disabled: false,
+              handler: this.mostarFormAuto,
+              tooltip: '<b>Saldos: Anticipo/Retenciones</b>'
+          });
+          
 	    
          this.addButton('ant_estado',{
          	  grupo:[0,1,2],
@@ -784,7 +794,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 		'tipo_anticipo',
 		'ajuste_anticipo','desc_funcionario1',
 		'ajuste_aplicado', 'codigo_poa','obs_poa',
-		'monto_estimado_sg','id_obligacion_pago_extendida', 'obs_presupuestos','id_contrato','desc_contrato'
+		'monto_estimado_sg','id_obligacion_pago_extendida', 'obs_presupuestos','id_contrato','desc_contrato','monto_ajuste_ret_garantia_ga','monto_ajuste_ret_anticipo_par_ga','monto_total_adjudicado','total_anticio','pedido_sap'
 		
 	],
 	
@@ -1708,8 +1718,146 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 										
 			   
 	 },
+	 //formulario de anticipos/retenciones
+	crearFormAuto:function(){
+		  this.formAuto = new Ext.form.FormPanel({
+            baseCls: 'x-plain',
+            autoDestroy: true,
+           
+            border: false,
+            layout: 'form',
+             autoHeight: true,
+           
     
-    
+            items: [
+                 {
+       				name: 'monto_total_adjudicado',
+            		xtype: 'numberfield',
+            		fieldLabel: 'Monto Adjudicado',
+            		allowDecimals: true,
+            		value: 0,
+            		allowNegative: false,
+            		qtip: 'Monto total adjudicado, según contrato'       				
+       			},
+       			{
+       				name: 'total_anticipo',
+            		xtype: 'numberfield',
+            		fieldLabel: 'Anticipo Total',
+            		allowDecimals: true,
+            		value: 0,
+            		allowNegative: false,
+            		qtip: 'Monto total anticipado'
+       			},
+       			{
+       				name: 'monto_ajuste_ret_anticipo_par_ga',
+            		xtype: 'numberfield',
+            		fieldLabel: 'Saldo Anticipo por retener',
+            		allowDecimals: true,
+            		value: 0,
+            		allowNegative: false,
+            		qtip: 'Saldo anticipo por retener'
+       			},
+       			{
+       				name: 'monto_ajuste_ret_garantia_ga',
+            		xtype: 'numberfield',
+            		fieldLabel: 'Saldo retencion',
+            		allowDecimals: true,
+            		value: 0,
+            		allowNegative: false,
+            		qtip: 'Saldo de Retenciones por devolver'
+       			},
+       			{
+       				name: 'pedido_sap',
+            		xtype: 'textfield',
+            		fieldLabel: 'Pedido SAP',
+            		allowBlank: true,
+					anchor: '80%',
+					gwidth: 100,
+            		qtip: 'Numero de pedido SAP'
+       			}]
+        });
+	this.wAuto = new Ext.Window({
+            title: 'Configuracion',
+            collapsible: true,
+            maximizable: true,
+            autoDestroy: true,
+            width: 380,
+            height: 280,
+            layout: 'fit',
+            plain: true,
+            bodyStyle: 'padding:5px;',
+            buttonAlign: 'center',
+            items: this.formAuto,
+            modal:true,
+             closeAction: 'hide',
+            buttons: [{
+                text: 'Guardar',
+                handler: this.saveAuto,
+                scope: this
+                
+            },
+             {
+                text: 'Cancelar',
+                handler: function(){ this.wAuto.hide() },
+                scope: this
+            }]
+        });
+        
+         this.cmpAdjudicado = this.formAuto.getForm().findField('monto_total_adjudicado');
+         this.cmpAnticipo = this.formAuto.getForm().findField('total_anticipo');
+         this.cmpSanti = this.formAuto.getForm().findField('monto_ajuste_ret_anticipo_par_ga');
+         this.cmpSret = this.formAuto.getForm().findField('monto_ajuste_ret_garantia_ga');
+         this.cmpPsap = this.formAuto.getForm().findField('pedido_sap');
+         
+	},
+     mostarFormAuto:function(){
+		var data = this.getSelectedData();
+		if(data){
+			this.cmpAdjudicado.setValue(data.monto_total_adjudicado);
+			this.cmpAnticipo.setValue(data.total_anticipo);
+			this.cmpSanti.setValue(data.monto_ajuste_ret_anticipo_par_ga);
+			this.cmpSret.setValue(data.monto_ajuste_ret_garantia_ga);
+			this.cmpPsap.setValue(data.pedido_sap);
+			this.wAuto.show();
+		}
+		
+	},
+    saveAuto: function(){
+		    var d = this.getSelectedData();
+		    Phx.CP.loadingShow();
+            Ext.Ajax.request({
+                url: '../../sis_tesoreria/control/ObligacionPago/editAntiRet',
+                params: { 
+                	      monto_total_adjudicado: this.cmpAdjudicado.getValue(),
+                	      total_anticipo: this.cmpAnticipo.getValue(),
+                	      monto_ajuste_ret_anticipo_par_ga: this.cmpSanti.getValue(),
+                	      monto_ajuste_ret_garantia_ga: this.cmpSret.getValue(),
+                	      pedido_sap: this.cmpPsap.getValue(),
+                	      id_obligacion_pago: d.id_obligacion_pago
+                	    },
+                success: this.successSinc,
+                failure: this.conexionFailure,
+                timeout: this.timeout,
+                scope: this
+            });
+		
+	},
+	successSinc:function(resp){
+            Phx.CP.loadingHide();
+            var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+            if(!reg.ROOT.error){
+            	if(this.wOt){
+            		this.wOt.hide(); 
+            	}
+            	if(this.wAuto){
+            		this.wAuto.hide(); 
+            	}
+                
+                this.reload();
+             }else{
+                alert('ocurrio un error durante el proceso')
+            }
+    },
     onBtnCheckPresup : function() {
         var rec = this.sm.getSelected();
         //Se define el nombre de la columna de la llave primaria

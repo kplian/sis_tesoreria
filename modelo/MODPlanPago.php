@@ -114,6 +114,8 @@ class MODPlanPago extends MODbase{
 		$this->captura('contador_estados','bigint');
 		$this->captura('prioridad_lp','integer');
 		//$this->captura('es_ultima_cuota','boolean');
+		$this->captura('id_gestion','integer');
+		$this->captura('id_periodo','integer');
 
 		
 		//Ejecuta la instruccion

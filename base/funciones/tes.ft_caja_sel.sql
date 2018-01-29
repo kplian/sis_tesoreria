@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_caja_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -7,48 +9,55 @@ CREATE OR REPLACE FUNCTION tes.ft_caja_sel (
 RETURNS varchar AS
 $body$
 /**************************************************************************
- SISTEMA:   Sistema de Tesoreria
- FUNCION:     tes.ft_caja_sel
+ SISTEMA:		Sistema de Tesoreria
+ FUNCION: 		tes.ft_caja_sel
  DESCRIPCION:   Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'tes.tcaja'
- AUTOR:      (admin)
- FECHA:         16-12-2013 20:43:44
- COMENTARIOS: 
+ AUTOR: 		 (admin)
+ FECHA:	        16-12-2013 20:43:44
+ COMENTARIOS:	
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
 
- DESCRIPCION: 
- AUTOR:     
- FECHA:   
+ DESCRIPCION:	
+ AUTOR:			
+ FECHA:		
 ***************************************************************************/
 
 DECLARE
 
-  v_consulta        varchar;
-  v_parametros      record;
-  v_nombre_funcion    text;
-  v_resp        varchar;
-    v_filtro      varchar;
-    v_inner       varchar;
-    v_cajas       record;
-    v_i         integer;
-    v_id_caja     integer[];
+	v_consulta    		varchar;
+	v_parametros  		record;
+	v_nombre_funcion   	text;
+	v_resp				varchar;
+    v_filtro			varchar;
+    v_inner				varchar;
+    v_cajas				record;
+    v_i					integer;
+    v_id_caja			integer[];
+    v_id_tipo_solicitud_ape integer;
+    v_id_tipo_solicitud_sal integer;
+    v_id_tipo_solicitud_ing integer;
+    v_id_tipo_solicitud_rep integer;
+    v_id_tipo_solicitud_dev integer;    
+    v_id_tipo_solicitud_ren integer;    
+    v_id_tipo_solicitud_sol integer;
 
 BEGIN
 
-  v_nombre_funcion = 'tes.ft_caja_sel';
+	v_nombre_funcion = 'tes.ft_caja_sel';
     v_parametros = pxp.f_get_record(p_tabla);
 
-  /*********************************
-  #TRANSACCION:  'TES_CAJA_SEL'
-  #DESCRIPCION: Consulta de datos
-  #AUTOR:   admin
-  #FECHA:   16-12-2013 20:43:44
-  ***********************************/
+	/*********************************
+ 	#TRANSACCION:  'TES_CAJA_SEL'
+ 	#DESCRIPCION:	Consulta de datos
+ 	#AUTOR:		admin
+ 	#FECHA:		16-12-2013 20:43:44
+	***********************************/
 
-  if(p_transaccion='TES_CAJA_SEL')then
+	if(p_transaccion='TES_CAJA_SEL')then
 
-      begin 
-          v_filtro='';
+    	begin	
+        	v_filtro='';
             v_inner='';
 
             IF (v_parametros.id_funcionario_usu is null) then
@@ -66,14 +75,14 @@ BEGIN
                    --pc.estado in (''borrador'',''anulado'',''rechazado'') and  ';
                  ELSE
                      --v_filtro = '(caja.id_usuario_reg='||p_id_usuario||' ) and  pc.estado in (''borrador'',''abierto'',''cerrado'',''anulado'',''rechazado'') and  ';
-           --v_filtro = 'pc.estado in (''borrador'',''anulado'',''rechazado'') and  ';
+					 --v_filtro = 'pc.estado in (''borrador'',''anulado'',''rechazado'') and  ';
                 END IF;
 
             END IF;
 
             IF  lower(v_parametros.tipo_interfaz) = 'cajavb' THEN
 
-        v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = pc.id_proceso_wf';
+				v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = pc.id_proceso_wf';
 
                 IF p_administrador !=1 THEN
                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') and  (pc.estado = ''solicitado'') and  ';
@@ -86,52 +95,52 @@ BEGIN
             IF  lower(v_parametros.tipo_interfaz) = 'cajaabierto' THEN
 
                 IF p_administrador !=1 THEN
-                  v_i = 1;
-                  FOR v_cajas in (select id_caja
-                            from tes.tcajero c 
-                            where id_funcionario=v_parametros.id_funcionario_usu
-                            and tipo='responsable'  and  c.estado_reg = 'activo')LOOP
-                      v_id_caja[v_i] = v_cajas.id_caja;
+                	v_i = 1;
+                	FOR v_cajas in (select id_caja
+                    				from tes.tcajero c 
+                    				where id_funcionario=v_parametros.id_funcionario_usu
+				                    and tipo='responsable'  and  c.estado_reg = 'activo')LOOP
+                    	v_id_caja[v_i] = v_cajas.id_caja;
                         v_i = v_i + 1;
                     END LOOP;
 
                     IF v_i > 1 THEN
-                      v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and caja.id_caja in('||array_to_string(v_id_caja,',')||') and ';
+                    	v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and caja.id_caja in('||array_to_string(v_id_caja,',')||') and ';
                     ELSE
-                      v_inner = ' left join tes.tcaja_funcionario cjusu on cjusu.id_caja=caja.id_caja ';
-                      v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and cjusu.id_funcionario='||v_parametros.id_funcionario_usu::integer||' and ';
+                    	v_inner = ' left join tes.tcaja_funcionario cjusu on cjusu.id_caja=caja.id_caja ';
+                    	v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and cjusu.id_funcionario='||v_parametros.id_funcionario_usu::integer||' and ';
                     END IF;
-           
+					 
                 ELSE
-                   v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and ';
+	                 v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and ';
                END IF;              
             END IF;
             
             IF  lower(v_parametros.tipo_interfaz) = 'solicitudcaja' THEN
 
                 IF p_administrador !=1 THEN
-                  v_i = 1;
-                  FOR v_cajas in (select id_caja
-                            from tes.tcajero c
-                            where id_funcionario=v_parametros.id_funcionario_usu
-                            and tipo='responsable'  and  c.estado_reg = 'activo')LOOP
-                      v_id_caja[v_i] = v_cajas.id_caja;
+                	v_i = 1;
+                	FOR v_cajas in (select id_caja
+                    				from tes.tcajero c
+                    				where id_funcionario=v_parametros.id_funcionario_usu
+				                    and tipo='responsable'  and  c.estado_reg = 'activo')LOOP
+                    	v_id_caja[v_i] = v_cajas.id_caja;
                         v_i = v_i + 1;
                     END LOOP;
 
                     IF v_i > 1 THEN
-                      v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and caja.id_caja in('||array_to_string(v_id_caja,',')||') and ';
+                    	v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and caja.id_caja in('||array_to_string(v_id_caja,',')||') and ';
                     ELSE
                         --TODO, RAC  23/12/2017,  si no esun cajero filtra las por lugar segun oficina del funcionario,..... queda pendiente
                         
-                      
-                      v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'')  and ';
+                    	
+                    	v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'')  and ';
                         
                         
                     END IF;
-           
+					 
                 ELSE
-                   v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and ';
+	                 v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and ';
                END IF;              
             END IF;
             
@@ -147,113 +156,145 @@ BEGIN
                 
             END IF;
                         
-        --Sentencia de la consulta
-      v_consulta:='select
-            caja.id_caja,
-            caja.estado,
-            caja.importe_maximo_caja,
+    		--Sentencia de la consulta
+			v_consulta:='select
+						caja.id_caja,
+						caja.estado,
+						caja.importe_maximo_caja,
                         tes.f_calcular_saldo_caja(caja.id_caja) as saldo,
-            caja.tipo,
-            caja.estado_reg,
+						caja.tipo,
+						caja.estado_reg,
                         pc.estado as estado_proceso,
-            caja.importe_maximo_item,
-            caja.id_moneda,
-            caja.id_depto,
+						caja.importe_maximo_item,
+						caja.id_moneda,
+						caja.id_depto,
                         caja.id_cuenta_bancaria,
                         ctab.nro_cuenta ||''-'' ||ctab.denominacion as id_cuenta_bancaria,
-            caja.codigo,
+						caja.codigo,
                         fun.desc_funcionario1 as cajero,
-            caja.id_usuario_reg,
-            caja.fecha_reg,
-            caja.id_usuario_mod,
-            caja.fecha_mod,
-            usu1.cuenta as usr_reg,
-            usu2.cuenta as usr_mod,
-            mon.moneda as desc_moneda,  
-            depto.nombre as desc_depto,
+						caja.id_usuario_reg,
+						caja.fecha_reg,
+						caja.id_usuario_mod,
+						caja.fecha_mod,
+						usu1.cuenta as usr_reg,
+						usu2.cuenta as usr_mod,
+						mon.moneda as desc_moneda,	
+						depto.nombre as desc_depto,
                         deplb.nombre as desc_depto_lb,
                         caja.tipo_ejecucion,
                         pc.id_proceso_wf,
-                pc.id_estado_wf,
-                pc.nro_tramite,
+				        pc.id_estado_wf,
+       					pc.nro_tramite,
                         caja.dias_maximo_rendicion
-            from tes.tcaja caja
-            inner join segu.tusuario usu1 on usu1.id_usuario = caja.id_usuario_reg
+						from tes.tcaja caja
+						inner join segu.tusuario usu1 on usu1.id_usuario = caja.id_usuario_reg
                         inner join tes.tproceso_caja pc on pc.id_caja= caja.id_caja
-            left join segu.tusuario usu2 on usu2.id_usuario = caja.id_usuario_mod
-            inner join param.tmoneda mon on mon.id_moneda= caja.id_moneda
-            inner join param.tdepto depto on depto.id_depto=caja.id_depto
+						left join segu.tusuario usu2 on usu2.id_usuario = caja.id_usuario_mod
+						inner join param.tmoneda mon on mon.id_moneda= caja.id_moneda
+						inner join param.tdepto depto on depto.id_depto=caja.id_depto
                         left join param.tdepto deplb on deplb.id_depto=caja.id_depto_lb
                         left join tes.tcuenta_bancaria ctab on ctab.id_cuenta_bancaria=caja.id_cuenta_bancaria
                         left join tes.tcajero caje on caje.id_caja=caja.id_caja and caje.tipo=''responsable''
-            left join orga.vfuncionario fun on fun.id_funcionario=caje.id_funcionario
+						left join orga.vfuncionario fun on fun.id_funcionario=caje.id_funcionario
                         '||v_inner||'   
                         where caja.estado_reg = ''activo'' and  '||v_filtro;
             
-      --Definicion de la respuesta
-      v_consulta:=v_consulta||v_parametros.filtro;
-      v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
-      raise notice '%', v_consulta;
-      --Devuelve la respuesta
-      return v_consulta;
-            
-    end;
+			--Definicion de la respuesta
+			v_consulta:=v_consulta||v_parametros.filtro;
+			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+			raise notice '%', v_consulta;
+			--Devuelve la respuesta
+			return v_consulta;
+						
+		end;
 
       /*********************************    
       #TRANSACCION:  'TES_CAJA_REP_SEL'
-      #DESCRIPCION: Reporte de datos
-      #AUTOR:   mp  
-      #FECHA:   29-08-2013 00:28:30
+      #DESCRIPCION:	Reporte de rendicion de cajaero
+      #AUTOR:		mp	
+      #FECHA:		29-08-2013 00:28:30
       ***********************************/
-    elsif(p_transaccion='TES_CAJA_REP_SEL') then
-        begin     
-        v_consulta := 'SELECT 
-                              ren.id_proceso_caja,
-                              ren.estado,
-                              ren.id_int_comprobante,
-                              ren.nro_tramite,
-                              ren.tipo,
-                              ren.motivo,
-                              ren.estado_reg,
-                              ren.id_caja,
-                              caja.id_depto_lb,
-                              ren.id_proceso_wf,
-                              0::NUMERIC as monto,
-                              rend.nombre,
-                              caja.id_moneda,
-                              '''' as razon_social,     
-                              0::NUMERIC as importe_pago_liquido,
-                              '''' as tramites,
-                    ren.fecha,
-                              '''' as nombre_fun                                                       
+		elsif(p_transaccion='TES_CAJA_REP_SEL') then
+     		begin 
+            	
+                
+                select id_tipo_solicitud into v_id_tipo_solicitud_sol
+                from tes.ttipo_solicitud
+                where codigo='SOLEFE';
+          		
+                select id_tipo_solicitud into v_id_tipo_solicitud_ren
+                from tes.ttipo_solicitud
+                where codigo='RENEFE';
+                
+                select id_tipo_solicitud into v_id_tipo_solicitud_dev
+                from tes.ttipo_solicitud
+                where codigo='DEVEFE';
+          		
+                select id_tipo_solicitud into v_id_tipo_solicitud_rep
+                from tes.ttipo_solicitud
+                where codigo='REPEFE';
+                
+                select id_tipo_solicitud into v_id_tipo_solicitud_ing
+                from tes.ttipo_solicitud
+                where codigo='INGEFE';
+          		
+                select id_tipo_solicitud into v_id_tipo_solicitud_sal
+                from tes.ttipo_solicitud
+                where codigo='SALEFE';
+		            	
+                select id_tipo_solicitud into v_id_tipo_solicitud_ape
+                from tes.ttipo_solicitud
+                where codigo='APECAJ';
+                
+				v_consulta := '(SELECT 
+                              ren.id_proceso_caja::integer,
+                              ren.estado::varchar,
+                              ren.id_int_comprobante::integer,
+                              ren.nro_tramite::varchar,
+                              ren.tipo::varchar,
+                              ren.motivo::varchar,
+                              ren.estado_reg::varchar,
+                              ren.id_caja::integer,
+                              caja.id_depto_lb::integer,
+                              ren.id_proceso_wf::integer,
+                              0.00::NUMERIC as monto,
+                              rend.nombre::varchar,
+                              caja.id_moneda::integer,
+                              ''''::varchar as razon_social,     
+                              0.00::NUMERIC as importe_pago_liquido,                     
+                              ren.fecha::date,
+                              ''''::varchar as nombre_fun,
+                              ren.fecha_reg::date as fecha_reg,
+                              ''''::varchar estado_r                                                      
                               FROM tes.tproceso_caja ren
                               INNER JOIN segu.tusuario usu1 ON usu1.id_usuario = ren.id_usuario_reg
                               LEFT JOIN segu.tusuario usu2 ON usu2.id_usuario = ren.id_usuario_mod
                               LEFT JOIN tes.ttipo_proceso_caja rend ON rend.id_tipo_proceso_caja = ren.id_tipo_proceso_caja
                               LEFT JOIN tes.tcaja caja ON caja.id_caja = ren.id_caja
                               WHERE '||v_parametros.filtro||'
-                                                                                                              
+                                                                                                                                            
                               UNION ALL
-                                                                                         
+                                                                                                                       
                               SELECT 
-                              ren.id_proceso_caja AS id_proceso_caja,
-                              '''' as estado,
-                              0 AS id_int_comprobante,
-                              '''' as nro_tramite,
-                              '''' as tipo,
-                              '''' as motivo,
-                              '''' as estado_reg,
-                              0 as id_caja,
-                              0 as id_depto_lb,
-                              0 as id_proceso_wf,
-                              0::NUMERIC as monto,
-                              '''' as nombre,
-                              0 as id_moneda, 
-                              dc.razon_social,    
+                              ren.id_proceso_caja::integer AS id_proceso_caja,
+                              ''''::varchar as estado,
+                              0::integer AS id_int_comprobante,
+                              solren.nro_tramite ::varchar as nro_tramite,
+                              ''''::varchar as tipo,
+                              ''''::varchar as motivo,
+                              ''''::varchar as estado_reg,
+                              0::integer as id_caja,
+                              0::integer as id_depto_lb,
+                              0::integer as id_proceso_wf,
+                              0.00::NUMERIC as monto,
+                              null::varchar as nombre,
+                              0::integer as id_moneda, 
+                              dc.razon_social::varchar,    
                               dc.importe_pago_liquido::NUMERIC,
-                              solren.nro_tramite as tramites,
-                              solefe.fecha,                                                                                    
-                              f.paterno as nombre_fun
+                              solefe.fecha::date,                                                                                    
+                              f.paterno::varchar as nombre_fun,
+							  ren.fecha_reg::date as fecha_reg,
+                              solren.estado::varchar as estado_r 
                               FROM tes.tsolicitud_rendicion_det ren
                               INNER JOIN tes.tsolicitud_efectivo solren on solren.id_solicitud_efectivo = ren.id_solicitud_efectivo
                               INNER JOIN tes.tsolicitud_efectivo solefe on solefe.id_solicitud_efectivo=solren.id_solicitud_efectivo_fk
@@ -264,26 +305,69 @@ BEGIN
                               INNER JOIN segu.tusuario usu1 on usu1.id_usuario = ren.id_usuario_reg
                               LEFT JOIN segu.tusuario usu2 on usu2.id_usuario = ren.id_usuario_mod
                               LEFT JOIN orga.tfuncionario_tmp f on f.id_funcionario=solefe.id_funcionario
-                              WHERE ren.id_proceso_caja is not null and '||v_parametros.filtro||' 
-                              ';
-        return v_consulta;
-      end;
+                              WHERE ren.id_proceso_caja is not null and caja.id_caja ='||v_parametros.id_caja||'
+                              )
+                              union all
+                              (
+                              select
+                              0::int as id_proceso_caja,
+                              solefe.estado::varchar,
+                              0::int AS id_int_comprobante,
+                              solefe.nro_tramite::varchar,
+                              ''''::varchar as tipo,
+                              solefe.motivo::varchar,
+                              solefe.estado_reg::varchar, 
+                              solefe.id_caja::int,
+                              caja.id_depto_lb::int,
+                              solpri.id_proceso_wf::integer,
+                              solefe.monto::numeric,
+                              ''''::varchar as nombre,
+                              caja.id_moneda::integer,
+                              ''''::varchar as razon_social,    
+                              0.00::numeric as importe_pago_liquido,
+                              solefe.fecha_mod::date,                                                                                   
+                              usu2.cuenta::varchar as usr_mod,
+                              solefe.fecha_reg::date as fecha_reg,
+                              ''''::varchar as estado_r
+                              from tes.tsolicitud_efectivo solefe
+                              inner join segu.tusuario usu1 on usu1.id_usuario = solefe.id_usuario_reg
+                              inner join tes.tcaja caja on caja.id_caja=solefe.id_caja
+                              inner join orga.vfuncionario fun on fun.id_funcionario = solefe.id_funcionario
+                              left join segu.tusuario usu2 on usu2.id_usuario = solefe.id_usuario_mod
+                              left join tes.tsolicitud_efectivo solpri on solpri.id_solicitud_efectivo=solefe.id_solicitud_efectivo_fk
+                              inner join wf.testado_wf ew on ew.id_estado_wf = solefe.id_estado_wf
+                              where (solefe.id_tipo_solicitud ='||v_id_tipo_solicitud_ape||' or
+                              solefe.id_tipo_solicitud ='||v_id_tipo_solicitud_sal||' or
+                              solefe.id_tipo_solicitud ='||v_id_tipo_solicitud_ing||' or 
+                              solefe.id_tipo_solicitud ='||v_id_tipo_solicitud_rep||' or
+                              solefe.id_tipo_solicitud ='||v_id_tipo_solicitud_dev||' or 
+                              solefe.id_tipo_solicitud ='||v_id_tipo_solicitud_ren||' or
+                              solefe.id_tipo_solicitud ='||v_id_tipo_solicitud_sol||') 
+                              AND solefe.estado =''ingresado'' and caja.id_caja= '||v_parametros.id_caja||')
+                              order by fecha_reg ';
+                           --raise notice '%',v_consulta;
+                                --                          raise exception '**';
+				return v_consulta;
+			end;
 
-  /*********************************    
-  #TRANSACCION:  'TES_CAJA_CONT'
-  #DESCRIPCION: Conteo de registros
-  #AUTOR:   admin 
-  #FECHA:   16-12-2013 20:43:44
-  ***********************************/
+	
+    
+    
+	/*********************************    
+ 	#TRANSACCION:  'TES_CAJA_CONT'
+ 	#DESCRIPCION:	Conteo de registros
+ 	#AUTOR:		admin	
+ 	#FECHA:		16-12-2013 20:43:44
+	***********************************/
 
-  elsif(p_transaccion='TES_CAJA_CONT')then
+	elsif(p_transaccion='TES_CAJA_CONT')then
 
-    begin
-          v_filtro='';
+		begin
+        	v_filtro='';
             v_inner='';
             
             IF (v_parametros.id_funcionario_usu is null) then
-                
+              	
                 v_parametros.id_funcionario_usu = -1;
             
             END IF;                        
@@ -303,52 +387,52 @@ BEGIN
            IF  lower(v_parametros.tipo_interfaz) = 'cajaabierto' THEN
 
                 IF p_administrador !=1 THEN
-                  v_i = 1;
-                  FOR v_cajas in (select id_caja
-                            from tes.tcajero c
-                            where id_funcionario=v_parametros.id_funcionario_usu
-                            and tipo='responsable'  and  c.estado_reg = 'activo')LOOP
-                      v_id_caja[v_i] = v_cajas.id_caja;
+                	v_i = 1;
+                	FOR v_cajas in (select id_caja
+                    				from tes.tcajero c
+                    				where id_funcionario=v_parametros.id_funcionario_usu
+				                    and tipo='responsable'  and  c.estado_reg = 'activo')LOOP
+                    	v_id_caja[v_i] = v_cajas.id_caja;
                         v_i = v_i + 1;
                     END LOOP;
 
                     IF v_i > 1 THEN
-                      v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and caja.id_caja in('||array_to_string(v_id_caja,',')||') and ';
+                    	v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and caja.id_caja in('||array_to_string(v_id_caja,',')||') and ';
                     ELSE
-                      v_inner = ' left join tes.tcaja_funcionario cjusu on cjusu.id_caja=caja.id_caja ';
-                      v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and cjusu.id_funcionario='||v_parametros.id_funcionario_usu::integer||' and ';
+                    	v_inner = ' left join tes.tcaja_funcionario cjusu on cjusu.id_caja=caja.id_caja ';
+                    	v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and cjusu.id_funcionario='||v_parametros.id_funcionario_usu::integer||' and ';
                     END IF;
-           
+					 
                 ELSE
-                   v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and ';
+	                 v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and ';
                END IF;              
             END IF;
             
             IF  lower(v_parametros.tipo_interfaz) = 'solicitudcaja' THEN
 
                 IF p_administrador !=1 THEN
-                  v_i = 1;
-                  FOR v_cajas in (select id_caja
-                            from tes.tcajero c
-                            where id_funcionario=v_parametros.id_funcionario_usu
-                            and tipo='responsable' and  c.estado_reg = 'activo' )LOOP
-                      v_id_caja[v_i] = v_cajas.id_caja;
+                	v_i = 1;
+                	FOR v_cajas in (select id_caja
+                    				from tes.tcajero c
+                    				where id_funcionario=v_parametros.id_funcionario_usu
+				                    and tipo='responsable' and  c.estado_reg = 'activo' )LOOP
+                    	v_id_caja[v_i] = v_cajas.id_caja;
                         v_i = v_i + 1;
                     END LOOP;
 
                     IF v_i > 1 THEN
-                      v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and caja.id_caja in('||array_to_string(v_id_caja,',')||') and ';
+                    	v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and caja.id_caja in('||array_to_string(v_id_caja,',')||') and ';
                     ELSE
                         --TODO, RAC  23/12/2017,  si no esun cajero filtra las por lugar segun oficina del funcionario,..... queda pendiente
                         
-                      
-                      v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'')  and ';
+                    	
+                    	v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'')  and ';
                         
                         
                     END IF;
-           
+					 
                 ELSE
-                   v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and ';
+	                 v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and ';
                END IF;              
             END IF;
             
@@ -372,43 +456,43 @@ BEGIN
                 
             END IF;
             
-      --Sentencia de la consulta de conteo de registros
-      v_consulta:='select count(caja.id_caja)
-              from tes.tcaja caja
-              inner join segu.tusuario usu1 on usu1.id_usuario = caja.id_usuario_reg
-                  inner join tes.tproceso_caja pc on pc.id_caja= caja.id_caja
-            left join segu.tusuario usu2 on usu2.id_usuario = caja.id_usuario_mod
-            inner join param.tmoneda mon on mon.id_moneda= caja.id_moneda
+			--Sentencia de la consulta de conteo de registros
+			v_consulta:='select count(caja.id_caja)
+					    from tes.tcaja caja
+					    inner join segu.tusuario usu1 on usu1.id_usuario = caja.id_usuario_reg
+            			inner join tes.tproceso_caja pc on pc.id_caja= caja.id_caja
+						left join segu.tusuario usu2 on usu2.id_usuario = caja.id_usuario_mod
+						inner join param.tmoneda mon on mon.id_moneda= caja.id_moneda
                         inner join param.tdepto depto on depto.id_depto=caja.id_depto
                         left join param.tdepto deplb on deplb.id_depto=caja.id_depto_lb
                         left join tes.tcuenta_bancaria ctab on ctab.id_cuenta_bancaria=caja.id_cuenta_bancaria
                         left join tes.tcajero caje on caje.id_caja=caja.id_caja and caje.tipo=''responsable''
-            left join orga.vfuncionario fun on fun.id_funcionario=caje.id_funcionario
-              '||v_inner||'   
+						left join orga.vfuncionario fun on fun.id_funcionario=caje.id_funcionario
+					    '||v_inner||'   
                         where caja.estado_reg = ''activo'' AND '||v_filtro;
-      
-      --Definicion de la respuesta        
-      v_consulta:=v_consulta||v_parametros.filtro;
+			
+			--Definicion de la respuesta		    
+			v_consulta:=v_consulta||v_parametros.filtro;
 
-      --Devuelve la respuesta
-      return v_consulta;
+			--Devuelve la respuesta
+			return v_consulta;
 
-    end;
-          
-  else
-               
-    raise exception 'Transaccion inexistente';
-                   
-  end if;
-          
+		end;
+					
+	else
+					     
+		raise exception 'Transaccion inexistente';
+					         
+	end if;
+					
 EXCEPTION
-          
-  WHEN OTHERS THEN
-      v_resp='';
-      v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
-      v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
-      v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
-      raise exception '%',v_resp;
+					
+	WHEN OTHERS THEN
+			v_resp='';
+			v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+			v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
+			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+			raise exception '%',v_resp;
 END;
 $body$
 LANGUAGE 'plpgsql'

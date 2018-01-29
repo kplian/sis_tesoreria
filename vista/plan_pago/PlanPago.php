@@ -1271,7 +1271,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		{name:'fecha_costo_ini', type: 'date',dateFormat:'Y-m-d'},
 		{name:'fecha_costo_fin', type: 'date',dateFormat:'Y-m-d'},
 		'id_depto_conta_pp','desc_depto_conta_pp','funcionario_wf','tiene_form500',
-		'id_depto_lb','desc_depto_lb','prioridad_lp',{name:'ultima_cuota_dev',type:'numeric'}
+		'id_depto_lb','desc_depto_lb','prioridad_lp',{name:'ultima_cuota_dev',type:'numeric'},'id_gestion','id_periodo'
 		
 	],
 	

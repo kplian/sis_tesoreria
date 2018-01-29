@@ -112,6 +112,25 @@ class MODCaja extends MODbase{
 		return $this->respuesta;
 	}
 	
+	function editMon(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_caja_ime';
+		$this->transaccion='TES_CAJA_MOD_MONTO';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_caja','id_caja','int4');
+		$this->setParametro('monto','monto','numeric');
+		$this->setParametro('estado','estado','varchar');
+		$this->setParametro('id_proceso_caja','id_proceso_caja','int4');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//var_dump($this->armarConsulta());
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
 	function abrirCerrarCaja(){
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.ft_caja_ime';
@@ -216,7 +235,7 @@ class MODCaja extends MODbase{
 		$this->captura('id_int_comprobante','int4');
 		$this->captura('nro_tramite','varchar');
 		$this->captura('tipo','varchar');
-		$this->captura('motivo','text');
+		$this->captura('motivo','varchar');
 		$this->captura('estado_reg','varchar');	
 		$this->captura('id_caja','int4');
 		$this->captura('id_depto_lb','int4');		
@@ -226,15 +245,16 @@ class MODCaja extends MODbase{
 		$this->captura('id_moneda','int4');	
 		$this->captura('razon_social','varchar');
 		$this->captura('importe_pago_liquido','numeric');
-		
-		$this->captura('tramites','varchar');
 		$this->captura('fecha','date');
 		$this->captura('nombre_fun','varchar');
-		
+		$this->captura('fecha_reg','date');
+	    $this->captura('estado_r','varchar');		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
 		return $this->respuesta;
 	}
+	//
+	
 }
 ?>

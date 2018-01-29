@@ -146,7 +146,7 @@ BEGIN
      --SI es del tipo anticopo
      --  Verificamos configuracion si Anticipo ejecuta presupuesto
      --  llamaos a funcion de presupeustos apra ejecucion de anticipo
-     IF   v_registros.tipo in ( 'anticipo', 'ant_parcial') THEN
+     IF   v_registros.tipo in ( 'anticipo') THEN
         IF not  tes.f_gestionar_presupuesto_tesoreria(
                                                       v_registros.id_obligacion_pago, 
                                                       p_id_usuario, 

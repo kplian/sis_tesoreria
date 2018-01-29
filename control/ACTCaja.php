@@ -122,28 +122,33 @@ class ACTCaja extends ACTbase{
 		}			
 	}
 	//
-	function impReporteProcesoCaja($create_file=false, $onlyData = false) {
-		//if($this->objParam->getParametro('tipo_formato')=='pdf') {
-			$nombreArchivo = uniqid(md5(session_id()).'ProcesoCaja').'.pdf';			
-			$dataSource = $this->listarRepCaja();	
-			$dataEntidad = "";
-			$dataPeriodo = "";	
-			$orientacion = 'P';		
-			$tamano = 'LETTER';
-			$titulo = 'Consolidado';
-			$this->objParam->addParametro('orientacion',$orientacion);
-			$this->objParam->addParametro('tamano',$tamano);		
-			$this->objParam->addParametro('titulo_archivo',$titulo);	
-			$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
-			$reporte = new RProcesoCaja($this->objParam);  
-			$reporte->datosHeader($dataSource->getDatos(),$dataSource->extraData, '' , '');		
-			$reporte->generarReporte();
-			$reporte->output($reporte->url_archivo,'F');
-			$this->mensajeExito=new Mensaje();
-			$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se genera con exito el reporte: '.$nombreArchivo,'control');
-			$this->mensajeExito->setArchivoGenerado($nombreArchivo);
-			$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());		
-		//}	
+	function impReporteProcesoCaja($create_file=false, $onlyData = false) {	
+		$nombreArchivo = uniqid(md5(session_id()).'ProcesoCaja').'.pdf';			
+		$dataSource = $this->listarRepCaja();
+		$dataEntidad = "";
+		$dataPeriodo = "";	
+		$orientacion = 'P';		
+		$tamano = 'LETTER';
+		$titulo = 'Consolidado';
+		
+		$this->objParam->addParametro('orientacion',$orientacion);
+		$this->objParam->addParametro('tamano',$tamano);		
+		$this->objParam->addParametro('titulo_archivo',$titulo);	
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+		$reporte = new RProcesoCaja($this->objParam);  
+		$reporte->datosHeader($dataSource->getDatos(),$dataSource->extraData, $this->objParam->getParametro('caja'), $this->objParam->getParametro('fecha'));		
+		$reporte->generarReporte();
+		$reporte->output($reporte->url_archivo,'F');
+		$this->mensajeExito=new Mensaje();
+		$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se genera con exito el reporte: '.$nombreArchivo,'control');
+		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());		
+	}
+	//
+	function editMonto(){
+		$this->objFunc=$this->create('MODCaja');				
+		$this->res=$this->objFunc->editMon($this->objParam);		
+		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 }
 

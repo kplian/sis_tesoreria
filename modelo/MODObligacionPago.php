@@ -80,11 +80,15 @@ class MODObligacionPago extends MODbase{
 		$this->captura('codigo_poa','varchar');
         $this->captura('obs_poa','varchar');
 		$this->captura('uo_ex','varchar');
-
 		//Funcionario responsable de el plan de pagos
 		$this->captura('id_funcionario_responsable','integer');
 		$this->captura('desc_fun_responsable','text');
 		
+		$this->captura('monto_ajuste_ret_garantia_ga','numeric');
+		$this->captura('monto_ajuste_ret_anticipo_par_ga','numeric');
+		$this->captura('monto_total_adjudicado','numeric');
+        $this->captura('total_anticipo','numeric');
+		$this->captura('pedido_sap','varchar');
 		
 		
 		
@@ -920,6 +924,27 @@ class MODObligacionPago extends MODbase{
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+function editAntiRet(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_obligacion_pago_ime';
+		$this->transaccion='TES_ANTIRET_IME';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
+		$this->setParametro('monto_total_adjudicado','monto_total_adjudicado','numeric');
+		$this->setParametro('total_anticipo','total_anticipo','numeric');
+		$this->setParametro('monto_ajuste_ret_anticipo_par_ga','monto_ajuste_ret_anticipo_par_ga','numeric');
+		$this->setParametro('monto_ajuste_ret_garantia_ga','monto_ajuste_ret_garantia_ga','numeric');
+		$this->setParametro('pedido_sap','pedido_sap','varchar');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}

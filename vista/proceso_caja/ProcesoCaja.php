@@ -11,7 +11,7 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
-
+	
 	nombreVista: 'ProcesoCaja',
 
 	constructor:function(config){
@@ -19,7 +19,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
     	//llama al constructor de la clase padre    	
 		Phx.vista.ProcesoCaja.superclass.constructor.call(this,config);
 		this.init();
-		
+		this.crearFormAuto();
 		this.addButton('diagrama_gantt',
             {
                 text:'Gant',
@@ -29,6 +29,14 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
                 tooltip: '<b>Diagrama Gantt de Solicitud de Efectivo</b>'
             }
         );
+ 
+		this.addButton('agregarmonto',{ 
+			text: 'Agregar monto', 
+			iconCls: 'blist', 
+			disabled: false, 
+			handler: this.agregarmonto, 
+			tooltip: '<b>Agregar monto</b>'
+		});
 	},
 
 	Atributos:[
@@ -495,7 +503,21 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				id_grupo:1,
 				grid:true,
 				form:false
-		}
+		},
+		{
+			config:{
+				name: 'monto_rep',	
+				fieldLabel: 'Monto a reponer',
+				allowBlank: true,
+				inputType:'hidden',
+				anchor: '80%',
+				gwidth: 200,
+				maxLength:500
+			},
+			type:'NumberField',
+			grid:true,
+			form:false
+		 },	
 	],
 	tam_pag:50,
 	title:'Rendicion Caja',
@@ -528,7 +550,8 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
-		{name:'nombre', type: 'string'}
+		{name:'nombre', type: 'string'},
+		'monto_rep'
 
 	],
 	sortInfo:{
@@ -541,11 +564,15 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 
 
 	preparaMenu:function(n){
-          var data = this.getSelectedData();
-          var tb =this.tbar;
+		var data = this.getSelectedData();
+		var tb =this.tbar;
+		Phx.vista.ProcesoCaja.superclass.preparaMenu.call(this,n);
+		if(data['tipo']=='SOLREP' && data['estado']=='borrador'){
+			this.getBoton('agregarmonto').enable();
+		}else{
+			this.getBoton('agregarmonto').disable();
+		}
 		
-          Phx.vista.ProcesoCaja.superclass.preparaMenu.call(this,n);
-
      },
 
      liberaMenu:function(n){
@@ -553,6 +580,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
           var tb =this.tbar;
 
           Phx.vista.ProcesoCaja.superclass.liberaMenu.call(this,n);
+          this.getBoton('agregarmonto').disable();
      },
      
      diagramGantt : function (){
@@ -568,8 +596,79 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 	            scope: this
 	        });
         }
-    },
-
+	},
+	//
+	crearFormAuto:function(){
+		this.formAuto = new Ext.form.FormPanel({
+			baseCls: 'x-plain',
+			autoDestroy: true,
+			border: false,
+			layout: 'form',
+			autoHeight: true,
+			items: 
+			[{
+				name:'monto_rep',
+				xtype:'numberfield',
+				fieldLabel:'Monto a Reponer',
+				emptyText:'........',	
+			}]
+		});
+		this.wAuto = new Ext.Window({
+			title: 'Monto',
+			collapsible: true,
+			maximizable: true,
+			autoDestroy: true,
+			width: 380,
+			height: 170,
+			layout: 'fit',
+			plain: true,
+			bodyStyle: 'padding:5px;',
+			buttonAlign: 'center',
+			items: this.formAuto,
+			modal:true,
+			closeAction: 'hide',
+			buttons: [{
+				text: 'Guardar',
+				handler: this.saveAuto,
+				scope: this
+			},
+			{
+				text: 'Cancelar',
+				handler: function(){ this.wAuto.hide() },
+				scope: this
+			}]
+		});
+		this.cmpAuto = this.formAuto.getForm().findField('monto_rep');
+	},
+	//
+	agregarmonto:function(){
+		var data = this.getSelectedData();		
+		if(data){		
+			this.cmpAuto.setValue(data.monto);
+			this.wAuto.show();
+		}
+	},
+	//
+	saveAuto: function(){
+		var d = this.getSelectedData();
+		Phx.CP.loadingShow();	
+		console.log(d);	
+		Ext.Ajax.request({
+			url: '../../sis_tesoreria/control/Caja/editMonto',
+			params: {
+				id_caja:d.id_caja,
+				monto_rep: this.cmpAuto.getValue(),
+				estado:d.estado,
+				id_proceso_caja:d.id_proceso_caja		
+			},
+			success: this.successSinc,
+			failure: this.conexionFailure,
+			timeout: this.timeout,
+			scope: this
+		});	
+		this.wAuto.hide();					
+	},
+	//
 	tabsouth:[
             {
              url:'../../../sis_tesoreria/vista/solicitud_rendicion_det/RendicionProcesoCaja.php',
