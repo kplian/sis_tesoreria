@@ -73,8 +73,9 @@ Phx.vista.ProcesoCajaVb = {
 			this.getBoton('ant_estado').disable();
 		}
 		if(data['tipo']=='SOLREN'){
-		//this.getBoton('consolidado_rendicion').enable();
-		//this.getBoton('consolidado_reposicion').disable();
+			this.getBoton('consolidado_rendicion').enable();
+			this.TabPanelSouth.get(2).enable();	
+			this.TabPanelSouth.setActiveTab(0)	
 		}else if(data['tipo']=='SOLREP'){
 		//this.getBoton('consolidado_rendicion').disable();
 		//this.getBoton('consolidado_reposicion').enable();

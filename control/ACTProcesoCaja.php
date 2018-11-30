@@ -10,6 +10,7 @@ require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
 require_once(dirname(__FILE__).'/../reportes/RMemoCajaChica.php');
 require_once(dirname(__FILE__).'/../reportes/RVoBoRepoCaja.php');
+require_once(dirname(__FILE__).'/../reportes/RMensualCaja.php');
 
 class ACTProcesoCaja extends ACTbase{
 
@@ -212,6 +213,45 @@ class ACTProcesoCaja extends ACTbase{
 		else{
 			return dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo;
 		}		
+	}
+	//
+	function listarReporteMenCaja(){
+		if($this->objParam->getParametro('id_caja')!=''){
+			$this->objParam->addFiltro("caja.id_caja =".$this->objParam->getParametro('id_caja')." AND "."ren.id_proceso_caja =".$this->objParam->getParametro('id_proceso_caja'));    
+		}
+		$this->objFunc=$this->create('MODProcesoCaja');		
+		$cbteHeader = $this->objFunc->listarReporteMenCaja($this->objParam);					
+		if($cbteHeader->getTipo() == 'EXITO'){										
+			return $cbteHeader;			
+		}
+		else{
+			$cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+			exit;
+		}			
+	}
+	//
+	function reportemensual($create_file=false, $onlyData = false) {		
+		$nombreArchivo = uniqid(md5(session_id()).'ReporteMensual').'.pdf';			
+		$dataSource = $this->listarReporteMenCaja();
+		//var_dump($dataSource);
+		$dataEntidad = "";
+		$dataPeriodo = "";	
+		$orientacion = 'L';		
+		$tamano = 'LETTER';
+		$titulo = 'Consolidado';
+		
+		$this->objParam->addParametro('orientacion',$orientacion);
+		$this->objParam->addParametro('tamano',$tamano);		
+		$this->objParam->addParametro('titulo_archivo',$titulo);	
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+		$reporte = new RMensualCaja($this->objParam);  
+		$reporte->datosHeader($dataSource->getDatos(),$dataSource->extraData, $this->objParam->getParametro('codigo'), $this->objParam->getParametro('fecha'));		
+		$reporte->generarReporte();
+		$reporte->output($reporte->url_archivo,'F');
+		$this->mensajeExito=new Mensaje();
+		$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se genera con exito el reporte: '.$nombreArchivo,'control');
+		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());		
 	}
 
 }

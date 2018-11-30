@@ -26,6 +26,7 @@ $body$
    
  #0        		 09-03-2016        Gonzalo Sarmiento       Esta funcion a partir del id Documento Compra Venta se encarga de gestionar el presupuesto,
  #0       		 01/12/2017        Rensi Arteaga           Se cambia la logica de reversion de comprobantes de caja para que use el nro de tramite de la soclitud de efectivo donde se rindio
+ #100            13/02/2018        RAC (KPLIAN)            Solo comproemte partidas presupuestarias
 ***************************************************************************/
 
 DECLARE
@@ -63,6 +64,7 @@ DECLARE
   v_reg_sol				record;
   v_fecha 				date;
   v_id_partida			integer;
+  v_sw_movimiento       varchar;
   
 
   
@@ -108,7 +110,7 @@ BEGIN
                      END IF;
                                           
                      
-                     v_i = v_i +1;     
+                      
                      
                     -- recuperar la partida de la relacion contable de compras
                     SELECT 
@@ -120,42 +122,62 @@ BEGIN
                     IF  v_id_partida  is NULL  THEN
                       raise exception 'No se encontro partida para el concepto de gasto y el centro de costos solicitados';
                     END IF;
-                     
-                    --  armamos los array para enviar a presupuestos     
-           
-                    va_id_presupuesto[v_i] = v_registros.id_presupuesto;
-                    va_id_partida[v_i]= v_id_partida;
-                    va_momento[v_i]	= 1; --el momento 1 es el comprometido
-                    va_monto[v_i]  = v_registros.precio_total_final; 
-                    va_id_moneda[v_i]  = v_registros.id_moneda;                   
-                    va_columna_relacion[v_i]= 'id_doc_concepto';
-                    va_fk_llave[v_i] = v_registros.id_doc_concepto;
-                    va_nro_tramite[v_i] = v_registros.nro_tramite;
-                    va_id_doc_concepto[v_i] = v_registros.id_doc_concepto;
-                                        
-                    -- la fecha de reversion como maximo puede ser el 31 de diciembre   
-                  
-                      
-                       
-                    IF  now()  < v_registros.fecha THEN
-                      v_fecha = v_registros.fecha::date;
-                    ELSE
-                       -- la fecha de reversion como maximo puede ser el 31 de diciembre   
-                       v_fecha = now()::date;
-                       v_ano_1 =  EXTRACT(YEAR FROM  now()::date);
-                       v_ano_2 =  EXTRACT(YEAR FROM  v_registros.fecha::date);
-                       
-                       IF  v_ano_1  >  v_ano_2 THEN
-                         v_fecha = ('31-12-'|| v_ano_2::varchar)::date;
-                       END IF;
-                    END IF;      
-                  
-                   va_fecha[v_i] = v_registros.fecha::date;
-                   
+                    
+                    v_sw_movimiento='';
+                    --revisamos el tipo de aprtida
+                    select 
+                       p.sw_movimiento
+                      into
+                       v_sw_movimiento
+                    from pre.tpartida p 
+                    where p.id_partida = v_id_partida;
+                    
+                    IF  v_sw_movimiento = '' THEN
+                      raise exception 'No se encontro partida para comprometer para el concepto ID:%', v_registros.id_concepto_ingas;
+                    END IF;
+                    
+                    
+                    --#100, 13/02/2018  solo comproemte partida presupesutarias
+                    IF v_sw_movimiento != 'flujo' THEN 
+                          --  armamos los array para enviar a presupuestos 
+                          v_i = v_i +1;    
+                 
+                          va_id_presupuesto[v_i] = v_registros.id_presupuesto;
+                          va_id_partida[v_i]= v_id_partida;
+                          va_momento[v_i]	= 1; --el momento 1 es el comprometido
+                          va_monto[v_i]  = v_registros.precio_total_final; 
+                          va_id_moneda[v_i]  = v_registros.id_moneda;                   
+                          va_columna_relacion[v_i]= 'id_doc_concepto';
+                          va_fk_llave[v_i] = v_registros.id_doc_concepto;
+                          va_nro_tramite[v_i] = v_registros.nro_tramite;
+                          va_id_doc_concepto[v_i] = v_registros.id_doc_concepto;
+                                              
+                          -- la fecha de reversion como maximo puede ser el 31 de diciembre   
+                        
+                            
+                             
+                          IF  now()  < v_registros.fecha THEN
+                            v_fecha = v_registros.fecha::date;
+                          ELSE
+                             -- la fecha de reversion como maximo puede ser el 31 de diciembre   
+                             v_fecha = now()::date;
+                             v_ano_1 =  EXTRACT(YEAR FROM  now()::date);
+                             v_ano_2 =  EXTRACT(YEAR FROM  v_registros.fecha::date);
+                             
+                             IF  v_ano_1  >  v_ano_2 THEN
+                               v_fecha = ('31-12-'|| v_ano_2::varchar)::date;
+                             END IF;
+                          END IF;      
+                        
+                         va_fecha[v_i] = v_registros.fecha::date;
+                         
+                            
+                      END IF;
              
              
              END LOOP;
              
+           
               IF v_i > 0 THEN 
               
                     --llamada a la funcion de compromiso
@@ -220,7 +242,8 @@ BEGIN
                                   WHERE rd.id_proceso_caja = p_id_proceso_caja
                                           and  rd.estado_reg = 'activo'
                                           and  sol.estado_reg = 'activo'
-                                          and  dc.estado_reg = 'activo') LOOP
+                                          and  dc.estado_reg = 'activo'
+                                          and  dc.id_partida_ejecucion is not null) LOOP
                                         
                       IF(v_registros.id_partida_ejecucion is NULL) THEN
                          raise exception 'El presupuesto del detalle con el identificador (%)  no se encuntra comprometido',v_registros.id_doc_concepto;

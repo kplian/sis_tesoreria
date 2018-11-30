@@ -47,9 +47,12 @@ DECLARE
      
      v_importe						numeric;
      v_importe_mb				    numeric;
-     v_total_importe_gasto 	        integer;
-     v_total_importe_recurso 	    integer;
+     v_total_importe_gasto 	        numeric;
+     v_total_importe_recurso 	    numeric;
      v_factor	                    numeric;
+     v_factor_mb                    numeric;
+     v_total_importe_gasto_mb       numeric;
+     v_total_importe_recurso_mb     numeric;
     
 BEGIN
 
@@ -62,7 +65,8 @@ BEGIN
            pp.id_plan_pago,
            pp.tipo,
            pp.estado,
-           pp.descuento_anticipo
+           pp.descuento_anticipo,
+           pp.descuento_anticipo_mb
            
          into
           v_registros_cbte  
@@ -81,15 +85,16 @@ BEGIN
         
                 
                 --calculat el total a ejecutar
-                
-                 select
-                                         
+                   select
                              sum(COALESCE(it.importe_gasto,0)) as total_importe_gasto,
-                             sum(COALESCE(it.importe_recurso,0)) as total_importe_recurso                                         
-                            
+                             sum(COALESCE(it.importe_recurso,0)) as total_importe_recurso,
+                             sum(COALESCE(it.importe_gasto_mb,0)) as total_importe_gasto_mb,
+                             sum(COALESCE(it.importe_recurso_mb,0)) as total_importe_recurso_mb
                     into 
                        v_total_importe_gasto ,
-                       v_total_importe_recurso                    
+                       v_total_importe_recurso,
+                       v_total_importe_gasto_mb ,
+                       v_total_importe_recurso_mb                     
                   from conta.tint_transaccion it
                   inner join pre.tpartida par on par.id_partida = it.id_partida
                   inner join pre.tpresupuesto pr on pr.id_centro_costo = 
@@ -101,9 +106,19 @@ BEGIN
                         
                 IF  v_total_importe_gasto > 0 THEN
                      v_factor = v_registros_cbte.descuento_anticipo/v_total_importe_gasto;
+                     v_factor_mb = v_registros_cbte.descuento_anticipo_mb/v_total_importe_gasto_mb;
                 ELSE 
                     v_factor = v_registros_cbte.descuento_anticipo/v_total_importe_recurso;
+                    v_factor_mb = v_registros_cbte.descuento_anticipo_mb/v_total_importe_recurso_mb;
                 END IF;
+                
+                IF p_id_int_comprobante = 9330   THEN
+                 
+                     --raise exception 'mensaje de error factor % =  % / %', v_factor,  v_registros_cbte.descuento_anticipo  , v_total_importe_gasto ;
+                 
+                 
+                 END IF;
+      
                 
                 
         
@@ -130,8 +145,7 @@ BEGIN
                                          it.actualizacion
                                       from conta.tint_transaccion it
                                       inner join pre.tpartida par on par.id_partida = it.id_partida
-                                      inner join pre.tpresupuesto pr on pr.id_centro_costo = 
-                                      it.id_centro_costo
+                                      inner join pre.tpresupuesto pr on pr.id_centro_costo =  it.id_centro_costo
                                       where it.id_int_comprobante = p_id_int_comprobante
                                             and it.estado_reg = 'activo'
                                             and par.sw_movimiento = 'presupuestaria' )  LOOP
@@ -147,16 +161,40 @@ BEGIN
                             
                             --cacular monto no ejecutado
                             
-                            update conta.tint_transaccion tr set
-                              monto_no_ejecutado =   v_importe*v_factor,
-                              monto_no_ejecutado_mb = v_importe_mb*v_factor
-                            where tr.id_int_transaccion   = v_registros.id_int_transaccion ;
+                            --el monto no ejecutado no puede ser mayor que el monto a eejcutar 
+                            
+                            IF  v_factor   <= 1 THEN
+                            
+                                update conta.tint_transaccion tr set
+                                  monto_no_ejecutado =   v_importe*v_factor,
+                                  monto_no_ejecutado_mb = v_importe_mb*v_factor
+                                where tr.id_int_transaccion   = v_registros.id_int_transaccion ;
+                                
+                            ELSE 
+                            
+                                update conta.tint_transaccion tr set
+                                   monto_no_ejecutado =   v_importe,
+                                   monto_no_ejecutado_mb = v_importe_mb
+                                where tr.id_int_transaccion   = v_registros.id_int_transaccion ;  
+                            
+                            
+                            END IF;
+                            
                                    
                   END LOOP;
                      
                      
                 
          END IF;
+         
+         IF p_id_int_comprobante = 9330   THEN
+         
+            --raise exception  'LLEga ';  
+         
+         
+         END IF;
+      
+        
         
         
     

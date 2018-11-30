@@ -35,7 +35,6 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 	
 	constructor:function(config){
 		this.maestro=config.maestro;
-		
 		this.Atributos[this.getIndAtributo('monto_rendido')].config.renderer = function(value, p, record) {			
 				    var saldo = parseFloat(record.data.monto) + parseFloat(record.data.monto_repuesto) - parseFloat(record.data.monto_rendido) - parseFloat(record.data.monto_devuelto);
 					if (record.data.estado == 'entregado' || record.data.estado == 'finalizado') {
@@ -78,7 +77,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			{	text:'Siguiente',
 				iconCls: 'badelante',
 				grupo:[0,2],
-				disabled:true,
+				disabled:false,
 				handler:this.sigEstado,
 				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
 			}
@@ -97,7 +96,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			text : 'Devolucion Efectivo',
 			iconCls : 'bballot',
 			grupo:[2],
-			disabled : true,
+			disabled : false,
 			handler : this.onBtnDevolucion,
 			tooltip : '<b>Devolucion Sin Añadir Facturas</b>'
 		});
@@ -127,7 +126,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 				argument: {estado: 'anterior'},
 				iconCls: 'batras',
 				disabled:false,
-				grupo:[3],
+				//grupo:[3],
 				handler:this.antEstado,
 				tooltip: '<b>Anterior</b><p>Pasa al anterior estado</p>'
 			}
@@ -674,30 +673,31 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
               this.getBoton('fin_registro').enable();
 			  this.getBoton('edit').enable();
 			  this.getBoton('del').enable();
-			  this.getBoton('btnRendicion').disable();
+			  this.getBoton('btnRendicion').hide();
+			  //this.getCmp
 			  this.getBoton('diagrama_gantt').enable();
 			  //this.getBoton('btnReciboEntrega').disable();
 			  //this.getBoton('btnRendicionEfectivo').disable();
-          }else if (data['estado'] == 'entregado'){
-              this.getBoton('fin_registro').enable();
-			  this.getBoton('edit').disable();
-			  this.getBoton('del').disable();
-			  this.getBoton('diagrama_gantt').enable();
-			  this.getBoton('btnRendiciones').enable();
-			  //this.getBoton('btnRendicionEfectivo').enable();
-			  if(data.dias_no_rendido < 0)
-				//this.getBoton('btnRendicion').disable();
-			  //else
-				this.getBoton('btnRendicion').enable();
-			  //this.getBoton('btnReciboEntrega').enable();
-			  
-          }else if (data['estado'] == 'finalizado'){
+		}else if (data['estado'] == 'entregado'){
+			//this.getBoton('fin_registro').disable();
+			this.getBoton('fin_registro').enable();
+			this.getBoton('edit').disable();
+			this.getBoton('del').disable();
+			this.getBoton('diagrama_gantt').enable();
+			this.getBoton('btnRendiciones').enable();
+			//this.getBoton('btnRendicionEfectivo').enable();
+			 if(data.dias_no_rendido < 0)
+			//this.getBoton('btnRendicion').disable();
+			//else
+			this.getBoton('btnRendicion').enable();
+			//this.getBoton('btnReciboEntrega').enable();
+		}else if (data['estado'] == 'finalizado'){
 			  this.getBoton('fin_registro').disable();
 			  this.getBoton('edit').disable();
 			  this.getBoton('del').disable();
 			  this.getBoton('btnRendicion').disable();
 			  this.getBoton('btnRendiciones').enable();
-              this.getBoton('diagrama_gantt').enable();
+			this.getBoton('diagrama_gantt').enable();
 		  }else if(data['estado'] == 'vbjefe'){
 			  this.getBoton('fin_registro').disable();
 			  this.getBoton('edit').disable();
@@ -733,7 +733,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			this.getBoton('fin_registro').disable();
 			this.getBoton('btnRendicion').disable();
 			this.getBoton('btnRendiciones').disable();
-			this.getBoton('btnDevol').disable();
+			//this.getBoton('btnDevol').enable();
 		}
 	},
 	 
@@ -806,7 +806,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		}, rec.data, this.idContenedor, 'RendicionEfectivoSolicitante');
 	},
 
-	loadCheckDocumentosSolWf:function() {
+	loadCheckDocumentosSolWf:function() {		
 			var rec=this.sm.getSelected();
 			rec.data.nombreVista = this.nombreVista;
 			Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
@@ -847,7 +847,9 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 	},
 	
 	onBtnRendicionEfectivo : function() {
+		
 		var rec=this.sm.getSelected();
+		
         Ext.Ajax.request({
             url:'../../sis_tesoreria/control/SolicitudEfectivo/reporteRendicionEfectivo',
             params:{'id_proceso_wf':rec.data.id_proceso_wf},

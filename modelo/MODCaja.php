@@ -227,18 +227,19 @@ class MODCaja extends MODbase{
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
 		$this-> setCount(false);
 		$this->setParametro('id_caja','id_caja','int4');
-		$this->setParametro('id_proceso_caja','id_proceso_caja','int4');			
+		$this->setParametro('id_proceso_caja','id_proceso_caja','int4');		
+		$this->setParametro('nro_tramite','nro_tramite','varchar');
+		
+		$this->setParametro('fecha','fecha','date');	
+		$this->setParametro('tipo','tipo','varchar');
+		$this->setParametro('estado','estado','varchar');
+		$this->setParametro('id_int_comprobante','id_int_comprobante','int4');
+		$this->setParametro('nombre','nombre','varchar');	
 		//Definicion de la lista del resultado del query
-		$this->captura('id_proceso_caja','int4');
-		$this->captura('estado','varchar');
-		$this->captura('id_int_comprobante','int4');
+		
 		$this->captura('nro_tramite','varchar');
 		$this->captura('tipo','varchar');
 		$this->captura('motivo','varchar');
-		$this->captura('estado_reg','varchar');	
-		$this->captura('id_caja','int4');
-		$this->captura('id_depto_lb','int4');		
-		$this->captura('id_proceso_wf','int4');
 		$this->captura('monto','numeric');
 		$this->captura('nombre','varchar');
 		$this->captura('id_moneda','int4');	
@@ -248,12 +249,160 @@ class MODCaja extends MODbase{
 		$this->captura('nombre_fun','varchar');
 		$this->captura('fecha_reg','date');
 	    $this->captura('estado_r','varchar');		
+		$this->captura('nit','varchar');
+		$this->captura('nro_autorizacion','varchar');	
+		$this->captura('nro_documento','varchar');	
+		$this->captura('codigo_control','varchar');
+		$this->captura('importe_doc','numeric');	
+		$this->captura('importe_iva','numeric');
+		$this->captura('nom_proceso','varchar');	
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
 		return $this->respuesta;
 	}
 	//
+	function listarCajas(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.ft_caja_sel';
+		$this->transaccion='TES_LCAJ_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		//Definicion de la lista del resultado del query
+		$this-> setCount(false);
+		$this->captura('id_caja','int4');
+		$this->captura('estado','varchar');
+		$this->captura('tipo','varchar');
+		$this->captura('codigo','varchar');	
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		return $this->respuesta;
+	}
+
+	function repCajaFechas(){
+		$this->procedimiento='tes.ft_caja_sel';
+		$this->transaccion='TES_RECAJFEC_SEL';
+		$this->tipo_procedimiento='SEL';
+		$this->setCount(false);
+		$this->setParametro('id_caja','id_caja','int4');
+		$this->setParametro('fecha_ini','fecha_ini','date');
+		$this->setParametro('fecha_fin','fecha_fin','date');		
+		//Definicion de la lista del resultado del query
+		$this->captura('id_solicitud_efectivo','int4');
+		$this->captura('fecha','date');
+		$this->captura('monto_ingreso','numeric');
+		$this->captura('monto_salida','numeric');		
+		$this->captura('estado','varchar');
+		$this->captura('monto','numeric');
+		$this->captura('nro_tramite','varchar');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
+	function repMensualFechas(){
+		$this->procedimiento='tes.ft_caja_sel';
+		$this->transaccion='TES_REPMENFEC_SEL';
+		$this->tipo_procedimiento='SEL';
+		$this->setCount(false);
+		$this->setParametro('id_caja','id_caja','int4');
+		$this->setParametro('fecha_ini','fecha_ini','date');
+		$this->setParametro('fecha_fin','fecha_fin','date');		
+		//Definicion de la lista del resultado del query
+		$this->captura('saldo','numeric');
+		$this->captura('nro_tramite','varchar');
+		$this->captura('desc_plantilla','varchar');
+		
+		$this->captura('fecha','date');		
+		$this->captura('nit','varchar');
+		$this->captura('razon_social','varchar');
+		
+		$this->captura('nro_autorizacion','varchar');
+		$this->captura('nro_documento','varchar');
+		$this->captura('codigo_control','varchar');
+		
+		$this->captura('monto','numeric');
+		$this->captura('importe_pago_liquido','numeric');
+		$this->captura('importe_iva','numeric');
+		$this->captura('importe_descuento','numeric');			
+		$this->captura('importe_descuento_ley','numeric');
+		$this->captura('importe_excento','numeric');
+		
+		$this->captura('motivo','varchar');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	//cabecera
+	function recuperarDatos(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.ft_caja_sel';
+		$this->transaccion='TES_DATOS_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this-> setCount(false);
+		$this->setParametro('id_caja','id_caja','int4');
+		$this->setParametro('id_proceso_caja','id_proceso_caja','int4');
+		//Definicion de la lista del resultado del query
+		
+		$this->captura('cajero','varchar');
+		$this->captura('codigo','varchar');
+		$this->captura('salida','numeric');
+		$this->captura('ingreso','numeric');
+		$this->captura('nombre','varchar');	
+		$this->captura('saldo','numeric');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		return $this->respuesta;
+	}
+	//
+	//
+	function listDatArq(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.ft_caja_sel';
+		$this->transaccion='TES_CAJARQ_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this-> setCount(false);
+		$this->setParametro('id_caja','id_caja','int4');
+		$this->setParametro('id_proceso_caja','id_proceso_caja','int4');		
+		$this->setParametro('nro_tramite','nro_tramite','varchar');
+		
+		$this->setParametro('fecha','fecha','date');	
+		$this->setParametro('tipo','tipo','varchar');
+		$this->setParametro('estado','estado','varchar');
+		$this->setParametro('id_int_comprobante','id_int_comprobante','int4');
+		$this->setParametro('nombre','nombre','varchar');	
+		//Definicion de la lista del resultado del query
+		
+		$this->captura('nro_tramite','varchar');
+		$this->captura('tipo','varchar');
+		$this->captura('motivo','varchar');
+		$this->captura('monto','numeric');
+		$this->captura('nombre','varchar');
+		$this->captura('id_moneda','int4');	
+		$this->captura('razon_social','varchar');
+		$this->captura('importe_pago_liquido','numeric');
+		$this->captura('fecha','date');
+		$this->captura('nombre_fun','varchar');
+		$this->captura('fecha_reg','date');
+	    $this->captura('estado_r','varchar');		
+		$this->captura('nit','varchar');
+		$this->captura('nro_autorizacion','varchar');	
+		$this->captura('nro_documento','varchar');	
+		$this->captura('codigo_control','varchar');
+		$this->captura('importe_doc','numeric');	
+		$this->captura('importe_iva','numeric');
+		$this->captura('nom_proceso','varchar');	
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		return $this->respuesta;
+	}
 	
 }
 ?>

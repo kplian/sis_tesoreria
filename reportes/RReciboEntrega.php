@@ -107,8 +107,14 @@ Class RReciboEntrega extends Report {
         $this->pdf->Cell($width4, $height, $this->getDataSource()->getParameter('solicitante'), 1, 1, 'L', false, '', 0, false, 'T', 'C');
         $this->pdf->SetFont('', 'B');
         $this->pdf->Cell($width2, $height, 'MOTIVO: ', 1, 0, 'L', false, '', 0, false, 'T', 'C');
-		$this->pdf->SetFont('', '');		
-        $this->pdf->Cell($width4, $height, $this->getDataSource()->getParameter('motivo'), 1, 1, 'L', false, '', 0, false, 'T', 'C');
+		$this->pdf->SetFont('', '');	
+			
+
+		$this->pdf->Cell($width4, $height, $this->getDataSource()->getParameter('motivo'), 1, 1, 'L', false, '', 1, false, 'T', 'C');  
+        /*$this->pdf->Ln();
+		$this->pdf->MultiCell($width4, $height, $this->getDataSource()->getParameter('motivo'), 1, 1, 'L', false, '', 0, true, 'T', 'C');
+        $this->pdf->Ln();*/
+		
         $this->pdf->SetFont('', 'B');
         $this->pdf->Cell($width2, $height, 'IMPORTE ENTREGADO: ', 1, 0, 'L', false, '', 0, false, 'T', 'C');
 		$this->pdf->SetFont('', '');		

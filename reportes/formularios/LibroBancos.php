@@ -256,7 +256,37 @@ header("content-type: text/javascript; charset=UTF-8");
 			type:'ComboBox',
 			id_grupo:1,
 			form:true
-		}],
+		},{
+			config:{
+				name: 'fecha_ini_reg',
+				fieldLabel: 'Fec. Ini Reg',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				format: 'd/m/Y', 
+				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+			},
+			type:'DateField',
+			filters:{pfiltro:'fecha_ini_reg',type:'date'},
+			grid:false,	
+			form:true
+		},{
+			config:{
+				name: 'fecha_fin_reg',
+				fieldLabel: 'Fec. Fin Reg',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				format: 'd/m/Y', 
+				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+			},
+			type:'DateField',
+			filters:{pfiltro:'fecha_fin_reg',type:'date'},
+			grid:false,
+			form:true
+		}
+		
+		],
 		title : 'Reporte Libro Bancos',		
 		ActSave : '../../sis_tesoreria/control/TsLibroBancos/reporteLibroBancos',
 		timeout : 1500000,
@@ -273,14 +303,17 @@ header("content-type: text/javascript; charset=UTF-8");
 		},
 		
 		iniciarEventos:function(){        
-			this.cmpFormatoReporte = this.getComponente('formato_reporte');
-			this.cmpFechaIni = this.getComponente('fecha_ini');
+			this.cmpFormatoReporte = this.getComponente('formato_reporte');			
+			this.cmpFechaIni = this.getComponente('fecha_ini');			
 			this.cmpFechaFin = this.getComponente('fecha_fin');
 			this.cmpIdCuentaBancaria = this.getComponente('id_cuenta_bancaria');
 			this.cmpEstado = this.getComponente('estado');
 			this.cmpTipo = this.getComponente('tipo');
 			this.cmpNombreBanco = this.getComponente('nombre_banco');
 			this.cmpNroCuenta = this.getComponente('nro_cuenta');
+			
+			this.cmpFechaIniReg = this.getComponente('fecha_ini_reg');
+			this.cmpFechaFinReg = this.getComponente('fecha_fin_reg');
 			
 			this.getComponente('finalidad').hide(true);
 			this.cmpNroCuenta.hide(true);
@@ -298,23 +331,56 @@ header("content-type: text/javascript; charset=UTF-8");
 		},
 		
 		onSubmit:function(o){
+			
 			if(this.cmpFormatoReporte.getValue()==2){
-				var data = 'FechaIni=' + this.cmpFechaIni.getValue().format('d-m-Y');
-				data = data + '&FechaFin=' + this.cmpFechaFin.getValue().format('d-m-Y');
-				data = data + '&IdCuentaBancaria=' + this.cmpIdCuentaBancaria.getValue();
-				data = data + '&Estado=' + this.cmpEstado.getValue();
-				data = data + '&Tipo=' + this.cmpTipo.getValue();
-				data = data + '&NombreBanco=' + this.cmpNombreBanco.getValue();
-				data = data + '&NumeroCuenta=' + this.cmpNroCuenta.getValue();
+				console.log(this.cmpFormatoReporte.getValue());
 				
-				console.log(data);
-				window.open('http://sms.obairlines.bo/LibroBancos/Home/VerLibroBancos?'+data);
-				//window.open('http://localhost:2309/Home/VerLibroBancos?'+data);				
+				var cuenta = this.cmpIdCuentaBancaria.getValue();
+				var estado = this.cmpEstado.getValue();
+				var tipo = this.cmpTipo.getValue();
+				var banco = this.cmpNombreBanco.getValue();
+				var nro_cuenta = this.cmpNroCuenta.getValue();	
+				var finalidad = this.getComponente('finalidad').getValue();
+				var IdCuentaBancaria = this.cmpIdCuentaBancaria.getValue();
+				var id_finalidad = this.getComponente('id_finalidad').getValue();				
+				if(this.cmpFechaIni.getValue() == null || this.cmpFechaIni.getValue() == ''){
+					console.log('->');
+					var ini_reg = this.cmpFechaIniReg.getValue().format('d-m-Y');
+					var fin_reg = this.cmpFechaFinReg.getValue().format('d-m-Y');
+				}else{
+					console.log('ingresa->');
+					var ini = this.cmpFechaIni.getValue().format('d-m-Y');			
+					var fin = this.cmpFechaFin.getValue().format('d-m-Y');
+				}
+				var formato ='xls';			
+				Phx.CP.loadingShow();		
+				Ext.Ajax.request({
+					url:'../../sis_tesoreria/control/TsLibroBancos/reporteLibroBancos',
+					params:
+					{	
+						'fecha_ini':ini,
+						'fecha_fin':fin,
+						//'cuenta':cuenta,
+						'estado':estado,
+						'tipo':tipo,
+						//'banco':banco,
+						'nro_cuenta':nro_cuenta,
+						'formato':formato,
+						'finalidad':finalidad,
+						'id_cuenta_bancaria':IdCuentaBancaria,
+						'id_finalidad':id_finalidad,						
+						'fecha_ini_reg':ini_reg,
+						'fecha_fin_reg':fin_reg
+					},
+					success: this.successExport,		
+					failure: this.conexionFailure,
+					timeout:this.timeout,
+					scope:this
+				});	
 			}else{
 				Phx.vista.ReporteLibroBancos.superclass.onSubmit.call(this,o);				
 			}
 		},
-		
 		tipo : 'reporte',
 		clsSubmit : 'bprint',
 		

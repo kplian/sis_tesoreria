@@ -6,6 +6,9 @@
 *@date 20-09-2011 10:22:05
 *@description Archivo con la interfaz de usuario que permite 
 *dar el visto a solicitudes de compra
+ * *Issue			Fecha        Author				Descripcion
+ * #1			21/09/2018		EGS					Se modifico el edit para q los campos igualen con el new
+ * 
 *
 */
 header("content-type: text/javascript; charset=UTF-8");
@@ -57,6 +60,14 @@ Phx.vista.ObligacionPagoEspecial = {
        this.cmpFecha.disable(); 
        this.cmpTipoCambioConv.disable();
        this.Cmp.id_moneda.disable();
+      
+                 //#1			21/09/2018		EGS	
+      this.ocultarComponente(this.cmpTipoObligacion);
+      this.ocultarComponente(this.cmpIdContrato);
+      this.ocultarComponente(this.cmpPagoVariable);
+      this.ocultarComponente(this.cmpTipoAnticipo);
+      this.ocultarComponente(this.cmpTotalNroCuota);
+          //#1			21/09/2018		EGS	
        
        
        this.mostrarComponente(this.Cmp.id_funcionario);
@@ -82,6 +93,10 @@ Phx.vista.ObligacionPagoEspecial = {
        	this.Cmp.id_proveedor.enable();
        	this.mostrarComponente(this.Cmp.id_proveedor);
        }
+       
+         //#1			21/09/2018		EGS	
+     	 this.Cmp.id_proveedor.disable();
+         //#1			21/09/2018		EGS	
        
            
     },

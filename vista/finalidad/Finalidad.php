@@ -246,7 +246,7 @@ Phx.vista.Finalidad=Ext.extend(Phx.gridInterfaz,{
        				store: new Ext.data.ArrayStore({
                         fields: ['variable', 'valor'],
                         data : [ ['caja_chica', 'Caja Chica'],
-                                 ['fondos_avance', 'Fondos Avance']
+                                 ['fondos_avance', 'Fondos con Cargo a Rendición de Cuentas']
                                ]
                         }),
        				valueField: 'variable',

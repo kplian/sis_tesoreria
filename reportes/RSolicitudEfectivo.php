@@ -113,7 +113,7 @@ Class RSolicitudEfectivo extends CustomReport {
         $pdf->SetFont('', '');
 		if($this->getDataSource()->getParameter('motivo')!=''){
 			$pdf->Cell($width2, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
-			$pdf->Cell($width3, $height, $this->getDataSource()->getParameter('motivo'), 0, 0, 'L', false, '', 0, false, 'T', 'C');        
+			$pdf->Cell($width3, $height, $this->getDataSource()->getParameter('motivo'), 0, 0, 'L', false, '', 1, false, 'T', 'C');        
 		}else{
 			$this->writeDetalles($this->getDataSource()->getParameter('detalleDataSource'), $pdf);
 		}

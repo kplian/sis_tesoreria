@@ -10,6 +10,8 @@
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
+var mes=null;
+var caja=null;
 Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 	
 	nombreVista: 'ProcesoCaja',
@@ -18,6 +20,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		this.maestro=config.maestro;
     	//llama al constructor de la clase padre    	
 		Phx.vista.ProcesoCaja.superclass.constructor.call(this,config);
+		this.caja();
 		this.init();
 		this.crearFormAuto();
 		this.addButton('diagrama_gantt',
@@ -33,7 +36,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		this.addButton('agregarmonto',{ 
 			text: 'Agregar monto', 
 			iconCls: 'blist', 
-			disabled: false, 
+			disabled: true, 
 			handler: this.agregarmonto, 
 			tooltip: '<b>Agregar monto</b>'
 		});		
@@ -299,7 +302,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'monto',
-				fieldLabel: 'Monto',
+				fieldLabel: 'Monto Salida',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
@@ -307,6 +310,21 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'NumberField',
 				filters:{pfiltro:'ren.monto',type:'numeric'},
+				id_grupo:1,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
+				name: 'monto_ren_ingreso',
+				fieldLabel: 'Monto Ingreso',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1179650
+			},
+				type:'NumberField',
+				filters:{pfiltro:'ren.monto_ren_ingreso',type:'numeric'},
 				id_grupo:1,
 				grid:true,
 				form:false
@@ -517,7 +535,22 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			type:'NumberField',
 			grid:true,
 			form:false
-		 },	
+		 },
+		 {
+			config: {
+				name: 'id_int_comprobante',
+				fieldLabel: 'Id.Cbte.',
+				anchor: '80%',
+				gwidth: 180,
+				maxLength:50
+			},
+			type: 'TextField',
+			filters: {pfiltro:'ren.id_int_comprobante',type:'numeric'},
+			bottom_filter: true,
+			id_grupo: 1,
+			grid: true,
+			form: false
+		}
 	],
 	tam_pag:50,
 	title:'Rendicion Caja',
@@ -540,6 +573,7 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		{name:'fecha', type: 'date',dateFormat:'Y-m-d'},
 		{name:'id_proceso_wf', type: 'numeric'},
 		{name:'monto', type: 'numeric'},
+		{name:'monto_ren_ingreso', type: 'numeric'},
 		{name:'id_estado_wf', type: 'numeric'},
 		{name:'fecha_inicio', type: 'date',dateFormat:'Y-m-d'},
 		{name:'fecha_reg', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
@@ -649,10 +683,66 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		}
 	},
 	//
+	caja: function() {
+		this.caja = new Ext.Toolbar.SplitButton({
+			id: 'b-caja-' + this.idContenedor,
+			text: 'Reporte Mensual de caja',
+			disabled: false,
+			//grupo:[0,1],
+			iconCls : 'bprint',
+			handler:this.formfiltro,
+			scope: this
+		});
+		this.tbar.add(this.caja);
+	},
+	//
+	formfiltro:function(){		
+		var rec = this.sm.getSelected();
+		var data = rec.data;
+		console.log('datos ...',data);
+		if (data) {					
+			Phx.CP.loadWindows('../../../sis_tesoreria/vista/proceso_caja/FormReporteCaja.php',
+				'Mes',
+				{
+					modal:true,
+					width:400,
+					height:180
+				}, 
+				{
+					data:{
+						id_caja: rec.data.id_caja								  
+					}
+				}, 
+				this.idContenedor,'FormReporteCaja',
+				{
+					config:[{
+						event:'beforesave',
+						delegate: this.caja_dato,
+					}],
+					scope:this
+				}
+			)
+		}
+	},	
+	caja_dato : function (wizard,resp){
+		Phx.CP.loadingShow();	
+		Ext.Ajax.request({
+			url:'../../sis_tesoreria/control/ProcesoCaja/reportemensual',
+			params:
+			{		
+				'id_caja':resp.id_caja,			
+				'mes':resp.mes				
+			},
+			success: this.successExport,		
+			failure: this.conexionFailure,
+			timeout:this.timeout,
+			scope:this
+		});
+    },
+	//
 	saveAuto: function(){
 		var d = this.getSelectedData();
 		Phx.CP.loadingShow();	
-		console.log(d);	
 		Ext.Ajax.request({
 			url: '../../sis_tesoreria/control/Caja/editMonto',
 			params: {
@@ -669,21 +759,27 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		this.wAuto.hide();			
 	},
 	//
-	tabsouth:[
-            {
-             url:'../../../sis_tesoreria/vista/solicitud_rendicion_det/RendicionProcesoCaja.php',
-             title:'Detalle',
-             height:'50%',
-             cls:'RendicionProcesoCaja'
-			},
+	tabsouth:
+		[			
+			{
+				url:'../../../sis_tesoreria/vista/solicitud_rendicion_det/RendicionProcesoCaja.php',
+				title:'Salidas',
+				height:'50%',
+				cls:'RendicionProcesoCaja'
+			},			
 			{
 				url:'../../../sis_tesoreria/vista/caja/CajaDeposito.php',
 				title:'Depositos',
 				height:'50%',
 				cls:'CajaDeposito'
-			}
-       ]
-
+			},
+			{
+				url:'../../../sis_tesoreria/vista/solicitud_rendicion_det/Ingreso.php',
+				title:'Ingresos',
+				height:'50%',
+				cls:'Ingreso'
+			},
+		]
 	}
 )
 </script>

@@ -375,6 +375,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 	}
 	
 	function reporteRendicionEfectivo($create_file=false, $onlyData = false){
+			
 		$dataSource = new DataSource();
 		//captura datos de firma
 		if ($this->objParam->getParametro('firmar') == 'si') {
@@ -403,7 +404,6 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$resultReciboEntrega = $this->objFunc->reporteReciboEntrega();
 
 		$datosReciboEntrega = $resultReciboEntrega->getDatos();		
-
 		//armamos el array parametros y metemos ahi los data sets de las otras tablas
 		$dataSource->putParameter('codigo_proc', $datosReciboEntrega[0]['codigo_proc']);
 		$dataSource->putParameter('fecha_entrega', $datosReciboEntrega[0]['fecha_entrega']);
@@ -416,6 +416,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$dataSource->putParameter('motivo', $datosReciboEntrega[0]['motivo']);
 		$dataSource->putParameter('monto', $datosReciboEntrega[0]['monto']);
 		$dataSource->putParameter('fecha_rendicion', $datosReciboEntrega[0]['fecha_rendicion']);
+		$dataSource->putParameter('monto_dev', $datosReciboEntrega[0]['monto_dev']);
 		
 		$this->objParam->defecto('ordenacion', 'fecha');
 		$this->objParam->defecto('cantidad', 1000);
@@ -424,6 +425,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$modRendicionEfectivo = $this->create('MODSolicitudEfectivo');
 		//lista el detalle de la rendicion
 		$resultRendicionEfectivo = $modRendicionEfectivo->reporteRendicionEfectivo();
+		
 		//var_dump($resultRendicionEfectivo); exit;
 		//agrupa el detalle de la rendicion por centros de costos y partidas
 		//$solicitudRendicionEfectivoAgrupado = $this->groupArray($resultRendicionEfectivo->getDatos(), 'desc_ingas','codigo_cc', $datosSolicitud[0]['id_moneda'],$datosSolicitud[0]['estado'],$onlyData);

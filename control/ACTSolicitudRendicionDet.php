@@ -139,6 +139,16 @@ class ACTSolicitudRendicionDet extends ACTbase{
 		$this->res=$this->objFunc->obtener_item_monto($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+		
+	function listarSolicitudIngresoDet(){
+		if($this->objParam->getParametro('id_proceso_caja')!=''){
+			$this->objParam->addFiltro("id_proceso_caja = ".$this->objParam->getParametro('id_proceso_caja'));	
+		}
+		
+		$this->objFunc=$this->create('MODSolicitudRendicionDet');			
+		$this->res=$this->objFunc->listarSolicitudIngresoDet($this->objParam);		
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
 }
 
 ?>

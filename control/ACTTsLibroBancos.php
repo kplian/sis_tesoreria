@@ -14,9 +14,10 @@ require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
 include_once(dirname(__FILE__).'/../../lib/PHPMailer/class.phpmailer.php');
 include_once(dirname(__FILE__).'/../../lib/PHPMailer/class.smtp.php');
 include_once(dirname(__FILE__).'/../../lib/lib_general/cls_correo_externo.php');
+require_once(dirname(__FILE__).'/../../sis_tesoreria/reportes/RLibroBancosXls.php');
+require_once(dirname(__FILE__).'/../../sis_tesoreria/reportes/RepLibroBancoXls.php');
 
-
-class ACTTsLibroBancos extends ACTbase{    
+class ACTTsLibroBancos extends ACTbase{
 			
 	function listarTsLibroBancos(){
 		$this->objParam->defecto('ordenacion','id_libro_bancos');
@@ -402,32 +403,55 @@ class ACTTsLibroBancos extends ACTbase{
 		$dataSource->putParameter('fecha_fin', $fecha_fin);
 		$dataSource->putParameter('tipo', $tipo);
 		$dataSource->putParameter('estado', $estado);
-		$dataSource->putParameter('finalidad', $finalidad);		
+		$dataSource->putParameter('finalidad', $finalidad);	
 		
-		$this->objFunc=$this->create('MODTsLibroBancos');
-		$resultLibroBancos = $this->objFunc->reporteLibroBancos($this->objParam);
+		if($this->objParam->getParametro('formato')=='xls'){
+					
+			$this->objFun=$this->create('MODTsLibroBancos');	
+			$this->res = $this->objFun->reporteLibroBancos();
+			
+			if($this->res->getTipo()=='ERROR'){
+				$this->res->imprimirRespuesta($this->res->generarJson());
+				exit;
+			}
+			$titulo ='LibroBanco';
+			$nombreArchivo=uniqid(md5(session_id()).$titulo);
+			$nombreArchivo.='.xls';
+			$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+			$this->objParam->addParametro('datos',$this->res->datos);			
+			$this->objReporteFormato=new RLibroBancosXls($this->objParam);
+			$this->objReporteFormato->generarDatos();
+			$this->objReporteFormato->generarReporte();
+			$this->mensajeExito=new Mensaje();
+			$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se genero con éxito el reporte: '.$nombreArchivo,'control');
+			$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+			$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());	
 				
-		if($resultLibroBancos->getTipo()=='EXITO'){
-						
-			$datosLibroBancos = $resultLibroBancos->getDatos();
-			$dataSource->setDataSet($datosLibroBancos);    
-			
-			$nombreArchivo = 'LibroBancos.pdf';
-			$reporte = new RLibroBancos();
-			
-			$reporte->setDataSource($dataSource);	
-			$reportWriter = new ReportWriter($reporte, dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo);
-			$reportWriter->writeReport(ReportWriter::PDF);
-	
-			$mensajeExito = new Mensaje();
-			$mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
-			'Se generó con éxito el reporte: '.$nombreArchivo,'control');
-			$mensajeExito->setArchivoGenerado($nombreArchivo);
-			$this->res = $mensajeExito;
-			$this->res->imprimirRespuesta($this->res->generarJson());
-		}
-		else{			 
-			 $resultLibroBancos->imprimirRespuesta($resultLibroBancos->generarJson());			
+		} else{
+			$this->objFunc=$this->create('MODTsLibroBancos');
+			$resultLibroBancos = $this->objFunc->reporteLibroBancos($this->objParam);				
+			if($resultLibroBancos->getTipo()=='EXITO'){
+							
+				$datosLibroBancos = $resultLibroBancos->getDatos();
+				$dataSource->setDataSet($datosLibroBancos);    
+				
+				$nombreArchivo = 'LibroBancos.pdf';
+				$reporte = new RLibroBancos();
+				
+				$reporte->setDataSource($dataSource);	
+				$reportWriter = new ReportWriter($reporte, dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo);
+				$reportWriter->writeReport(ReportWriter::PDF);
+		
+				$mensajeExito = new Mensaje();
+				$mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
+				'Se generó con éxito el reporte: '.$nombreArchivo,'control');
+				$mensajeExito->setArchivoGenerado($nombreArchivo);
+				$this->res = $mensajeExito;
+				$this->res->imprimirRespuesta($this->res->generarJson());
+			}
+			else{			 
+				 $resultLibroBancos->imprimirRespuesta($resultLibroBancos->generarJson());			
+			}
 		}
 	}
 	
@@ -549,6 +573,38 @@ class ACTTsLibroBancos extends ACTbase{
 		   exit;
 	   
     }
+	
+	function repLibroBanco(){
+		$dataSource = new DataSource();
+		
+		$nro_cuenta = $this->objParam->getParametro('id_cuenta_bancaria');
+		$fecha_ini = $this->objParam->getParametro('fecha_ini');
+		$fecha_fin = $this->objParam->getParametro('fecha_fin');
+			
+		$dataSource->putParameter('id_cuenta_bancaria', $nro_cuenta);
+		$dataSource->putParameter('fecha_ini', $fecha_ini);
+		$dataSource->putParameter('fecha_fin', $fecha_fin);
+					
+		$this->objFun=$this->create('MODTsLibroBancos');	
+		$this->res = $this->objFun->repLibroBancos();
+			
+		if($this->res->getTipo()=='ERROR'){
+			$this->res->imprimirRespuesta($this->res->generarJson());
+			exit;
+		}
+		$titulo ='Libro';
+		$nombreArchivo=uniqid(md5(session_id()).$titulo);
+		$nombreArchivo.='.xls';
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+		$this->objParam->addParametro('datos',$this->res->datos);			
+		$this->objReporteFormato=new RepLibroBancoXls($this->objParam);
+		$this->objReporteFormato->generarDatos();
+		$this->objReporteFormato->generarReporte();
+		$this->mensajeExito=new Mensaje();
+		$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se genero con éxito el reporte: '.$nombreArchivo,'control');
+		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());	
+	}
 	
 }
 

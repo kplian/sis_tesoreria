@@ -5,6 +5,9 @@
 *@author  (admin)
 *@date 10-04-2013 15:43:23
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
+*
+*@date 30/08/2018
+*@description añadida la columna retenciones de garantía para mostrar el reporte de solicitud de pago
 */
 
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
@@ -123,16 +126,19 @@ class ACTPlanPago extends ACTbase{
         		
         		$dataSource->putParameter('importe',$datosPlanPago[0]['importe']);
         		$dataSource->putParameter('monto_no_pagado',$datosPlanPago[0]['monto_no_pagado']);
+        		$dataSource->putParameter('monto_retgar_mo',$datosPlanPago[0]['monto_retgar_mo']);
         		$dataSource->putParameter('otros_descuentos',$datosPlanPago[0]['otros_descuentos']);
-        		$dataSource->putParameter('descuento_ley',$datosPlanPago[0]['descuento_ley']);
+                $dataSource->putParameter('descuento_ley',$datosPlanPago[0]['descuento_ley']);
         		$dataSource->putParameter('monto_ejecutado_total',$datosPlanPago[0]['monto_ejecutado_total']);
         		$dataSource->putParameter('liquido_pagable',$datosPlanPago[0]['liquido_pagable']);
         		$dataSource->putParameter('total_pagado',$datosPlanPago[0]['total_pagado']);
         		$dataSource->putParameter('fecha_reg',$datosPlanPago[0]['fecha_reg']);
         		
         		$dataSource->putParameter('monto_excento',$datosPlanPago[0]['monto_excento']);
-        		
-        		
+				
+        		$dataSource->putParameter('num_tramite',$datosPlanPago[0]['num_tramite']);
+        		$dataSource->putParameter('nro_contrato',$datosPlanPago[0]['nro_contrato']);
+				$dataSource->putParameter('pago_borrador',$datosPlanPago[0]['pago_borrador']);
         		
         		
         		//preapra conslta del prorrateo

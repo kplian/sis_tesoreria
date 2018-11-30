@@ -29,6 +29,14 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		);
 		*/
 		this.iniciarEventos();
+		var dataPadre = Phx.CP.getPagina(this.idContenedorPadre).getSelectedData()
+		if(dataPadre){
+			this.onEnablePanel(this, dataPadre);
+		}
+		else
+		{
+			this.bloquearMenus();
+		}
 		//this.load({params:{start:0, limit:this.tam_pag}})
 	},
 			
@@ -412,7 +420,7 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		{name:'tipo', type: 'string'},
 		{name:'id_plantilla', type: 'numeric'},
 		{name:'id_moneda', type: 'numeric'},
-		{name:'fecha', type: 'date'},
+		
 		{name:'nit', type: 'string'},
 		{name:'razon_social', type: 'string'},
 		{name:'nro_autorizacion', type: 'string'},
@@ -430,6 +438,10 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		{name:'monto', type: 'numeric'},
 		{name:'id_usuario_reg', type: 'numeric'},
 		{name:'fecha_reg', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
+		
+		{name:'fecha', type: 'date', dateFormat:'Y-m-d'},
+		
+		
 		{name:'usuario_ai', type: 'string'},
 		{name:'id_usuario_ai', type: 'numeric'},
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
@@ -501,6 +513,7 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		}*/
 
 	},
+	
 	
 	bnew:false,
 	bedit:false,

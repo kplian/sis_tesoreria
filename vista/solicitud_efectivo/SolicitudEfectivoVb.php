@@ -423,6 +423,24 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				id_grupo:1,
 				grid:true,
 				form:false
+		},
+		{
+			config:{
+				name: 'id_tipo_solicitud',
+				fieldLabel: 'Tipo Solicitud',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength: 10,
+				renderer: function(value, p, record) {
+					return String.format('{0}', record.data['nombre_tipo_solicitud']);
+				},
+				hidden: true
+			},
+				type:'TextField',
+				id_grupo:1,
+				grid:true,
+				form:false
 		}
 	],
 	tam_pag:50,	
@@ -454,7 +472,9 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
-		
+		{name:'id_tipo_solicitud', type: 'numeric'},
+		{name:'codigo_tipo_solicitud', type: 'string'},
+		{name:'nombre_tipo_solicitud', type: 'string'}
 	],
 	sortInfo:{
 		field: 'id_solicitud_efectivo',
@@ -547,57 +567,84 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
         this.reload();
      }, 
 	 
-	sigEstado:function(){                   
-	  var rec=this.sm.getSelected();
-	  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
-								'Estado de Wf',
-								{
-									modal:true,
-									width:700,
-									height:450
-								}, {data:{
-									   id_estado_wf:rec.data.id_estado_wf,
-									   id_proceso_wf:rec.data.id_proceso_wf									  
-									}}, this.idContenedor,'FormEstadoWf',
-								{
-									config:[{
-											  event:'beforesave',
-											  delegate: this.onSaveWizard												  
-											}],
-									
-									scope:this
-								 });        
-			   
-	 },
-	 
-	 onSaveWizard:function(wizard,resp){
-			Phx.CP.loadingShow();
-			console.log(resp);
-			Ext.Ajax.request({
-				url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
-				params:{
-						
-					id_proceso_wf_act:  resp.id_proceso_wf_act,
-					id_estado_wf_act:   resp.id_estado_wf_act,
-					id_tipo_estado:     resp.id_tipo_estado,
-					id_funcionario_wf:  resp.id_funcionario_wf,
-					id_depto_wf:        resp.id_depto_wf,
-					obs:                resp.obs,
-					json_procesos:      Ext.util.JSON.encode(resp.procesos)
-					},
-				success:this.successWizard,
-				failure: this.conexionFailure,
-				argument:{wizard:wizard},
-				timeout:this.timeout,
-				scope:this
-			});
-		},
+	sigEstado:function(){
+		var rec=this.sm.getSelected();
+		this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+		'Estado de Wf',
+		{
+			modal:true,
+			width:700,
+			height:450
+		},{data:{
+			estado_wf:rec.estado,
+			id_estado_wf:rec.data.id_estado_wf,
+			id_proceso_wf:rec.data.id_proceso_wf									  
+			}},this.idContenedor,'FormEstadoWf',
+		{
+			config:
+			[{
+				event:'beforesave',
+				delegate: this.onSaveWizard												  
+			}],			
+			scope:this
+		});
+	},
+	
+	onSaveWizard:function(wizard,resp){
+		Phx.CP.loadingShow();
+		console.log('-----------');
+		console.log('-->',wizard);
+		console.log('-->',resp);
+		console.log('-----------');
+		Ext.Ajax.request({
+			url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
+			params:{
+					
+				id_proceso_wf_act:  resp.id_proceso_wf_act,
+				id_estado_wf_act:   resp.id_estado_wf_act,
+				id_tipo_estado:     resp.id_tipo_estado,
+				id_funcionario_wf:  resp.id_funcionario_wf,
+				id_depto_wf:        resp.id_depto_wf,
+				obs:                resp.obs,
+				json_procesos:      Ext.util.JSON.encode(resp.procesos)
+				},
+			success:this.successWizard,
+			failure: this.conexionFailure,
+			argument:
+			{
+				wizard:wizard, 
+				id_proceso_wf : resp.id_proceso_wf_act,
+				id_estado_wf:   resp.id_estado_wf_act,
+				resp : resp
+			},
+			timeout:this.timeout,
+			scope:this
+		});
+	},
 		
 	successWizard:function(resp){
-			Phx.CP.loadingHide();
-			resp.argument.wizard.panel.destroy()
-			this.reload();
-		 },
+		Phx.CP.loadingHide();
+		resp.argument.wizard.panel.destroy();
+		this.reload();
+		console.log(resp.argument.wizard.Cmp.id_tipo_estado.lastSelectionText);
+		if(resp.argument.wizard.Cmp.id_tipo_estado.lastSelectionText=='entregado'
+		|| resp.argument.wizard.Cmp.id_tipo_estado.lastSelectionText=='ingresado'){
+			if (resp.argument.id_proceso_wf) {
+				Phx.CP.loadingShow();
+				Ext.Ajax.request({
+					url : '../../sis_tesoreria/control/SolicitudEfectivo/reporteReciboEntrega',
+					params : {
+						'id_proceso_wf' : resp.argument.id_proceso_wf,
+						'id_estado_wf':   resp.argument.id_estado_wf,
+					},
+					success : this.successExport,
+					failure : this.conexionFailure,
+					timeout : this.timeout,
+					scope : this
+				});
+			}
+		}			
+	},
 
 	loadCheckDocumentosSolWf:function() {
 		var rec=this.sm.getSelected();

@@ -99,7 +99,7 @@ BEGIN
                 	FOR v_cajas in (select id_caja
                     				from tes.tcajero c 
                     				where id_funcionario=v_parametros.id_funcionario_usu
-				                    and tipo='responsable'  and  c.estado_reg = 'activo')LOOP
+				                    and tipo in ('responsable','administrador')  and  c.estado_reg = 'activo')LOOP
                     	v_id_caja[v_i] = v_cajas.id_caja;
                         v_i = v_i + 1;
                     END LOOP;
@@ -194,7 +194,7 @@ BEGIN
 						inner join param.tdepto depto on depto.id_depto=caja.id_depto
                         left join param.tdepto deplb on deplb.id_depto=caja.id_depto_lb
                         left join tes.tcuenta_bancaria ctab on ctab.id_cuenta_bancaria=caja.id_cuenta_bancaria
-                        left join tes.tcajero caje on caje.id_caja=caja.id_caja and caje.tipo=''responsable''
+                        left join tes.tcajero caje on caje.id_caja=caja.id_caja and caje.tipo in(''responsable'',''administrador'')
 						left join orga.vfuncionario fun on fun.id_funcionario=caje.id_funcionario
                         '||v_inner||'   
                         where caja.estado_reg = ''activo'' and  '||v_filtro;
@@ -246,107 +246,72 @@ BEGIN
                 from tes.ttipo_solicitud
                 where codigo='APECAJ';
                 
-				v_consulta := '(SELECT 
-                              ren.id_proceso_caja::integer,
-                              ren.estado::varchar,
-                              ren.id_int_comprobante::integer,
-                              ren.nro_tramite::varchar,
-                              ren.tipo::varchar,
-                              ren.motivo::varchar,
-                              ren.estado_reg::varchar,
-                              ren.id_caja::integer,
-                              caja.id_depto_lb::integer,
-                              ren.id_proceso_wf::integer,
-                              0.00::NUMERIC as monto,
-                              rend.nombre::varchar,
-                              caja.id_moneda::integer,
-                              ''''::varchar as razon_social,     
-                              0.00::NUMERIC as importe_pago_liquido,                     
-                              ren.fecha::date,
-                              ''''::varchar as nombre_fun,
-                              ren.fecha_reg::date as fecha_reg,
-                              ''''::varchar estado_r                                                      
-                              FROM tes.tproceso_caja ren
-                              INNER JOIN segu.tusuario usu1 ON usu1.id_usuario = ren.id_usuario_reg
-                              LEFT JOIN segu.tusuario usu2 ON usu2.id_usuario = ren.id_usuario_mod
-                              LEFT JOIN tes.ttipo_proceso_caja rend ON rend.id_tipo_proceso_caja = ren.id_tipo_proceso_caja
-                              LEFT JOIN tes.tcaja caja ON caja.id_caja = ren.id_caja
-                              WHERE '||v_parametros.filtro||'
-                                                                                                                                            
-                              UNION ALL
-                                                                                                                       
-                              SELECT 
-                              ren.id_proceso_caja::integer AS id_proceso_caja,
-                              ''''::varchar as estado,
-                              0::integer AS id_int_comprobante,
-                              solren.nro_tramite ::varchar as nro_tramite,
-                              ''''::varchar as tipo,
-                              ''''::varchar as motivo,
-                              ''''::varchar as estado_reg,
-                              0::integer as id_caja,
-                              0::integer as id_depto_lb,
-                              0::integer as id_proceso_wf,
-                              0.00::NUMERIC as monto,
-                              null::varchar as nombre,
-                              0::integer as id_moneda, 
-                              dc.razon_social::varchar,    
-                              dc.importe_pago_liquido::NUMERIC,
-                              solefe.fecha::date,                                                                                    
-                              f.paterno::varchar as nombre_fun,
-							  ren.fecha_reg::date as fecha_reg,
-                              solren.estado::varchar as estado_r 
-                              FROM tes.tsolicitud_rendicion_det ren
-                              INNER JOIN tes.tsolicitud_efectivo solren on solren.id_solicitud_efectivo = ren.id_solicitud_efectivo
-                              INNER JOIN tes.tsolicitud_efectivo solefe on solefe.id_solicitud_efectivo=solren.id_solicitud_efectivo_fk
-                              INNER JOIN tes.tcaja caja on caja.id_caja=solefe.id_caja
-                              LEFT JOIN conta.tdoc_compra_venta dc on dc.id_doc_compra_venta=ren.id_documento_respaldo
-                              LEFT JOIN param.tplantilla pla on pla.id_plantilla = dc.id_plantilla
-                              LEFT JOIN param.tmoneda mon on mon.id_moneda = dc.id_moneda
-                              INNER JOIN segu.tusuario usu1 on usu1.id_usuario = ren.id_usuario_reg
-                              LEFT JOIN segu.tusuario usu2 on usu2.id_usuario = ren.id_usuario_mod
-                              LEFT JOIN orga.tfuncionario_tmp f on f.id_funcionario=solefe.id_funcionario
-                              WHERE ren.id_proceso_caja is not null and caja.id_caja ='||v_parametros.id_caja||'
-                              )
-                              union all
-                              (
-                              select
-                              0::int as id_proceso_caja,
-                              solefe.estado::varchar,
-                              0::int AS id_int_comprobante,
+				v_consulta := 'select                                
                               solefe.nro_tramite::varchar,
-                              ''''::varchar as tipo,
+                              dc.tipo::varchar,
                               solefe.motivo::varchar,
-                              solefe.estado_reg::varchar, 
-                              solefe.id_caja::int,
-                              caja.id_depto_lb::int,
-                              solpri.id_proceso_wf::integer,
-                              solefe.monto::numeric,
-                              ''''::varchar as nombre,
-                              caja.id_moneda::integer,
-                              ''''::varchar as razon_social,    
-                              0.00::numeric as importe_pago_liquido,
-                              solefe.fecha_mod::date,                                                                                   
-                              usu2.cuenta::varchar as usr_mod,
-                              solefe.fecha_reg::date as fecha_reg,
-                              ''''::varchar as estado_r
-                              from tes.tsolicitud_efectivo solefe
-                              inner join segu.tusuario usu1 on usu1.id_usuario = solefe.id_usuario_reg
-                              inner join tes.tcaja caja on caja.id_caja=solefe.id_caja
-                              inner join orga.vfuncionario fun on fun.id_funcionario = solefe.id_funcionario
-                              left join segu.tusuario usu2 on usu2.id_usuario = solefe.id_usuario_mod
-                              left join tes.tsolicitud_efectivo solpri on solpri.id_solicitud_efectivo=solefe.id_solicitud_efectivo_fk
-                              inner join wf.testado_wf ew on ew.id_estado_wf = solefe.id_estado_wf
-                              where (solefe.id_tipo_solicitud ='||v_id_tipo_solicitud_ape||' or
-                              solefe.id_tipo_solicitud ='||v_id_tipo_solicitud_sal||' or
-                              solefe.id_tipo_solicitud ='||v_id_tipo_solicitud_ing||' or 
-                              solefe.id_tipo_solicitud ='||v_id_tipo_solicitud_rep||' or
-                              solefe.id_tipo_solicitud ='||v_id_tipo_solicitud_dev||' or 
-                              solefe.id_tipo_solicitud ='||v_id_tipo_solicitud_ren||' or
-                              solefe.id_tipo_solicitud ='||v_id_tipo_solicitud_sol||') 
-                              AND solefe.estado =''ingresado'' and caja.id_caja= '||v_parametros.id_caja||')
-                              order by fecha_reg ';
+                              rend.monto::numeric,
+                              pla.desc_plantilla::varchar as nombre,
+                              dc.id_moneda::integer,
+                              dc.razon_social::varchar,
+                              dc.importe_pago_liquido::numeric,
+                              dc.fecha::date,
+                              ''''::varchar as nombre_fun,
+                              dc.fecha_reg::date,
+                              dc.estado_reg::varchar as estado_r,
+                              dc.nit::varchar,
+                              dc.nro_autorizacion::varchar,
+                              dc.nro_documento::varchar,
+                              dc.codigo_control::varchar,
+                              dc.importe_doc::numeric,
+                              dc.importe_iva::numeric
+
+                              from tes.tsolicitud_rendicion_det rend
+                              inner join tes.tsolicitud_efectivo solren on solren.id_solicitud_efectivo = rend.id_solicitud_efectivo
+                              inner join tes.tsolicitud_efectivo solefe on solefe.id_solicitud_efectivo = solren.id_solicitud_efectivo_fk
+                              inner join tes.tcaja caja on caja.id_caja = solefe.id_caja
+                              left join conta.tdoc_compra_venta dc on dc.id_doc_compra_venta = rend.id_documento_respaldo
+                              left join param.tplantilla pla on pla.id_plantilla = dc.id_plantilla
+                              left join param.tmoneda mon on mon.id_moneda = dc.id_moneda
+                              inner join segu.tusuario usu1 on usu1.id_usuario = rend.id_usuario_reg
+                              left join segu.tusuario usu2 on usu2.id_usuario = rend.id_usuario_mod
+                              where rend.id_proceso_caja = '||v_parametros.id_proceso_caja||'
+
+                              union all
+                              select
+                              tesa.nro_tramite,
+                              NULL::varchar as tipo,
+                              NULL::varchar as motivo,
+                              tesa.monto,
+                              NULL::varchar as nombre,
+                              0::integer as id_moneda,
+                              NULL::varchar as razon_social,
+                              0::numeric as importe_pago_liquido,
+                              tesa.fecha,
+                              ''''::varchar as nombre_fun,
+                              null::date as fecha_reg,
+                              a.nombre::varchar as estado_reg,
+                              ''''::varchar as nit,
+                              ''''::varchar as nro_autorizacion,
+                              ''''::varchar as nro_documento,
+                              ''''::varchar as codigo_control,
+                              0::numeric as importe_doc,
+                              0::numeric as importe_iva
+                                                                                  
+                              from tes.tsolicitud_efectivo tesa
+                              inner join segu.tusuario usu1 on usu1.id_usuario = tesa.id_usuario_reg
+                              left join segu.tusuario usu2 on usu2.id_usuario = tesa.id_usuario_mod
+                              join tes.tcaja caja on caja.id_caja=tesa.id_caja
+                              join tes.ttipo_solicitud a on a.id_tipo_solicitud=tesa.id_tipo_solicitud
+                              join tes.tproceso_caja tp on tp.id_proceso_caja=tesa.id_proceso_caja_rend 
+                              where 
+                              tesa.ingreso_cd=''si'' and 
+                              tesa.estado=''ingresado'' and
+                              id_proceso_caja='||v_parametros.id_proceso_caja||' and
+                              a.id_tipo_solicitud=5 
+                              order by nro_tramite ASC ';
                            --raise notice '%',v_consulta;
-                                --                          raise exception '**';
+                           --raise exception '%',v_consulta;
 				return v_consulta;
 			end;
 
@@ -466,7 +431,7 @@ BEGIN
                         inner join param.tdepto depto on depto.id_depto=caja.id_depto
                         left join param.tdepto deplb on deplb.id_depto=caja.id_depto_lb
                         left join tes.tcuenta_bancaria ctab on ctab.id_cuenta_bancaria=caja.id_cuenta_bancaria
-                        left join tes.tcajero caje on caje.id_caja=caja.id_caja and caje.tipo=''responsable''
+                        left join tes.tcajero caje on caje.id_caja=caja.id_caja and caje.tipo in (''responsable'',''administrador'')
 						left join orga.vfuncionario fun on fun.id_funcionario=caje.id_funcionario
 					    '||v_inner||'   
                         where caja.estado_reg = ''activo'' AND '||v_filtro;

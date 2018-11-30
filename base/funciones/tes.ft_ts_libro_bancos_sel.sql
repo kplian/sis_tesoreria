@@ -1,6 +1,6 @@
 --------------- SQL ---------------
 
-CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_sel (  
+CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_sel (
   p_administrador integer,
   p_id_usuario integer,
   p_tabla varchar,
@@ -324,198 +324,378 @@ BEGIN
  	#AUTOR:		Gonzalo Sarmiento Sejas
 	***********************************/
 
-       ELSEIF (p_transaccion = 'TES_RELIBA_SEL') THEN
-       BEGIN
+	ELSEIF (p_transaccion = 'TES_RELIBA_SEL') THEN
+    	BEGIN
         --to_char(now(), ''dd/mm/yyyy'') as fecha,
-        raise notice 'fecha unio %', v_parametros.fecha_ini;
-        v_fecha_anterior = to_char(v_parametros.fecha_ini-1, 'dd/mm/yyyy') ;
-        raise notice 'fecha anterior %', v_fecha_anterior;
-          v_consulta := '(SELECT
-              '''||v_fecha_anterior||''' as fecha_reporte,
-              ''SALDO ANTERIOR'' as a_favor,
-              NULL as detalle,
-              NULL as nro_liquidacion,
-              NULL as nro_comprobante,
-              NULL as comprobante_sigma,
-              NULL as nro_cheque,
-              NULL as debe,
-              NULL as haber,
+        --raise notice 'fecha %', v_parametros.fecha_ini;
+        --raise notice 'fecha=> %', v_parametros.fecha_ini_reg;        
+        IF (v_parametros.fecha_ini is null) THEN
+        	v_fecha_anterior = to_char(v_parametros.fecha_ini_reg-1, 'dd/mm/yyyy') ;
+          	v_consulta := '(SELECT 
+            				NULL as fecha_reporte,
+            				NULL AS fecha_reg,
+                            ''SALDO ANTERIOR'' as a_favor,                            
+                            NULL as detalle,
+                            NULL as nro_liquidacion,
+                            NULL as nro_comprobante,
+                            NULL as comprobante_sigma,
+                            NULL as nro_cheque,
+                            NULL as debe,
+                            NULL as haber,
+                          
+                                    coalesce((Select sum(Coalesce(lbr.importe_deposito,0))-sum(coalesce(lbr.importe_cheque,0))
+                                             From tes.tts_libro_bancos lbr
+                                             Where lbr.fecha < '''||v_parametros.fecha_ini_reg||'''
+                                             and lbr.id_cuenta_bancaria = '||v_parametros.id_cuenta_bancaria||'
+                                             and lbr.estado not in (''anulado'', ''borrador'') ),0.00) as saldo,
+                            NULL as total_debe,
+                            NULL as total_haber,
+                            0::numeric as indice,
+                            ''01/01/2013''::date as fecha)';
+          v_consulta := v_consulta || 
+          					'UNION (SELECT                            
+                            to_char(LB.fecha, ''dd/mm/yyyy'') as fecha_reporte,
+                            to_char(LB.fecha_reg, ''dd/mm/yyyy'') as fecha_reg,
+                            LB.a_favor,
+                            case when LB.tipo=''transf_interna_debe'' then
+                            LB.detalle ||''  -  Cbte destino: ''||COALESCE(lbp.nro_comprobante,'''')
+                            when LB.tipo=''transf_interna_haber'' then
+                            LB.detalle ||''  -  Cbte origen: ''||COALESCE(lbp.nro_comprobante,'''')
+                            else
+                            LB.detalle
+                            end,
+                            LB.nro_liquidacion,
+                            LB.nro_comprobante,
+                            LB.comprobante_sigma,
+                            LB.nro_cheque,
+                            case when LB.importe_deposito = 0 then
+                                NULL
+                            else
+                                 LB.importe_deposito
+                            end as debe,
+                            case when LB.importe_cheque = 0 and LB.estado <> ''anulado'' then
+                                NULL
+                            else
+                                LB.importe_cheque
+                            end as haber,
 
-              to_char(
-                      coalesce((Select sum(Coalesce(lbr.importe_deposito,0))-sum(coalesce(lbr.importe_cheque,0))
-                               From tes.tts_libro_bancos lbr
-                               Where lbr.fecha < '''||v_parametros.fecha_ini||'''
-                               and lbr.id_cuenta_bancaria = '||v_parametros.id_cuenta_bancaria||'
-                               and lbr.estado not in (''anulado'', ''borrador'') ),0.00),''999G999G999G999D99'') as saldo,
-              NULL as total_debe,
-              NULL as total_haber,
-              0::numeric as indice,
-              ''01/01/2013''::date as fecha
-              )
-              ';
+                            (Select sum(lbr.importe_deposito) - sum(lbr.importe_cheque)
+                                             From tes.tts_libro_bancos lbr
+                                             where
+                                             lbr.id_cuenta_bancaria = LB.id_cuenta_bancaria
+                                             and lbr.estado not in (''anulado'',''borrador'')
+                                             and ((lbr.fecha < LB.fecha) or (lbr.fecha = LB.fecha and lbr.indice <= LB.indice))
 
-          v_consulta := v_consulta || ' UNION (SELECT
-
-              to_char(LB.fecha, ''dd/mm/yyyy'') as fecha_reporte,
-
-              LB.a_favor,
-			  case when LB.tipo=''transf_interna_debe'' then
-              LB.detalle ||''  -  Cbte destino: ''||COALESCE(lbp.nro_comprobante,'''')
-              when LB.tipo=''transf_interna_haber'' then
-              LB.detalle ||''  -  Cbte origen: ''||COALESCE(lbp.nro_comprobante,'''')
-              else
-              LB.detalle
-              end,
-              LB.nro_liquidacion,
-              LB.nro_comprobante,
-              LB.comprobante_sigma,
-              LB.nro_cheque,
-              case when LB.importe_deposito = 0 then
-                  NULL
-              else
-                  to_char(LB.importe_deposito,''999G999G999D99'')
-              end as debe,
-              case when LB.importe_cheque = 0 and LB.estado <> ''anulado'' then
-                  NULL
-              else
-                  to_char(LB.importe_cheque,''999G999G999D99'')
-              end as haber,
-
-              to_char((Select sum(lbr.importe_deposito) - sum(lbr.importe_cheque)
-                               From tes.tts_libro_bancos lbr
-                               where
-                               lbr.id_cuenta_bancaria = LB.id_cuenta_bancaria
-                               and lbr.estado not in (''anulado'',''borrador'')
-                               and ((lbr.fecha < LB.fecha) or (lbr.fecha = LB.fecha and lbr.indice <= LB.indice))
-
-                                ),''999G999G999G999D99'') as saldo,
+                                              ) as saldo,
 
 
-              to_char((Select sum(lbr.importe_deposito)
-                               From tes.tts_libro_bancos lbr
-                               where lbr.fecha BETWEEN  '''||v_parametros.fecha_ini||''' and LB.fecha
-                               and lbr.id_cuenta_bancaria = LB.id_cuenta_bancaria
-                               and case when ('''||v_parametros.estado||'''=''Todos'')
-                                then   lbr.estado in (''impreso'',
-                                                         ''entregado'',''cobrado'',
-                                                         ''anulado'',''reingresado'',
-                                                         ''depositado'',''transferido'',
-                                                         ''sigep_swift'' )
+                            (Select sum(lbr.importe_deposito)
+                                             From tes.tts_libro_bancos lbr
+                                             where lbr.fecha BETWEEN  '''||v_parametros.fecha_ini_reg||''' and LB.fecha
+                                             and lbr.id_cuenta_bancaria = LB.id_cuenta_bancaria
+                                             and case when ('''||v_parametros.estado||'''=''Todos'')
+                                              then   lbr.estado in (''impreso'',
+                                                                       ''entregado'',''cobrado'',
+                                                                       ''anulado'',''reingresado'',
+                                                                       ''depositado'',''transferido'',
+                                                                       ''sigep_swift'' )
 
-                                when ('''||v_parametros.estado||'''=''impreso y entregado'')
-                                then   lbr.estado in (''impreso'', ''entregado'' )
+                                              when ('''||v_parametros.estado||'''=''impreso y entregado'')
+                                              then   lbr.estado in (''impreso'', ''entregado'' )
 
-                                else lbr.estado in ('''||v_parametros.estado||''')
-                                end
+                                              else lbr.estado in ('''||v_parametros.estado||''')
+                                              end
 
-                                and
+                                              and
 
-                                case when ('''||v_parametros.tipo||'''=''Todos'')
-                                then   lbr.tipo in   (''cheque'',
-                                                      ''deposito'',
-                                                      ''debito_automatico'',
-                                                      ''transferencia_carta'')
+                                              case when ('''||v_parametros.tipo||'''=''Todos'')
+                                              then   lbr.tipo in   (''cheque'',
+                                                                    ''deposito'',
+                                                                    ''debito_automatico'',
+                                                                    ''transferencia_carta'')
 
-                                when ('''||v_parametros.tipo||'''=''transferencia_interna'')
-                               	then   lbr.tipo in (''transf_interna_debe'')
+                                              when ('''||v_parametros.tipo||'''=''transferencia_interna'')
+                                              then   lbr.tipo in (''transf_interna_debe'')
 
-                                else lbr.tipo in ('''||v_parametros.tipo||''')
-                                end
+                                              else lbr.tipo in ('''||v_parametros.tipo||''')
+                                              end
 
-                                and
-                                case when ('||v_parametros.id_finalidad||'=0)
-                                then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
-                                else lbr.id_finalidad in ('||v_parametros.id_finalidad||')
-                                end
-                               ),''999G999G999G999D99'') as total_debe,
+                                              and
+                                              case when ('||v_parametros.id_finalidad||'=0)
+                                              then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
+                                              else lbr.id_finalidad in ('||v_parametros.id_finalidad||')
+                                              end
+                                             ) as total_debe,
 
-              to_char((Select sum(lbr.importe_cheque)
-                               From tes.tts_libro_bancos lbr
-                               where lbr.fecha BETWEEN  '''||v_parametros.fecha_ini||''' and  LB.fecha
-                               and lbr.id_cuenta_bancaria = LB.id_cuenta_bancaria
-                               and case when ('''||v_parametros.estado||'''=''Todos'')
-                                then   lbr.estado in (''impreso'',
-                                                         ''entregado'',''cobrado'',
-                                                         ''anulado'',''reingresado'',
-                                                         ''depositado'',''transferido'',
-                                                         ''sigep_swift'' )
+                            (Select sum(lbr.importe_cheque)
+                                             From tes.tts_libro_bancos lbr
+                                             where lbr.fecha BETWEEN  '''||v_parametros.fecha_ini_reg||''' and  LB.fecha
+                                             and lbr.id_cuenta_bancaria = LB.id_cuenta_bancaria
+                                             and case when ('''||v_parametros.estado||'''=''Todos'')
+                                              then   lbr.estado in (''impreso'',
+                                                                       ''entregado'',''cobrado'',
+                                                                       ''anulado'',''reingresado'',
+                                                                       ''depositado'',''transferido'',
+                                                                       ''sigep_swift'' )
 
-                                when ('''||v_parametros.estado||'''=''impreso y entregado'')
-                                then   lbr.estado in (''impreso'', ''entregado'' )
+                                              when ('''||v_parametros.estado||'''=''impreso y entregado'')
+                                              then   lbr.estado in (''impreso'', ''entregado'' )
 
-                                else lbr.estado in ('''||v_parametros.estado||''')
-                                end
+                                              else lbr.estado in ('''||v_parametros.estado||''')
+                                              end
 
-                                and
+                                              and
 
-                                case when ('''||v_parametros.tipo||'''=''Todos'')
-                                then   lbr.tipo in   (''cheque'',
-                                                                ''deposito'',
-                                                                ''debito_automatico'',
-                                                                ''transferencia_carta'')
+                                              case when ('''||v_parametros.tipo||'''=''Todos'')
+                                              then   lbr.tipo in   (''cheque'',
+                                                                              ''deposito'',
+                                                                              ''debito_automatico'',
+                                                                              ''transferencia_carta'')
 
-                                when ('''||v_parametros.tipo||'''=''transferencia_interna'')
-                               	then   lbr.tipo in (''transf_interna_haber'')
+                                              when ('''||v_parametros.tipo||'''=''transferencia_interna'')
+                                              then   lbr.tipo in (''transf_interna_haber'')
 
-                                else lbr.tipo in ('''||v_parametros.tipo||''')
-                                end
-                                and
-                                case when ('||v_parametros.id_finalidad||'=0)
-                                then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
-                                else lbr.id_finalidad in ('||v_parametros.id_finalidad||')
-                                end
-                                ),''999G999G999G999D99'') as total_haber,
-
-
-              LB.indice,
-              LB.fecha
+                                              else lbr.tipo in ('''||v_parametros.tipo||''')
+                                              end
+                                              and
+                                              case when ('||v_parametros.id_finalidad||'=0)
+                                              then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
+                                              else lbr.id_finalidad in ('||v_parametros.id_finalidad||')
+                                              end
+                                              ) as total_haber,
 
 
-              FROM tes.tts_libro_bancos LB
-      		  LEFT JOIN tes.tts_libro_bancos lbp on lbp.id_libro_bancos=LB.id_libro_bancos_fk
-              WHERE
-              LB.id_cuenta_bancaria = '||v_parametros.id_cuenta_bancaria||' and
-              LB.fecha BETWEEN  '''||v_parametros.fecha_ini||''' and   '''||v_parametros.fecha_fin||''' and
+                            LB.indice,
+                            LB.fecha
 
-              case when ('''||v_parametros.estado||'''=''Todos'')
-              then   LB.estado in (''impreso'',
-                                       ''entregado'',''cobrado'',
-                                       ''anulado'',''reingresado'',
-                                       ''depositado'',''transferido'',
-                                       ''sigep_swift'' )
 
-              when ('''||v_parametros.estado||'''=''impreso y entregado'')
-              then   LB.estado in (''impreso'', ''entregado'' )
+                            FROM tes.tts_libro_bancos LB
+                            LEFT JOIN tes.tts_libro_bancos lbp on lbp.id_libro_bancos=LB.id_libro_bancos_fk
+                            WHERE
+                            LB.id_cuenta_bancaria = '||v_parametros.id_cuenta_bancaria||' and
+                            LB.fecha BETWEEN  '''||v_parametros.fecha_ini_reg||''' and   '''||v_parametros.fecha_fin_reg||''' and
 
-              else LB.estado in ('''||v_parametros.estado||''')
-              end
+                            case when ('''||v_parametros.estado||'''=''Todos'')
+                            then   LB.estado in (''impreso'',
+                                                     ''entregado'',''cobrado'',
+                                                     ''anulado'',''reingresado'',
+                                                     ''depositado'',''transferido'',
+                                                     ''sigep_swift'' )
 
-              and
+                            when ('''||v_parametros.estado||'''=''impreso y entregado'')
+                            then   LB.estado in (''impreso'', ''entregado'' )
 
-              case when ('''||v_parametros.tipo||'''=''Todos'')
-              then   LB.tipo in   (''cheque'',
-                                              ''deposito'',
-                                              ''debito_automatico'',
-                                              ''transferencia_carta'')
+                            else LB.estado in ('''||v_parametros.estado||''')
+                            end
 
-              when ('''||v_parametros.tipo||'''=''transferencia_interna'')
-              then   lb.tipo in (''transf_interna_debe'',''transf_interna_haber'')
-              else LB.tipo in ('''||v_parametros.tipo||''')
-              end
+                            and
 
-              and
-              case when ('||v_parametros.id_finalidad||'=0)
-              then   0=0
-              else LB.id_finalidad in ('||v_parametros.id_finalidad||')
-              end
+                            case when ('''||v_parametros.tipo||'''=''Todos'')
+                            then   LB.tipo in   (''cheque'',
+                                                            ''deposito'',
+                                                            ''debito_automatico'',
+                                                            ''transferencia_carta'')
 
-              )  order by fecha, indice, nro_cheque asc';
+                            when ('''||v_parametros.tipo||'''=''transferencia_interna'')
+                            then   lb.tipo in (''transf_interna_debe'',''transf_interna_haber'')
+                            else LB.tipo in ('''||v_parametros.tipo||''')
+                            end
 
-              raise notice '%',v_consulta||'';
+                            and
+                            case when ('||v_parametros.id_finalidad||'=0)
+                            then   0=0
+                            else LB.id_finalidad in ('||v_parametros.id_finalidad||')
+                            end
+                            )  
+                            order by fecha, indice, nro_cheque asc';	
+     	ELSE
+        	v_fecha_anterior = to_char(v_parametros.fecha_ini-1, 'dd/mm/yyyy') ;
+        	raise notice 'fecha anterior %', v_fecha_anterior;
+          	v_consulta := '(SELECT 
+            				'''||v_fecha_anterior||''' as fecha_reporte,
+            				NULL as fecha_reg,
+                            ''SALDO ANTERIOR'' as a_favor,
+                            NULL as detalle,
+                            NULL as nro_liquidacion,
+                            NULL as nro_comprobante,
+                            NULL as comprobante_sigma,
+                            NULL as nro_cheque,
+                            NULL as debe,
+                            NULL as haber,
+                           
+                                    coalesce((Select sum(Coalesce(lbr.importe_deposito,0))-sum(coalesce(lbr.importe_cheque,0))
+                                             From tes.tts_libro_bancos lbr
+                                             Where lbr.fecha < '''||v_parametros.fecha_ini||'''
+                                             and lbr.id_cuenta_bancaria = '||v_parametros.id_cuenta_bancaria||'
+                                             and lbr.estado not in (''anulado'', ''borrador'') ),0.00)  as saldo,
+                            NULL as total_debe,
+                            NULL as total_haber,
+                            0::numeric as indice,
+                            ''01/01/2013''::date as fecha)';
+          v_consulta := v_consulta || 
+          					'UNION 
+                            (SELECT
+                            to_char(LB.fecha, ''dd/mm/yyyy'') as fecha_reporte,
+                            to_char(LB.fecha_reg, ''dd/mm/yyyy'') as fecha_reg,
+                            LB.a_favor,
+                            case when LB.tipo=''transf_interna_debe'' then
+                            LB.detalle ||''  -  Cbte destino: ''||COALESCE(lbp.nro_comprobante,'''')
+                            when LB.tipo=''transf_interna_haber'' then
+                            LB.detalle ||''  -  Cbte origen: ''||COALESCE(lbp.nro_comprobante,'''')
+                            else
+                            LB.detalle
+                            end,
+                            LB.nro_liquidacion,
+                            LB.nro_comprobante,
+                            LB.comprobante_sigma,
+                            LB.nro_cheque,
+                            case when LB.importe_deposito = 0 then
+                                NULL
+                            else
+                                 LB.importe_deposito 
+                            end as debe,
+                            case when LB.importe_cheque = 0 and LB.estado <> ''anulado'' then
+                                NULL
+                            else
+                                 LB.importe_cheque 
+                            end as haber,
 
-			 --Devuelve la respuesta
-		 	 return v_consulta;
-       END;
+                            (Select sum(lbr.importe_deposito) - sum(lbr.importe_cheque)
+                                             From tes.tts_libro_bancos lbr
+                                             where
+                                             lbr.id_cuenta_bancaria = LB.id_cuenta_bancaria
+                                             and lbr.estado not in (''anulado'',''borrador'')
+                                             and ((lbr.fecha < LB.fecha) or (lbr.fecha = LB.fecha and lbr.indice <= LB.indice))
+
+                                              )  as saldo,
+
+
+                             (Select sum(lbr.importe_deposito)
+                                             From tes.tts_libro_bancos lbr
+                                             where lbr.fecha BETWEEN  '''||v_parametros.fecha_ini||''' and LB.fecha
+                                             and lbr.id_cuenta_bancaria = LB.id_cuenta_bancaria
+                                             and case when ('''||v_parametros.estado||'''=''Todos'')
+                                              then   lbr.estado in (''impreso'',
+                                                                       ''entregado'',''cobrado'',
+                                                                       ''anulado'',''reingresado'',
+                                                                       ''depositado'',''transferido'',
+                                                                       ''sigep_swift'' )
+
+                                              when ('''||v_parametros.estado||'''=''impreso y entregado'')
+                                              then   lbr.estado in (''impreso'', ''entregado'' )
+
+                                              else lbr.estado in ('''||v_parametros.estado||''')
+                                              end
+
+                                              and
+
+                                              case when ('''||v_parametros.tipo||'''=''Todos'')
+                                              then   lbr.tipo in   (''cheque'',
+                                                                    ''deposito'',
+                                                                    ''debito_automatico'',
+                                                                    ''transferencia_carta'')
+
+                                              when ('''||v_parametros.tipo||'''=''transferencia_interna'')
+                                              then   lbr.tipo in (''transf_interna_debe'')
+
+                                              else lbr.tipo in ('''||v_parametros.tipo||''')
+                                              end
+
+                                              and
+                                              case when ('||v_parametros.id_finalidad||'=0)
+                                              then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
+                                              else lbr.id_finalidad in ('||v_parametros.id_finalidad||')
+                                              end
+                                             )  as total_debe,
+
+                             (Select sum(lbr.importe_cheque)
+                                             From tes.tts_libro_bancos lbr
+                                             where lbr.fecha BETWEEN  '''||v_parametros.fecha_ini||''' and  LB.fecha
+                                             and lbr.id_cuenta_bancaria = LB.id_cuenta_bancaria
+                                             and case when ('''||v_parametros.estado||'''=''Todos'')
+                                              then   lbr.estado in (''impreso'',
+                                                                       ''entregado'',''cobrado'',
+                                                                       ''anulado'',''reingresado'',
+                                                                       ''depositado'',''transferido'',
+                                                                       ''sigep_swift'' )
+
+                                              when ('''||v_parametros.estado||'''=''impreso y entregado'')
+                                              then   lbr.estado in (''impreso'', ''entregado'' )
+
+                                              else lbr.estado in ('''||v_parametros.estado||''')
+                                              end
+
+                                              and
+
+                                              case when ('''||v_parametros.tipo||'''=''Todos'')
+                                              then   lbr.tipo in   (''cheque'',
+                                                                              ''deposito'',
+                                                                              ''debito_automatico'',
+                                                                              ''transferencia_carta'')
+
+                                              when ('''||v_parametros.tipo||'''=''transferencia_interna'')
+                                              then   lbr.tipo in (''transf_interna_haber'')
+
+                                              else lbr.tipo in ('''||v_parametros.tipo||''')
+                                              end
+                                              and
+                                              case when ('||v_parametros.id_finalidad||'=0)
+                                              then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
+                                              else lbr.id_finalidad in ('||v_parametros.id_finalidad||')
+                                              end
+                                              )  as total_haber,
+
+
+                            LB.indice,
+                            LB.fecha
+
+
+                            FROM tes.tts_libro_bancos LB
+                            LEFT JOIN tes.tts_libro_bancos lbp on lbp.id_libro_bancos=LB.id_libro_bancos_fk
+                            WHERE
+                            LB.id_cuenta_bancaria = '||v_parametros.id_cuenta_bancaria||' and
+                            LB.fecha BETWEEN  '''||v_parametros.fecha_ini||''' and   '''||v_parametros.fecha_fin||''' and
+
+                            case when ('''||v_parametros.estado||'''=''Todos'')
+                            then   LB.estado in (''impreso'',
+                                                     ''entregado'',''cobrado'',
+                                                     ''anulado'',''reingresado'',
+                                                     ''depositado'',''transferido'',
+                                                     ''sigep_swift'' )
+
+                            when ('''||v_parametros.estado||'''=''impreso y entregado'')
+                            then   LB.estado in (''impreso'', ''entregado'' )
+
+                            else LB.estado in ('''||v_parametros.estado||''')
+                            end
+
+                            and
+
+                            case when ('''||v_parametros.tipo||'''=''Todos'')
+                            then   LB.tipo in   (''cheque'',
+                                                            ''deposito'',
+                                                            ''debito_automatico'',
+                                                            ''transferencia_carta'')
+
+                            when ('''||v_parametros.tipo||'''=''transferencia_interna'')
+                            then   lb.tipo in (''transf_interna_debe'',''transf_interna_haber'')
+                            else LB.tipo in ('''||v_parametros.tipo||''')
+                            end
+
+                            and
+                            case when ('||v_parametros.id_finalidad||'=0)
+                            then   0=0
+                            else LB.id_finalidad in ('||v_parametros.id_finalidad||')
+                            end
+                            )  
+                            order by fecha, indice, nro_cheque asc';
+		  END IF;
+          raise notice '%',v_consulta;
+          --raise exception  'libro de bancos %',v_consulta;
+		  --Devuelve la respuesta
+		  return v_consulta;
+             
+       END;    
 
 	else
 

@@ -122,7 +122,10 @@ Phx.vista.PlanPagoRegIni = {
         
         this.Cmp.id_plantilla.on('select',function(cmb,rec,i){  
             this.getDecuentosPorAplicar(rec.data.id_plantilla);
-            this.Cmp.monto_excento.reset();
+            if(this.accionFormulario != 'EDIT'){
+            	 this.Cmp.monto_excento.reset();
+            }
+           
             if(rec.data.sw_monto_excento=='si'){
                this.Cmp.monto_excento.enable();
                this.Cmp.tipo_excento.setValue(rec.data.tipo_excento);
@@ -142,6 +145,7 @@ Phx.vista.PlanPagoRegIni = {
         	 var data = this.getSelectedData();
              //segun el tipo define los campo visibles y no visibles
              this.setTipoPago[rec.data.variable](this,data);
+             this.inicioValores();//27/08/2018 resetea valores al cambiar el tipo de pago
              this.unblockGroup(1);
              this.window.doLayout();
 	     

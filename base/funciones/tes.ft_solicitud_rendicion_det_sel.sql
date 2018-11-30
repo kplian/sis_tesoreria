@@ -102,6 +102,7 @@ BEGIN
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
             
             raise notice '.. % ..',v_consulta;
+            --raise exception '.. % ..',v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 
@@ -171,7 +172,75 @@ BEGIN
 			return v_consulta;
 
 		end;
-					
+	
+    
+    
+    /*********************************
+ 	#TRANSACCION:  'TES_ING_SEL'
+ 	#DESCRIPCION:	Lista de Ingresos para rendicion
+ 	#AUTOR:		manu
+ 	#FECHA:		04/04/2018
+	***********************************/
+
+	ELSEIF(p_transaccion='TES_ING_SEL')then
+    	begin
+    		--Sentencia de la consulta            
+			v_consulta:='select
+             			tesa.id_solicitud_efectivo,               
+                        tesa.monto,
+                        tesa.fecha,
+                        tesa.nro_tramite,
+                        usu1.cuenta as usr_reg,
+                        usu2.cuenta as usr_mod,
+                        a.nombre as estado                                       
+                        from tes.tsolicitud_efectivo tesa
+                        inner join segu.tusuario usu1 on usu1.id_usuario = tesa.id_usuario_reg
+                        left join segu.tusuario usu2 on usu2.id_usuario = tesa.id_usuario_mod
+                        join tes.tcaja caja on caja.id_caja=tesa.id_caja
+                        join tes.ttipo_solicitud a on a.id_tipo_solicitud=tesa.id_tipo_solicitud
+                        join tes.tproceso_caja tp on tp.id_proceso_caja=tesa.id_proceso_caja_rend 
+                        where 
+                        tesa.ingreso_cd=''si'' and                        
+                        tesa.estado=''ingresado'' and                   
+                        a.id_tipo_solicitud=5 and' ;
+            v_consulta:=v_consulta||v_parametros.filtro;
+			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+			return v_consulta;
+
+		end;
+
+    /*********************************
+ 	#TRANSACCION:  'TES_ING_CONT'
+ 	#DESCRIPCION:	Conteo de registros
+ 	#AUTOR:		gsarmiento
+ 	#FECHA:		24-11-2015 12:59:51
+	***********************************/
+
+	elsif(p_transaccion='TES_ING_CONT')then
+
+		begin       	
+			--Sentencia de la consulta de conteo de registros
+			v_consulta:='select 
+                        count(tesa.id_solicitud_efectivo)
+                        from tes.tsolicitud_efectivo tesa
+                        inner join segu.tusuario usu1 on usu1.id_usuario = tesa.id_usuario_reg
+                        left join segu.tusuario usu2 on usu2.id_usuario = tesa.id_usuario_mod
+                        join tes.tcaja caja on caja.id_caja=tesa.id_caja
+                        join tes.ttipo_solicitud a on a.id_tipo_solicitud=tesa.id_tipo_solicitud
+                        join tes.tproceso_caja tp on tp.id_proceso_caja=tesa.id_proceso_caja_rend 
+                        where 
+                        tesa.ingreso_cd=''si'' and                         
+                        tesa.estado=''ingresado'' and                        
+                        a.id_tipo_solicitud=5 and';
+                                    v_consulta:=v_consulta||v_parametros.filtro;
+ 			raise notice   '%', v_consulta;
+			--Definicion de la respuesta			
+			--Devuelve la respuesta
+			return v_consulta;
+
+		end; 
+    
+    				
 	else
 					     
 		raise exception 'Transaccion inexistente';

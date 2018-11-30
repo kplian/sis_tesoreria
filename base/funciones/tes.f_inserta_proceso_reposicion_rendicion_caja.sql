@@ -22,6 +22,8 @@ $body$
    
  #0        		 27-01-2017        Gonzalo Sarmiento       inserta procesos de Rendicion y de Reposicion de Caja Chica
  #146 IC		 05/12/2017        RAC					   ajustar funcion de calculo de reposicion para considerar ingresos de efectiv en caja
+ #147 IC		 16/02/2018        RAC					   Solo se consideran las facturas hasta la fecha de rendicion del proceo 
+ #148 IC		 13/03/2018        RAC					   Considerar ingresos para la rendiciones que vengan de viaticos fondos en avance CD
 ***************************************************************************/
 
 DECLARE
@@ -44,6 +46,7 @@ v_nombre_funcion		varchar;
 v_solicitudes			record;
 v_rendiciones			record;
 v_monto_ing_extra       numeric;
+v_monto_ingreso         numeric;
 
 BEGIN
 
@@ -184,6 +187,10 @@ BEGIN
       IF (p_hstore->'tipo')::varchar = 'REPO' THEN
           v_num_tramite = COALESCE(v_registros.nro_tramite,'');
       END IF;
+      
+      --raise exception 'test %',(p_hstore->'tipo')::varchar; -- #148
+      
+      
 
 
       -- inciar el tramite en el sistema de WF
@@ -249,7 +256,7 @@ BEGIN
                   se.ingreso_extra = 'si' and 
                   se.id_proceso_caja_repo is null;
                   
-              v_monto = COALESCE(v_monto,0) - COALESCE(v_monto_ing_extra,0);
+              v_monto = COALESCE(v_monto,0) - COALESCE(v_monto_ing_extra,0);  
               
               IF v_monto <= 0 THEN
                  -- raise exception 'No  tiene saldo por reponer,  o tiene reposiciones en proceso, (Primero rinda si tiene facturas pendientes y Revise si tiene reposiciones en proceso ...) % ',(v_monto * -1);
@@ -257,13 +264,41 @@ BEGIN
               
        ELSIF (p_hstore->'tipo')::varchar = 'SOLREN' THEN
        
-       		select sum(r.monto) into v_monto
+       		select 
+                sum(r.monto) 
+            into 
+               v_monto
             from tes.tsolicitud_rendicion_det r
             inner join tes.tsolicitud_efectivo efe on efe.id_solicitud_efectivo=r.id_solicitud_efectivo
             inner join conta.tdoc_compra_venta d on d.id_doc_compra_venta=r.id_documento_respaldo
-            where r.id_proceso_caja is null and efe.id_caja=(p_hstore->'id_caja')::integer
-            --and d.fecha BETWEEN (p_hstore->'fecha_inicio')::date and (p_hstore->'fecha_fin')::date
+            where r.id_proceso_caja is null 
+            and efe.id_caja=(p_hstore->'id_caja')::integer          
+            and d.fecha::date < ((p_hstore->'fecha')::date + interval '1 day')::date    -- #147 RAC 16/02/2018  solo ingresa las facturas con fecha menor o igual al procesa
+            --and d.id_plantilla in (38,42,1,23,25,24,33,27)
+            --and d.id_doc_compra_venta not  in (7114, 3570) 
             and efe.estado='rendido';
+            
+            
+             -- #148 RAC 13/03/2018  sumar todos los ingresos de CD marcados y finalizados             
+             --OJO analizar si es fecha o fecha entrega             
+            select 
+               sum(se.monto) 
+             into 
+               v_monto_ingreso
+            from tes.tsolicitud_efectivo se 
+            inner join tes.ttipo_solicitud ts on ts.id_tipo_solicitud = se.id_tipo_solicitud
+            
+            where 
+                      se.id_proceso_caja_rend is null 
+                  and se.id_caja=(p_hstore->'id_caja')::integer          
+                  and coalesce(se.fecha_ult_mov,se.fecha)::date < ((p_hstore->'fecha')::date + interval '1 day')::date    -- #147 RAC 16/02/2018  solo ingresa las facturas con fecha menor o igual al procesa
+                  and ts.codigo = 'INGEFE' 
+                  and se.ingreso_cd = 'si'     --solo los ingresos que venga de sistema de cuenta documentada
+                  and se.estado='ingresado';
+                  
+                  
+                  --raise exception 'total ingresos .... %  -  %',(p_hstore->'id_caja')::integer , ((p_hstore->'fecha')::date + interval '1 day')::date;
+            
             
        END IF;
 
@@ -300,30 +335,32 @@ BEGIN
           fecha_mod,
           id_usuario_mod,
           id_tipo_proceso_caja,
-          id_gestion
+          id_gestion,
+          monto_ren_ingreso
       ) values(
-      v_codigo_estado,
-      --v_parametros.id_comprobante_diario,
-      v_num_rendicion,
-      (p_hstore->'tipo')::varchar,
-      (p_hstore->'motivo')::varchar,
-      'activo',
-      (p_hstore->'fecha_fin')::date,
-      (p_hstore->'id_caja')::integer,
-      (p_hstore->'fecha')::date,
-      v_id_proceso_wf,
-      v_monto,
-      --v_parametros.id_comprobante_pago,
-      v_id_estado_wf,
-      (p_hstore->'fecha_inicio')::date,
-      now(),
-      (p_hstore->'_nombre_usuario_ai')::varchar,
-      p_id_usuario,
-      (p_hstore->'_id_usuario_ai')::integer,
-      null,
-      null,
-      v_registros_trendicion.id_tipo_proceso_caja,
-      v_id_gestion
+        v_codigo_estado,
+        --v_parametros.id_comprobante_diario,
+        v_num_rendicion,
+        (p_hstore->'tipo')::varchar,
+        (p_hstore->'motivo')::varchar,
+        'activo',
+        (p_hstore->'fecha_fin')::date,
+        (p_hstore->'id_caja')::integer,
+        (p_hstore->'fecha')::date,
+        v_id_proceso_wf,
+        v_monto,
+        --v_parametros.id_comprobante_pago,
+        v_id_estado_wf,
+        (p_hstore->'fecha_inicio')::date,
+        now(),
+        (p_hstore->'_nombre_usuario_ai')::varchar,
+        p_id_usuario,
+        (p_hstore->'_id_usuario_ai')::integer,
+        null,
+        null,
+        v_registros_trendicion.id_tipo_proceso_caja,
+        v_id_gestion,
+        COALESCE(v_monto_ingreso,0)
       )RETURNING id_proceso_caja into v_id_proceso_caja;
 
       IF (p_hstore->'tipo')::varchar in ('SOLREN','RENYREP','RENYCER') THEN
@@ -331,13 +368,38 @@ BEGIN
           --asocia las facturas con el proceso caja de la rendicion de caja
           UPDATE tes.tsolicitud_rendicion_det
           SET id_proceso_caja = v_id_proceso_caja
-          WHERE id_solicitud_rendicion_det in (select r.id_solicitud_rendicion_det
+          WHERE id_solicitud_rendicion_det in (select 
+                                                  r.id_solicitud_rendicion_det
                                               from tes.tsolicitud_rendicion_det r
                                               inner join tes.tsolicitud_efectivo efe on efe.id_solicitud_efectivo=r.id_solicitud_efectivo
                                               inner join conta.tdoc_compra_venta d on d.id_doc_compra_venta=r.id_documento_respaldo
-                                              where r.id_proceso_caja is null and efe.id_caja=(p_hstore->'id_caja')::integer
-                                              --and d.fecha BETWEEN (p_hstore->'fecha_inicio')::date and (p_hstore->'fecha_fin')::date
+                                              where r.id_proceso_caja is null 
+                                              and efe.id_caja=(p_hstore->'id_caja')::integer                                             
+                                              and d.fecha::date < ((p_hstore->'fecha')::date + interval '1 day')::date -- #147 RAC 16/02/2018  solo ingresa las facturas con fecha menor o igual al procesa
+                                            --  and d.id_plantilla in (38,42,1,23,25,24,33,27)
+                                            --  and d.id_doc_compra_venta not  in (7114, 3570) 
                                               and efe.estado='rendido');
+                                              
+                                              
+                                               --and d.fecha BETWEEN (p_hstore->'fecha_inicio')::date and (p_hstore->'fecha_fin')::date
+                                               
+                                               
+                                               
+          --# 148,  relaciona ingresos al proceso de cada TODO 
+         
+           UPDATE    tes.tsolicitud_efectivo se  SET         
+                      id_proceso_caja_rend = v_id_proceso_caja
+           FROM  tes.ttipo_solicitud ts 
+           WHERE 
+                      ts.id_tipo_solicitud = se.id_tipo_solicitud 
+                  and se.id_proceso_caja_rend is null 
+                  and se.id_caja=(p_hstore->'id_caja')::integer          
+                  and coalesce(se.fecha_ult_mov,se.fecha)::date < ((p_hstore->'fecha')::date + interval '1 day')::date    -- #147 RAC 16/02/2018  solo ingresa las facturas con fecha menor o igual al procesa
+                  and ts.codigo = 'INGEFE' 
+                  and se.ingreso_cd = 'si'     --solo los ingresos que venga de sistema de cuenta documentada
+                  and se.estado='ingresado';                                      
+                                               
+                                               
       
       ELSIF (p_hstore->'tipo')::varchar = 'SOLREP' THEN
           
@@ -361,6 +423,7 @@ BEGIN
                   
           
       END IF;
+      
      
       --Definicion de la respuesta
       v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Rendicion Caja almacenado(a) con exito (id_proceso_caja'||v_id_proceso_caja||')');

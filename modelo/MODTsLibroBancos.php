@@ -91,7 +91,8 @@ class MODTsLibroBancos extends MODbase{
 		return $this->respuesta;
 	}
 	
-	function reporteLibroBancos(){
+	
+    function reporteLibroBancos(){
 		//Definicion de variables para ejecucion del procedimientp
 		$this->procedimiento='tes.ft_ts_libro_bancos_sel';
 		$this->transaccion='TES_RELIBA_SEL';
@@ -103,21 +104,25 @@ class MODTsLibroBancos extends MODbase{
 		$this->setParametro('estado','estado','varchar');
 		$this->setParametro('tipo','tipo','varchar');
 		$this->setParametro('id_finalidad','id_finalidad','int4');
+		
+		$this->setParametro('fecha_ini_reg','fecha_ini_reg','date');
+		$this->setParametro('fecha_fin_reg','fecha_fin_reg','date');
 		$this->setCount(false);
 		
 		//Definicion de la lista del resultado del query
 		$this->captura('fecha_reporte','text');
+		$this->captura('fecha_reg','text');
 		$this->captura('a_favor','varchar');
 		$this->captura('detalle','text');
 		$this->captura('nro_liquidacion','varchar');
 		$this->captura('nro_comprobante','varchar');
 		$this->captura('comprobante_sigma','varchar');
 		$this->captura('nro_cheque','integer');
-		$this->captura('importe_deposito','text');
-		$this->captura('importe_cheque','text');
-		$this->captura('saldo','text');
-		$this->captura('total_debe','text');
-		$this->captura('total_haber','text');
+		$this->captura('importe_deposito','numeric');
+		$this->captura('importe_cheque','numeric');
+		$this->captura('saldo','numeric');
+		$this->captura('total_debe','numeric');
+		$this->captura('total_haber','numeric');
 		$this->captura('indice','numeric');
 		$this->captura('fecha','date');
 		
@@ -406,5 +411,52 @@ class MODTsLibroBancos extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}	
+
+
+	function repLibroBancos(){
+		$this->procedimiento='tes.ft_ts_libro_bancos_sel';
+		$this->transaccion='TES_REBAN_SEL';
+		$this->tipo_procedimiento='SEL';
+		$this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
+		$this->setParametro('fecha_ini','fecha_ini','date');
+		$this->setParametro('fecha_fin','fecha_fin','date');		
+		$this->setCount(false);
+		
+		//Definicion de la lista del resultado del query
+		/*
+		
+		$this->captura('fecha_reporte','text');
+		$this->captura('fecha_reg','text');
+		*/
+		$this->captura('fecha','date');
+		$this->captura('id_int_comprobante','int4');
+		$this->captura('nro_cuenta','varchar');
+		$this->captura('nombre_cuenta','varchar');
+		$this->captura('nro_cheque','varchar');
+		
+		$this->captura('importe_debe_mb','numeric');
+		$this->captura('importe_haber_mb','numeric');
+		$this->captura('importe_gasto_mb','numeric');
+		$this->captura('importe_recurso_mb','numeric');
+
+		$this->captura('importe_debe_mt','numeric');
+		$this->captura('importe_haber_mt','numeric');
+		$this->captura('importe_gasto_mt','numeric');
+		$this->captura('importe_recurso_mt','numeric');
+		
+		$this->captura('importe_debe_ma','numeric');
+		$this->captura('importe_haber_ma','numeric');
+		$this->captura('importe_gasto_ma','numeric');
+		$this->captura('importe_recurso_ma','numeric');
+		
+		$this->captura('saldo','numeric');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
 }
 ?>

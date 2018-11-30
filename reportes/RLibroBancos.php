@@ -190,8 +190,8 @@ Class RLibroBancos extends Report {
 							'nro_comprobante' => $row['nro_comprobante'],
 							'comprobante_sigma' => $row['comprobante_sigma'],
 							'nro_cheque' => $row['nro_cheque'],
-							'importe_deposito' => $row['importe_deposito'],
-							'importe_cheque' => $row['importe_cheque']
+							'importe_deposito' => number_format($row['importe_deposito'], 2 , '.' , ',' ) ,
+							'importe_cheque' => number_format($row['importe_cheque'], 2 , '.' , ',' ) 
 						);
 			}else{
 				$RowArray = array(
@@ -202,16 +202,16 @@ Class RLibroBancos extends Report {
 							'nro_comprobante' => $row['nro_comprobante'],
 							'comprobante_sigma' => $row['comprobante_sigma'],
 							'nro_cheque' => $row['nro_cheque'],
-							'importe_deposito' => $row['importe_deposito'],
-							'importe_cheque' => $row['importe_cheque'],
-							'saldo' => $row['saldo']
+							'importe_deposito' => number_format($row['importe_deposito'], 2 , '.' , ',' ) ,
+							'importe_cheque' => number_format($row['importe_cheque'], 2 , '.' , ',' ) ,
+							'saldo' => number_format($row['saldo'] , 2 , '.' , ',' )  
 						);
 			}
                          
             $pdf-> MultiRow($RowArray, $fill = false, $border = 1) ; 
-			$saldo_final=$row['saldo'];
-			$total_debe=$row['total_debe'];
-			$total_haber=$row['total_haber'];           
+			$saldo_final= number_format($row['saldo'] , 2 , '.' , ',' )  ;
+			$total_debe= number_format($row['total_debe'] , 2 , '.' , ',' )  ;
+			$total_haber= number_format($row['total_haber'] , 2 , '.' , ',' )  ;           
         }
 		$pdf->SetFont('','B');
 		if($this->getDataSource()->getParameter('estado') == 'impreso y entregado' )

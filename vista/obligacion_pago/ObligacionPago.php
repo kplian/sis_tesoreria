@@ -5,7 +5,11 @@
 *@author  Gonzalo Sarmiento Sejas
 *@date 02-04-2013 16:01:32
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
-*/
+	Issue			Fecha        Author				Descripcion
+ * #1			21/09/2018		EGS					se aumento variables para q los campos igualen con el new con obligacion de pago especial.php
+ *
+ * 
+ * */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
@@ -414,7 +418,10 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                 maxLength:1245184
             },
             type:'MoneyField',
-            filters:{pfiltro:'obdet.monto_pago_mo',type:'numeric'},
+            //modificado x manuel guerra 09/10/2018
+            //no filtraba  con obdet.monto_pago_mo            
+            //filters:{pfiltro:'obdet.monto_pago_mo',type:'numeric'},obpg.total_pago
+            filters:{pfiltro:'obpg.total_pago',type:'numeric'},
             id_grupo:1,
             grid:true,
             form:false
@@ -674,7 +681,20 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 			filters:{pfiltro:'obpg.obs_presupuestos',type:'string'},
 			grid:true,
 			form:false
+		},	
+		{
+			config:{
+				fieldLabel:'Pedido SAP',
+				gwidth: 180,
+				name: 'pedido_sap'
+			},
+			type:'Field',
+			filters:{pfiltro:'obpg.pedido_sap',type:'string'},
+			grid:true,
+			form:false
 		},		
+		
+		
 		{
 			config:{
 				fieldLabel:'Estado Reg.',
@@ -794,7 +814,15 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 		'tipo_anticipo',
 		'ajuste_anticipo','desc_funcionario1',
 		'ajuste_aplicado', 'codigo_poa','obs_poa',
-		'monto_estimado_sg','id_obligacion_pago_extendida', 'obs_presupuestos','id_contrato','desc_contrato','monto_ajuste_ret_garantia_ga','monto_ajuste_ret_anticipo_par_ga','monto_total_adjudicado','total_anticio','pedido_sap'
+		'monto_estimado_sg',
+		'id_obligacion_pago_extendida',
+		 'obs_presupuestos','id_contrato',
+		 'desc_contrato',
+		 'monto_ajuste_ret_garantia_ga',
+		 'monto_ajuste_ret_anticipo_par_ga',
+		 'monto_total_adjudicado',
+		 'total_anticipo',////EGS13/08/2018////
+		 'pedido_sap'
 		
 	],
 	
@@ -862,6 +890,14 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 	    this.cmpMoneda=this.getComponente('id_moneda');
 	    this.cmpDepto=this.getComponente('id_depto');
 	    this.cmpTipoCambioConv=this.getComponente('tipo_cambio_conv');
+	    
+	    
+	         //#1			21/09/2018		EGS		
+	    this.cmpIdContrato=this.getComponente('id_contrato');
+	    this.cmpPagoVariable=this.getComponente('pago_variable');
+	    this.cmpTipoAnticipo=this.getComponente('tipo_anticipo');
+	    this.cmpTotalNroCuota=this.getComponente('total_nro_cuota');
+	     //#1			21/09/2018		EGS		
 	    
 	   // this.cmpPorcAnticipo=this.getComponente('porc_anticipo');
 	   // this.cmpPorcRetgar=this.getComponente('porc_retgar');

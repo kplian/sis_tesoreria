@@ -1759,5 +1759,24 @@ VALUES
 
 
 /***********************************F-DAT-RAC-TES-31-07/11/2017*****************************************/
-  
 
+
+/***********************************I-DAT-JRR-TES-31-28/02/2018*****************************************/
+
+
+select pxp.f_insert_tgui ('Solicitud de Transferencia', 'Solicitud de Transferencia', 'TESOLTRA', 'si', 4, 'sis_tesoreria/vista/solicitud_transferencia/SolicitudTransferencia.php', 3, '', 'SolicitudTransferencia', 'TES');
+select pxp.f_insert_testructura_gui ('TESOLTRA', 'CARLB');
+select pxp.f_insert_tgui ('Aprobacion Transferencia', 'Aprobacion Transferencia', 'TEAPROTRA', 'si', 0, 'sis_tesoreria/vista/solicitud_transferencia/SolicitudTransferenciaAprobacion.php', 4, '', 'SolicitudTransferenciaAprobacion', 'TES');
+
+select pxp.f_insert_testructura_gui ('TEAPROTRA', 'CARLB');
+
+
+/***********************************F-DAT-JRR-TES-31-28/02/2018**************	***************************/
+
+/***********************************I-DAT-RCM-TES-0-17/04/2018*****************************************/
+select pxp.f_insert_tgui ('Reportes', 'Reportes varios Caja', 'TESREPFR', 'si', 1, '', 2, '', '', 'TES');
+select pxp.f_insert_tgui ('Movimiento de Caja', 'Reporte Movimiento de Caja', 'REPMOVCA', 'si', 14, 'sis_tesoreria/vista/reportes/RepMovimientoCaja.php', 2, '', 'RepMovimientoCaja', 'TES');
+
+select pxp.f_insert_testructura_gui ('TESREPFR', 'CARFR');
+select pxp.f_insert_testructura_gui ('REPMOVCA', 'TESREPFR');
+/***********************************F-DAT-JRR-TES-0-17/04/2018*****************************************/

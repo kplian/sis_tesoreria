@@ -5,7 +5,11 @@
 *@author  (admin)
 *@date 10-04-2013 15:43:23
 *@description Clase que envia los parametros requeridos a la Base de datos para la ejecucion de las funciones, y que recibe la respuesta del resultado de la ejecucion de las mismas
-*/
+*@date 30/08/2018
+*@description añadida la columna retenciones de garantía para mostrar el reporte de solicitud de pago
+*	ISSUE    	  Fecha 		Autor				Descripcion	
+* #1			16/102016		EGS					Se aumento el campo pago borrador y sus respectivas validaciones 
+* */
 
 class MODPlanPago extends MODbase{
 	
@@ -116,7 +120,10 @@ class MODPlanPago extends MODbase{
 		//$this->captura('es_ultima_cuota','boolean');
 		$this->captura('id_gestion','integer');
 		$this->captura('id_periodo','integer');
+		
+		$this->captura('pago_borrador','varchar'); //#1			16/102016		EGS	
 
+		
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -162,6 +169,8 @@ class MODPlanPago extends MODbase{
 		$this->tipo_procedimiento='IME';
 				
 		//Define los parametros para la funcion
+		
+		$this->setParametro('pago_borrador','pago_borrador','varchar');/// #1			16/102016		EGS	
 		$this->setParametro('tipo_pago','tipo_pago','varchar');
 		$this->setParametro('monto_ejecutar_total_mo','monto_ejecutar_total_mo','numeric');
 		$this->setParametro('obs_descuentos_anticipo','obs_descuentos_anticipo','text');
@@ -258,6 +267,8 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('fecha_costo_fin','fecha_costo_fin','date');
 		$this->setParametro('id_depto_lb','id_depto_lb','int4');
 		$this->setParametro('es_ultima_cuota','es_ultima_cuota','boolean');
+	
+		$this->setParametro('pago_borrador','pago_borrador','varchar');/// #1			16/102016		EGS	
 
 		
 
@@ -536,6 +547,7 @@ class MODPlanPago extends MODbase{
 		$this->captura('otros_descuentos','numeric');
 		
 		$this->captura('obs_otros_descuentos','text');
+        $this->captura('monto_retgar_mo','numeric');
 		$this->captura('descuento_ley','numeric');
 		$this->captura('obs_descuento_ley','text');
 		
@@ -548,7 +560,10 @@ class MODPlanPago extends MODbase{
 		
 		$this->captura('monto_excento','numeric');
 		
+		$this->captura('num_tramite','varchar');
+		$this->captura('nro_contrato','varchar');
 		
+		$this->captura('pago_borrador','varchar');
 		
 		  
 		//Ejecuta la respuesta

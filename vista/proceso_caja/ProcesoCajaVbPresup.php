@@ -31,7 +31,7 @@ Phx.vista.ProcesoCajaVbPresup = {
 	   Phx.vista.ProcesoCajaVbPresup.superclass.constructor.call(this,config);
 
 		this.addButton('consolidado_rendicion',
-				{	text:'Reporte Rendicion',
+				{	text:'Reporte Rendicion.',
 					iconCls: 'blist',
 					disabled:true,
 					grupo:[0,1],
@@ -63,20 +63,21 @@ Phx.vista.ProcesoCajaVbPresup = {
 		this.getBoton('chkpresupuesto').enable();
 
 		if(data['tipo']=='SOLREN'){
-			//this.getBoton('consolidado_reposicion').disable();
+			this.getBoton('consolidado_rendicion').enable();
+			this.TabPanelSouth.get(2).enable();	
+			this.TabPanelSouth.setActiveTab(0)	
 		}else if(data['tipo']=='SOLREP'){
 			//this.getBoton('consolidado_reposicion').enable();
 		}else{
 			//this.getBoton('consolidado_reposicion').disable();
 		}
-	   //this.getBoton('relacionar_deposito').disable();
+		//this.getBoton('relacionar_deposito').disable();
 
      },
 
 	consolidado_rendicion : function() {
 		var rec = this.getSelectedData();
-		var NumSelect=this.sm.getCount();
-
+		var NumSelect=this.sm.getCount();	
 		if(NumSelect != 0)
 		{
 			Phx.CP.loadingShow();
@@ -84,7 +85,8 @@ Phx.vista.ProcesoCajaVbPresup = {
 				url:'../../sis_tesoreria/control/Caja/impReporteProcesoCaja',
 				params:{
 					'id_caja':rec.id_caja,
-					'id_proceso_caja':rec.id_proceso_caja
+					'id_proceso_caja':rec.id_proceso_caja,
+					'fecha':rec.fecha
 				},
 				success:this.successExport,
 				failure: this.conexionFailure,
@@ -94,7 +96,7 @@ Phx.vista.ProcesoCajaVbPresup = {
 		}
 		else
 		{
-			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
+			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.!');
 		}
 	},
 

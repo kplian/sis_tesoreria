@@ -615,6 +615,26 @@ class MODSolicitudRendicionDet extends MODbase{
 		$this->ejecutarConsulta();
 		//Devuelve la respuesta
 		return $this->respuesta;
-	}		
+	}
+	
+	function listarSolicitudIngresoDet(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.ft_solicitud_rendicion_det_sel';
+		$this->transaccion='TES_ING_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+				
+		$this->captura('id_solicitud_efectivo','int4');
+		$this->captura('monto','numeric');
+		$this->captura('fecha','date');
+		$this->captura('nro_tramite','varchar');
+		$this->captura('usr_reg','varchar');
+		$this->captura('usr_mod','varchar');
+		$this->captura('estado','varchar');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}			
 }
 ?>

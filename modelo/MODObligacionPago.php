@@ -168,6 +168,15 @@ class MODObligacionPago extends MODbase{
 		$this->captura('id_contrato','integer');
 		$this->captura('obs_presupuestos','varchar');
 		$this->captura('uo_ex','varchar');
+		
+		
+		/////////////EGS 13/08/2018/////////
+		$this->captura('monto_total_adjudicado','numeric');
+		$this->captura('total_anticipo','numeric');
+		$this->captura('monto_ajuste_ret_anticipo_par_ga','numeric');
+		$this->captura('monto_ajuste_ret_garantia_ga','numeric');
+		$this->captura('pedido_sap','varchar');
+         //////////////// EGS 13/08/2018 //////////////
 
 
         
@@ -927,7 +936,7 @@ class MODObligacionPago extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
-function editAntiRet(){
+   function editAntiRet(){
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.ft_obligacion_pago_ime';
 		$this->transaccion='TES_ANTIRET_IME';

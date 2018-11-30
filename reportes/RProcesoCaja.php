@@ -33,7 +33,8 @@ class RProcesoCaja extends ReportePDF {
 		$this->SetAutoPageBreak(TRUE, 10);
 		$this->ancho_hoja = $this->getPageWidth()-PDF_MARGIN_LEFT-PDF_MARGIN_RIGHT-10;
 		$this->datos_detalle = $detalle;
-		$this->datos_titulo = $resultado;	
+		$this->datos_titulo = $resultado;
+		$this->fecha = $fecha;	
 		$this->SetMargins(25, 15, 5,10);
 	}
 	//
@@ -45,7 +46,7 @@ class RProcesoCaja extends ReportePDF {
 	}
 	//	
 	function generarCabecera(){
-		$conf_par_tablewidths=array(7,20,40,40,20,20,15);
+		$conf_par_tablewidths=array(7,17,40,40,20,20,15);
 		$conf_par_tablenumbers=array(0,0,0,0,0,0,0);
 		$conf_par_tablealigns=array('C','C','C','C','C','C','C');
 		$conf_tabletextcolor=array();
@@ -88,18 +89,26 @@ class RProcesoCaja extends ReportePDF {
 		$this->s3 = 0;
 		$this->s4 = 0;
 		$this->imprimirLinea($val,$count,$fill);
+		$this->Ln(5);
+		$this->SetFont('', 'B',7);				
+		//$this->Cell(150, $height, 'Saldo:   '.number_format($this->t2-$this->t3), 0, 0, 'R', false, '', 0, false, 'T', 'R');
+		$this->Ln(10);		
+		$this->SetFont('', 'B',7);				
+		//$this->Cell(150, $height, 'ENTREGADOS EN ESPERA ', 0, 0, 'C', false, '', 0, false, 'T', 'C');
+		//$this->Ln(5);
+		//$this->generarCabecera2();
 	}
 	//
 	function imprimirLinea($val,$count,$fill){
 		$this->SetFillColor(224, 235, 255);
 		$this->SetTextColor(0);
-		$this->SetFont('','',6);
-		$this->tablenumbers=array(0,0,0,0,0,2,2);
-		$this->tablealigns=array('C','L','L','L','L','R','R');			
-		$this->tableborders=array('RLTB','RLTB','RLTB','RLTB','RLTB','RLTB','RLTB');
-		$this->tabletextcolor=array();	
-		$i=0;
+		$this->SetFont('','',6);			
+		$i=1;
 		foreach ($this->getDataSource() as $datarow) {
+			$this->tablenumbers=array(0,0,0,0,0,2,2);
+			$this->tablealigns=array('C','L','L','L','L','R','R');			
+			$this->tableborders=array('RLTB','RLTB','RLTB','RLTB','RLTB','RLTB','RLTB');
+			$this->tabletextcolor=array();			
 			if($datarow['monto']==0.00){
 				$datarow['monto']= 0;
 			}
@@ -107,9 +116,8 @@ class RProcesoCaja extends ReportePDF {
 				$datarow['importe_pago_liquido']= 0;
 			}
 			
-			if($i==0){				
-				$fec=$datarow['fecha'];
-			}else{			
+										
+			if($datarow['estado_r']== 'ingreso'){
 				$RowArray = array(
 					's0' => $i,
 					's1' => trim($datarow['fecha_reg']),
@@ -117,26 +125,30 @@ class RProcesoCaja extends ReportePDF {
 					's3' => trim($datarow['motivo'].$datarow['razon_social']),			
 					's4' => trim($datarow['estado_r'].$datarow['estado']),
 					's5' => $datarow['monto'],				
-					's6' => $datarow['importe_pago_liquido']
+					's6' => 0
 				);
-				$fill = !$fill;					
-				$this->total = $this->total -1;								
-				$this-> MultiRow($RowArray,$fill,0);			
-				$this->revisarfinPagina($datarow);
-			}	
-			$i++;			
+			}else{				
+				$RowArray = array(
+					's0' => $i,
+					's1' => trim($datarow['fecha_reg']),
+					's2' => trim($datarow['nro_tramite']),					
+					's3' => trim($datarow['motivo'].$datarow['razon_social']),			
+					's4' => trim($datarow['estado_r'].$datarow['estado']),
+					's5' => 0,				
+					's6' => $datarow['importe_pago_liquido']
+				);	
+			}
+							
+			$fill = !$fill;					
+			$this->total = $this->total -1;								
+			$this-> MultiRow($RowArray,$fill,0);			
+			$this->revisarfinPagina($datarow);			
+			$i++;
+						
 		}			
 		$this->cerrarCuadro();
 		$this->cerrarCuadroTotal();	
-		$this->Ln(5);
-		$this->SetFont('', 'B',7);				
-		$this->Cell(150, $height, 'Saldo:   '.number_format($this->t2-$this->t3), 0, 0, 'R', false, '', 0, false, 'T', 'R');
-					
-		$this->tablewidths=$conf_par_tablewidths;
-		$this->tablealigns=$conf_par_tablealigns;
-		$this->tablenumbers=$conf_par_tablenumbers;
-		$this->tableborders=$conf_tableborders;
-		$this->tabletextcolor=$conf_tabletextcolor;		
+
 	}
 	
 	//
@@ -157,17 +169,25 @@ class RProcesoCaja extends ReportePDF {
 	}
 	//
 	function calcularMontos($val){
-		$this->s2 = $this->s2 + $val['monto'];
-		$this->s3 = $this->s3 + $val['importe_pago_liquido'];
+		if($val['estado_r']== 'ingreso'){
+			$this->s2 = $this->s2 + $val['monto'];
+			//$this->s3 = $this->s3 + 0;
+			
+			$this->t2 = $this->t2 + $val['monto'];	
+			//$this->t3 = $this->t3 + 0;			
+		}else{
+			//$this->s2 = $this->s2 + 0;
+			$this->s3 = $this->s3 + $val['importe_pago_liquido'];
+			
+			//$this->t2 = $this->t2 + 0;	
+			$this->t3 = $this->t3 + $val['importe_pago_liquido'];			
+		}
 		
-		$this->t2 = $this->t2 + $val['monto'];	
-		$this->t3 = $this->t3 + $val['importe_pago_liquido'];
-				
 	}	
 	//revisarfinPagina pie
 	function cerrarCuadro(){
 		//si noes inicio termina el cuardro anterior
-		$conf_par_tablewidths=array(7,20,40,40,20,20,15);				
+		$conf_par_tablewidths=array(7,17,40,40,20,20,15);				
 		$this->tablealigns=array('R','R','R','R','R','R','R');		
 		$this->tablenumbers=array(0,0,0,0,0,2,2);
 		$this->tableborders=array('T','T','T','T','LRTB','LRTB');								
@@ -188,7 +208,7 @@ class RProcesoCaja extends ReportePDF {
 	}
 	//revisarfinPagina pie
 	function cerrarCuadroTotal(){
-		$conf_par_tablewidths=array(7,20,40,40,20,20,15);			
+		$conf_par_tablewidths=array(7,17,40,40,20,20,15);			
 		$this->tablealigns=array('R','R','R','R','R','R','R');		
 		$this->tablenumbers=array(0,0,0,0,0,2,2);
 		$this->tableborders=array('','','','','LRTB','LRTB','LRTB');									
@@ -239,15 +259,14 @@ class RProcesoCaja extends ReportePDF {
 		$esp_width = 10;
 		$width_c1= 30;
 		$width_c2= 40;		
-		
 		$fechaactual = date("d-m-Y H:i:s");
-				
+		
 		$this->SetFont('', 'B',7);
 		$this->SetFillColor(192,192,192, true);	
 		$this->Cell($width1, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
 		$this->Cell($width_c1, $height, 'CAJA :', 0, 0, 'L', false, '', 0, false, 'T', 'C');
 		$this->SetFont('', '',7);				
-		$this->Cell($width_c2, $height, $this->objParam->getParametro('caja'), 0, 0, 'L', true, '', 0, false, 'T', 'C');
+		$this->Cell($width_c2, $height,$this->objParam->getParametro('nro_tramite'), 0, 0, 'L', true, '', 0, false, 'T', 'C');
 		$this->Ln(5);
 		
 		$this->SetFont('', 'B',7);
@@ -262,6 +281,102 @@ class RProcesoCaja extends ReportePDF {
 		$this->Ln(6);
 		$this->SetFont('','B',6);
 		$this->generarCabecera();
-	}		
+	}	
+	//
+	function generarCabecera2(){
+		$count = 1;
+		$fill = 0;
+		$conf_par_tablewidths=array(7,17,35,60,20,20);
+		$conf_par_tablenumbers=array(0,0,0,0,0);
+		$conf_par_tablealigns=array('C','C','C','C','C');
+		$conf_tabletextcolor=array();
+		$this->tablewidths=$conf_par_tablewidths;
+		$this->tablealigns=$conf_par_tablealigns;
+		$this->tablenumbers=$conf_par_tablenumbers;
+		$this->tableborders=$conf_tableborders;
+		$this->tabletextcolor=$conf_tabletextcolor;		
+		$RowArray2 = array(
+							's0' => 'Nº',
+							's1' => 'FECHA',
+							's2' => 'NRO TRAMITE',
+							's3' => 'MOTIVO',
+							's4' => 'ESTADO',
+							's5' => 'MONTO'
+						);
+		$this->MultiRow($RowArray2, false, 1);
+		$this->imprime($val,$count,$fill);
+	}
+	//
+	function imprime($val,$count,$fill){
+		$this->SetFillColor(224, 235, 255);
+		$this->SetTextColor(0);
+		$this->SetFont('','',6);			
+		$values =$this->getDataSource();
+		$i=1;	
+		if (is_array($values) || is_object($values))
+		{			
+			foreach ($values as $value)
+			{
+				$this->tablenumbers=array(0,0,0,0,0,2);
+				$this->tablealigns=array('C','L','L','L','R','R');			
+				$this->tableborders=array('RLTB','RLTB','RLTB','RLTB','RLTB','RLTB');
+				$this->tabletextcolor=array();	
+				if($value['estado_r']== 'entregado'){
+					$value = array(
+						's0' => $i,
+						's1' => $value['fecha'],
+						's2' => $value['nro_tramite'],					
+						's3' => $value['motivo'],			
+						's4' => $value['estado_r'],
+						's5' => $value['monto']
+					);				
+					$this->revisarfinPaginadet($value);								
+					$fill = !$fill;	
+					$this-> MultiRow($value,$i,0);
+					$i++;
+				}
+			}
+			
+		}$this->cerrarCuadroDet();		
+	}	
+	//
+	function cerrarCuadroDet(){
+		//si no es inicio termina el cuardro anterior
+		$conf_par_tablewidths=array(7,17,35,60,20,20);				
+		$this->tablealigns=array('R','R','R','R','R','R');		
+		$this->tablenumbers=array(0,0,0,0,0,2);
+		$this->tableborders=array('T','T','T','T','LRTB');								
+		$RowArray = array(
+							't0' => '',
+							't1' => '',
+							't2' => '',
+							't3' => '',							
+							'espacio' => 'Total',							
+							't5' => $this->t1
+						);		
+		$this-> MultiRow($RowArray,false,1);
+	}
+	//
+	function revisarfinPaginadet($a){
+		$dimensions = $this->getPageDimensions();
+		$hasBorder = false;
+		$startY = $this->GetY();
+		$this->getNumLines($row['cell1data'], 90);
+		$this->calcularMontosdes($a);			
+		if ($startY > 237) {			
+			$this->cerrarCuadroDet();			
+			if($this->total!= 0){
+				$this->AddPage();
+				$this->generarCabecera2();
+			}				
+		}
+	}
+	//
+	function calcularMontosdes($val){
+		if($val['s4']== 'entregado'){
+			$this->t1 = $this->t1 + $val['s5'];
+		}
+		
+	}	
 }
 ?>

@@ -270,7 +270,9 @@ Phx.vista.PlanPagoVbCostos = {
         
         this.Cmp.id_plantilla.on('select',function(cmb,rec,i){
             this.getDecuentosPorAplicar(rec.data.id_plantilla);
-            this.Cmp.monto_excento.reset();
+            if(this.accionFormulario != 'EDIT'){
+            	 this.Cmp.monto_excento.reset();
+            }
             if(rec.data.sw_monto_excento=='si'){
                this.Cmp.monto_excento.enable();
                this.Cmp.tipo_excento.setValue(rec.data.tipo_excento);

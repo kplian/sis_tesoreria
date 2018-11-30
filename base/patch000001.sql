@@ -1814,6 +1814,7 @@ IS 'Indica el id_proceso_caja de tipo reposicion donde fue considerado el ingres
 
 
 /*************************I-SCP-RAC-TES-0-25/01/2018*************/
+
 CREATE TABLE tes.tplan_pago_doc_compra (
     id_plan_pago_doc_compra serial NOT NULL,
     id_plan_pago integer NOT NULL,
@@ -1824,4 +1825,27 @@ CREATE TABLE tes.tplan_pago_doc_compra (
 WITH (
     OIDS = FALSE
 );
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN fin_forzado VARCHAR(2) DEFAULT 'no' NOT NULL;
+
+COMMENT ON COLUMN tes.tobligacion_pago.fin_forzado
+IS 'si o no, se marca como si si es que la obligacion fue forzada a finalizar con anticpos o retenciones  o pagos pendientes';
+
+
+
 /*************************F-SCP-RAC-TES-0-25/01/2018*************/
+
+
+/*************************I-SCP-EGS-TES-0-16/10/2018*************/
+
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN pago_borrador VARCHAR(50) DEFAULT 'no' NOT NULL;
+  
+  
+  
+  
+/*************************F-SCP-EGS-TES-0-16/10/2018*************/

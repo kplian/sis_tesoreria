@@ -32,6 +32,35 @@ require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
 		$this->SetFont('', 'B');
 		//$this->Cell(30, $height, $this->getDataSource()->getParameter('nro_tramite'), 0, 0, 'L', false, '', 1, false, 'T', 'C');		
     }  
+	public function Footer(){
+		$this->SetFontSize(5.5);
+		$this->setY(-15);
+		$ormargins = $this->getOriginalMargins();
+		$this->SetTextColor(0, 0, 0);
+		//set style for cell border
+		$line_width = 0.85 / $this->getScaleFactor();
+		$this->SetLineStyle(array('width' => $line_width, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0, 0, 0)));
+		$ancho = round(($this->getPageWidth() - $ormargins['left'] - $ormargins['right']) / 3);
+		$this->Ln(2);
+		$cur_y = $this->GetY();
+		//$this->Cell($ancho, 0, 'Generado por XPHS', 'T', 0, 'L');
+		if ($this->usuario_firma == '') {
+			$this->Cell($ancho, 0, 'Usuario: '.$_SESSION['_LOGIN'], '', 0, 'L');
+		} else {
+			$this->Cell($ancho, 0, 'Usuario Firma: '.$this->usuario_firma, '', 0, 'L');
+		}
+		$pagenumtxt = 'Página'.' '.$this->getAliasNumPage().' de '.$this->getAliasNbPages();
+		$this->Cell($ancho, 0, $pagenumtxt, '', 0, 'C');
+		$this->Cell($ancho, 0, $_SESSION['_REP_NOMBRE_SISTEMA'], '', 0, 'R');
+		$this->Ln();
+		$fec = date("d-m-Y H:i:s");
+		if ($this->fecha_rep == '') {			
+			$this->Cell($ancho, 0, "Fecha : " . $fec, '', 0, 'L');
+		} else {
+			//$this->Cell($ancho, 0, "Fecha Firma: " . $this->fecha_rep, '', 0, 'L');
+		}	
+		
+	}
     
 }
 
@@ -101,9 +130,9 @@ Class RRendicionEfectivo extends Report {
 		$pdf->SetFont('', '');		
         $pdf->Cell($width4, $height, $this->getDataSource()->getParameter('solicitante'), 1, 1, 'L', false, '', 0, false, 'T', 'C');
         $pdf->SetFont('', 'B');
-        $pdf->Cell($width2, $height, 'POR CONCEPTO : ', 1, 0, 'L', false, '', 0, false, 'T', 'C');
+        $pdf->Cell($width2, $height*2, 'POR CONCEPTO : ', 1, 0, 'L', false, '', 0, false, 'T', 'C');
 		$pdf->SetFont('', '');		
-        $pdf->Cell($width4, $height, $this->getDataSource()->getParameter('motivo'), 1, 1, 'L', false, '', 0, false, 'T', 'C');
+        $pdf->Cell($width4, $height*2, $this->getDataSource()->getParameter('motivo'), 1, 1, 'L', false, '', 1, false, 'T', 'C');
         
         $pdf->Ln();
         $pdf->Ln();
@@ -159,7 +188,10 @@ Class RRendicionEfectivo extends Report {
         $total_cargo = 0;
         $total_descargo = 0;
         $count_facturas = 0;
-		
+		$total_dev = 0;
+		$total_rep = 0;
+		$total_importe = 0;
+		$aux = 0;
 		$pdf->tablewidths=$conf_det_tablewidths;
 		$pdf->tablealigns=$conf_det_tablealigns;
 		$pdf->tablenumbers=$conf_det_tablenumbers;
@@ -177,97 +209,63 @@ Class RRendicionEfectivo extends Report {
                     );     
                          
             $pdf-> MultiRow($RowArray,false,1); 
+		foreach($dataSource->getDataset() as $row) {
+	
+			$pdf->tablewidths=$conf_par_tablewidths;
+			$pdf->tablealigns=$conf_par_tablealigns;
+			$pdf->tablenumbers=$conf_par_tablenumbers;
+			$pdf->tableborders=$conf_tableborders;
+			$pdf->tabletextcolor=$conf_tabletextcolor;
+			$pdf->tablewidths=$conf_det_tablewidths;
+			$pdf->tablealigns=$conf_det_tablealigns;
+			$pdf->tablenumbers=$conf_det_tablenumbers;
+			$pdf->tableborders=$conf_tableborders;
+			$pdf->tabletextcolor=$conf_tabletextcolor;
 			
-        foreach($dataSource->getDataset() as $row) {
-               
-            $pdf->tablewidths=$conf_par_tablewidths;
-            $pdf->tablealigns=$conf_par_tablealigns;
-            $pdf->tablenumbers=$conf_par_tablenumbers;
-            $pdf->tableborders=$conf_tableborders;
-            $pdf->tabletextcolor=$conf_tabletextcolor;
-            /*                    
-            $RowArray = array(
-                        'desc_centro_costo'    => 'Centro de Costo'
-                    );     
-                         
-             $pdf-> MultiRow($RowArray,false,0); 
-            
-            $RowArray = array(
-                        'desc_centro_costo'    => $row['groupeddata'][0]['codigo_cc']
-                    );     
-                         
-            $pdf-> MultiRow($RowArray,false,0); 
-            */
-            /////////////////////////////////      
-            //agregar detalle de la solicitud
-            //////////////////////////////////
-            
-            $pdf->tablewidths=$conf_det_tablewidths;
-            $pdf->tablealigns=$conf_det_tablealigns;
-            $pdf->tablenumbers=$conf_det_tablenumbers;
-            $pdf->tableborders=$conf_tableborders;
-            $pdf->tabletextcolor=$conf_tabletextcolor;
-            
-            $RowArray = array(
-            			'fecha_entrega'  => 'Fecha',
-                        'desc_plantilla' => 'Tipo Documento',
-						'rendicion' => 'Documento',
-						'importe_neto' => 'Total',
-						'impuesto_descuento_ley' => 'Retencion',
-						'cargo' => 'Cargo',
-						'descargo' => 'Descargo',
-                    );     
-                         
-            //$pdf-> MultiRow($RowArray,false,1); 
-            
-            $totalRef=0;
-            $xEnd=0;
-            $yEnd=0;
-            
+			$RowArray = array(
+				'fecha_entrega'  => 'Fecha',
+				'desc_plantilla' => 'Tipo Documento',
+				'rendicion' => 'Documento',
+				'importe_neto' => 'Total',
+				'impuesto_descuento_ley' => 'Retencion',
+				'cargo' => 'Cargo',
+				'descargo' => 'Descargo',
+            );
             $pdf->tablewidths=$conf_det2_tablewidths;
             $pdf->tablealigns=$conf_det2_tablealigns;
             $pdf->tablenumbers=$conf_det2_tablenumbers;
             $pdf->tableborders=$conf_tableborders;
-            
-            //foreach ($row as $solicitudDetalle) {
-				//var_dump($row); exit;
-                $RowArray = array(
-                        'fecha_entrega'  => $row['fecha_entrega'],
-                        'desc_plantilla' => $row['desc_plantilla'],
-                        'rendicion' => $row['rendicion'],
-                        'importe_neto' => $row['importe_neto'],
-                        'impuesto_descuento_ley' => $row['impuesto_descuento_ley'],
-                        'cargo' => $row['cargo'],
-                        'descargo' => $row['descargo'],
-                    );     
-                         
-                $pdf-> MultiRow($row,false,1) ; 
-                
-                //$totalRef=$totalRef+$row['descargo'];
-            //}
-			/*
-           //coloca el total de la partida 
-           $pdf->tablewidths=$conf_tp_tablewidths;
-           $pdf->tablealigns=$conf_tp_tablealigns;
-           $pdf->tablenumbers=$conf_tp_tablenumbers;
-           $pdf->tableborders=$conf_tp_tableborders;
-            
-           $RowArray = array(
-                        'precio_unitario' => '('.$this->getDataSource()->getParameter('moneda').')',
-                        'precio_total' => $totalRef
-                    );     
-                         
-           $pdf-> MultiRow($RowArray,false,1); 
-            */           
-           $total_rendicion = $total_rendicion + $row['importe_neto'];           
-           $total_retencion = $total_retencion + $row['impuesto_descuento_ley'];           
-           $total_cargo = $total_cargo + $row['cargo'];           
-           $total_descargo = $total_descargo + $row['descargo'];           
+			
+            $RowArray = array(
+                'fecha_entrega'  => $row['fecha_entrega'],
+                'desc_plantilla' => $row['desc_plantilla'],
+                'rendicion' => $row['rendicion'],
+                'importe_neto' => $row['importe_neto'],
+                'impuesto_descuento_ley' => $row['impuesto_descuento_ley'],
+                'cargo' => $row['cargo'],
+                'descargo' => $row['importe_neto'] - $row['impuesto_descuento_ley'],
+                //'importe_pago_liquido' => $row['importe_pago_liquido']
+            );     
+            $pdf-> MultiRow($RowArray,false,1); 
+
+           $total_rendicion = $total_rendicion + $row['importe_neto']; 
+           $total_retencion = $total_retencion + $row['impuesto_descuento_ley'];
+           $total_cargo = $total_cargo + $row['cargo'];
+           $total_descargo = $total_descargo + $row['descargo'];
            $count_facturas = $count_facturas + 1;
-           //$pdf->Ln();
-           
-        } 
-        
+		   $total_rep=$row['monto_dev'];
+		   $total_dev=$row['rendicion'];
+		   $total_importe+=$row['importe_pago_liquido'];
+		  
+		}
+		if(($total_cargo-$total_importe)>0){
+			$total_dev=$total_cargo-$total_importe;
+			$total_rep=0;
+		}else{
+			$total_rep=$total_importe-$total_cargo;	
+			$total_dev=	0;	
+		}
+		
         //coloca el gran total de la solicitud 
                
         if($count_facturas > 1){
@@ -281,7 +279,7 @@ Class RRendicionEfectivo extends Report {
                         'total_rendicion' => number_format($total_rendicion,2),
                         'total_retencion' => number_format($total_retencion,2),
                         'total_cargo' => number_format($total_cargo,2),
-                        'total_descargo' => number_format($total_descargo,2)
+                        'total_descargo' => number_format($total_importe,2)
                     );     
            $saldo_caja = $total_cargo - $total_descargo; 
 		   $saldo_caja = $saldo_caja > 0 ? $saldo_caja : 0;
@@ -295,7 +293,8 @@ Class RRendicionEfectivo extends Report {
                         'total_rendicion' => null,
                         'total_retencion' => null,
                         'total_cargo' => number_format(0,2),
-                        'total_descargo' => number_format($saldo_caja,2)
+                        //'total_descargo' => number_format($saldo_caja,2)
+                        'total_descargo' => number_format($total_dev,2)
                     ); 
 		   $pdf-> MultiRow($RowArray,false,1); 
 		   
@@ -303,8 +302,10 @@ Class RRendicionEfectivo extends Report {
                         'leyenda' => 'Saldo a Favor del Solicitante ('.$this->getDataSource()->getParameter('moneda').')',
                         'total_rendicion' => null,
                         'total_retencion' => null,
-                        'total_cargo' => number_format($saldo_solicitante,2),
-                        'total_descargo' => number_format(0,2)
+                        //'total_cargo' => number_format($total_retencion-$saldo_solicitante,2),
+                        'total_cargo' => number_format(0,2),
+                        //'total_descargo' => number_format(0,2)
+                        'total_descargo' => number_format($total_rep,2)
                     ); 
 		   $pdf-> MultiRow($RowArray,false,1); 
 		   
@@ -312,8 +313,10 @@ Class RRendicionEfectivo extends Report {
                         'leyenda' => 'Sumas Iguales ('.$this->getDataSource()->getParameter('moneda').')',
                         'total_rendicion' => null,
                         'total_retencion' => null,
-                        'total_cargo' => number_format($total_cargo + $saldo_solicitante,2),
-                        'total_descargo' => number_format($total_descargo + $saldo_caja,2)
+                        //'total_cargo' => number_format($total_cargo + $saldo_solicitante,2),
+                        'total_cargo' => number_format($total_cargo,2),
+                        //'total_descargo' => number_format($total_descargo + $saldo_caja,2)
+                        'total_descargo' => number_format($total_cargo,2)
                     ); 
 		   $pdf-> MultiRow($RowArray,false,1); 
 		   $pdf->Ln();

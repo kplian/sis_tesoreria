@@ -15,7 +15,8 @@ $body$
    	
  ISSUE            FECHA:		      AUTOR                 DESCRIPCION
  #0             10/06/2013        RAC KPLIAN        Generar comprobantes de devengado o pago segun corresponda al tipo de plan de pago  y pasa al siguiente estado
- #31, ETR       23/11/2017        RAC KPLIAN        al validar si el presupesuto alcanza apra generar el cbte considerar si el anticipo ejecuo presupeusto    
+ #31, ETR       23/11/2017        RAC KPLIAN        al validar si el presupesuto alcanza apra generar el cbte considerar si el anticipo ejecuo presupeusto  
+ #33, ETR       06/03/2018        RAC KPLIAN        Si tiene credito fiscal restar el 13% al validar el presupeusto   
  
 ***************************************************************************/
 
@@ -55,6 +56,7 @@ DECLARE
     v_codigo_plt_cbte				varchar;
     v_tes_anticipo_ejecuta_pres	    varchar;
     v_des_antipo_si_ejecuta			numeric;
+    v_iva		numeric;
 	
     
 BEGIN
@@ -86,12 +88,17 @@ BEGIN
              tpp.codigo_plantilla_comprobante,
              pp.id_depto_lb,
              pp.id_estado_wf,
-             pp.descuento_anticipo
+             pp.descuento_anticipo,
+             pp.id_plantilla,
+             plt.tipo_informe,
+             plt.tipo_excento,
+             pp.monto_excento
            into
               v_registros
            FROM tes.tplan_pago pp
            inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago and op.estado_reg = 'activo'
            inner join tes.ttipo_plan_pago tpp on tpp.codigo = pp.tipo and tpp.estado_reg = 'activo'
+           left JOIN param.tplantilla plt on plt.id_plantilla = pp.id_plantilla
            where pp.id_plan_pago = p_id_plan_pago;
            
           
@@ -130,6 +137,8 @@ BEGIN
 
           -- obtener el estado de la cuota anterior
           --validar que no se salte el orden de los devengados
+          
+          -- RAC 02/02/2018,  coemntado temporalmente --03062018  ...  descomentado
 
                 IF  EXISTS (SELECT 1
                 FROM tes.tplan_pago pp
@@ -143,6 +152,8 @@ BEGIN
 
 
                  END IF;
+                 
+                
 
 
 
@@ -200,6 +211,27 @@ BEGIN
                       v_des_antipo_si_ejecuta = 0;
                       IF v_tes_anticipo_ejecuta_pres = 'si' and  v_registros.descuento_anticipo > 0  THEN                         
                          v_des_antipo_si_ejecuta =  v_registros.descuento_anticipo;                         
+                      END IF;
+                      
+                      
+                           
+                      IF  v_registros.tipo_informe = 'lcv'  THEN
+                      
+                          --TODO obtener el monto exacto del iva, considerar el excento
+                          
+                          
+                          --verificar si el pago tiene IVA,  el iva no ejecuta presupeusto
+                           select  
+                                 ps_monto_porc
+                           into
+                                v_iva
+                             FROM  conta.f_get_detalle_plantilla_calculo(v_registros.id_plantilla, 'IVA-CF');
+                          
+                          IF COALESCE(v_iva,0) > 0 THEN
+                              v_des_antipo_si_ejecuta =  COALESCE(v_des_antipo_si_ejecuta,0) + ((v_registros_pro.monto_ejecutar_mo - COALESCE(v_registros.monto_excento,0)) * v_iva) ;
+                          END IF;
+                          
+                      
                       END IF;
                         
 

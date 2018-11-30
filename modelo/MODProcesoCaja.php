@@ -48,7 +48,7 @@ class MODProcesoCaja extends MODbase{
 		$this->captura('usr_mod','varchar');
 		$this->captura('nombre','varchar');
 		$this->captura('id_moneda','int4');
-
+		$this->captura('monto_ren_ingreso','numeric');
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
@@ -388,6 +388,42 @@ class MODProcesoCaja extends MODbase{
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
 		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	//
+	function listarReporteMenCaja(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.ft_caja_rep_sel';
+		$this->transaccion='TES_CAJA_REP_MEN_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this-> setCount(false);
+		$this->setParametro('id_caja','id_caja','int4');
+		$this->setParametro('mes','mes','int4');			
+		//Definicion de la lista del resultado del query
+		$this->captura('saldo','numeric');
+		$this->captura('nro_tramite','varchar');
+		$this->captura('desc_plantilla','varchar');
+		$this->captura('fecha','date');
+		
+		$this->captura('nit','varchar');
+		$this->captura('razon_social','varchar');
+		$this->captura('nro_autorizacion','varchar');
+		
+		$this->captura('nro_documento','varchar');	
+		$this->captura('codigo_control','varchar');
+		$this->captura('monto','numeric');
+		
+		$this->captura('importe_pago_liquido','numeric');
+		$this->captura('importe_iva','numeric');
+		$this->captura('importe_descuento','numeric');
+		
+	    $this->captura('importe_descuento_ley','numeric');		
+		$this->captura('importe_excento','numeric');	
+		$this->captura('motivo','varchar');	
+		$this->captura('tramite','varchar');	
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
 		return $this->respuesta;
 	}
 }

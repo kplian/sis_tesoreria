@@ -1,4 +1,8 @@
 <?php
+/*
+*@date 30/08/2018
+*@description añadida la columna retenciones de garantía para mostrar el reporte de solicitud de pago
+*/
 require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
 
  class CustomReport extends TCPDF {
@@ -23,11 +27,11 @@ require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
         $this->SetFont('','B'); 
         
        
-        if($this->getDataSource()->getParameter('tipo')=='devengado_pagado'){
+        if($this->getDataSource()->getParameter('tipo')=='devengado_pagado'&& $this->getDataSource()->getParameter('pago_borrador')=='no'){
                 
              $titulo='Devengado y Pago';
         }
-        elseif(($this->getDataSource()->getParameter('tipo'))=='devengado'){
+        elseif(($this->getDataSource()->getParameter('tipo'))=='devengado'|| $this->getDataSource()->getParameter('pago_borrador')=='si'){
                 
              $titulo='Devengado';
         }
@@ -159,7 +163,29 @@ Class RSolicitudPlanPago extends Report {
         $pdf->Cell($width2*2, $height, 'Tipo de Pago: ', 0, 0, 'L', false, '', 0, false, 'T', 'C');
         $pdf->SetFont('', '');
         $pdf->Cell($width3, $height, $this->getDataSource()->getParameter('tipo_pago'), 0, 0, 'L', false, '', 0, false, 'T', 'C');
-        $pdf->Ln();
+		
+		$pdf->Ln();
+		if($this->getDataSource()->getParameter('nro_contrato') != ''){
+		        $pdf->SetFont('', 'B');
+		        $pdf->Cell($width2*2, $height, 'Nro contrato: ', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+		        $pdf->SetFont('', '');
+		        $pdf->Cell($width3, $height, $this->getDataSource()->getParameter('nro_contrato'), 0, 0, 'L', false, '', 0, false, 'T', 'C');        $pdf->Ln();
+        }
+		
+		
+		$pdf->Ln();
+		
+		
+		//$pdf->Cell($width2*2, $height, 'Conformidad de recepcion: ', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+		/*$pdf->SetFont('', 'B');
+		$pdf->Cell(40, $height, 'Conformidad de recepcion: ', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+        $pdf->SetFont('', '');
+        $pdf->Cell($width2, $height, 'El material, suministro o servicio ha sido recibido en conformidad de acuerdo a condiciones según pedido, se adjunta', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+		$pdf->Ln();
+		$pdf->Cell(40, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+		$pdf->Cell($width3, $height, 'factura y/o recibo de pago.', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+		*/
+		
 		
         $pdf->Ln();
 		$pdf->Ln();
@@ -169,6 +195,7 @@ Class RSolicitudPlanPago extends Report {
         $pdf->SetFont('', '');
         $pdf->Cell($width3, $height, $this->getDataSource()->getParameter('importe'), 0, 0, 'R', false, '', 0, false, 'T', 'C');
         $pdf->Ln();
+        
 		$pdf->Cell($width2+$width3, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
 		$pdf->SetFont('', 'B');
         $pdf->Cell($width2*2, $height, 'Monto no Pagado ('.$this->getDataSource()->getParameter('codigo_moneda').'):', 0, 0, 'R', false, '', 0, false, 'T', 'C');
@@ -177,6 +204,13 @@ Class RSolicitudPlanPago extends Report {
         $pdf->Ln();
 		
 		$pdf->Cell($width2+$width3, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+		$pdf->SetFont('', 'B');
+        $pdf->Cell($width2*2, $height, 'Ret. Garantia ('.$this->getDataSource()->getParameter('codigo_moneda').'):', 0, 0, 'R', false, '', 0, false, 'T', 'C');
+        $pdf->SetFont('', '');
+        $pdf->Cell($width3, $height, $this->getDataSource()->getParameter('monto_retgar_mo'), 0, 0, 'R', false, '', 0, false, 'T', 'C');
+        $pdf->Ln();
+        
+        $pdf->Cell($width2+$width3, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
 		$pdf->SetFont('', 'B');
         $pdf->Cell($width2*2, $height, 'Otros Descuentos ('.$this->getDataSource()->getParameter('codigo_moneda').'):', 0, 0, 'R', false, '', 0, false, 'T', 'C');
         $pdf->SetFont('', '');

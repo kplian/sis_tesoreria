@@ -5,6 +5,9 @@
 *@author  (admin)
 *@date 10-04-2013 15:43:23
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
+*	ISSUE    	  Fecha 		Autor				Descripcion	
+* #1			16/102016		EGS					Se aumento el campo pago borrador y sus respectivas validaciones 
+* 
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -121,7 +124,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 	arrayStore :{
                 	'TODOS':[
                 	            ['devengado_pagado','Devengar y pagar (2 comprobantes)'],
-                                ['devengado_pagado_1c','Caso especial'],
+                                ['devengado_pagado_1c','Devengar y pagar (1 comprobante)'],
                                 ['devengado','Devengar'],
                                 ['devengado_rrhh','Devengar RH'],
                                 ['rendicion','Agrupar Dev y Pagar (Agrupa varios documentos)'], //es similr a un devengar y pagar pero no genera prorrateo directamente
@@ -391,10 +394,18 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 allowBlank: false,
                 emptyText:'Tipo de Cuoata',
                 renderer:function (value, p, record){
+                		console.log('record',record.data.pago_borrador);
                         var dato='';
                         dato = (dato==''&&value=='devengado')?'Devengar':dato;
                         dato = (dato==''&&value=='devengado_rrhh')?'Devengar':dato;
+                       
+						if (record.data.pago_borrador =='si') {
+                         dato = (dato==''&&value=='devengado_pagado')?'Devengar':dato;
+                        
+                        } else{
+                        
                         dato = (dato==''&&value=='devengado_pagado')?'Devengar y pagar (2 cbte)':dato;
+                        };
                         dato = (dato==''&&value=='devengado_pagado_1c')?'Devengar y pagar (1 cbte)':dato;
                         dato = (dato==''&&value=='pagado')?'Pagar':dato;
                         dato = (dato==''&&value=='pagado_rrhh')?'Pagar':dato;
@@ -430,6 +441,35 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:true
         },
+                ///#1			16/102016		EGS	
+        {
+			config:{
+				name:'pago_borrador',
+				fieldLabel:'Pago a Borrador',
+				typeAhead: true,
+				allowBlank:true,
+				triggerAction: 'all',
+				emptyText:'Si o No',
+				selectOnFocus:true,
+				mode:'local',
+				qtip: 'Devuelve El Pago Directo a Borrador',
+				store:new Ext.data.ArrayStore({
+					fields: ['ID', 'valor'],
+					data :	[
+						['si','si'],
+						['no','no']
+					]
+				}),
+				valueField:'ID',
+				displayField:'valor',
+				width:250,
+				valorInicial:'no'							
+			},
+			type:'ComboBox',
+			id_grupo:1,
+			form:true
+		},
+		///#1			16/102016		EGS	
          {
             config:{
                 name: 'nombre_pago',
@@ -1271,8 +1311,11 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 		{name:'fecha_costo_ini', type: 'date',dateFormat:'Y-m-d'},
 		{name:'fecha_costo_fin', type: 'date',dateFormat:'Y-m-d'},
 		'id_depto_conta_pp','desc_depto_conta_pp','funcionario_wf','tiene_form500',
-		'id_depto_lb','desc_depto_lb','prioridad_lp',{name:'ultima_cuota_dev',type:'numeric'},'id_gestion','id_periodo'
-		
+		'id_depto_lb','desc_depto_lb','prioridad_lp',{name:'ultima_cuota_dev',type:'numeric'},'id_gestion','id_periodo',
+			
+		//#1			16/102016		EGS	
+		{name:'pago_borrador', type: 'string'},
+		//#1			16/102016		EGS	
 	],
 	
    arrayDefaultColumHidden:['id_fecha_reg','id_fecha_mod',
@@ -1871,8 +1914,12 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
     
     
     inicioValores:function(){
+    	//RAC 1/02/2018 permite fecha inico posterior, esto es temporal para regulizarciones
+    	//var anio = fecha.getFullYear();
+       // var fecha_inicio = new Date(anio+'/01/1');       
         
-        this.Cmp.fecha_tentativa.minValue=new Date();
+        //this.Cmp.fecha_tentativa.minValue=fecha_fin;
+        
         this.Cmp.fecha_tentativa.setValue(new Date());
         this.Cmp.nombre_pago.setValue(this.maestro.desc_proveedor);
         this.Cmp.monto.setValue(0);
@@ -1949,7 +1996,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 me.Cmp.monto_retgar_mo.setReadOnly(false);
                 me.mostrarGrupo(3); //mostra el grupo rango de costo
                 me.ocultarGrupo(2); //ocultar el grupo de ajustes
-                
+                //#1			16/102016		EGS	
+                me.ocultarComponente(me.Cmp.pago_borrador);
+                //#1			16/102016		EGS	
                 
            },
            
@@ -1969,7 +2018,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 me.Cmp.monto_retgar_mo.setReadOnly(false);
                 me.ocultarGrupo(2); //ocultar el grupo de ajustes
                 me.ocultarGrupo(3); //ocultar el grupo de periodo del costo
-                
+                      
+                //#1			16/102016		EGS	
+                 me.ocultarComponente(me.Cmp.pago_borrador);
+                 //#1			16/102016		EGS	
                 
                 
            },
@@ -1991,7 +2043,11 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                me.Cmp.monto_retgar_mo.setReadOnly(false);
                me.mostrarGrupo(3); //mostra el grupo rango de costo
                me.ocultarGrupo(2); //ocultar el grupo de ajustes
+                //#1			16/102016		EGS	
+               me.Cmp.pago_borrador.setValue('no');
                
+               me.mostrarComponente(me.Cmp.pago_borrador);
+              //#1			16/102016		EGS	
                
               
         
@@ -2000,7 +2056,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
            
            'devengado_pagado_1c':function(me){
                //plantilla (TIPO DOCUMENTO)
-               me.setTipoPago['devengado_pagado'](me); 
+               me.setTipoPago['devengado_pagado'](me);
+                //#1			16/102016		EGS	
+                me.ocultarComponente(me.Cmp.pago_borrador);      
+                //#1			16/102016		EGS	 
                      
            },
            
@@ -2014,6 +2073,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                me.habilitarDescuentos(me);
                me.ocultarGrupo(2); //ocultar el grupo de ajustes
                me.ocultarGrupo(3); //ocultar el grupo de periodo del costo
+                 
+               //#1			16/102016		EGS	
+                me.ocultarComponente(me.Cmp.pago_borrador);
+                //#1			16/102016		EGS	
               
           },
            'dev_garantia':function(me){
@@ -2029,6 +2092,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
               me.ocultarComponente(me.Cmp.monto_anticipo);
               me.ocultarGrupo(2); //ocultar el grupo de ajustes
               me.ocultarGrupo(3); //ocultar el grupo de periodo del costo
+                    
+             //#1			16/102016		EGS	
+               me.ocultarComponente(me.Cmp.pago_borrador);
+               //#1			16/102016		EGS	
              
               
            },
@@ -2046,7 +2113,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
               me.ocultarComponente(me.Cmp.monto_anticipo);
               me.ocultarGrupo(2); //ocultar el grupo de ajustes
               me.ocultarGrupo(3); //ocultar el grupo de periodo del costo
-             
+                         
+             //#1			16/102016		EGS	
+               me.ocultarComponente(me.Cmp.pago_borrador);
+              //#1			16/102016		EGS	
               
           },
            
@@ -2059,6 +2129,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                me.Cmp.monto_retgar_mo.setReadOnly(true);
                me.ocultarGrupo(2); //ocultar el grupo de ajustes
                me.ocultarGrupo(3); //ocultar el grupo de periodo del costo
+                            
+              //#1			16/102016		EGS	
+               me.ocultarComponente(me.Cmp.pago_borrador);
+               //#1			16/102016		EGS	
               
         }, 
         'pagado_rrhh':function(me){
@@ -2070,7 +2144,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                me.Cmp.monto_retgar_mo.setReadOnly(true);
                me.ocultarGrupo(2); //ocultar el grupo de ajustes
                me.ocultarGrupo(3); //ocultar el grupo de periodo del costo
-              
+             
+         		 //#1			16/102016		EGS	
+          	   me.ocultarComponente(me.Cmp.pago_borrador);
+          	   //#1			16/102016		EGS	    
         },
         'ant_parcial':function(me){
                 me.ocultarComponente(me.Cmp.id_plantilla);
@@ -2092,7 +2169,11 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 me.ocultarComponente(me.Cmp.monto_anticipo);
                 me.ocultarGrupo(2); //ocultar el grupo de ajustes
                 me.ocultarGrupo(3); //ocultar el grupo de periodo del costo
-            
+                           
+                
+                //#1			16/102016		EGS	
+                me.ocultarComponente(me.Cmp.pago_borrador);
+            	//#1			16/102016		EGS	
         },
         
         'anticipo':function(me){
@@ -2115,9 +2196,18 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 me.mostrarComponente(me.Cmp.obs_descuentos_ley);
                 me.ocultarGrupo(2); //ocultar el grupo de ajustes
                 me.mostrarGrupo(3); //ocultar el grupo de periodo del costo
+                              
+                //#1			16/102016		EGS	
+                 me.ocultarComponente(me.Cmp.pago_borrador);
+                 //#1			16/102016		EGS	
                 
          },
          'ant_aplicado':function(me, data){
+         	
+         		//#1			16/102016		EGS	
+         		me.ocultarComponente(me.Cmp.pago_borrador);
+         		//#1			16/102016		EGS	
+         		
                 me.Cmp.id_plantilla.disable();
                 me.ocultarComponente(me.Cmp.descuento_ley);
                 me.ocultarComponente(me.Cmp.obs_descuentos_ley);

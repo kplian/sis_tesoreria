@@ -713,9 +713,11 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		if(data.tipo=='cheque'){
 			this.mostrarComponente(this.cmpNroCheque);
 			this.mostrarComponente(this.cmpImporteCheque);
+			this.cmpNroCheque.allowBlank=false;
 		}
 		else{
 			this.ocultarComponente(this.cmpNroCheque);
+			this.cmpNroCheque.allowBlank=true;
 			if(data.tipo=='deposito'){
 				this.mostrarComponente(this.cmpImporteDeposito);
 				this.ocultarComponente(this.cmpImporteCheque);

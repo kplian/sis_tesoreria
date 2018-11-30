@@ -199,11 +199,11 @@ BEGIN
       
       
       
-        ELSEIF p_operacion = 'revertir' THEN
+        ELSEIF p_operacion = 'revertir_old' THEN
        
         -- revierte el presupuesto total que se encuentre comprometido
         
-       
+       raise exception 'llega';
            v_i = 0;
           
            FOR v_registros in ( 
@@ -300,7 +300,96 @@ BEGIN
                                                              p_conexion
                                                              );
                END IF;
-                     
+               
+        --02/02/2018 --AJSUTE PARA REVERTIR PRESUPUESTO,        
+               
+        ELSEIF p_operacion = 'revertir' THEN
+       
+        -- revierte el presupuesto total que se encuentre comprometido
+        
+       
+           v_i = 0;
+          
+           FOR v_registros in ( 
+                            SELECT
+                              opd.id_obligacion_det,
+                              opd.id_centro_costo,
+                              op.id_gestion,
+                              op.id_obligacion_pago,
+                              opd.id_partida,
+                              opd.monto_pago_mb,
+                              opd.monto_pago_mo,
+                              p.id_presupuesto,
+                              op.comprometido,
+                              opd.revertido_mb,
+                              opd.revertido_mo,
+                              opd.id_partida_ejecucion_com,
+                              op.id_moneda,
+                              op.fecha,
+                              op.num_tramite,
+                              op.tipo_cambio_conv
+                              
+                              FROM  tes.tobligacion_pago  op
+                              INNER JOIN tes.tobligacion_det opd  on  opd.id_obligacion_pago = op.id_obligacion_pago and opd.estado_reg = 'activo'
+                              INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = opd.id_centro_costo 
+                              WHERE  
+                                     op.id_obligacion_pago = p_id_obligacion_pago
+                                     and opd.estado_reg = 'activo' 
+                                     and opd.monto_pago_mo > 0  ) LOOP
+                                     
+                     IF(v_registros.id_partida_ejecucion_com is not  NULL) THEN                     
+                    
+                              SELECT 
+                                       COALESCE(ps_comprometido,0), 
+                                       COALESCE(ps_ejecutado,0)  
+                                   into 
+                                       v_comprometido,
+                                       v_ejecutado
+                               FROM pre.f_verificar_com_eje_pag(v_registros.id_partida_ejecucion_com,v_registros.id_moneda);
+                          
+                              --la fecha de reversion no puede ser anterior a la fecha de la solictud
+                              -- la fecha de solictud es la fecha de compromiso 
+                              IF  now()  < v_registros.fecha THEN
+                                v_fecha = v_registros.fecha::date;
+                              ELSE
+                                 -- la fecha de reversion como maximo puede ser el 31 de diciembre   
+                                 v_fecha = now()::date;
+                                 v_ano_1 =  EXTRACT(YEAR FROM  now()::date);
+                                 v_ano_2 =  EXTRACT(YEAR FROM  v_registros.fecha::date);
+                                 
+                                 IF  v_ano_1  >  v_ano_2 THEN
+                                   v_fecha = ('31-12-'|| v_ano_2::varchar)::date;
+                                 END IF;
+                              END IF;
+                              --armamos los array para enviar a presupuestos          
+                              IF v_comprometido - v_ejecutado > 0 THEN
+                              
+                               va_resp_ges = pre.f_gestionar_presupuesto_individual(
+                                              p_id_usuario, 
+                                              NULL::NUMERIC, --tipo cambio
+                                              v_registros.id_presupuesto, 
+                                              v_registros.id_partida, 
+                                              v_registros.id_moneda, --  RAC Cambio por moneda de la solicitud , v_id_moneda_base;
+                                              ((v_comprometido  - v_ejecutado)*-1)::NUMERIC, --RAC Cambio por moneda de la solicitud , v_registros.precio_ga_mb;
+                                              v_fecha, 
+                                              'comprometido'::Varchar, --traducido a varchar
+                                               v_registros.id_partida_ejecucion_com::INTEGER, 
+                                              'id_obligacion_pago'::VARCHAR, 
+                                               v_registros.id_obligacion_pago, 
+                                               v_reg_op.num_tramite::VARCHAR 
+                                              );
+                               
+                                  v_i = v_i +1;                
+                                 
+                                
+                              END IF;
+                            
+                    
+                    END IF;
+             
+             END LOOP;
+             
+            
       
        ELSEIF p_operacion = 'sincronizar_presupuesto' THEN
        

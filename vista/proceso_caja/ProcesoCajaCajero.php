@@ -11,60 +11,69 @@
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
-    Phx.vista.ProcesoCajaCajero = {
-        bedit:false,
-        bnew:true,
-        bsave:false,
-        bdel:true,
-        require:'../../../sis_tesoreria/vista/proceso_caja/ProcesoCaja.php',
-        requireclase:'Phx.vista.ProcesoCaja',
-        title:'Rendiciones/Reposiciones Caja',
-        nombreVista: 'ProcesoCajaCajero',
-        /*
-         *  Interface heredada en el sistema de tesoreria para que el responsable
-         *  de rendiciones apruebe las rendiciones , y pase por los pasos configurados en el WF
-         *  de validacion, aprobacion
-         * */
+	Phx.vista.ProcesoCajaCajero = {
+		bedit:false,
+		bnew:true,
+		bsave:false,
+		bdel:true,
+		require:'../../../sis_tesoreria/vista/proceso_caja/ProcesoCaja.php',
+		requireclase:'Phx.vista.ProcesoCaja',
+		title:'Rendiciones/Reposiciones Caja',
+		nombreVista: 'ProcesoCajaCajero',
+		/*
+		 *  Interface heredada en el sistema de tesoreria para que el responsable
+		 *  de rendiciones apruebe las rendiciones , y pase por los pasos configurados en el WF
+		 *  de validacion, aprobacion
+		 * */
+		constructor: function(config) {
+			Phx.vista.ProcesoCajaCajero.superclass.constructor.call(this,config);
+			this.addButton('fin_registro',
+				{	
+					text:'Siguiente',
+					iconCls: 'badelante',
+					disabled:true,
+					handler:this.sigEstado,
+					tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
+				}
+			);
+			//
+			this.addButton('consolidado_rendicion',
+				{	
+					text:'Reporte Rendicion',
+					iconCls: 'blist',
+					disabled:true,
+					grupo:[0,1],
+					handler:this.consolidado_rendicion,
+					tooltip: '<b>Consolidado Rendicion</b><p>Consolidado por Rendicion</p>'
+				}
+			);
+			//
+			this.addButton('arqueo',
+				{	
+					text:'Arqueo',
+					iconCls: 'blist',
+					disabled:true,
+					grupo:[0,1],
+					handler:this.arqueo,
+					tooltip: '<b>Arqueo</b>'
+				}
+			);
+			this.load({params:{start:0, limit: this.tam_pag, tipo_interfaz:this.nombreVista, id_caja:this.id_caja}});
+			//RCM: correción del error en la paginación
+			Ext.apply(this.store.baseParams,{ tipo_interfaz:this.nombreVista, id_caja:this.id_caja})
+		},
 
-        constructor: function(config) {
-
-            Phx.vista.ProcesoCajaCajero.superclass.constructor.call(this,config);
-
-            this.addButton('fin_registro',
-                {	text:'Siguiente',
-                    iconCls: 'badelante',
-                    disabled:true,
-                    handler:this.sigEstado,
-                    tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
-                }
-            );
-
-            this.addButton('consolidado_rendicion',
-                {	text:'Reporte Rendicion',
-                    iconCls: 'blist',
-                    disabled:true,
-                    grupo:[0,1],
-                    handler:this.consolidado_rendicion,
-                    tooltip: '<b>Consolidado Rendicion</b><p>Consolidado por Rendicion</p>'
-                }
-            );
-
-            this.load({params:{start:0, limit: this.tam_pag, tipo_interfaz:this.nombreVista, id_caja:this.id_caja}});
-        },
-
-        onButtonNew: function(){
-            Phx.vista.ProcesoCajaCajero.superclass.onButtonNew.call(this);
-            this.Cmp.id_caja.setValue(this.id_caja);
-
-            this.Cmp.tipo.reset();
-            this.Cmp.tipo.store.baseParams = Ext.apply(this.Cmp.tipo.store.baseParams,{estado_caja: this.estado} )
-            this.Cmp.tipo.modificado = true;
-
-            if(this.estado=='cerrado'){
-                this.ocultarComponente(this.Cmp.fecha_inicio);
-                this.ocultarComponente(this.Cmp.fecha_fin);
-            }
-        },
+		onButtonNew: function(){
+			Phx.vista.ProcesoCajaCajero.superclass.onButtonNew.call(this);
+			this.Cmp.id_caja.setValue(this.id_caja);
+			this.Cmp.tipo.reset();
+			this.Cmp.tipo.store.baseParams = Ext.apply(this.Cmp.tipo.store.baseParams,{estado_caja: this.estado} )
+			this.Cmp.tipo.modificado = true;
+			if(this.estado=='cerrado'){
+				this.ocultarComponente(this.Cmp.fecha_inicio);
+				this.ocultarComponente(this.Cmp.fecha_fin);
+			}
+		},
 
         sigEstado:function() {
             var rec = this.sm.getSelected();
@@ -210,16 +219,15 @@ header("content-type: text/javascript; charset=UTF-8");
             Ext.Ajax.request({
                 url:'../../sis_tesoreria/control/ProcesoCaja/siguienteEstadoProcesoCaja',
                 params:{
-
-                    id_proceso_wf_act:  resp.id_proceso_wf_act,
-                    id_estado_wf_act:   resp.id_estado_wf_act,
-                    id_tipo_estado:     resp.id_tipo_estado,
-                    id_funcionario_wf:  resp.id_funcionario_wf,
-                    id_depto_wf:        resp.id_depto_wf,
-                    obs:                resp.obs,
-                    id_cuenta_bancaria:	resp.id_cuenta_bancaria,
-                    id_cuenta_bancaria_mov : resp.id_cuenta_bancaria_mov,
-                    json_procesos:      Ext.util.JSON.encode(resp.procesos)
+					id_proceso_wf_act:  resp.id_proceso_wf_act,
+					id_estado_wf_act:   resp.id_estado_wf_act,
+					id_tipo_estado:     resp.id_tipo_estado,
+					id_funcionario_wf:  resp.id_funcionario_wf,
+					id_depto_wf:        resp.id_depto_wf,
+					obs:                resp.obs,
+					id_cuenta_bancaria:	resp.id_cuenta_bancaria,
+					id_cuenta_bancaria_mov : resp.id_cuenta_bancaria_mov,
+					json_procesos:      Ext.util.JSON.encode(resp.procesos)
                 },
                 success:this.successWizard,
                 failure: this.conexionFailure,
@@ -250,28 +258,28 @@ header("content-type: text/javascript; charset=UTF-8");
             }
 
             if(data['tipo']=='SOLREN'){
-                this.getBoton('consolidado_rendicion').enable();
-                //this.getBoton('chkpresupuesto').enable();
-                //this.getBoton('consolidado_reposicion').disable();
+				this.getBoton('consolidado_rendicion').enable();
+				this.getBoton('arqueo').enable();
+				this.TabPanelSouth.get(2).enable();	
+				this.TabPanelSouth.setActiveTab(0)					
             }else if(data['tipo']=='SOLREP'){
-                this.getBoton('consolidado_rendicion').disable();
-                //this.getBoton('chkpresupuesto').disable();
-                //this.getBoton('consolidado_reposicion').enable();
-            }else{
-                this.getBoton('consolidado_rendicion').disable();
-                //this.getBoton('chkpresupuesto').disable();
-                //this.getBoton('consolidado_reposicion').disable();
-            }
+				this.getBoton('consolidado_rendicion').disable();
+				this.getBoton('arqueo').disable();
+				//this.getBoton('chkpresupuesto').disable();
+				//this.getBoton('consolidado_reposicion').enable();
+			}else{
+				this.getBoton('consolidado_rendicion').disable();
+				//this.getBoton('chkpresupuesto').disable();
+				//this.getBoton('consolidado_reposicion').disable();
+			}
 
-            if(data['tipo']=='CIERRE'){
-                //habilitar pestaña depositos
-                this.enableTabDepositos();
-            }else{
-                //deshabilitar pestaña depositos
-                this.disableTabDepositos();
-            }
-
-        },
+			if(data['tipo']=='CIERRE'){
+				//habilitar pestaña depositos
+				this.enableTabDepositos();
+			}else{				
+				this.disableTabDepositos();
+			}
+		},
 
         enableTabDepositos:function(){
             if(this.TabPanelSouth.get(1)){
@@ -312,7 +320,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		consolidado_rendicion : function() {
 			var rec = this.getSelectedData();
 			var NumSelect=this.sm.getCount();
-	
+			console.log(rec);
 			if(NumSelect != 0)
 			{
 				Phx.CP.loadingShow();
@@ -320,7 +328,9 @@ header("content-type: text/javascript; charset=UTF-8");
 					url:'../../sis_tesoreria/control/Caja/impReporteProcesoCaja',
 					params:{
 						'id_caja':rec.id_caja,
-						'id_proceso_caja':rec.id_proceso_caja
+						'id_proceso_caja':rec.id_proceso_caja,
+						'nro_tramite':rec.nro_tramite,
+						'fecha':rec.fecha
 					},
 					success:this.successExport,
 					failure: this.conexionFailure,
@@ -364,6 +374,36 @@ header("content-type: text/javascript; charset=UTF-8");
             var tb = Phx.vista.ProcesoCajaCajero.superclass.liberaMenu.call(this);
 
             return tb
-        }
+        },
+        //
+		arqueo : function() {
+			var rec = this.getSelectedData();
+			var NumSelect=this.sm.getCount();			
+			if(NumSelect != 0)
+			{
+				Phx.CP.loadingShow();
+				Ext.Ajax.request({
+					url:'../../sis_tesoreria/control/Caja/arqueo',
+					params:{
+						'id_caja':rec.id_caja,
+						'id_proceso_caja':rec.id_proceso_caja,
+						'nro_tramite':rec.nro_tramite,
+						'fecha':rec.fecha/*,
+						'tipo':rec.tipo,
+						'estado':rec.estado,
+						'id_int_comprobante':rec.id_int_comprobante,
+						'nombre':rec.nombre*/
+					},
+					success:this.successExport,
+					failure: this.conexionFailure,
+					timeout:this.timeout,
+					scope:this
+				});		
+			}
+			else
+			{
+				Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
+			}
+		}
     };
 </script>

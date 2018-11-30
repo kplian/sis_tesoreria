@@ -5,7 +5,11 @@
 *@author  Gonzalo Sarmiento Sejas
 *@date 02-04-2013 20:27:35
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
-*/
+* Issue			Fecha			Author          Descripcion
+ * #1				21/09/2018		EGS				se arreglo para filtros del concepto y gasto con especial
+ * 
+ * */
+
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
@@ -583,9 +587,12 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
         if(this.maestro.tipo_obligacion=='pago_unico'){
         	this.Cmp.id_concepto_ingas.store.baseParams.autorizacion = 'pago_unico';
         }
-        if(this.maestro.tipo_obligacion=='especial'){
-        	this.Cmp.id_concepto_ingas.store.baseParams.autorizacion = 'pago_especial';
+           
+        //#1				21/09/2018		EGS	
+        if(this.maestro.tipo_obligacion=='pago_especial'){
+        	this.Cmp.id_concepto_ingas.store.baseParams.autorizacion = 'especial';
         }
+       // #1				21/09/2018		EGS	
         
         this.store.baseParams={id_obligacion_pago:this.maestro.id_obligacion_pago};
         this.load({params:{start:0, limit:50}})

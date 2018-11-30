@@ -330,7 +330,7 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->captura('motivo','text');
 		$this->captura('monto','numeric');
 		$this->captura('fecha_rendicion','date');
-
+		$this->captura('monto_dev','numeric');
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		//var_dump($this->consulta); exit;
@@ -382,7 +382,8 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->captura('impuesto_descuento_ley','numeric');		
 		$this->captura('cargo','numeric');
 		$this->captura('descargo','numeric');
-		
+		$this->captura('importe_pago_liquido','numeric');
+		$this->captura('motivo','varchar');
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();

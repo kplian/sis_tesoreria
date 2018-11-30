@@ -614,7 +614,13 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 									},
 								success:this.successWizard,
 								failure: this.conexionFailure,
-								argument:{wizard:wizard},
+								argument:
+								{
+									wizard:wizard, 
+									id_proceso_wf : resp.id_proceso_wf_act,
+									id_estado_wf:   resp.id_estado_wf_act,
+									resp : resp
+								},
 								timeout:this.timeout,
 								scope:this
 							});							
@@ -649,8 +655,14 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 									},
 								success:this.successWizard,
 								failure: this.conexionFailure,
-								argument:{wizard:wizard},
-								timeout:this.timeout,
+								argument:
+								{
+									wizard:wizard, 
+									id_proceso_wf : resp.id_proceso_wf_act,
+									id_estado_wf:   resp.id_estado_wf_act,
+									resp : resp
+								},
+													timeout:this.timeout,
 								scope:this
 							});							
 						} else {
@@ -683,7 +695,13 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 									},
 								success:this.successWizard,
 								failure: this.conexionFailure,
-								argument:{wizard:wizard},
+								argument:
+								{
+									wizard:wizard, 
+									id_proceso_wf : resp.id_proceso_wf_act,
+									id_estado_wf:   resp.id_estado_wf_act,
+									resp : resp
+								},
 								timeout:this.timeout,
 								scope:this
 							});							
@@ -710,7 +728,13 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 									},
 								success:this.successWizard,
 								failure: this.conexionFailure,
-								argument:{wizard:wizard},
+								argument:
+								{
+									wizard:wizard, 
+									id_proceso_wf : resp.id_proceso_wf_act,
+									id_estado_wf:   resp.id_estado_wf_act,
+									resp : resp
+								},
 								timeout:this.timeout,
 								scope:this
 							});	
@@ -769,20 +793,36 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 	},
 		
 	successWizard:function(resp){
-			Phx.CP.loadingHide();
-			resp.argument.wizard.panel.destroy()
-			this.reload();
-		 },
+		Phx.CP.loadingHide();
+		resp.argument.wizard.panel.destroy()
+		this.reload();
+		
+		if(resp.argument.wizard.Cmp.id_tipo_estado.lastSelectionText=='rendido'){
+			if (resp.argument.id_proceso_wf) {
+				Phx.CP.loadingShow();
+				Ext.Ajax.request({
+					url : '../../sis_tesoreria/control/SolicitudEfectivo/reporteRendicionEfectivo',
+					params : {
+						'id_proceso_wf' : resp.argument.id_proceso_wf
+					},
+					success : this.successExport,
+					failure : this.conexionFailure,
+					timeout : this.timeout,
+					scope : this
+				});
+			}
+		}
+	},
 	
-	tabsouth:[
-            { 
-             url:'../../../sis_tesoreria/vista/solicitud_rendicion_det/AprobacionFacturas.php',
-             title:'Detalle', 
-             height:'50%',
-             cls:'AprobacionFacturas'
-            }    
-       ]
-	   
+	tabsouth:
+	[
+		{
+			url:'../../../sis_tesoreria/vista/solicitud_rendicion_det/AprobacionFacturas.php',
+			title:'Detalle', 
+			height:'50%',
+			cls:'AprobacionFacturas'
+		}
+	]
 	}
 )
 </script>

@@ -60,6 +60,7 @@ Phx.vista.ObligacionPagoConsulta = {
               	this.getBoton('btnVerifPresup').disable();
               }
             }
+            this.getBoton('chkpresupuesto').enable();
           
      },
      
@@ -79,6 +80,7 @@ Phx.vista.ObligacionPagoConsulta = {
 			
 			//Inhabilita el reporte de disponibilidad
             this.getBoton('btnVerifPresup').disable();
+            this.getBoton('chkpresupuesto').disable();
         }
        this.TabPanelSouth.get(1).disable();
        
