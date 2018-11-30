@@ -220,7 +220,12 @@ BEGIN
                               obpg.obs_poa,
                               obpg.uo_ex,
                               obpg.id_funcionario_responsable,
-							                fresp.desc_funcionario1 AS desc_fun_responsable
+							                fresp.desc_funcionario1 AS desc_fun_responsable,
+                              obpg.monto_ajuste_ret_garantia_ga,
+                              obpg.monto_ajuste_ret_anticipo_par_ga,
+                              obpg.monto_total_adjudicado,
+                              obpg.total_anticipo,
+                              obpg.pedido_sap
 
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
@@ -242,7 +247,8 @@ BEGIN
 
 
 
-            -- raise notice '%',v_consulta;
+          --raise notice 'err %',v_consulta;
+          --raise EXCEPTION 'error provocado %',v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 
@@ -470,7 +476,12 @@ BEGIN
                               con.tipo||'' - ''||con.numero::varchar as desc_contrato,
                               con.id_contrato,
                               obpg.obs_presupuestos,
-                              obpg.uo_ex
+                              obpg.uo_ex,
+                               obpg.monto_total_adjudicado,
+                               obpg.total_anticipo,
+                               obpg.monto_ajuste_ret_anticipo_par_ga,
+                               obpg.monto_ajuste_ret_garantia_ga,
+                               obpg.pedido_sap
 
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
@@ -494,8 +505,9 @@ BEGIN
 
 
 
-              raise notice '%',v_consulta;
+              raise notice 'SSS %',v_consulta;
 			--Devuelve la respuesta
+           -- RAISE EXCEPTION 'consulta atrapado %',v_consulta;
 			return v_consulta;
 
 		end;

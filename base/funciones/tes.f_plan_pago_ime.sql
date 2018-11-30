@@ -17,10 +17,9 @@ $body$
  COMENTARIOS:	
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
-
- DESCRIPCION:	
- AUTOR:			
- FECHA:		
+ISUUE		FECHA:			 AUTOR:	 		DESCRIPCION:	
+#1			16/10/2018		EGS 			se agrego el campo pago_borrador en la sentencia de modificacion en TES_PLAPA_MOD			
+	
 ***************************************************************************/
 
 DECLARE
@@ -665,7 +664,8 @@ BEGIN
             monto_ajuste_ag = v_parametros.monto_ajuste_ag,
             monto_anticipo = v_monto_anticipo,
             fecha_costo_ini = v_parametros.fecha_costo_ini, 
-            fecha_costo_fin = v_parametros.fecha_costo_fin	
+            fecha_costo_fin = v_parametros.fecha_costo_fin,
+            pago_borrador = v_parametros.pago_borrador		 --#1			16/10/2018		EGS 	
             where id_plan_pago = v_parametros.id_plan_pago;
            
            
@@ -805,7 +805,7 @@ BEGIN
                      
                      IF  v_id_tipo_estado is NULL THEN
                     
-                         raise exception 'no existe el estado enulado en la cofiguacion de WF para este tipo de proceso';
+                         raise exception 'no existe el estado anulado en la cofiguacion de WF para este tipo de proceso';
                      
                      END IF;
                      -- pasamos la cotizacion al siguiente estado
@@ -985,6 +985,8 @@ BEGIN
                 
           end if;
           
+           
+          
           
           
           IF  v_registros.tipo  in ('pagado' ,'devengado_pagado','devengado_pagado_1c','anticipo','ant_parcial') THEN
@@ -1067,6 +1069,8 @@ BEGIN
               
            END IF;
            
+          
+           
            
            v_verficacion = tes.f_generar_comprobante(
                                                       p_id_usuario,
@@ -1075,6 +1079,10 @@ BEGIN
                                                       v_parametros.id_plan_pago, 
                                                       v_parametros.id_depto_conta,
                                                       v_nombre_conexion);
+                                                      
+           IF p_id_usuario = 429  THEN
+              --raise exception 'lleha   %',v_verficacion;                   
+           END  IF;                                           
           
           --select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'exito'); 
           

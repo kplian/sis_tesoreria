@@ -155,6 +155,13 @@ DECLARE
   v_pre_integrar_presupuestos varchar;
   va_num_tramite VARCHAR [ ];
   v_adq_comprometer_presupuesto varchar;
+  
+  --RCM 12/06/2018: alarmas
+  v_acceso_directo                varchar;
+  v_clase                         varchar;
+  v_parametros_ad                 varchar;
+  v_tipo_noti                     varchar;
+  v_titulo                        varchar;
 
 BEGIN
 
@@ -730,7 +737,13 @@ BEGIN
       ---------------------------------------
       -- REGISTA EL SIGUIENTE ESTADO DEL WF.
       ---------------------------------------
-
+	  --RCM 12/06/2018: alarmas
+      v_acceso_directo = '../../../sis_tesoreria/vista/obligacion_pago/ObligacionPagoVb.php';
+      v_clase = 'ObligacionPagoVb';
+      v_parametros_ad = '{filtro_directo:{campo:"obpg.id_proceso_wf",valor:"'||v_id_proceso_wf::varchar||'"}}';
+      v_tipo_noti = 'notificacion';
+      v_titulo  = 'Visto Bueno';
+      
       v_id_estado_actual =  wf.f_registra_estado_wf(
         v_parametros.id_tipo_estado,
         v_parametros.id_funcionario_wf,
@@ -740,7 +753,12 @@ BEGIN
         v_parametros._id_usuario_ai,
         v_parametros._nombre_usuario_ai,
         v_id_depto,
-        v_obs);
+        v_obs,
+        v_acceso_directo,
+        v_clase,
+        v_parametros_ad,
+        v_tipo_noti,
+        v_titulo);
 
       --------------------------------------
       -- registra los procesos disparados
@@ -1950,6 +1968,34 @@ BEGIN
 
       --Devuelve la respuesta
       return v_resp;
+
+    end;
+    
+    /*********************************    
+     #TRANSACCION:  'TES_ANTIRET_IME'
+     #DESCRIPCION:  Modifica los valores de saldos de anticipos y retenciones                    
+     #AUTOR:        fpc
+     #FECHA:        1-4-2015 14:48:35
+    ***********************************/
+
+    elsif(p_transaccion='TES_ANTIRET_IME')then
+
+    begin
+        update tes.tobligacion_pago
+        set monto_total_adjudicado = v_parametros.monto_total_adjudicado,
+            total_anticipo = v_parametros.total_anticipo,
+            monto_ajuste_ret_anticipo_par_ga = v_parametros.monto_ajuste_ret_anticipo_par_ga,
+            monto_ajuste_ret_garantia_ga = v_parametros.monto_ajuste_ret_garantia_ga,
+            pedido_sap = v_parametros.pedido_sap
+        where id_obligacion_pago = v_parametros.id_obligacion_pago;
+
+        --Definicion de la respuesta
+        v_resp = pxp.f_agrega_clave(v_resp,'mensaje','UOs, EPs retornados');
+        v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',
+          v_parametros.id_obligacion_pago::varchar);
+
+        --Devuelve la respuesta
+        return v_resp;
 
     end;
 

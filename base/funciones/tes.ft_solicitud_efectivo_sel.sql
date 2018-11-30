@@ -46,7 +46,8 @@ DECLARE
     v_cajas				record;
     v_id_caja			integer[];
     v_i					integer;
-
+	v_aux				varchar;
+    v_proceso			integer;
 BEGIN
 
 	v_nombre_funcion = 'tes.ft_solicitud_efectivo_sel';
@@ -64,6 +65,7 @@ BEGIN
     	begin
         	v_filtro='';
             v_inner='';
+            v_aux='';
 
             IF (v_parametros.id_funcionario_usu is null) then
                 v_parametros.id_funcionario_usu = -1;
@@ -78,7 +80,7 @@ BEGIN
             END IF;
 
             IF  lower(v_parametros.tipo_interfaz) in ('condetalle','sindetalle','efectivocaja') THEN
-
+			
                     select id_tipo_solicitud into v_id_tipo_solicitud
                     from tes.ttipo_solicitud
                     where codigo='SOLEFE';
@@ -112,14 +114,15 @@ BEGIN
                             
                                        OR (solefe.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||' or  solefe.id_usuario_reg = '||p_id_usuario||')) and solefe.id_tipo_solicitud = '||v_id_tipo_solicitud||' and ';
                         ELSE
-                            v_filtro = '(solefe.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or solefe.id_usuario_reg='||p_id_usuario||' or solefe.id_usuario_mod='||p_id_usuario||') and solefe.id_tipo_solicitud = '||v_id_tipo_solicitud||' and ';
+                            v_filtro = '(solefe.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or solefe.id_usuario_reg='||p_id_usuario||') and solefe.id_tipo_solicitud = '||v_id_tipo_solicitud||' and ';
+                            -- or solefe.id_usuario_mod='||p_id_usuario||'
                         END IF;
 
                     ELSE
                       --   v_filtro = '(pc.estado = ''solicitado'') and ';
                        v_filtro = 'solefe.id_tipo_solicitud = '||v_id_tipo_solicitud||' and ';
                     END IF;
-
+				
             END IF;
             
            
@@ -164,7 +167,7 @@ BEGIN
             	select id_tipo_solicitud into v_id_tipo_solicitud
                 from tes.ttipo_solicitud
                 where codigo='RENEFE';
-
+				v_aux='solefe.monto!=0.00 and';                			
                 v_saldo = 'solpri.monto - COALESCE((
                                  select sum(monto)
                                  from tes.tsolicitud_efectivo
@@ -251,13 +254,13 @@ BEGIN
 						left join segu.tusuario usu2 on usu2.id_usuario = solefe.id_usuario_mod
                         left join tes.tsolicitud_efectivo solpri on solpri.id_solicitud_efectivo=solefe.id_solicitud_efectivo_fk
                         '||v_inner||'
-				        where  ' || v_filtro;
+				        where  '  || v_aux || v_filtro;
 
 			--Definicion de la respuesta
             v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 			--Devuelve la respuesta
-            raise notice   '%', v_consulta;
+    
            
 			return v_consulta;
 
@@ -347,28 +350,37 @@ BEGIN
     	begin
 
     		--Sentencia de la consulta
-			v_consulta:='select 
+            v_consulta:='select 
                           ts.codigo as codigo_proc,
-                          sol.fecha_entrega, m.moneda, sol.nro_tramite, cj.codigo,
-						 fun.desc_funcionario1 as cajero, slct.nombre_unidad, slct.desc_funcionario1 as solicitante,
-                         sol.motivo, sol.monto, ren.fecha as fecha_rendicion
-                         from tes.tsolicitud_efectivo sol
-                         inner join tes.ttipo_solicitud ts on ts.id_tipo_solicitud = sol.id_tipo_solicitud
-                         left join tes.tsolicitud_efectivo ren on ren.id_solicitud_efectivo_fk = sol.id_solicitud_efectivo
-                         and ren.estado = ''rendido''
-                         inner join tes.tcaja cj on cj.id_caja=sol.id_caja
-                         inner join tes.tcajero cjr on cjr.id_caja=cj.id_caja
-                           and cjr.tipo=''responsable'' 
-                           and   (  sol.fecha_entrega between cjr.fecha_inicio 
-                           and COALESCE   (cjr.fecha_fin, current_date)  or (sol.fecha_entrega is null  
-                           and sol.fecha between cjr.fecha_inicio 
-                           and COALESCE   (cjr.fecha_fin, current_date)))
-                         inner join orga.vfuncionario fun on fun.id_funcionario=cjr.id_funcionario
-                         inner join param.tmoneda m on m.id_moneda=cj.id_moneda
-                         inner join orga.vfuncionario_cargo slct on slct.id_funcionario=sol.id_funcionario
-                         and current_date between slct.fecha_asignacion and COALESCE(slct.fecha_finalizacion,current_date)
+                          sol.fecha_ult_mov::date as fecha_entrega, 
+                          m.moneda, 
+                          sol.nro_tramite, 
+                          cj.codigo,
+                          fun.desc_funcionario1 as cajero, 
+                          slct.nombre_unidad, 
+                          slct.desc_funcionario1 as solicitante,
+                          sol.motivo, 
+                          sol.monto, 
+                          ren.fecha as fecha_rendicion,
+                          ps.monto as monto_dev
+                          from tes.tsolicitud_efectivo sol
+                          inner join tes.ttipo_solicitud ts on ts.id_tipo_solicitud = sol.id_tipo_solicitud
+                          left join (SELECT t.id_solicitud_efectivo_fk,t.monto FROM tes.tsolicitud_efectivo t where t.estado=''rendido'') AS ps on ps.id_solicitud_efectivo_fk = sol.id_solicitud_efectivo
+                          left join tes.tsolicitud_efectivo ren on ren.id_solicitud_efectivo_fk = sol.id_solicitud_efectivo
+                          and ren.estado = ''rendido''
+                          inner join tes.tcaja cj on cj.id_caja=sol.id_caja
+                          inner join tes.tcajero cjr on cjr.id_caja=cj.id_caja
+                          and cjr.tipo=''responsable'' 
+                          and (sol.fecha_entrega between cjr.fecha_inicio 
+                          and COALESCE   (cjr.fecha_fin, current_date)  or (sol.fecha_entrega is null  
+                          and sol.fecha between cjr.fecha_inicio 
+                          and COALESCE   (cjr.fecha_fin, current_date)))
+                          inner join orga.vfuncionario fun on fun.id_funcionario=cjr.id_funcionario
+                          inner join param.tmoneda m on m.id_moneda=cj.id_moneda
+                          inner join orga.vfuncionario_cargo slct on slct.id_funcionario=sol.id_funcionario
+                          and current_date between slct.fecha_asignacion and COALESCE(slct.fecha_finalizacion,current_date)
                          where ';
-                  /*       
+              /*           
              v_consulta:='select 
                           
                            ts.codigo,sol.fecha_entrega, m.moneda, sol.nro_tramite, cj.codigo,
@@ -411,14 +423,26 @@ BEGIN
 	elsif(p_transaccion='TES_RNDEFE_SEL')then
 
     	begin
-    		--Sentencia de la consulta
-			v_consulta:='select sol.fecha_entrega as fecha,
+    		select t.codigo_proceso
+            into v_aux
+            from wf.tproceso_wf t
+            where t.id_proceso_wf=v_parametros.id_proceso_wf;
+            
+            select t.id_proceso_wf
+            into v_proceso
+            from wf.tproceso_wf t
+            join wf.ttipo_proceso tp on tp.id_tipo_proceso=t.id_tipo_proceso
+            where t.codigo_proceso like v_aux and tp.nombre='Solicitud de Efectivo';
+            
+            	v_consulta:='select sol.fecha_ult_mov as fecha,
 								sol.nro_tramite as desc_plantilla,
                                 NULL as rendicion,
                                 NULL as importe_neto,
                                 NULL as importe_descuento_ley,
                                 sol.monto as cargo,
-                                0.00 as descargo
+                                0.00 as descargo,
+                                NULL as importe_pago_liquido,
+                                sol.motivo::varchar 
                           from tes.tsolicitud_efectivo sol
                           where sol.id_proceso_wf='||v_parametros.id_proceso_wf||'
                           UNION ALL
@@ -430,7 +454,9 @@ BEGIN
                                doc.importe_neto,
                                doc.importe_descuento_ley,
                                0.00 as cargo,
-                               doc.importe_neto as descargo
+                               doc.importe_neto as descargo,
+                               doc.importe_pago_liquido,
+                               null::varchar as motivo
                       from tes.tsolicitud_efectivo sol
                       inner join tes.tsolicitud_efectivo ren on ren.id_solicitud_efectivo_fk=sol.id_solicitud_efectivo
                            inner join tes.tsolicitud_rendicion_det det on det.id_solicitud_efectivo =
@@ -439,7 +465,38 @@ BEGIN
                              det.id_documento_respaldo
                            inner join param.tplantilla pla on pla.id_plantilla = doc.id_plantilla
                       where ren.estado = ''rendido'' and sol.id_proceso_wf='||v_parametros.id_proceso_wf||' ';
-			
+			/*v_consulta:='select sol.fecha_entrega as fecha,
+								sol.nro_tramite as desc_plantilla,
+                                NULL as rendicion,
+                                NULL as importe_neto,
+                                NULL as importe_descuento_ley,
+                                sol.monto as cargo,
+                                0.00 as descargo,
+                                NULL as importe_pago_liquido,
+                                sol.motivo
+                          from tes.tsolicitud_efectivo sol
+                          where sol.id_proceso_wf='||v_proceso||'
+                          UNION ALL
+                               select doc.fecha,
+                               null as desc_plantilla,
+                               ''Razon Social: ''       || doc.razon_social || '' N° Doc: '' ||
+                               doc.nro_documento || ''Nit:'' || doc.nit || '' Nro Autorizacion:'' ||
+                               doc.nro_autorizacion || '' Cod Control: '' || doc.codigo_control as rendicion,
+                               doc.importe_neto,
+                               doc.importe_descuento_ley,
+                               0.00 as cargo,
+                               doc.importe_neto as descargo,
+                               doc.importe_pago_liquido,
+                               null as motivo
+                      from tes.tsolicitud_efectivo sol
+                      inner join tes.tsolicitud_efectivo ren on ren.id_solicitud_efectivo_fk=sol.id_solicitud_efectivo
+                           inner join tes.tsolicitud_rendicion_det det on det.id_solicitud_efectivo =
+                             ren.id_solicitud_efectivo
+                           inner join conta.tdoc_compra_venta doc on doc.id_doc_compra_venta =
+                             det.id_documento_respaldo
+                           inner join param.tplantilla pla on pla.id_plantilla = doc.id_plantilla
+                      where ren.estado = ''rendido'' and sol.id_proceso_wf='||v_proceso||' ';
+			*/
 			--Definicion de la respuesta
             --v_consulta:=v_consulta||v_parametros.filtro;
 			--v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
@@ -496,7 +553,8 @@ BEGIN
                             
                                        OR (solefe.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||' or  solefe.id_usuario_reg = '||p_id_usuario||')) and solefe.id_tipo_solicitud = '||v_id_tipo_solicitud||' and ';
                         ELSE
-                            v_filtro = '(solefe.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or solefe.id_usuario_reg='||p_id_usuario||' or solefe.id_usuario_mod='||p_id_usuario||') and solefe.id_tipo_solicitud = '||v_id_tipo_solicitud||' and ';
+                            v_filtro = '(solefe.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or solefe.id_usuario_reg='||p_id_usuario||' ) and solefe.id_tipo_solicitud = '||v_id_tipo_solicitud||' and ';
+                            --or solefe.id_usuario_mod='||p_id_usuario||'
                         END IF;
 
                     ELSE
@@ -729,11 +787,9 @@ BEGIN
                 	v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = solefe.id_proceso_wf ';
 
                     IF p_administrador !=1 THEN
-<<<<<<< HEAD
+
                        v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or solefe.id_usuario_reg = '||p_id_usuario||' ) and  (solefe.estado in (''rendido'')) and  solefe.id_tipo_solicitud = ' || v_id_tipo_solicitud|| ' and ';
-=======
-                       v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or solefe.id_usuario_reg = '||p_id_usuario||') and  (solefe.estado in (''rendido'')) and  solefe.id_tipo_solicitud = ' || v_id_tipo_solicitud|| ' and ';
->>>>>>> a302ef6ac37816313680f73e57510fbc2cdf1262
+
                     ELSE
                          v_filtro = '(solefe.estado in (''rendido'')) and solefe.id_tipo_solicitud=' ||v_id_tipo_solicitud||' and ';
                     END IF;
@@ -795,8 +851,8 @@ BEGIN
 			--Definicion de la respuesta
             v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
-			--Devuelve la respuesta
-            raise notice   '%', v_consulta;
+			--Devuelve la respuesta            
+            raise notice   '%', v_consulta;        
 			return v_consulta;
 
 		end;

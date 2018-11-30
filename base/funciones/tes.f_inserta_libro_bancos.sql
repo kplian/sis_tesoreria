@@ -133,7 +133,15 @@ BEGIN
         --obtener id del proceso macro
         v_sistema_origen = COALESCE(p_hstore->'sistema_origen','PXP')::varchar;
 		--si es un ingreso independiente de otros sistemas
-		IF( v_sistema_origen != 'KERP' OR (v_sistema_origen = 'KERP' AND (p_hstore->'tipo') in ('deposito')))THEN
+        -- 28 /04/2018  RAC - KPLIAN
+        --Modificamos esta condiciones, siempre que tenga comprobante el proceso se generara de maneras disparada
+        -- 
+        
+		IF (p_hstore->'id_int_comprobante')::int4 is null THEN
+        
+        
+           --RAC  04/05/2018
+            --raise exception 'Todo registro de libro de bancos  tiene que originarce desde un comprobante, ya no son permitidos los registros manuales';
         
             select 
              pm.id_proceso_macro
@@ -142,11 +150,8 @@ BEGIN
             from wf.tproceso_macro pm
             where pm.codigo = v_codigo_proceso_macro;
             
-            
-            If v_id_proceso_macro is NULL THEN
-            
-               raise exception 'El proceso macro  de codigo % no esta configurado en el sistema WF',v_codigo_proceso_macro;  
-            
+            If v_id_proceso_macro is NULL THEN            
+               raise exception 'El proceso macro  de codigo % no esta configurado en el sistema WF',v_codigo_proceso_macro;
             END IF;
             
             --   obtener el codigo del tipo_proceso
@@ -157,13 +162,10 @@ BEGIN
                     and tp.estado_reg = 'activo' and tp.codigo_llave=(p_hstore->'tipo')::varchar;
                 
             IF v_codigo_tipo_proceso is NULL THEN
-            
                raise exception 'No existe un proceso inicial para el proceso macro indicado % (Revise la configuración)',v_codigo_proceso_macro;
-            
             END IF;
-      
             
-            v_anho = (date_part('year', g_fecha::date))::integer;
+             v_anho = (date_part('year', g_fecha::date))::integer;
     			
                 select 
                  ges.id_gestion
@@ -200,7 +202,7 @@ BEGIN
                    v_id_estado_wf,
                    v_codigo_estado; 
               	
-            ELSE 
+        ELSE 
             	--si es un registro disparado por otros sistemas
             	/*
                 select pp.id_estado_wf, op.num_tramite into v_id_estado_wf_anterior, v_num_tramite

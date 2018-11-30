@@ -1,6 +1,9 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_generar_deposito_cheque (
   p_id_usuario integer,
   p_id_int_comprobante integer,
+  p_id_int_transaccion integer,
   p_id_finalidad integer,
   p_id_cbte_endesis integer = NULL::integer,
   p_c31 varchar = ''::character varying,
@@ -55,16 +58,16 @@ BEGIN
        inner join conta.tint_transaccion tra on tra.id_int_comprobante = cbte.id_int_comprobante
        left join tes.tdepto_cuenta_bancaria dpcb on dpcb.id_cuenta_bancaria = tra.id_cuenta_bancaria
        left join param.tdepto depto on depto.id_depto=dpcb.id_depto
-        where cbte.id_int_comprobante = p_id_int_comprobante and tra.forma_pago = 'cheque';
+        where cbte.id_int_comprobante = p_id_int_comprobante and tra.forma_pago = 'cheque'  and   tra.id_int_transaccion = p_id_int_transaccion;
 
         if(v_datos_deposito_cheque.id_depto_libro is null)then
         	raise exception 'El comprobante % no cuenta con el id_depto_libro ',p_id_int_comprobante;
         end if;
         
         v_resp = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,
-        			array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','fecha','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','id_int_comprobante','sistema_origen'],
-                    array[' 0 = 0 ','','','','','NULL','NULL',v_datos_deposito_cheque.id_cuenta_bancaria::varchar,v_datos_deposito_cheque.id_depto_libro::varchar,''||current_date::varchar||'',v_datos_deposito_cheque.beneficiario::varchar,'',v_datos_deposito_cheque.importe_haber::varchar,'','INGRESO PARA PAGO A '||v_datos_deposito_cheque.glosa::varchar,v_datos_deposito_cheque.origen::varchar,v_datos_deposito_cheque.nro_tramite::varchar,'0','','','C31-'||p_c31,'deposito',p_id_finalidad::varchar,p_id_int_comprobante::varchar,v_sistema_origen::varchar],
-                    array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','date','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','varchar','varchar']
+        			array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','fecha','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','id_int_comprobante','sistema_origen','id_int_transaccion'],
+                    array[' 0 = 0 ','','','','','NULL','NULL',v_datos_deposito_cheque.id_cuenta_bancaria::varchar,v_datos_deposito_cheque.id_depto_libro::varchar,''||current_date::varchar||'',v_datos_deposito_cheque.beneficiario::varchar,'',v_datos_deposito_cheque.importe_haber::varchar,'','INGRESO PARA PAGO A '||v_datos_deposito_cheque.glosa::varchar,v_datos_deposito_cheque.origen::varchar,v_datos_deposito_cheque.nro_tramite::varchar,'0','','','C31-'||p_c31,'deposito',p_id_finalidad::varchar,p_id_int_comprobante::varchar,v_sistema_origen::varchar,p_id_int_transaccion],
+                    array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','date','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','varchar','varchar','integer']
                     ,'',NULL,NULL);
                     
         v_respuesta = substring(v_resp from '%#"tipo_respuesta":"_____"#"%' for '#');
@@ -81,9 +84,9 @@ BEGIN
         END IF;--fin error respuesta 
  
         v_resp = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,
-        			array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','sistema_origen','id_int_comprobante'],
-                    array[' 0 = 0 ','','','','','NULL','NULL',v_datos_deposito_cheque.id_cuenta_bancaria::varchar,v_datos_deposito_cheque.id_depto_libro::varchar,v_datos_deposito_cheque.beneficiario::varchar,'NULL','0','',v_datos_deposito_cheque.glosa::varchar,v_datos_deposito_cheque.origen::varchar,v_datos_deposito_cheque.nro_tramite::varchar,'0',v_id_deposito::varchar,'','C31-'||p_c31,'cheque',p_id_finalidad::varchar,v_sistema_origen::varchar,p_id_int_comprobante::varchar],
-                    array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','varchar','varchar']
+        			array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','sistema_origen','id_int_comprobante','id_int_transaccion'],
+                    array[' 0 = 0 ','','','','','NULL','NULL',v_datos_deposito_cheque.id_cuenta_bancaria::varchar,v_datos_deposito_cheque.id_depto_libro::varchar,v_datos_deposito_cheque.beneficiario::varchar,'NULL','0','',v_datos_deposito_cheque.glosa::varchar,v_datos_deposito_cheque.origen::varchar,v_datos_deposito_cheque.nro_tramite::varchar,'0',v_id_deposito::varchar,'','C31-'||p_c31,'cheque',p_id_finalidad::varchar,v_sistema_origen::varchar,p_id_int_comprobante::varchar, p_id_int_transaccion::varchar],
+                    array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','varchar','varchar','integer']
                     ,'',NULL,NULL);
 
         v_respuesta = substring(v_resp from '%#"tipo_respuesta":"_____"#"%' for '#');

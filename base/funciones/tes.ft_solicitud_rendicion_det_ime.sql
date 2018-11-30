@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_solicitud_rendicion_det_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -166,9 +168,9 @@ BEGIN
             select fecha into v_fecha_documento
             from conta.tdoc_compra_venta
             where id_doc_compra_venta=v_parametros.id_documento_respaldo;
-
+			--manuel guerra 22/08, volver variable global
             IF v_fecha_documento > v_fecha_solicitud + 3 THEN
-                raise exception 'No es posible registrar documentos con fecha mayor a 3 dias de la fecha de solicitud %',v_fecha_solicitud;
+                --raise exception 'No es posible registrar documentos con fecha mayor a 3 dias de la fecha de solicitud %',v_fecha_solicitud;
             END IF;
 
             --Sentencia de la modificacion

@@ -47,6 +47,7 @@ v_solicitudes			record;
 v_rendiciones			record;
 v_monto_ing_extra       numeric;
 v_monto_ingreso         numeric;
+v_saldo			        numeric;
 
 BEGIN
 
@@ -62,7 +63,7 @@ BEGIN
     (p_hstore->'_nombre_usuario_ai')::varchar;
     (p_hstore->'_id_usuario_ai')::integer;
     */
-
+    
     v_nombre_funcion = 'tes.f_inserta_proceso_reposicion_rendicion_caja';
 	--obtener gestion
        v_anho = (date_part('year', (p_hstore->'fecha')::date))::integer;
@@ -86,7 +87,7 @@ BEGIN
       and pc.estado not in ('contabilizado','rendido','cerrado');
 
       IF v_proceso_pendiente is not null THEN
-         raise exception 'No se puede registra un nuevo proceso caja, existe el proceso % pendiente de finalizacion', v_proceso_pendiente;
+         --raise exception 'No se puede registra un nuevo proceso caja, existe el proceso % pendiente de finalizacion', v_proceso_pendiente;
       END IF;
 
 
@@ -257,9 +258,10 @@ BEGIN
                   se.id_proceso_caja_repo is null;
                   
               v_monto = COALESCE(v_monto,0) - COALESCE(v_monto_ing_extra,0);  
-              
+              v_saldo=tes.f_calcular_saldo_caja((p_hstore->'id_caja')::integer);
+              v_monto = COALESCE(v_registros.importe_maximo_caja,0) - COALESCE(v_saldo,0);  
               IF v_monto <= 0 THEN
-                 -- raise exception 'No  tiene saldo por reponer,  o tiene reposiciones en proceso, (Primero rinda si tiene facturas pendientes y Revise si tiene reposiciones en proceso ...) % ',(v_monto * -1);
+                  --raise exception 'No  tiene saldo por reponer,  o tiene reposiciones en proceso, (Primero rinda si tiene facturas pendientes y Revise si tiene reposiciones en proceso ...) % ',(v_monto * -1);
               END IF;
               
        ELSIF (p_hstore->'tipo')::varchar = 'SOLREN' THEN
@@ -386,7 +388,9 @@ BEGIN
                                                
                                                
           --# 148,  relaciona ingresos al proceso de cada TODO 
-         
+/*if (p_hstore->'id_caja')::integer = 132 then
+	raise exception 'loading... ...';
+end if;*/
            UPDATE    tes.tsolicitud_efectivo se  SET         
                       id_proceso_caja_rend = v_id_proceso_caja
            FROM  tes.ttipo_solicitud ts 
@@ -430,7 +434,9 @@ BEGIN
       v_resp = pxp.f_agrega_clave(v_resp,'id_proceso_caja',v_id_proceso_caja::varchar);
 	  v_resp = pxp.f_agrega_clave(v_resp,'id_estado_wf',v_id_estado_wf::varchar);
       v_resp = pxp.f_agrega_clave(v_resp,'id_proceso_wf',v_id_proceso_wf::varchar);
-
+/*if (p_hstore->'id_caja')::integer = 132 then
+	raise exception 'ending... ...';
+end if;*/
       --Devuelve la respuesta
       return v_resp;
 

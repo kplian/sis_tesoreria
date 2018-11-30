@@ -17,10 +17,9 @@ $body$
  COMENTARIOS:	
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
-
- DESCRIPCION:	
- AUTOR:			
- FECHA:		
+ISSUE 			FECHA: 			AUTOR:						DESCRIPCION:
+ #1				16/10/2018		EGS							se aumento el campo pago_borrador en la sentencia de insercion y una validacion	
+	
 ***************************************************************************/
 
 DECLARE
@@ -71,6 +70,8 @@ DECLARE
     
     v_monto_anticipo  numeric;
     v_check_ant_mixto numeric;
+    
+ v_pago_borrador  varchar; --#1				16/10/2018		EGS	
     			
     
     
@@ -486,6 +487,12 @@ BEGIN
             
             END IF;
             
+            --- #1				16/10/2018		EGS	 
+           if p_hstore->'pago_borrador' is null then
+           		v_pago_borrador = 'no';
+           ELSE
+           		v_pago_borrador =p_hstore->'pago_borrador';
+           end if ;
           
         
             --Sentencia de la insercion
@@ -535,7 +542,8 @@ BEGIN
             porc_monto_retgar,
             monto_anticipo,
             fecha_costo_ini,
-            fecha_costo_fin
+            fecha_costo_fin,
+            pago_borrador  -- #1				16/10/2018		EGS	
           	) values(
 			'activo',
 			v_nro_cuota,
@@ -582,7 +590,8 @@ BEGIN
             v_porc_monto_retgar,
             v_monto_anticipo,
             (p_hstore->'fecha_costo_ini')::date, 
-            (p_hstore->'fecha_costo_fin')::date
+            (p_hstore->'fecha_costo_fin')::date,
+            v_pago_borrador::varchar  -- #1				16/10/2018		EGS
            )RETURNING id_plan_pago into v_id_plan_pago;
             
             

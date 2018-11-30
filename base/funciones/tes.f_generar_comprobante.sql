@@ -17,6 +17,7 @@ $body$
  #0             10/06/2013        RAC KPLIAN        Generar comprobantes de devengado o pago segun corresponda al tipo de plan de pago  y pasa al siguiente estado
  #31, ETR       23/11/2017        RAC KPLIAN        al validar si el presupesuto alcanza apra generar el cbte considerar si el anticipo ejecuo presupeusto  
  #33, ETR       06/03/2018        RAC KPLIAN        Si tiene credito fiscal restar el 13% al validar el presupeusto   
+ #33 ETR        12/04/2018        RAC KPLIAN        Calculo defactor de monto excento y anticipo para  obligacioens de apgo con  prorrateo 
  
 ***************************************************************************/
 
@@ -57,6 +58,8 @@ DECLARE
     v_tes_anticipo_ejecuta_pres	    varchar;
     v_des_antipo_si_ejecuta			numeric;
     v_iva		numeric;
+    v_factor_excento  numeric;
+    v_factor_anticipo numeric;
 	
     
 BEGIN
@@ -139,6 +142,7 @@ BEGIN
           --validar que no se salte el orden de los devengados
           
           -- RAC 02/02/2018,  coemntado temporalmente --03062018  ...  descomentado
+          --  12/04/2018 coemntado nuevamente a solicitud de jefe de contadores autorizado por genrete financiero
 
                 IF  EXISTS (SELECT 1
                 FROM tes.tplan_pago pp
@@ -148,7 +152,7 @@ BEGIN
                       and  pp.nro_cuota < v_registros.nro_cuota ) THEN
 
 
-                    raise exception 'Antes de Continuar,  la cuotas anteriores tienes que estar finalizadas';
+                   -- raise exception 'Antes de Continuar,  la cuotas anteriores tienes que estar finalizadas';
 
 
                  END IF;
@@ -177,7 +181,8 @@ BEGIN
                                    od.id_concepto_ingas,
                                    par.sw_movimiento,
                                    tp.movimiento,
-                                   od.id_centro_costo
+                                   od.id_centro_costo,
+                                   od.factor_porcentual
                                  from  tes.tprorrateo pro
                                  inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det
                                  INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = od.id_centro_costo
@@ -204,6 +209,9 @@ BEGIN
 
                         END IF;
                         
+                                                                 
+          
+                        
                         
                       --31/11/2017,  si los anticipos ejecutas presupeusto se considera ese monto (SE RESTA EL DSECUENTO DE ANTICIPO)
                       
@@ -228,15 +236,21 @@ BEGIN
                              FROM  conta.f_get_detalle_plantilla_calculo(v_registros.id_plantilla, 'IVA-CF');
                           
                           IF COALESCE(v_iva,0) > 0 THEN
-                              v_des_antipo_si_ejecuta =  COALESCE(v_des_antipo_si_ejecuta,0) + ((v_registros_pro.monto_ejecutar_mo - COALESCE(v_registros.monto_excento,0)) * v_iva) ;
+                              
+                              --si existe monto excento calcular el factor del monto excento
+                              v_des_antipo_si_ejecuta =  COALESCE(v_des_antipo_si_ejecuta *  v_registros_pro.factor_porcentual,0) + ((v_registros_pro.monto_ejecutar_mo - COALESCE(v_registros.monto_excento *  v_registros_pro.factor_porcentual,0)) * v_iva) ;
                           END IF;
                           
                       
                       END IF;
+                      
+                       IF p_id_usuario = 429  THEN
+                          --  raise exception 'falla   % , % , % , %',v_comprometido, v_ejecutado, v_des_antipo_si_ejecuta, v_registros_pro.monto_ejecutar_mo;                   
+                        END  IF;  
                         
 
                       --verifica si el presupuesto comprometido sobrante alcanza para devengar
-                      IF  ( v_comprometido - (v_ejecutado - v_des_antipo_si_ejecuta ))  <  v_registros_pro.monto_ejecutar_mo  and v_registros_pro.sw_movimiento != 'flujo' THEN
+                      IF  round((v_comprometido - (v_ejecutado - v_des_antipo_si_ejecuta )),2)  <  round(v_registros_pro.monto_ejecutar_mo,2)  and v_registros_pro.sw_movimiento != 'flujo' THEN
 
                          -- raise EXCEPTION  '% - % = % < %',v_comprometido,v_ejecutado,v_comprometido - v_ejecutado, v_registros_pro.monto_ejecutar_mb;
 
@@ -248,7 +262,7 @@ BEGIN
                          where cig.id_concepto_ingas  = v_registros_pro.id_concepto_ingas;
 
                           --sinc_presupuesto
-                          v_mensaje_verificacion =v_mensaje_verificacion ||v_cont::varchar||') '||v_desc_ingas||'('||  substr(v_registros_pro.descripcion, 0, 15)   ||'...)'||' Presup. '||v_registros_pro.id_centro_costo||' monto faltante ' || (v_registros_pro.monto_ejecutar_mo - (v_comprometido - v_ejecutado))::varchar||' \n';
+                          v_mensaje_verificacion =v_mensaje_verificacion ||v_cont::varchar||') '||v_desc_ingas||'('||  substr(v_registros_pro.descripcion, 0, 15)   ||'...)'||' Presup. '||v_registros_pro.id_centro_costo||' monto faltante ' || (v_registros_pro.monto_ejecutar_mo - (v_comprometido - (v_ejecutado - v_des_antipo_si_ejecuta )))::varchar||' \n';
                           v_sw_verificacion=false;
                           v_cont = v_cont +1;
                      
@@ -273,6 +287,10 @@ BEGIN
            
            
           END IF;
+          
+          IF p_id_usuario = 429  THEN
+                --  raise exception 'PASA   % , % , % , %',v_comprometido, v_ejecutado, v_des_antipo_si_ejecuta, v_registros_pro.monto_ejecutar_mo;                   
+           END  IF;  
           
           
           

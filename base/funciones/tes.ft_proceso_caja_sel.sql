@@ -126,7 +126,8 @@ BEGIN
 						usu1.cuenta as usr_reg,
 						usu2.cuenta as usr_mod,
                         tpc.nombre,
-                        cj.id_moneda	
+                        cj.id_moneda,
+						ren.monto_ren_ingreso	
 						from tes.tproceso_caja ren
 						inner join segu.tusuario usu1 on usu1.id_usuario = ren.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = ren.id_usuario_mod
@@ -137,7 +138,7 @@ BEGIN
 			
 			--Definicion de la respuesta                        
 			v_consulta:=v_consulta||v_parametros.filtro;
---            raise exception '%', v_consulta;
+            --raise exception '%', v_consulta;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 			raise notice '%', v_consulta;
 			--Devuelve la respuesta

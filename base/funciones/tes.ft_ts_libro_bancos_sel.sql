@@ -31,7 +31,13 @@ DECLARE
 	v_resp				varchar;
     v_filtro_saldo		varchar;
     v_fecha_anterior	date;
+    v_fecha_ant     	date;
     v_cnx 				varchar;
+    v_aux 				varchar;
+    v_signo				varchar;    
+    v_sign				varchar;
+	v_saldo 			numeric;
+    v_cbte 				integer;
 BEGIN
 
 	v_nombre_funcion = 'tes.ft_ts_libro_bancos_sel';
@@ -317,7 +323,120 @@ BEGIN
                 return v_consulta;
 
             end;
+	
+     /*********************************
+      #TRANSACCION:  'TES_REBAN_SEL'
+      #DESCRIPCION:	Consulta de datos contabilizados
+      #AUTOR:			mp
+      #FECHA:			21/05/2018
+      ***********************************/
+      
+    	ELSEIF(p_transaccion='TES_REBAN_SEL')then
+        begin
+        	--raise EXCEPTION '%',v_parametros.id_cuenta_bancaria;
+            select nro_cuenta into v_aux
+            from tes.tcuenta_bancaria 
+            where id_cuenta_bancaria= v_parametros.id_cuenta_bancaria;
+            
+            v_fecha_ant = to_char(v_parametros.fecha_ini,'DD/MM/YYYY');
+			    
+            IF v_parametros.fecha_ini ='2018-01-01' THEN
+            	v_sign = '';
+            	v_signo = '=';                
+                v_cbte = '1440';
+            ELSE
+            	v_sign ='=';
+            	v_signo = '<';                
+                v_cbte = '0';
+                         
+            END IF;
+                            
+          	v_consulta:='select
+                      '''||v_fecha_ant||''' as fecha,
+                      '''||v_cbte||''' as id_int_comprobante,
+                      ''SALDO ANTERIOR''::varchar as nro_cuenta,
+                      null::varchar as nombre_cuenta,
+                      null::varchar as nro_cheque,
+                      0::numeric as importe_debe_mb,
+                      0::numeric as importe_haber_mb, 
+                      0::numeric as importe_gasto_mb,
+                      0::numeric as importe_recurso_mb,
+                                                  
+                      0::numeric as importe_debe_mt,
+                      0::numeric as importe_haber_mt, 
+                      0::numeric as importe_gasto_mt,
+                      0::numeric as importe_recurso_mt,
+                                                  
+                      0::numeric as importe_debe_ma,
+                      0::numeric as importe_haber_ma, 
+                      0::numeric as importe_gasto_ma,
+                      0::numeric as importe_recurso_ma,
 
+                      COALESCE((sum(transa.importe_debe_mb) - sum(transa.importe_haber_mb)),0)::numeric as saldo
+
+                      from conta.tint_transaccion transa
+                      inner join conta.tint_comprobante icbte on icbte.id_int_comprobante = transa.id_int_comprobante
+                      inner join param.tperiodo per on per.id_periodo = icbte.id_periodo
+                      inner join conta.tcuenta cue on cue.id_cuenta = transa.id_cuenta
+                      inner join conta.tconfig_tipo_cuenta ctc on ctc.tipo_cuenta = cue.tipo_cuenta     
+                      inner join conta.tcuenta_auxiliar cax on cax.id_cuenta=cue.id_cuenta
+                      inner join conta.tauxiliar tax on tax.id_auxiliar=cax.id_auxiliar  
+                      inner join conta.tconfig_subtipo_cuenta csc on csc.id_config_subtipo_cuenta = cue.id_config_subtipo_cuenta 
+                      where 
+                      icbte.estado_reg = ''validado'' 
+                      and icbte.fecha '||v_signo||' '''|| v_parametros.fecha_ini||'''
+                      AND tax.nombre_auxiliar like '''||'%'||v_aux||'%'||'''
+                      AND csc.nombre=''BANCOS'' 
+                      AND per.id_gestion = 2 
+
+                      union all
+
+                      select
+                      fecha,                      
+                      icbte.id_int_comprobante::integer,
+                      cue.nro_cuenta::varchar,
+                      cue.nombre_cuenta::varchar,
+                      (select lb.nro_cheque::varchar
+                      from tes.tts_libro_bancos lb
+                      where lb.id_int_comprobante=icbte.id_int_comprobante
+                      LIMIT 1)::varchar as nro_cheque,
+                      COALESCE(sum(transa.importe_debe_mb),0)::numeric as importe_debe_mb,
+                      COALESCE(sum( transa.importe_haber_mb),0)::numeric as importe_haber_mb, 
+                      COALESCE(sum( transa.importe_gasto_mb),0)::numeric as importe_gasto_mb,
+                      COALESCE(sum(transa.importe_recurso_mb),0)::numeric as importe_recurso_mb,
+                                                  
+                      COALESCE(sum(transa.importe_debe_mt),0)::numeric as importe_debe_mt,
+                      COALESCE(sum(transa.importe_haber_mt),0)::numeric as importe_haber_mt, 
+                      COALESCE(sum(transa.importe_gasto_mt),0)::numeric as importe_gasto_mt,
+                      COALESCE(sum(transa.importe_recurso_mt),0)::numeric as importe_recurso_mt,
+                                                  
+                      COALESCE(sum(transa.importe_debe_ma),0)::numeric as importe_debe_ma,
+                      COALESCE(sum(transa.importe_haber_ma),0)::numeric as importe_haber_ma, 
+                      COALESCE(sum(transa.importe_gasto_ma),0)::numeric as importe_gasto_ma,
+                      COALESCE(sum(transa.importe_recurso_ma),0)::numeric as importe_recurso_ma,
+
+                      0::numeric as saldo
+                      from conta.tint_transaccion transa
+                      inner join conta.tint_comprobante icbte on icbte.id_int_comprobante = transa.id_int_comprobante
+                      inner join param.tdepto dep on dep.id_depto = icbte.id_depto
+                      inner join param.tperiodo per on per.id_periodo = icbte.id_periodo                       
+                      inner join conta.tcuenta cue on cue.id_cuenta = transa.id_cuenta
+                      inner join conta.tconfig_tipo_cuenta ctc on ctc.tipo_cuenta = cue.tipo_cuenta     
+                      inner join conta.tcuenta_auxiliar cax on cax.id_cuenta=cue.id_cuenta
+                      inner join conta.tauxiliar tax on tax.id_auxiliar=cax.id_auxiliar                   
+                      inner join conta.tconfig_subtipo_cuenta csc on csc.id_config_subtipo_cuenta = cue.id_config_subtipo_cuenta
+                      where icbte.estado_reg = ''validado'' 
+                      and icbte.fecha >'||v_sign||' '''||v_parametros.fecha_ini||''' and icbte.fecha <= '''||v_parametros.fecha_fin||''' 
+                      AND tax.nombre_auxiliar like '''||'%'||v_aux||'%'||'''
+                      and csc.nombre=''BANCOS'' 
+                      AND per.id_gestion = 2 
+                      group by icbte.id_int_comprobante,icbte.fecha,cue.nro_cuenta,cue.nombre_cuenta
+                      order by fecha,id_int_comprobante ASC';	
+                      
+            --raise notice '%',v_consulta;          
+          	--raise exception '%',v_consulta;            		                      
+          return v_consulta;
+        end;
     /*********************************
  	#TRANSACCION:  'TES_RELIBA_SEL'
  	#DESCRIPCION:	Reporte libro de bancos
@@ -328,13 +447,15 @@ BEGIN
     	BEGIN
         --to_char(now(), ''dd/mm/yyyy'') as fecha,
         --raise notice 'fecha %', v_parametros.fecha_ini;
-        --raise notice 'fecha=> %', v_parametros.fecha_ini_reg;        
+        --raise notice 'fecha=> %', v_parametros.fecha_ini_reg; 
+        --excel.       
         IF (v_parametros.fecha_ini is null) THEN
-        	v_fecha_anterior = to_char(v_parametros.fecha_ini_reg-1, 'dd/mm/yyyy') ;
+        	v_fecha_ant = to_char(v_parametros.fecha_ini_reg-1,'DD/MM/YYYY');
+           -- raise exception 'fecha=> %', v_fecha_ant;     
           	v_consulta := '(SELECT 
-            				NULL as fecha_reporte,
-            				NULL AS fecha_reg,
-                            ''SALDO ANTERIOR'' as a_favor,                            
+            				null as fecha_reporte,
+            				''01/01/2018'' as fecha_reg,
+                            '''|| v_fecha_ant||''' as a_favor,                            
                             NULL as detalle,
                             NULL as nro_liquidacion,
                             NULL as nro_comprobante,
@@ -342,8 +463,7 @@ BEGIN
                             NULL as nro_cheque,
                             NULL as debe,
                             NULL as haber,
-                          
-                                    coalesce((Select sum(Coalesce(lbr.importe_deposito,0))-sum(coalesce(lbr.importe_cheque,0))
+                            coalesce((Select sum(Coalesce(lbr.importe_deposito,0))-sum(coalesce(lbr.importe_cheque,0))
                                              From tes.tts_libro_bancos lbr
                                              Where lbr.fecha < '''||v_parametros.fecha_ini_reg||'''
                                              and lbr.id_cuenta_bancaria = '||v_parametros.id_cuenta_bancaria||'
@@ -398,7 +518,7 @@ BEGIN
                                                                        ''entregado'',''cobrado'',
                                                                        ''anulado'',''reingresado'',
                                                                        ''depositado'',''transferido'',
-                                                                       ''sigep_swift'' )
+                                                                       ''sigep_swift'')
 
                                               when ('''||v_parametros.estado||'''=''impreso y entregado'')
                                               then   lbr.estado in (''impreso'', ''entregado'' )
@@ -422,7 +542,7 @@ BEGIN
 
                                               and
                                               case when ('||v_parametros.id_finalidad||'=0)
-                                              then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
+                                              then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,14,15,16,17,18,19,20)
                                               else lbr.id_finalidad in ('||v_parametros.id_finalidad||')
                                               end
                                              ) as total_debe,
@@ -459,13 +579,13 @@ BEGIN
                                               end
                                               and
                                               case when ('||v_parametros.id_finalidad||'=0)
-                                              then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
+                                              then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,14,15,16,17,18,19,20)
                                               else lbr.id_finalidad in ('||v_parametros.id_finalidad||')
                                               end
                                               ) as total_haber,
 
 
-                            LB.indice,
+                           coalesce( LB.indice,0),
                             LB.fecha
 
 
@@ -473,44 +593,18 @@ BEGIN
                             LEFT JOIN tes.tts_libro_bancos lbp on lbp.id_libro_bancos=LB.id_libro_bancos_fk
                             WHERE
                             LB.id_cuenta_bancaria = '||v_parametros.id_cuenta_bancaria||' and
-                            LB.fecha BETWEEN  '''||v_parametros.fecha_ini_reg||''' and   '''||v_parametros.fecha_fin_reg||''' and
-
-                            case when ('''||v_parametros.estado||'''=''Todos'')
-                            then   LB.estado in (''impreso'',
-                                                     ''entregado'',''cobrado'',
-                                                     ''anulado'',''reingresado'',
-                                                     ''depositado'',''transferido'',
-                                                     ''sigep_swift'' )
-
-                            when ('''||v_parametros.estado||'''=''impreso y entregado'')
-                            then   LB.estado in (''impreso'', ''entregado'' )
-
-                            else LB.estado in ('''||v_parametros.estado||''')
-                            end
-
-                            and
-
-                            case when ('''||v_parametros.tipo||'''=''Todos'')
-                            then   LB.tipo in   (''cheque'',
-                                                            ''deposito'',
-                                                            ''debito_automatico'',
-                                                            ''transferencia_carta'')
-
-                            when ('''||v_parametros.tipo||'''=''transferencia_interna'')
-                            then   lb.tipo in (''transf_interna_debe'',''transf_interna_haber'')
-                            else LB.tipo in ('''||v_parametros.tipo||''')
-                            end
-
-                            and
-                            case when ('||v_parametros.id_finalidad||'=0)
-                            then   0=0
-                            else LB.id_finalidad in ('||v_parametros.id_finalidad||')
-                            end
+                            LB.fecha >= '''||v_parametros.fecha_ini_reg||''' and  LB.fecha <=  '''||v_parametros.fecha_fin_reg||''' 
+							and lb.estado not in (''anulado'',''borrador'') and
+                            lb.fecha::date >= '''||v_parametros.fecha_ini_reg||''' and
+                            lb.fecha is not null 
                             )  
-                            order by fecha, indice, nro_cheque asc';	
+                            order by fecha_reg, indice, nro_cheque asc';
+          					raise notice '%',v_consulta;
+                            --raise exception '%',v_consulta;
      	ELSE
         	v_fecha_anterior = to_char(v_parametros.fecha_ini-1, 'dd/mm/yyyy') ;
-        	raise notice 'fecha anterior %', v_fecha_anterior;
+        	raise notice 'fecha anterior %', v_fecha_anterior;     
+--         raise exception '%',v_fecha_anterior;       
           	v_consulta := '(SELECT 
             				'''||v_fecha_anterior||''' as fecha_reporte,
             				NULL as fecha_reg,
@@ -603,7 +697,7 @@ BEGIN
 
                                               and
                                               case when ('||v_parametros.id_finalidad||'=0)
-                                              then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
+                                              then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,14,15,16,17,18,19,20)
                                               else lbr.id_finalidad in ('||v_parametros.id_finalidad||')
                                               end
                                              )  as total_debe,
@@ -640,7 +734,7 @@ BEGIN
                                               end
                                               and
                                               case when ('||v_parametros.id_finalidad||'=0)
-                                              then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
+                                              then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,14,15,16,17,18,19,20)
                                               else lbr.id_finalidad in ('||v_parametros.id_finalidad||')
                                               end
                                               )  as total_haber,
@@ -691,6 +785,7 @@ BEGIN
                             order by fecha, indice, nro_cheque asc';
 		  END IF;
           raise notice '%',v_consulta;
+         --raise exception '%',v_consulta;
           --raise exception  'libro de bancos %',v_consulta;
 		  --Devuelve la respuesta
 		  return v_consulta;

@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_solicitud_efectivo_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -18,9 +20,10 @@ $body$
     
  ISSUE            FECHA:          AUTOR                 DESCRIPCION
    
- #0            10-02-2015        Gonzalo Sarmiento       Funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'tes.tsolicitud_efectivo'
- #0            30/11/2017        Rensi Arteaga           BUG, Restituciones queda en borrador ....
- #146 SC       04/12/2017        RAC             Validacion de vbcasjero para ingreso de caja, los pasa directoa finalizado
+ #0            10-02-2015        Gonzalo Sarmiento      Funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'tes.tsolicitud_efectivo'
+ #0            30/11/2017        Rensi Arteaga          BUG, Restituciones queda en borrador ....
+ #146 SC       04/12/2017        RAC             		Validacion de vbcasjero para ingreso de caja, los pasa directoa finalizado
+ #147 SC       10/10/2018        Manu Guerra     		puede generar solicitud efectivo, a pesar del cierre, se comentó  
 ***************************************************************************/
 
 DECLARE
@@ -107,7 +110,8 @@ BEGIN
             IF EXISTS (select 1
                      from tes.tproceso_caja
                      where tipo='CIERRE' and id_caja=v_parametros.id_caja)  THEN
-                raise exception 'No puede realizar solicitudes ni rendiciones, la caja se encuentra en proceso de cierre';
+                     --#147
+		             --raise exception 'No puede realizar solicitudes ni rendiciones, la caja se encuentra en proceso de cierre';
             END IF;
 
             v_resp=tes.f_inserta_solicitud_efectivo(p_administrador,p_id_usuario,hstore(v_parametros));
@@ -308,6 +312,8 @@ BEGIN
               from tes.tsolicitud_efectivo se
               inner join tes.tcaja ca on ca.id_caja = se.id_caja
               where se.id_proceso_wf  = v_parametros.id_proceso_wf_act;
+              
+              
 
               SELECT cj.tipo_ejecucion, cj.id_depto into v_caja
               from tes.tsolicitud_efectivo se
@@ -492,6 +498,8 @@ BEGIN
                           --Creacion de la rendicion
                           -----------------------------------
                           
+                          --RAC, 06/04/2018, se modifica la fecha del documento , vale provisorio para que sea la fecha de regisotr conincidiendo con la fecha de entrega del dinero en cajas
+                          
                           v_resp = tes.f_inserta_solicitud_efectivo(0,p_id_usuario,hstore(v_registros)||hstore(v_registros1));
                           v_id_solicitud_efectivo_rend = pxp.f_obtiene_clave_valor(v_resp,'id_solicitud_efectivo','','','valor')::integer;
 
@@ -501,7 +509,7 @@ BEGIN
                           'no' as movil,-- = (p_hstore->'movil')::varchar; --'no',--'movil',
                           'compra' as tipo, -- (p_hstore->'tipo')::varchar; --'venta',--'tipo',
                           0 as importe_excento, -- (p_hstore->'importe_excento')::numeric; --coalesce(null as venta.excento::varchar,'0'),--'importe_excento',
-                          v_rec.fecha as fecha, -- (p_hstore->'fecha')::date; --to_char(null as venta.fecha,'DD/MM/YYYY'),--'fecha',
+                          now()::date as fecha, -- (p_hstore->'fecha')::date; --to_char(null as venta.fecha,'DD/MM/YYYY'),--'fecha',
                           v_rec.nro_tramite||'-DEV' as nro_documento, -- (p_hstore->'nro_documento')::varchar; --COALESCE(null as venta.nro_factura,'0')::varchar,--'nro_documento',
                           v_fun.ci as nit, -- (p_hstore->'nit')::varchar; --coalesce(null as venta.nit,''),--'nit',
                           0 as importe_ice, -- (p_hstore->'importe_ice')::numeric; --null as venta.total_venta_msuc::varchar,--'importe_ice',

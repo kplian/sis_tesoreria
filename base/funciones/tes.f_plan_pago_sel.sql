@@ -17,10 +17,9 @@ $body$
  COMENTARIOS:
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
+ISSUE 			FECHA: 			AUTOR:						DESCRIPCION:
+ #1				16/10/2018		EGS							se aumento el campo pago_borrador en la sentencia de la consulta
 
- DESCRIPCION:
- AUTOR:
- FECHA:
 ***************************************************************************/
 
 DECLARE
@@ -161,7 +160,7 @@ BEGIN
 
 
 
-
+		---#1				16/10/2018		EGS	
     		--Sentencia de la consulta
 			v_consulta:='select
 						'||v_strg_pp||',
@@ -252,7 +251,19 @@ BEGIN
                         (select count(*)
                              from unnest(pwf.id_tipo_estado_wfs) elemento
                              where elemento = ew.id_tipo_estado) as contador_estados,
-                        depto.prioridad as prioridad_lp
+                        depto.prioridad as prioridad_lp,
+                        (select 
+                            ges.id_gestion
+                            from param.tgestion ges
+                            where ges.gestion = (date_part(''year'', plapa.fecha_pag))::integer
+                            limit 1 offset 0) as id_gestion,
+                            (select
+                            id_periodo
+                            from param.tperiodo
+                            where plapa.fecha_pag between fecha_ini and fecha_fin
+                            limit 1 offset 0) as id_periodo,
+                            plapa.pago_borrador
+                        
 
                         from tes.tplan_pago plapa
                         inner join wf.tproceso_wf pwf on pwf.id_proceso_wf = plapa.id_proceso_wf
@@ -476,6 +487,7 @@ BEGIN
                                   pg.monto_no_pagado as monto_no_pagado,
                                   pg.otros_descuentos as otros_descuentos,
                                   pg.obs_otros_descuentos,
+                                  pg.monto_retgar_mo,
                                   pg.descuento_ley,
                                   pg.obs_descuentos_ley,
                                   pg.monto_ejecutar_total_mo as monto_ejecutado_total,
@@ -484,18 +496,28 @@ BEGIN
                                   pg.fecha_reg,
                                   op.total_pago,
                                   pg.tipo,
-                                  pg.monto_excento
+                                  pg.monto_excento,
+                                  op.num_tramite::varchar,
+                                  (case when cot.nro_contrato !='''' or cot.nro_contrato is not null then
+                                  cot.nro_contrato
+                                  else
+                                  ''''
+                                  end)::varchar as nro_contrato,
+                                  pg.pago_borrador
                         from tes.tplan_pago pg
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago=pg.id_obligacion_pago
                         inner join param.vproveedor pv on pv.id_proveedor=op.id_proveedor
                         left join tes.tcuenta_bancaria cta on cta.id_cuenta_bancaria=pg.id_cuenta_bancaria
                         inner join param.tmoneda mon on mon.id_moneda=op.id_moneda
+                        
+                        left join adq.tcotizacion cot on cot.id_obligacion_pago = op.id_obligacion_pago
                         where pg.id_plan_pago='||v_parametros.id_plan_pago||' and ';
 
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
-
+--raise NOTICE 'error pr %',v_consulta;
+--RAISE EXCEPTION 'err %',v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 

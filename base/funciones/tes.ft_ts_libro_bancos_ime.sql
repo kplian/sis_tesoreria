@@ -147,12 +147,15 @@ BEGIN
             IF(v_parametros.tipo in ('cheque','debito_automatico','transferencia_carta','transf_interna_debe','transf_interna_haber'))Then
 
               IF g_centro != 'otro' THEN
+                  
+                  
+                  
                   --Comparamos el saldo de la cuenta bancaria con el importe del cheque
                   Select coalesce(sum(Coalesce(lbr.importe_deposito, 0)) -
                           sum(coalesce(lbr.importe_cheque, 0)), 0)
                           into g_saldo_cuenta_bancaria
                   From tes.tts_libro_bancos lbr
-                  where lbr.fecha <= g_fecha and
+                  where  lbr.fecha is not null and -- lbr.fecha <= g_fecha and   --OJO  27/03/2018   COMENTADO para VALIDAR, comentado
                   lbr.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria;
 
                   IF(v_parametros.importe_cheque > g_saldo_cuenta_bancaria) Then
@@ -322,8 +325,8 @@ BEGIN
                                                                                                             Where li.id_libro_bancos = v_parametros.id_libro_bancos) , 0)
             Into g_saldo_cuenta_bancaria
              From tes.tts_libro_bancos lbr
-             where lbr.fecha <= v_parametros.fecha
-             and lbr.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria;
+             where lbr.fecha is not null and --lbr.fecha <= v_parametros.fecha  and  --OJO  27/03/2018   COMENTADO APRA VALIDAR, comentado
+                  lbr.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria;
 
             --Comparamos el saldo de la cuenta bancaria con el importe del cheque
             IF(v_parametros.importe_cheque > g_saldo_cuenta_bancaria) Then

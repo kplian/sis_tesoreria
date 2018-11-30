@@ -230,6 +230,9 @@ BEGIN
                       v_saldo_x_descontar = tes.f_determinar_total_faltante((p_hstore->'id_obligacion_pago')::integer,'ant_parcial_descontado');
                              
                       -- saldo_x_descontar - descuento_anticipo >  sando_x_pagar
+                      if p_id_usuario=425 then
+                        raise exception 'descuento_anticipo: % ___ monto: %', COALESCE((p_hstore->'descuento_anticipo')::numeric,0), COALESCE((p_hstore->'monto')::numeric,0);
+                      end if;
                       IF (v_saldo_x_descontar -  COALESCE((p_hstore->'descuento_anticipo')::numeric,0))  > (v_saldo_x_pagar  - COALESCE((p_hstore->'monto')::numeric,0)) THEN
                           raise exception 'El saldo a pagar no es sufuciente para recuperar el anticipo (%)',v_saldo_x_descontar;
                       END IF; 

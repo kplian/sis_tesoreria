@@ -47,30 +47,52 @@ DECLARE
     v_auxiliar			integer;
     v_saldo_ant 		numeric;
     v_saldo 			numeric;
-
+    v_fecha				date[];
+    v_estado			varchar;
+    v_tipo 				varchar;
+	v_tipo_c 			varchar[];
+    v_tam				integer;
+    v_mes				integer;
+    v_int				record;
 BEGIN
 
 	v_nombre_funcion = 'tes.ft_caja_rep_sel';
     v_parametros = pxp.f_get_record(p_tabla);
-
-
-
-	
-       /*********************************    
-      #TRANSACCION:  'TES_CAJA_REP_MEN_SEL'
-      #DESCRIPCION:	Reporte de rendicion mensual de cajaero
-      #AUTOR:		mp	
-      #FECHA:		21-03-2018 00:28:30
-      ***********************************/
-     if(p_transaccion='TES_CAJA_REP_MEN_SEL') then
-     		begin          
+    
+    /*********************************    
+    #TRANSACCION:  'TES_CAJA_REP_MEN_SEL'
+    #DESCRIPCION:	Reporte de rendicion mensual de cajaero
+    #AUTOR:		mp	
+    #FECHA:		21-03-2018 00:28:30
+    ***********************************/
+    if(p_transaccion='TES_CAJA_REP_MEN_SEL') then
+    	begin
+          	
+             SELECT
+              pc.id_proceso_caja, 
+              pc.fecha,
+              pc.tipo,
+              pc.estado
+              INTO v_int
+              FROM tes.tproceso_caja pc
+              INNER JOIN tes.tcaja caja on pc.id_caja=caja.id_caja
+              WHERE caja.id_caja = v_parametros.id_caja
+              and pc.estado='cerrado';
             	
-                v_resultado=0;
-				v_auxiliar=v_parametros.mes-1;
-                WHILE v_auxiliar > 0 LOOP	
+              v_resultado=0;
+              v_auxiliar=v_parametros.mes-1;
+                             	
+              IF v_int.tipo='CIERRE' and v_parametros.mes>EXTRACT(MONTH FROM v_int.fecha) THEN
+              	v_mes=EXTRACT(MONTH FROM v_int.fecha);
+              ELSE
+              	v_mes =0;	 
+              END IF; 
+                             --                                     
+                WHILE v_auxiliar > v_mes LOOP	
                     v_resultado = v_resultado ||','||v_auxiliar;                     
                     v_auxiliar = v_auxiliar-1;
-                END LOOP;  
+                END LOOP;
+                
                 IF v_parametros.id_caja=135 THEN
                 	v_aux = 'dc.fecha';
                     
@@ -83,7 +105,10 @@ BEGIN
                       from tes.tproceso_caja ren
                       left join tes.ttipo_proceso_caja tpc on tpc.id_tipo_proceso_caja=ren.id_tipo_proceso_caja 
                       left join tes.tcaja cj on cj.id_caja=ren.id_caja
-                      where cj.id_caja= '||v_parametros.id_caja||' and ren.motivo NOT ILIKE ''%RENDICION%'' and  tpc.codigo!=''SOLREN'' and (EXTRACT(MONTH FROM ren.fecha)) in ('||v_resultado||')
+                      where cj.id_caja= '||v_parametros.id_caja||' and ren.motivo NOT ILIKE ''%RENDICION%'' 
+                      and tpc.codigo!=''SOLREN'' 
+                      and tpc.codigo!=''CIERRE''
+                      and (EXTRACT(MONTH FROM ren.fecha)) in ('||v_resultado||')
 
                       union all
 
@@ -118,7 +143,11 @@ BEGIN
                       from tes.tproceso_caja ren
                       left join tes.ttipo_proceso_caja tpc on tpc.id_tipo_proceso_caja=ren.id_tipo_proceso_caja 
                       left join tes.tcaja cj on cj.id_caja=ren.id_caja
-                      where cj.id_caja= '||v_parametros.id_caja||'  and ren.motivo NOT ILIKE ''%RENDICION%'' and  tpc.codigo!=''SOLREN'' and (EXTRACT(MONTH FROM ren.fecha)) in ('||v_resultado||')
+                      where cj.id_caja= '||v_parametros.id_caja||'  
+                      and ren.motivo NOT ILIKE ''%RENDICION%'' 
+                      and tpc.codigo!=''SOLREN'' 
+                      and tpc.codigo!=''CIERRE''
+                      and (EXTRACT(MONTH FROM ren.fecha)) in ('||v_resultado||')
 
                       union all
 
@@ -140,13 +169,18 @@ BEGIN
                       inner join tes.tcaja caja on caja.id_caja = solefe.id_caja
                       left join conta.tdoc_compra_venta dc on dc.id_doc_compra_venta = rend.id_documento_respaldo
                       where caja.id_caja= '||v_parametros.id_caja||' and solren.estado=''rendido'' and (EXTRACT(MONTH FROM dc.fecha)) in ('||v_resultado||')
-                    )as resultado';
-                    
-                                        
-                END IF;           
-                            
-                EXECUTE(v_consulta)into v_saldo_ant;
+                    )as resultado';                                                            
+                END IF;          
                 
+                
+                 
+                            
+                EXECUTE(v_consulta)into v_saldo_ant;                                   
+                                                                                 
+                IF v_int.tipo='CIERRE' and v_parametros.mes=EXTRACT(MONTH FROM v_int.fecha)+1 THEN
+                   v_saldo_ant=0;
+                END IF;
+      
                 IF v_parametros.mes=1 and v_parametros.id_caja=128 THEN
              		v_aux = 'dc.fecha';
             	END IF;   
@@ -172,11 +206,37 @@ BEGIN
                               null::numeric as importe_descuento,
                               null::numeric as importe_descuento_ley,
                               null::numeric as importe_excento,
-                              ''''::varchar
+                              ''''::varchar as motivo,
+                              null::varchar as tramite 
                               from tes.tproceso_caja n
                               LIMIT 1)
                               
                               UNION 
+                              
+                              select 
+                  			  0::numeric as saldo,
+                              ren.nro_tramite::VARCHAR,
+                              ''''::varchar as desc_plantilla,
+                              ren.fecha::DATE,
+                              ''''::varchar as nit,
+                              ''''::varchar as razon_social,
+                              ''''::varchar as nro_autorizacion,
+                              ''''::varchar as nro_documento,
+                              ''''::varchar as codigo_control,                             
+                              ren.monto,
+                              null::numeric as importe_pago_liquido,
+                              null::numeric as importe_iva,
+                              null::numeric as importe_descuento,
+                              null::numeric as importe_descuento_ley,
+                              null::numeric as importe_excento,
+                              ''rendido''as motivo,
+                              null::varchar as tramite                             
+                              from tes.tproceso_caja ren
+                              left join tes.ttipo_proceso_caja tpc on tpc.id_tipo_proceso_caja=ren.id_tipo_proceso_caja 
+                              left join tes.tcaja cj on cj.id_caja=ren.id_caja
+                              where cj.id_caja='||v_parametros.id_caja||' and  tpc.codigo=''CIERRE'' and (EXTRACT(MONTH FROM ren.fecha))= '||v_parametros.mes||'
+
+                              UNION all
                               
                               select 
                   			  0::numeric as saldo,
@@ -194,11 +254,12 @@ BEGIN
                               null::numeric as importe_descuento,
                               null::numeric as importe_descuento_ley,
                               null::numeric as importe_excento,
-                              ren.motivo::varchar
+                              ren.motivo::varchar,
+                              null::varchar as tramite 
                               from tes.tproceso_caja ren
                               left join tes.ttipo_proceso_caja tpc on tpc.id_tipo_proceso_caja=ren.id_tipo_proceso_caja 
                               left join tes.tcaja cj on cj.id_caja=ren.id_caja
-                              where cj.id_caja='||v_parametros.id_caja||' and ren.motivo NOT ILIKE ''%RENDICION%'' and  tpc.codigo!=''SOLREN'' and (EXTRACT(MONTH FROM ren.fecha))= '||v_parametros.mes||'
+                              where cj.id_caja='||v_parametros.id_caja||' and ren.motivo NOT ILIKE ''%RENDICION%'' AND tpc.codigo!=''CIERRE'' and  tpc.codigo!=''SOLREN'' and (EXTRACT(MONTH FROM ren.fecha))= '||v_parametros.mes||'
 
                               union all
 
@@ -218,7 +279,8 @@ BEGIN
                               null::numeric as importe_descuento,
                               null::numeric as importe_descuento_ley,
                               null::numeric as importe_excento,
-                              solefe.estado::varchar as motivo 
+                              solefe.estado::varchar as motivo,
+                              null::varchar as tramite 
                               from tes.tsolicitud_efectivo solefe
                               inner join segu.tusuario usu1 on usu1.id_usuario = solefe.id_usuario_reg
                               inner join tes.tcaja caja on caja.id_caja=solefe.id_caja
@@ -245,29 +307,19 @@ BEGIN
                               dc.importe_descuento::numeric,
                               dc.importe_descuento_ley::numeric,
                               dc.importe_excento::numeric,
-                              solren.estado::varchar as motivo 
+                              solren.estado::varchar as motivo,
+                              tc.nro_tramite as tramite
                               from tes.tsolicitud_rendicion_det rend
                               inner join tes.tsolicitud_efectivo solren on solren.id_solicitud_efectivo = rend.id_solicitud_efectivo
                               inner join tes.tsolicitud_efectivo solefe on solefe.id_solicitud_efectivo = solren.id_solicitud_efectivo_fk
                               inner join tes.tcaja caja on caja.id_caja = solefe.id_caja
                               left join conta.tdoc_compra_venta dc on dc.id_doc_compra_venta = rend.id_documento_respaldo
                               left join param.tplantilla pla on pla.id_plantilla = dc.id_plantilla
-                              where caja.id_caja='||v_parametros.id_caja||' and solren.estado=''rendido''                               
-                              
-                              
-                             
-                                              
-                              
+                              left join tes.tproceso_caja tc on tc.id_proceso_caja=rend.id_proceso_caja
+                              where caja.id_caja='||v_parametros.id_caja||' and solren.estado=''rendido''                                                                                         
                               and (EXTRACT(MONTH FROM '|| v_aux ||'))= '||v_parametros.mes||'
-                              order by fecha asc ';      
-                              
-             IF p_id_usuario = 429 THEN
-               raise notice '%', v_consulta;
-            END IF;
-            
-                                      
-                --raise notice '%',v_consulta;
-                --raise exception '%',v_consulta;
+                              order by fecha asc ';                                 
+   
 				return v_consulta;
 			end;
 

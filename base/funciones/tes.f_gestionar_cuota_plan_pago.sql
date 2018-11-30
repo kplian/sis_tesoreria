@@ -21,8 +21,9 @@ Descripcion  Esta funcion gestiona los planes de pago de la siguiente manera
    HISTORIAL DE MODIFICACIONES:
    	
  ISSUE            FECHA:		      AUTOR                 DESCRIPCION
- #31, ETR       27/10/2017        RAC KPLIAN        Considerar si anticipos ejecutan presupeusto    
-
+ #31, ETR       27/10/2017        RAC KPLIAN             Considerar si anticipos ejecutan presupeusto    
+ #0   ETR       28/02/2018        Jaime Rivera KPLIAN    BUG que generaba doble regitro en libro de bancos que vienen de Obligaciones de pago en regionales
+ #1				16/10/2018			EGS					 Se aumento la validacion que cuando sea devengado_pago el pago  pueda estar en borrador
 */
 
 
@@ -119,7 +120,8 @@ BEGIN
       pp.id_depto_conta,
 	  dpc.prioridad as prioridad_conta,
       dpl.prioridad as prioridad_libro,
-      c.temporal
+      c.temporal,
+      pp.pago_borrador ---#1				16/10/2018			EGS	
       into
       v_registros
       from  tes.tplan_pago pp
@@ -146,7 +148,7 @@ BEGIN
      --SI es del tipo anticopo
      --  Verificamos configuracion si Anticipo ejecuta presupuesto
      --  llamaos a funcion de presupeustos apra ejecucion de anticipo
-     IF   v_registros.tipo in ( 'anticipo') THEN
+     IF   v_registros.tipo in ('ant_parcial') THEN
         IF not  tes.f_gestionar_presupuesto_tesoreria(
                                                       v_registros.id_obligacion_pago, 
                                                       p_id_usuario, 
@@ -158,7 +160,7 @@ BEGIN
         --NOTA, el presupeusto retenido no ejecutra presupesuto
      END IF; 
      
-     --raise exception 'entra';
+     
      -- 3)  Si es devengado_pagado o   devengado, se identifica  con id_plan_pago_fk = null
     
     
@@ -430,7 +432,8 @@ BEGIN
                          ----------------------------------------------------------
                          --antes de generar el comprobante pasa al estado vbconta 
                          ----------------------------------------------------------
-                        
+                         --#1				16/10/2018			EGS	 
+                     IF(v_registros.pago_borrador = 'no')then   
                          select   
                           te.id_tipo_estado
                          into
@@ -486,11 +489,12 @@ BEGIN
                             raise exception 'Error al generar el comprobante de pago';
                           
                           END IF;
-           
+           				end if;-- #1				16/10/2018			EGS
     
             END IF;
             
             
+            /*jrr:comentado por duplicidad en libro bancos
             v_tes_integrar_lb_pagado = pxp.f_get_variable_global('tes_integrar_lb_pagado');
 			
             
@@ -509,7 +513,7 @@ BEGIN
                            
                 END IF;
             END IF;
-			
+			*/
 		
 --raise exception '123';
   
