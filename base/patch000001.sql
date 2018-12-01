@@ -1819,7 +1819,7 @@ CREATE TABLE tes.tplan_pago_doc_compra (
     id_plan_pago_doc_compra serial NOT NULL,
     id_plan_pago integer NOT NULL,
     id_doc_compra_venta integer,
-    CONSTRAINT tplan_pago_doc_compra_pkey PRIMARY KEY (tplan_pago_doc_compra)
+    CONSTRAINT tplan_pago_doc_compra_pkey PRIMARY KEY (id_plan_pago_doc_compra)
 )
     INHERITS (pxp.tbase)
 WITH (
@@ -1839,13 +1839,223 @@ IS 'si o no, se marca como si si es que la obligacion fue forzada a finalizar co
 /*************************F-SCP-RAC-TES-0-25/01/2018*************/
 
 
-/*************************I-SCP-EGS-TES-0-16/10/2018*************/
+/*************************I-SCP-JUAN-TES-0-26/01/2018*************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN tabla VARCHAR(255);
+
+/*************************F-SCP-JUAN-TES-0-26/10/2018*************/ 
+
+
+/*************************I-SCP-RAC-TES-0-01/12/2018*************/
+ 
+ CREATE TABLE tes.tcuenta_bancaria_periodo (
+  id_usuario_reg INTEGER,
+  id_usuario_mod INTEGER,
+  fecha_reg TIMESTAMP WITHOUT TIME ZONE DEFAULT now(),
+  fecha_mod TIMESTAMP WITHOUT TIME ZONE DEFAULT now(),
+  estado_reg VARCHAR(10) DEFAULT 'activo'::character varying,
+  id_usuario_ai INTEGER,
+  usuario_ai VARCHAR(300),
+  id_cuenta_bancaria_periodo SERIAL,
+  id_cuenta_bancaria INTEGER,
+  id_periodo INTEGER,
+  estado VARCHAR,
+  CONSTRAINT tcuenta_bancaria_periodo_pk_tcuenta_bancaria_periodo_id_cuenta_ PRIMARY KEY(id_cuenta_bancaria_periodo)
+) INHERITS (pxp.tbase)
+
+WITH (oids = false);
+
+CREATE TABLE tes.tsolicitud_transferencia (
+  id_usuario_reg INTEGER,
+  id_usuario_mod INTEGER,
+  fecha_reg TIMESTAMP WITHOUT TIME ZONE DEFAULT now(),
+  fecha_mod TIMESTAMP WITHOUT TIME ZONE DEFAULT now(),
+  estado_reg VARCHAR(10) DEFAULT 'activo'::character varying,
+  id_usuario_ai INTEGER,
+  usuario_ai VARCHAR(300),
+  id_solicitud_transferencia SERIAL,
+  id_cuenta_origen INTEGER,
+  id_cuenta_destino INTEGER NOT NULL,
+  monto NUMERIC(18,2) NOT NULL,
+  motivo TEXT NOT NULL,
+  num_tramite VARCHAR(25) NOT NULL,
+  id_proceso_wf INTEGER NOT NULL,
+  id_estado_wf INTEGER NOT NULL,
+  estado VARCHAR(25) NOT NULL,
+  id_int_comprobante INTEGER,
+  CONSTRAINT tsolicitud_transferencia_pkey PRIMARY KEY(id_solicitud_transferencia)
+) INHERITS (pxp.tbase)
+
+WITH (oids = false);
+
+
+COMMENT ON COLUMN tes.tobligacion_pago.id_funcionario_responsable
+IS 'Funcionario que esta a cargo del plan de pagos cuando el solicitante original designa por alguna razon deja sus funciones o esta de vacion asigna a otro funcionario para que este continue con los pagos pendientes.';
+
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN monto_total_adjudicado NUMERIC(19,2);
+
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN total_anticipo NUMERIC(19,2);
+
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN pedido_sap VARCHAR(100);
+
+
+
+ALTER TABLE tes.ttipo_plan_pago
+  ADD COLUMN tipo_ejecucion VARCHAR(20);
+
+COMMENT ON COLUMN tes.ttipo_plan_pago.tipo_ejecucion
+IS 'bandera que permite marcar cuales devengan, pagan o no ejecutan para ser considerados en el reporte de gary';
+
+ALTER TABLE tes.tcaja
+  ALTER COLUMN importe_maximo_item TYPE NUMERIC(18,2);
 
 
 ALTER TABLE tes.tplan_pago
-  ADD COLUMN pago_borrador VARCHAR(50) DEFAULT 'no' NOT NULL;
+  ALTER COLUMN nro_cheque SET DEFAULT 0;
+  
+  ALTER TABLE tes.tplan_pago
+  ADD COLUMN monto_anticipar_sg NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tplan_pago.monto_anticipar_sg
+IS 'monto anticipar que puede ser aplicado con otro comprobante  o puede ser llevado al gasto en la siguiente gestion,  si este valor es mayor a cero al cerrar la obligacion de pagos y no a sido totalmente aplicado, debe crearce una obligacion de pago extentida  para la siguiente gestion con un plan de pagos del tipo anticipo en estado anticipado por la suma de estos valores en registors activos';
+
+  
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN observaciones_pago TEXT;
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN es_ultima_cuota BOOLEAN;
+
+COMMENT ON COLUMN tes.tplan_pago.es_ultima_cuota
+IS 'Campo que nos sirve para verificar si es la ultima cuota de pago.';
+
+ALTER TABLE tes.tplan_pago
+  ADD COLUMN pago_borrador VARCHAR(50) DEFAULT 'no'::character varying NOT NULL;
+
+
+
+ALTER TABLE tes.tproceso_caja
+  ADD COLUMN monto NUMERIC(18,2);
+
+
+ALTER TABLE tes.tproceso_caja
+  ADD COLUMN monto_ren_ingreso NUMERIC DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tproceso_caja.monto_ren_ingreso
+IS 'monto acumulado de recibo de ingreso a caja que deben ser contabilizados, hecho para rendiciones de fondos o viaticos';
+
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD COLUMN id_funcionario_finanzas INTEGER;
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.id_funcionario_finanzas
+IS 'id del funcionario de finanzas';
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.id_proceso_caja_repo
+IS 'Indica el id_proceso_caja de tipo reposicion donde fue considerado el ingreso_extra = si,';
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD COLUMN observaciones VARCHAR(1000);
+
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD COLUMN id_proceso_caja_rend INTEGER;
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.id_proceso_caja_rend
+IS 'SOLO para ingresos identifica el proceso de caja donde se incluye la rendicion del ingreso de efectivo';
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD COLUMN ingreso_cd VARCHAR(4) DEFAULT 'no'::character varying NOT NULL;
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.ingreso_cd
+IS 'Para marcar las solicitudes de Ingreso generadas desde sistema de cuenta documentada';
+
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD COLUMN fecha_ult_mov DATE;
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.fecha_ult_mov
+IS 'fecha de ultimo omivimeitno se carga a travez de un triguer las pasar por ciertos estados';
+
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD COLUMN fecha_entregado_ult DATE;
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.fecha_entregado_ult
+IS 'fecha de ultimo entregado';
+
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD COLUMN fecha_mod_bk DATE;
+
+ALTER TABLE tes.tsolicitud_efectivo_det
+  ALTER COLUMN id_partida_ejecucion SET NOT NULL;
+
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD CONSTRAINT tts_libro_bancos_fk FOREIGN KEY (id_libro_bancos_fk)
+    REFERENCES tes.tts_libro_bancos(id_libro_bancos)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ 
+
+
+ALTER TABLE tes.tsolicitud_efectivo
+  ADD CONSTRAINT tsolicitud_efectivo__id_proceso_caja_red_fk FOREIGN KEY (id_proceso_caja_repo)
+    REFERENCES tes.tproceso_caja(id_proceso_caja)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tplan_pago
+  ADD CONSTRAINT fk_tplan_pago__id_cuenta_bancaria_mov FOREIGN KEY (id_cuenta_bancaria_mov)
+    REFERENCES tes.tts_libro_bancos(id_libro_bancos)
+    MATCH FULL
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+
+
+ALTER TABLE tes.tcaja_funcionario
+  ADD CONSTRAINT fk_tcaja_usuario__id_caja FOREIGN KEY (id_caja)
+    REFERENCES tes.tcaja(id_caja)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+
+-- object recreation
+ALTER TABLE tes.tobligacion_pago
+  DROP CONSTRAINT chk_tobligacion_pago__estado RESTRICT;
+
+ALTER TABLE tes.tobligacion_pago
+  ADD CONSTRAINT chk_tobligacion_pago__estado CHECK ((estado)::text = ANY (ARRAY[('liberacion'::character varying)::text, ('borrador'::character varying)::text, ('registrado'::character varying)::text, ('en_pago'::character varying)::text, ('finalizado'::character varying)::text, ('vbpoa'::character varying)::text, ('vbpresupuestos'::character varying)::text, ('anulado'::character varying)::text]));
+
+
+
+ALTER TABLE tes.tobligacion_pago
+  DROP CONSTRAINT chk_tobligacion_pago__tipo_obligacion RESTRICT;
+
+ALTER TABLE tes.tobligacion_pago
+  ADD CONSTRAINT chk_tobligacion_pago__tipo_obligacion CHECK ((tipo_obligacion)::text = ANY (ARRAY[('adquisiciones'::character varying)::text, ('pago_unico'::character varying)::text, ('pago_especial'::character varying)::text, ('caja_chica'::character varying)::text, ('viaticos'::character varying)::text, ('fondos_en_avance'::character varying)::text, ('pago_directo'::character varying)::text, ('rrhh'::character varying)::text]));
+
+
+
+
+/*************************F-SCP-RAC-TES-0-01/12/2018*************/
+
+
   
   
-  
-  
-/*************************F-SCP-EGS-TES-0-16/10/2018*************/
