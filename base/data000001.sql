@@ -478,16 +478,14 @@ VALUES
 /***********************************I-DAT-RAC-TES-31-07/11/2017*****************************************/
   
 
-INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
-VALUES 
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")VALUES 
   (E'tes_anticipo_ejecuta_pres', E'no', E'si o no, anticipos ejecutan presupeusto, mismo sin ejecucion contable');
 
 
 /***********************************F-DAT-RAC-TES-31-07/11/2017*****************************************/
 
 
-
-/***********************************I-DAT-RCM-TES-0-17/04/2018*****************************************/
+/***********************************I-DAT-RAC-TES-31-03/12/2018*****************************************/
 
 select pxp.f_insert_tgui ('<i class="fa fa-money fa-2x"></i> TESORERIA', '', 'TES', 'si', 9, '', 1, '', '', 'TES');
 select pxp.f_insert_tgui ('Obligacion Pago', 'Obligaciones de pago', 'OBPG', 'si', 0, 'sis_tesoreria/vista/obligacion_pago/ObligacionPagoTes.php', 2, '', 'ObligacionPagoTes', 'TES');
@@ -1892,11 +1890,8 @@ select pxp.f_insert_tgui ('Chequear documento del WF', 'Chequear documento del W
 select pxp.f_insert_tgui ('Pagos similares', 'Pagos similares', 'PAGESP.6.6', 'no', 0, 'sis_tesoreria/vista/plan_pago/RepFilPlanPago.php', 6, '', '90%', 'TES');
 select pxp.f_insert_tgui ('Observaciones del WF', 'Observaciones del WF', 'PAGESP.6.7', 'no', 0, 'sis_workflow/vista/obs/Obs.php', 6, '', '80%', 'TES');
 select pxp.f_insert_tgui ('Rango de Fechas', 'Rango de Fechas', 'RERANFEC', 'no', 13, 'sis_tesoreria/reportes/formularios/RepMensualFechas.php', 3, '', 'RepMensualFechas', 'TES');
+/***********************************F-DAT-RAC-TES-31-03/12/2018*****************************************/
 
-
-
-
-/***********************************F-DAT-RCM-TES-0-17/04/2018*****************************************/
 
 
 

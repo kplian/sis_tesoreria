@@ -1845,9 +1845,6 @@ AS
 
 
 -----------
-
-DROP VIEW tes.vlibro_bancos;
-
 CREATE OR REPLACE VIEW tes.vlibro_bancos(
     id_libro_bancos,
     num_tramite,
@@ -1888,7 +1885,7 @@ CREATE OR REPLACE VIEW tes.vlibro_bancos(
     comprobante_sigma,
     notificado,
     fondo_devolucion_retencion,
-	columna_pk,
+    columna_pk,
     id_int_comprobante)
 AS
   SELECT lban.id_libro_bancos,
@@ -1905,7 +1902,8 @@ AS
          lban.importe_cheque,
          lban.id_libro_bancos_fk,
          lban.estado,
-         lban.nro_comprobante,
+         ((lban.id_int_comprobante::character varying::text || ' - '::text) ||
+           lban.nro_comprobante::text)::character varying AS nro_comprobante,
          lban.indice,
          lban.estado_reg,
          lban.tipo,
@@ -1925,32 +1923,30 @@ AS
          fin.nombre_finalidad,
          fin.color,
          CASE
-           WHEN lban.tipo::text = 'deposito' ::text THEN lban.importe_deposito -
+           WHEN lban.tipo::text = 'deposito'::text THEN lban.importe_deposito -
              COALESCE((
                         SELECT COALESCE(sum(lb.importe_cheque), 0::numeric) AS
                           "coalesce"
                         FROM tes.tts_libro_bancos lb
                         WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos AND
-                              (lb.tipo::text <> ALL (ARRAY [ 'deposito'
-                                ::character varying::text,
-                                'transf_interna_haber' ::character varying::text
-                                ]))
+                              (lb.tipo::text <> ALL (ARRAY [ 'deposito'::
+                                character varying::text, 'transf_interna_haber'
+                                ::character varying::text ]))
          ), 0::numeric) + COALESCE((
-                                     SELECT COALESCE(sum(lb.importe_deposito),
-                                       0::numeric) AS "coalesce"
+                                     SELECT COALESCE(sum(lb.importe_deposito), 0
+                                       ::numeric) AS "coalesce"
                                      FROM tes.tts_libro_bancos lb
                                      WHERE lb.id_libro_bancos_fk =
                                        lban.id_libro_bancos AND
                                            (lb.tipo::text = ANY (ARRAY [
-                                             'deposito' ::character
-                                             varying::text,
-                                             'transf_interna_haber' ::character
-                                             varying::text ]))
+                                             'deposito'::character varying::
+                                             text, 'transf_interna_haber'::
+                                             character varying::text ]))
          ), 0::numeric)
-           WHEN (lban.tipo::text = ANY (ARRAY [ 'cheque' ::character
-             varying::text, 'debito_automatico' ::character varying::text,
-             'transferencia_carta' ::character varying::text,
-             'transf_interna_debe' ::character varying::text ])) AND
+           WHEN (lban.tipo::text = ANY (ARRAY [ 'cheque'::character varying::
+             text, 'debito_automatico'::character varying::text,
+             'transferencia_carta'::character varying::text,
+             'transf_interna_debe'::character varying::text ])) AND
              lban.id_libro_bancos_fk IS NOT NULL THEN ((
                                                          SELECT COALESCE(
                                                            lb.importe_deposito,
@@ -1967,17 +1963,17 @@ AS
                   "coalesce"
                 FROM tes.tts_libro_bancos lb
                 WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos_fk AND
-                      (lb.tipo::text = ANY (ARRAY [ 'deposito' ::character
-                        varying::text, 'transf_interna_haber' ::character
-                        varying::text ]))
+                      (lb.tipo::text = ANY (ARRAY [ 'deposito'::character
+                        varying::text, 'transf_interna_haber'::character varying
+                        ::text ]))
          )) -((
                 SELECT sum(lb2.importe_cheque) AS sum
                 FROM tes.tts_libro_bancos lb2
                 WHERE lb2.id_libro_bancos <= lban.id_libro_bancos AND
                       lb2.id_libro_bancos_fk = lban.id_libro_bancos_fk AND
-                      (lb2.tipo::text <> ALL (ARRAY [ 'deposito' ::character
-                        varying::text, 'transf_interna_haber' ::character
-                        varying::text ]))
+                      (lb2.tipo::text <> ALL (ARRAY [ 'deposito'::character
+                        varying::text, 'transf_interna_haber'::character varying
+                        ::text ]))
          ))
            ELSE 0::numeric
          END AS saldo_deposito,
@@ -1986,16 +1982,17 @@ AS
          lban.comprobante_sigma,
          lban.notificado,
          lban.fondo_devolucion_retencion,
-		 lban.columna_pk,
+         lban.columna_pk,
          lban.id_int_comprobante
   FROM tes.tts_libro_bancos lban
        JOIN segu.tusuario usu1 ON usu1.id_usuario = lban.id_usuario_reg
        LEFT JOIN param.tdepto depto ON depto.id_depto = lban.id_depto
        LEFT JOIN segu.tusuario usu2 ON usu2.id_usuario = lban.id_usuario_mod
        JOIN tes.tfinalidad fin ON fin.id_finalidad = lban.id_finalidad
-       LEFT JOIN param.tregional reg ON reg.codigo_regional::text =
-         lban.origen::text
+       LEFT JOIN param.tregional reg ON reg.codigo_regional::text = lban.origen
+         ::text
   ORDER BY lban.fecha DESC;
+
 
 
 ---------------------------------------------
@@ -2674,164 +2671,352 @@ AS
 /***********************************F-DEP-RAC-TES-0-29/11/2017****************************************/
   
   
-   
-/***********************************I-DEP-RAC-TES-0-24/02/2018****************************************/
-  
-   
-  
-  CREATE OR REPLACE VIEW tes.vlibro_bancos(
-    id_libro_bancos,
+
+/**********************************I-DEP-RAC-TES-0-01/12/2018****************************************/
+
+
+
+--DROP VIEW tes.vsolicitud_transferencia;
+CREATE OR REPLACE VIEW tes.vsolicitud_transferencia (
+    id_depto_conta,
     num_tramite,
-    id_cuenta_bancaria,
+    acreedor,
+    id_moneda,
     fecha,
-    a_favor,
-    nro_cheque,
-    importe_deposito,
-    nro_liquidacion,
-    detalle,
-    origen,
-    observaciones,
-    importe_cheque,
-    id_libro_bancos_fk,
-    estado,
-    nro_comprobante,
-    indice,
-    estado_reg,
-    tipo,
-    nro_deposito,
-    fecha_reg,
-    id_usuario_reg,
-    fecha_mod,
-    id_usuario_mod,
-    usr_reg,
-    usr_mod,
-    id_depto,
-    nombre_depto,
+    id_gestion,
+    id_cuenta_origen,
+    id_cuenta_destino,
+    monto,
+    motivo,
+    id_solicitud_transferencia,
     id_proceso_wf,
     id_estado_wf,
-    fecha_cheque_literal,
-    id_finalidad,
-    nombre_finalidad,
-    color,
-    saldo_deposito,
-    nombre_regional,
-    sistema_origen,
-    comprobante_sigma,
-    notificado,
-    fondo_devolucion_retencion,
-    columna_pk,
-    id_int_comprobante)
+    estado,
+    forma_pago,
+    banco,
+    id_depto_lb)
 AS
-  SELECT lban.id_libro_bancos,
-         lban.num_tramite,
-         lban.id_cuenta_bancaria,
-         lban.fecha,
-         lban.a_favor,
-         lban.nro_cheque,
-         lban.importe_deposito,
-         lban.nro_liquidacion,
-         lban.detalle,
-         lban.origen,
-         lban.observaciones,
-         lban.importe_cheque,
-         lban.id_libro_bancos_fk,
-         lban.estado,
-         ((lban.id_int_comprobante::character varying::text || ' - '::text) ||
-           lban.nro_comprobante::text)::character varying AS nro_comprobante,
-         lban.indice,
-         lban.estado_reg,
-         lban.tipo,
-         lban.nro_deposito,
-         lban.fecha_reg,
-         lban.id_usuario_reg,
-         lban.fecha_mod,
-         lban.id_usuario_mod,
-         usu1.cuenta AS usr_reg,
-         usu2.cuenta AS usr_mod,
-         lban.id_depto,
-         depto.nombre AS nombre_depto,
-         lban.id_proceso_wf,
-         lban.id_estado_wf,
-         upper(pxp.f_fecha_literal(lban.fecha)) AS fecha_cheque_literal,
-         lban.id_finalidad,
-         fin.nombre_finalidad,
-         fin.color,
-         CASE
-           WHEN lban.tipo::text = 'deposito'::text THEN lban.importe_deposito -
-             COALESCE((
-                        SELECT COALESCE(sum(lb.importe_cheque), 0::numeric) AS
-                          "coalesce"
-                        FROM tes.tts_libro_bancos lb
-                        WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos AND
-                              (lb.tipo::text <> ALL (ARRAY [ 'deposito'::
-                                character varying::text, 'transf_interna_haber'
-                                ::character varying::text ]))
-         ), 0::numeric) + COALESCE((
-                                     SELECT COALESCE(sum(lb.importe_deposito), 0
-                                       ::numeric) AS "coalesce"
-                                     FROM tes.tts_libro_bancos lb
-                                     WHERE lb.id_libro_bancos_fk =
-                                       lban.id_libro_bancos AND
-                                           (lb.tipo::text = ANY (ARRAY [
-                                             'deposito'::character varying::
-                                             text, 'transf_interna_haber'::
-                                             character varying::text ]))
-         ), 0::numeric)
-           WHEN (lban.tipo::text = ANY (ARRAY [ 'cheque'::character varying::
-             text, 'debito_automatico'::character varying::text,
-             'transferencia_carta'::character varying::text,
-             'transf_interna_debe'::character varying::text ])) AND
-             lban.id_libro_bancos_fk IS NOT NULL THEN ((
-                                                         SELECT COALESCE(
-                                                           lb.importe_deposito,
-                                                           0::numeric) AS
-                                                           "coalesce"
-                                                         FROM
-                                                           tes.tts_libro_bancos
-                                                           lb
-                                                         WHERE
-                                                           lb.id_libro_bancos =
-                                                           lban.id_libro_bancos_fk
-         )) +((
-                SELECT COALESCE(sum(lb.importe_deposito), 0::numeric) AS
-                  "coalesce"
-                FROM tes.tts_libro_bancos lb
-                WHERE lb.id_libro_bancos_fk = lban.id_libro_bancos_fk AND
-                      (lb.tipo::text = ANY (ARRAY [ 'deposito'::character
-                        varying::text, 'transf_interna_haber'::character varying
-                        ::text ]))
-         )) -((
-                SELECT sum(lb2.importe_cheque) AS sum
-                FROM tes.tts_libro_bancos lb2
-                WHERE lb2.id_libro_bancos <= lban.id_libro_bancos AND
-                      lb2.id_libro_bancos_fk = lban.id_libro_bancos_fk AND
-                      (lb2.tipo::text <> ALL (ARRAY [ 'deposito'::character
-                        varying::text, 'transf_interna_haber'::character varying
-                        ::text ]))
-         ))
-           ELSE 0::numeric
-         END AS saldo_deposito,
-         reg.nombre_regional,
-         lban.sistema_origen,
-         lban.comprobante_sigma,
-         lban.notificado,
-         lban.fondo_devolucion_retencion,
-         lban.columna_pk,
-         lban.id_int_comprobante
-  FROM tes.tts_libro_bancos lban
-       JOIN segu.tusuario usu1 ON usu1.id_usuario = lban.id_usuario_reg
-       LEFT JOIN param.tdepto depto ON depto.id_depto = lban.id_depto
-       LEFT JOIN segu.tusuario usu2 ON usu2.id_usuario = lban.id_usuario_mod
-       JOIN tes.tfinalidad fin ON fin.id_finalidad = lban.id_finalidad
-       LEFT JOIN param.tregional reg ON reg.codigo_regional::text = lban.origen
-         ::text
-  ORDER BY lban.fecha DESC;
+ SELECT dd.id_depto_destino AS id_depto_conta,
+    st.num_tramite,
+    cbd.denominacion AS acreedor,
+    cb.id_moneda,
+    now()::date AS fecha,
+    g.id_gestion,
+    st.id_cuenta_origen,
+    st.id_cuenta_destino,
+    st.monto,
+    st.motivo,
+    st.id_solicitud_transferencia,
+    st.id_proceso_wf,
+    st.id_estado_wf,
+    st.estado,
+    'transferencia' AS forma_pago,
+    'si' AS banco,
+    dc.id_depto AS id_depto_lb
+   FROM tes.tsolicitud_transferencia st
+     JOIN tes.tdepto_cuenta_bancaria dc ON st.id_cuenta_origen = dc.id_cuenta_bancaria AND dc.estado_reg::text = 'activo'::text
+     JOIN param.tdepto_depto dd ON dc.id_depto = dd.id_depto_origen AND dd.estado_reg::text = 'activo'::text
+     JOIN tes.tcuenta_bancaria cb ON st.id_cuenta_origen = cb.id_cuenta_bancaria
+     JOIN tes.tcuenta_bancaria cbd ON st.id_cuenta_destino = cbd.id_cuenta_bancaria
+     JOIN tes.tdepto_cuenta_bancaria dcd ON st.id_cuenta_destino = dcd.id_cuenta_bancaria AND dc.estado_reg::text = 'activo'::text
+     JOIN param.tdepto ddes ON ddes.id_depto = dcd.id_depto
+     JOIN param.tgestion g ON g.gestion::numeric = to_char(now()::date::timestamp with time zone, 'YYYY'::text)::numeric;
 
 
------------------------------------------------------------------------
 
--------------------
 
+
+CREATE OR REPLACE VIEW tes.vdevoluciones_caja_cd (
+    id_solicitud_efectivo,
+    id_funcionario,
+    nro_tramite,
+    monto,
+    estado,
+    fecha,
+    ingreso_cd,
+    observaciones,
+    motivo,
+    codigo,
+    nombre,
+    id_proceso_caja_rend,
+    glosa,
+    desc_funcionario1)
+AS
+ SELECT se.id_solicitud_efectivo,
+    se.id_funcionario,
+    se.nro_tramite,
+    se.monto,
+    se.estado,
+    se.fecha,
+    se.ingreso_cd,
+    se.observaciones,
+    se.motivo,
+    ts.codigo,
+    ts.nombre,
+    se.id_proceso_caja_rend,
+    (se.nro_tramite::text || ' - '::text) || se.motivo AS glosa,
+    f.desc_funcionario1
+   FROM tes.tsolicitud_efectivo se
+     JOIN tes.ttipo_solicitud ts ON ts.id_tipo_solicitud = se.id_tipo_solicitud
+     JOIN orga.vfuncionario f ON f.id_funcionario = se.id_funcionario
+  WHERE se.id_proceso_caja_rend IS NOT NULL;
+
+
+
+CREATE OR REPLACE VIEW tes.vsolicitud_efectivo_entregado (
+    id_solicitud_efectivo,
+    id_caja,
+    codigo,
+    id_depto,
+    id_moneda,
+    id_estado_wf,
+    monto,
+    monto_rendido,
+    monto_devuelto,
+    monto_repuesto,
+    id_proceso_wf,
+    nro_tramite,
+    estado,
+    estado_reg,
+    motivo,
+    id_funcionario,
+    desc_funcionario,
+    fecha,
+    fecha_entrega,
+    dias_maximo_rendicion,
+    dias_no_rendidos,
+    id_usuario_ai,
+    fecha_reg,
+    usuario_ai,
+    id_usuario_reg,
+    id_usuario_mod,
+    fecha_mod,
+    usr_reg,
+    usr_mod,
+    fecha_entregado_ult,
+    fecha_ult_mov,
+    solicitud_efectivo_padre,
+    saldo)
+AS
+ SELECT solefe.id_solicitud_efectivo,
+    solefe.id_caja,
+    caja.codigo,
+    caja.id_depto,
+    caja.id_moneda,
+    solefe.id_estado_wf,
+    solefe.monto,
+    COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
+           FROM tes.tsolicitud_efectivo
+          WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'rendido'::text), 0.00) AS monto_rendido,
+    COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
+           FROM tes.tsolicitud_efectivo
+          WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'devuelto'::text), 0.00) AS monto_devuelto,
+    COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
+           FROM tes.tsolicitud_efectivo
+          WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'repuesto'::text), 0.00) AS monto_repuesto,
+    solefe.id_proceso_wf,
+    solefe.nro_tramite,
+    solefe.estado,
+    solefe.estado_reg,
+    solefe.motivo,
+    solefe.id_funcionario,
+    fun.desc_funcionario1 AS desc_funcionario,
+    solefe.fecha,
+    solefe.fecha_entrega,
+    caja.dias_maximo_rendicion,
+        CASE
+            WHEN solefe.estado::text = 'finalizado'::text THEN caja.dias_maximo_rendicion
+            ELSE caja.dias_maximo_rendicion - ('now'::text::date - COALESCE(solefe.fecha_entrega, 'now'::text::date) - pxp.f_get_weekend_days(COALESCE(solefe.fecha_entrega, 'now'::text::date), 'now'::text::date))
+        END AS dias_no_rendidos,
+    solefe.id_usuario_ai,
+    solefe.fecha_reg,
+    solefe.usuario_ai,
+    solefe.id_usuario_reg,
+    solefe.id_usuario_mod,
+    solefe.fecha_mod,
+    usu1.cuenta AS usr_reg,
+    usu2.cuenta AS usr_mod,
+    solefe.fecha_entregado_ult,
+    solefe.fecha_ult_mov,
+    solpri.nro_tramite AS solicitud_efectivo_padre,
+        CASE
+            WHEN solefe.estado::text = ANY (ARRAY['entregado'::character varying::text, 'finalizado'::character varying::text]) THEN solefe.monto - COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
+               FROM tes.tsolicitud_efectivo
+              WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'rendido'::text), 0.00) - COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
+               FROM tes.tsolicitud_efectivo
+              WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'devuelto'::text), 0.00) + COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
+               FROM tes.tsolicitud_efectivo
+              WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'repuesto'::text), 0.00)
+            ELSE 0.00
+        END AS saldo
+   FROM tes.tsolicitud_efectivo solefe
+     JOIN segu.tusuario usu1 ON usu1.id_usuario = solefe.id_usuario_reg
+     JOIN tes.tcaja caja ON caja.id_caja = solefe.id_caja
+     JOIN orga.vfuncionario fun ON fun.id_funcionario = solefe.id_funcionario
+     LEFT JOIN segu.tusuario usu2 ON usu2.id_usuario = solefe.id_usuario_mod
+     LEFT JOIN tes.tsolicitud_efectivo solpri ON solpri.id_solicitud_efectivo = solefe.id_solicitud_efectivo_fk
+  WHERE solefe.id_tipo_solicitud = 1 AND 0 = 0 AND caja.tipo_ejecucion::text = 'sin_detalle'::text AND solefe.estado::text = 'entregado'::text;
+
+
+
+
+CREATE OR REPLACE VIEW tes.vsolicitud_efectivo_finalizada (
+    id_solicitud_efectivo,
+    id_caja,
+    codigo,
+    id_depto,
+    id_moneda,
+    id_estado_wf,
+    monto,
+    monto_rendido,
+    monto_rendido_sin_cbte,
+    monto_rendido_con_cbte,
+    monto_devuelto,
+    monto_repuesto,
+    id_proceso_wf,
+    nro_tramite,
+    estado,
+    estado_reg,
+    motivo,
+    id_funcionario,
+    desc_funcionario,
+    fecha,
+    fecha_entrega,
+    dias_maximo_rendicion,
+    dias_no_rendidos,
+    id_usuario_ai,
+    fecha_reg,
+    usuario_ai,
+    id_usuario_reg,
+    id_usuario_mod,
+    fecha_mod,
+    usr_reg,
+    usr_mod,
+    fecha_entregado_ult,
+    fecha_ult_mov,
+    saldo)
+AS
+ SELECT solefe.id_solicitud_efectivo,
+    solefe.id_caja,
+    caja.codigo,
+    caja.id_depto,
+    caja.id_moneda,
+    solefe.id_estado_wf,
+    solefe.monto,
+    COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
+           FROM tes.tsolicitud_efectivo
+          WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'rendido'::text), 0.00) AS monto_rendido,
+    COALESCE(( SELECT sum(sr1.monto) AS sum
+           FROM tes.tsolicitud_efectivo s1
+             JOIN tes.tsolicitud_rendicion_det sr1 ON sr1.id_solicitud_efectivo = s1.id_solicitud_efectivo
+             JOIN tes.tproceso_caja p1 ON p1.id_proceso_caja = sr1.id_proceso_caja AND p1.estado::text <> 'rendido'::text
+          WHERE s1.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND s1.estado::text = 'rendido'::text), 0.00) AS monto_rendido_sin_cbte,
+    COALESCE(( SELECT sum(sr2.monto) AS sum
+           FROM tes.tsolicitud_efectivo s2
+             JOIN tes.tsolicitud_rendicion_det sr2 ON sr2.id_solicitud_efectivo = s2.id_solicitud_efectivo
+             JOIN tes.tproceso_caja p2 ON p2.id_proceso_caja = sr2.id_proceso_caja AND p2.estado::text = 'rendido'::text
+          WHERE s2.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND s2.estado::text = 'rendido'::text), 0.00) AS monto_rendido_con_cbte,
+    COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
+           FROM tes.tsolicitud_efectivo
+          WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'devuelto'::text), 0.00) AS monto_devuelto,
+    COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
+           FROM tes.tsolicitud_efectivo
+          WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'repuesto'::text), 0.00) AS monto_repuesto,
+    solefe.id_proceso_wf,
+    solefe.nro_tramite,
+    solefe.estado,
+    solefe.estado_reg,
+    solefe.motivo,
+    solefe.id_funcionario,
+    fun.desc_funcionario1 AS desc_funcionario,
+    solefe.fecha,
+    solefe.fecha_entrega,
+    caja.dias_maximo_rendicion,
+        CASE
+            WHEN solefe.estado::text = 'finalizado'::text THEN caja.dias_maximo_rendicion
+            ELSE caja.dias_maximo_rendicion - ('now'::text::date - COALESCE(solefe.fecha_entrega, 'now'::text::date) - pxp.f_get_weekend_days(COALESCE(solefe.fecha_entrega, 'now'::text::date), 'now'::text::date))
+        END AS dias_no_rendidos,
+    solefe.id_usuario_ai,
+    solefe.fecha_reg,
+    solefe.usuario_ai,
+    solefe.id_usuario_reg,
+    solefe.id_usuario_mod,
+    solefe.fecha_mod,
+    usu1.cuenta AS usr_reg,
+    usu2.cuenta AS usr_mod,
+    solefe.fecha_entregado_ult,
+    solefe.fecha_ult_mov,
+        CASE
+            WHEN solefe.estado::text = ANY (ARRAY['entregado'::character varying::text, 'finalizado'::character varying::text]) THEN solefe.monto - COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
+               FROM tes.tsolicitud_efectivo
+              WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'rendido'::text), 0.00) - COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
+               FROM tes.tsolicitud_efectivo
+              WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'devuelto'::text), 0.00) + COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
+               FROM tes.tsolicitud_efectivo
+              WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'repuesto'::text), 0.00)
+            ELSE 0.00
+        END AS saldo
+   FROM tes.tsolicitud_efectivo solefe
+     JOIN segu.tusuario usu1 ON usu1.id_usuario = solefe.id_usuario_reg
+     JOIN tes.tcaja caja ON caja.id_caja = solefe.id_caja
+     JOIN orga.vfuncionario fun ON fun.id_funcionario = solefe.id_funcionario
+     LEFT JOIN segu.tusuario usu2 ON usu2.id_usuario = solefe.id_usuario_mod
+  WHERE solefe.id_tipo_solicitud = 1 AND caja.tipo_ejecucion::text = 'sin_detalle'::text AND solefe.estado::text = 'finalizado'::text;
+
+
+
+ALTER TABLE tes.tsolicitud_transferencia
+  ADD CONSTRAINT fk_tsolicitud_transferencia__id_cuenta_destino FOREIGN KEY (id_cuenta_destino)
+    REFERENCES tes.tcuenta_bancaria(id_cuenta_bancaria)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_transferencia
+  ADD CONSTRAINT fk_tsolicitud_transferencia__id_cuenta_origen FOREIGN KEY (id_cuenta_origen)
+    REFERENCES tes.tcuenta_bancaria(id_cuenta_bancaria)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_transferencia
+  ADD CONSTRAINT fk_tsolicitud_transferencia__id_estado_wf FOREIGN KEY (id_estado_wf)
+    REFERENCES wf.testado_wf(id_estado_wf)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_transferencia
+  ADD CONSTRAINT fk_tsolicitud_transferencia__id_int_comprobante FOREIGN KEY (id_int_comprobante)
+    REFERENCES conta.tint_comprobante(id_int_comprobante)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tsolicitud_transferencia
+  ADD CONSTRAINT fk_tsolicitud_transferencia__id_proceso_wf FOREIGN KEY (id_proceso_wf)
+    REFERENCES wf.tproceso_wf(id_proceso_wf)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+
+ALTER TABLE tes.tcuenta_bancaria_periodo
+  ADD CONSTRAINT tcuenta_bancaria_periodo_fk FOREIGN KEY (id_cuenta_bancaria)
+    REFERENCES tes.tcuenta_bancaria(id_cuenta_bancaria)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tcuenta_bancaria_periodo
+  ADD CONSTRAINT tcuenta_bancaria_periodo_fk1 FOREIGN KEY (id_periodo)
+    REFERENCES param.tperiodo(id_periodo)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE
+    NOT DEFERRABLE;
+    
+    
+ 
 select pxp.f_insert_testructura_gui ('TES', 'SISTEMA');
 select pxp.f_delete_testructura_gui ('OBPG', 'TES');
 select pxp.f_insert_testructura_gui ('OBPG.1', 'OBPG');
@@ -4278,356 +4463,7 @@ select pxp.f_insert_testructura_gui ('PAGESP.6.4', 'PAGESP.6');
 select pxp.f_insert_testructura_gui ('PAGESP.6.5', 'PAGESP.6');
 select pxp.f_insert_testructura_gui ('PAGESP.6.6', 'PAGESP.6');
 select pxp.f_insert_testructura_gui ('PAGESP.6.7', 'PAGESP.6');
-select pxp.f_insert_testructura_gui ('RERANFEC', 'TESREPFR');
-  
-    
-/***********************************F-DEP-RAC-TES-0-24/02/2018****************************************/
-
-
-
-/**********************************I-DEP-RAC-TES-0-01/12/2018****************************************/
-
-
-
-
---DROP VIEW tes.vsolicitud_transferencia;
-CREATE OR REPLACE VIEW tes.vsolicitud_transferencia (
-    id_depto_conta,
-    num_tramite,
-    acreedor,
-    id_moneda,
-    fecha,
-    id_gestion,
-    id_cuenta_origen,
-    id_cuenta_destino,
-    monto,
-    motivo,
-    id_solicitud_transferencia,
-    id_proceso_wf,
-    id_estado_wf,
-    estado,
-    forma_pago,
-    banco,
-    id_depto_lb)
-AS
- SELECT dd.id_depto_destino AS id_depto_conta,
-    st.num_tramite,
-    cbd.denominacion AS acreedor,
-    cb.id_moneda,
-    now()::date AS fecha,
-    g.id_gestion,
-    st.id_cuenta_origen,
-    st.id_cuenta_destino,
-    st.monto,
-    st.motivo,
-    st.id_solicitud_transferencia,
-    st.id_proceso_wf,
-    st.id_estado_wf,
-    st.estado,
-    'transferencia' AS forma_pago,
-    'si' AS banco,
-    dc.id_depto AS id_depto_lb
-   FROM tes.tsolicitud_transferencia st
-     JOIN tes.tdepto_cuenta_bancaria dc ON st.id_cuenta_origen = dc.id_cuenta_bancaria AND dc.estado_reg::text = 'activo'::text
-     JOIN param.tdepto_depto dd ON dc.id_depto = dd.id_depto_origen AND dd.estado_reg::text = 'activo'::text
-     JOIN tes.tcuenta_bancaria cb ON st.id_cuenta_origen = cb.id_cuenta_bancaria
-     JOIN tes.tcuenta_bancaria cbd ON st.id_cuenta_destino = cbd.id_cuenta_bancaria
-     JOIN tes.tdepto_cuenta_bancaria dcd ON st.id_cuenta_destino = dcd.id_cuenta_bancaria AND dc.estado_reg::text = 'activo'::text
-     JOIN param.tdepto ddes ON ddes.id_depto = dcd.id_depto
-     JOIN param.tgestion g ON g.gestion::numeric = to_char(now()::date::timestamp with time zone, 'YYYY'::text)::numeric;
-
-
-
-
-
-CREATE OR REPLACE VIEW tes.vdevoluciones_caja_cd (
-    id_solicitud_efectivo,
-    id_funcionario,
-    nro_tramite,
-    monto,
-    estado,
-    fecha,
-    ingreso_cd,
-    observaciones,
-    motivo,
-    codigo,
-    nombre,
-    id_proceso_caja_rend,
-    glosa,
-    desc_funcionario1)
-AS
- SELECT se.id_solicitud_efectivo,
-    se.id_funcionario,
-    se.nro_tramite,
-    se.monto,
-    se.estado,
-    se.fecha,
-    se.ingreso_cd,
-    se.observaciones,
-    se.motivo,
-    ts.codigo,
-    ts.nombre,
-    se.id_proceso_caja_rend,
-    (se.nro_tramite::text || ' - '::text) || se.motivo AS glosa,
-    f.desc_funcionario1
-   FROM tes.tsolicitud_efectivo se
-     JOIN tes.ttipo_solicitud ts ON ts.id_tipo_solicitud = se.id_tipo_solicitud
-     JOIN orga.vfuncionario f ON f.id_funcionario = se.id_funcionario
-  WHERE se.id_proceso_caja_rend IS NOT NULL;
-
-
-
-CREATE OR REPLACE VIEW tes.vsolicitud_efectivo_entregado (
-    id_solicitud_efectivo,
-    id_caja,
-    codigo,
-    id_depto,
-    id_moneda,
-    id_estado_wf,
-    monto,
-    monto_rendido,
-    monto_devuelto,
-    monto_repuesto,
-    id_proceso_wf,
-    nro_tramite,
-    estado,
-    estado_reg,
-    motivo,
-    id_funcionario,
-    desc_funcionario,
-    fecha,
-    fecha_entrega,
-    dias_maximo_rendicion,
-    dias_no_rendidos,
-    id_usuario_ai,
-    fecha_reg,
-    usuario_ai,
-    id_usuario_reg,
-    id_usuario_mod,
-    fecha_mod,
-    usr_reg,
-    usr_mod,
-    fecha_entregado_ult,
-    fecha_ult_mov,
-    solicitud_efectivo_padre,
-    saldo)
-AS
- SELECT solefe.id_solicitud_efectivo,
-    solefe.id_caja,
-    caja.codigo,
-    caja.id_depto,
-    caja.id_moneda,
-    solefe.id_estado_wf,
-    solefe.monto,
-    COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
-           FROM tes.tsolicitud_efectivo
-          WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'rendido'::text), 0.00) AS monto_rendido,
-    COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
-           FROM tes.tsolicitud_efectivo
-          WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'devuelto'::text), 0.00) AS monto_devuelto,
-    COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
-           FROM tes.tsolicitud_efectivo
-          WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'repuesto'::text), 0.00) AS monto_repuesto,
-    solefe.id_proceso_wf,
-    solefe.nro_tramite,
-    solefe.estado,
-    solefe.estado_reg,
-    solefe.motivo,
-    solefe.id_funcionario,
-    fun.desc_funcionario1 AS desc_funcionario,
-    solefe.fecha,
-    solefe.fecha_entrega,
-    caja.dias_maximo_rendicion,
-        CASE
-            WHEN solefe.estado::text = 'finalizado'::text THEN caja.dias_maximo_rendicion
-            ELSE caja.dias_maximo_rendicion - ('now'::text::date - COALESCE(solefe.fecha_entrega, 'now'::text::date) - pxp.f_get_weekend_days(COALESCE(solefe.fecha_entrega, 'now'::text::date), 'now'::text::date))
-        END AS dias_no_rendidos,
-    solefe.id_usuario_ai,
-    solefe.fecha_reg,
-    solefe.usuario_ai,
-    solefe.id_usuario_reg,
-    solefe.id_usuario_mod,
-    solefe.fecha_mod,
-    usu1.cuenta AS usr_reg,
-    usu2.cuenta AS usr_mod,
-    solefe.fecha_entregado_ult,
-    solefe.fecha_ult_mov,
-    solpri.nro_tramite AS solicitud_efectivo_padre,
-        CASE
-            WHEN solefe.estado::text = ANY (ARRAY['entregado'::character varying::text, 'finalizado'::character varying::text]) THEN solefe.monto - COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
-               FROM tes.tsolicitud_efectivo
-              WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'rendido'::text), 0.00) - COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
-               FROM tes.tsolicitud_efectivo
-              WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'devuelto'::text), 0.00) + COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
-               FROM tes.tsolicitud_efectivo
-              WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'repuesto'::text), 0.00)
-            ELSE 0.00
-        END AS saldo
-   FROM tes.tsolicitud_efectivo solefe
-     JOIN segu.tusuario usu1 ON usu1.id_usuario = solefe.id_usuario_reg
-     JOIN tes.tcaja caja ON caja.id_caja = solefe.id_caja
-     JOIN orga.vfuncionario fun ON fun.id_funcionario = solefe.id_funcionario
-     LEFT JOIN segu.tusuario usu2 ON usu2.id_usuario = solefe.id_usuario_mod
-     LEFT JOIN tes.tsolicitud_efectivo solpri ON solpri.id_solicitud_efectivo = solefe.id_solicitud_efectivo_fk
-  WHERE solefe.id_tipo_solicitud = 1 AND 0 = 0 AND caja.tipo_ejecucion::text = 'sin_detalle'::text AND solefe.estado::text = 'entregado'::text;
-
-
-
-
-CREATE OR REPLACE VIEW tes.vsolicitud_efectivo_finalizada (
-    id_solicitud_efectivo,
-    id_caja,
-    codigo,
-    id_depto,
-    id_moneda,
-    id_estado_wf,
-    monto,
-    monto_rendido,
-    monto_rendido_sin_cbte,
-    monto_rendido_con_cbte,
-    monto_devuelto,
-    monto_repuesto,
-    id_proceso_wf,
-    nro_tramite,
-    estado,
-    estado_reg,
-    motivo,
-    id_funcionario,
-    desc_funcionario,
-    fecha,
-    fecha_entrega,
-    dias_maximo_rendicion,
-    dias_no_rendidos,
-    id_usuario_ai,
-    fecha_reg,
-    usuario_ai,
-    id_usuario_reg,
-    id_usuario_mod,
-    fecha_mod,
-    usr_reg,
-    usr_mod,
-    fecha_entregado_ult,
-    fecha_ult_mov,
-    saldo)
-AS
- SELECT solefe.id_solicitud_efectivo,
-    solefe.id_caja,
-    caja.codigo,
-    caja.id_depto,
-    caja.id_moneda,
-    solefe.id_estado_wf,
-    solefe.monto,
-    COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
-           FROM tes.tsolicitud_efectivo
-          WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'rendido'::text), 0.00) AS monto_rendido,
-    COALESCE(( SELECT sum(sr1.monto) AS sum
-           FROM tes.tsolicitud_efectivo s1
-             JOIN tes.tsolicitud_rendicion_det sr1 ON sr1.id_solicitud_efectivo = s1.id_solicitud_efectivo
-             JOIN tes.tproceso_caja p1 ON p1.id_proceso_caja = sr1.id_proceso_caja AND p1.estado::text <> 'rendido'::text
-          WHERE s1.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND s1.estado::text = 'rendido'::text), 0.00) AS monto_rendido_sin_cbte,
-    COALESCE(( SELECT sum(sr2.monto) AS sum
-           FROM tes.tsolicitud_efectivo s2
-             JOIN tes.tsolicitud_rendicion_det sr2 ON sr2.id_solicitud_efectivo = s2.id_solicitud_efectivo
-             JOIN tes.tproceso_caja p2 ON p2.id_proceso_caja = sr2.id_proceso_caja AND p2.estado::text = 'rendido'::text
-          WHERE s2.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND s2.estado::text = 'rendido'::text), 0.00) AS monto_rendido_con_cbte,
-    COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
-           FROM tes.tsolicitud_efectivo
-          WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'devuelto'::text), 0.00) AS monto_devuelto,
-    COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
-           FROM tes.tsolicitud_efectivo
-          WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'repuesto'::text), 0.00) AS monto_repuesto,
-    solefe.id_proceso_wf,
-    solefe.nro_tramite,
-    solefe.estado,
-    solefe.estado_reg,
-    solefe.motivo,
-    solefe.id_funcionario,
-    fun.desc_funcionario1 AS desc_funcionario,
-    solefe.fecha,
-    solefe.fecha_entrega,
-    caja.dias_maximo_rendicion,
-        CASE
-            WHEN solefe.estado::text = 'finalizado'::text THEN caja.dias_maximo_rendicion
-            ELSE caja.dias_maximo_rendicion - ('now'::text::date - COALESCE(solefe.fecha_entrega, 'now'::text::date) - pxp.f_get_weekend_days(COALESCE(solefe.fecha_entrega, 'now'::text::date), 'now'::text::date))
-        END AS dias_no_rendidos,
-    solefe.id_usuario_ai,
-    solefe.fecha_reg,
-    solefe.usuario_ai,
-    solefe.id_usuario_reg,
-    solefe.id_usuario_mod,
-    solefe.fecha_mod,
-    usu1.cuenta AS usr_reg,
-    usu2.cuenta AS usr_mod,
-    solefe.fecha_entregado_ult,
-    solefe.fecha_ult_mov,
-        CASE
-            WHEN solefe.estado::text = ANY (ARRAY['entregado'::character varying::text, 'finalizado'::character varying::text]) THEN solefe.monto - COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
-               FROM tes.tsolicitud_efectivo
-              WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'rendido'::text), 0.00) - COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
-               FROM tes.tsolicitud_efectivo
-              WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'devuelto'::text), 0.00) + COALESCE(( SELECT sum(tsolicitud_efectivo.monto) AS sum
-               FROM tes.tsolicitud_efectivo
-              WHERE tsolicitud_efectivo.id_solicitud_efectivo_fk = solefe.id_solicitud_efectivo AND tsolicitud_efectivo.estado::text = 'repuesto'::text), 0.00)
-            ELSE 0.00
-        END AS saldo
-   FROM tes.tsolicitud_efectivo solefe
-     JOIN segu.tusuario usu1 ON usu1.id_usuario = solefe.id_usuario_reg
-     JOIN tes.tcaja caja ON caja.id_caja = solefe.id_caja
-     JOIN orga.vfuncionario fun ON fun.id_funcionario = solefe.id_funcionario
-     LEFT JOIN segu.tusuario usu2 ON usu2.id_usuario = solefe.id_usuario_mod
-  WHERE solefe.id_tipo_solicitud = 1 AND caja.tipo_ejecucion::text = 'sin_detalle'::text AND solefe.estado::text = 'finalizado'::text;
-
-
-
-ALTER TABLE tes.tsolicitud_transferencia
-  ADD CONSTRAINT fk_tsolicitud_transferencia__id_cuenta_destino FOREIGN KEY (id_cuenta_destino)
-    REFERENCES tes.tcuenta_bancaria(id_cuenta_bancaria)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.tsolicitud_transferencia
-  ADD CONSTRAINT fk_tsolicitud_transferencia__id_cuenta_origen FOREIGN KEY (id_cuenta_origen)
-    REFERENCES tes.tcuenta_bancaria(id_cuenta_bancaria)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.tsolicitud_transferencia
-  ADD CONSTRAINT fk_tsolicitud_transferencia__id_estado_wf FOREIGN KEY (id_estado_wf)
-    REFERENCES wf.testado_wf(id_estado_wf)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.tsolicitud_transferencia
-  ADD CONSTRAINT fk_tsolicitud_transferencia__id_int_comprobante FOREIGN KEY (id_int_comprobante)
-    REFERENCES conta.tint_comprobante(id_int_comprobante)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.tsolicitud_transferencia
-  ADD CONSTRAINT fk_tsolicitud_transferencia__id_proceso_wf FOREIGN KEY (id_proceso_wf)
-    REFERENCES wf.tproceso_wf(id_proceso_wf)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-
-ALTER TABLE tes.tcuenta_bancaria_periodo
-  ADD CONSTRAINT tcuenta_bancaria_periodo_fk FOREIGN KEY (id_cuenta_bancaria)
-    REFERENCES tes.tcuenta_bancaria(id_cuenta_bancaria)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.tcuenta_bancaria_periodo
-  ADD CONSTRAINT tcuenta_bancaria_periodo_fk1 FOREIGN KEY (id_periodo)
-    REFERENCES param.tperiodo(id_periodo)
-    ON DELETE NO ACTION
-    ON UPDATE CASCADE
-    NOT DEFERRABLE;
+select pxp.f_insert_testructura_gui ('RERANFEC', 'TESREPFR');   
 
 
 /**********************************F-DEP-RAC-TES-0-01/12/2018****************************************/

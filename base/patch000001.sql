@@ -606,7 +606,7 @@ IS 'cuando viene de adquisiciones para disminuir la complekidad de las consultas
 
 
 
-/***********************************I-SCP-RAC-TES-0-19/08/2014***************************************/
+/***********************************I-SCP-RAC-TES-1-19/08/2014***************************************/
 
 CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
     id_plan_pago,
@@ -766,7 +766,7 @@ AS
            op.tipo_solicitud,
            op.tipo_concepto_solicitud;
 
-/***********************************F-SCP-RAC-TES-0-19/08/2014***************************************/
+/***********************************F-SCP-RAC-TES-1-19/08/2014***************************************/
 
 
 
@@ -1372,7 +1372,7 @@ WITHOUT OIDS;
 /*****************************F-SCP-JRR-TES-0-25/08/2015*************/
 
 
-/*****************************I-SCP-RAC-TES-0-08/22/2015*************/
+/*****************************I-SCP-RAC-TES-0-11/08/2015*************/
 
 
 --------------- SQL ---------------
@@ -1384,9 +1384,9 @@ ALTER TABLE tes.tobligacion_pago
   ALTER COLUMN tipo_cambio_conv TYPE NUMERIC;
   
   
-/*****************************F-SCP-RAC-TES-0-08/22/2015*************/
+/*****************************F-SCP-RAC-TES-0-22/08/2015*************/
 
-/*****************************I-SCP-GSS-TES-0-20/21/2016*************/
+/*****************************I-SCP-GSS-TES-0-20/11/2016*************/
 CREATE TABLE tes.tsolicitud_rendicion_det (
   id_solicitud_rendicion_det SERIAL, 
   id_documento_respaldo INTEGER, 
@@ -1398,7 +1398,7 @@ CREATE TABLE tes.tsolicitud_rendicion_det (
 
 WITHOUT OIDS;;
 
-/*****************************F-SCP-GSS-TES-0-20/21/2016*************/
+/*****************************F-SCP-GSS-TES-0-20/11/2016*************/
 
 /*****************************I-SCP-GSS-TES-0-21/01/2016*************/
 ALTER TABLE tes.tcaja
@@ -1850,6 +1850,10 @@ ALTER TABLE tes.tts_libro_bancos
 
 
 /*************************I-SCP-RAC-TES-0-01/12/2018*************/
+
+
+
+
  
  CREATE TABLE tes.tcuenta_bancaria_periodo (
   id_usuario_reg INTEGER,
