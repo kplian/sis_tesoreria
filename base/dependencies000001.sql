@@ -431,6 +431,171 @@ CREATE TRIGGER trig_actualiza_informacion_estado_pp
 
 
 
+
+/***********************************I-DEP-RAC-TES-1-19/08/2014***************************************/
+
+CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
+    id_plan_pago,
+    id_proveedor,
+    desc_proveedor,
+    id_moneda,
+    id_depto_conta,
+    numero,
+    fecha_actual,
+    estado,
+    monto_ejecutar_total_mb,
+    monto_ejecutar_total_mo,
+    monto,
+    monto_mb,
+    monto_retgar_mb,
+    monto_retgar_mo,
+    monto_no_pagado,
+    monto_no_pagado_mb,
+    otros_descuentos,
+    otros_descuentos_mb,
+    id_plantilla,
+    id_cuenta_bancaria,
+    id_cuenta_bancaria_mov,
+    nro_cheque,
+    nro_cuenta_bancaria,
+    num_tramite,
+    tipo,
+    id_gestion_cuentas,
+    id_int_comprobante,
+    liquido_pagable,
+    liquido_pagable_mb,
+    nombre_pago,
+    porc_monto_excento_var,
+    obs_pp,
+    descuento_anticipo,
+    descuento_inter_serv,
+    tipo_obligacion,
+    id_categoria_compra,
+    codigo_categoria,
+    nombre_categoria,
+    id_proceso_wf,
+    detalle,
+    codigo_moneda,
+    nro_cuota,
+    tipo_pago,
+    tipo_solicitud,
+    tipo_concepto_solicitud,
+    total_monto_op_mb,
+    total_monto_op_mo,
+    total_pago)
+AS
+  SELECT pp.id_plan_pago,
+         op.id_proveedor,
+         p.desc_proveedor,
+         op.id_moneda,
+         pp.id_depto_conta,
+         op.numero,
+         now() AS fecha_actual,
+         pp.estado,
+         pp.monto_ejecutar_total_mb,
+         pp.monto_ejecutar_total_mo,
+         pp.monto,
+         pp.monto_mb,
+         pp.monto_retgar_mb,
+         pp.monto_retgar_mo,
+         pp.monto_no_pagado,
+         pp.monto_no_pagado_mb,
+         pp.otros_descuentos,
+         pp.otros_descuentos_mb,
+         pp.id_plantilla,
+         pp.id_cuenta_bancaria,
+         pp.id_cuenta_bancaria_mov,
+         pp.nro_cheque,
+         pp.nro_cuenta_bancaria,
+         op.num_tramite,
+         pp.tipo,
+         op.id_gestion AS id_gestion_cuentas,
+         pp.id_int_comprobante,
+         pp.liquido_pagable,
+         pp.liquido_pagable_mb,
+         pp.nombre_pago,
+         pp.porc_monto_excento_var,
+         ((COALESCE(op.numero, '' ::character varying) ::text || ' ' ::text) ||
+          COALESCE(pp.obs_monto_no_pagado, '' ::text)) ::character varying AS
+           obs_pp,
+         pp.descuento_anticipo,
+         pp.descuento_inter_serv,
+         op.tipo_obligacion,
+         op.id_categoria_compra,
+         COALESCE(cac.codigo, '' ::character varying) AS codigo_categoria,
+         COALESCE(cac.nombre, '' ::character varying) AS nombre_categoria,
+         pp.id_proceso_wf,
+         ('<table>' ::text || pxp.html_rows((((('<td>' ::text ||
+          ci.desc_ingas::text) || '<br/>' ::text) || od.descripcion) || '</td>'
+           ::text) ::character varying) ::text) || '</table>' ::text AS detalle,
+         mon.codigo AS codigo_moneda,
+         pp.nro_cuota,
+         pp.tipo_pago,
+         op.tipo_solicitud,
+         op.tipo_concepto_solicitud,
+         sum(od.monto_pago_mb) AS total_monto_op_mb,
+         sum(od.monto_pago_mo) AS total_monto_op_mo,
+         op.total_pago
+  FROM tes.tplan_pago pp
+       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
+        op.id_obligacion_pago
+       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
+       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
+       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
+        op.id_categoria_compra
+       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
+        op.id_obligacion_pago
+       JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas =
+        od.id_concepto_ingas
+  GROUP BY pp.id_plan_pago,
+           op.id_proveedor,
+           p.desc_proveedor,
+           op.id_moneda,
+           pp.id_depto_conta,
+           op.numero,
+           pp.estado,
+           pp.monto_ejecutar_total_mb,
+           pp.monto_ejecutar_total_mo,
+           pp.monto,
+           pp.monto_mb,
+           pp.monto_retgar_mb,
+           pp.monto_retgar_mo,
+           pp.monto_no_pagado,
+           pp.monto_no_pagado_mb,
+           pp.otros_descuentos,
+           pp.otros_descuentos_mb,
+           pp.id_plantilla,
+           pp.id_cuenta_bancaria,
+           pp.id_cuenta_bancaria_mov,
+           pp.nro_cheque,
+           pp.nro_cuenta_bancaria,
+           op.num_tramite,
+           pp.tipo,
+           op.id_gestion,
+           pp.id_int_comprobante,
+           pp.liquido_pagable,
+           pp.liquido_pagable_mb,
+           pp.nombre_pago,
+           pp.porc_monto_excento_var,
+           pp.obs_monto_no_pagado,
+           pp.descuento_anticipo,
+           pp.descuento_inter_serv,
+           op.tipo_obligacion,
+           op.id_categoria_compra,
+           cac.codigo,
+           cac.nombre,
+           pp.id_proceso_wf,
+           mon.codigo,
+           pp.nro_cuota,
+           pp.tipo_pago,
+           op.total_pago,
+           op.tipo_solicitud,
+           op.tipo_concepto_solicitud;
+
+/***********************************F-DEP-RAC-TES-1-19/08/2014***************************************/
+
+
+
 /***********************************I-DEP-RAC-TES-0-01/09/2014*****************************************/
 
 --------------- SQL ---------------
@@ -1345,8 +1510,6 @@ group by
 --------
 
 --------------- SQL ---------------
-
-DROP VIEW tes.vpagos_relacionados;
 
 CREATE OR REPLACE VIEW tes.vpagos_relacionados(
     desc_proveedor,
@@ -3018,322 +3181,23 @@ ALTER TABLE tes.tcuenta_bancaria_periodo
     
  
 select pxp.f_insert_testructura_gui ('TES', 'SISTEMA');
-select pxp.f_delete_testructura_gui ('OBPG', 'TES');
-select pxp.f_insert_testructura_gui ('OBPG.1', 'OBPG');
-select pxp.f_delete_testructura_gui ('CTABAN', 'TES');
-select pxp.f_delete_testructura_gui ('CAJA', 'TES');
-select pxp.f_delete_testructura_gui ('CTABANE', 'TES');
-select pxp.f_delete_testructura_gui ('TIPP', 'TES');
-select pxp.f_delete_testructura_gui ('CTABANCEND', 'TES');
-select pxp.f_delete_testructura_gui ('VBPDC', 'TES');
-select pxp.f_delete_testructura_gui ('OPUNI', 'TES');
-select pxp.f_delete_testructura_gui ('VBOPOA', 'TES');
 select pxp.f_insert_testructura_gui ('REPPP', 'REPOP');
-select pxp.f_delete_testructura_gui ('SOLEFE', 'TES');
-select pxp.f_delete_testructura_gui ('VBCAJA', 'TES');
-select pxp.f_insert_testructura_gui ('CAJA.2', 'CAJA');
-select pxp.f_insert_testructura_gui ('CAJA.2.1', 'CAJA.2');
-select pxp.f_insert_testructura_gui ('CAJA.2.1.1', 'CAJA.2.1');
-select pxp.f_insert_testructura_gui ('CAJA.2.1.2', 'CAJA.2.1');
-select pxp.f_insert_testructura_gui ('CAJA.2.1.3', 'CAJA.2.1');
-select pxp.f_insert_testructura_gui ('CAJA.2.1.4', 'CAJA.2.1');
-select pxp.f_insert_testructura_gui ('CAJA.2.1.5', 'CAJA.2.1');
-select pxp.f_insert_testructura_gui ('CAJA.2.1.5.1', 'CAJA.2.1.5');
-select pxp.f_insert_testructura_gui ('CAJA.2.1.5.1.1', 'CAJA.2.1.5.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.1', 'SOLEFE');
-select pxp.f_insert_testructura_gui ('VBCAJA.1', 'VBCAJA');
-select pxp.f_insert_testructura_gui ('VBCAJA.2', 'VBCAJA');
-select pxp.f_insert_testructura_gui ('VBCAJA.1.1', 'VBCAJA.1');
-select pxp.f_insert_testructura_gui ('VBCAJA.1.1.1', 'VBCAJA.1.1');
-select pxp.f_insert_testructura_gui ('VBCAJA.1.1.2', 'VBCAJA.1.1');
-select pxp.f_insert_testructura_gui ('VBCAJA.1.1.3', 'VBCAJA.1.1');
-select pxp.f_insert_testructura_gui ('VBCAJA.1.1.4', 'VBCAJA.1.1');
-select pxp.f_insert_testructura_gui ('VBCAJA.1.1.5', 'VBCAJA.1.1');
-select pxp.f_insert_testructura_gui ('VBCAJA.1.1.5.1', 'VBCAJA.1.1.5');
-select pxp.f_insert_testructura_gui ('VBCAJA.1.1.5.1.1', 'VBCAJA.1.1.5.1');
-select pxp.f_delete_testructura_gui ('SOLEFESD', 'TES');
-select pxp.f_delete_testructura_gui ('VBSOLEFE', 'TES');
-select pxp.f_delete_testructura_gui ('VBRENCJ', 'TES');
-select pxp.f_insert_testructura_gui ('CAJA.3', 'CAJA');
-select pxp.f_insert_testructura_gui ('CAJA.3.1', 'CAJA.3');
-select pxp.f_insert_testructura_gui ('CAJA.3.2', 'CAJA.3');
-select pxp.f_insert_testructura_gui ('SOLEFE.2', 'SOLEFE');
-select pxp.f_insert_testructura_gui ('SOLEFE.3', 'SOLEFE');
-select pxp.f_insert_testructura_gui ('SOLEFE.4', 'SOLEFE');
-select pxp.f_insert_testructura_gui ('SOLEFE.2.1', 'SOLEFE.2');
-select pxp.f_insert_testructura_gui ('SOLEFE.2.1.1', 'SOLEFE.2.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.2.1.2', 'SOLEFE.2.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.2.1.3', 'SOLEFE.2.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.2.1.4', 'SOLEFE.2.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.2.1.5', 'SOLEFE.2.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.2.1.5.1', 'SOLEFE.2.1.5');
-select pxp.f_insert_testructura_gui ('SOLEFE.2.1.5.1.1', 'SOLEFE.2.1.5.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.3.1', 'SOLEFE.3');
-select pxp.f_insert_testructura_gui ('SOLEFE.4.1', 'SOLEFE.4');
-select pxp.f_insert_testructura_gui ('VBCAJA.3', 'VBCAJA');
-select pxp.f_insert_testructura_gui ('VBCAJA.4', 'VBCAJA');
-select pxp.f_insert_testructura_gui ('VBCAJA.4.1', 'VBCAJA.4');
-select pxp.f_insert_testructura_gui ('VBCAJA.4.2', 'VBCAJA.4');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1', 'SOLEFESD');
-select pxp.f_insert_testructura_gui ('SOLEFESD.2', 'SOLEFESD');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.1', 'SOLEFESD.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.2.1', 'SOLEFESD.2');
-select pxp.f_insert_testructura_gui ('SOLEFESD.2.1.1', 'SOLEFESD.2.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.2.1.2', 'SOLEFESD.2.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.2.1.3', 'SOLEFESD.2.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.2.1.4', 'SOLEFESD.2.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.2.1.5', 'SOLEFESD.2.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.2.1.5.1', 'SOLEFESD.2.1.5');
-select pxp.f_insert_testructura_gui ('SOLEFESD.2.1.5.1.1', 'SOLEFESD.2.1.5.1');
-select pxp.f_insert_testructura_gui ('VBSOLEFE.1', 'VBSOLEFE');
-select pxp.f_insert_testructura_gui ('VBSOLEFE.2', 'VBSOLEFE');
-select pxp.f_insert_testructura_gui ('VBSOLEFE.3', 'VBSOLEFE');
-select pxp.f_insert_testructura_gui ('VBSOLEFE.2.1', 'VBSOLEFE.2');
-select pxp.f_insert_testructura_gui ('VBSOLEFE.2.1.1', 'VBSOLEFE.2.1');
-select pxp.f_insert_testructura_gui ('VBSOLEFE.2.1.2', 'VBSOLEFE.2.1');
-select pxp.f_insert_testructura_gui ('VBSOLEFE.2.1.3', 'VBSOLEFE.2.1');
-select pxp.f_insert_testructura_gui ('VBSOLEFE.2.1.4', 'VBSOLEFE.2.1');
-select pxp.f_insert_testructura_gui ('VBSOLEFE.2.1.5', 'VBSOLEFE.2.1');
-select pxp.f_insert_testructura_gui ('VBSOLEFE.2.1.5.1', 'VBSOLEFE.2.1.5');
-select pxp.f_insert_testructura_gui ('VBSOLEFE.2.1.5.1.1', 'VBSOLEFE.2.1.5.1');
-select pxp.f_insert_testructura_gui ('VBRENCJ.1', 'VBRENCJ');
-select pxp.f_insert_testructura_gui ('VBRENCJ.2', 'VBRENCJ');
-select pxp.f_insert_testructura_gui ('VBRENCJ.3', 'VBRENCJ');
-select pxp.f_insert_testructura_gui ('VBRENCJ.2.1', 'VBRENCJ.2');
-select pxp.f_insert_testructura_gui ('VBRENCJ.2.1.1', 'VBRENCJ.2.1');
-select pxp.f_insert_testructura_gui ('VBRENCJ.2.1.2', 'VBRENCJ.2.1');
-select pxp.f_insert_testructura_gui ('VBRENCJ.2.1.3', 'VBRENCJ.2.1');
-select pxp.f_insert_testructura_gui ('VBRENCJ.2.1.4', 'VBRENCJ.2.1');
-select pxp.f_insert_testructura_gui ('VBRENCJ.2.1.5', 'VBRENCJ.2.1');
-select pxp.f_insert_testructura_gui ('VBRENCJ.2.1.5.1', 'VBRENCJ.2.1.5');
-select pxp.f_insert_testructura_gui ('VBRENCJ.2.1.5.1.1', 'VBRENCJ.2.1.5.1');
-select pxp.f_delete_testructura_gui ('SOLCAJA', 'TES');
-select pxp.f_insert_testructura_gui ('CAJA.3.1.1', 'CAJA.3.1');
-select pxp.f_insert_testructura_gui ('CAJA.3.1.1.1', 'CAJA.3.1.1');
-select pxp.f_insert_testructura_gui ('CAJA.3.1.1.2', 'CAJA.3.1.1');
-select pxp.f_insert_testructura_gui ('CAJA.3.1.1.3', 'CAJA.3.1.1');
-select pxp.f_insert_testructura_gui ('CAJA.3.1.1.4', 'CAJA.3.1.1');
-select pxp.f_insert_testructura_gui ('CAJA.3.1.1.5', 'CAJA.3.1.1');
-select pxp.f_insert_testructura_gui ('CAJA.3.1.1.5.1', 'CAJA.3.1.1.5');
-select pxp.f_insert_testructura_gui ('CAJA.3.1.1.5.1.1', 'CAJA.3.1.1.5.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.1', 'SOLCAJA');
-select pxp.f_insert_testructura_gui ('SOLCAJA.2', 'SOLCAJA');
-select pxp.f_insert_testructura_gui ('SOLCAJA.1.1', 'SOLCAJA.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.1.1.1', 'SOLCAJA.1.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.1.1.2', 'SOLCAJA.1.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.1.1.3', 'SOLCAJA.1.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.1.1.4', 'SOLCAJA.1.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.1.1.5', 'SOLCAJA.1.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.1.1.5.1', 'SOLCAJA.1.1.5');
-select pxp.f_insert_testructura_gui ('SOLCAJA.1.1.5.1.1', 'SOLCAJA.1.1.5.1');
 select pxp.f_insert_testructura_gui ('REPPPBA', 'REPOP');
-select pxp.f_delete_testructura_gui ('PRCRE', 'TES');
-select pxp.f_delete_testructura_gui ('PP', 'TES');
-select pxp.f_delete_testructura_gui ('PPC', 'TES');
-select pxp.f_delete_testructura_gui ('VBPCOS', 'TES');
-select pxp.f_insert_testructura_gui ('OBPG.2', 'OBPG');
-select pxp.f_insert_testructura_gui ('OBPG.3', 'OBPG');
-select pxp.f_insert_testructura_gui ('OBPG.4', 'OBPG');
-select pxp.f_insert_testructura_gui ('OBPG.5', 'OBPG');
-select pxp.f_insert_testructura_gui ('OBPG.6', 'OBPG');
-select pxp.f_insert_testructura_gui ('OBPG.7', 'OBPG');
-select pxp.f_insert_testructura_gui ('OBPG.3.1', 'OBPG.3');
-select pxp.f_insert_testructura_gui ('OBPG.3.2', 'OBPG.3');
-select pxp.f_insert_testructura_gui ('OBPG.3.3', 'OBPG.3');
-select pxp.f_insert_testructura_gui ('OBPG.3.3.1', 'OBPG.3.3');
-select pxp.f_insert_testructura_gui ('OBPG.6.1', 'OBPG.6');
-select pxp.f_insert_testructura_gui ('OBPG.6.2', 'OBPG.6');
-select pxp.f_insert_testructura_gui ('OBPG.6.3', 'OBPG.6');
-select pxp.f_insert_testructura_gui ('OBPG.6.2.1', 'OBPG.6.2');
-select pxp.f_insert_testructura_gui ('OBPG.6.3.1', 'OBPG.6.3');
-select pxp.f_insert_testructura_gui ('OBPG.7.1', 'OBPG.7');
-select pxp.f_insert_testructura_gui ('OBPG.7.2', 'OBPG.7');
-select pxp.f_insert_testructura_gui ('OBPG.7.1.1', 'OBPG.7.1');
-select pxp.f_insert_testructura_gui ('CTABAN.1', 'CTABAN');
-select pxp.f_insert_testructura_gui ('CTABAN.2', 'CTABAN');
-select pxp.f_insert_testructura_gui ('CTABAN.2.1', 'CTABAN.2');
-select pxp.f_insert_testructura_gui ('CTABAN.2.1.1', 'CTABAN.2.1');
-select pxp.f_insert_testructura_gui ('CAJA.1', 'CAJA');
-select pxp.f_insert_testructura_gui ('CTABANE.1', 'CTABANE');
-select pxp.f_insert_testructura_gui ('CTABANE.2', 'CTABANE');
-select pxp.f_insert_testructura_gui ('CTABANE.3', 'CTABANE');
-select pxp.f_insert_testructura_gui ('CTABANE.3.1', 'CTABANE.3');
-select pxp.f_insert_testructura_gui ('CTABANE.3.1.1', 'CTABANE.3.1');
-select pxp.f_delete_testructura_gui ('VBDP', 'TES');
-select pxp.f_insert_testructura_gui ('VBDP.1', 'VBDP');
-select pxp.f_insert_testructura_gui ('VBDP.2', 'VBDP');
-select pxp.f_insert_testructura_gui ('VBDP.3', 'VBDP');
-select pxp.f_insert_testructura_gui ('VBDP.2.1', 'VBDP.2');
-select pxp.f_insert_testructura_gui ('VBDP.2.2', 'VBDP.2');
-select pxp.f_insert_testructura_gui ('VBDP.2.2.1', 'VBDP.2.2');
-select pxp.f_insert_testructura_gui ('VBDP.2.2.2', 'VBDP.2.2');
-select pxp.f_insert_testructura_gui ('VBDP.2.2.3', 'VBDP.2.2');
-select pxp.f_insert_testructura_gui ('VBDP.2.2.2.1', 'VBDP.2.2.2');
-select pxp.f_insert_testructura_gui ('VBDP.2.2.3.1', 'VBDP.2.2.3');
-select pxp.f_insert_testructura_gui ('VBDP.3.1', 'VBDP.3');
-select pxp.f_insert_testructura_gui ('OBPG.3.3.2', 'OBPG.3.3');
-select pxp.f_insert_testructura_gui ('OBPG.4.1', 'OBPG.4');
-select pxp.f_insert_testructura_gui ('OBPG.4.2', 'OBPG.4');
-select pxp.f_insert_testructura_gui ('OBPG.6.3.1.1', 'OBPG.6.3.1');
-select pxp.f_insert_testructura_gui ('OBPG.7.1.1.1', 'OBPG.7.1.1');
-select pxp.f_insert_testructura_gui ('OBPG.7.1.1.1.1', 'OBPG.7.1.1.1');
-select pxp.f_insert_testructura_gui ('OBPG.7.2.1', 'OBPG.7.2');
-select pxp.f_insert_testructura_gui ('VBDP.2.2.3.1.1', 'VBDP.2.2.3.1');
-select pxp.f_insert_testructura_gui ('VBDP.3.2', 'VBDP.3');
-select pxp.f_insert_testructura_gui ('OBPG.8', 'OBPG');
-select pxp.f_insert_testructura_gui ('OBPG.8.1', 'OBPG.8');
-select pxp.f_insert_testructura_gui ('OBPG.8.2', 'OBPG.8');
-select pxp.f_insert_testructura_gui ('OBPG.8.3', 'OBPG.8');
-select pxp.f_insert_testructura_gui ('OBPG.8.3.1', 'OBPG.8.3');
-select pxp.f_insert_testructura_gui ('OBPG.8.3.2', 'OBPG.8.3');
-select pxp.f_delete_testructura_gui ('CONEX', 'TES');
-select pxp.f_delete_testructura_gui ('SOLPD', 'TES');
-select pxp.f_insert_testructura_gui ('OBPG.8.4', 'OBPG.8');
-select pxp.f_insert_testructura_gui ('OBPG.8.5', 'OBPG.8');
-select pxp.f_insert_testructura_gui ('OBPG.3.4', 'OBPG.3');
-select pxp.f_insert_testructura_gui ('OBPG.3.5', 'OBPG.3');
-select pxp.f_insert_testructura_gui ('VBDP.4', 'VBDP');
-select pxp.f_insert_testructura_gui ('VBDP.5', 'VBDP');
-select pxp.f_insert_testructura_gui ('SOLPD.1', 'SOLPD');
-select pxp.f_insert_testructura_gui ('SOLPD.2', 'SOLPD');
-select pxp.f_insert_testructura_gui ('SOLPD.3', 'SOLPD');
-select pxp.f_insert_testructura_gui ('SOLPD.4', 'SOLPD');
-select pxp.f_insert_testructura_gui ('SOLPD.5', 'SOLPD');
-select pxp.f_insert_testructura_gui ('SOLPD.6', 'SOLPD');
-select pxp.f_insert_testructura_gui ('SOLPD.7', 'SOLPD');
-select pxp.f_insert_testructura_gui ('SOLPD.2.1', 'SOLPD.2');
-select pxp.f_insert_testructura_gui ('SOLPD.2.2', 'SOLPD.2');
-select pxp.f_insert_testructura_gui ('SOLPD.2.3', 'SOLPD.2');
-select pxp.f_insert_testructura_gui ('SOLPD.2.4', 'SOLPD.2');
-select pxp.f_insert_testructura_gui ('SOLPD.2.5', 'SOLPD.2');
-select pxp.f_insert_testructura_gui ('SOLPD.2.5.1', 'SOLPD.2.5');
-select pxp.f_insert_testructura_gui ('SOLPD.2.5.2', 'SOLPD.2.5');
-select pxp.f_insert_testructura_gui ('SOLPD.4.1', 'SOLPD.4');
-select pxp.f_insert_testructura_gui ('SOLPD.4.2', 'SOLPD.4');
-select pxp.f_insert_testructura_gui ('SOLPD.4.3', 'SOLPD.4');
-select pxp.f_insert_testructura_gui ('SOLPD.4.4', 'SOLPD.4');
-select pxp.f_insert_testructura_gui ('SOLPD.4.5', 'SOLPD.4');
-select pxp.f_insert_testructura_gui ('SOLPD.4.5.1', 'SOLPD.4.5');
-select pxp.f_insert_testructura_gui ('SOLPD.4.5.2', 'SOLPD.4.5');
-select pxp.f_insert_testructura_gui ('SOLPD.5.1', 'SOLPD.5');
-select pxp.f_insert_testructura_gui ('SOLPD.5.2', 'SOLPD.5');
-select pxp.f_insert_testructura_gui ('SOLPD.7.1', 'SOLPD.7');
-select pxp.f_insert_testructura_gui ('SOLPD.7.2', 'SOLPD.7');
-select pxp.f_insert_testructura_gui ('SOLPD.7.3', 'SOLPD.7');
-select pxp.f_insert_testructura_gui ('SOLPD.7.2.1', 'SOLPD.7.2');
-select pxp.f_insert_testructura_gui ('SOLPD.7.3.1', 'SOLPD.7.3');
-select pxp.f_insert_testructura_gui ('SOLPD.7.3.1.1', 'SOLPD.7.3.1');
-select pxp.f_insert_testructura_gui ('OBPG.1.1', 'OBPG.1');
-select pxp.f_insert_testructura_gui ('SOLPD.1.1', 'SOLPD.1');
-select pxp.f_delete_testructura_gui ('REVBPP', 'TES');
-select pxp.f_insert_testructura_gui ('REVBPP.1', 'REVBPP');
-select pxp.f_insert_testructura_gui ('REVBPP.2', 'REVBPP');
-select pxp.f_insert_testructura_gui ('REVBPP.3', 'REVBPP');
-select pxp.f_insert_testructura_gui ('REVBPP.4', 'REVBPP');
-select pxp.f_insert_testructura_gui ('REVBPP.5', 'REVBPP');
-select pxp.f_insert_testructura_gui ('REVBPP.2.1', 'REVBPP.2');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2', 'REVBPP.2');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.1', 'REVBPP.2.2');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.2', 'REVBPP.2.2');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.3', 'REVBPP.2.2');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.2.1', 'REVBPP.2.2.2');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.3.1', 'REVBPP.2.2.3');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.3.1.1', 'REVBPP.2.2.3.1');
-select pxp.f_insert_testructura_gui ('REVBPP.5.1', 'REVBPP.5');
-select pxp.f_insert_testructura_gui ('REVBPP.5.2', 'REVBPP.5');
-select pxp.f_delete_testructura_gui ('VBOP', 'TES');
-select pxp.f_insert_testructura_gui ('VBOP.1', 'VBOP');
-select pxp.f_insert_testructura_gui ('VBOP.2', 'VBOP');
-select pxp.f_insert_testructura_gui ('VBOP.3', 'VBOP');
-select pxp.f_insert_testructura_gui ('VBOP.4', 'VBOP');
-select pxp.f_insert_testructura_gui ('VBOP.5', 'VBOP');
-select pxp.f_insert_testructura_gui ('VBOP.6', 'VBOP');
-select pxp.f_insert_testructura_gui ('VBOP.7', 'VBOP');
-select pxp.f_insert_testructura_gui ('VBOP.1.1', 'VBOP.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.1', 'VBOP.2');
-select pxp.f_insert_testructura_gui ('VBOP.2.2', 'VBOP.2');
-select pxp.f_insert_testructura_gui ('VBOP.2.3', 'VBOP.2');
-select pxp.f_insert_testructura_gui ('VBOP.2.4', 'VBOP.2');
-select pxp.f_insert_testructura_gui ('VBOP.2.5', 'VBOP.2');
-select pxp.f_insert_testructura_gui ('VBOP.2.5.1', 'VBOP.2.5');
-select pxp.f_insert_testructura_gui ('VBOP.2.5.2', 'VBOP.2.5');
-select pxp.f_insert_testructura_gui ('VBOP.4.1', 'VBOP.4');
-select pxp.f_insert_testructura_gui ('VBOP.4.2', 'VBOP.4');
-select pxp.f_insert_testructura_gui ('VBOP.4.3', 'VBOP.4');
-select pxp.f_insert_testructura_gui ('VBOP.4.4', 'VBOP.4');
-select pxp.f_insert_testructura_gui ('VBOP.4.5', 'VBOP.4');
-select pxp.f_insert_testructura_gui ('VBOP.4.5.1', 'VBOP.4.5');
-select pxp.f_insert_testructura_gui ('VBOP.4.5.2', 'VBOP.4.5');
-select pxp.f_insert_testructura_gui ('VBOP.5.1', 'VBOP.5');
-select pxp.f_insert_testructura_gui ('VBOP.5.2', 'VBOP.5');
-select pxp.f_insert_testructura_gui ('VBOP.7.1', 'VBOP.7');
-select pxp.f_insert_testructura_gui ('VBOP.7.2', 'VBOP.7');
-select pxp.f_insert_testructura_gui ('VBOP.7.3', 'VBOP.7');
-select pxp.f_insert_testructura_gui ('VBOP.7.2.1', 'VBOP.7.2');
-select pxp.f_insert_testructura_gui ('VBOP.7.3.1', 'VBOP.7.3');
-select pxp.f_insert_testructura_gui ('VBOP.7.3.1.1', 'VBOP.7.3.1');
-select pxp.f_delete_testructura_gui ('TIPPRO', 'TES');
-select pxp.f_insert_testructura_gui ('VBDP.6', 'VBDP');
-select pxp.f_insert_testructura_gui ('VBDP.6.1', 'VBDP.6');
-select pxp.f_insert_testructura_gui ('VBDP.6.2', 'VBDP.6');
-select pxp.f_insert_testructura_gui ('VBDP.6.3', 'VBDP.6');
-select pxp.f_insert_testructura_gui ('VBDP.6.4', 'VBDP.6');
-select pxp.f_insert_testructura_gui ('VBDP.6.5', 'VBDP.6');
-select pxp.f_insert_testructura_gui ('VBDP.6.6', 'VBDP.6');
-select pxp.f_insert_testructura_gui ('VBDP.6.7', 'VBDP.6');
-select pxp.f_insert_testructura_gui ('VBDP.6.1.1', 'VBDP.6.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.3.1', 'VBDP.6.3');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.1', 'VBDP.6.4');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.2', 'VBDP.6.4');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.3', 'VBDP.6.4');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.4', 'VBDP.6.4');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.5', 'VBDP.6.4');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.5.1', 'VBDP.6.4.5');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.5.2', 'VBDP.6.4.5');
-select pxp.f_insert_testructura_gui ('VBDP.6.5.1', 'VBDP.6.5');
-select pxp.f_insert_testructura_gui ('VBDP.6.5.2', 'VBDP.6.5');
-select pxp.f_insert_testructura_gui ('VBDP.6.7.1', 'VBDP.6.7');
-select pxp.f_insert_testructura_gui ('VBDP.6.7.2', 'VBDP.6.7');
-select pxp.f_insert_testructura_gui ('VBDP.6.7.3', 'VBDP.6.7');
-select pxp.f_insert_testructura_gui ('VBDP.6.7.2.1', 'VBDP.6.7.2');
-select pxp.f_insert_testructura_gui ('VBDP.6.7.3.1', 'VBDP.6.7.3');
-select pxp.f_insert_testructura_gui ('VBDP.6.7.3.1.1', 'VBDP.6.7.3.1');
-select pxp.f_delete_testructura_gui ('REPOP', 'TES');
 select pxp.f_insert_testructura_gui ('REPPAGCON', 'REPOP');
-select pxp.f_insert_testructura_gui ('REPPAGCON.1', 'REPPAGCON');
-select pxp.f_delete_testructura_gui ('OPCONTA', 'TES');
-select pxp.f_delete_testructura_gui ('CONOP', 'TES');
 select pxp.f_insert_testructura_gui ('CAROP', 'TES');
 select pxp.f_insert_testructura_gui ('CARLB', 'TES');
 select pxp.f_insert_testructura_gui ('CARFR', 'TES');
-select pxp.f_delete_testructura_gui ('SOLPD', 'CAROP');
-select pxp.f_delete_testructura_gui ('OPUNI', 'CAROP');
-select pxp.f_delete_testructura_gui ('OBPG', 'CAROP');
 select pxp.f_insert_testructura_gui ('CTABAN', 'CARLB');
-select pxp.f_delete_testructura_gui ('VBOPOA', 'CAROP');
-select pxp.f_delete_testructura_gui ('VBOP', 'CAROP');
 select pxp.f_insert_testructura_gui ('CTABANE', 'CARLB');
-select pxp.f_delete_testructura_gui ('VBDP', 'CAROP');
-select pxp.f_delete_testructura_gui ('VBPDC', 'CAROP');
 select pxp.f_insert_testructura_gui ('CTABANCEND', 'CARLB');
-select pxp.f_delete_testructura_gui ('VBPCOS', 'CAROP');
-select pxp.f_delete_testructura_gui ('REVBPP', 'CAROP');
-select pxp.f_delete_testructura_gui ('TIPP', 'CAROP');
 select pxp.f_insert_testructura_gui ('CAJA', 'CARFR');
-select pxp.f_delete_testructura_gui ('CONOP', 'CAROP');
 select pxp.f_insert_testructura_gui ('SOLCAJA', 'CARFR');
 select pxp.f_insert_testructura_gui ('VBCAJA', 'CARFR');
 select pxp.f_insert_testructura_gui ('SOLEFE', 'CARFR');
 select pxp.f_insert_testructura_gui ('SOLEFESD', 'CARFR');
 select pxp.f_insert_testructura_gui ('VBSOLEFE', 'CARFR');
 select pxp.f_insert_testructura_gui ('VBRENCJ', 'CARFR');
-select pxp.f_delete_testructura_gui ('OPCONTA', 'CAROP');
-select pxp.f_delete_testructura_gui ('TIPPRO', 'CAROP');
-select pxp.f_delete_testructura_gui ('CONEX', 'CAROP');
 select pxp.f_insert_testructura_gui ('REPOP', 'CAROP');
-select pxp.f_delete_testructura_gui ('PRCRE', 'CAROP');
-select pxp.f_delete_testructura_gui ('PP', 'CAROP');
-select pxp.f_delete_testructura_gui ('PPC', 'CAROP');
 select pxp.f_insert_testructura_gui ('CAOPCOFG', 'CAROP');
 select pxp.f_insert_testructura_gui ('TIPPRO', 'CAOPCOFG');
 select pxp.f_insert_testructura_gui ('TIPP', 'CAOPCOFG');
@@ -3354,1122 +3218,668 @@ select pxp.f_insert_testructura_gui ('VBPDC', 'CAROPVB');
 select pxp.f_insert_testructura_gui ('REVBPP', 'CAROPVB');
 select pxp.f_insert_testructura_gui ('OPCONTA', 'REPOP');
 select pxp.f_insert_testructura_gui ('CONOP', 'REPOP');
-select pxp.f_delete_testructura_gui ('REPLB', 'CARLB');
 select pxp.f_insert_testructura_gui ('FINCUE', 'CARLB');
-select pxp.f_delete_testructura_gui ('TPC', 'CARFR');
 select pxp.f_insert_testructura_gui ('VBCJ', 'CARFR');
 select pxp.f_insert_testructura_gui ('VBCP', 'CARFR');
-select pxp.f_delete_testructura_gui ('TPSOL', 'CARFR');
 select pxp.f_insert_testructura_gui ('VBFACREN', 'CARFR');
 select pxp.f_insert_testructura_gui ('VBRENCJA', 'CARFR');
-select pxp.f_insert_testructura_gui ('OBPG.9', 'OBPG');
-select pxp.f_insert_testructura_gui ('OBPG.10', 'OBPG');
-select pxp.f_insert_testructura_gui ('OBPG.11', 'OBPG');
-select pxp.f_insert_testructura_gui ('OBPG.8.6', 'OBPG.8');
-select pxp.f_insert_testructura_gui ('OBPG.8.7', 'OBPG.8');
-select pxp.f_insert_testructura_gui ('OBPG.8.5.1', 'OBPG.8.5');
-select pxp.f_insert_testructura_gui ('OBPG.8.5.1.1', 'OBPG.8.5.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.5.1.2', 'OBPG.8.5.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.5.1.3', 'OBPG.8.5.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.5.1.4', 'OBPG.8.5.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.5.1.5', 'OBPG.8.5.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.5.1.5.1', 'OBPG.8.5.1.5');
-select pxp.f_insert_testructura_gui ('OBPG.8.5.1.5.1.1', 'OBPG.8.5.1.5.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.7.1', 'OBPG.8.7');
-select pxp.f_insert_testructura_gui ('OBPG.8.7.1.1', 'OBPG.8.7.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.7.1.2', 'OBPG.8.7.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.7.1.3', 'OBPG.8.7.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.7.1.4', 'OBPG.8.7.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.7.1.1.1', 'OBPG.8.7.1.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.7.1.1.1.1', 'OBPG.8.7.1.1.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.7.1.1.1.1.1', 'OBPG.8.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.7.1.1.1.1.2', 'OBPG.8.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.7.1.1.1.1.2.1', 'OBPG.8.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('OBPG.8.7.1.1.1.1.2.2', 'OBPG.8.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('OBPG.3.6', 'OBPG.3');
-select pxp.f_insert_testructura_gui ('OBPG.3.7', 'OBPG.3');
-select pxp.f_insert_testructura_gui ('OBPG.6.4', 'OBPG.6');
-select pxp.f_insert_testructura_gui ('OBPG.6.5', 'OBPG.6');
-select pxp.f_insert_testructura_gui ('OBPG.6.6', 'OBPG.6');
-select pxp.f_insert_testructura_gui ('OBPG.6.7', 'OBPG.6');
-select pxp.f_insert_testructura_gui ('OBPG.6.8', 'OBPG.6');
-select pxp.f_insert_testructura_gui ('OBPG.6.4.1', 'OBPG.6.4');
-select pxp.f_insert_testructura_gui ('CTABAN.3', 'CTABAN');
-select pxp.f_insert_testructura_gui ('CTABAN.4', 'CTABAN');
-select pxp.f_insert_testructura_gui ('CTABAN.5', 'CTABAN');
-select pxp.f_insert_testructura_gui ('CTABAN.4.1', 'CTABAN.4');
-select pxp.f_insert_testructura_gui ('CTABAN.4.1.1', 'CTABAN.4.1');
-select pxp.f_insert_testructura_gui ('CTABAN.4.1.2', 'CTABAN.4.1');
-select pxp.f_insert_testructura_gui ('CTABAN.4.1.3', 'CTABAN.4.1');
-select pxp.f_insert_testructura_gui ('CTABAN.4.1.4', 'CTABAN.4.1');
-select pxp.f_insert_testructura_gui ('CTABAN.4.1.1.1', 'CTABAN.4.1.1');
-select pxp.f_insert_testructura_gui ('CTABAN.4.1.1.2', 'CTABAN.4.1.1');
-select pxp.f_insert_testructura_gui ('CTABAN.4.1.1.2.1', 'CTABAN.4.1.1.2');
-select pxp.f_insert_testructura_gui ('CTABAN.4.1.1.2.2', 'CTABAN.4.1.1.2');
-select pxp.f_insert_testructura_gui ('CTABAN.4.1.4.1', 'CTABAN.4.1.4');
-select pxp.f_insert_testructura_gui ('CAJA.4', 'CAJA');
-select pxp.f_insert_testructura_gui ('CAJA.5', 'CAJA');
-select pxp.f_insert_testructura_gui ('CAJA.6', 'CAJA');
-select pxp.f_insert_testructura_gui ('CAJA.4.1', 'CAJA.4');
-select pxp.f_insert_testructura_gui ('CAJA.4.2', 'CAJA.4');
-select pxp.f_insert_testructura_gui ('CAJA.4.3', 'CAJA.4');
-select pxp.f_insert_testructura_gui ('CAJA.4.4', 'CAJA.4');
-select pxp.f_insert_testructura_gui ('CAJA.4.1.1', 'CAJA.4.1');
-select pxp.f_insert_testructura_gui ('CAJA.4.1.1.1', 'CAJA.4.1.1');
-select pxp.f_insert_testructura_gui ('CAJA.4.1.1.2', 'CAJA.4.1.1');
-select pxp.f_insert_testructura_gui ('CAJA.4.1.1.3', 'CAJA.4.1.1');
-select pxp.f_insert_testructura_gui ('CAJA.4.1.1.4', 'CAJA.4.1.1');
-select pxp.f_insert_testructura_gui ('CAJA.4.1.1.5', 'CAJA.4.1.1');
-select pxp.f_insert_testructura_gui ('CAJA.4.1.1.5.1', 'CAJA.4.1.1.5');
-select pxp.f_insert_testructura_gui ('CAJA.4.1.1.5.1.1', 'CAJA.4.1.1.5.1');
-select pxp.f_insert_testructura_gui ('CAJA.4.4.1', 'CAJA.4.4');
-select pxp.f_insert_testructura_gui ('CAJA.4.4.2', 'CAJA.4.4');
-select pxp.f_insert_testructura_gui ('CAJA.5.1', 'CAJA.5');
-select pxp.f_insert_testructura_gui ('CAJA.5.1.1', 'CAJA.5.1');
-select pxp.f_insert_testructura_gui ('CAJA.5.1.2', 'CAJA.5.1');
-select pxp.f_insert_testructura_gui ('CAJA.5.1.3', 'CAJA.5.1');
-select pxp.f_insert_testructura_gui ('CAJA.5.1.4', 'CAJA.5.1');
-select pxp.f_insert_testructura_gui ('CAJA.5.1.1.1', 'CAJA.5.1.1');
-select pxp.f_insert_testructura_gui ('CAJA.5.1.1.1.1', 'CAJA.5.1.1.1');
-select pxp.f_insert_testructura_gui ('CAJA.5.1.1.1.1.1', 'CAJA.5.1.1.1.1');
-select pxp.f_insert_testructura_gui ('CAJA.5.1.1.1.1.2', 'CAJA.5.1.1.1.1');
-select pxp.f_insert_testructura_gui ('CAJA.5.1.1.1.1.2.1', 'CAJA.5.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('CAJA.5.1.1.1.1.2.2', 'CAJA.5.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('CAJA.6.1', 'CAJA.6');
-select pxp.f_insert_testructura_gui ('CTABANE.4', 'CTABANE');
-select pxp.f_insert_testructura_gui ('CTABANE.5', 'CTABANE');
-select pxp.f_insert_testructura_gui ('CTABANE.6', 'CTABANE');
-select pxp.f_insert_testructura_gui ('CTABANE.7', 'CTABANE');
-select pxp.f_insert_testructura_gui ('CTABANE.8', 'CTABANE');
-select pxp.f_insert_testructura_gui ('CTABANE.5.1', 'CTABANE.5');
-select pxp.f_insert_testructura_gui ('CTABANE.5.2', 'CTABANE.5');
-select pxp.f_insert_testructura_gui ('CTABANE.5.3', 'CTABANE.5');
-select pxp.f_insert_testructura_gui ('CTABANE.5.1.1', 'CTABANE.5.1');
-select pxp.f_insert_testructura_gui ('CTABANE.5.1.1.1', 'CTABANE.5.1.1');
-select pxp.f_insert_testructura_gui ('CTABANE.5.1.1.2', 'CTABANE.5.1.1');
-select pxp.f_insert_testructura_gui ('CTABANE.5.1.1.3', 'CTABANE.5.1.1');
-select pxp.f_insert_testructura_gui ('CTABANE.5.1.1.4', 'CTABANE.5.1.1');
-select pxp.f_insert_testructura_gui ('CTABANE.5.1.1.5', 'CTABANE.5.1.1');
-select pxp.f_insert_testructura_gui ('CTABANE.5.1.1.5.1', 'CTABANE.5.1.1.5');
-select pxp.f_insert_testructura_gui ('CTABANE.5.1.1.5.1.1', 'CTABANE.5.1.1.5.1');
-select pxp.f_insert_testructura_gui ('CTABANE.5.3.1', 'CTABANE.5.3');
-select pxp.f_insert_testructura_gui ('CTABANE.7.1', 'CTABANE.7');
-select pxp.f_insert_testructura_gui ('CTABANE.7.1.1', 'CTABANE.7.1');
-select pxp.f_insert_testructura_gui ('CTABANE.7.1.2', 'CTABANE.7.1');
-select pxp.f_insert_testructura_gui ('CTABANE.7.1.3', 'CTABANE.7.1');
-select pxp.f_insert_testructura_gui ('CTABANE.7.1.4', 'CTABANE.7.1');
-select pxp.f_insert_testructura_gui ('CTABANE.7.1.1.1', 'CTABANE.7.1.1');
-select pxp.f_insert_testructura_gui ('CTABANE.7.1.1.2', 'CTABANE.7.1.1');
-select pxp.f_insert_testructura_gui ('CTABANE.7.1.1.2.1', 'CTABANE.7.1.1.2');
-select pxp.f_insert_testructura_gui ('CTABANE.7.1.1.2.2', 'CTABANE.7.1.1.2');
-select pxp.f_insert_testructura_gui ('CTABANE.7.1.4.1', 'CTABANE.7.1.4');
-select pxp.f_insert_testructura_gui ('VBDP.7', 'VBDP');
-select pxp.f_insert_testructura_gui ('VBDP.8', 'VBDP');
-select pxp.f_insert_testructura_gui ('VBDP.6.8', 'VBDP.6');
-select pxp.f_insert_testructura_gui ('VBDP.6.9', 'VBDP.6');
-select pxp.f_insert_testructura_gui ('VBDP.6.10', 'VBDP.6');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.6', 'VBDP.6.4');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7', 'VBDP.6.4');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.4.1', 'VBDP.6.4.4');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.4.1.1', 'VBDP.6.4.4.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.4.1.2', 'VBDP.6.4.4.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.4.1.3', 'VBDP.6.4.4.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.4.1.4', 'VBDP.6.4.4.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.4.1.5', 'VBDP.6.4.4.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.4.1.5.1', 'VBDP.6.4.4.1.5');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.4.1.5.1.1', 'VBDP.6.4.4.1.5.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7.1', 'VBDP.6.4.7');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7.1.1', 'VBDP.6.4.7.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7.1.2', 'VBDP.6.4.7.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7.1.3', 'VBDP.6.4.7.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7.1.4', 'VBDP.6.4.7.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7.1.1.1', 'VBDP.6.4.7.1.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7.1.1.1.1', 'VBDP.6.4.7.1.1.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7.1.1.1.1.1', 'VBDP.6.4.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7.1.1.1.1.2', 'VBDP.6.4.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7.1.1.1.1.2.1', 'VBDP.6.4.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7.1.1.1.1.2.2', 'VBDP.6.4.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBDP.6.7.4', 'VBDP.6.7');
-select pxp.f_insert_testructura_gui ('VBDP.6.7.5', 'VBDP.6.7');
-select pxp.f_insert_testructura_gui ('VBDP.6.7.6', 'VBDP.6.7');
-select pxp.f_insert_testructura_gui ('VBDP.6.7.7', 'VBDP.6.7');
-select pxp.f_insert_testructura_gui ('VBDP.6.7.8', 'VBDP.6.7');
-select pxp.f_insert_testructura_gui ('VBDP.6.7.4.1', 'VBDP.6.7.4');
-select pxp.f_insert_testructura_gui ('SOLPD.8', 'SOLPD');
-select pxp.f_insert_testructura_gui ('SOLPD.9', 'SOLPD');
-select pxp.f_insert_testructura_gui ('SOLPD.10', 'SOLPD');
-select pxp.f_insert_testructura_gui ('SOLPD.2.6', 'SOLPD.2');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7', 'SOLPD.2');
-select pxp.f_insert_testructura_gui ('SOLPD.2.4.1', 'SOLPD.2.4');
-select pxp.f_insert_testructura_gui ('SOLPD.2.4.1.1', 'SOLPD.2.4.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.4.1.2', 'SOLPD.2.4.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.4.1.3', 'SOLPD.2.4.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.4.1.4', 'SOLPD.2.4.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.4.1.5', 'SOLPD.2.4.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.4.1.5.1', 'SOLPD.2.4.1.5');
-select pxp.f_insert_testructura_gui ('SOLPD.2.4.1.5.1.1', 'SOLPD.2.4.1.5.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7.1', 'SOLPD.2.7');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7.1.1', 'SOLPD.2.7.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7.1.2', 'SOLPD.2.7.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7.1.3', 'SOLPD.2.7.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7.1.4', 'SOLPD.2.7.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7.1.1.1', 'SOLPD.2.7.1.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7.1.1.1.1', 'SOLPD.2.7.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7.1.1.1.1.1', 'SOLPD.2.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7.1.1.1.1.2', 'SOLPD.2.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7.1.1.1.1.2.1', 'SOLPD.2.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7.1.1.1.1.2.2', 'SOLPD.2.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('SOLPD.4.6', 'SOLPD.4');
-select pxp.f_insert_testructura_gui ('SOLPD.4.7', 'SOLPD.4');
-select pxp.f_insert_testructura_gui ('SOLPD.7.4', 'SOLPD.7');
-select pxp.f_insert_testructura_gui ('SOLPD.7.5', 'SOLPD.7');
-select pxp.f_insert_testructura_gui ('SOLPD.7.6', 'SOLPD.7');
-select pxp.f_insert_testructura_gui ('SOLPD.7.7', 'SOLPD.7');
-select pxp.f_insert_testructura_gui ('SOLPD.7.8', 'SOLPD.7');
-select pxp.f_insert_testructura_gui ('SOLPD.7.4.1', 'SOLPD.7.4');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1', 'CTABANCEND');
-select pxp.f_insert_testructura_gui ('CTABANCEND.2', 'CTABANCEND');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.1', 'CTABANCEND.1');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.2', 'CTABANCEND.1');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.3', 'CTABANCEND.1');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.4', 'CTABANCEND.1');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.1.1', 'CTABANCEND.1.1');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.1.1.1', 'CTABANCEND.1.1.1');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.1.1.2', 'CTABANCEND.1.1.1');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.1.1.3', 'CTABANCEND.1.1.1');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.1.1.4', 'CTABANCEND.1.1.1');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.1.1.5', 'CTABANCEND.1.1.1');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.1.1.5.1', 'CTABANCEND.1.1.1.5');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.1.1.5.1.1', 'CTABANCEND.1.1.1.5.1');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.3.1', 'CTABANCEND.1.3');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.3.2', 'CTABANCEND.1.3');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.3.3', 'CTABANCEND.1.3');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.3.4', 'CTABANCEND.1.3');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.3.4.1', 'CTABANCEND.1.3.4');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.4.1', 'CTABANCEND.1.4');
-select pxp.f_insert_testructura_gui ('CTABANCEND.1.4.2', 'CTABANCEND.1.4');
-select pxp.f_insert_testructura_gui ('CTABANCEND.2.1', 'CTABANCEND.2');
-select pxp.f_insert_testructura_gui ('CTABANCEND.2.1.1', 'CTABANCEND.2.1');
-select pxp.f_insert_testructura_gui ('CTABANCEND.2.1.2', 'CTABANCEND.2.1');
-select pxp.f_insert_testructura_gui ('CTABANCEND.2.1.2.1', 'CTABANCEND.2.1.2');
-select pxp.f_insert_testructura_gui ('CTABANCEND.2.1.2.2', 'CTABANCEND.2.1.2');
-select pxp.f_insert_testructura_gui ('REVBPP.6', 'REVBPP');
-select pxp.f_insert_testructura_gui ('REVBPP.7', 'REVBPP');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.4', 'REVBPP.2.2');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.5', 'REVBPP.2.2');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.6', 'REVBPP.2.2');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.7', 'REVBPP.2.2');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.8', 'REVBPP.2.2');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.4.1', 'REVBPP.2.2.4');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.4.1.1', 'REVBPP.2.2.4.1');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.4.1.1.1', 'REVBPP.2.2.4.1.1');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.4.1.1.2', 'REVBPP.2.2.4.1.1');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.4.1.1.2.1', 'REVBPP.2.2.4.1.1.2');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.4.1.1.2.2', 'REVBPP.2.2.4.1.1.2');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.6.1', 'REVBPP.2.2.6');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.6.1.1', 'REVBPP.2.2.6.1');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.6.1.2', 'REVBPP.2.2.6.1');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.6.1.3', 'REVBPP.2.2.6.1');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.6.1.4', 'REVBPP.2.2.6.1');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.6.1.5', 'REVBPP.2.2.6.1');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.6.1.5.1', 'REVBPP.2.2.6.1.5');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.6.1.5.1.1', 'REVBPP.2.2.6.1.5.1');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.8.1', 'REVBPP.2.2.8');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.8.1.1', 'REVBPP.2.2.8.1');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.8.1.2', 'REVBPP.2.2.8.1');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.8.1.3', 'REVBPP.2.2.8.1');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.8.1.4', 'REVBPP.2.2.8.1');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.8.1.1.1', 'REVBPP.2.2.8.1.1');
-select pxp.f_insert_testructura_gui ('VBOP.8', 'VBOP');
-select pxp.f_insert_testructura_gui ('VBOP.9', 'VBOP');
-select pxp.f_insert_testructura_gui ('VBOP.10', 'VBOP');
-select pxp.f_insert_testructura_gui ('VBOP.2.6', 'VBOP.2');
-select pxp.f_insert_testructura_gui ('VBOP.2.7', 'VBOP.2');
-select pxp.f_insert_testructura_gui ('VBOP.2.4.1', 'VBOP.2.4');
-select pxp.f_insert_testructura_gui ('VBOP.2.4.1.1', 'VBOP.2.4.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.4.1.2', 'VBOP.2.4.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.4.1.3', 'VBOP.2.4.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.4.1.4', 'VBOP.2.4.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.4.1.5', 'VBOP.2.4.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.4.1.5.1', 'VBOP.2.4.1.5');
-select pxp.f_insert_testructura_gui ('VBOP.2.4.1.5.1.1', 'VBOP.2.4.1.5.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.7.1', 'VBOP.2.7');
-select pxp.f_insert_testructura_gui ('VBOP.2.7.1.1', 'VBOP.2.7.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.7.1.2', 'VBOP.2.7.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.7.1.3', 'VBOP.2.7.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.7.1.4', 'VBOP.2.7.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.7.1.1.1', 'VBOP.2.7.1.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.7.1.1.1.1', 'VBOP.2.7.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.7.1.1.1.1.1', 'VBOP.2.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.7.1.1.1.1.2', 'VBOP.2.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.7.1.1.1.1.2.1', 'VBOP.2.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBOP.2.7.1.1.1.1.2.2', 'VBOP.2.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBOP.4.6', 'VBOP.4');
-select pxp.f_insert_testructura_gui ('VBOP.4.7', 'VBOP.4');
-select pxp.f_insert_testructura_gui ('VBOP.7.4', 'VBOP.7');
-select pxp.f_insert_testructura_gui ('VBOP.7.5', 'VBOP.7');
-select pxp.f_insert_testructura_gui ('VBOP.7.6', 'VBOP.7');
-select pxp.f_insert_testructura_gui ('VBOP.7.7', 'VBOP.7');
-select pxp.f_insert_testructura_gui ('VBOP.7.8', 'VBOP.7');
-select pxp.f_insert_testructura_gui ('VBOP.7.4.1', 'VBOP.7.4');
-select pxp.f_insert_testructura_gui ('OPCONTA.1', 'OPCONTA');
-select pxp.f_insert_testructura_gui ('OPCONTA.2', 'OPCONTA');
-select pxp.f_insert_testructura_gui ('OPCONTA.3', 'OPCONTA');
-select pxp.f_insert_testructura_gui ('OPCONTA.4', 'OPCONTA');
-select pxp.f_insert_testructura_gui ('OPCONTA.5', 'OPCONTA');
-select pxp.f_insert_testructura_gui ('OPCONTA.6', 'OPCONTA');
-select pxp.f_insert_testructura_gui ('OPCONTA.7', 'OPCONTA');
-select pxp.f_insert_testructura_gui ('OPCONTA.8', 'OPCONTA');
-select pxp.f_insert_testructura_gui ('OPCONTA.9', 'OPCONTA');
-select pxp.f_insert_testructura_gui ('OPCONTA.10', 'OPCONTA');
-select pxp.f_insert_testructura_gui ('OPCONTA.1.1', 'OPCONTA.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.1', 'OPCONTA.2');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.2', 'OPCONTA.2');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.3', 'OPCONTA.2');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.4', 'OPCONTA.2');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.5', 'OPCONTA.2');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.6', 'OPCONTA.2');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7', 'OPCONTA.2');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.4.1', 'OPCONTA.2.4');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.4.1.1', 'OPCONTA.2.4.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.4.1.2', 'OPCONTA.2.4.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.4.1.3', 'OPCONTA.2.4.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.4.1.4', 'OPCONTA.2.4.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.4.1.5', 'OPCONTA.2.4.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.4.1.5.1', 'OPCONTA.2.4.1.5');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.4.1.5.1.1', 'OPCONTA.2.4.1.5.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7.1', 'OPCONTA.2.7');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7.1.1', 'OPCONTA.2.7.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7.1.2', 'OPCONTA.2.7.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7.1.3', 'OPCONTA.2.7.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7.1.4', 'OPCONTA.2.7.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7.1.1.1', 'OPCONTA.2.7.1.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7.1.1.1.1', 'OPCONTA.2.7.1.1.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7.1.1.1.1.1', 'OPCONTA.2.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7.1.1.1.1.2', 'OPCONTA.2.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7.1.1.1.1.2.1', 'OPCONTA.2.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7.1.1.1.1.2.2', 'OPCONTA.2.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('OPCONTA.4.1', 'OPCONTA.4');
-select pxp.f_insert_testructura_gui ('OPCONTA.4.2', 'OPCONTA.4');
-select pxp.f_insert_testructura_gui ('OPCONTA.4.3', 'OPCONTA.4');
-select pxp.f_insert_testructura_gui ('OPCONTA.4.4', 'OPCONTA.4');
-select pxp.f_insert_testructura_gui ('OPCONTA.4.5', 'OPCONTA.4');
-select pxp.f_insert_testructura_gui ('OPCONTA.4.6', 'OPCONTA.4');
-select pxp.f_insert_testructura_gui ('OPCONTA.4.7', 'OPCONTA.4');
-select pxp.f_insert_testructura_gui ('OPCONTA.10.1', 'OPCONTA.10');
-select pxp.f_insert_testructura_gui ('OPCONTA.10.2', 'OPCONTA.10');
-select pxp.f_insert_testructura_gui ('OPCONTA.10.3', 'OPCONTA.10');
-select pxp.f_insert_testructura_gui ('OPCONTA.10.4', 'OPCONTA.10');
-select pxp.f_insert_testructura_gui ('OPCONTA.10.5', 'OPCONTA.10');
-select pxp.f_insert_testructura_gui ('OPCONTA.10.6', 'OPCONTA.10');
-select pxp.f_insert_testructura_gui ('OPCONTA.10.7', 'OPCONTA.10');
-select pxp.f_insert_testructura_gui ('OPCONTA.10.1.1', 'OPCONTA.10.1');
-select pxp.f_insert_testructura_gui ('CONOP.1', 'CONOP');
-select pxp.f_insert_testructura_gui ('CONOP.2', 'CONOP');
-select pxp.f_insert_testructura_gui ('CONOP.3', 'CONOP');
-select pxp.f_insert_testructura_gui ('CONOP.4', 'CONOP');
-select pxp.f_insert_testructura_gui ('CONOP.5', 'CONOP');
-select pxp.f_insert_testructura_gui ('CONOP.6', 'CONOP');
-select pxp.f_insert_testructura_gui ('CONOP.7', 'CONOP');
-select pxp.f_insert_testructura_gui ('CONOP.8', 'CONOP');
-select pxp.f_insert_testructura_gui ('CONOP.9', 'CONOP');
-select pxp.f_insert_testructura_gui ('CONOP.10', 'CONOP');
-select pxp.f_insert_testructura_gui ('CONOP.11', 'CONOP');
-select pxp.f_insert_testructura_gui ('CONOP.1.1', 'CONOP.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.1', 'CONOP.2');
-select pxp.f_insert_testructura_gui ('CONOP.2.2', 'CONOP.2');
-select pxp.f_insert_testructura_gui ('CONOP.2.3', 'CONOP.2');
-select pxp.f_insert_testructura_gui ('CONOP.2.4', 'CONOP.2');
-select pxp.f_insert_testructura_gui ('CONOP.2.5', 'CONOP.2');
-select pxp.f_insert_testructura_gui ('CONOP.2.6', 'CONOP.2');
-select pxp.f_insert_testructura_gui ('CONOP.2.3.1', 'CONOP.2.3');
-select pxp.f_insert_testructura_gui ('CONOP.2.3.1.1', 'CONOP.2.3.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.3.1.2', 'CONOP.2.3.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.3.1.3', 'CONOP.2.3.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.3.1.4', 'CONOP.2.3.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.3.1.5', 'CONOP.2.3.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.3.1.5.1', 'CONOP.2.3.1.5');
-select pxp.f_insert_testructura_gui ('CONOP.2.3.1.5.1.1', 'CONOP.2.3.1.5.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.6.1', 'CONOP.2.6');
-select pxp.f_insert_testructura_gui ('CONOP.2.6.1.1', 'CONOP.2.6.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.6.1.2', 'CONOP.2.6.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.6.1.3', 'CONOP.2.6.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.6.1.4', 'CONOP.2.6.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.6.1.1.1', 'CONOP.2.6.1.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.6.1.1.1.1', 'CONOP.2.6.1.1.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.6.1.1.1.1.1', 'CONOP.2.6.1.1.1.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.6.1.1.1.1.2', 'CONOP.2.6.1.1.1.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.6.1.1.1.1.2.1', 'CONOP.2.6.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('CONOP.2.6.1.1.1.1.2.2', 'CONOP.2.6.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('CONOP.4.1', 'CONOP.4');
-select pxp.f_insert_testructura_gui ('CONOP.5.1', 'CONOP.5');
-select pxp.f_insert_testructura_gui ('CONOP.5.2', 'CONOP.5');
-select pxp.f_insert_testructura_gui ('CONOP.5.3', 'CONOP.5');
-select pxp.f_insert_testructura_gui ('CONOP.5.4', 'CONOP.5');
-select pxp.f_insert_testructura_gui ('CONOP.5.5', 'CONOP.5');
-select pxp.f_insert_testructura_gui ('CONOP.5.6', 'CONOP.5');
-select pxp.f_insert_testructura_gui ('CONOP.5.7', 'CONOP.5');
-select pxp.f_insert_testructura_gui ('CONOP.11.1', 'CONOP.11');
-select pxp.f_insert_testructura_gui ('CONOP.11.2', 'CONOP.11');
-select pxp.f_insert_testructura_gui ('CONOP.11.3', 'CONOP.11');
-select pxp.f_insert_testructura_gui ('CONOP.11.4', 'CONOP.11');
-select pxp.f_insert_testructura_gui ('CONOP.11.5', 'CONOP.11');
-select pxp.f_insert_testructura_gui ('CONOP.11.6', 'CONOP.11');
-select pxp.f_insert_testructura_gui ('CONOP.11.7', 'CONOP.11');
-select pxp.f_insert_testructura_gui ('CONOP.11.1.1', 'CONOP.11.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1', 'VBPDC');
-select pxp.f_insert_testructura_gui ('VBPDC.2', 'VBPDC');
-select pxp.f_insert_testructura_gui ('VBPDC.3', 'VBPDC');
-select pxp.f_insert_testructura_gui ('VBPDC.4', 'VBPDC');
-select pxp.f_insert_testructura_gui ('VBPDC.5', 'VBPDC');
-select pxp.f_insert_testructura_gui ('VBPDC.6', 'VBPDC');
-select pxp.f_insert_testructura_gui ('VBPDC.7', 'VBPDC');
-select pxp.f_insert_testructura_gui ('VBPDC.8', 'VBPDC');
-select pxp.f_insert_testructura_gui ('VBPDC.1.1', 'VBPDC.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.2', 'VBPDC.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.3', 'VBPDC.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4', 'VBPDC.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.5', 'VBPDC.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.6', 'VBPDC.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.7', 'VBPDC.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.8', 'VBPDC.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.9', 'VBPDC.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.10', 'VBPDC.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.1.1', 'VBPDC.1.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.3.1', 'VBPDC.1.3');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.1', 'VBPDC.1.4');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.2', 'VBPDC.1.4');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.3', 'VBPDC.1.4');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.4', 'VBPDC.1.4');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.5', 'VBPDC.1.4');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.6', 'VBPDC.1.4');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7', 'VBPDC.1.4');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.4.1', 'VBPDC.1.4.4');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.4.1.1', 'VBPDC.1.4.4.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.4.1.2', 'VBPDC.1.4.4.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.4.1.3', 'VBPDC.1.4.4.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.4.1.4', 'VBPDC.1.4.4.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.4.1.5', 'VBPDC.1.4.4.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.4.1.5.1', 'VBPDC.1.4.4.1.5');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.4.1.5.1.1', 'VBPDC.1.4.4.1.5.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7.1', 'VBPDC.1.4.7');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7.1.1', 'VBPDC.1.4.7.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7.1.2', 'VBPDC.1.4.7.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7.1.3', 'VBPDC.1.4.7.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7.1.4', 'VBPDC.1.4.7.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7.1.1.1', 'VBPDC.1.4.7.1.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7.1.1.1.1', 'VBPDC.1.4.7.1.1.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7.1.1.1.1.1', 'VBPDC.1.4.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7.1.1.1.1.2', 'VBPDC.1.4.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7.1.1.1.1.2.1', 'VBPDC.1.4.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7.1.1.1.1.2.2', 'VBPDC.1.4.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBPDC.1.10.1', 'VBPDC.1.10');
-select pxp.f_insert_testructura_gui ('VBPDC.1.10.2', 'VBPDC.1.10');
-select pxp.f_insert_testructura_gui ('VBPDC.1.10.3', 'VBPDC.1.10');
-select pxp.f_insert_testructura_gui ('VBPDC.1.10.4', 'VBPDC.1.10');
-select pxp.f_insert_testructura_gui ('VBPDC.1.10.5', 'VBPDC.1.10');
-select pxp.f_insert_testructura_gui ('VBPDC.1.10.6', 'VBPDC.1.10');
-select pxp.f_insert_testructura_gui ('VBPDC.1.10.7', 'VBPDC.1.10');
-select pxp.f_insert_testructura_gui ('VBPDC.1.10.1.1', 'VBPDC.1.10.1');
-select pxp.f_insert_testructura_gui ('VBPDC.3.1', 'VBPDC.3');
-select pxp.f_insert_testructura_gui ('VBPDC.3.2', 'VBPDC.3');
-select pxp.f_insert_testructura_gui ('OPUNI.1', 'OPUNI');
-select pxp.f_insert_testructura_gui ('OPUNI.2', 'OPUNI');
-select pxp.f_insert_testructura_gui ('OPUNI.3', 'OPUNI');
-select pxp.f_insert_testructura_gui ('OPUNI.4', 'OPUNI');
-select pxp.f_insert_testructura_gui ('OPUNI.5', 'OPUNI');
-select pxp.f_insert_testructura_gui ('OPUNI.6', 'OPUNI');
-select pxp.f_insert_testructura_gui ('OPUNI.7', 'OPUNI');
-select pxp.f_insert_testructura_gui ('OPUNI.8', 'OPUNI');
-select pxp.f_insert_testructura_gui ('OPUNI.9', 'OPUNI');
-select pxp.f_insert_testructura_gui ('OPUNI.10', 'OPUNI');
-select pxp.f_insert_testructura_gui ('OPUNI.11', 'OPUNI');
-select pxp.f_insert_testructura_gui ('OPUNI.1.1', 'OPUNI.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.1', 'OPUNI.2');
-select pxp.f_insert_testructura_gui ('OPUNI.2.2', 'OPUNI.2');
-select pxp.f_insert_testructura_gui ('OPUNI.2.3', 'OPUNI.2');
-select pxp.f_insert_testructura_gui ('OPUNI.2.4', 'OPUNI.2');
-select pxp.f_insert_testructura_gui ('OPUNI.2.5', 'OPUNI.2');
-select pxp.f_insert_testructura_gui ('OPUNI.2.6', 'OPUNI.2');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7', 'OPUNI.2');
-select pxp.f_insert_testructura_gui ('OPUNI.2.4.1', 'OPUNI.2.4');
-select pxp.f_insert_testructura_gui ('OPUNI.2.4.1.1', 'OPUNI.2.4.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.4.1.2', 'OPUNI.2.4.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.4.1.3', 'OPUNI.2.4.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.4.1.4', 'OPUNI.2.4.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.4.1.5', 'OPUNI.2.4.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.4.1.5.1', 'OPUNI.2.4.1.5');
-select pxp.f_insert_testructura_gui ('OPUNI.2.4.1.5.1.1', 'OPUNI.2.4.1.5.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7.1', 'OPUNI.2.7');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7.1.1', 'OPUNI.2.7.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7.1.2', 'OPUNI.2.7.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7.1.3', 'OPUNI.2.7.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7.1.4', 'OPUNI.2.7.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7.1.1.1', 'OPUNI.2.7.1.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7.1.1.1.1', 'OPUNI.2.7.1.1.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7.1.1.1.1.1', 'OPUNI.2.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7.1.1.1.1.2', 'OPUNI.2.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7.1.1.1.1.2.1', 'OPUNI.2.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7.1.1.1.1.2.2', 'OPUNI.2.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('OPUNI.3.1', 'OPUNI.3');
-select pxp.f_insert_testructura_gui ('OPUNI.3.2', 'OPUNI.3');
-select pxp.f_insert_testructura_gui ('OPUNI.3.2.1', 'OPUNI.3.2');
-select pxp.f_insert_testructura_gui ('OPUNI.3.2.2', 'OPUNI.3.2');
-select pxp.f_insert_testructura_gui ('OPUNI.3.2.3', 'OPUNI.3.2');
-select pxp.f_insert_testructura_gui ('OPUNI.3.2.4', 'OPUNI.3.2');
-select pxp.f_insert_testructura_gui ('OPUNI.3.2.5', 'OPUNI.3.2');
-select pxp.f_insert_testructura_gui ('OPUNI.3.2.6', 'OPUNI.3.2');
-select pxp.f_insert_testructura_gui ('OPUNI.3.2.7', 'OPUNI.3.2');
-select pxp.f_insert_testructura_gui ('OPUNI.3.2.1.1', 'OPUNI.3.2.1');
-select pxp.f_insert_testructura_gui ('OPUNI.6.1', 'OPUNI.6');
-select pxp.f_insert_testructura_gui ('OPUNI.6.2', 'OPUNI.6');
-select pxp.f_insert_testructura_gui ('OPUNI.6.3', 'OPUNI.6');
-select pxp.f_insert_testructura_gui ('OPUNI.6.4', 'OPUNI.6');
-select pxp.f_insert_testructura_gui ('OPUNI.6.5', 'OPUNI.6');
-select pxp.f_insert_testructura_gui ('OPUNI.6.6', 'OPUNI.6');
-select pxp.f_insert_testructura_gui ('OPUNI.6.7', 'OPUNI.6');
-select pxp.f_insert_testructura_gui ('VBOPOA.1', 'VBOPOA');
-select pxp.f_insert_testructura_gui ('VBOPOA.2', 'VBOPOA');
-select pxp.f_insert_testructura_gui ('VBOPOA.3', 'VBOPOA');
-select pxp.f_insert_testructura_gui ('VBOPOA.4', 'VBOPOA');
-select pxp.f_insert_testructura_gui ('VBOPOA.5', 'VBOPOA');
-select pxp.f_insert_testructura_gui ('VBOPOA.6', 'VBOPOA');
-select pxp.f_insert_testructura_gui ('VBOPOA.7', 'VBOPOA');
-select pxp.f_insert_testructura_gui ('VBOPOA.8', 'VBOPOA');
-select pxp.f_insert_testructura_gui ('VBOPOA.9', 'VBOPOA');
-select pxp.f_insert_testructura_gui ('VBOPOA.10', 'VBOPOA');
-select pxp.f_insert_testructura_gui ('VBOPOA.1.1', 'VBOPOA.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.1', 'VBOPOA.2');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.2', 'VBOPOA.2');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.3', 'VBOPOA.2');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.4', 'VBOPOA.2');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.5', 'VBOPOA.2');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.6', 'VBOPOA.2');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7', 'VBOPOA.2');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.4.1', 'VBOPOA.2.4');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.4.1.1', 'VBOPOA.2.4.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.4.1.2', 'VBOPOA.2.4.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.4.1.3', 'VBOPOA.2.4.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.4.1.4', 'VBOPOA.2.4.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.4.1.5', 'VBOPOA.2.4.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.4.1.5.1', 'VBOPOA.2.4.1.5');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.4.1.5.1.1', 'VBOPOA.2.4.1.5.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7.1', 'VBOPOA.2.7');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7.1.1', 'VBOPOA.2.7.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7.1.2', 'VBOPOA.2.7.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7.1.3', 'VBOPOA.2.7.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7.1.4', 'VBOPOA.2.7.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7.1.1.1', 'VBOPOA.2.7.1.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7.1.1.1.1', 'VBOPOA.2.7.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7.1.1.1.1.1', 'VBOPOA.2.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7.1.1.1.1.2', 'VBOPOA.2.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7.1.1.1.1.2.1', 'VBOPOA.2.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7.1.1.1.1.2.2', 'VBOPOA.2.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBOPOA.4.1', 'VBOPOA.4');
-select pxp.f_insert_testructura_gui ('VBOPOA.4.2', 'VBOPOA.4');
-select pxp.f_insert_testructura_gui ('VBOPOA.4.3', 'VBOPOA.4');
-select pxp.f_insert_testructura_gui ('VBOPOA.4.4', 'VBOPOA.4');
-select pxp.f_insert_testructura_gui ('VBOPOA.4.5', 'VBOPOA.4');
-select pxp.f_insert_testructura_gui ('VBOPOA.4.6', 'VBOPOA.4');
-select pxp.f_insert_testructura_gui ('VBOPOA.4.7', 'VBOPOA.4');
-select pxp.f_insert_testructura_gui ('VBOPOA.10.1', 'VBOPOA.10');
-select pxp.f_insert_testructura_gui ('VBOPOA.10.2', 'VBOPOA.10');
-select pxp.f_insert_testructura_gui ('VBOPOA.10.3', 'VBOPOA.10');
-select pxp.f_insert_testructura_gui ('VBOPOA.10.4', 'VBOPOA.10');
-select pxp.f_insert_testructura_gui ('VBOPOA.10.5', 'VBOPOA.10');
-select pxp.f_insert_testructura_gui ('VBOPOA.10.6', 'VBOPOA.10');
-select pxp.f_insert_testructura_gui ('VBOPOA.10.7', 'VBOPOA.10');
-select pxp.f_insert_testructura_gui ('VBOPOA.10.1.1', 'VBOPOA.10.1');
-select pxp.f_insert_testructura_gui ('REPPP.1', 'REPPP');
-select pxp.f_insert_testructura_gui ('REPPP.1.1', 'REPPP.1');
-select pxp.f_insert_testructura_gui ('REPPP.1.1.1', 'REPPP.1.1');
-select pxp.f_insert_testructura_gui ('REPPP.1.1.2', 'REPPP.1.1');
-select pxp.f_insert_testructura_gui ('REPPP.1.1.3', 'REPPP.1.1');
-select pxp.f_insert_testructura_gui ('REPPP.1.1.4', 'REPPP.1.1');
-select pxp.f_insert_testructura_gui ('REPPP.1.1.5', 'REPPP.1.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3', 'SOLCAJA');
-select pxp.f_insert_testructura_gui ('SOLCAJA.4', 'SOLCAJA');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3.1', 'SOLCAJA.3');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3.1.1', 'SOLCAJA.3.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3.1.2', 'SOLCAJA.3.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3.1.3', 'SOLCAJA.3.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3.1.4', 'SOLCAJA.3.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3.1.1.1', 'SOLCAJA.3.1.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3.1.1.1.1', 'SOLCAJA.3.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3.1.1.1.1.1', 'SOLCAJA.3.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3.1.1.1.1.2', 'SOLCAJA.3.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3.1.1.1.1.2.1', 'SOLCAJA.3.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3.1.1.1.1.2.2', 'SOLCAJA.3.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('SOLCAJA.4.1', 'SOLCAJA.4');
-select pxp.f_insert_testructura_gui ('VBCAJA.5', 'VBCAJA');
-select pxp.f_insert_testructura_gui ('VBCAJA.6', 'VBCAJA');
-select pxp.f_insert_testructura_gui ('VBCAJA.5.1', 'VBCAJA.5');
-select pxp.f_insert_testructura_gui ('VBCAJA.5.1.1', 'VBCAJA.5.1');
-select pxp.f_insert_testructura_gui ('VBCAJA.5.1.2', 'VBCAJA.5.1');
-select pxp.f_insert_testructura_gui ('VBCAJA.5.1.3', 'VBCAJA.5.1');
-select pxp.f_insert_testructura_gui ('VBCAJA.5.1.4', 'VBCAJA.5.1');
-select pxp.f_insert_testructura_gui ('VBCAJA.5.1.1.1', 'VBCAJA.5.1.1');
-select pxp.f_insert_testructura_gui ('VBCAJA.5.1.1.1.1', 'VBCAJA.5.1.1.1');
-select pxp.f_insert_testructura_gui ('VBCAJA.5.1.1.1.1.1', 'VBCAJA.5.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBCAJA.5.1.1.1.1.2', 'VBCAJA.5.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBCAJA.5.1.1.1.1.2.1', 'VBCAJA.5.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBCAJA.5.1.1.1.1.2.2', 'VBCAJA.5.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBCAJA.6.1', 'VBCAJA.6');
-select pxp.f_insert_testructura_gui ('SOLEFE.5', 'SOLEFE');
-select pxp.f_insert_testructura_gui ('SOLEFE.6', 'SOLEFE');
-select pxp.f_insert_testructura_gui ('SOLEFE.3.2', 'SOLEFE.3');
-select pxp.f_insert_testructura_gui ('SOLEFE.3.2.1', 'SOLEFE.3.2');
-select pxp.f_insert_testructura_gui ('SOLEFESD.3', 'SOLEFESD');
-select pxp.f_insert_testructura_gui ('SOLEFESD.4', 'SOLEFESD');
-select pxp.f_insert_testructura_gui ('SOLEFESD.5', 'SOLEFESD');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.2', 'SOLEFESD.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.2.1', 'SOLEFESD.1.2');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.2.1.1', 'SOLEFESD.1.2.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.2.1.2', 'SOLEFESD.1.2.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.2.1.3', 'SOLEFESD.1.2.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.2.1.4', 'SOLEFESD.1.2.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.2.1.5', 'SOLEFESD.1.2.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.2.1.5.1', 'SOLEFESD.1.2.1.5');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.2.1.5.1.1', 'SOLEFESD.1.2.1.5.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.3.1', 'SOLEFESD.3');
-select pxp.f_insert_testructura_gui ('SOLEFESD.3.2', 'SOLEFESD.3');
-select pxp.f_insert_testructura_gui ('SOLEFESD.3.3', 'SOLEFESD.3');
-select pxp.f_insert_testructura_gui ('SOLEFESD.3.4', 'SOLEFESD.3');
-select pxp.f_insert_testructura_gui ('SOLEFESD.3.2.1', 'SOLEFESD.3.2');
-select pxp.f_insert_testructura_gui ('SOLEFESD.3.2.2', 'SOLEFESD.3.2');
-select pxp.f_insert_testructura_gui ('SOLEFESD.3.2.2.1', 'SOLEFESD.3.2.2');
-select pxp.f_insert_testructura_gui ('SOLEFESD.3.4.1', 'SOLEFESD.3.4');
-select pxp.f_insert_testructura_gui ('SOLEFESD.3.4.2', 'SOLEFESD.3.4');
-select pxp.f_insert_testructura_gui ('VBSOLEFE.4', 'VBSOLEFE');
-select pxp.f_insert_testructura_gui ('VBRENCJ.4', 'VBRENCJ');
-select pxp.f_insert_testructura_gui ('VBRENCJ.4.1', 'VBRENCJ.4');
-select pxp.f_insert_testructura_gui ('VBRENCJ.4.2', 'VBRENCJ.4');
-select pxp.f_insert_testructura_gui ('REPPPBA.1', 'REPPPBA');
-select pxp.f_insert_testructura_gui ('REPPPBA.1.1', 'REPPPBA.1');
-select pxp.f_insert_testructura_gui ('REPPPBA.1.2', 'REPPPBA.1');
-select pxp.f_insert_testructura_gui ('REPPPBA.1.3', 'REPPPBA.1');
-select pxp.f_insert_testructura_gui ('REPPPBA.1.4', 'REPPPBA.1');
-select pxp.f_insert_testructura_gui ('REPPPBA.1.5', 'REPPPBA.1');
-select pxp.f_insert_testructura_gui ('REPPPBA.1.5.1', 'REPPPBA.1.5');
-select pxp.f_insert_testructura_gui ('REPPPBA.1.5.1.1', 'REPPPBA.1.5.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1', 'VBPCOS');
-select pxp.f_insert_testructura_gui ('VBPCOS.2', 'VBPCOS');
-select pxp.f_insert_testructura_gui ('VBPCOS.3', 'VBPCOS');
-select pxp.f_insert_testructura_gui ('VBPCOS.4', 'VBPCOS');
-select pxp.f_insert_testructura_gui ('VBPCOS.5', 'VBPCOS');
-select pxp.f_insert_testructura_gui ('VBPCOS.6', 'VBPCOS');
-select pxp.f_insert_testructura_gui ('VBPCOS.7', 'VBPCOS');
-select pxp.f_insert_testructura_gui ('VBPCOS.8', 'VBPCOS');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.1', 'VBPCOS.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.2', 'VBPCOS.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.3', 'VBPCOS.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4', 'VBPCOS.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.5', 'VBPCOS.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.6', 'VBPCOS.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.7', 'VBPCOS.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.8', 'VBPCOS.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.9', 'VBPCOS.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.10', 'VBPCOS.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.1.1', 'VBPCOS.1.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.3.1', 'VBPCOS.1.3');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.1', 'VBPCOS.1.4');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.2', 'VBPCOS.1.4');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.3', 'VBPCOS.1.4');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.4', 'VBPCOS.1.4');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.5', 'VBPCOS.1.4');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.6', 'VBPCOS.1.4');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7', 'VBPCOS.1.4');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.4.1', 'VBPCOS.1.4.4');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.4.1.1', 'VBPCOS.1.4.4.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.4.1.2', 'VBPCOS.1.4.4.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.4.1.3', 'VBPCOS.1.4.4.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.4.1.4', 'VBPCOS.1.4.4.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.4.1.5', 'VBPCOS.1.4.4.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.4.1.5.1', 'VBPCOS.1.4.4.1.5');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.4.1.5.1.1', 'VBPCOS.1.4.4.1.5.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7.1', 'VBPCOS.1.4.7');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7.1.1', 'VBPCOS.1.4.7.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7.1.2', 'VBPCOS.1.4.7.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7.1.3', 'VBPCOS.1.4.7.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7.1.4', 'VBPCOS.1.4.7.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7.1.1.1', 'VBPCOS.1.4.7.1.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7.1.1.1.1', 'VBPCOS.1.4.7.1.1.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7.1.1.1.1.1', 'VBPCOS.1.4.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7.1.1.1.1.2', 'VBPCOS.1.4.7.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7.1.1.1.1.2.1', 'VBPCOS.1.4.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7.1.1.1.1.2.2', 'VBPCOS.1.4.7.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.10.1', 'VBPCOS.1.10');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.10.2', 'VBPCOS.1.10');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.10.3', 'VBPCOS.1.10');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.10.4', 'VBPCOS.1.10');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.10.5', 'VBPCOS.1.10');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.10.6', 'VBPCOS.1.10');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.10.7', 'VBPCOS.1.10');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.10.1.1', 'VBPCOS.1.10.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.3.1', 'VBPCOS.3');
-select pxp.f_insert_testructura_gui ('VBPCOS.3.2', 'VBPCOS.3');
-select pxp.f_insert_testructura_gui ('VBCJ.1', 'VBCJ');
-select pxp.f_insert_testructura_gui ('VBCJ.2', 'VBCJ');
-select pxp.f_insert_testructura_gui ('VBCJ.3', 'VBCJ');
-select pxp.f_insert_testructura_gui ('VBCJ.4', 'VBCJ');
-select pxp.f_insert_testructura_gui ('VBCJ.2.1', 'VBCJ.2');
-select pxp.f_insert_testructura_gui ('VBCJ.2.1.1', 'VBCJ.2.1');
-select pxp.f_insert_testructura_gui ('VBCJ.2.1.2', 'VBCJ.2.1');
-select pxp.f_insert_testructura_gui ('VBCJ.2.1.3', 'VBCJ.2.1');
-select pxp.f_insert_testructura_gui ('VBCJ.2.1.4', 'VBCJ.2.1');
-select pxp.f_insert_testructura_gui ('VBCJ.2.1.5', 'VBCJ.2.1');
-select pxp.f_insert_testructura_gui ('VBCJ.2.1.5.1', 'VBCJ.2.1.5');
-select pxp.f_insert_testructura_gui ('VBCJ.2.1.5.1.1', 'VBCJ.2.1.5.1');
-select pxp.f_insert_testructura_gui ('VBCJ.4.1', 'VBCJ.4');
-select pxp.f_insert_testructura_gui ('VBCJ.4.2', 'VBCJ.4');
-select pxp.f_insert_testructura_gui ('VBCP.1', 'VBCP');
-select pxp.f_insert_testructura_gui ('VBCP.2', 'VBCP');
-select pxp.f_insert_testructura_gui ('VBCP.3', 'VBCP');
-select pxp.f_insert_testructura_gui ('VBCP.4', 'VBCP');
-select pxp.f_insert_testructura_gui ('VBCP.5', 'VBCP');
-select pxp.f_insert_testructura_gui ('VBCP.3.1', 'VBCP.3');
-select pxp.f_insert_testructura_gui ('VBCP.3.1.1', 'VBCP.3.1');
-select pxp.f_insert_testructura_gui ('VBCP.3.1.2', 'VBCP.3.1');
-select pxp.f_insert_testructura_gui ('VBCP.3.1.3', 'VBCP.3.1');
-select pxp.f_insert_testructura_gui ('VBCP.3.1.4', 'VBCP.3.1');
-select pxp.f_insert_testructura_gui ('VBCP.3.1.5', 'VBCP.3.1');
-select pxp.f_insert_testructura_gui ('VBCP.3.1.5.1', 'VBCP.3.1.5');
-select pxp.f_insert_testructura_gui ('VBCP.3.1.5.1.1', 'VBCP.3.1.5.1');
-select pxp.f_insert_testructura_gui ('VBCP.5.1', 'VBCP.5');
-select pxp.f_insert_testructura_gui ('VBCP.5.2', 'VBCP.5');
-select pxp.f_insert_testructura_gui ('VBFACREN.1', 'VBFACREN');
-select pxp.f_insert_testructura_gui ('VBFACREN.2', 'VBFACREN');
-select pxp.f_insert_testructura_gui ('VBFACREN.1.1', 'VBFACREN.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.1.1.1', 'VBFACREN.1.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.1.1.2', 'VBFACREN.1.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.1.1.3', 'VBFACREN.1.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.1.1.4', 'VBFACREN.1.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.1.1.5', 'VBFACREN.1.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.1.1.5.1', 'VBFACREN.1.1.5');
-select pxp.f_insert_testructura_gui ('VBFACREN.1.1.5.1.1', 'VBFACREN.1.1.5.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.2.1', 'VBFACREN.2');
-select pxp.f_insert_testructura_gui ('VBFACREN.2.2', 'VBFACREN.2');
-select pxp.f_insert_testructura_gui ('VBFACREN.2.2.1', 'VBFACREN.2.2');
-select pxp.f_insert_testructura_gui ('VBRENCJA.1', 'VBRENCJA');
-select pxp.f_insert_testructura_gui ('VBRENCJA.2', 'VBRENCJA');
-select pxp.f_insert_testructura_gui ('VBRENCJA.3', 'VBRENCJA');
-select pxp.f_insert_testructura_gui ('VBRENCJA.4', 'VBRENCJA');
-select pxp.f_insert_testructura_gui ('VBRENCJA.5', 'VBRENCJA');
-select pxp.f_insert_testructura_gui ('VBRENCJA.6', 'VBRENCJA');
-select pxp.f_insert_testructura_gui ('VBRENCJA.4.1', 'VBRENCJA.4');
-select pxp.f_insert_testructura_gui ('VBRENCJA.4.1.1', 'VBRENCJA.4.1');
-select pxp.f_insert_testructura_gui ('VBRENCJA.4.1.2', 'VBRENCJA.4.1');
-select pxp.f_insert_testructura_gui ('VBRENCJA.4.1.3', 'VBRENCJA.4.1');
-select pxp.f_insert_testructura_gui ('VBRENCJA.4.1.4', 'VBRENCJA.4.1');
-select pxp.f_insert_testructura_gui ('VBRENCJA.4.1.5', 'VBRENCJA.4.1');
-select pxp.f_insert_testructura_gui ('VBRENCJA.4.1.5.1', 'VBRENCJA.4.1.5');
-select pxp.f_insert_testructura_gui ('VBRENCJA.4.1.5.1.1', 'VBRENCJA.4.1.5.1');
-select pxp.f_insert_testructura_gui ('VBRENCJA.6.1', 'VBRENCJA.6');
-select pxp.f_insert_testructura_gui ('VBRENCJA.6.2', 'VBRENCJA.6');
 select pxp.f_insert_testructura_gui ('COFCAJA', 'CARFR');
 select pxp.f_insert_testructura_gui ('TPSOL', 'COFCAJA');
 select pxp.f_insert_testructura_gui ('TPC', 'COFCAJA');
 select pxp.f_insert_testructura_gui ('INGCAJ', 'CARFR');
-select pxp.f_insert_testructura_gui ('OBPG.12', 'OBPG');
-select pxp.f_insert_testructura_gui ('OBPG.8.7.1.1.1.2', 'OBPG.8.7.1.1.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.7.1.1.1.2.1', 'OBPG.8.7.1.1.1.2');
-select pxp.f_insert_testructura_gui ('OBPG.8.7.1.1.1.2.1.1', 'OBPG.8.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.7.1.1.1.2.1.2', 'OBPG.8.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.7.1.1.1.2.1.2.1', 'OBPG.8.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('OBPG.8.7.1.1.1.2.1.2.2', 'OBPG.8.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('CTABAN.2.2', 'CTABAN.2');
-select pxp.f_insert_testructura_gui ('CTABAN.2.2.1', 'CTABAN.2.2');
-select pxp.f_insert_testructura_gui ('CAJA.5.1.1.1.2', 'CAJA.5.1.1.1');
-select pxp.f_insert_testructura_gui ('CAJA.5.1.1.1.2.1', 'CAJA.5.1.1.1.2');
-select pxp.f_insert_testructura_gui ('CAJA.5.1.1.1.2.1.1', 'CAJA.5.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('CAJA.5.1.1.1.2.1.2', 'CAJA.5.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('CAJA.5.1.1.1.2.1.2.1', 'CAJA.5.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('CAJA.5.1.1.1.2.1.2.2', 'CAJA.5.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('CAJA.6.2', 'CAJA.6');
-select pxp.f_insert_testructura_gui ('CTABANE.3.2', 'CTABANE.3');
-select pxp.f_insert_testructura_gui ('CTABANE.3.2.1', 'CTABANE.3.2');
-select pxp.f_insert_testructura_gui ('VBDP.6.11', 'VBDP.6');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7.1.1.1.2', 'VBDP.6.4.7.1.1.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7.1.1.1.2.1', 'VBDP.6.4.7.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7.1.1.1.2.1.1', 'VBDP.6.4.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7.1.1.1.2.1.2', 'VBDP.6.4.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7.1.1.1.2.1.2.1', 'VBDP.6.4.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('VBDP.6.4.7.1.1.1.2.1.2.2', 'VBDP.6.4.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('SOLPD.11', 'SOLPD');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7.1.1.1.2', 'SOLPD.2.7.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7.1.1.1.2.1', 'SOLPD.2.7.1.1.1.2');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7.1.1.1.2.1.1', 'SOLPD.2.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7.1.1.1.2.1.2', 'SOLPD.2.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7.1.1.1.2.1.2.1', 'SOLPD.2.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('SOLPD.2.7.1.1.1.2.1.2.2', 'SOLPD.2.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('CTABANCEND.2.2', 'CTABANCEND.2');
-select pxp.f_insert_testructura_gui ('CTABANCEND.2.2.1', 'CTABANCEND.2.2');
-select pxp.f_insert_testructura_gui ('CTABANCEND.2.2.1.1', 'CTABANCEND.2.2.1');
-select pxp.f_insert_testructura_gui ('CTABANCEND.2.2.1.2', 'CTABANCEND.2.2.1');
-select pxp.f_insert_testructura_gui ('CTABANCEND.2.2.1.2.1', 'CTABANCEND.2.2.1.2');
-select pxp.f_insert_testructura_gui ('CTABANCEND.2.2.1.2.2', 'CTABANCEND.2.2.1.2');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.4.1.2', 'REVBPP.2.2.4.1');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.4.1.2.1', 'REVBPP.2.2.4.1.2');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.4.1.2.1.1', 'REVBPP.2.2.4.1.2.1');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.4.1.2.1.2', 'REVBPP.2.2.4.1.2.1');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.4.1.2.1.2.1', 'REVBPP.2.2.4.1.2.1.2');
-select pxp.f_insert_testructura_gui ('REVBPP.2.2.4.1.2.1.2.2', 'REVBPP.2.2.4.1.2.1.2');
-select pxp.f_insert_testructura_gui ('VBOP.11', 'VBOP');
-select pxp.f_insert_testructura_gui ('VBOP.2.7.1.1.1.2', 'VBOP.2.7.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.7.1.1.1.2.1', 'VBOP.2.7.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBOP.2.7.1.1.1.2.1.1', 'VBOP.2.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.7.1.1.1.2.1.2', 'VBOP.2.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.7.1.1.1.2.1.2.1', 'VBOP.2.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('VBOP.2.7.1.1.1.2.1.2.2', 'VBOP.2.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('OPCONTA.11', 'OPCONTA');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7.1.1.1.2', 'OPCONTA.2.7.1.1.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7.1.1.1.2.1', 'OPCONTA.2.7.1.1.1.2');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7.1.1.1.2.1.1', 'OPCONTA.2.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7.1.1.1.2.1.2', 'OPCONTA.2.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7.1.1.1.2.1.2.1', 'OPCONTA.2.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.7.1.1.1.2.1.2.2', 'OPCONTA.2.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('CONOP.12', 'CONOP');
-select pxp.f_insert_testructura_gui ('CONOP.2.6.1.1.1.2', 'CONOP.2.6.1.1.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.6.1.1.1.2.1', 'CONOP.2.6.1.1.1.2');
-select pxp.f_insert_testructura_gui ('CONOP.2.6.1.1.1.2.1.1', 'CONOP.2.6.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.6.1.1.1.2.1.2', 'CONOP.2.6.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('CONOP.2.6.1.1.1.2.1.2.1', 'CONOP.2.6.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('CONOP.2.6.1.1.1.2.1.2.2', 'CONOP.2.6.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('VBPDC.1.11', 'VBPDC.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7.1.1.1.2', 'VBPDC.1.4.7.1.1.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7.1.1.1.2.1', 'VBPDC.1.4.7.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7.1.1.1.2.1.1', 'VBPDC.1.4.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7.1.1.1.2.1.2', 'VBPDC.1.4.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7.1.1.1.2.1.2.1', 'VBPDC.1.4.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('VBPDC.1.4.7.1.1.1.2.1.2.2', 'VBPDC.1.4.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('OPUNI.12', 'OPUNI');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7.1.1.1.2', 'OPUNI.2.7.1.1.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7.1.1.1.2.1', 'OPUNI.2.7.1.1.1.2');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7.1.1.1.2.1.1', 'OPUNI.2.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7.1.1.1.2.1.2', 'OPUNI.2.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7.1.1.1.2.1.2.1', 'OPUNI.2.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('OPUNI.2.7.1.1.1.2.1.2.2', 'OPUNI.2.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('VBOPOA.11', 'VBOPOA');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7.1.1.1.2', 'VBOPOA.2.7.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7.1.1.1.2.1', 'VBOPOA.2.7.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7.1.1.1.2.1.1', 'VBOPOA.2.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7.1.1.1.2.1.2', 'VBOPOA.2.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7.1.1.1.2.1.2.1', 'VBOPOA.2.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.7.1.1.1.2.1.2.2', 'VBOPOA.2.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3.1.1.1.2', 'SOLCAJA.3.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3.1.1.1.2.1', 'SOLCAJA.3.1.1.1.2');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3.1.1.1.2.1.1', 'SOLCAJA.3.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3.1.1.1.2.1.2', 'SOLCAJA.3.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3.1.1.1.2.1.2.1', 'SOLCAJA.3.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('SOLCAJA.3.1.1.1.2.1.2.2', 'SOLCAJA.3.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('SOLCAJA.4.2', 'SOLCAJA.4');
-select pxp.f_insert_testructura_gui ('VBCAJA.5.1.1.1.2', 'VBCAJA.5.1.1.1');
-select pxp.f_insert_testructura_gui ('VBCAJA.5.1.1.1.2.1', 'VBCAJA.5.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBCAJA.5.1.1.1.2.1.1', 'VBCAJA.5.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('VBCAJA.5.1.1.1.2.1.2', 'VBCAJA.5.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('VBCAJA.5.1.1.1.2.1.2.1', 'VBCAJA.5.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('VBCAJA.5.1.1.1.2.1.2.2', 'VBCAJA.5.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('VBCAJA.6.2', 'VBCAJA.6');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.11', 'VBPCOS.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7.1.1.1.2', 'VBPCOS.1.4.7.1.1.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7.1.1.1.2.1', 'VBPCOS.1.4.7.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7.1.1.1.2.1.1', 'VBPCOS.1.4.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7.1.1.1.2.1.2', 'VBPCOS.1.4.7.1.1.1.2.1');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7.1.1.1.2.1.2.1', 'VBPCOS.1.4.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('VBPCOS.1.4.7.1.1.1.2.1.2.2', 'VBPCOS.1.4.7.1.1.1.2.1.2');
-select pxp.f_insert_testructura_gui ('INGCAJ.1', 'INGCAJ');
-select pxp.f_insert_testructura_gui ('INGCAJ.2', 'INGCAJ');
-select pxp.f_insert_testructura_gui ('INGCAJ.3', 'INGCAJ');
-select pxp.f_insert_testructura_gui ('INGCAJ.4', 'INGCAJ');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.1', 'INGCAJ.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.2', 'INGCAJ.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.2.1', 'INGCAJ.1.2');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.2.1.1', 'INGCAJ.1.2.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.2.1.2', 'INGCAJ.1.2.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.2.1.3', 'INGCAJ.1.2.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.2.1.4', 'INGCAJ.1.2.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.2.1.5', 'INGCAJ.1.2.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.2.1.5.1', 'INGCAJ.1.2.1.5');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.2.1.5.1.1', 'INGCAJ.1.2.1.5.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.3.5', 'SOLEFESD.3');
-select pxp.f_insert_testructura_gui ('VBFACREN.3', 'VBFACREN');
-select pxp.f_insert_testructura_gui ('SOLEFE.3.1.1', 'SOLEFE.3.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.3.1.1.1', 'SOLEFE.3.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.3.1.1.2', 'SOLEFE.3.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.3.1.1.3', 'SOLEFE.3.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.3.1.1.4', 'SOLEFE.3.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.3.1.1.1.1', 'SOLEFE.3.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.3.1.1.1.1.1', 'SOLEFE.3.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.3.1.1.1.1.2', 'SOLEFE.3.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.3.1.1.1.1.1.1', 'SOLEFE.3.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.3.1.1.1.1.1.1.1', 'SOLEFE.3.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.3.1.1.1.1.1.1.2', 'SOLEFE.3.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFE.3.1.1.1.1.1.1.2.1', 'SOLEFE.3.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('SOLEFE.3.1.1.1.1.1.1.2.2', 'SOLEFE.3.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.1.1', 'SOLEFESD.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.1.1.1', 'SOLEFESD.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.1.1.2', 'SOLEFESD.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.1.1.3', 'SOLEFESD.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.1.1.4', 'SOLEFESD.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.1.1.1.1', 'SOLEFESD.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.1.1.1.1.1', 'SOLEFESD.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.1.1.1.1.2', 'SOLEFESD.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.1.1.1.1.1.1', 'SOLEFESD.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.1.1.1.1.1.1.1', 'SOLEFESD.1.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.1.1.1.1.1.1.2', 'SOLEFESD.1.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.1.1.1.1.1.1.2.1', 'SOLEFESD.1.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('SOLEFESD.1.1.1.1.1.1.1.2.2', 'SOLEFESD.1.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBFACREN.2.1.1', 'VBFACREN.2.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.2.1.1.1', 'VBFACREN.2.1.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.2.1.1.2', 'VBFACREN.2.1.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.2.1.1.3', 'VBFACREN.2.1.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.2.1.1.4', 'VBFACREN.2.1.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.2.1.1.1.1', 'VBFACREN.2.1.1.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.2.1.1.1.1.1', 'VBFACREN.2.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.2.1.1.1.1.2', 'VBFACREN.2.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.2.1.1.1.1.1.1', 'VBFACREN.2.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.2.1.1.1.1.1.1.1', 'VBFACREN.2.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.2.1.1.1.1.1.1.2', 'VBFACREN.2.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBFACREN.2.1.1.1.1.1.1.2.1', 'VBFACREN.2.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBFACREN.2.1.1.1.1.1.1.2.2', 'VBFACREN.2.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.1.1', 'INGCAJ.1.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.1.1.1', 'INGCAJ.1.1.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.1.1.2', 'INGCAJ.1.1.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.1.1.3', 'INGCAJ.1.1.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.1.1.4', 'INGCAJ.1.1.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.1.1.1.1', 'INGCAJ.1.1.1.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.1.1.1.1.1', 'INGCAJ.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.1.1.1.1.2', 'INGCAJ.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.1.1.1.1.1.1', 'INGCAJ.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.1.1.1.1.1.1.1', 'INGCAJ.1.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.1.1.1.1.1.1.2', 'INGCAJ.1.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.1.1.1.1.1.1.2.1', 'INGCAJ.1.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('INGCAJ.1.1.1.1.1.1.1.2.2', 'INGCAJ.1.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('OBPG.8.8', 'OBPG.8');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.1', 'OBPG.8.8');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.2', 'OBPG.8.8');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.3', 'OBPG.8.8');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.1.1', 'OBPG.8.8.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.1.1.1', 'OBPG.8.8.1.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.1.1.2', 'OBPG.8.8.1.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.1.1.3', 'OBPG.8.8.1.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.1.1.4', 'OBPG.8.8.1.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.1.1.1.1', 'OBPG.8.8.1.1.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.1.1.1.1.1', 'OBPG.8.8.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.1.1.1.1.2', 'OBPG.8.8.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.1.1.1.1.1.1', 'OBPG.8.8.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.1.1.1.1.1.1.1', 'OBPG.8.8.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.1.1.1.1.1.1.2', 'OBPG.8.8.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.1.1.1.1.1.1.2.1', 'OBPG.8.8.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.1.1.1.1.1.1.2.2', 'OBPG.8.8.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.2.1', 'OBPG.8.8.2');
-select pxp.f_insert_testructura_gui ('OBPG.8.8.3.1', 'OBPG.8.8.3');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8', 'SOLPD.2');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.1', 'SOLPD.2.8');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.2', 'SOLPD.2.8');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.3', 'SOLPD.2.8');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.1.1', 'SOLPD.2.8.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.1.1.1', 'SOLPD.2.8.1.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.1.1.2', 'SOLPD.2.8.1.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.1.1.3', 'SOLPD.2.8.1.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.1.1.4', 'SOLPD.2.8.1.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.1.1.1.1', 'SOLPD.2.8.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.1.1.1.1.1', 'SOLPD.2.8.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.1.1.1.1.2', 'SOLPD.2.8.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.1.1.1.1.1.1', 'SOLPD.2.8.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.1.1.1.1.1.1.1', 'SOLPD.2.8.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.1.1.1.1.1.1.2', 'SOLPD.2.8.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.1.1.1.1.1.1.2.1', 'SOLPD.2.8.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.1.1.1.1.1.1.2.2', 'SOLPD.2.8.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.2.1', 'SOLPD.2.8.2');
-select pxp.f_insert_testructura_gui ('SOLPD.2.8.3.1', 'SOLPD.2.8.3');
-select pxp.f_insert_testructura_gui ('VBOP.2.8', 'VBOP.2');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.1', 'VBOP.2.8');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.2', 'VBOP.2.8');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.3', 'VBOP.2.8');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.1.1', 'VBOP.2.8.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.1.1.1', 'VBOP.2.8.1.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.1.1.2', 'VBOP.2.8.1.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.1.1.3', 'VBOP.2.8.1.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.1.1.4', 'VBOP.2.8.1.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.1.1.1.1', 'VBOP.2.8.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.1.1.1.1.1', 'VBOP.2.8.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.1.1.1.1.2', 'VBOP.2.8.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.1.1.1.1.1.1', 'VBOP.2.8.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.1.1.1.1.1.1.1', 'VBOP.2.8.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.1.1.1.1.1.1.2', 'VBOP.2.8.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.1.1.1.1.1.1.2.1', 'VBOP.2.8.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.1.1.1.1.1.1.2.2', 'VBOP.2.8.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.2.1', 'VBOP.2.8.2');
-select pxp.f_insert_testructura_gui ('VBOP.2.8.3.1', 'VBOP.2.8.3');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8', 'OPCONTA.2');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.1', 'OPCONTA.2.8');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.2', 'OPCONTA.2.8');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.3', 'OPCONTA.2.8');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.1.1', 'OPCONTA.2.8.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.1.1.1', 'OPCONTA.2.8.1.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.1.1.2', 'OPCONTA.2.8.1.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.1.1.3', 'OPCONTA.2.8.1.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.1.1.4', 'OPCONTA.2.8.1.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.1.1.1.1', 'OPCONTA.2.8.1.1.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.1.1.1.1.1', 'OPCONTA.2.8.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.1.1.1.1.2', 'OPCONTA.2.8.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.1.1.1.1.1.1', 'OPCONTA.2.8.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.1.1.1.1.1.1.1', 'OPCONTA.2.8.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.1.1.1.1.1.1.2', 'OPCONTA.2.8.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.1.1.1.1.1.1.2.1', 'OPCONTA.2.8.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.1.1.1.1.1.1.2.2', 'OPCONTA.2.8.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.2.1', 'OPCONTA.2.8.2');
-select pxp.f_insert_testructura_gui ('OPCONTA.2.8.3.1', 'OPCONTA.2.8.3');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8', 'OPUNI.2');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.1', 'OPUNI.2.8');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.2', 'OPUNI.2.8');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.3', 'OPUNI.2.8');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.1.1', 'OPUNI.2.8.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.1.1.1', 'OPUNI.2.8.1.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.1.1.2', 'OPUNI.2.8.1.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.1.1.3', 'OPUNI.2.8.1.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.1.1.4', 'OPUNI.2.8.1.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.1.1.1.1', 'OPUNI.2.8.1.1.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.1.1.1.1.1', 'OPUNI.2.8.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.1.1.1.1.2', 'OPUNI.2.8.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.1.1.1.1.1.1', 'OPUNI.2.8.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.1.1.1.1.1.1.1', 'OPUNI.2.8.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.1.1.1.1.1.1.2', 'OPUNI.2.8.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.1.1.1.1.1.1.2.1', 'OPUNI.2.8.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.1.1.1.1.1.1.2.2', 'OPUNI.2.8.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.2.1', 'OPUNI.2.8.2');
-select pxp.f_insert_testructura_gui ('OPUNI.2.8.3.1', 'OPUNI.2.8.3');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8', 'VBOPOA.2');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.1', 'VBOPOA.2.8');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.2', 'VBOPOA.2.8');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.3', 'VBOPOA.2.8');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.1.1', 'VBOPOA.2.8.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.1.1.1', 'VBOPOA.2.8.1.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.1.1.2', 'VBOPOA.2.8.1.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.1.1.3', 'VBOPOA.2.8.1.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.1.1.4', 'VBOPOA.2.8.1.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.1.1.1.1', 'VBOPOA.2.8.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.1.1.1.1.1', 'VBOPOA.2.8.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.1.1.1.1.2', 'VBOPOA.2.8.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.1.1.1.1.1.1', 'VBOPOA.2.8.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.1.1.1.1.1.1.1', 'VBOPOA.2.8.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.1.1.1.1.1.1.2', 'VBOPOA.2.8.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.1.1.1.1.1.1.2.1', 'VBOPOA.2.8.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.1.1.1.1.1.1.2.2', 'VBOPOA.2.8.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.2.1', 'VBOPOA.2.8.2');
-select pxp.f_insert_testructura_gui ('VBOPOA.2.8.3.1', 'VBOPOA.2.8.3');
-select pxp.f_delete_testructura_gui ('CONOPT', 'CAROPSOL');
-select pxp.f_insert_testructura_gui ('CAJA.4.5', 'CAJA.4');
-select pxp.f_insert_testructura_gui ('VBRENCJ.5', 'VBRENCJ');
-select pxp.f_insert_testructura_gui ('VBCJ.5', 'VBCJ');
-select pxp.f_insert_testructura_gui ('VBCP.6', 'VBCP');
-select pxp.f_insert_testructura_gui ('VBRENCJA.7', 'VBRENCJA');
 select pxp.f_insert_testructura_gui ('TESREPFR', 'CARFR');
 select pxp.f_insert_testructura_gui ('REPMOVCA', 'TESREPFR');
-select pxp.f_insert_testructura_gui ('CAJA.4.6', 'CAJA.4');
-select pxp.f_insert_testructura_gui ('VBRENCJ.6', 'VBRENCJ');
-select pxp.f_insert_testructura_gui ('VBCJ.6', 'VBCJ');
-select pxp.f_insert_testructura_gui ('VBCP.7', 'VBCP');
-select pxp.f_insert_testructura_gui ('VBRENCJA.8', 'VBRENCJA');
-select pxp.f_insert_testructura_gui ('REPMOVCA.1', 'REPMOVCA');
 select pxp.f_insert_testructura_gui ('TESOLTRA', 'CARLB');
 select pxp.f_insert_testructura_gui ('TEAPROTRA', 'CARLB');
-select pxp.f_insert_testructura_gui ('TESOLTRA.1', 'TESOLTRA');
-select pxp.f_insert_testructura_gui ('TESOLTRA.1.1', 'TESOLTRA.1');
-select pxp.f_insert_testructura_gui ('TESOLTRA.1.1.1', 'TESOLTRA.1.1');
-select pxp.f_insert_testructura_gui ('TESOLTRA.1.1.2', 'TESOLTRA.1.1');
-select pxp.f_insert_testructura_gui ('TESOLTRA.1.1.3', 'TESOLTRA.1.1');
-select pxp.f_insert_testructura_gui ('TESOLTRA.1.1.4', 'TESOLTRA.1.1');
-select pxp.f_insert_testructura_gui ('TESOLTRA.1.1.5', 'TESOLTRA.1.1');
-select pxp.f_insert_testructura_gui ('TESOLTRA.1.1.5.1', 'TESOLTRA.1.1.5');
-select pxp.f_insert_testructura_gui ('TESOLTRA.1.1.5.1.1', 'TESOLTRA.1.1.5.1');
-select pxp.f_insert_testructura_gui ('TEAPROTRA.1', 'TEAPROTRA');
-select pxp.f_insert_testructura_gui ('TEAPROTRA.1.1', 'TEAPROTRA.1');
-select pxp.f_insert_testructura_gui ('TEAPROTRA.1.1.1', 'TEAPROTRA.1.1');
-select pxp.f_insert_testructura_gui ('TEAPROTRA.1.1.2', 'TEAPROTRA.1.1');
-select pxp.f_insert_testructura_gui ('TEAPROTRA.1.1.3', 'TEAPROTRA.1.1');
-select pxp.f_insert_testructura_gui ('TEAPROTRA.1.1.4', 'TEAPROTRA.1.1');
-select pxp.f_insert_testructura_gui ('TEAPROTRA.1.1.5', 'TEAPROTRA.1.1');
-select pxp.f_insert_testructura_gui ('TEAPROTRA.1.1.5.1', 'TEAPROTRA.1.1.5');
-select pxp.f_insert_testructura_gui ('TEAPROTRA.1.1.5.1.1', 'TEAPROTRA.1.1.5.1');
 select pxp.f_insert_testructura_gui ('REPLIB', 'CARLB');
-select pxp.f_delete_testructura_gui ('REPLB', 'TESOLTRA');
 select pxp.f_insert_testructura_gui ('REPLB', 'CARLB');
 select pxp.f_insert_testructura_gui ('PAGESP', 'CAROPSOL');
 select pxp.f_insert_testructura_gui ('RCRF', 'TESREPFR');
-select pxp.f_insert_testructura_gui ('PAGESP.1', 'PAGESP');
-select pxp.f_insert_testructura_gui ('PAGESP.2', 'PAGESP');
-select pxp.f_insert_testructura_gui ('PAGESP.3', 'PAGESP');
-select pxp.f_insert_testructura_gui ('PAGESP.4', 'PAGESP');
-select pxp.f_insert_testructura_gui ('PAGESP.5', 'PAGESP');
-select pxp.f_insert_testructura_gui ('PAGESP.6', 'PAGESP');
-select pxp.f_insert_testructura_gui ('PAGESP.7', 'PAGESP');
-select pxp.f_insert_testructura_gui ('PAGESP.8', 'PAGESP');
-select pxp.f_insert_testructura_gui ('PAGESP.9', 'PAGESP');
-select pxp.f_insert_testructura_gui ('PAGESP.10', 'PAGESP');
-select pxp.f_insert_testructura_gui ('PAGESP.11', 'PAGESP');
-select pxp.f_insert_testructura_gui ('PAGESP.12', 'PAGESP');
-select pxp.f_insert_testructura_gui ('PAGESP.1.1', 'PAGESP.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.1', 'PAGESP.2');
-select pxp.f_insert_testructura_gui ('PAGESP.2.2', 'PAGESP.2');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3', 'PAGESP.2');
-select pxp.f_insert_testructura_gui ('PAGESP.2.4', 'PAGESP.2');
-select pxp.f_insert_testructura_gui ('PAGESP.2.5', 'PAGESP.2');
-select pxp.f_insert_testructura_gui ('PAGESP.2.6', 'PAGESP.2');
-select pxp.f_insert_testructura_gui ('PAGESP.2.7', 'PAGESP.2');
-select pxp.f_insert_testructura_gui ('PAGESP.2.8', 'PAGESP.2');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.1', 'PAGESP.2.3');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.2', 'PAGESP.2.3');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.3', 'PAGESP.2.3');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.1.1', 'PAGESP.2.3.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.1.1.1', 'PAGESP.2.3.1.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.1.1.2', 'PAGESP.2.3.1.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.1.1.3', 'PAGESP.2.3.1.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.1.1.4', 'PAGESP.2.3.1.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.1.1.1.1', 'PAGESP.2.3.1.1.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.1.1.1.1.1', 'PAGESP.2.3.1.1.1.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.1.1.1.1.2', 'PAGESP.2.3.1.1.1.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.1.1.1.1.1.1', 'PAGESP.2.3.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.1.1.1.1.1.1.1', 'PAGESP.2.3.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.1.1.1.1.1.1.2', 'PAGESP.2.3.1.1.1.1.1.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.1.1.1.1.1.1.2.1', 'PAGESP.2.3.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.1.1.1.1.1.1.2.2', 'PAGESP.2.3.1.1.1.1.1.1.2');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.2.1', 'PAGESP.2.3.2');
-select pxp.f_insert_testructura_gui ('PAGESP.2.3.3.1', 'PAGESP.2.3.3');
-select pxp.f_insert_testructura_gui ('PAGESP.2.5.1', 'PAGESP.2.5');
-select pxp.f_insert_testructura_gui ('PAGESP.2.5.1.1', 'PAGESP.2.5.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.5.1.2', 'PAGESP.2.5.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.5.1.3', 'PAGESP.2.5.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.5.1.4', 'PAGESP.2.5.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.5.1.5', 'PAGESP.2.5.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.5.1.5.1', 'PAGESP.2.5.1.5');
-select pxp.f_insert_testructura_gui ('PAGESP.2.5.1.5.1.1', 'PAGESP.2.5.1.5.1');
-select pxp.f_insert_testructura_gui ('PAGESP.2.8.1', 'PAGESP.2.8');
-select pxp.f_insert_testructura_gui ('PAGESP.3.1', 'PAGESP.3');
-select pxp.f_insert_testructura_gui ('PAGESP.3.2', 'PAGESP.3');
-select pxp.f_insert_testructura_gui ('PAGESP.3.2.1', 'PAGESP.3.2');
-select pxp.f_insert_testructura_gui ('PAGESP.3.2.2', 'PAGESP.3.2');
-select pxp.f_insert_testructura_gui ('PAGESP.3.2.3', 'PAGESP.3.2');
-select pxp.f_insert_testructura_gui ('PAGESP.3.2.4', 'PAGESP.3.2');
-select pxp.f_insert_testructura_gui ('PAGESP.3.2.5', 'PAGESP.3.2');
-select pxp.f_insert_testructura_gui ('PAGESP.3.2.6', 'PAGESP.3.2');
-select pxp.f_insert_testructura_gui ('PAGESP.3.2.7', 'PAGESP.3.2');
-select pxp.f_insert_testructura_gui ('PAGESP.3.2.1.1', 'PAGESP.3.2.1');
-select pxp.f_insert_testructura_gui ('PAGESP.6.1', 'PAGESP.6');
-select pxp.f_insert_testructura_gui ('PAGESP.6.2', 'PAGESP.6');
-select pxp.f_insert_testructura_gui ('PAGESP.6.3', 'PAGESP.6');
-select pxp.f_insert_testructura_gui ('PAGESP.6.4', 'PAGESP.6');
-select pxp.f_insert_testructura_gui ('PAGESP.6.5', 'PAGESP.6');
-select pxp.f_insert_testructura_gui ('PAGESP.6.6', 'PAGESP.6');
-select pxp.f_insert_testructura_gui ('PAGESP.6.7', 'PAGESP.6');
-select pxp.f_insert_testructura_gui ('RERANFEC', 'TESREPFR');   
 
 
 /**********************************F-DEP-RAC-TES-0-01/12/2018****************************************/
 
 
+/**********************************I-DEP-CAP-TES-0-04/12/2018****************************************/
 
-   
+DROP VIEW tes.vcomp_devtesprov_plan_pago;
+
+CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago (
+    id_plan_pago,
+    id_proveedor,
+    desc_proveedor,
+    id_moneda,
+    id_depto_conta,
+    numero,
+    fecha_actual,
+    estado,
+    monto_ejecutar_total_mb,
+    monto_ejecutar_total_mo,
+    monto,
+    monto_mb,
+    monto_retgar_mb,
+    monto_retgar_mo,
+    monto_no_pagado,
+    monto_no_pagado_mb,
+    otros_descuentos,
+    otros_descuentos_mb,
+    id_plantilla,
+    id_cuenta_bancaria,
+    id_cuenta_bancaria_mov,
+    nro_cheque,
+    nro_cuenta_bancaria,
+    num_tramite,
+    tipo,
+    id_gestion_cuentas,
+    id_int_comprobante,
+    liquido_pagable,
+    liquido_pagable_mb,
+    nombre_pago,
+    porc_monto_excento_var,
+    obs_pp,
+    descuento_anticipo,
+    descuento_inter_serv,
+    tipo_obligacion,
+    id_categoria_compra,
+    codigo_categoria,
+    nombre_categoria,
+    id_proceso_wf,
+    forma_pago,
+    monto_ajuste_ag,
+    monto_ajuste_siguiente_pago,
+    monto_anticipo,
+    tipo_cambio_conv,
+    id_depto_libro,
+    fecha_costo_ini,
+    fecha_costo_fin,
+    id_obligacion_pago,
+    fecha_tentativa,
+    id_int_comprobante_rel)
+AS
+ SELECT pp.id_plan_pago,
+    op.id_proveedor,
+    p.desc_proveedor,
+    op.id_moneda,
+    op.id_depto_conta,
+    op.numero,
+    now() AS fecha_actual,
+    pp.estado,
+    pp.monto_ejecutar_total_mb,
+    pp.monto_ejecutar_total_mo,
+    pp.monto,
+    pp.monto_mb,
+    pp.monto_retgar_mb,
+    pp.monto_retgar_mo,
+    pp.monto_no_pagado,
+    pp.monto_no_pagado_mb,
+    pp.otros_descuentos,
+    pp.otros_descuentos_mb,
+    pp.id_plantilla,
+    pp.id_cuenta_bancaria,
+    pp.id_cuenta_bancaria_mov,
+    pp.nro_cheque,
+    pp.nro_cuenta_bancaria,
+    op.num_tramite,
+    pp.tipo,
+    op.id_gestion AS id_gestion_cuentas,
+    pp.id_int_comprobante,
+    pp.liquido_pagable,
+    pp.liquido_pagable_mb,
+    pp.nombre_pago,
+    pp.porc_monto_excento_var,
+    ((COALESCE(op.numero, ''::character varying)::text || ' '::text) || COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS obs_pp,
+    pp.descuento_anticipo,
+    pp.descuento_inter_serv,
+    op.tipo_obligacion,
+    op.id_categoria_compra,
+    COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
+    COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
+    pp.id_proceso_wf,
+    pp.forma_pago,
+    pp.monto_ajuste_ag,
+    pp.monto_ajuste_siguiente_pago,
+    pp.monto_anticipo,
+    op.tipo_cambio_conv,
+    pp.id_depto_lb AS id_depto_libro,
+        CASE
+            WHEN pp.fecha_costo_ini IS NULL THEN now()::date
+            WHEN pp.fecha_costo_ini > now() THEN now()::date
+            ELSE pp.fecha_costo_ini
+        END AS fecha_costo_ini,
+    COALESCE(pp.fecha_costo_fin, now()::date) AS fecha_costo_fin,
+    op.id_obligacion_pago,
+    pp.fecha_tentativa,
+    pr.id_int_comprobante AS id_int_comprobante_rel
+   FROM tes.tplan_pago pp
+     JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago = op.id_obligacion_pago
+     JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
+     LEFT JOIN tes.tplan_pago pr ON pr.id_plan_pago = pp.id_plan_pago_fk
+     LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra = op.id_categoria_compra;
+
+DROP VIEW tes.vcomp_devtesprov_plan_pago_2;
+
+CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2 (
+    id_plan_pago,
+    id_proveedor,
+    desc_proveedor,
+    id_moneda,
+    id_depto_conta,
+    numero,
+    fecha_actual,
+    estado,
+    monto_ejecutar_total_mb,
+    monto_ejecutar_total_mo,
+    monto,
+    monto_mb,
+    monto_retgar_mb,
+    monto_retgar_mo,
+    monto_no_pagado,
+    monto_no_pagado_mb,
+    otros_descuentos,
+    otros_descuentos_mb,
+    id_plantilla,
+    id_cuenta_bancaria,
+    id_cuenta_bancaria_mov,
+    nro_cheque,
+    nro_cuenta_bancaria,
+    num_tramite,
+    tipo,
+    id_gestion_cuentas,
+    id_int_comprobante,
+    liquido_pagable,
+    liquido_pagable_mb,
+    nombre_pago,
+    porc_monto_excento_var,
+    obs_pp,
+    descuento_anticipo,
+    descuento_inter_serv,
+    tipo_obligacion,
+    id_categoria_compra,
+    codigo_categoria,
+    nombre_categoria,
+    id_proceso_wf,
+    detalle,
+    codigo_moneda,
+    nro_cuota,
+    tipo_pago,
+    tipo_solicitud,
+    tipo_concepto_solicitud,
+    total_monto_op_mb,
+    total_monto_op_mo,
+    total_pago,
+    fecha_tentativa,
+    desc_funcionario,
+    email_empresa,
+    desc_usuario,
+    id_funcionario_gerente,
+    correo_usuario,
+    sw_conformidad,
+    ultima_cuota_pp,
+    ultima_cuota_dev,
+    tiene_form500,
+    prioridad_op,
+    prioridad_lb,
+    id_depto_lb)
+AS
+ SELECT pp.id_plan_pago,
+    op.id_proveedor,
+    COALESCE(p.desc_proveedor, ''::character varying) AS desc_proveedor,
+    op.id_moneda,
+    pp.id_depto_conta,
+    op.numero,
+    now() AS fecha_actual,
+    pp.estado,
+    pp.monto_ejecutar_total_mb,
+    pp.monto_ejecutar_total_mo,
+    pp.monto,
+    pp.monto_mb,
+    pp.monto_retgar_mb,
+    pp.monto_retgar_mo,
+    pp.monto_no_pagado,
+    pp.monto_no_pagado_mb,
+    pp.otros_descuentos,
+    pp.otros_descuentos_mb,
+    pp.id_plantilla,
+    pp.id_cuenta_bancaria,
+    pp.id_cuenta_bancaria_mov,
+    pp.nro_cheque,
+    pp.nro_cuenta_bancaria,
+    op.num_tramite,
+    pp.tipo,
+    op.id_gestion AS id_gestion_cuentas,
+    pp.id_int_comprobante,
+    pp.liquido_pagable,
+    pp.liquido_pagable_mb,
+    pp.nombre_pago,
+    pp.porc_monto_excento_var,
+    ((COALESCE(op.numero, ''::character varying)::text || ' '::text) || COALESCE(pp.obs_monto_no_pagado, ''::text))::character varying AS obs_pp,
+    pp.descuento_anticipo,
+    pp.descuento_inter_serv,
+    op.tipo_obligacion,
+    op.id_categoria_compra,
+    COALESCE(cac.codigo, ''::character varying) AS codigo_categoria,
+    COALESCE(cac.nombre, ''::character varying) AS nombre_categoria,
+    pp.id_proceso_wf,
+    ((('<table border="1"><TR>
+   <TH>Concepto</TH>
+   <TH>Detalle</TH>
+   <TH>Importe ('::text || mon.codigo::text) || ')</TH>'::text) || pxp.html_rows(((((((((('<td>'::text || ci.desc_ingas::text) || '</td>
+       <td>'::text) || '<font hdden=true>'::text) || od.id_obligacion_det::character varying::text) || '</font>'::text) || od.descripcion) || '</td> <td>'::text) || od.monto_pago_mo::text) || '</td>'::text)::character varying)::text) || '</table>'::text AS detalle,
+    mon.codigo AS codigo_moneda,
+    pp.nro_cuota,
+    pp.tipo_pago,
+    op.tipo_solicitud,
+    op.tipo_concepto_solicitud,
+    COALESCE(sum(od.monto_pago_mb), 0::numeric) AS total_monto_op_mb,
+    COALESCE(sum(od.monto_pago_mo), 0::numeric) AS total_monto_op_mo,
+    op.total_pago,
+    pp.fecha_tentativa,
+    fun.desc_funcionario1 AS desc_funcionario,
+    fun.email_empresa,
+    usu.desc_persona AS desc_usuario,
+    COALESCE(op.id_funcionario_gerente, 0) AS id_funcionario_gerente,
+    ususol.correo AS correo_usuario,
+        CASE
+            WHEN pp.fecha_conformidad IS NULL THEN 'no'::text
+            ELSE 'si'::text
+        END AS sw_conformidad,
+    op.ultima_cuota_pp,
+    op.ultima_cuota_dev,
+    pp.tiene_form500,
+    dep.prioridad AS prioridad_op,
+    COALESCE(deplb.prioridad, '-1'::integer) AS prioridad_lb,
+    pp.id_depto_lb
+   FROM tes.tplan_pago pp
+     JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago = op.id_obligacion_pago
+     JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
+     JOIN param.tdepto dep ON dep.id_depto = op.id_depto
+     LEFT JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
+     LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra = op.id_categoria_compra
+     LEFT JOIN adq.tcotizacion cot ON op.id_obligacion_pago = cot.id_obligacion_pago
+     LEFT JOIN adq.tproceso_compra pro ON pro.id_proceso_compra = cot.id_proceso_compra
+     LEFT JOIN adq.tsolicitud sol ON sol.id_solicitud = pro.id_solicitud
+     LEFT JOIN segu.vusuario ususol ON ususol.id_usuario = sol.id_usuario_reg
+     LEFT JOIN param.tdepto deplb ON deplb.id_depto = pp.id_depto_lb
+     JOIN tes.tobligacion_det od ON od.id_obligacion_pago = op.id_obligacion_pago AND od.estado_reg::text = 'activo'::text
+     JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas = od.id_concepto_ingas
+     JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario = op.id_funcionario AND fun.estado_reg_asi::text = 'activo'::text
+     JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
+  GROUP BY pp.id_plan_pago, op.id_proveedor, p.desc_proveedor, op.id_moneda, pp.id_depto_conta, op.numero, pp.estado, pp.monto_ejecutar_total_mb, pp.monto_ejecutar_total_mo, pp.monto, pp.monto_mb, pp.monto_retgar_mb, pp.monto_retgar_mo, pp.monto_no_pagado, pp.monto_no_pagado_mb, pp.otros_descuentos, pp.otros_descuentos_mb, pp.id_plantilla, pp.id_cuenta_bancaria, pp.id_cuenta_bancaria_mov, pp.nro_cheque, pp.nro_cuenta_bancaria, op.num_tramite, pp.tipo, op.id_gestion, pp.id_int_comprobante, pp.liquido_pagable, pp.liquido_pagable_mb, pp.nombre_pago, pp.porc_monto_excento_var, pp.obs_monto_no_pagado, pp.descuento_anticipo, pp.descuento_inter_serv, op.tipo_obligacion, op.id_categoria_compra, cac.codigo, cac.nombre, pp.id_proceso_wf, mon.codigo, pp.nro_cuota, pp.tipo_pago, op.total_pago, op.tipo_solicitud, op.tipo_concepto_solicitud, pp.fecha_tentativa, fun.desc_funcionario1, fun.email_empresa, usu.desc_persona, op.id_funcionario_gerente, ususol.correo, op.ultima_cuota_pp, op.ultima_cuota_dev, pp.tiene_form500, dep.prioridad, deplb.prioridad;
+
+
+DROP VIEW tes.vobligacion_pago;
+
+CREATE OR REPLACE VIEW tes.vobligacion_pago (
+    id_usuario_reg,
+    id_usuario_mod,
+    fecha_reg,
+    fecha_mod,
+    estado_reg,
+    id_usuario_ai,
+    usuario_ai,
+    id_obligacion_pago,
+    id_proveedor,
+    id_funcionario,
+    id_subsistema,
+    id_moneda,
+    id_depto,
+    id_estado_wf,
+    id_proceso_wf,
+    id_gestion,
+    fecha,
+    numero,
+    estado,
+    obs,
+    porc_anticipo,
+    porc_retgar,
+    tipo_cambio_conv,
+    num_tramite,
+    tipo_obligacion,
+    comprometido,
+    pago_variable,
+    nro_cuota_vigente,
+    total_pago,
+    id_depto_conta,
+    total_nro_cuota,
+    id_plantilla,
+    fecha_pp_ini,
+    rotacion,
+    ultima_cuota_pp,
+    ultimo_estado_pp,
+    tipo_anticipo,
+    id_categoria_compra,
+    tipo_solicitud,
+    tipo_concepto_solicitud,
+    id_funcionario_gerente,
+    ajuste_anticipo,
+    ajuste_aplicado,
+    id_obligacion_pago_extendida,
+    monto_estimado_sg,
+    monto_ajuste_ret_garantia_ga,
+    monto_ajuste_ret_anticipo_par_ga,
+    id_contrato,
+    obs_presupuestos,
+    ultima_cuota_dev,
+    codigo_poa,
+    obs_poa,
+    uo_ex,
+    detalle)
+AS
+ SELECT op.id_usuario_reg,
+    op.id_usuario_mod,
+    op.fecha_reg,
+    op.fecha_mod,
+    op.estado_reg,
+    op.id_usuario_ai,
+    op.usuario_ai,
+    op.id_obligacion_pago,
+    op.id_proveedor,
+    op.id_funcionario,
+    op.id_subsistema,
+    op.id_moneda,
+    op.id_depto,
+    op.id_estado_wf,
+    op.id_proceso_wf,
+    op.id_gestion,
+    op.fecha,
+    op.numero,
+    op.estado,
+    op.obs,
+    op.porc_anticipo,
+    op.porc_retgar,
+    op.tipo_cambio_conv,
+    op.num_tramite,
+    op.tipo_obligacion,
+    op.comprometido,
+    op.pago_variable,
+    op.nro_cuota_vigente,
+    op.total_pago,
+    op.id_depto_conta,
+    op.total_nro_cuota,
+    op.id_plantilla,
+    op.fecha_pp_ini,
+    op.rotacion,
+    op.ultima_cuota_pp,
+    op.ultimo_estado_pp,
+    op.tipo_anticipo,
+    op.id_categoria_compra,
+    op.tipo_solicitud,
+    op.tipo_concepto_solicitud,
+    op.id_funcionario_gerente,
+    op.ajuste_anticipo,
+    op.ajuste_aplicado,
+    op.id_obligacion_pago_extendida,
+    op.monto_estimado_sg,
+    op.monto_ajuste_ret_garantia_ga,
+    op.monto_ajuste_ret_anticipo_par_ga,
+    op.id_contrato,
+    op.obs_presupuestos,
+    op.ultima_cuota_dev,
+    op.codigo_poa,
+    op.obs_poa,
+    op.uo_ex,
+    ((('<table border="1"><TR>
+   <TH>Concepto</TH>
+   <TH>Detalle</TH>
+   <TH>Importe ('::text || mon.codigo::text) || ')</TH>'::text) || pxp.html_rows(((((((((('<td>'::text || ci.desc_ingas::text) || '</td>
+       <td>'::text) || '<font hdden=true>'::text) || od.id_obligacion_det::character varying::text) || '</font>'::text) || od.descripcion) || '</td> <td>'::text) || od.monto_pago_mo::text) || '</td>'::text)::character varying)::text) || '</table>'::text AS detalle
+   FROM tes.tobligacion_pago op
+     JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
+     JOIN param.tdepto dep ON dep.id_depto = op.id_depto
+     LEFT JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
+     LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra = op.id_categoria_compra
+     LEFT JOIN adq.tcotizacion cot ON op.id_obligacion_pago = cot.id_obligacion_pago
+     LEFT JOIN adq.tproceso_compra pro ON pro.id_proceso_compra = cot.id_proceso_compra
+     LEFT JOIN adq.tsolicitud sol ON sol.id_solicitud = pro.id_solicitud
+     LEFT JOIN segu.vusuario ususol ON ususol.id_usuario = sol.id_usuario_reg
+     JOIN tes.tobligacion_det od ON od.id_obligacion_pago = op.id_obligacion_pago AND od.estado_reg::text = 'activo'::text
+     JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas = od.id_concepto_ingas
+     JOIN orga.vfuncionario_cargo fun ON fun.id_funcionario = op.id_funcionario AND fun.estado_reg_asi::text = 'activo'::text
+     JOIN segu.vusuario usu ON usu.id_usuario = op.id_usuario_reg
+  GROUP BY op.id_usuario_reg, op.id_usuario_mod, op.fecha_reg, op.fecha_mod, op.estado_reg, op.id_usuario_ai, op.usuario_ai, op.id_obligacion_pago, op.id_proveedor, op.id_funcionario, op.id_subsistema, op.id_moneda, op.id_depto, op.id_estado_wf, op.id_proceso_wf, op.id_gestion, op.fecha, op.numero, op.estado, op.obs, op.porc_anticipo, op.porc_retgar, op.tipo_cambio_conv, op.num_tramite, op.tipo_obligacion, op.comprometido, op.pago_variable, op.nro_cuota_vigente, op.total_pago, op.id_depto_conta, op.total_nro_cuota, op.id_plantilla, op.fecha_pp_ini, op.rotacion, op.ultima_cuota_pp, op.ultimo_estado_pp, op.tipo_anticipo, op.id_categoria_compra, op.tipo_solicitud, op.tipo_concepto_solicitud, op.id_funcionario_gerente, op.ajuste_anticipo, op.ajuste_aplicado, op.id_obligacion_pago_extendida, op.monto_estimado_sg, op.monto_ajuste_ret_garantia_ga, op.monto_ajuste_ret_anticipo_par_ga, op.id_contrato, op.obs_presupuestos, op.ultima_cuota_dev, op.codigo_poa, op.obs_poa, op.uo_ex, mon.codigo;
+
+
+DROP VIEW tes.vpagos_relacionados;
+
+CREATE OR REPLACE VIEW tes.vpagos_relacionados (
+    desc_proveedor,
+    num_tramite,
+    estado,
+    fecha_tentativa,
+    nro_cuota,
+    monto,
+    monto_mb,
+    codigo,
+    conceptos,
+    ordenes,
+    id_orden_trabajos,
+    id_concepto_ingas,
+    id_plan_pago,
+    id_proceso_wf,
+    id_estado_wf,
+    id_proveedor,
+    obs,
+    tipo)
+AS
+ WITH detalle AS (
+         SELECT op_1.id_obligacion_pago,
+            pxp.list(cig.desc_ingas::text) AS conceptos,
+            pxp.list(ot.desc_orden::text) AS ordenes,
+            pxp.aggarray(od.id_orden_trabajo::text) AS id_orden_trabajos,
+            pxp.aggarray(od.id_concepto_ingas::text) AS id_concepto_ingas
+           FROM tes.tobligacion_pago op_1
+             JOIN tes.tobligacion_det od ON od.id_obligacion_pago = op_1.id_obligacion_pago
+             JOIN param.tconcepto_ingas cig ON cig.id_concepto_ingas = od.id_concepto_ingas
+             LEFT JOIN conta.torden_trabajo ot ON ot.id_orden_trabajo = od.id_orden_trabajo
+          GROUP BY op_1.id_obligacion_pago
+        )
+ SELECT prov.desc_proveedor,
+    op.num_tramite,
+    pp.estado,
+    COALESCE(pp.fecha_tentativa, op.fecha) AS fecha_tentativa,
+    pp.nro_cuota,
+    pp.monto,
+    param.f_convertir_moneda(op.id_moneda, 1, pp.monto, op.fecha, 'O'::character varying, 2) AS monto_mb,
+    mon.codigo,
+    det.conceptos,
+    det.ordenes,
+    det.id_orden_trabajos,
+    det.id_concepto_ingas,
+    pp.id_plan_pago,
+    pp.id_proceso_wf,
+    pp.id_estado_wf,
+    op.id_proveedor,
+    op.obs,
+    pp.tipo
+   FROM tes.tobligacion_pago op
+     JOIN param.vproveedor prov ON prov.id_proveedor = op.id_proveedor
+     JOIN tes.tplan_pago pp ON pp.id_obligacion_pago = op.id_obligacion_pago
+     JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
+     JOIN detalle det ON det.id_obligacion_pago = op.id_obligacion_pago;
+
+DROP VIEW tes.vproceso_caja;
+
+CREATE OR REPLACE VIEW tes.vproceso_caja (
+    id_proceso_caja,
+    id_cajero,
+    id_caja,
+    id_depto_conta,
+    fecha_cbte,
+    id_moneda,
+    id_gestion,
+    codigo,
+    fecha_inicio,
+    fecha_fin,
+    id_funcionario,
+    id_cuenta_bancaria,
+    monto_reposicion,
+    nro_tramite,
+    nombre_cajero,
+    id_depto_lb,
+    monto_ren_ingreso)
+AS
+ SELECT pc.id_proceso_caja,
+    c.id_cajero,
+    ca.id_caja,
+    pc.id_depto_conta,
+    pc.fecha AS fecha_cbte,
+    ca.id_moneda,
+    pc.id_gestion,
+    ca.codigo,
+    c.fecha_inicio,
+    c.fecha_fin,
+    c.id_funcionario,
+    pc.id_cuenta_bancaria,
+    pc.monto AS monto_reposicion,
+    pc.nro_tramite,
+    f.desc_funcionario1 AS nombre_cajero,
+    ca.id_depto_lb,
+    pc.monto_ren_ingreso
+   FROM tes.tproceso_caja pc
+     JOIN tes.tcaja ca ON pc.id_caja = ca.id_caja
+     JOIN tes.tcajero c ON c.id_caja = ca.id_caja AND c.tipo::text = 'responsable'::text
+     JOIN orga.vfuncionario f ON f.id_funcionario = c.id_funcionario
+  WHERE pc.fecha >= c.fecha_inicio AND pc.fecha <= c.fecha_fin OR pc.fecha >= c.fecha_inicio AND c.fecha_fin IS NULL;
+
+DROP VIEW tes.vsrd_doc_compra_venta_det;
+
+CREATE OR REPLACE VIEW tes.vsrd_doc_compra_venta_det (
+    id_solicitud_rendicion_det,
+    id_proceso_caja,
+    id_moneda,
+    id_int_comprobante,
+    id_plantilla,
+    importe_doc,
+    importe_excento,
+    importe_total_excento,
+    importe_descuento,
+    importe_descuento_ley,
+    importe_ice,
+    importe_it,
+    importe_iva,
+    importe_pago_liquido,
+    nro_documento,
+    nro_dui,
+    nro_autorizacion,
+    razon_social,
+    revisado,
+    manual,
+    obs,
+    nit,
+    fecha,
+    codigo_control,
+    sw_contabilizar,
+    tipo,
+    id_doc_compra_venta,
+    id_concepto_ingas,
+    id_centro_costo,
+    id_orden_trabajo,
+    precio_total,
+    id_doc_concepto,
+    desc_ingas,
+    descripcion,
+    importe_neto,
+    importe_anticipo,
+    importe_pendiente,
+    importe_retgar,
+    precio_total_final,
+    porc_monto_excento_var,
+    nro_tramite_se)
+AS
+ SELECT srd.id_solicitud_rendicion_det,
+    srd.id_proceso_caja,
+    dcv.id_moneda,
+    dcv.id_int_comprobante,
+    dcv.id_plantilla,
+    dcv.importe_doc,
+    dcv.importe_excento,
+    COALESCE(dcv.importe_excento, 0::numeric) + COALESCE(dcv.importe_ice, 0::numeric) AS importe_total_excento,
+    dcv.importe_descuento,
+    dcv.importe_descuento_ley,
+    dcv.importe_ice,
+    dcv.importe_it,
+    dcv.importe_iva,
+    dcv.importe_pago_liquido,
+    dcv.nro_documento,
+    dcv.nro_dui,
+    dcv.nro_autorizacion,
+    dcv.razon_social,
+    dcv.revisado,
+    dcv.manual,
+    dcv.obs,
+    dcv.nit,
+    dcv.fecha,
+    dcv.codigo_control,
+    dcv.sw_contabilizar,
+    dcv.tipo,
+    dcv.id_doc_compra_venta,
+    dco.id_concepto_ingas,
+    dco.id_centro_costo,
+    dco.id_orden_trabajo,
+    dco.precio_total,
+    dco.id_doc_concepto,
+    cig.desc_ingas,
+    (((((((dcv.razon_social::text || ' - '::text) || cig.desc_ingas::text) || ' ( '::text) || dco.descripcion) || ' ) Nro Doc: '::text) || COALESCE(dcv.nro_documento)::text) || ' Nt: '::text) || COALESCE(se.nro_tramite, ''::character varying)::text AS descripcion,
+    dcv.importe_neto,
+    dcv.importe_anticipo,
+    dcv.importe_pendiente,
+    dcv.importe_retgar,
+    dco.precio_total_final,
+    (COALESCE(dcv.importe_excento, 0::numeric) + COALESCE(dcv.importe_ice, 0::numeric)) / dcv.importe_neto AS porc_monto_excento_var,
+    se.nro_tramite AS nro_tramite_se
+   FROM tes.tsolicitud_rendicion_det srd
+     JOIN tes.tsolicitud_efectivo se ON se.id_solicitud_efectivo = srd.id_solicitud_efectivo
+     JOIN conta.tdoc_compra_venta dcv ON srd.id_documento_respaldo = dcv.id_doc_compra_venta
+     JOIN conta.tdoc_concepto dco ON dco.id_doc_compra_venta = dcv.id_doc_compra_venta
+     JOIN param.tconcepto_ingas cig ON cig.id_concepto_ingas = dco.id_concepto_ingas;
+
+
+ALTER TABLE tes.tobligacion_pago
+  DROP CONSTRAINT chk_tobligacion_pago__tipo_obligacion RESTRICT;
+
+ALTER TABLE tes.tobligacion_pago
+  ADD CONSTRAINT tobligacion_pago_fk FOREIGN KEY (id_contrato)
+    REFERENCES leg.tcontrato(id_contrato)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE tes.tobligacion_pago
+  ADD CONSTRAINT chk_tobligacion_pago__tipo_obligacion CHECK ((tipo_obligacion)::text = ANY (ARRAY[('adquisiciones'::character varying)::text, ('pago_unico'::character varying)::text, ('pago_especial'::character varying)::text, ('caja_chica'::character varying)::text, ('viaticos'::character varying)::text, ('fondos_en_avance'::character varying)::text, ('pago_directo'::character varying)::text, ('rrhh'::character varying)::text]));
+
+CREATE TRIGGER f_trig_tsolicitud_efectivo_before
+  BEFORE INSERT OR UPDATE 
+  ON tes.tsolicitud_efectivo
   
-  
+FOR EACH ROW 
+  EXECUTE PROCEDURE tes.f_trig_solicitud_efectivo_before();
+
+CREATE INDEX tts_libro_bancos_idx__tipo ON tes.tts_libro_bancos
+  USING btree (tipo COLLATE pg_catalog."default");
+
+CREATE INDEX tts_libro_bancos_idx__origen ON tes.tts_libro_bancos
+  USING btree (origen COLLATE pg_catalog."default");
+
+CREATE INDEX tts_libro_bancos_idx__id_libro_bancos_fk ON tes.tts_libro_bancos
+  USING btree (id_libro_bancos_fk);
+
+CREATE INDEX tts_libro_bancos_idx__id_finalidad ON tes.tts_libro_bancos
+  USING btree (id_finalidad);
+
+CREATE INDEX tts_libro_bancos_idx__id_depto ON tes.tts_libro_bancos
+  USING btree (id_depto);
+
+CREATE INDEX tts_libro_bancos_idx__fecha ON tes.tts_libro_bancos
+  USING btree (fecha, id_libro_bancos_fk, id_cuenta_bancaria);
+
+CREATE UNIQUE INDEX tts_libro_bancos_idx ON tes.tts_libro_bancos
+  USING btree (id_cuenta_bancaria, nro_cheque);
+
+CREATE INDEX idx_tts_libro_bancos__id_libro_bancos_fk ON tes.tts_libro_bancos
+  USING btree (id_libro_bancos_fk);
+
+CREATE INDEX idx_tts_libro_bancos__id_finalidad ON tes.tts_libro_bancos
+  USING btree (id_finalidad);
+
+
+/**********************************F-DEP-CAP-TES-0-04/12/2018****************************************/

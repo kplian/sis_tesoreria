@@ -13,11 +13,9 @@ $body$
  FECHA:	        31-10-2014
  COMENTARIOS:	
 ***************************************************************************
- HISTORIAL DE MODIFICACIONES:
-
- DESCRIPCION:	
- AUTOR:			
- FECHA:		
+ ISSUE            FECHA:		      AUTOR                 DESCRIPCION
+   
+#1        		    05/12/2018      CHROS                 aumenta funcionalidad para crear OP asociadas a contratos
 ***************************************************************************/
 
 DECLARE
@@ -48,7 +46,7 @@ DECLARE
     v_registros_documento 		record;
     v_registros_con 			record; 
     v_id_documento_wf_op 		integer;
-    
+    v_rec   record;
   
  
      
@@ -211,7 +209,38 @@ BEGIN
         limit 1 offset 0;
        
         -- inciar el tramite en el sistema de WF
-         SELECT 
+        -- inciar el tramite en el sistema de WF
+        --#1CHROS 19/11/2018 - crea OP y poner como inicio un contrato elaborado para que el número de trámite sea el del contrato y los documentos sean visibles
+        IF (p_hstore->'id_contrato')::integer is not  NULL   and (p_hstore->'tipo_obligacion')::varchar != 'adquisiciones'  THEN
+          select
+              c.id_estado_wf
+          into
+              v_rec
+          from leg.tcontrato c
+          where c.id_contrato = (p_hstore->'id_contrato')::integer;
+        
+          SELECT
+              ps_id_proceso_wf,
+              ps_id_estado_wf,
+              ps_codigo_estado,
+              ps_nro_tramite
+          into
+              v_id_proceso_wf,
+              v_id_estado_wf,
+              v_codigo_estado,
+              v_num_tramite
+          FROM wf.f_registra_proceso_disparado_wf(
+              p_id_usuario,
+              (p_hstore->'_id_usuario_ai')::integer,
+              (p_hstore->'_nombre_usuario_ai')::varchar,
+              v_rec.id_estado_wf,
+              (p_hstore->'id_funcionario')::integer,
+              (p_hstore->'id_depto')::integer,
+              'Obligacion de pago ('||v_num||') '||(p_hstore->'obs')::varchar,
+              'LEG', --dispara proceso del comprobante
+              v_num);
+        ELSE
+          SELECT 
                ps_num_tramite ,
                ps_id_proceso_wf ,
                ps_id_estado_wf ,
@@ -232,7 +261,7 @@ BEGIN
                (p_hstore->'id_depto')::integer,
                'Obligacion de pago ('||v_num||') '||(p_hstore->'obs')::varchar,
                v_num );
-            
+        END IF;
            
             -- raise exception 'estado %',v_codigo_estado;
              

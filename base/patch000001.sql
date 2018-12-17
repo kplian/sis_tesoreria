@@ -606,170 +606,6 @@ IS 'cuando viene de adquisiciones para disminuir la complekidad de las consultas
 
 
 
-/***********************************I-SCP-RAC-TES-1-19/08/2014***************************************/
-
-CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
-    id_plan_pago,
-    id_proveedor,
-    desc_proveedor,
-    id_moneda,
-    id_depto_conta,
-    numero,
-    fecha_actual,
-    estado,
-    monto_ejecutar_total_mb,
-    monto_ejecutar_total_mo,
-    monto,
-    monto_mb,
-    monto_retgar_mb,
-    monto_retgar_mo,
-    monto_no_pagado,
-    monto_no_pagado_mb,
-    otros_descuentos,
-    otros_descuentos_mb,
-    id_plantilla,
-    id_cuenta_bancaria,
-    id_cuenta_bancaria_mov,
-    nro_cheque,
-    nro_cuenta_bancaria,
-    num_tramite,
-    tipo,
-    id_gestion_cuentas,
-    id_int_comprobante,
-    liquido_pagable,
-    liquido_pagable_mb,
-    nombre_pago,
-    porc_monto_excento_var,
-    obs_pp,
-    descuento_anticipo,
-    descuento_inter_serv,
-    tipo_obligacion,
-    id_categoria_compra,
-    codigo_categoria,
-    nombre_categoria,
-    id_proceso_wf,
-    detalle,
-    codigo_moneda,
-    nro_cuota,
-    tipo_pago,
-    tipo_solicitud,
-    tipo_concepto_solicitud,
-    total_monto_op_mb,
-    total_monto_op_mo,
-    total_pago)
-AS
-  SELECT pp.id_plan_pago,
-         op.id_proveedor,
-         p.desc_proveedor,
-         op.id_moneda,
-         pp.id_depto_conta,
-         op.numero,
-         now() AS fecha_actual,
-         pp.estado,
-         pp.monto_ejecutar_total_mb,
-         pp.monto_ejecutar_total_mo,
-         pp.monto,
-         pp.monto_mb,
-         pp.monto_retgar_mb,
-         pp.monto_retgar_mo,
-         pp.monto_no_pagado,
-         pp.monto_no_pagado_mb,
-         pp.otros_descuentos,
-         pp.otros_descuentos_mb,
-         pp.id_plantilla,
-         pp.id_cuenta_bancaria,
-         pp.id_cuenta_bancaria_mov,
-         pp.nro_cheque,
-         pp.nro_cuenta_bancaria,
-         op.num_tramite,
-         pp.tipo,
-         op.id_gestion AS id_gestion_cuentas,
-         pp.id_int_comprobante,
-         pp.liquido_pagable,
-         pp.liquido_pagable_mb,
-         pp.nombre_pago,
-         pp.porc_monto_excento_var,
-         ((COALESCE(op.numero, '' ::character varying) ::text || ' ' ::text) ||
-          COALESCE(pp.obs_monto_no_pagado, '' ::text)) ::character varying AS
-           obs_pp,
-         pp.descuento_anticipo,
-         pp.descuento_inter_serv,
-         op.tipo_obligacion,
-         op.id_categoria_compra,
-         COALESCE(cac.codigo, '' ::character varying) AS codigo_categoria,
-         COALESCE(cac.nombre, '' ::character varying) AS nombre_categoria,
-         pp.id_proceso_wf,
-         ('<table>' ::text || pxp.html_rows((((('<td>' ::text ||
-          ci.desc_ingas::text) || '<br/>' ::text) || od.descripcion) || '</td>'
-           ::text) ::character varying) ::text) || '</table>' ::text AS detalle,
-         mon.codigo AS codigo_moneda,
-         pp.nro_cuota,
-         pp.tipo_pago,
-         op.tipo_solicitud,
-         op.tipo_concepto_solicitud,
-         sum(od.monto_pago_mb) AS total_monto_op_mb,
-         sum(od.monto_pago_mo) AS total_monto_op_mo,
-         op.total_pago
-  FROM tes.tplan_pago pp
-       JOIN tes.tobligacion_pago op ON pp.id_obligacion_pago =
-        op.id_obligacion_pago
-       JOIN param.tmoneda mon ON mon.id_moneda = op.id_moneda
-       JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
-       LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra =
-        op.id_categoria_compra
-       JOIN tes.tobligacion_det od ON od.id_obligacion_pago =
-        op.id_obligacion_pago
-       JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas =
-        od.id_concepto_ingas
-  GROUP BY pp.id_plan_pago,
-           op.id_proveedor,
-           p.desc_proveedor,
-           op.id_moneda,
-           pp.id_depto_conta,
-           op.numero,
-           pp.estado,
-           pp.monto_ejecutar_total_mb,
-           pp.monto_ejecutar_total_mo,
-           pp.monto,
-           pp.monto_mb,
-           pp.monto_retgar_mb,
-           pp.monto_retgar_mo,
-           pp.monto_no_pagado,
-           pp.monto_no_pagado_mb,
-           pp.otros_descuentos,
-           pp.otros_descuentos_mb,
-           pp.id_plantilla,
-           pp.id_cuenta_bancaria,
-           pp.id_cuenta_bancaria_mov,
-           pp.nro_cheque,
-           pp.nro_cuenta_bancaria,
-           op.num_tramite,
-           pp.tipo,
-           op.id_gestion,
-           pp.id_int_comprobante,
-           pp.liquido_pagable,
-           pp.liquido_pagable_mb,
-           pp.nombre_pago,
-           pp.porc_monto_excento_var,
-           pp.obs_monto_no_pagado,
-           pp.descuento_anticipo,
-           pp.descuento_inter_serv,
-           op.tipo_obligacion,
-           op.id_categoria_compra,
-           cac.codigo,
-           cac.nombre,
-           pp.id_proceso_wf,
-           mon.codigo,
-           pp.nro_cuota,
-           pp.tipo_pago,
-           op.total_pago,
-           op.tipo_solicitud,
-           op.tipo_concepto_solicitud;
-
-/***********************************F-SCP-RAC-TES-1-19/08/2014***************************************/
-
-
-
 /***********************************I-SCP-RAC-TES-0-1/09/2014***************************************/
 
 --------------- SQL ---------------
@@ -1262,12 +1098,6 @@ ALTER TABLE tes.tobligacion_pago
 
 
 
-/*****************************I-SCP-RAC-TES-0-29/07/2015*************/
-
-select pxp.f_insert_tgui ('Victo bueno de Pagos (Costos)', 'Visto bueno de pagos costos', 'VBPCOS', 'si', 5, 'sis_tesoreria/vista/plan_pago/PlanPagoVbCostos.php', 2, '', 'PlanPagoVbCostos', 'TES');
-select pxp.f_insert_testructura_gui ('VBPCOS', 'TES');
-
-/*****************************F-SCP-RAC-TES-0-29/07/2015*************/
 
 /*****************************I-SCP-JRR-TES-0-10/08/2015*************/
 
@@ -1660,25 +1490,7 @@ ALTER TABLE tes.tts_libro_bancos
 
 /*****************************I-SCP-GSS-TES-0-22/08/2016*************/
 
-CREATE TABLE cd.tdeposito_cd (
-  id_deposito_cd SERIAL, 
-  id_cuenta_doc INTEGER, 
-  id_libro_bancos INTEGER, 
-  importe_contable_deposito NUMERIC(20,2), 
-  CONSTRAINT tdeposito_cd_pkey PRIMARY KEY(id_deposito_cd), 
-  CONSTRAINT fk_tdeposito_cd__id_cuenta_doc FOREIGN KEY (id_cuenta_doc)
-    REFERENCES cd.tcuenta_doc(id_cuenta_doc)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE, 
-  CONSTRAINT fk_tdeposito_cd__id_libro_bancos FOREIGN KEY (id_libro_bancos)
-    REFERENCES tes.tts_libro_bancos(id_libro_bancos)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE
-) INHERITS (pxp.tbase)
 
-WITH (oids = false);
 
 
 --------------- SQL ---------------
@@ -2061,5 +1873,43 @@ ALTER TABLE tes.tobligacion_pago
 /*************************F-SCP-RAC-TES-0-01/12/2018*************/
 
 
-  
-  
+/*************************I-SCP-CAP-TES-0-06/12/2018*************/
+
+ALTER TABLE tes.tobligacion_pago
+  ALTER COLUMN monto_ajuste_ret_garantia_ga DROP NOT NULL;
+
+ALTER TABLE tes.tobligacion_pago
+  ALTER COLUMN monto_ajuste_ret_anticipo_par_ga DROP NOT NULL;
+
+
+/*************************F-SCP-CAP-TES-0-06/12/2018*************/
+
+
+
+/*************************I-SCP-CAP-TES-7890-13/12/2018*************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN monto_sg_mo NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tobligacion_pago.monto_sg_mo
+IS 'monto para ser pagado en la sigueinbte gestion,  este monto no sera comprometido,  se prorrate entr_monto_sg_mo en la tabla obligacion_det';
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_det
+  ADD COLUMN monto_pago_sg_mo NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tobligacion_det.monto_pago_sg_mo
+IS 'monto a pagar siguiente gestion en moneda original, este monto no comprometera presupuesto';
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_det
+  ADD COLUMN monto_pago_sg_mb NUMERIC(19,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN tes.tobligacion_det.monto_pago_sg_mb
+IS 'monto para la siguiente gestion en moenda base, este monto no comprometera presupuestos';
+
+/*************************F-SCP-CAP-TES-7890-13/12/2018*************/
