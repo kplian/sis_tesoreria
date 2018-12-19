@@ -20,6 +20,11 @@ $body$
  DESCRIPCION:	
  AUTOR:			
  FECHA:		
+      HISTORIAL DE MODIFICACIONES:
+   	
+ ISSUE            FECHA:		      AUTOR                                DESCRIPCION
+ #0       		   26-1-2014     RAC KPLIAN               creación
+ #7890            29/11/2018     RAC KPLIAN               se considera el caso de no tener retenciones  
 ***************************************************************************/
 
 DECLARE
@@ -228,14 +233,15 @@ BEGIN
                             
                       -- saldo_x_descontar = determinar cuanto falta por descontar del anticipo
                       v_saldo_x_descontar = tes.f_determinar_total_faltante((p_hstore->'id_obligacion_pago')::integer,'ant_parcial_descontado');
+                      
+                      --raise exception '1) %, 2) % 3) %, 4) %', v_saldo_x_descontar,   COALESCE((p_hstore->'descuento_anticipo')::numeric,0) ,v_saldo_x_pagar  , COALESCE((p_hstore->'monto')::numeric,0);
                              
-                      -- saldo_x_descontar - descuento_anticipo >  sando_x_pagar
-                      if p_id_usuario=425 then
-                        raise exception 'descuento_anticipo: % ___ monto: %', COALESCE((p_hstore->'descuento_anticipo')::numeric,0), COALESCE((p_hstore->'monto')::numeric,0);
-                      end if;
-                      IF (v_saldo_x_descontar -  COALESCE((p_hstore->'descuento_anticipo')::numeric,0))  > (v_saldo_x_pagar  - COALESCE((p_hstore->'monto')::numeric,0)) THEN
-                          raise exception 'El saldo a pagar no es sufuciente para recuperar el anticipo (%)',v_saldo_x_descontar;
-                      END IF; 
+                      -- saldo_x_descontar - descuento_anticipo >  sando_x_pagar 
+                      IF (v_saldo_x_descontar -  COALESCE((p_hstore->'descuento_anticipo')::numeric,0))  > 0  THEN   --7890  17/12/2018  RAC valdiacion                
+                            IF (v_saldo_x_descontar -  COALESCE((p_hstore->'descuento_anticipo')::numeric,0))  > (v_saldo_x_pagar  - COALESCE((p_hstore->'monto')::numeric,0)) THEN
+                                raise exception 'El saldo a pagar no es sufuciente para recuperar el anticipo (%)',v_saldo_x_descontar;
+                            END IF; 
+                      END IF;
                   
                   END IF;
                   

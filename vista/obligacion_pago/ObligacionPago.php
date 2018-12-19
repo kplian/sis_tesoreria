@@ -1,15 +1,15 @@
 <?php
-/**
+/***************************************************************************************************************************************************
 *@package pXP
 *@file ObligacionPago.php
 *@author  Gonzalo Sarmiento Sejas
 *@date 02-04-2013 16:01:32
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
 	Issue			Fecha        Author				Descripcion
- * #1			21/09/2018		EGS					se aumento variables para q los campos igualen con el new con obligacion de pago especial.php
- *
- * 
- * */
+ #1			21/09/2018		EGS					se aumento variables para q los campos igualen con el new con obligacion de pago especial.php
+ #7890      18/12/2018      RAC KPLIAN          se adicionan columnas onto sigueinte gestion y si es forzado a finalizar
+ 
+ *********************************************************************************************************************************************/
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
@@ -147,8 +147,13 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                 gwidth: 150,
                 maxLength:200,
                 renderer: function(value, p, record){
-                        if(record.data.monto_estimado_sg > 0 && !record.data.id_obligacion_pago_extendida){
-                             return String.format('<div ext:qtip="La extención de la obligación esta pendiente"><b><font color="red">{0}</font></b><br><b>Monto ampliado: </b>{1}</div>', value, record.data.monto_estimado_sg);
+                        if((record.data.monto_estimado_sg > 0  || record.data.fin_forzado == 'si') && !record.data.id_obligacion_pago_extendida){  //#7890 considera obligacion forzada a finalizar
+                        	if(record.data.monto_estimado_sg > 0 ){                        		
+                        	    return String.format('<div ext:qtip="La extención de la obligación esta pendiente"><b><font color="red">{0}</font></b><br><b>Monto ampliado: </b>{1}</div>', value, record.data.monto_estimado_sg);
+                        	}
+                        	else{
+                        	   return String.format('<div ext:qtip="La extención de la obligación esta pendiente"><b><font color="red">{0}</font></b</div>', value); // #7890
+                        	}
                         }
                         else{
 	                        if(record.data.monto_estimado_sg > 0 && record.data.id_obligacion_pago_extendida > 0){
@@ -816,13 +821,15 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 		'ajuste_aplicado', 'codigo_poa','obs_poa',
 		'monto_estimado_sg',
 		'id_obligacion_pago_extendida',
-		 'obs_presupuestos','id_contrato',
-		 'desc_contrato',
-		 'monto_ajuste_ret_garantia_ga',
-		 'monto_ajuste_ret_anticipo_par_ga',
-		 'monto_total_adjudicado',
-		 'total_anticipo',////EGS13/08/2018////
-		 'pedido_sap'
+		'obs_presupuestos','id_contrato',
+		'desc_contrato',
+		'monto_ajuste_ret_garantia_ga',
+		'monto_ajuste_ret_anticipo_par_ga',
+		'monto_total_adjudicado',
+		'total_anticipo',////EGS13/08/2018////
+		'pedido_sap',
+		'fin_forzado',  //#7890
+		'monto_sg_mo'   //#7890
 		
 	],
 	
@@ -832,10 +839,11 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 	
 	
 	
-	
 	rowExpander: new Ext.ux.grid.RowExpander({
 		        tpl : new Ext.Template('<br>',
 		            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Obligación de pago:&nbsp;&nbsp;</b> {numero}</p>',
+		            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Monto Total:&nbsp;&nbsp;</b> {total_pago:number("0,000.00")}   {moneda}</p>',
+		            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Monto gestiones siguientes:&nbsp;&nbsp;</b> {monto_sg_mo:number("0,000.00")}  {moneda}   (No comprometido)</p>',
 		            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Contrato:&nbsp;&nbsp;</b> {desc_contrato}</p>',
 		            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Depto:&nbsp;&nbsp;</b> {nombre_depto}</p>',
 		            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Justificación:&nbsp;&nbsp;</b> {obs}</p>',
@@ -1035,7 +1043,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
        }   
      },
      
-     fin_registro: function(a,b,forzar_fin, paneldoc){                   
+     fin_registro: function(a,b, forzar_fin, paneldoc){                   
             var d = this.sm.getSelected().data;
             if(d.estado !='en_pago'){
 	               this.mostrarWizard(this.sm.getSelected());
@@ -1079,12 +1087,9 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
      },
      
      conexionFailureFin: function(r1,r2){
-            Phx.CP.loadingHide();
-            
-            var reg = Ext.util.JSON.decode(Ext.util.Format.trim(r1.responseText));
-            if( reg.ROOT.datos.preguntar == "si"){
-            	
-            	alert(reg.ROOT.detalle.mensaje)
+     	    Phx.CP.loadingHide();            
+            var reg = Ext.util.JSON.decode(Ext.util.Format.trim(r1.responseText));  //#7890  revisar si la varaible de pregunta es necesario no se logro devolverdesde la base de datos y actualmente es ignorada, en todo caso pregunta
+            if( reg.ROOT.datos.preguntar == "si"){            	
             	if(confirm('Si va extender esta obligacón para las gestión siguiente puede forzar. ¿Desea forzar la finalización?. ')){
             		this.fin_registro(undefined, undefined, true); 
             	}
@@ -1178,6 +1183,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                     this.getBoton('ant_estado').disable();
                     this.getBoton('fin_registro').disable();
                     this.getBoton('est_anticipo').disable();
+                    //this.enableTabPagos();  //7890 OJO .....RAC 10/12/2018 solo prueba, descomentar solo apra mostras plan de pagos en procesos finalizados
                     if(data['id_obligacion_pago_extendida']=='' || !data['id_obligacion_pago_extendida'] ){
                     	this.getBoton('extenderop').enable();
                     }

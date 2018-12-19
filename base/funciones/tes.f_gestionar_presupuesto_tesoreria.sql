@@ -22,14 +22,16 @@ $body$
 
     HISTORIAL DE MODIFICACIONES:
    	
- ISSUE            FECHA:		      AUTOR                 DESCRIPCION
- #0              04-07-2013        RAC KPLIAN        validaciones
- #31,  ETR       27/10/2017        RAC KPLIAN        agregar operacion para ejecutar anticipos y para revertir anticipos en proporcion    
- #32   ETR       05/02/2018        RAC KPLIAN        agregar informacion de anticipo a partida ejecucion  
- #33   ETR		 15/05/2018		   RAC KPLIAN        no cnsiderar el desceutno de anticipos para  el compromiso  de presupeusto al sincronizar
- #34   ETR       17/05/2018        RAC KPLIAN        Considerar nuevo metodo de sincrnoziacion con TIPO_CC
- #100  ETR       30/05/2018        RAC KPLIAN        Nueva funcion de sincronizacion que considere si el IVA de amnera opcional v_conta_revertir_iva_comprometido
- #101  ETR       02/07/2018        RAC KPLIAN        Considera facturas con monto excento al sicronizar presupuestos
+ ISSUE              FECHA:		      AUTOR                 DESCRIPCION
+ #0               04-07-2013         RAC KPLIAN        validaciones
+ #31,   ETR       27/10/2017        RAC KPLIAN        agregar operacion para ejecutar anticipos y para revertir anticipos en proporcion    
+ #32    ETR       05/02/2018        RAC KPLIAN        agregar informacion de anticipo a partida ejecucion  
+ #33    ETR		  15/05/2018		RAC KPLIAN        no cnsiderar el desceutno de anticipos para  el compromiso  de presupeusto al sincronizar
+ #34    ETR       17/05/2018        RAC KPLIAN        Considerar nuevo metodo de sincrnoziacion con TIPO_CC
+ #100   ETR       30/05/2018        RAC KPLIAN        Nueva funcion de sincronizacion que considere si el IVA de amnera opcional v_conta_revertir_iva_comprometido
+ #101   ETR       02/07/2018        RAC KPLIAN        Considera facturas con monto excento al sicronizar presupuestos
+ #7777  ETR       13/12/2018        RAC KPLIAN        Determinar si el anticipo es de la misma gestion que la obligacion de pago y si es necesario realizar la conversion 
+ #7890  ETR       13/12/2018        RAC KPLIAN        Al aprobacion una olbigacion de pago colo comprometer el monto previsto para la gestion actual  (restar monto_sg_mo)  
 ***************************************************************************/
 
 DECLARE
@@ -76,14 +78,18 @@ DECLARE
   v_mensaje_error					varchar;
   v_sw_revertir_ant					boolean;
   v_monto_a_revertir_mb				numeric;
-  v_tes_anticipo_ejecuta_pres    	varchar;  --#31, ++ 
+  v_tes_anticipo_ejecuta_pres    	varchar;    --#31, ++ 
   v_descuento_anticipo numeric;
-  v_conta_revertir_iva_comprometido  varchar;  --#100, ++ 
-  v_id_plantilla                     integer;  --#100 ++
-  v_total_iva                        numeric;  --#100 ++
-  v_monto_ejecutar_total_mo          numeric;  --#100 ++
-  v_desc_iva                         numeric;  --#100 ++
-  v_monto_excento                    numeric;  --#101 ++
+  v_conta_revertir_iva_comprometido  varchar;   --#100, ++ 
+  v_id_plantilla                     integer;   --#100 ++
+  v_total_iva                        numeric;   --#100 ++
+  v_monto_ejecutar_total_mo          numeric;   --#100 ++
+  v_desc_iva                         numeric;   --#100 ++
+  v_monto_excento                    numeric;   --#101 ++
+  v_monto_det_comprometer            numeric;   --#7890
+  v_id_centro_costo_ant              integer;   --#7777
+  v_id_partida_ant                   integer;   --#7777
+  v_id_gestion_cbte                  integer;   --#7777
   		
   
 
@@ -96,7 +102,7 @@ BEGIN
    
   v_id_moneda_base =  param.f_get_moneda_base();
   
-  
+
   SELECT
    *
   into
@@ -109,6 +115,7 @@ BEGIN
         
           --compromete al finalizar el registro de la obligacion
            v_i = 0;
+           v_tes_anticipo_ejecuta_pres = pxp.f_get_variable_global('tes_anticipo_ejecuta_pres');
            
            -- verifica que solicitud
        
@@ -128,7 +135,12 @@ BEGIN
                                     op.num_tramite,
                                     op.tipo_cambio_conv,
                                     par.sw_movimiento,
-                                    tp.movimiento
+                                    tp.movimiento,
+                                    opd.monto_pago_sg_mo,   --7890
+                                    opd.monto_pago_sg_mb,   --7890
+                                    opd.factor_porcentual,   --7890
+                                    op.monto_ajuste_ret_anticipo_par_ga, --7890
+                                    opd.factor_porcentual  --7890
                               
                               FROM  tes.tobligacion_pago  op
                               INNER JOIN tes.tobligacion_det opd  on  opd.id_obligacion_pago = op.id_obligacion_pago and opd.estado_reg = 'activo'
@@ -143,28 +155,37 @@ BEGIN
                                      and opd.monto_pago_mo > 0 ) LOOP
                                      
                                 
-                     IF(v_registros.comprometido='si') THEN                     
+                       IF(v_registros.comprometido='si') THEN                     
                         raise exception 'El presupuesto ya se encuentra comprometido';                     
-                     END IF;
+                       END IF;
                      
-                     IF v_registros.sw_movimiento = 'flujo'  THEN                              
+                       IF v_registros.sw_movimiento = 'flujo'  THEN                              
                            IF v_registros.movimiento != 'administrativo'  THEN
                                  raise exception 'partida de flujo solo son admitidas con presupuestos administrativos';
                            END IF;
-                     ELSE
-                     
-                         v_i = v_i +1; 
+                       ELSE
+                         
+                       --#7890 se resta el monto previsto para la siguiente gestion
+                       IF v_tes_anticipo_ejecuta_pres = 'si' and COALESCE(v_registros.monto_ajuste_ret_anticipo_par_ga,0) > 0 THEN
+                        --si los anticipos ejecutan presupuesto arrastramos un anticopo por retener de la gestion anterior, no necesario volverlo a comprometer                        
+                        v_monto_det_comprometer = v_registros.monto_pago_mo - COALESCE(v_registros.monto_pago_sg_mo,0) - (v_registros.factor_porcentual*COALESCE(v_registros.monto_ajuste_ret_anticipo_par_ga,0));  
+                       ELSE
+                         v_monto_det_comprometer = v_registros.monto_pago_mo - COALESCE(v_registros.monto_pago_sg_mo,0) ; 
+                       END IF;
+                         
+                         
+                       v_i = v_i +1; 
                        --armamos los array para enviar a presupuestos 
-                        va_id_presupuesto[v_i] = v_registros.id_presupuesto;
-                        va_id_partida[v_i]= v_registros.id_partida;
-                        va_momento[v_i]	= 1; --el momento 1 es el comprometido
-                        va_monto[v_i]  = v_registros.monto_pago_mo; --v_registros.monto_pago_mb;
-                        va_id_moneda[v_i]  = v_registros.id_moneda; --v_id_moneda_base;                      
-                        va_columna_relacion[v_i]= 'id_obligacion_pago';
-                        va_fk_llave[v_i] = v_registros.id_obligacion_pago;
-                        va_id_obligacion_det[v_i]= v_registros.id_obligacion_det;
-                        va_fecha[v_i]= v_registros.fecha::date;
-                        va_nro_tramite[v_i]=v_reg_op.num_tramite;
+                       va_id_presupuesto[v_i] = v_registros.id_presupuesto;
+                       va_id_partida[v_i]= v_registros.id_partida;
+                       va_momento[v_i]	= 1; --el momento 1 es el comprometido
+                       va_monto[v_i]  = v_monto_det_comprometer;     --#7890 monto a comprometer
+                       va_id_moneda[v_i]  = v_registros.id_moneda; --v_id_moneda_base;                      
+                       va_columna_relacion[v_i]= 'id_obligacion_pago';
+                       va_fk_llave[v_i] = v_registros.id_obligacion_pago;
+                       va_id_obligacion_det[v_i]= v_registros.id_obligacion_det;
+                       va_fecha[v_i]= v_registros.fecha::date;
+                       va_nro_tramite[v_i]=v_reg_op.num_tramite;
                    
                    END IF;  
              
@@ -189,14 +210,10 @@ BEGIN
                                                                NULL,
                                                                p_conexion);
                  
-                
-                 
                  --actualizacion de los id_partida_ejecucion en el detalle de solicitud
                
-                 
                    FOR v_cont IN 1..v_i LOOP
                    
-                      
                       update tes.tobligacion_det opd set
                          id_partida_ejecucion_com = va_resp_ges[v_cont],
                          fecha_mod = now(),
@@ -215,7 +232,7 @@ BEGIN
        
         -- revierte el presupuesto total que se encuentre comprometido
         
-       raise exception 'llega';
+      -- raise exception 'llega';
            v_i = 0;
           
            FOR v_registros in ( 
@@ -839,9 +856,12 @@ BEGIN
        --   Ejecuta el presupeusta (debe estar comprometido previamente en las partidas correpondecientes)
        -----------------------------------------------------------------------------------------------------------
        ELSEIF p_operacion = 'ejecutar_anticipo' THEN
+       
+       
+             
            
            v_tes_anticipo_ejecuta_pres = pxp.f_get_variable_global('tes_anticipo_ejecuta_pres');
-           
+          
            IF v_tes_anticipo_ejecuta_pres = 'si' THEN
                   --recueprar el total del monto que se va anticipiar, es el total a ejecutar
                    select 
@@ -853,7 +873,9 @@ BEGIN
                      cbte.tipo_cambio,
                      cbte.id_moneda,
                      cbte.fecha,
-                     cbte.id_int_comprobante
+                     cbte.id_int_comprobante,
+                     op.id_gestion,
+                     cbte.id_periodo
                      
                    into
                      v_registros
@@ -862,6 +884,16 @@ BEGIN
                    inner join conta.tint_comprobante cbte on cbte.id_int_comprobante = pp.id_int_comprobante
                    where pp.id_plan_pago = p_id_plan_pago;
                    
+                   
+                   --------------------------------------------------------------
+                   -- 7777  Determinar la gestion de ejecucion presupeustaria    TODO
+                   --------------------------------------------------------------
+                   select  
+                      per.id_gestion 
+                    into 
+                      v_id_gestion_cbte
+                   from param.tperiodo per
+                   where per.id_periodo = v_registros.id_periodo;
                  
                    
                   --recuperar el total de la obligacion
@@ -897,12 +929,21 @@ BEGIN
                            v_monto_ejecutar =   v_registros.monto *  v_registros_pro.factor;
                            v_monto_ejecutar_mb =   v_registros.monto_mb *  v_registros_pro.factor; 
                            
+                           -- #7777  determinar la gestion de ejecucion 
+                           IF v_id_gestion_cbte  = v_registros.id_gestion  THEN
+                              v_id_centro_costo_ant = v_registros_pro.id_centro_costo;
+                              v_id_partida_ant =  v_registros_pro.id_partida;
+                           ELSE
+                              raise exception 'La obligación de pago es de otra gestión .... <BR> esto generaría inconsistencia, antes de solicitar el anticipo  extienda la obligación de pago';
+                           END IF;
+                           
+                           
                            -- #32  0/02/2018  se adicionan campo apra especificar el monto anticipado que se ejecuta y la glosa
                            v_resultado_ges = pre.f_gestionar_presupuesto_individual(
                                                     p_id_usuario,
                                                     v_registros.tipo_cambio,
-                                                    v_registros_pro.id_centro_costo ,
-                                                    v_registros_pro.id_partida,
+                                                    v_id_centro_costo_ant , --  #7777
+                                                    v_id_partida_ant,  --  #7777
                                                     v_registros.id_moneda,
                                                     v_monto_ejecutar,
                                                     v_registros.fecha,
@@ -918,8 +959,6 @@ BEGIN
                                                     
                                                     
                                                     ); 
-                                                    
-                               --   raise exception 'entra... %', v_resultado_ges;                     
                                                     
                                                     
                              --  analizamos respuesta y retornamos error
@@ -941,7 +980,7 @@ BEGIN
                   END LOOP; 
                   
                   IF p_id_usuario =  429 THEN
-                      raise exception 'llega ... % - %',v_monto_ejecutar, v_registros_pro.id_partida;
+                     -- raise exception 'llega ... % - %',v_monto_ejecutar, v_registros_pro.id_partida;
                   END IF;
                   
                   IF v_sw_error THEN
@@ -952,11 +991,15 @@ BEGIN
                   
             END IF;
        -----------------------------------------------------------------------    
-       -- #31,  revertir anticipos en proporcion 
-       --     revierte en proporcion del  decuento por anticipo an las partidas y centros correpodencientes
-       --     esta pensado para ejcutarce en la prevalizacion del comprobante de aplicacion
+       -- #31, revertir anticipos en proporcion 
+       --      revierte en proporcion del  decuento por anticipo an las partidas y centros correpodencientes
+       --      esta pensado para ejcutarce en la prevalizacion del comprobante de aplicacion
        ---------------------------------------------------------------------------------------------
        ELSEIF p_operacion = 'revertir_anticipo' THEN
+        
+          --OJO ANALIZAR SI ESTO SE EJECUTA
+          
+          raise exception 'entra para revertir...';
        
            v_tes_anticipo_ejecuta_pres = pxp.f_get_variable_global('tes_anticipo_ejecuta_pres');
            IF v_tes_anticipo_ejecuta_pres = 'si' THEN
@@ -1080,7 +1123,6 @@ BEGIN
          raise exception 'Operación no implementada';
        END IF;
    
-
   
   return  TRUE;
 
