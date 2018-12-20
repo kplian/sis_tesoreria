@@ -5,6 +5,20 @@ CREATE OR REPLACE FUNCTION tes.f_validar_contrato (
 )
 RETURNS boolean AS
 $body$
+/**************************************************************************
+ SISTEMA:		Adquisiciones
+ FUNCION: 		tes.f_validar_contrato
+ DESCRIPCION:   Inserta registro de cotizacionf
+ AUTOR: 		jaime
+ FECHA:	        
+ COMENTARIOS:	
+***************************************************************************
+ ISSUE            FECHA:		      AUTOR                 DESCRIPCION
+   
+#1        		                    Jaime KPLIAN          Creaciòn
+#7891        	05/12/2018          RAC KPLIAN           omite validacion para  obligaciones extendidad
+***************************************************************************/
+
 DECLARE
    
     v_resp		            varchar;
@@ -19,10 +33,12 @@ BEGIN
     -- verificamso si tiene por lo menos un concepto de gasto que requeire contrato
     select 
       op.id_contrato,
-      op.tipo_obligacion
+      op.tipo_obligacion,
+      ope.id_obligacion_pago  as id_op_original --#7891 
     into 
       v_registros_op
     from tes.tobligacion_pago op
+    left join tes.tobligacion_pago ope on ope.id_obligacion_pago_extendida = op.id_obligacion_pago
     where op.id_obligacion_pago = p_id_obligacion_pago;
     
     select
@@ -36,7 +52,7 @@ BEGIN
     --TODO, validaciones  adiconales sobre el  contrtao, fecha, montos  etc....
     --TODO validar que obligacione de adquisicioens deberian tener contrato 
     
-    IF v_count > 0  and v_registros_op.tipo_obligacion = 'pago_directo' THEN
+    IF v_count > 0  and v_registros_op.tipo_obligacion = 'pago_directo' and v_registros_op.id_op_original is null THEN -- #7891 
        IF v_registros_op.id_contrato is null then
               raise exception 'Para esta obligacion de pago es requerido un contrato de referencia';
        END IF;

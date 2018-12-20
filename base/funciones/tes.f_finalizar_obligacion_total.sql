@@ -9,6 +9,27 @@ CREATE OR REPLACE FUNCTION tes.f_finalizar_obligacion_total (
 )
 RETURNS varchar AS
 $body$
+/************************************************************************** SISTEMA:        Sistema de Tesoreria FUNCION:         tes.ft_obligacion_pago_ime
+ DESCRIPCION:   Funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'tes.tobligacion_pago'
+ AUTOR:         RAC KPLIAN  
+ FECHA:        2014 16:01:32
+ COMENTARIOS:    
+***************************************************************************
+ HISTORIAL DE MODIFICACIONES:
+
+ DESCRIPCION:    
+ AUTOR:            
+ FECHA:     
+     HISTORIAL DE MODIFICACIONES:
+   	
+ ISSUE            FECHA:		      AUTOR                                DESCRIPCION
+ #0       		       2014     RAC (KPLIAN)          creación
+ #7890           29/11/2018     RAC KPLIAN            Se corrige la opcion de preguntar apra forzar cierres en obligaciones de pago extendidas
+          
+***************************************************************************/
+
+
+
 DECLARE
   v_total_detalle 		numeric;
   v_factor				numeric;
@@ -44,6 +65,7 @@ DECLARE
     v_id_funcionario_estado integer;
 BEGIN
 	v_nombre_funcion = 'tes.f_finalizar_obligacion_total';
+    v_preguntar = 'no';   --#7890   mejora a las funcionaldiad de extencion de adquisiciones  
        --recupera parametros
 			
              select 
@@ -158,10 +180,15 @@ BEGIN
             
                  IF v_resp_fin[1] = 'false'  THEN
                     
-                    v_preguntar = 'si';
-                    raise exception '%',v_resp_fin[2];
+                    v_preguntar = 'si';                    
+                    raise exception ' %',v_resp_fin[2];
                  
                  ELSE
+                      --#7890  se marcan las obligaciones forzadas a finalizar
+                      update tes.tobligacion_pago set
+                        fin_forzado = p_forzar_fin
+                      where id_obligacion_pago = p_id_obligacion_pago;
+                 
                      v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligacion fue finzalida, y el presupuesto sobrante revertido');
                      v_resp = pxp.f_agrega_clave(v_resp,'preguntar','no');
                  END IF;
@@ -172,6 +199,7 @@ BEGIN
             
             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago',p_id_obligacion_pago::varchar);
             
+            --raise exception 'llega al final...';
               
             --Devuelve la respuesta
             return v_resp;      
@@ -183,6 +211,10 @@ EXCEPTION
 		v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
 		v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
 		v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+        v_resp = pxp.f_agrega_clave(v_resp,'_preguntar',v_preguntar);  --#7890  manda variable para preguntar si es necesario forzar el cierre
+                                                                       --#7890 NOTA, los nombres de las varaible no peende usarce de una funcion aotra
+                                                                       --#7890 el resultado se peirde no investigue la causa
+        
 		raise exception '%',v_resp;
 				        
 END;
