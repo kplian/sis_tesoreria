@@ -50,7 +50,7 @@ BEGIN
 	v_nombre_funcion = 'tes.f_determinar_total_faltante';
    
  
-            IF p_filtro not in ('registrado','registrado_pagado','registrado_monto_ejecutar','especial_total','anticipo_sin_aplicar','total_registrado_pagado','devengado','pagado','ant_parcial','ant_parcial_descontado','ant_aplicado_descontado','dev_garantia','ant_aplicado_descontado_op_variable','especial') THEN
+            IF p_filtro not in ('registrado','registrado_pagado','registrado_monto_ejecutar','especial_total','anticipo_sin_aplicar','total_registrado_pagado','devengado','pagado','ant_parcial','ant_parcial_descontado','ant_aplicado_descontado','dev_garantia','ant_aplicado_descontado_op_variable','especial','op_devengados','op_devengado_pagado','op_anticipos','op_retencion_garantia_dev','op_anticipos_pagados','op_anticipos_aplicados','op_reten_garantia','op_ant_fac_pag','op_apli_anti_fact', 'op_total_multa_retenida') THEN
               
               		raise exception 'filtro no reconocido (%) para determinar el total faltante ', p_filtro;
             
@@ -573,7 +573,193 @@ BEGIN
                         return v_monto_total; 
             
             
-            ELSE
+            ---------------------------
+            -- op_devengados 
+            ---------------------------
+            
+            ELSEIF   p_filtro in ('op_devengados') THEN
+                     
+                      select 
+                       sum(pp.monto)
+                      into
+                       v_monto_total_registrado
+                      from tes.tplan_pago pp
+                      where  pp.estado_reg='activo'  
+                            and pp.estado in('devengado')
+                            and pp.estado not in ('borrador','pendiente') 
+                            and pp.id_obligacion_pago = p_id_obligacion_pago; 
+                            
+                     v_monto_total  = COALESCE(v_monto_total_registrado,0);
+                           
+                     return v_monto_total;
+
+            ---------------------------
+            -- op_devengado_pagado 
+            ---------------------------
+            
+            ELSEIF   p_filtro in ('op_devengado_pagado') THEN
+
+                      select 
+                      sum(COALESCE(pp.monto_retgar_mo,0)) 
+                      into 
+                        v_monto_aux
+                      from tes.tplan_pago pp  
+                      where  pp.estado_reg='activo' 
+                      and pp.estado in('devengado')
+                      and  pp.id_obligacion_pago = p_id_obligacion_pago
+                      and pp.estado not in ('borrador','pendiente');    
+                      
+                      select 
+                       sum(COALESCE(pp.monto,0))
+                      into
+                       v_monto_total_registrado
+                      from tes.tplan_pago pp
+                      where pp.estado_reg='activo'  
+                            --and pp.tipo in('devengado','devengado_pagado','rendicion','anticipo','devengado_pagado_1c')
+                            and pp.tipo in('pagado')
+                            and pp.id_obligacion_pago = p_id_obligacion_pago 
+                            and pp.estado not in ('borrador','pendiente');
+                     v_monto_total  =  COALESCE(v_monto_total_registrado,0)-COALESCE(v_monto_aux,0);
+                           
+                     return COALESCE(v_monto_total,0);
+            
+            ELSEIF   p_filtro in ('op_saldo_dev_pag') THEN
+                     select 
+                      op.total_pago,
+                      op.monto_estimado_sg
+                     into
+                       v_monto_total,
+                       v_monto_est_sig_gestion
+                     from tes.tobligacion_pago op
+                     where op.id_obligacion_pago = p_id_obligacion_pago; 
+                    
+                     -- determina el total registrado 
+                      select 
+                       sum(pp.monto)
+                      into
+                       v_monto_total_registrado
+                      from tes.tplan_pago pp
+                      where  pp.estado_reg='activo'  
+                            --and pp.tipo in('devengado','devengado_pagado','rendicion','anticipo','devengado_pagado_1c')
+                            and pp.tipo in('pagado')
+                            and pp.id_obligacion_pago = p_id_obligacion_pago; 
+                            
+                     v_monto_total  = COALESCE(v_monto_total,0) +  COALESCE(v_monto_est_sig_gestion,0) - COALESCE(v_monto_total_registrado,0);
+                           
+                     return COALESCE(v_monto_total,0)-COALESCE(v_monto_total,0);
+
+            ELSEIF   p_filtro in ('op_anticipos') THEN
+            
+                     select 
+                      sum(COALESCE(pp.monto_retgar_mo,0)) 
+                      into 
+                        v_monto_total
+                      from tes.tplan_pago pp  
+                      where  pp.estado_reg='activo' 
+                      and pp.estado in('devengado')
+                      and  pp.id_obligacion_pago = p_id_obligacion_pago
+                      and pp.estado not in ('borrador','pendiente');    
+                      
+                      return COALESCE(v_monto_total,0);
+
+            ELSEIF   p_filtro in ('op_retencion_garantia_dev') THEN
+            
+                      select
+                          sum(pp.monto)
+                          into 
+                          v_monto_total
+                          from tes.tplan_pago pp
+                          where  pp.estado_reg='activo'  
+                          and pp.estado in('devuelto')
+                          and pp.estado not in ('borrador','pendiente') 
+                          and pp.id_obligacion_pago = p_id_obligacion_pago;
+                      
+                      return COALESCE(v_monto_total,0);
+
+            ELSEIF   p_filtro in ('op_anticipos_pagados') THEN
+            
+                      select
+                          sum(pp.monto)
+                          into 
+                          v_monto_total
+                          from tes.tplan_pago pp
+                          where  pp.estado_reg='activo'  
+                          and pp.estado in('anticipado')
+                          and pp.estado not in ('borrador','pendiente') 
+                          and pp.id_obligacion_pago = p_id_obligacion_pago;
+                      
+                      return COALESCE(v_monto_total,0);
+                      
+            ELSEIF   p_filtro in ('op_anticipos_aplicados') THEN
+                      select
+                          sum(pp.descuento_anticipo)
+                          into 
+                          v_monto_total
+                          from tes.tplan_pago pp
+                          where  pp.estado_reg='activo'  
+                          and pp.estado in('pagado')
+                          and pp.estado not in ('borrador','pendiente') 
+                          and pp.id_obligacion_pago = p_id_obligacion_pago;
+                      
+                      return COALESCE(v_monto_total,0);
+                      
+            ELSEIF   p_filtro in ('op_reten_garantia') THEN
+                      select
+                          sum(pp.monto_retgar_mo)
+                          into 
+                          v_monto_total
+                          from tes.tplan_pago pp
+                          where  pp.estado_reg='activo'  
+                          and pp.estado in('pagado')
+                          and pp.estado not in ('borrador','pendiente') 
+                          and pp.id_obligacion_pago = p_id_obligacion_pago;
+                      
+                      return COALESCE(v_monto_total,0);
+                      
+            ELSEIF   p_filtro in ('op_ant_fac_pag') THEN
+            
+                      select
+                          sum(pp.monto)
+                          into 
+                          v_monto_total
+                          from tes.tplan_pago pp
+                          join param.tplantilla pla on pla.id_plantilla=pp.id_plantilla
+                          where  pp.estado_reg='activo'  
+                          and pp.tipo in('anticipo')
+                          and pp.estado not in ('borrador','pendiente') 
+                          and pp.id_obligacion_pago = p_id_obligacion_pago;
+                      
+                      return COALESCE(v_monto_total,0);
+                      
+            ELSEIF   p_filtro in ('op_apli_anti_fact') THEN
+            
+                      select
+                          sum(pp.monto)
+                          into 
+                          v_monto_total
+                          from tes.tplan_pago pp
+                          join param.tplantilla pla on pla.id_plantilla=pp.id_plantilla
+                          where  pp.estado_reg='activo'  
+                          and pp.tipo in('ant_aplicado')
+                          and pp.estado not in ('borrador','pendiente') 
+                          and pp.id_obligacion_pago = p_id_obligacion_pago;
+                      
+                      return COALESCE(v_monto_total,0);
+                      
+             ELSEIF   p_filtro in ('op_total_multa_retenida') THEN
+                        select
+                            sum(pp.otros_descuentos)
+                            into 
+                            v_monto_total
+                            from tes.tplan_pago pp
+                            join param.tplantilla pla on pla.id_plantilla=pp.id_plantilla
+                            where  pp.estado_reg='activo'  
+                            and pp.estado in ('pagado')
+                            and pp.estado not in ('borrador','pendiente') 
+                            and pp.id_obligacion_pago = p_id_obligacion_pago;
+                        
+                        return COALESCE(v_monto_total,0);
+              ELSE 
                
                      raise exception 'Los otros filtros no fueron implementados %',p_filtro;
             
