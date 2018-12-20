@@ -977,6 +977,136 @@ BEGIN
 			return v_consulta;
 
 		end;
+    /*********************************
+ 	#TRANSACCION:  'TES_CON_OP_PLANPAG'  #1 ENDETR
+ 	#DESCRIPCION:	Consulta OP de plan de pagos
+ 	#AUTOR:		JUAN
+ 	#FECHA:		04-12-2018 15:43:23
+	***********************************/
+
+	elsif(p_transaccion='TES_CON_OP_PLANPAG')then
+
+		begin
+            --raise exception '%',v_parametros.id_gestion;
+			v_consulta:='select 
+                          op.num_tramite,
+                          op.estado,
+                          op.ultima_cuota_pp::NUMERIC,
+                          op.ultimo_estado_pp::VARCHAR,
+                          op.fecha::date,
+                          p.nombre_completo1::VARCHAR as funcionario,
+                          prov.rotulo_comercial::VARCHAR as proveedor,
+                          
+                          op.total_pago::NUMERIC,
+                          m.moneda::VARCHAR,
+                          op.pago_variable::VARCHAR,
+                          op.pedido_sap::VARCHAR,
+                          op.monto_total_adjudicado::NUMERIC as monto_adjudicado,
+                          
+                          op.total_anticipo::NUMERIC as anticipo_total,
+                          op.monto_ajuste_ret_garantia_ga::NUMERIC as saldo_anticipo_por_retener,
+                          op.monto_estimado_sg,
+                          pp.nro_cuota::NUMERIC,
+                          (CASE WHEN pp.estado=''pagado'' THEN
+                          ''contabilizado''
+                          ELSE
+                          pp.estado
+                          END)::VARCHAR as estado_rev,
+                          
+                          pp.tipo::VARCHAR as tipo_cuota,
+                          pp.nombre_pago::VARCHAR,
+                          pp.fecha_tentativa::date,
+                          pp.liquido_pagable::NUMERIC,
+                          op.numero::varchar as obligacion_pago,
+                          
+                          pla.desc_plantilla as documento,
+                          pp.monto::NUMERIC,
+                          pp.monto_excento::NUMERIC,
+                          pp.monto_anticipo::NUMERIC,
+                          pp.descuento_anticipo::NUMERIC,
+                          pp.monto_retgar_mo::NUMERIC as retencion_garantia,
+                          pp.monto_no_pagado::NUMERIC,
+                          pp.otros_descuentos::NUMERIC as multas,
+                          pp.descuento_inter_serv::NUMERIC as descuento_intercambio_servicio,
+                          pp.descuento_ley::NUMERIC,
+                          pp.monto_ejecutar_total_mo::NUMERIC as total_ejecutar_presupuestariamente,
+                          --pp.liquido_pagable as  liquido_pagable_1,
+
+                          (cb.nombre_institucion||''  (''||cb.nro_cuenta||'')'')::varchar as cuenta_bancaria,
+                          depto.nombre::varchar as libro_banos
+
+                          from tes.tobligacion_pago op
+                          JOIN tes.tobligacion_det od on op.id_obligacion_pago=od.id_obligacion_pago
+                          join tes.tplan_pago pp on pp.id_obligacion_pago=op.id_obligacion_pago and pp.estado!=''anulado''  
+                          join param.tplantilla pla on pla.id_plantilla=pp.id_plantilla
+
+                          left join tes.vcuenta_bancaria cb on cb.id_cuenta_bancaria = pp.id_cuenta_bancaria
+                          left JOIN wf.tproceso_wf pwf on pwf.id_proceso_wf=op.id_proceso_wf
+                          left join tes.tts_libro_bancos lb on pp.id_int_comprobante  = lb.id_int_comprobante
+                          left join param.tdepto depto on depto.id_depto = pp.id_depto_lb
+                           
+                          left join orga.tfuncionario f on f.id_funcionario=op.id_funcionario
+                          left join segu.vpersona p on p.id_persona=f.id_persona
+                          left join param.tproveedor prov on prov.id_proveedor=op.id_proveedor
+                          left join param.tmoneda m on m.id_moneda=op.id_moneda
+                          where op.estado!=''anulado'' and pp.estado_reg=''activo''  and op.id_gestion='||v_parametros.id_gestion||'
+                          --and op.id_obligacion_pago=5312
+                          order by op.num_tramite ASC';
+
+            --v_consulta:=v_consulta||v_parametros.filtro;
+			v_consulta:=v_consulta||'';
+
+            raise notice '% .',v_consulta;
+			--Devuelve la respuesta
+			return v_consulta;
+
+		end;
+        
+	elsif(p_transaccion='TES_OBLI_PAG_PEND')then --#1 ENDETR
+
+		begin
+            --raise exception '%',v_parametros.id_gestion;
+			v_consulta:='select 
+                          op.id_obligacion_pago,
+                          op.num_tramite,
+                          op.total_pago::numeric as total_monto_op,
+
+                          tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_devengados'',null)::NUMERIC as total_devengado,
+                          tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_devengado_pagado'',null)::NUMERIC as devengado_pagado,
+                          (tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_devengados'',null)-
+                          tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_devengado_pagado'',null)-
+                          tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_retencion_garantia_dev'',null))::NUMERIC as saldo_devengado_por_pagar, --restar a saldo_devengado_por_pagar con ret_gar_dev
+
+                          tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_anticipos_pagados'',null)::NUMERIC as anticipo_pagado,
+                          tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_anticipos_aplicados'',null)::NUMERIC as anticipo_aplicados,
+                          (tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_anticipos_pagados'',null)-
+                          tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_anticipos_aplicados'',null))::NUMERIC as saldo_anticipos_por_aplicar,
+                          tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_ant_fac_pag'',null)::NUMERIC as anticipo_facturado_pagado,
+                          tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_apli_anti_fact'',null)::NUMERIC as aplicacion_anticipo_facturado,
+
+                          (tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_ant_fac_pag'',null)-
+                          tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_apli_anti_fact'',null))::NUMERIC as saldo_por_aplicar_anticipo,
+
+                          tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_reten_garantia'',null)::NUMERIC as retencion_garantia,
+                          tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_retencion_garantia_dev'',null)::NUMERIC as ret_gar_dev,
+                          (tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_reten_garantia'',null)-
+                          tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_retencion_garantia_dev'',null))::NUMERIC as saldo_retencion_por_devolver,
+                          tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_total_multa_retenida'',null)::NUMERIC as total_multas_retenidas,
+                          (''(''||prov.codigo||'')''||ins.nombre)::varchar  as rotulo_comercial
+                          from tes.tobligacion_pago op 
+                          join tes.tplan_pago pp on pp.id_obligacion_pago=op.id_obligacion_pago
+                          left join param.tproveedor prov on prov.id_proveedor=op.id_proveedor
+                          left join param.tinstitucion ins on ins.id_institucion=prov.id_institucion
+                          where op.id_gestion='||v_parametros.id_gestion||' and pp.estado not in (''borrador'',''pendiente'') 
+                          group by op.id_obligacion_pago,op.num_tramite,op.total_pago,ins.nombre,prov.codigo
+                          ORDER BY ins.nombre ASC';
+
+
+            raise notice '% .',v_consulta;
+			--Devuelve la respuesta
+			return v_consulta;
+
+		end;
     else
 
 

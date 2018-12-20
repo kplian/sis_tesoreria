@@ -973,7 +973,122 @@ function listarPagos(){
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+    function consultaOpPlanPago(){
 
+        $this->procedimiento='tes.f_plan_pago_sel';
+        $this->transaccion='TES_CON_OP_PLANPAG';
+        $this->tipo_procedimiento='SEL';//tipo de transaccion
+
+        $this->setParametro('id_gestion','id_gestion','int4');
+		
+        $this->setCount(false);
+
+        $this->captura('num_tramite', 'varchar');
+		$this->captura('estado', 'varchar');
+		$this->captura('ultima_cuota_pp', 'NUMERIC');
+		$this->captura('ultimo_estado_pp', 'varchar');
+		$this->captura('fecha', 'date');
+		$this->captura('funcionario', 'varchar');
+		$this->captura('proveedor', 'varchar');
+		$this->captura('total_pago', 'NUMERIC');
+		$this->captura('moneda', 'varchar');
+		$this->captura('pago_variable', 'varchar');
+		$this->captura('pedido_sap', 'varchar');
+		$this->captura('monto_adjudicado', 'NUMERIC');
+		
+		$this->captura('anticipo_total', 'NUMERIC');
+		$this->captura('saldo_anticipo_por_retener', 'NUMERIC');
+		$this->captura('monto_estimado_sg', 'NUMERIC');
+		$this->captura('nro_cuota', 'NUMERIC');
+		$this->captura('estado_rev', 'varchar');
+		
+		$this->captura('tipo_cuota', 'varchar');
+		$this->captura('nombre_pago', 'varchar');
+		$this->captura('fecha_tentativa', 'date');
+		$this->captura('liquido_pagable', 'NUMERIC');
+		$this->captura('obligacion_pago', 'varchar');
+		$this->captura('documento', 'varchar');
+        
+		$this->captura('monto', 'NUMERIC');
+		$this->captura('monto_excento', 'NUMERIC');
+		$this->captura('monto_anticipo', 'NUMERIC');
+		$this->captura('descuento_anticipo', 'NUMERIC');
+		
+		$this->captura('retencion_garantia', 'NUMERIC');
+		$this->captura('monto_no_pagado', 'NUMERIC');
+		$this->captura('multas', 'NUMERIC');
+		$this->captura('descuento_intercambio_servicio', 'NUMERIC');
+		$this->captura('descuento_ley', 'NUMERIC');
+		$this->captura('total_ejecutar_presupuestariamente', 'NUMERIC');
+		
+		$this->captura('cuenta_bancaria', 'varchar');
+		$this->captura('libro_banos', 'varchar');
+		
+		
+		
+		
+        /*$this->captura('id_moneda', 'integer');
+        $this->captura('id_funcionario', 'integer');
+        $this->captura('num_tramite', 'varchar');
+        $this->captura('proveedor', 'varchar');
+        $this->captura('tipo', 'varchar');
+        $this->captura('estado', 'varchar');
+        $this->captura('monto', 'NUMERIC');
+        $this->captura('fecha_dev', 'DATE');
+        $this->captura('nro_cuota', 'NUMERIC');
+        $this->captura('monto_retgar_mo', 'NUMERIC');
+        $this->captura('moneda', 'varchar');
+        $this->captura('liquido_pagable', 'NUMERIC');
+        $this->captura('c31', 'varchar');*/
+
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+       // var_dump($this->respuesta);exit;
+       //Devuelve la respuesta
+        return $this->respuesta;
+	}
+    function obligacionPagosPendientes(){
+
+        $this->procedimiento='tes.f_plan_pago_sel';
+        $this->transaccion='TES_OBLI_PAG_PEND';
+        $this->tipo_procedimiento='SEL';//tipo de transaccion
+
+        $this->setParametro('id_gestion','id_gestion','int4');
+		
+        $this->setCount(false);
+        
+        $this->captura('id_obligacion_pago', 'int4');
+        $this->captura('num_tramite', 'varchar');
+		$this->captura('total_monto_op', 'NUMERIC');
+		$this->captura('total_devengado', 'NUMERIC');
+		$this->captura('devengado_pagado', 'NUMERIC');
+        $this->captura('saldo_devengado_por_pagar', 'NUMERIC');
+        $this->captura('anticipo_pagado', 'NUMERIC');
+		$this->captura('anticipo_aplicados', 'NUMERIC');
+		$this->captura('saldo_anticipos_por_aplicar', 'NUMERIC');
+		
+        //$this->captura('saldo_devengado_por_pagar', 'NUMERIC');
+       
+        
+        
+        $this->captura('anticipo_facturado_pagado', 'NUMERIC');
+		
+		$this->captura('aplicacion_anticipo_facturado', 'NUMERIC');
+		$this->captura('saldo_por_aplicar_anticipo', 'NUMERIC');
+		$this->captura('retencion_garantia', 'NUMERIC');
+		$this->captura('ret_gar_dev', 'NUMERIC');
+		$this->captura('saldo_retencion_por_devolver', 'NUMERIC');
+		$this->captura('total_multas_retenidas', 'NUMERIC');
+		$this->captura('rotulo_comercial', 'varchar');
+
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+       // var_dump($this->respuesta);exit;
+       //Devuelve la respuesta
+        return $this->respuesta;
+	}
 
 
 }
