@@ -41,7 +41,7 @@ class RObligacionPagosPendientesXls
     }
     function imprimeCabecera() {
         $this->docexcel->createSheet();
-        $this->docexcel->getActiveSheet()->setTitle('OBLIGACIONES DE PAGOS PENDIENTES');
+        $this->docexcel->getActiveSheet()->setTitle('OBLIGACIONES PENDIENTES');
 		
 		//var_dump('ver gestion ',$gestion);
 		//$this->docexcel->getActiveSheet()->setTitle($gestion);
