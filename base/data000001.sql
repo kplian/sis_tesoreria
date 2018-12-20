@@ -496,5 +496,19 @@ INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")VALUES
 
 
 
+/***********************************I-DAT-RAC-TES-7890-19/11/2017*****************************************/
+
+select wf.f_import_ttipo_proceso_origen ('insert','CON','LEGAL','TOPD','finalizado','manual','');
+select wf.f_import_ttipo_proceso_origen ('insert','TOPD','TES-PD','CON','finalizado','manual','');
+select wf.f_import_ttipo_proceso_origen ('insert','TOPD','TES-PD','TOPD','finalizado','manual','');
+
+
+/***********************************F-DAT-RAC-TES-7890-19/11/2017*****************************************/
+
+/***********************************I-DAT-JJA-TES-0-05/12/2018*****************************************/
+select pxp.f_insert_tgui ('Consulta OP por plan de pagos', 'Consulta OP  por plan de pagos', 'CONPLAPAG', 'si', 1, 'sis_tesoreria/reportes/formularios/ConsultaOpPlanPago.php', 3, '', 'ConsultaOpPlanPago', 'TES');
+/***********************************F-DAT-JJA-TES-0-05/12/2018*****************************************/
+
+
 
 

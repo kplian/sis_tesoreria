@@ -16,6 +16,9 @@ require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
 require_once(dirname(__FILE__).'/../reportes/RConformidad.php');
 require_once(dirname(__FILE__).'/../reportes/RProcesoConRetencionXLS.php');
 
+require_once(dirname(__FILE__).'/../reportes/RConsultaOpObligacionPagoXls.php');
+require_once(dirname(__FILE__).'/../reportes/RObligacionPagosPendientesXls.php');
+
 class ACTPlanPago extends ACTbase{    
 			
 	function listarPlanPago(){
@@ -436,7 +439,56 @@ class ACTPlanPago extends ACTbase{
 
 
     }
+	function consultaOpPlanPago(){
+		
+		$var='';
+		
+        $this->objFun=$this->create('MODPlanPago');
+		if($this->objParam->getParametro('tipo_repo') == 'consulta_op_plan_pago'){
+			$this->res = $this->objFun->consultaOpPlanPago();
+		}else{
+			$this->res = $this->objFun->obligacionPagosPendientes();
+		}
+		
+		
+		if($this->objParam->getParametro('formato_reporte') == 'xls'){
+
+
+            if($this->res->getTipo()=='ERROR'){
+                $this->res->imprimirRespuesta($this->res->generarJson());
+                exit;
+            }
+
+			$var = 'Consulta OP por plan de pagos';
+            //obtener titulo de reporte
+            $titulo ='Consulta OP por plan de pagos';
+            //Genera el nombre del archivo (aleatorio + titulo)
+            $nombreArchivo=uniqid(md5(session_id()).$titulo);
+            $nombreArchivo.='.xls';
+
+            $this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+            $this->objParam->addParametro('datos',$this->res->datos);
+			$this->objParam->addParametro('gestion',$this->objParam->getParametro('gestion'));
 			
+			$this->objParam->addParametro('var',$var);
+            //Instancia la clase de excel
+            if($this->objParam->getParametro('tipo_repo') == 'consulta_op_plan_pago'){
+               $this->objReporteFormato=new RConsultaOpObligacionPagoXls($this->objParam);
+			}else{
+			   $this->objReporteFormato=new RObligacionPagosPendientesXls($this->objParam);
+			}
+			
+            $this->objReporteFormato->generarDatos();
+            $this->objReporteFormato->generarReporte();
+
+            $this->mensajeExito=new Mensaje();
+            $this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
+                'Se generó con éxito el reporte: '.$nombreArchivo,'control');
+            $this->mensajeExito->setArchivoGenerado($nombreArchivo);
+            $this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+
+        } 
+	}	
 }
 
 ?>

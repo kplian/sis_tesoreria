@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.f_inserta_obligacion_pago (
   p_administrador integer,
   p_id_usuario integer,
@@ -16,6 +18,7 @@ $body$
  ISSUE            FECHA:		      AUTOR                 DESCRIPCION
    
 #1        		    05/12/2018      CHROS                 aumenta funcionalidad para crear OP asociadas a contratos
+#7891        		05/12/2018      RAC KPLIAN            agrega logica para que al extender un proceso tome el nro de tramite del original
 ***************************************************************************/
 
 DECLARE
@@ -46,8 +49,9 @@ DECLARE
     v_registros_documento 		record;
     v_registros_con 			record; 
     v_id_documento_wf_op 		integer;
-    v_rec   record;
-  
+    v_rec                       record;
+    v_extendida                 varchar; --#7891
+    v_rec_op_ext                record;  --#7891
  
      
 			    
@@ -80,6 +84,9 @@ BEGIN
             (p_hstore->'_id_usuario_ai')::integer,
             (p_hstore->'_nombre_usuario_ai')::varchar,
             (p_hstore->'tipo_anticipo')::varchar,
+            (p_hstore->'extendida')::varchar,
+            (p_hstore->'id_obligacion_pago_ext')::integer
+            
     
     */
     
@@ -94,7 +101,9 @@ BEGIN
                        where per.fecha_ini <= (p_hstore->'fecha')::date 
                          and per.fecha_fin >= (p_hstore->'fecha')::date
                          limit 1 offset 0;
-        
+                         
+                         
+       
         
         IF   (p_hstore->'tipo_obligacion')::varchar = 'adquisiciones'    THEN
              raise exception 'Los pagos de adquisiciones tienen que ser habilitados desde el sistema de adquisiciones';   
@@ -208,212 +217,249 @@ BEGIN
         where ges.gestion = v_anho
         limit 1 offset 0;
        
-        -- inciar el tramite en el sistema de WF
-        -- inciar el tramite en el sistema de WF
-        --#1CHROS 19/11/2018 - crea OP y poner como inicio un contrato elaborado para que el número de trámite sea el del contrato y los documentos sean visibles
-        IF (p_hstore->'id_contrato')::integer is not  NULL   and (p_hstore->'tipo_obligacion')::varchar != 'adquisiciones'  THEN
-          select
-              c.id_estado_wf
-          into
-              v_rec
-          from leg.tcontrato c
-          where c.id_contrato = (p_hstore->'id_contrato')::integer;
+        --#7891 Revisa si es un proceso disparado
+        v_extendida = 'no'; --  for defecto el valor es no
+        IF  p_hstore->'extendida' = 'si'  THEN
+              v_extendida = 'si';
+        END IF;
         
-          SELECT
-              ps_id_proceso_wf,
-              ps_id_estado_wf,
-              ps_codigo_estado,
-              ps_nro_tramite
-          into
-              v_id_proceso_wf,
-              v_id_estado_wf,
-              v_codigo_estado,
-              v_num_tramite
-          FROM wf.f_registra_proceso_disparado_wf(
-              p_id_usuario,
-              (p_hstore->'_id_usuario_ai')::integer,
-              (p_hstore->'_nombre_usuario_ai')::varchar,
-              v_rec.id_estado_wf,
-              (p_hstore->'id_funcionario')::integer,
-              (p_hstore->'id_depto')::integer,
-              'Obligacion de pago ('||v_num||') '||(p_hstore->'obs')::varchar,
-              'LEG', --dispara proceso del comprobante
-              v_num);
-        ELSE
-          SELECT 
-               ps_num_tramite ,
-               ps_id_proceso_wf ,
-               ps_id_estado_wf ,
-               ps_codigo_estado 
-            into
-               v_num_tramite,
-               v_id_proceso_wf,
-               v_id_estado_wf,
-               v_codigo_estado   
+        IF  v_extendida = 'no'  THEN --#7891 si no es una olbigacion extendida mantiene el proceso normal
+       
+                -- inciar el tramite en el sistema de WF
+                --#1CHROS 19/11/2018 - crea OP y poner como inicio un contrato elaborado para que el número de trámite sea el del contrato y los documentos sean visibles
+                IF (p_hstore->'id_contrato')::integer is not  NULL   and (p_hstore->'tipo_obligacion')::varchar != 'adquisiciones'  THEN
+                  select
+                      c.id_estado_wf
+                  into
+                      v_rec
+                  from leg.tcontrato c
+                  where c.id_contrato = (p_hstore->'id_contrato')::integer;
                 
-          FROM wf.f_inicia_tramite(
-               p_id_usuario,
-               (p_hstore->'_id_usuario_ai')::integer,
-               (p_hstore->'_nombre_usuario_ai')::varchar,
-               v_id_gestion, 
-               v_codigo_tipo_proceso, 
-               (p_hstore->'id_funcionario')::integer,
-               (p_hstore->'id_depto')::integer,
-               'Obligacion de pago ('||v_num||') '||(p_hstore->'obs')::varchar,
-               v_num );
+                  SELECT
+                      ps_id_proceso_wf,
+                      ps_id_estado_wf,
+                      ps_codigo_estado,
+                      ps_nro_tramite
+                  into
+                      v_id_proceso_wf,
+                      v_id_estado_wf,
+                      v_codigo_estado,
+                      v_num_tramite
+                  FROM wf.f_registra_proceso_disparado_wf(
+                      p_id_usuario,
+                      (p_hstore->'_id_usuario_ai')::integer,
+                      (p_hstore->'_nombre_usuario_ai')::varchar,
+                      v_rec.id_estado_wf,
+                      (p_hstore->'id_funcionario')::integer,
+                      (p_hstore->'id_depto')::integer,
+                      'Obligacion de pago ('||v_num||') '||(p_hstore->'obs')::varchar,
+                      'LEG', --dispara proceso del comprobante
+                      v_num);
+                ELSE
+                  SELECT 
+                       ps_num_tramite ,
+                       ps_id_proceso_wf ,
+                       ps_id_estado_wf ,
+                       ps_codigo_estado 
+                    into
+                       v_num_tramite,
+                       v_id_proceso_wf,
+                       v_id_estado_wf,
+                       v_codigo_estado   
+                        
+                  FROM wf.f_inicia_tramite(
+                       p_id_usuario,
+                       (p_hstore->'_id_usuario_ai')::integer,
+                       (p_hstore->'_nombre_usuario_ai')::varchar,
+                       v_id_gestion, 
+                       v_codigo_tipo_proceso, 
+                       (p_hstore->'id_funcionario')::integer,
+                       (p_hstore->'id_depto')::integer,
+                       'Obligacion de pago ('||v_num||') '||(p_hstore->'obs')::varchar,
+                       v_num );
+                END IF;
+            
+        ELSE  
+                 --#7891  si es una olbigacion extendida recupera el nro de tramite de la obligacion original
+                  select
+                      ope.id_estado_wf
+                  into
+                      v_rec_op_ext
+                  from tes.tobligacion_pago ope
+                  where ope.id_obligacion_pago = (p_hstore->'id_obligacion_pago_ext')::integer;
+                
+                  SELECT
+                      ps_id_proceso_wf,
+                      ps_id_estado_wf,
+                      ps_codigo_estado,
+                      ps_nro_tramite
+                  into
+                      v_id_proceso_wf,
+                      v_id_estado_wf,
+                      v_codigo_estado,
+                      v_num_tramite
+                  FROM wf.f_registra_proceso_disparado_wf(
+                      p_id_usuario,
+                      (p_hstore->'_id_usuario_ai')::integer,
+                      (p_hstore->'_nombre_usuario_ai')::varchar,
+                      v_rec_op_ext.id_estado_wf,
+                      (p_hstore->'id_funcionario')::integer,
+                      (p_hstore->'id_depto')::integer,
+                      'Obligacion de pago extendida('||v_num||') '||(p_hstore->'obs')::varchar,
+                      'TOPD', --dispara proceso del comprobante
+                      v_num);
+             
         END IF;
            
-            -- raise exception 'estado %',v_codigo_estado;
-             
-      
-        	--Sentencia de la insercion
-        	insert into tes.tobligacion_pago(
-			id_proveedor,
-			estado,
-			tipo_obligacion,
-			id_moneda,
-			obs,
-			--porc_retgar,
-			id_subsistema,
-			id_funcionario,
-			estado_reg,
-			--porc_anticipo,
-			id_estado_wf,
-			id_depto,
-			num_tramite,
-			id_proceso_wf,
-			fecha_reg,
-			id_usuario_reg,
-			fecha_mod,
-			id_usuario_mod,
-            numero,
-            fecha,
-            id_gestion,
-            tipo_cambio_conv,    -->  TIPO cambio convenido ....
-            pago_variable,
-            total_nro_cuota,
-            fecha_pp_ini,
-            rotacion,
-            id_plantilla,
-            id_usuario_ai,
-            usuario_ai,
-            tipo_anticipo,
-            id_funcionario_gerente,
-            id_contrato
+        
+        --Sentencia de la insercion
+        insert into tes.tobligacion_pago(
+          id_proveedor,
+          estado,
+          tipo_obligacion,
+          id_moneda,
+          obs,
+          --porc_retgar,
+          id_subsistema,
+          id_funcionario,
+          estado_reg,
+          --porc_anticipo,
+          id_estado_wf,
+          id_depto,
+          num_tramite,
+          id_proceso_wf,
+          fecha_reg,
+          id_usuario_reg,
+          fecha_mod,
+          id_usuario_mod,
+          numero,
+          fecha,
+          id_gestion,
+          tipo_cambio_conv,    -->  TIPO cambio convenido ....
+          pago_variable,
+          total_nro_cuota,
+          fecha_pp_ini,
+          rotacion,
+          id_plantilla,
+          id_usuario_ai,
+          usuario_ai,
+          tipo_anticipo,
+          id_funcionario_gerente,
+          id_contrato
             
-          	) values(
-			(p_hstore->'id_proveedor')::integer,
-			v_codigo_estado,
-			(p_hstore->'tipo_obligacion')::varchar,
-			(p_hstore->'id_moneda')::integer,
-			(p_hstore->'obs')::varchar,
-			--v_parametros.porc_retgar,
-			v_id_subsistema,
-			(p_hstore->'id_funcionario')::integer,
-			'activo',
-			--v_parametros.porc_anticipo,
-			v_id_estado_wf,
-			(p_hstore->'id_depto')::integer,
-			v_num_tramite,
-			v_id_proceso_wf,
-			now(),
-			p_id_usuario,
-			null,
-			null,
-            v_num,
-            (p_hstore->'fecha')::date,
-            v_id_gestion,
-            (p_hstore->'tipo_cambio_conv')::numeric,                -->  TIPO cambio convenido ....
-            (p_hstore->'pago_variable')::varchar,
-            (p_hstore->'total_nro_cuota')::integer,
-            (p_hstore->'fecha_pp_ini')::date,
-            (p_hstore->'rotacion')::integer,
-            (p_hstore->'id_plantilla')::integer,
-            (p_hstore->'_id_usuario_ai')::integer,
-            (p_hstore->'_nombre_usuario_ai')::varchar,
-            (p_hstore->'tipo_anticipo')::varchar,
-             va_id_funcionario_gerente[1],
-            (p_hstore->'id_contrato')::integer
+        ) values(
+          (p_hstore->'id_proveedor')::integer,
+          v_codigo_estado,
+          (p_hstore->'tipo_obligacion')::varchar,
+          (p_hstore->'id_moneda')::integer,
+          (p_hstore->'obs')::varchar,
+          --v_parametros.porc_retgar,
+          v_id_subsistema,
+          (p_hstore->'id_funcionario')::integer,
+          'activo',
+          --v_parametros.porc_anticipo,
+          v_id_estado_wf,
+          (p_hstore->'id_depto')::integer,
+          v_num_tramite,
+          v_id_proceso_wf,
+          now(),
+          p_id_usuario,
+          null,
+          null,
+          v_num,
+          (p_hstore->'fecha')::date,
+          v_id_gestion,
+          (p_hstore->'tipo_cambio_conv')::numeric,                -->  TIPO cambio convenido ....
+          (p_hstore->'pago_variable')::varchar,
+          (p_hstore->'total_nro_cuota')::integer,
+          (p_hstore->'fecha_pp_ini')::date,
+          (p_hstore->'rotacion')::integer,
+          (p_hstore->'id_plantilla')::integer,
+          (p_hstore->'_id_usuario_ai')::integer,
+          (p_hstore->'_nombre_usuario_ai')::varchar,
+          (p_hstore->'tipo_anticipo')::varchar,
+           va_id_funcionario_gerente[1],
+          (p_hstore->'id_contrato')::integer
 							
-			)RETURNING id_obligacion_pago into v_id_obligacion_pago;
+        )RETURNING id_obligacion_pago into v_id_obligacion_pago;
             
             
-            -- inserta documentos en estado borrador si estan configurados
-            v_resp_doc =  wf.f_inserta_documento_wf(p_id_usuario, v_id_proceso_wf, v_id_estado_wf);
-            -- verificar documentos
-            v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_wf);
+        -- inserta documentos en estado borrador si estan configurados
+        v_resp_doc =  wf.f_inserta_documento_wf(p_id_usuario, v_id_proceso_wf, v_id_estado_wf);
+        -- verificar documentos
+        v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_wf);
             
-            -------------------------------------
-            -- COPIA CONTRATOS
-            -------------------------------------
+        -------------------------------------
+        -- COPIA CONTRATOS
+        -------------------------------------
             
-            --  Si el la referencia al contrato esta presente ..  copiar el documento de contrato
-            IF (p_hstore->'id_contrato')::integer  is not  NULL   and (p_hstore->'tipo_obligacion')::varchar != 'adquisiciones'  THEN
-                 --con el ide de contrato obtenet el id_proceso_wf
-                 SELECT
-                   con.id_proceso_wf,
-                   con.numero,
-                   con.estado,
-                   pwf.nro_tramite
-                 INTO
-                  v_registros_con
-                 FROM leg.tcontrato con
-                 INNER JOIN wf.tproceso_wf pwf on pwf.id_proceso_wf = con.id_proceso_wf
-                 WHERE con.id_contrato = (p_hstore->'id_contrato')::integer;
+        --  Si el la referencia al contrato esta presente ..  copiar el documento de contrato
+        IF (p_hstore->'id_contrato')::integer  is not  NULL   and (p_hstore->'tipo_obligacion')::varchar != 'adquisiciones'  THEN
+             --con el ide de contrato obtenet el id_proceso_wf
+             SELECT
+               con.id_proceso_wf,
+               con.numero,
+               con.estado,
+               pwf.nro_tramite
+             INTO
+              v_registros_con
+             FROM leg.tcontrato con
+             INNER JOIN wf.tproceso_wf pwf on pwf.id_proceso_wf = con.id_proceso_wf
+             WHERE con.id_contrato = (p_hstore->'id_contrato')::integer;
                 
-                  -- octenemos el documentos constro del origen
+              -- octenemos el documentos constro del origen
                
-                  SELECT
-                    *
-                  into
-                   v_registros_documento
-                  FROM wf.tdocumento_wf d
-                  INNER JOIN wf.ttipo_documento td on td.id_tipo_documento = d.id_tipo_documento
-                  WHERE td.codigo = 'CONTRATO' and 
-                        d.id_proceso_wf = v_registros_con.id_proceso_wf;
+              SELECT
+                *
+              into
+               v_registros_documento
+              FROM wf.tdocumento_wf d
+              INNER JOIN wf.ttipo_documento td on td.id_tipo_documento = d.id_tipo_documento
+              WHERE td.codigo = 'CONTRATO' and 
+                    d.id_proceso_wf = v_registros_con.id_proceso_wf;
                  
-                   -- copiamos el link de referencia del contrato de la obligacion de pago
-                     select
-                     dwf.id_documento_wf
-                    into
-                     v_id_documento_wf_op
-                    from wf.tdocumento_wf dwf
-                    inner  join  wf.ttipo_documento td on td.id_tipo_documento = dwf.id_tipo_documento
-                    where td.codigo = 'CONTRATO'  and dwf.id_proceso_wf = v_id_proceso_wf;
+               -- copiamos el link de referencia del contrato de la obligacion de pago
+                 select
+                 dwf.id_documento_wf
+                into
+                 v_id_documento_wf_op
+                from wf.tdocumento_wf dwf
+                inner  join  wf.ttipo_documento td on td.id_tipo_documento = dwf.id_tipo_documento
+                where td.codigo = 'CONTRATO'  and dwf.id_proceso_wf = v_id_proceso_wf;
                  
-                    UPDATE 
-                      wf.tdocumento_wf  
-                    SET 
-                       id_usuario_mod = p_id_usuario,
-                       fecha_mod = now(),
-                       chequeado = v_registros_documento.chequeado,
-                       url = v_registros_documento.url,
-                       extension = v_registros_documento.extension,
-                       obs = v_registros_documento.obs,
-                       chequeado_fisico = v_registros_documento.chequeado_fisico,
-                       id_usuario_upload = v_registros_documento.id_usuario_upload,
-                       fecha_upload = v_registros_documento.fecha_upload,
-                       id_proceso_wf_ori = v_registros_documento.id_proceso_wf,
-                       id_documento_wf_ori = v_registros_documento.id_documento_wf,
-                       nro_tramite_ori = v_registros_con.nro_tramite
-                    WHERE 
-                      id_documento_wf = v_id_documento_wf_op;    
+                UPDATE 
+                  wf.tdocumento_wf  
+                SET 
+                   id_usuario_mod = p_id_usuario,
+                   fecha_mod = now(),
+                   chequeado = v_registros_documento.chequeado,
+                   url = v_registros_documento.url,
+                   extension = v_registros_documento.extension,
+                   obs = v_registros_documento.obs,
+                   chequeado_fisico = v_registros_documento.chequeado_fisico,
+                   id_usuario_upload = v_registros_documento.id_usuario_upload,
+                   fecha_upload = v_registros_documento.fecha_upload,
+                   id_proceso_wf_ori = v_registros_documento.id_proceso_wf,
+                   id_documento_wf_ori = v_registros_documento.id_documento_wf,
+                   nro_tramite_ori = v_registros_con.nro_tramite
+                WHERE 
+                  id_documento_wf = v_id_documento_wf_op;    
                 
             
-            END IF;
+        END IF;
             
-             --Definicion de la respuesta
-			 v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligaciones de Pago almacenado(a) con exito (id_obligacion_pago'||v_id_obligacion_pago||')'); 
-             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago', v_id_obligacion_pago::varchar);
-             v_resp = pxp.f_agrega_clave(v_resp,'id_proceso_wf', v_id_proceso_wf::varchar);
-             v_resp = pxp.f_agrega_clave(v_resp,'id_estado_wf', v_id_estado_wf::varchar);
-             v_resp = pxp.f_agrega_clave(v_resp,'num_tramite', v_num_tramite::varchar);
-             v_resp = pxp.f_agrega_clave(v_resp,'id_gestion', v_id_gestion::varchar);
+         --Definicion de la respuesta
+         v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Obligaciones de Pago almacenado(a) con exito (id_obligacion_pago'||v_id_obligacion_pago||')'); 
+         v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_pago', v_id_obligacion_pago::varchar);
+         v_resp = pxp.f_agrega_clave(v_resp,'id_proceso_wf', v_id_proceso_wf::varchar);
+         v_resp = pxp.f_agrega_clave(v_resp,'id_estado_wf', v_id_estado_wf::varchar);
+         v_resp = pxp.f_agrega_clave(v_resp,'num_tramite', v_num_tramite::varchar);
+         v_resp = pxp.f_agrega_clave(v_resp,'id_gestion', v_id_gestion::varchar);
              
             
 
-            --Devuelve la respuesta
-            return v_resp;
+        --Devuelve la respuesta
+        return v_resp;
 			
 			
 

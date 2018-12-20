@@ -21,6 +21,11 @@ $body$
  DESCRIPCION:
  AUTOR:
  FECHA:
+ HISTORIAL DE MODIFICACIONES:
+   	
+ ISSUE            FECHA:		      AUTOR                                DESCRIPCION
+ #0       		  02-04-2013     Gonzalo Sarmiento Sejas (KPLIAN)    creación
+ #7890            18/12/2018     RAC KPLIAN                          Se incluye la bandera que muestra que una obligacion a sido forzada a finalizar en los listados de obligaciones de pago
 ***************************************************************************/
 
 DECLARE
@@ -198,7 +203,7 @@ BEGIN
                               obpg.comprometido,
                               obpg.nro_cuota_vigente,
                               mn.tipo_moneda,
-                              obpg.total_pago,
+                              COALESCE(obpg.total_pago,0) as total_pago,
                               obpg.pago_variable,
                               obpg.id_depto_conta,
                               obpg.total_nro_cuota,
@@ -220,12 +225,14 @@ BEGIN
                               obpg.obs_poa,
                               obpg.uo_ex,
                               obpg.id_funcionario_responsable,
-							                fresp.desc_funcionario1 AS desc_fun_responsable,
+							  fresp.desc_funcionario1 AS desc_fun_responsable,
                               obpg.monto_ajuste_ret_garantia_ga,
                               obpg.monto_ajuste_ret_anticipo_par_ga,
                               obpg.monto_total_adjudicado,
                               obpg.total_anticipo,
-                              obpg.pedido_sap
+                              obpg.pedido_sap,                              
+                              obpg.fin_forzado,   --#7890
+                              obpg.monto_sg_mo    --#7890
 
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
@@ -457,7 +464,7 @@ BEGIN
                               obpg.comprometido,
                               obpg.nro_cuota_vigente,
                               mn.tipo_moneda,
-                              obpg.total_pago,
+                              COALESCE(obpg.total_pago,0) as total_pago,
                               obpg.pago_variable,
                               obpg.id_depto_conta,
                               obpg.total_nro_cuota,
@@ -477,11 +484,14 @@ BEGIN
                               con.id_contrato,
                               obpg.obs_presupuestos,
                               obpg.uo_ex,
-                               obpg.monto_total_adjudicado,
-                               obpg.total_anticipo,
-                               obpg.monto_ajuste_ret_anticipo_par_ga,
-                               obpg.monto_ajuste_ret_garantia_ga,
-                               obpg.pedido_sap
+                              obpg.monto_total_adjudicado,
+                              obpg.total_anticipo,
+                              obpg.monto_ajuste_ret_anticipo_par_ga,
+                              obpg.monto_ajuste_ret_garantia_ga,
+                              obpg.pedido_sap,                              
+                              obpg.fin_forzado,   --#7890
+                              obpg.monto_sg_mo    --#7890
+                              
 
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg

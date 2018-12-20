@@ -5,7 +5,15 @@
 *@author  Gonzalo Sarmiento Sejas
 *@date 02-04-2013 16:01:32
 *@description Clase que envia los parametros requeridos a la Base de datos para la ejecucion de las funciones, y que recibe la respuesta del resultado de la ejecucion de las mismas
-*/
+
+ *    HISTORIAL DE MODIFICACIONES:
+   	
+ ISSUE            FECHA:		      AUTOR                                DESCRIPCION
+ #0       		  02-04-2013     Gonzalo Sarmiento Sejas (KPLIAN)    creación
+ #7890            18/12/2018     RAC KPLIAN                          se adicionan columnas onto sigueinte gestion y si es forzado a finalizar
+ 
+
+ * */
 
 class MODObligacionPago extends MODbase{
 	
@@ -82,13 +90,15 @@ class MODObligacionPago extends MODbase{
 		$this->captura('uo_ex','varchar');
 		//Funcionario responsable de el plan de pagos
 		$this->captura('id_funcionario_responsable','integer');
-		$this->captura('desc_fun_responsable','text');
-		
+		$this->captura('desc_fun_responsable','text');		
 		$this->captura('monto_ajuste_ret_garantia_ga','numeric');
 		$this->captura('monto_ajuste_ret_anticipo_par_ga','numeric');
 		$this->captura('monto_total_adjudicado','numeric');
         $this->captura('total_anticipo','numeric');
 		$this->captura('pedido_sap','varchar');
+		$this->captura('fin_forzado','varchar'); //#7890
+		$this->captura('monto_sg_mo','numeric'); //#7890
+	 
 		
 		
 		
@@ -176,7 +186,9 @@ class MODObligacionPago extends MODbase{
 		$this->captura('monto_ajuste_ret_anticipo_par_ga','numeric');
 		$this->captura('monto_ajuste_ret_garantia_ga','numeric');
 		$this->captura('pedido_sap','varchar');
-         //////////////// EGS 13/08/2018 //////////////
+        //////////////// EGS 13/08/2018 //////////////
+        $this->captura('fin_forzado','varchar'); //#7890
+		$this->captura('monto_sg_mo','numeric'); //#7890
 
 
         
