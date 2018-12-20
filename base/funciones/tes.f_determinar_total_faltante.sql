@@ -621,7 +621,11 @@ BEGIN
                             and pp.estado not in ('borrador','pendiente');
                      v_monto_total  =  COALESCE(v_monto_total_registrado,0)-COALESCE(v_monto_aux,0);
                            
-                     return COALESCE(v_monto_total,0);
+                    if v_monto_total < 0 then --#2 ENDETR  JUAN  20/12/2018 Validacion de pagos en estado pendientes 
+                       return 0;
+                    else 
+                       return COALESCE(v_monto_total,0);
+                    end if;
             
             ELSEIF   p_filtro in ('op_saldo_dev_pag') THEN
                      select 
