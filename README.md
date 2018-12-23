@@ -1,5 +1,5 @@
 =================
-Sistema de Presupuestos
+Sistema de Tesoreria
 
 Requiere Framework PXP https://github.com/kplian/pxp
 
