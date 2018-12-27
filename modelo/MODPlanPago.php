@@ -1065,6 +1065,9 @@ function listarPagos(){
 		$this->captura('total_monto_op', 'NUMERIC');
 		$this->captura('total_devengado', 'NUMERIC');
 		$this->captura('devengado_pagado', 'NUMERIC');
+		
+		$this->captura('retencion_gestion_pasada', 'NUMERIC');
+		
         $this->captura('saldo_devengado_por_pagar', 'NUMERIC');
         $this->captura('anticipo_pagado', 'NUMERIC');
 		$this->captura('anticipo_aplicados', 'NUMERIC');

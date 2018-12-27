@@ -691,8 +691,16 @@ BEGIN
                           and pp.estado in('anticipado')
                           and pp.estado not in ('borrador','pendiente') 
                           and pp.id_obligacion_pago = p_id_obligacion_pago;
+                          
+                      select 
+                          op.total_anticipo
+                          into
+                          v_total_anticipo
+                          from tes.tobligacion_pago op
+                          where op.id_obligacion_pago = p_id_obligacion_pago;
                       
-                      return COALESCE(v_monto_total,0);
+                      
+                      return COALESCE(v_monto_total,0)+COALESCE(v_total_anticipo,0);
                       
             ELSEIF   p_filtro in ('op_anticipos_aplicados') THEN
                       select
@@ -705,7 +713,13 @@ BEGIN
                           and pp.estado not in ('borrador','pendiente') 
                           and pp.id_obligacion_pago = p_id_obligacion_pago;
                       
-                      return COALESCE(v_monto_total,0);
+                      select
+                       (op.total_anticipo - op.monto_ajuste_ret_anticipo_par_ga) 
+                      into v_total_anticipo
+                      from tes.tobligacion_pago op 
+                      where op.id_obligacion_pago = p_id_obligacion_pago;
+                      
+                      return COALESCE(v_monto_total,0)+COALESCE(v_total_anticipo,0);
                       
             ELSEIF   p_filtro in ('op_reten_garantia') THEN
                       select
@@ -718,7 +732,13 @@ BEGIN
                           and pp.estado not in ('borrador','pendiente') 
                           and pp.id_obligacion_pago = p_id_obligacion_pago;
                       
-                      return COALESCE(v_monto_total,0);
+                      select
+                      op.monto_ajuste_ret_garantia_ga 
+                      into v_total_anticipo
+                      from tes.tobligacion_pago op 
+                      where op.id_obligacion_pago = p_id_obligacion_pago;
+                      
+                      return COALESCE(v_monto_total,0)+COALESCE(v_total_anticipo,0);
                       
             ELSEIF   p_filtro in ('op_ant_fac_pag') THEN
             

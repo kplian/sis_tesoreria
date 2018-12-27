@@ -20,6 +20,7 @@ $body$
 ISSUE 			FECHA: 			AUTOR:						DESCRIPCION:
  #1				16/10/2018		EGS							se aumento el campo pago_borrador en la sentencia de la consulta
  #5  EndeETR    27/12/2018		EGS							se aumento en la sentencia de la transsancion   TES_PLAPAREP_SEL  el codigo de proveedor
+ #6  ENDETR		27/12/2018		JUAN						se agrego la columna (monto_ajuste_ret_garantia_ga) en reporte obligaciones de pagos pendientes
 ***************************************************************************/
 
 DECLARE
@@ -1074,7 +1075,10 @@ BEGIN
 
                           tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_devengados'',null)::NUMERIC as total_devengado,
                           tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_devengado_pagado'',null)::NUMERIC as devengado_pagado,
-                          (tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_devengados'',null)-
+                          
+                          op.monto_ajuste_ret_garantia_ga::NUMERIC as retencion_gestion_pasada, --#6 ENDETR
+                          
+                          (tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_devengados'',null)+op.monto_ajuste_ret_garantia_ga-
                           tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_devengado_pagado'',null)-
                           tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_retencion_garantia_dev'',null))::NUMERIC as saldo_devengado_por_pagar, --restar a saldo_devengado_por_pagar con ret_gar_dev
 

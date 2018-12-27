@@ -114,10 +114,12 @@ class RObligacionPagosPendientesXls
         $this->docexcel->getActiveSheet()->getColumnDimension('D')->setWidth(40);
         $this->docexcel->getActiveSheet()->getColumnDimension('E')->setWidth(30);
         $this->docexcel->getActiveSheet()->getColumnDimension('F')->setWidth(30);
-        $this->docexcel->getActiveSheet()->getColumnDimension('G')->setWidth(30);
-		$this->docexcel->getActiveSheet()->getColumnDimension('H')->setWidth(30);
 		
+		$this->docexcel->getActiveSheet()->getColumnDimension('G')->setWidth(30);
+		
+        $this->docexcel->getActiveSheet()->getColumnDimension('H')->setWidth(30);
 		$this->docexcel->getActiveSheet()->getColumnDimension('I')->setWidth(30);
+		
 		$this->docexcel->getActiveSheet()->getColumnDimension('J')->setWidth(30);
 		$this->docexcel->getActiveSheet()->getColumnDimension('K')->setWidth(30);
 		$this->docexcel->getActiveSheet()->getColumnDimension('L')->setWidth(30);
@@ -145,6 +147,7 @@ class RObligacionPagosPendientesXls
 		$this->docexcel->getActiveSheet()->getColumnDimension('AH')->setWidth(30);
 		$this->docexcel->getActiveSheet()->getColumnDimension('AI')->setWidth(30);
 		$this->docexcel->getActiveSheet()->getColumnDimension('AJ')->setWidth(30);
+		$this->docexcel->getActiveSheet()->getColumnDimension('AK')->setWidth(30);
         /*$this->docexcel->getActiveSheet()->getColumnDimension('H')->setWidth(30);
         $this->docexcel->getActiveSheet()->getColumnDimension('I')->setWidth(30);
         $this->docexcel->getActiveSheet()->getColumnDimension('J')->setWidth(30);
@@ -157,8 +160,8 @@ class RObligacionPagosPendientesXls
 
 
 
-        $this->docexcel->getActiveSheet()->getStyle('A5:Q5')->getAlignment()->setWrapText(true);
-        $this->docexcel->getActiveSheet()->getStyle('A5:Q5')->applyFromArray($styleTitulos2);
+        $this->docexcel->getActiveSheet()->getStyle('A5:R5')->getAlignment()->setWrapText(true);
+        $this->docexcel->getActiveSheet()->getStyle('A5:R5')->applyFromArray($styleTitulos2);
 
 
 
@@ -169,17 +172,20 @@ class RObligacionPagosPendientesXls
         $this->docexcel->getActiveSheet()->setCellValue('D5','Total monto OP');
         $this->docexcel->getActiveSheet()->setCellValue('E5','Total devengado');
         $this->docexcel->getActiveSheet()->setCellValue('F5','Devengado y pagado');
-        $this->docexcel->getActiveSheet()->setCellValue('G5','Saldo devengado por pagar');
-        $this->docexcel->getActiveSheet()->setCellValue('H5','Anticipos pagados');
-		$this->docexcel->getActiveSheet()->setCellValue('I5','Anticipos aplicados');
-		$this->docexcel->getActiveSheet()->setCellValue('J5','Saldo anticipo por aplicar');
-		$this->docexcel->getActiveSheet()->setCellValue('K5','Anticipos facturados pagados');
-		$this->docexcel->getActiveSheet()->setCellValue('L5','Aplicacion de anticipos facturados');
-		$this->docexcel->getActiveSheet()->setCellValue('M5','Saldo por aplicar anticipos/fac.');
-		$this->docexcel->getActiveSheet()->setCellValue('N5','Retenciones de garantia');
-		$this->docexcel->getActiveSheet()->setCellValue('O5','Retenciones de garantia devuelta');
-		$this->docexcel->getActiveSheet()->setCellValue('P5','Saldo retenciones por devolver');
-		$this->docexcel->getActiveSheet()->setCellValue('Q5','Total multas retenidas');
+		
+		$this->docexcel->getActiveSheet()->setCellValue('G5','Retenciones gestiones pasadas');
+		
+        $this->docexcel->getActiveSheet()->setCellValue('H5','Saldo devengado por pagar');
+        $this->docexcel->getActiveSheet()->setCellValue('I5','Anticipos pagados');
+		$this->docexcel->getActiveSheet()->setCellValue('J5','Anticipos aplicados');
+		$this->docexcel->getActiveSheet()->setCellValue('K5','Saldo anticipo por aplicar');
+		$this->docexcel->getActiveSheet()->setCellValue('L5','Anticipos facturados pagados');
+		$this->docexcel->getActiveSheet()->setCellValue('M5','Aplicacion de anticipos facturados');
+		$this->docexcel->getActiveSheet()->setCellValue('N5','Saldo por aplicar anticipos/fac.');
+		$this->docexcel->getActiveSheet()->setCellValue('O5','Retenciones de garantia');
+		$this->docexcel->getActiveSheet()->setCellValue('P5','Retenciones de garantia devuelta');
+		$this->docexcel->getActiveSheet()->setCellValue('Q5','Saldo retenciones por devolver');
+		$this->docexcel->getActiveSheet()->setCellValue('R5','Total multas retenidas');
 		
 		/*$this->docexcel->getActiveSheet()->setCellValue('Q5','Nro cuota');
 		$this->docexcel->getActiveSheet()->setCellValue('R5','Estado rev');
@@ -233,17 +239,20 @@ class RObligacionPagosPendientesXls
                 $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(3, $fila, $value['total_monto_op']);
                 $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(4, $fila, $value['total_devengado']);
                 $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(5, $fila, $value['devengado_pagado']);
-                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(6, $fila, $value['saldo_devengado_por_pagar']);
-                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(7, $fila, $value['anticipo_pagado']);
-				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(8, $fila, $value['anticipo_aplicados']);
-				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(9, $fila, $value['saldo_anticipos_por_aplicar']);
-				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(10, $fila, $value['anticipo_facturado_pagado']);
-				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(11, $fila, $value['aplicacion_anticipo_facturado']);
-				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(12, $fila, $value['saldo_por_aplicar_anticipo']);
-				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(13, $fila, $value['retencion_garantia']);
-				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(14, $fila, $value['ret_gar_dev']);
-				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(15, $fila, $value['saldo_retencion_por_devolver']);
-				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(16, $fila, $value['total_multas_retenidas']);
+				
+				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(6, $fila, $value['retencion_gestion_pasada']);
+				
+                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(7, $fila, $value['saldo_devengado_por_pagar']);
+                $this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(8, $fila, $value['anticipo_pagado']);
+				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(9, $fila, $value['anticipo_aplicados']);
+				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(10, $fila, $value['saldo_anticipos_por_aplicar']);
+				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(11, $fila, $value['anticipo_facturado_pagado']);
+				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(12, $fila, $value['aplicacion_anticipo_facturado']);
+				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(13, $fila, $value['saldo_por_aplicar_anticipo']);
+				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(14, $fila, $value['retencion_garantia']);
+				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(15, $fila, $value['ret_gar_dev']);
+				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(16, $fila, $value['saldo_retencion_por_devolver']);
+				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(17, $fila, $value['total_multas_retenidas']);
 				
 				
 				$fila++;
