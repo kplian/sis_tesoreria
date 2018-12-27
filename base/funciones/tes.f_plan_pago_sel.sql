@@ -19,7 +19,7 @@ $body$
  HISTORIAL DE MODIFICACIONES:
 ISSUE 			FECHA: 			AUTOR:						DESCRIPCION:
  #1				16/10/2018		EGS							se aumento el campo pago_borrador en la sentencia de la consulta
-
+ #5  EndeETR    27/12/2018		EGS							se aumento en la sentencia de la transsancion   TES_PLAPAREP_SEL  el codigo de proveedor
 ***************************************************************************/
 
 DECLARE
@@ -503,7 +503,8 @@ BEGIN
                                   else
                                   ''''
                                   end)::varchar as nro_contrato,
-                                  pg.pago_borrador
+                                  pg.pago_borrador,
+                                  pv.codigo as codigo_proveedor --- #5 EndeETR  27/12/2018 EGS	
                         from tes.tplan_pago pg
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago=pg.id_obligacion_pago
                         inner join param.vproveedor pv on pv.id_proveedor=op.id_proveedor

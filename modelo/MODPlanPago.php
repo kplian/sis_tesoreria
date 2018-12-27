@@ -7,9 +7,10 @@
 *@description Clase que envia los parametros requeridos a la Base de datos para la ejecucion de las funciones, y que recibe la respuesta del resultado de la ejecucion de las mismas
 *@date 30/08/2018
 *@description añadida la columna retenciones de garantía para mostrar el reporte de solicitud de pago
-*	ISSUE    	  Fecha 		Autor				Descripcion	
-* #1			16/102016		EGS					Se aumento el campo pago borrador y sus respectivas validaciones 
-* */
+*	ISSUE   	    Fecha 		 Autor				Descripcion	
+*   #1			    16/102016		EGS				Se aumento el campo pago borrador y sus respectivas validaciones 
+ 	#5	 EndeETR		27/12/2018		EGS				Se añadio el dato de codigo de proveedor
+ * * */
 
 class MODPlanPago extends MODbase{
 	
@@ -564,6 +565,7 @@ class MODPlanPago extends MODbase{
 		$this->captura('nro_contrato','varchar');
 		
 		$this->captura('pago_borrador','varchar');
+		$this->captura('codigo_proveedor','varchar');
 		
 		  
 		//Ejecuta la respuesta
