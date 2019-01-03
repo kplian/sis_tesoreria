@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_inserta_obligacion_pago (
   p_administrador integer,
   p_id_usuario integer,
@@ -19,6 +17,7 @@ $body$
    
 #1        		    05/12/2018      CHROS                 aumenta funcionalidad para crear OP asociadas a contratos
 #7891        		05/12/2018      RAC KPLIAN            agrega logica para que al extender un proceso tome el nro de tramite del original
+--#9 endetr         03/01/2019      chros             corrección de creación de OP en base a un contrato
 ***************************************************************************/
 
 DECLARE
@@ -223,8 +222,8 @@ BEGIN
               v_extendida = 'si';
         END IF;
         
-        IF  v_extendida = 'no'  THEN --#7891 si no es una olbigacion extendida mantiene el proceso normal
        
+        IF  v_extendida = 'no'  THEN --#7891 si no es una olbigacion extendida mantiene el proceso normal
                 -- inciar el tramite en el sistema de WF
                 --#1CHROS 19/11/2018 - crea OP y poner como inicio un contrato elaborado para que el número de trámite sea el del contrato y los documentos sean visibles
                 IF (p_hstore->'id_contrato')::integer is not  NULL   and (p_hstore->'tipo_obligacion')::varchar != 'adquisiciones'  THEN
@@ -235,6 +234,7 @@ BEGIN
                   from leg.tcontrato c
                   where c.id_contrato = (p_hstore->'id_contrato')::integer;
                 
+                  --#9
                   SELECT
                       ps_id_proceso_wf,
                       ps_id_estado_wf,
@@ -253,9 +253,10 @@ BEGIN
                       (p_hstore->'id_funcionario')::integer,
                       (p_hstore->'id_depto')::integer,
                       'Obligacion de pago ('||v_num||') '||(p_hstore->'obs')::varchar,
-                      'LEG', --dispara proceso del comprobante
+                      'TOPD', --dispara proceso del comprobante
                       v_num);
                 ELSE
+                 
                   SELECT 
                        ps_num_tramite ,
                        ps_id_proceso_wf ,
@@ -278,6 +279,8 @@ BEGIN
                        'Obligacion de pago ('||v_num||') '||(p_hstore->'obs')::varchar,
                        v_num );
                 END IF;
+                
+                
             
         ELSE  
                  --#7891  si es una olbigacion extendida recupera el nro de tramite de la obligacion original
@@ -310,7 +313,7 @@ BEGIN
                       v_num);
              
         END IF;
-           
+        
         
         --Sentencia de la insercion
         insert into tes.tobligacion_pago(
@@ -482,3 +485,6 @@ VOLATILE
 CALLED ON NULL INPUT
 SECURITY INVOKER
 COST 100;
+
+ALTER FUNCTION tes.f_inserta_obligacion_pago (p_administrador integer, p_id_usuario integer, p_hstore public.hstore)
+  OWNER TO postgres;
