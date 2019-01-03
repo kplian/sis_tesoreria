@@ -9,7 +9,7 @@ $body$
     
  ISSUE    FORK        FECHA:          AUTOR                 DESCRIPCION
 
- #10    ENDEETR      03/01/2019        Manu Guerra     		la fecha de reposicion o devolucion afectara segun la gestion 
+ #10    ENDEETR      03/01/2019        Manu Guerra     		la fecha de reposicion o devolucion afectara segun la gestion, para cierre de gestion 
 ***************************************************************************/
 DECLARE
   v_registros_con 	 record;
