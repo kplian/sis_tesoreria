@@ -11,11 +11,24 @@ CREATE OR REPLACE FUNCTION tes.f_generar_transferencia (
 )
 RETURNS varchar AS
 $body$
+
+
 /*
 	Autor: GSS
     Fecha: 08-06-2015
     Descripción: Función que se encarga de generar transferencia carta a la cuenta en dolares.
-*/
+
+      HISTORIAL DE MODIFICACIONES:
+       
+ ISSUE            FECHA:              AUTOR                 DESCRIPCION
+   
+ #0             08-06-2015       GSS BOA           creacion
+ #3  ETR        26/12/2018       RAC KPLIAN         al generar cheche se manda la fecha del cbte
+ 
+ */
+  
+    
+    
 DECLARE
 
     v_resp							varchar;
@@ -106,6 +119,7 @@ BEGIN
                     substr(depto.codigo, 4) as origen,
                     cbte.nro_tramite,
                     tra.id_cuenta_bancaria_mov as id_libro_bancos_deposito,
+                    cbte.fecha as fecha_cbte,  --#3 add fecha_cbte
                     (case when tra.forma_pago = 'transferencia' then
                     	'transferencia_carta'
                     else
@@ -116,7 +130,7 @@ BEGIN
              left join param.tdepto depto on depto.id_depto = cbte.id_depto_libro
              where     cbte.id_int_comprobante = p_id_int_comprobante 
                   and tra.id_int_transaccion  = p_id_int_transaccion
-             and tra.forma_pago IN ('transferencia','deposito')) LOOP--jrr habilitando depositos
+             and tra.forma_pago IN ('transferencia','deposito')) LOOP  --jrr habilitando depositos
          
          
            ----------------------------------------------------------------------------------------------
@@ -156,10 +170,10 @@ BEGIN
            END IF;
   		 
           IF(v_datos_transferencia.id_libro_bancos_deposito is null)THEN
-              v_resp = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,
-                          array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','sistema_origen','id_int_comprobante','id_int_transaccion'],
-                          array[' 0 = 0 ','','','','','NULL','NULL',v_datos_transferencia.id_cuenta_bancaria::varchar,v_datos_transferencia.id_depto_libro::varchar,v_datos_transferencia.beneficiario::varchar,'NULL',v_importe_debe::varchar,'','PAGO A '||v_datos_transferencia.glosa::varchar,v_datos_transferencia.origen::varchar,v_datos_transferencia.nro_tramite::varchar,v_importe_banco::varchar,'NULL','','C31-'||p_c31,v_datos_transferencia.forma_pago,p_id_finalidad::varchar,'KERP',p_id_int_comprobante::varchar,p_id_int_transaccion::varchar],
-                          array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','varchar','varchar','integer']
+              v_resp = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,          
+                          array['filtro', 'ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai',  'id_cuenta_bancaria',                                 'id_depto',                                     'a_favor',                                    'nro_cheque',   'importe_deposito',       'nro_liquidacion', 'detalle',                                      'origen',                                'observaciones',                            'importe_cheque',         'id_libro_bancos_fk', 'nro_comprobante','comprobante_sigma',  'tipo','                          id_finalidad',            'sistema_origen',  'id_int_comprobante',         'id_int_transaccion'            ,'fecha'],
+                          array[' 0 = 0 ' , '',         '',              '',       '',        'NULL',          'NULL',                v_datos_transferencia.id_cuenta_bancaria::varchar,   v_datos_transferencia.id_depto_libro::varchar,   v_datos_transferencia.beneficiario::varchar, 'NULL',          v_importe_debe::varchar,  '',               'PAGO A '||v_datos_transferencia.glosa::varchar, v_datos_transferencia.origen::varchar,  v_datos_transferencia.nro_tramite::varchar, v_importe_banco::varchar, 'NULL',               '',               'C31-'||p_c31        ,v_datos_transferencia.forma_pago, p_id_finalidad::varchar,  'KERP',            p_id_int_comprobante::varchar,  p_id_int_transaccion::varchar ,v_datos_cheque.fecha_cbte::varchar      ],    --#3 add fecha_cbte
+                          array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','varchar','varchar','integer','date']
                           ,'',NULL,NULL);            
               
               v_respuesta = substring(v_resp from '%#"tipo_respuesta":"_____"#"%' for '#');
