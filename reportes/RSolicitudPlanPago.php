@@ -2,7 +2,10 @@
 /*
 *@date 30/08/2018
 *@description añadida la columna retenciones de garantía para mostrar el reporte de solicitud de pago
-*/
+		ISSUE	FORK 	   FECHA			AUTHOR			DESCRIPCION
+ 		  #5	EndeETR		27/12/2018		EGS				Se añadio el dato de codigo de proveedor
+ * 
+ * */
 require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
 
  class CustomReport extends TCPDF {
@@ -136,7 +139,7 @@ Class RSolicitudPlanPago extends Report {
         $pdf->SetFont('', 'B');
         $pdf->Cell($width2*2, $height, 'Proveedor: ', 0, 0, 'L', false, '', 0, false, 'T', 'C');
         $pdf->SetFont('', '');
-        $pdf->Cell($width3, $height, $this->getDataSource()->getParameter('proveedor'), 0, 0, 'L', false, '', 0, false, 'T', 'C');
+        $pdf->Cell($width3, $height, $this->getDataSource()->getParameter('codigo_proveedor').' - '.$this->getDataSource()->getParameter('proveedor'), 0, 0, 'L', false, '', 0, false, 'T', 'C');
         $pdf->Ln();
         $pdf->SetFont('', 'B');
         $pdf->Cell($width2*2, $height, 'Nº Cuota: ', 0, 0, 'L', false, '', 0, false, 'T', 'C');

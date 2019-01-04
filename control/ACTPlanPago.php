@@ -8,7 +8,9 @@
 *
 *@date 30/08/2018
 *@description añadida la columna retenciones de garantía para mostrar el reporte de solicitud de pago
-*/
+		ISSUE	FORK 	   FECHA			AUTHOR			DESCRIPCION
+ 		  #5	EndeETR		27/12/2018		EGS				Se añadio el dato de codigo de proveedor
+ * */
 
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
 require_once(dirname(__FILE__).'/../reportes/RSolicitudPlanPago.php');
@@ -142,6 +144,7 @@ class ACTPlanPago extends ACTbase{
         		$dataSource->putParameter('num_tramite',$datosPlanPago[0]['num_tramite']);
         		$dataSource->putParameter('nro_contrato',$datosPlanPago[0]['nro_contrato']);
 				$dataSource->putParameter('pago_borrador',$datosPlanPago[0]['pago_borrador']);
+				$dataSource->putParameter('codigo_proveedor',$datosPlanPago[0]['codigo_proveedor']);
         		
         		
         		//preapra conslta del prorrateo
