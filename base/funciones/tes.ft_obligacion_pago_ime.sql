@@ -23,7 +23,8 @@ $body$
    	
  ISSUE            FECHA:		      AUTOR                                DESCRIPCION
  #0       		  02-04-2013     Gonzalo Sarmiento Sejas (KPLIAN)    creación
- #7890            29/11/2018     RAC KPLIAN                          Se corrige la opcion de preguntar apra forzar cierres en obligaciones de pago extendidas         
+ #7890            29/11/2018     RAC KPLIAN                          Se corrige la opcion de preguntar apra forzar cierres en obligaciones de pago extendidas  
+ #8 ETR           02/01/2019     RAC KPLIAN                          Se aumentan validacion al modificar datos de obligaciones de pago extendidas         
 ***************************************************************************/
 
 DECLARE
@@ -1831,7 +1832,21 @@ BEGIN
     elsif(p_transaccion='TES_ANTIRET_IME')then
 
     begin
-        
+    
+    
+       --#8
+        SELECT 
+          op.estado
+        into v_registros               
+       FROM tes.tobligacion_pago op
+       WHERE op.id_obligacion_pago = v_parametros.id_obligacion_pago;
+       
+       
+       IF v_registros.estado = 'finalizado' THEN
+           raise exception 'no puede modificar estos datos en obligaciones finalizadas  (Podria distorcionar reportes)';
+       END IF;
+       
+      
        --  #7890 verificamos si esta obligacion de pago es extendida
        --        si es extendida estos cmapo no se peuden editar 
     
@@ -1840,6 +1855,15 @@ BEGIN
                     FROM tes.tobligacion_pago op
                     WHERE op.id_obligacion_pago_extendida = v_parametros.id_obligacion_pago) THEN 
             raise exception 'No peude modificar estos datos en obligaciones de pago extendidas';
+        END IF;
+        
+        
+        --#8        
+        IF EXISTS (SELECT 
+                       1
+                    FROM adq.tcotizacion c
+                    WHERE c.id_obligacion_pago = v_parametros.id_obligacion_pago) THEN 
+            raise exception 'No peude modificar estos datos en obligaciones de pago que vienen de adquisiciones';
         END IF;
     
     
