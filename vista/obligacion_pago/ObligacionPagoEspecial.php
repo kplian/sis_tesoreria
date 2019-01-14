@@ -8,7 +8,7 @@
 *dar el visto a solicitudes de compra
  * *Issue			Fecha        Author				Descripcion
  * #1			21/09/2018		EGS					Se modifico el edit para q los campos igualen con el new
- * 
+  #12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
 *
 */
 header("content-type: text/javascript; charset=UTF-8");
@@ -84,14 +84,14 @@ Phx.vista.ObligacionPagoEspecial = {
        
        	if(data.estado != 'borrador'){
        	  this.Cmp.tipo_anticipo.disable();
-       	 
        	  this.Cmp.id_proveedor.disable();
-       	  
+       	  this.Cmp.comprometer_iva.disable();//#12
        }
        else{
        
        	this.Cmp.id_proveedor.enable();
        	this.mostrarComponente(this.Cmp.id_proveedor);
+       	this.Cmp.comprometer_iva.enable();//#12
        }
        
          //#1			21/09/2018		EGS	
@@ -122,8 +122,7 @@ Phx.vista.ObligacionPagoEspecial = {
 	                                            }],
 	                                    
 	                                    scope:this
-	                                 }); 
-        
+	                                 });
     },
     onSaveForm: function(form,  objRes){
     	var me = this;

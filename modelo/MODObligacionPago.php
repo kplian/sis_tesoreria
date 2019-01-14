@@ -11,7 +11,7 @@
  ISSUE            FECHA:		      AUTOR                                DESCRIPCION
  #0       		  02-04-2013     Gonzalo Sarmiento Sejas (KPLIAN)    creación
  #7890            18/12/2018     RAC KPLIAN                          se adicionan columnas onto sigueinte gestion y si es forzado a finalizar
- 
+ #12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
 
  * */
 
@@ -98,7 +98,7 @@ class MODObligacionPago extends MODbase{
 		$this->captura('pedido_sap','varchar');
 		$this->captura('fin_forzado','varchar'); //#7890
 		$this->captura('monto_sg_mo','numeric'); //#7890
-	 
+        $this->captura('comprometer_iva','varchar'); //#12
 		
 		
 		
@@ -242,7 +242,7 @@ class MODObligacionPago extends MODbase{
 		$this->setParametro('id_plantilla','id_plantilla','int4');
 		$this->setParametro('tipo_anticipo','tipo_anticipo','varchar');
 		$this->setParametro('id_contrato','id_contrato','int4');
-		
+        $this->setParametro('comprometer_iva','comprometer_iva','varchar');//#12
 		
 		
 		
@@ -284,7 +284,7 @@ class MODObligacionPago extends MODbase{
 		$this->setParametro('id_contrato','id_contrato','int4');
 
 		$this->setParametro('id_funcionario_responsable','id_funcionario_responsable','int4');
-        
+        $this->setParametro('comprometer_iva','comprometer_iva','varchar'); //#12
         
         
         

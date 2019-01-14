@@ -15,10 +15,8 @@ $body$
  COMENTARIOS: 
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
-
- DESCRIPCION: 
- AUTOR:     
- FECHA:   
+ Issue			Fecha        Author				Descripcion
+#12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
 ***************************************************************************/
 
 DECLARE
@@ -35,11 +33,11 @@ DECLARE
     v_tipo_obligacion varchar;
     v_id_moneda integer;
     v_id_partida integer;
-    v_id_gestion integer;    
-    v_id_obligacion integer;    
-    v_id_partida_ejecucion integer;     
+    v_id_gestion integer;
+    v_id_obligacion integer;
+    v_id_partida_ejecucion integer;
     v_id_partida_anterior integer;
-    v_id_cc_anterior    integer;   
+    v_id_cc_anterior    integer;
     v_monto         numeric;
     v_res         boolean;
     v_nombre_conexion   varchar;
@@ -48,27 +46,29 @@ DECLARE
     v_registros       record;
     v_registros_cig         record;
     v_relacion        varchar;
-    
-      
-    
+    v_id_moneda_sg		integer; --#12
+    v_monto_pago_sg_mb  numeric; --#12
+    v_fecha_ob			date; --#12
+
+
 BEGIN
 
     v_nombre_funcion = 'tes.ft_obligacion_det_ime';
     v_parametros = pxp.f_get_record(p_tabla);
 
-  /*********************************    
+  /*********************************
   #TRANSACCION:  'TES_OBDET_INS'
   #DESCRIPCION: Insercion de registros
-  #AUTOR:   Gonzalo Sarmiento Sejas 
+  #AUTOR:   Gonzalo Sarmiento Sejas
   #FECHA:   02-04-2013 20:27:35
   ***********************************/
 
   if(p_transaccion='TES_OBDET_INS')then
-          
+
         begin
-        
+
            --calculo monto en moneda base
-           
+
            select
              op.tipo_cambio_conv,
              op.tipo_obligacion,
@@ -77,56 +77,72 @@ BEGIN
              v_tipo_cambio_conv,
              v_tipo_obligacion,
              v_id_gestion
-           from tes.tobligacion_pago op 
+           from tes.tobligacion_pago op
            where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
-           
-          
+
+
           --no se admiten incersiones para pago tipo obligacion
-          IF v_tipo_obligacion='adquisiciones' THEN          
-              raise exception 'no se permiten inserciones en pagos de adquisiciones';          
+          IF v_tipo_obligacion='adquisiciones' THEN
+              raise exception 'no se permiten inserciones en pagos de adquisiciones';
           END IF;
-          
+
           --calcula monto en moneda base
            v_monto_mb = v_parametros.monto_pago_mo * v_tipo_cambio_conv;
-        
-        
+
+
           --recueprar la partida de la parametrizacion
           v_id_partida = NULL;
-          
-          
+
+
           raise notice '(''CUECOMP'', %, %, %)',  v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo;
-         
+
           --recupera el nombre del concepto de gasto
-           
+
           select
             cig.desc_ingas
           into
             v_registros_cig
           from param.tconcepto_ingas cig
           where cig.id_concepto_ingas =  v_parametros.id_concepto_ingas;
-          
-          
+
+
           IF v_tipo_obligacion = 'pago_especial' THEN
               v_relacion = 'PAGOES';
           ELSE
               v_relacion = 'CUECOMP';
-          END IF; 
-          
+          END IF;
+
           --raise exception 'sssssss  %', v_tipo_obligacion;
-             
-          SELECT 
-            ps_id_partida 
-          into 
-            v_id_partida 
+
+          SELECT
+            ps_id_partida
+          into
+            v_id_partida
           FROM conta.f_get_config_relacion_contable(v_relacion, v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo, 'No se encontro relación contable para el conceto de gasto: '||v_registros_cig.desc_ingas||'. <br> Mensaje: ');
-        
-           
-        
+
+
+
           IF v_id_partida is NULL THEN
               raise exception 'no se tiene una parametrizacion de partida  para este concepto de gasto en la relacion contable de código  (%,%,%,%)','CUECOMP', v_relacion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo;
           END IF;
-         
-        
+             ----#12
+        select 	op.id_moneda,
+        		op.fecha
+        		into
+                v_id_moneda_sg,
+                v_fecha_ob
+        from tes.tobligacion_pago op
+        where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
+
+
+        v_monto_pago_sg_mb = param.f_convertir_moneda( 	v_id_moneda,
+                                                       	NULL,   --por defecto moenda base
+                                                      	v_parametros.monto_pago_sg_mb,
+                                                       	v_fecha_ob,
+                                                      	 'O',-- tipo oficial, venta, compra
+                                                 NULL);
+             ---#12
+
           --Sentencia de la insercion
           insert into tes.tobligacion_det(
       estado_reg,
@@ -138,12 +154,14 @@ BEGIN
       id_obligacion_pago,
       id_centro_costo,
       monto_pago_mb,
-            descripcion,
+      descripcion,
       fecha_reg,
       id_usuario_reg,
       fecha_mod,
       id_usuario_mod,
-            id_orden_trabajo
+      id_orden_trabajo,
+      monto_pago_sg_mo, --#12
+      monto_pago_sg_mb --#12
           )
           values(
       'activo',
@@ -155,17 +173,18 @@ BEGIN
       v_parametros.id_obligacion_pago,
       v_parametros.id_centro_costo,
       v_monto_mb,
-            v_parametros.descripcion,   
+      v_parametros.descripcion,
       now(),
       p_id_usuario,
       null,
       null,
-            v_parametros.id_orden_trabajo
-              
+      v_parametros.id_orden_trabajo,
+      v_parametros.monto_pago_sg_mb,--#12
+      v_monto_pago_sg_mb --#12
       )RETURNING id_obligacion_det into v_id_obligacion_det;
-      
+
       --Definicion de la respuesta
-      v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Detalle almacenado(a) con exito (id_obligacion_det'||v_id_obligacion_det||')'); 
+      v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Detalle almacenado(a) con exito (id_obligacion_det'||v_id_obligacion_det||')');
             v_resp = pxp.f_agrega_clave(v_resp,'id_obligacion_det',v_id_obligacion_det::varchar);
 
             --Devuelve la respuesta
@@ -173,19 +192,19 @@ BEGIN
 
     end;
 
-  /*********************************    
+  /*********************************
   #TRANSACCION:  'TES_OBDET_MOD'
   #DESCRIPCION: Modificacion de registros
-  #AUTOR:   Gonzalo Sarmiento Sejas 
+  #AUTOR:   Gonzalo Sarmiento Sejas
   #FECHA:   02-04-2013 20:27:35
   ***********************************/
 
   elsif(p_transaccion='TES_OBDET_MOD')then
 
     begin
-        
+
            --calculo monto en moneda base
-           
+
            select
            op.tipo_cambio_conv,
            op.id_moneda,
@@ -194,38 +213,55 @@ BEGIN
            v_tipo_cambio_conv,
            v_id_moneda,
            v_id_gestion
-           from tes.tobligacion_pago op 
+           from tes.tobligacion_pago op
            where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
-           
+
            v_monto_mb = v_parametros.monto_pago_mo * v_tipo_cambio_conv;
-           
+
            --recueprar la partida de la parametrizacion
           v_id_partida = NULL;
-          
-          
+
+
           select
             cig.desc_ingas
             into
             v_registros_cig
             from param.tconcepto_ingas cig
             where cig.id_concepto_ingas =  v_parametros.id_concepto_ingas;
-          
-          SELECT 
-              ps_id_partida 
-            into 
-              v_id_partida 
+
+          SELECT
+              ps_id_partida
+            into
+              v_id_partida
           FROM conta.f_get_config_relacion_contable('CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo, 'No se encontro relación contable para el conceto de gasto: '||v_registros_cig.desc_ingas||'. <br> Mensaje: ');
-          
-          
-                    
-        
+
+
+
+
            IF v_id_partida is NULL THEN
-          
+
             raise exception 'no se tiene una parametrizacionde partida  para este concepto de gasto en la relacion contable de código CUECOMP  (%,%,%,%)','CUECOMP', v_id_gestion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo;
-            
+
            END IF;
-        
-        
+
+              ----#12
+        select 	op.id_moneda,
+        		op.fecha
+        		into
+                v_id_moneda_sg,
+                v_fecha_ob
+        from tes.tobligacion_pago op
+        where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
+
+
+        v_monto_pago_sg_mb = param.f_convertir_moneda( 	v_id_moneda,
+                                                       	NULL,   --por defecto moenda base
+                                                      	v_parametros.monto_pago_sg_mb,
+                                                       	v_fecha_ob,
+                                                      	 'O',-- tipo oficial, venta, compra
+                                                 NULL);
+         ---#12
+
       --Sentencia de la modificacion
       update tes.tobligacion_det set
       --id_cuenta = v_parametros.id_cuenta,
@@ -236,10 +272,12 @@ BEGIN
       id_obligacion_pago = v_parametros.id_obligacion_pago,
       id_centro_costo = v_parametros.id_centro_costo,
       monto_pago_mb = v_monto_mb,
-        fecha_mod = now(),
-            descripcion=v_parametros.descripcion,
+      fecha_mod = now(),
+      descripcion=v_parametros.descripcion,
       id_usuario_mod = p_id_usuario,
-            id_orden_trabajo = v_parametros.id_orden_trabajo
+      id_orden_trabajo = v_parametros.id_orden_trabajo,
+      monto_pago_sg_mo = v_parametros.monto_pago_sg_mb,--#12
+      monto_pago_sg_mb = v_monto_pago_sg_mb --#12
       where id_obligacion_det=v_parametros.id_obligacion_det;
                
       --Definicion de la respuesta

@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_pago_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -22,10 +20,11 @@ $body$
  AUTOR:
  FECHA:
  HISTORIAL DE MODIFICACIONES:
-   	
+
  ISSUE            FECHA:		      AUTOR                                DESCRIPCION
  #0       		  02-04-2013     Gonzalo Sarmiento Sejas (KPLIAN)    creación
  #7890            18/12/2018     RAC KPLIAN                          Se incluye la bandera que muestra que una obligacion a sido forzada a finalizar en los listados de obligaciones de pago
+ #12        	  10/01/2019     MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
 ***************************************************************************/
 
 DECLARE
@@ -230,10 +229,10 @@ BEGIN
                               obpg.monto_ajuste_ret_anticipo_par_ga,
                               obpg.monto_total_adjudicado,
                               obpg.total_anticipo,
-                              obpg.pedido_sap,                              
+                              obpg.pedido_sap,
                               obpg.fin_forzado,   --#7890
-                              obpg.monto_sg_mo    --#7890
-
+                              obpg.monto_sg_mo,    --#7890
+							  obpg.comprometer_iva	 --#12
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
                               left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod

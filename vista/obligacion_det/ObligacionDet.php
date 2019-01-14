@@ -7,7 +7,7 @@
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
 * Issue			Fecha			Author          Descripcion
  * #1				21/09/2018		EGS				se arreglo para filtros del concepto y gasto con especial
- * 
+ * #12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
  * */
 
 header("content-type: text/javascript; charset=UTF-8");
@@ -23,7 +23,7 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
 		this.grid.getBottomToolbar().disable();
 		this.init();
 		this.iniciarEventos();
-		
+        this.eventoCalculoGestion(); //#12
 		this.addButton('btnProrrateo',
             {
                 text: 'Prorrateo',
@@ -333,6 +333,58 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
 			grid:true,
 			form:true
 		},
+        ///#12
+        {
+            config:{
+                name: 'precio_ga',
+                fieldLabel: 'Monto Act. Ges.',
+                currencyChar:' ',
+                allowBlank: true,
+                disabled:true,
+                width: 100,
+                gwidth: 120,
+                maxLength:1245186
+            },
+            type:'MoneyField',
+            id_grupo:1,
+            grid:false,
+            form:true
+        },
+        {
+            config:{
+                name: 'monto_pago_sg_mo',
+                fieldLabel: 'Monto Sig. Ges. Mo',
+                currencyChar:' ',
+                allowBlank: true,
+                disabled:true,
+                width: 100,
+                gwidth: 120,
+                maxLength:1245186
+            },
+            type:'MoneyField',
+            filters:{pfiltro:'obdet.monto_pago_sg_mo',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
+        {
+            config:{
+                name: 'monto_pago_sg_mb',
+                fieldLabel: 'Monto Sig. Ges. Mb',
+                currencyChar:' ',
+                allowBlank: true,
+                //inputType:'hidden',
+                width: 100,
+                gwidth: 120,
+                maxLength:1245186
+            },
+            type:'MoneyField',
+            filters:{pfiltro:'obdet.monto_pago_sg_mb',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
+        //#12
 		{
 			config:{
 				name: 'monto_pago_mb',
@@ -488,7 +540,8 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},'desc_ingas','nombre_ingas','descripcion',
-		'id_orden_trabajo','desc_orden'
+		'id_orden_trabajo','desc_orden',
+        'monto_pago_sg_mo','monto_pago_sg_mb'//#12
 	],
 	onButtonEdit:function(){
 	    
@@ -660,7 +713,21 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
 		direction: 'ASC'
 	},
 	bdel:true,
-	bsave:false
+	bsave:false,
+    eventoCalculoGestion : function () {
+    this.cmpMontoPagoMo = this.getComponente('monto_pago_mo');
+    this.cmpPrecioSg = this.getComponente('monto_pago_sg_mb');
+    this.cmpPrecioGa = this.getComponente('precio_ga');
+    this.cmpMontoPagoMo.on('change',function(field){
+        var pTot = this.cmpMontoPagoMo.getValue();
+        this.cmpMontoPagoMo.setValue(pTot);
+        this.cmpPrecioGa.setValue(pTot);
+        this.cmpPrecioSg.setValue(0);
+    } ,this);
+    this.cmpPrecioSg.on('valid',function(field){
+        this.cmpPrecioGa.setValue(this.cmpMontoPagoMo.getValue() - this.cmpPrecioSg.getValue());
+    } ,this);
+    }
 	}
 )
 </script>	

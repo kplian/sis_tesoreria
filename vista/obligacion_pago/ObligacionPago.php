@@ -8,7 +8,7 @@
 	Issue			Fecha        Author				Descripcion
  #1			21/09/2018		EGS					se aumento variables para q los campos igualen con el new con obligacion de pago especial.php
  #7890      18/12/2018      RAC KPLIAN          se adicionan columnas onto sigueinte gestion y si es forzado a finalizar
- 
+ #12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
  *********************************************************************************************************************************************/
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -291,8 +291,10 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                 allowBlank: false,
                 readOnly : true,
                 gwidth: 100,
-                        format: 'd/m/Y', 
-                        renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+                format: 'd/m/Y',
+                renderer:function (value,p,record){
+                    return  String.format('<b><font size=3  color="#006400">{0}</font><b>',value?value.dateFormat('d/m/Y'):'');//#12
+                }
             },
             type:'DateField',
             filters:{pfiltro:'obpg.fecha',type:'date'},
@@ -465,6 +467,26 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
            grid:true,
            form:true
           },
+        /// #12
+        {
+            config:{
+                name: 'comprometer_iva',
+                fieldLabel: 'Comprometer Iva',
+                gwidth: 100,
+                maxLength:30,
+                items: [
+                    {boxLabel: 'Si',name: 'pg-iva',  inputValue: 'si',qtip:'Si esta habilita le resta el 13% del iva al momento de comproemter la obligacion de pago'
+                    },
+                    {boxLabel: 'No',name: 'pg-iva', inputValue: 'no'}
+                ]
+            },
+            type:'RadioGroupField',
+            filters:{pfiltro:'comprometer_iva',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
+         //#12
          {
             config:{
                 name: 'tipo_cambio_conv',
@@ -829,8 +851,8 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 		'total_anticipo',////EGS13/08/2018////
 		'pedido_sap',
 		'fin_forzado',  //#7890
-		'monto_sg_mo'   //#7890
-		
+		'monto_sg_mo',   //#7890
+		'comprometer_iva' // #12
 	],
 	
 	arrayDefaultColumHidden:['id_fecha_reg','id_fecha_mod','fecha_mod','usr_reg','estado_reg','fecha_reg','usr_mod',
