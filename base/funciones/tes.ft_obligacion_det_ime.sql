@@ -17,6 +17,7 @@ $body$
  HISTORIAL DE MODIFICACIONES:
  Issue			Fecha        Author				Descripcion
 #12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
+#13        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago formulario
 ***************************************************************************/
 
 DECLARE
@@ -125,7 +126,7 @@ BEGIN
           IF v_id_partida is NULL THEN
               raise exception 'no se tiene una parametrizacion de partida  para este concepto de gasto en la relacion contable de código  (%,%,%,%)','CUECOMP', v_relacion, v_parametros.id_concepto_ingas, v_parametros.id_centro_costo;
           END IF;
-             ----#12
+            ----#12
         select 	op.id_moneda,
         		op.fecha
         		into
@@ -134,13 +135,18 @@ BEGIN
         from tes.tobligacion_pago op
         where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
 
+          if  v_parametros.monto_pago_sg_mb != 0 then --#13
+              v_monto_pago_sg_mb = param.f_convertir_moneda( 	v_id_moneda,
+                                                              NULL,   --por defecto moenda base
+                                                              v_parametros.monto_pago_sg_mb,
+                                                              v_fecha_ob,
+                                                               'O',-- tipo oficial, venta, compra
+                                                                 NULL);
+          else
 
-        v_monto_pago_sg_mb = param.f_convertir_moneda( 	v_id_moneda,
-                                                       	NULL,   --por defecto moenda base
-                                                      	v_parametros.monto_pago_sg_mb,
-                                                       	v_fecha_ob,
-                                                      	 'O',-- tipo oficial, venta, compra
-                                                 NULL);
+       		  v_monto_pago_sg_mb = 0; --#13
+
+          end if;
              ---#12
 
           --Sentencia de la insercion

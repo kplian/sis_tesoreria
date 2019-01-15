@@ -5,6 +5,8 @@
 *@author  Rensi Arteaga Copari 
 *@date    30-01-2014
 *@description permites subir archivos a la tabla de documento_sol
+ * Issue			Fecha        Author				Descripcion
+#13        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago formuulario
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -597,6 +599,27 @@ Phx.vista.FormObligacionEspecial=Ext.extend(Phx.frmInterfaz,{
             id_grupo:1,
             form:true
         },
+        /// #13
+        {
+            config:{
+                name: 'comprometer_iva',
+                fieldLabel: 'Comprometer Iva',
+                allowBlank: false,
+                gwidth: 100,
+                maxLength:30,
+                items: [
+                    {boxLabel: 'Si',name: 'pg-iva',  inputValue: 'si',qtip:'Si esta habilita le resta el 13% del iva al momento de comproemter la obligacion de pago'
+                    },
+                    {boxLabel: 'No',name: 'pg-iva', inputValue: 'no'}
+                ]
+            },
+            type:'RadioGroupField',
+            filters:{pfiltro:'comprometer_iva',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
+        //#13
         {
 			//configuracion del componente
 			config:{
