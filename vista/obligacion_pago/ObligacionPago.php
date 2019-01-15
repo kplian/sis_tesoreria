@@ -471,7 +471,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
         {
             config:{
                 name: 'comprometer_iva',
-                fieldLabel: 'Comprometer Iva',
+                fieldLabel: 'Comprometer al 100%', //#13
                 gwidth: 100,
                 maxLength:30,
                 items: [

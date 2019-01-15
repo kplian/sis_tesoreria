@@ -640,7 +640,7 @@ Phx.vista.FormObligacion=Ext.extend(Phx.frmInterfaz,{
         {
             config:{
                 name: 'comprometer_iva',
-                fieldLabel: 'Comprometer Iva',
+                fieldLabel: 'Comprometer al 100%', //#13
                 allowBlank: false,
                 gwidth: 100,
                 maxLength:30,
