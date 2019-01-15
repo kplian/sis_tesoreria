@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.ft_obligacion_det_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -17,10 +15,8 @@ $body$
  COMENTARIOS:	
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
-
- DESCRIPCION:	
- AUTOR:			
- FECHA:		
+Issue			Fecha        Author				Descripcion
+ #12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago	
 ***************************************************************************/
 
 DECLARE
@@ -72,7 +68,9 @@ BEGIN
 						usu2.cuenta as usr_mod,
                         obdet.descripcion,
                         ot.id_orden_trabajo,
-                        ot.desc_orden
+                        ot.desc_orden,
+                        obdet.monto_pago_sg_mo,  --#12
+                        obdet.monto_pago_sg_mb	 --#12
 						from tes.tobligacion_det obdet
 						inner join segu.tusuario usu1 on usu1.id_usuario = obdet.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = obdet.id_usuario_mod

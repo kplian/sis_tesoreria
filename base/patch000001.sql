@@ -1913,3 +1913,20 @@ COMMENT ON COLUMN tes.tobligacion_det.monto_pago_sg_mb
 IS 'monto para la siguiente gestion en moenda base, este monto no comprometera presupuestos';
 
 /*************************F-SCP-CAP-TES-7890-13/12/2018*************/
+
+
+
+/*************************I-SCP-RAC-TES-12-13/12/2018*************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tobligacion_pago
+  ADD COLUMN comprometer_iva VARCHAR(2) DEFAULT 'si' NOT NULL;
+
+COMMENT ON COLUMN tes.tobligacion_pago.comprometer_iva
+IS 'si esta bandera esta habilita le resta el 13% del iva al momento de comproemter la obligacion de pago,   solo es validao para los que nacen en tesoreria, no considerado para lso que vienes de adquisiciones';
+
+
+/*************************F-SCP-RAC-TES-12-13/12/2018*************/
+
+

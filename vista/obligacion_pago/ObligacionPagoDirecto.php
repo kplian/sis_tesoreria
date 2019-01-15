@@ -88,6 +88,7 @@ Phx.vista.ObligacionPagoAdq = {
            this.mostrarComponente(this.cmpProveedor);
            this.cmpMoneda.enable();
        }
+      
            
     },
     

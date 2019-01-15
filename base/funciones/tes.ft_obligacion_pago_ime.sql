@@ -25,6 +25,7 @@ $body$
  #0       		  02-04-2013     Gonzalo Sarmiento Sejas (KPLIAN)    creación
  #7890            29/11/2018     RAC KPLIAN                          Se corrige la opcion de preguntar apra forzar cierres en obligaciones de pago extendidas  
  #8 ETR           02/01/2019     RAC KPLIAN                          Se aumentan validacion al modificar datos de obligaciones de pago extendidas         
+ #12        	  10/01/2019     MMV ENDETRAN      						 Considerar restar el iva al comprometer obligaciones de pago
 ***************************************************************************/
 
 DECLARE
@@ -187,7 +188,7 @@ BEGIN
 
     begin
 
-      v_resp = tes.f_inserta_obligacion_pago(p_administrador, p_id_usuario, hstore(v_parametros));
+      v_resp = tes.f_inserta_obligacion_pago(p_administrador, p_id_usuario, hstore(v_parametros));--#12
       --Devuelve la respuesta
       return v_resp;
 
@@ -319,7 +320,8 @@ BEGIN
           usuario_ai = v_parametros._nombre_usuario_ai,
           tipo_anticipo = v_parametros.tipo_anticipo,
           id_funcionario_gerente = va_id_funcionario_gerente [ 1 ],
-          id_contrato = v_id_contrato
+          id_contrato = v_id_contrato,
+          comprometer_iva = v_parametros.comprometer_iva --#12
       where id_obligacion_pago = v_parametros.id_obligacion_pago;
 
       -------------------------------------

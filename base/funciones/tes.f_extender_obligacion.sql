@@ -24,8 +24,8 @@ $body$
      HISTORIAL DE MODIFICACIONES:
    	
  ISSUE            FECHA:		      AUTOR                                DESCRIPCION
- #7890          29/11/2018		     RAC (KPLIAN)            refactorizacion de codigo para la extencion de obligaciones de  pago , seañaden neuvas funcionalidades
- 
+ #7890          29/11/2018		     RAC (KPLIAN)            refactorizacion de codigo para la extencion de obligaciones de  pago , seañaden neuvas funcionalidades 
+ #12            10/01/2019           RAC (KPLIAN)            considerar el campo comproemter_iva
           
 ***************************************************************************/
 
@@ -56,6 +56,8 @@ DECLARE
     v_monto_pro_total               numeric;  --#7890 
     v_monto_od_mo                   numeric;  --#7890
     v_monto_od_mb                   numeric;  --#7890
+    v_comprometer_iva               varchar;  --#12
+    v_id_gestion                    integer; --#12
   
 	
 BEGIN
@@ -80,7 +82,16 @@ BEGIN
       IF v_registros.id_obligacion_pago_extendida is not null THEN
         raise exception 'la obligacion de pago ya fue extendida';
       END IF;
-
+      
+      
+      
+      ---------------------------------------------------------------------------------------------------
+      --  #12  considerar si marcamos o no el campo de comprometer iva para la obligacion extendidad
+      --------------------------------------------------------------------------------------------------
+      v_comprometer_iva = v_registros.comprometer_iva; --valor por defecto
+      
+      
+     
       ------------------------------
       -- copiar obligacion de pago
       ------------------------------
@@ -92,6 +103,17 @@ BEGIN
       IF (v_anho||'-1-1')::date > v_date THEN
         v_date = (v_anho::varchar||'-1-1')::Date;
       END IF;
+      
+      --#12 validar gestion 
+      SELECT per.id_gestion INTO v_id_gestion 
+      FROM param.tperiodo per
+      WHERE  per.fecha_ini <= v_date and per.fecha_fin >= v_date;  
+      
+      IF v_id_gestion is null THEN
+         raise exception 'No se encontre una gestion abierta para la fecha % ',v_date;
+      END IF;
+      
+      --verificar si existe una sigueinte gestion apra el proceso
 
       v_hstore_registros =   hstore(ARRAY[
         'fecha',v_date::varchar,
@@ -113,7 +135,8 @@ BEGIN
         'tipo_anticipo',v_registros.tipo_anticipo::varchar,
         'id_contrato',v_registros.id_contrato::varchar,  ---#7890  manda contrato para la obligacion extendida id_contrato
         'extendida', 'si',  --#7890  indica que se esta extendiendo
-        'id_obligacion_pago_ext', p_id_obligacion_pago::varchar  --#7890  id_obligacion_pago_original
+        'id_obligacion_pago_ext', p_id_obligacion_pago::varchar,  --#7890  id_obligacion_pago_original
+        'comprometer_iva', v_comprometer_iva::varchar --#12
         ]);
 
       v_resp = tes.f_inserta_obligacion_pago(p_administrador, p_id_usuario,  hstore(v_hstore_registros));

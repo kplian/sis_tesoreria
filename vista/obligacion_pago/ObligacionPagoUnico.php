@@ -4,8 +4,8 @@
 *@file gen-SistemaDist.php
 *@author  (fprudencio)
 *@date 20-09-2011 10:22:05
-*@description Archivo con la interfaz de usuario que permite 
-*dar el visto a solicitudes de compra
+*@description Archivo con la interfaz de usuario que permite dar el visto a solicitudes de compra
+#12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
 *
 */
 header("content-type: text/javascript; charset=UTF-8");
@@ -76,14 +76,16 @@ Phx.vista.ObligacionPagoUnico = {
        
        	if(data.estado != 'borrador'){
        	  this.Cmp.tipo_anticipo.disable();
-       	 
+
        	  this.Cmp.id_proveedor.disable();
+       	  this.Cmp.comprometer_iva.disable();//#12
        	  
        }
        else{
        
        	this.Cmp.id_proveedor.enable();
        	this.mostrarComponente(this.Cmp.id_proveedor);
+       	this.Cmp.comprometer_iva.enable();//#12
        }
        
            
@@ -110,8 +112,7 @@ Phx.vista.ObligacionPagoUnico = {
 	                                            }],
 	                                    
 	                                    scope:this
-	                                 }); 
-        
+	                                 });
     },
     onSaveForm: function(form,  objRes){
     	var me = this;

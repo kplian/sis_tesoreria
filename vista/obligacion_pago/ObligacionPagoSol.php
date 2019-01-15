@@ -4,8 +4,9 @@
 *@file gen-SistemaDist.php
 *@author  (rarteaga)
 *@date 20-09-2011 10:22:05
-*@description Archivo con la interfaz de usuario que permite 
-*dar el visto a solicitudes de compra
+*@description Archivo con la interfaz de usuario que permite dar el visto a solicitudes de compra
+Issue			Fecha        Author				Descripcion
+#12        10/01/2019      NMMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
 *
 */
 header("content-type: text/javascript; charset=UTF-8");
@@ -254,11 +255,11 @@ Phx.vista.ObligacionPagoSol = {
        	  this.Cmp.total_nro_cuota.disable();
        	  this.Cmp.id_funcionario.disable();
        	  this.cmpProveedor.disable();
-       	  
-       
+       	  this.Cmp.comprometer_iva.disable();//#12
        }
        else{
        	this.Cmp.total_nro_cuota.enable();
+       	this.Cmp.comprometer_iva.enable();//#12
        }
            
     },
@@ -287,7 +288,7 @@ Phx.vista.ObligacionPagoSol = {
         this.cmpFecha.setValue(new Date());
         this.cmpFecha.fireEvent('change')
         this.cmpTipoObligacion.setValue('pago_directo');
-        
+        this.Cmp.comprometer_iva.enable();//#12
         
         
     },

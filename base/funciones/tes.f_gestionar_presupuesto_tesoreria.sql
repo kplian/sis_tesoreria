@@ -31,7 +31,8 @@ $body$
  #100   ETR       30/05/2018        RAC KPLIAN        Nueva funcion de sincronizacion que considere si el IVA de amnera opcional v_conta_revertir_iva_comprometido
  #101   ETR       02/07/2018        RAC KPLIAN        Considera facturas con monto excento al sicronizar presupuestos
  #7777  ETR       13/12/2018        RAC KPLIAN        Determinar si el anticipo es de la misma gestion que la obligacion de pago y si es necesario realizar la conversion 
- #7890  ETR       13/12/2018        RAC KPLIAN        Al aprobacion una olbigacion de pago colo comprometer el monto previsto para la gestion actual  (restar monto_sg_mo)  
+ #7890  ETR       13/12/2018        RAC KPLIAN        Al aprobacion una olbigacion de pago colo comprometer el monto previsto para la gestion actual  (restar monto_sg_mo)
+ #12    ETR       10/01/2018        RAC KPLIAN        Si la obigacion de la bandera comprometer_iva = no, le restamso el 13% a total que se tiene que comprometer   
 ***************************************************************************/
 
 DECLARE
@@ -140,7 +141,8 @@ BEGIN
                                     opd.monto_pago_sg_mb,   --7890
                                     opd.factor_porcentual,   --7890
                                     op.monto_ajuste_ret_anticipo_par_ga, --7890
-                                    opd.factor_porcentual  --7890
+                                    opd.factor_porcentual,  --7890
+                                    op.comprometer_iva     --#12
                               
                               FROM  tes.tobligacion_pago  op
                               INNER JOIN tes.tobligacion_det opd  on  opd.id_obligacion_pago = op.id_obligacion_pago and opd.estado_reg = 'activo'
@@ -171,6 +173,11 @@ BEGIN
                         v_monto_det_comprometer = v_registros.monto_pago_mo - COALESCE(v_registros.monto_pago_sg_mo,0) - (v_registros.factor_porcentual*COALESCE(v_registros.monto_ajuste_ret_anticipo_par_ga,0));  
                        ELSE
                          v_monto_det_comprometer = v_registros.monto_pago_mo - COALESCE(v_registros.monto_pago_sg_mo,0) ; 
+                       END IF;
+                       
+                       --#12 si comproemter el iva es igual  a NO restamos el 13 % 
+                       IF  v_registros.comprometer_iva = 'no'  THEN
+                           v_monto_det_comprometer = v_monto_det_comprometer * 0.87;  --#12 solo compromete el 87%
                        END IF;
                          
                          
@@ -232,7 +239,7 @@ BEGIN
        
         -- revierte el presupuesto total que se encuentre comprometido
         
-      -- raise exception 'llega';
+     
            v_i = 0;
           
            FOR v_registros in ( 
