@@ -1086,6 +1086,7 @@ function listarPagos(){
 		$this->captura('saldo_retencion_por_devolver', 'NUMERIC');
 		$this->captura('total_multas_retenidas', 'NUMERIC');
 		$this->captura('rotulo_comercial', 'varchar');
+		$this->captura('moneda', 'varchar'); //#15 ENDETR
 
         //Ejecuta la instruccion
         $this->armarConsulta();
