@@ -190,7 +190,7 @@ class MODObligacionPago extends MODbase{
         //////////////// EGS 13/08/2018 //////////////
         $this->captura('fin_forzado','varchar'); //#7890
 		$this->captura('monto_sg_mo','numeric'); //#7890
-        $this->captura('comprometer_iva','varchar'); //#16
+        $this->captura('comprometer_iva','varchar');  //#16
 
         
         //Ejecuta la instruccion

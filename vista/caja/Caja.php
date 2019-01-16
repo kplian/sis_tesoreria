@@ -416,7 +416,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 	ActSave:'../../sis_tesoreria/control/Caja/insertarCaja',
 	ActDel:'../../sis_tesoreria/control/Caja/eliminarCaja',
 	ActList:'../../sis_tesoreria/control/Caja/listarCaja',
-	id_store:'id_proceso_caja',
+	id_store:'id_caja',
 	fields: [
 		{name:'id_caja', type: 'numeric'},
 		{name:'nro_tramite', type: 'string'},
@@ -445,11 +445,10 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
 		{name:'desc_moneda', type: 'string'},
 		{name:'desc_depto', type: 'string'},
 		{name:'desc_depto_lb', type: 'string'},
-		{name:'tipo_ejecucion', type: 'string'},
-		{name:'id_proceso_caja', type: 'numeric'},
+		{name:'tipo_ejecucion', type: 'string'}
 	],
 	sortInfo:{
-		field: 'id_proceso_caja',
+		field: 'id_caja',
 		direction: 'DESC'
 	},
 	bdel:true,

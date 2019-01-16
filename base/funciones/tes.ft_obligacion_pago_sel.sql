@@ -491,7 +491,7 @@ BEGIN
                               obpg.pedido_sap,                              
                               obpg.fin_forzado,   --#7890
                               obpg.monto_sg_mo,    --#7890
-                              obpg.comprometer_iva	 --#16
+                              obpg.comprometer_iva	  --#16
 
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg

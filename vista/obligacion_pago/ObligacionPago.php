@@ -9,7 +9,7 @@
  #1			21/09/2018		EGS					se aumento variables para q los campos igualen con el new con obligacion de pago especial.php
  #7890      18/12/2018      RAC KPLIAN          se adicionan columnas onto sigueinte gestion y si es forzado a finalizar
  #12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
- #16              16/01/2019     MMV ENDETRAN      					 Incluir comprometer al 100% pago único sin contrato
+ #16        16/01/2019     MMV ENDETRAN      					 Incluir comprometer al 100% pago único sin contrato
 
  *********************************************************************************************************************************************/
 header("content-type: text/javascript; charset=UTF-8");
