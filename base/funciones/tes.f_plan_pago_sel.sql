@@ -21,6 +21,7 @@ ISSUE 			FECHA: 			AUTOR:						DESCRIPCION:
  #1				16/10/2018		EGS							se aumento el campo pago_borrador en la sentencia de la consulta
  #5  EndeETR    27/12/2018		EGS							se aumento en la sentencia de la transsancion   TES_PLAPAREP_SEL  el codigo de proveedor
  #6  ENDETR		27/12/2018		JUAN						se agrego la columna (monto_ajuste_ret_garantia_ga) en reporte obligaciones de pagos pendientes
+ #15 ENDETR     16/01/2019      JUAN                        se agrego la columna moneda en reporte de obligaciones de pagos pendientes
 ***************************************************************************/
 
 DECLARE
@@ -1097,13 +1098,15 @@ BEGIN
                           (tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_reten_garantia'',null)-
                           tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_retencion_garantia_dev'',null))::NUMERIC as saldo_retencion_por_devolver,
                           tes.f_determinar_total_faltante(op.id_obligacion_pago,''op_total_multa_retenida'',null)::NUMERIC as total_multas_retenidas,
-                          (''(''||prov.codigo||'')''||ins.nombre)::varchar  as rotulo_comercial
+                          (''(''||prov.codigo||'')''||ins.nombre)::varchar  as rotulo_comercial,
+                          m.moneda -- #15 ENDETR
                           from tes.tobligacion_pago op 
+                          join param.tmoneda m on m.id_moneda=op.id_moneda -- #15 ENDETR
                           join tes.tplan_pago pp on pp.id_obligacion_pago=op.id_obligacion_pago
                           left join param.tproveedor prov on prov.id_proveedor=op.id_proveedor
                           left join param.tinstitucion ins on ins.id_institucion=prov.id_institucion
                           where op.id_gestion='||v_parametros.id_gestion||' and pp.estado not in (''borrador'',''pendiente'') 
-                          group by op.id_obligacion_pago,op.num_tramite,op.total_pago,ins.nombre,prov.codigo
+                          group by op.id_obligacion_pago,op.num_tramite,op.total_pago,ins.nombre,prov.codigo,m.moneda
                           ORDER BY ins.nombre ASC';
 
 

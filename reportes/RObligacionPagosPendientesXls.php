@@ -160,8 +160,8 @@ class RObligacionPagosPendientesXls
 
 
 
-        $this->docexcel->getActiveSheet()->getStyle('A5:R5')->getAlignment()->setWrapText(true);
-        $this->docexcel->getActiveSheet()->getStyle('A5:R5')->applyFromArray($styleTitulos2);
+        $this->docexcel->getActiveSheet()->getStyle('A5:S5')->getAlignment()->setWrapText(true);
+        $this->docexcel->getActiveSheet()->getStyle('A5:S5')->applyFromArray($styleTitulos2);
 
 
 
@@ -186,7 +186,7 @@ class RObligacionPagosPendientesXls
 		$this->docexcel->getActiveSheet()->setCellValue('P5','Retenciones de garantia devuelta');
 		$this->docexcel->getActiveSheet()->setCellValue('Q5','Saldo retenciones por devolver');
 		$this->docexcel->getActiveSheet()->setCellValue('R5','Total multas retenidas');
-		
+		$this->docexcel->getActiveSheet()->setCellValue('S5','Moneda'); #15 ENDETR
 		/*$this->docexcel->getActiveSheet()->setCellValue('Q5','Nro cuota');
 		$this->docexcel->getActiveSheet()->setCellValue('R5','Estado rev');
 		
@@ -253,7 +253,7 @@ class RObligacionPagosPendientesXls
 				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(15, $fila, $value['ret_gar_dev']);
 				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(16, $fila, $value['saldo_retencion_por_devolver']);
 				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(17, $fila, $value['total_multas_retenidas']);
-				
+				$this->docexcel->getActiveSheet()->setCellValueByColumnAndRow(18, $fila, $value['moneda']); #15 ENDETR
 				
 				$fila++;
                 $this->numero++;
