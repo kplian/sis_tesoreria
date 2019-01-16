@@ -9,6 +9,8 @@
  #1			21/09/2018		EGS					se aumento variables para q los campos igualen con el new con obligacion de pago especial.php
  #7890      18/12/2018      RAC KPLIAN          se adicionan columnas onto sigueinte gestion y si es forzado a finalizar
  #12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
+ #16        16/01/2019     MMV ENDETRAN      					 Incluir comprometer al 100% pago único sin contrato
+
  *********************************************************************************************************************************************/
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -152,7 +154,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                         	    return String.format('<div ext:qtip="La extención de la obligación esta pendiente"><b><font color="red">{0}</font></b><br><b>Monto ampliado: </b>{1}</div>', value, record.data.monto_estimado_sg);
                         	}
                         	else{
-                        	   return String.format('<div ext:qtip="La extención de la obligación esta pendiente"><b><font color="red">{0}</font></b</div>', value); // #7890
+                        	   return String.format('<div ext:qtip="La extención de la obligación esta pendiente"><b><font color="red">{0}</font></b></div>', value); // #7890
                         	}
                         }
                         else{
@@ -475,7 +477,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                 gwidth: 100,
                 maxLength:30,
                 items: [
-                    {boxLabel: 'Si',name: 'pg-iva',  inputValue: 'si',qtip:'Si esta habilita le resta el 13% del iva al momento de comproemter la obligacion de pago'
+                    {boxLabel: 'Si',name: 'pg-iva',  inputValue: 'si', checked:true,qtip:'Si esta habilita le resta el 13% del iva al momento de comproemter la obligacion de pago' //#16
                     },
                     {boxLabel: 'No',name: 'pg-iva', inputValue: 'no'}
                 ]

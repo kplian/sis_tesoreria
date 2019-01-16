@@ -50,7 +50,7 @@ class MODCaja extends MODbase{
 		$this->captura('id_proceso_wf','int4');
 		$this->captura('id_estado_wf','int4');
 		$this->captura('nro_tramite','varchar');		
-		$this->captura('dias_maximo_rendicion','int4');		
+		$this->captura('dias_maximo_rendicion','int4');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();

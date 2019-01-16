@@ -13,6 +13,7 @@
  #7890            18/12/2018     RAC KPLIAN                          se adicionan columnas onto sigueinte gestion y si es forzado a finalizar
  #12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
 #13        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago formulario
+#16        16/01/2019    	MMV ENDETRAN      Incluir comprometer al 100% pago único sin contrato
  * */
 
 class MODObligacionPago extends MODbase{
@@ -189,7 +190,7 @@ class MODObligacionPago extends MODbase{
         //////////////// EGS 13/08/2018 //////////////
         $this->captura('fin_forzado','varchar'); //#7890
 		$this->captura('monto_sg_mo','numeric'); //#7890
-
+        $this->captura('comprometer_iva','varchar');  //#16
 
         
         //Ejecuta la instruccion

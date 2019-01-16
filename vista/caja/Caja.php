@@ -17,8 +17,7 @@ Phx.vista.Caja=Ext.extend(Phx.gridInterfaz,{
     	//llama al constructor de la clase padre
 		Phx.vista.Caja.superclass.constructor.call(this,config);
 		this.init();
-		this.iniciarEventos();
-		
+		this.iniciarEventos();		
 	    this.addBotonesGantt();
         
 		

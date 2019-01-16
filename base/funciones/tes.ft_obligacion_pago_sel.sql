@@ -25,6 +25,7 @@ $body$
  #0       		  02-04-2013     Gonzalo Sarmiento Sejas (KPLIAN)    creación
  #7890            18/12/2018     RAC KPLIAN                          Se incluye la bandera que muestra que una obligacion a sido forzada a finalizar en los listados de obligaciones de pago
  #12        	  10/01/2019     MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
+ #16              16/01/2019     MMV ENDETRAN      					 Incluir comprometer al 100% pago único sin contrato
 ***************************************************************************/
 
 DECLARE
@@ -489,8 +490,8 @@ BEGIN
                               obpg.monto_ajuste_ret_garantia_ga,
                               obpg.pedido_sap,                              
                               obpg.fin_forzado,   --#7890
-                              obpg.monto_sg_mo    --#7890
-                              
+                              obpg.monto_sg_mo,    --#7890
+                              obpg.comprometer_iva	  --#16
 
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
