@@ -9,6 +9,7 @@
  * *Issue			Fecha        Author				Descripcion
  * #1			21/09/2018		EGS					Se modifico el edit para q los campos igualen con el new
   #12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
+  #17         18/01/2019      MMV ENDETRAN       Plan de pago consulta obligaciones de pago
 *
 */
 header("content-type: text/javascript; charset=UTF-8");
@@ -49,6 +50,12 @@ Phx.vista.ObligacionPagoEspecial = {
               title:'Plan de Pagos (Reg. Adq.)', 
               height:'50%',
               cls:'PlanPagoRegIni'
+            },
+            {                                                                           //#17
+                url:'../../../sis_tesoreria/vista/plan_pago/PlanPagosConsulta.php',
+                title:'Plan de Pagos (Consulta)',
+                height:'50%',
+                cls:'PlanPagosConsulta'
             }
     
        ], 
