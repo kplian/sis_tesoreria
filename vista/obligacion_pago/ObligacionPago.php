@@ -10,6 +10,7 @@
  #7890      18/12/2018      RAC KPLIAN          se adicionan columnas onto sigueinte gestion y si es forzado a finalizar
  #12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
  #16        16/01/2019     MMV ENDETRAN      					 Incluir comprometer al 100% pago único sin contrato
+ #17         18/01/2019      MMV ENDETRAN       Plan de pago consulta obligaciones de pago
 
  *********************************************************************************************************************************************/
 header("content-type: text/javascript; charset=UTF-8");
@@ -67,7 +68,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
         this.addButton('reporte_plan_pago', { grupo:[0,1,2], text:'Planes de Pago', iconCls: 'bpdf32',disabled:true,handler:this.repPlanPago,tooltip: '<b>Reporte Plan Pago</b><p>Reporte Planes de Pago</p>'});
         
         this.disableTabPagos();
-      
+        this.disableTabConsulta(); //#17
         
         
         this.addButton('btnChequeoDocumentosWf',
@@ -1155,6 +1156,22 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 		          
 		}
      },
+    ////#17
+    enableTabConsulta:function(){
+        if(this.TabPanelSouth.get(2)){
+            this.TabPanelSouth.get(2).enable();
+            this.TabPanelSouth.setActiveTab(2)
+        }
+    },
+
+    disableTabConsulta:function(){
+        console.log('MMV',this.TabPanelSouth.get(2));
+        if(this.TabPanelSouth.get(2)){
+            this.TabPanelSouth.get(2).disable();
+            this.TabPanelSouth.setActiveTab(0)
+        }
+    },
+    ///#17
       preparaMenu:function(n){
           var data = this.getSelectedData();
           var tb =this.tbar;
@@ -1175,8 +1192,8 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
               this.getBoton('ajustes').disable();
              
               this.disableTabPagos();
-		      
-          
+		      this.disableTabConsulta(); //#17
+
           }
           else{
               
@@ -1200,6 +1217,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                if (data['estado'] == 'anulado'){
                     this.getBoton('fin_registro').disable();
                     this.disableTabPagos();
+                    this.enableTabConsulta(); //#17
                     this.getBoton('ant_estado').disable();
                     this.getBoton('est_anticipo').disable();
                }
@@ -1207,6 +1225,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                     this.getBoton('ant_estado').disable();
                     this.getBoton('fin_registro').disable();
                     this.getBoton('est_anticipo').disable();
+                   this.enableTabConsulta(); //#17
                     //this.enableTabPagos();  //7890 OJO .....RAC 10/12/2018 solo prueba, descomentar solo apra mostras plan de pagos en procesos finalizados
                     if(data['id_obligacion_pago_extendida']=='' || !data['id_obligacion_pago_extendida'] ){
                     	this.getBoton('extenderop').enable();
@@ -1337,7 +1356,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
             },
             {
               url:'../../../sis_tesoreria/vista/plan_pago/PlanPagoReq.php',
-              title:'Plan de Pagos', 
+              title:'Plan de Pagos',
               height:'50%',
               cls:'PlanPagoReq'
             }

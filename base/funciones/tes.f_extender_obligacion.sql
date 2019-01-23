@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_extender_obligacion (
   p_administrador integer,
   p_id_obligacion_pago integer,
@@ -26,7 +24,7 @@ $body$
  ISSUE            FECHA:		      AUTOR                                DESCRIPCION
  #7890          29/11/2018		     RAC (KPLIAN)            refactorizacion de codigo para la extencion de obligaciones de  pago , seañaden neuvas funcionalidades 
  #12            10/01/2019           RAC (KPLIAN)            considerar el campo comproemter_iva
-          
+--#18 endetr    23/01/2018        chros                     se mejoró el mensaje que se visualiza a momento de validar que existan los centros de costo en la siguiente gestión          
 ***************************************************************************/
 
 
@@ -187,8 +185,11 @@ BEGIN
              od.descripcion,
              od.monto_pago_mo,
              od.id_orden_trabajo,
-             od.monto_pago_mb
+             od.monto_pago_mb,
+             tcc.codigo
       FROM tes.tobligacion_det od
+      JOIN param.tcentro_costo cc ON cc.id_centro_costo=od.id_centro_costo
+      JOIN param.ttipo_cc tcc ON tcc.id_tipo_cc=cc.id_tipo_cc
       where od.estado_reg = 'activo' and
             od.id_obligacion_pago = p_id_obligacion_pago)
       LOOP
@@ -204,7 +205,7 @@ BEGIN
         
         --7890 add validacion
         IF v_id_centro_costo_dos is NULL  THEN
-          raise exception 'No se encontro  centro de costo equivalente para el id % , en la siguiente gestion' , v_registros_det.id_centro_costo;          
+          raise exception 'No se encontro centro de costo equivalente en la siguiente gestion para el centro %' , v_registros_det.codigo;--#18
         END IF;
         
 
