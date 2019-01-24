@@ -4,9 +4,9 @@
 *@file gen-SistemaDist.php
 *@author  (fprudencio)
 *@date 20-09-2011 10:22:05
-*@description Archivo con la interfaz de usuario que permite 
-*dar el visto a solicitudes de compra
-*
+ *@description Archivo con la interfaz de usuario que permite dar el visto a solicitudes de compra
+Issue			Fecha        Author				Descripcion
+#17         18/01/2019      MMV ENDETRAN       Plan de pago consulta obligaciones de pago
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -47,7 +47,13 @@ Phx.vista.ObligacionPagoAdq = {
               title:'Plan de Pagos (Reg. Adq.)', 
               height:'50%',
               cls:'PlanPagoRegIni'
-            }
+            },
+             {                                                                          //#17
+                 url:'../../../sis_tesoreria/vista/plan_pago/PlanPagosConsulta.php',
+                 title:'Plan de Pagos (Consulta)',
+                 height:'50%',
+                 cls:'PlanPagosConsulta'
+             }
     
        ], 
     onButtonEdit:function(){
