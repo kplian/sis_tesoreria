@@ -298,8 +298,8 @@ BEGIN
       descripcion=v_parametros.descripcion,
       id_usuario_mod = p_id_usuario,
       id_orden_trabajo = v_parametros.id_orden_trabajo,
-      monto_pago_sg_mo = v_parametros.monto_pago_sg_mb,--#12
-      monto_pago_sg_mb = monto_pago_sg_mo --#12
+      monto_pago_sg_mo = v_parametros.monto_pago_sg_mo,--#19
+      monto_pago_sg_mb = v_monto_pago_sg_mb --#12
       where id_obligacion_det=v_parametros.id_obligacion_det;
                
       --Definicion de la respuesta
