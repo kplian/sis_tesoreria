@@ -14,6 +14,8 @@
  #12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
 #13        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago formulario
 #16        16/01/2019    	MMV ENDETRAN      Incluir comprometer al 100% pago único sin contrato
+#19        25/01/2019      MMV ENDETRAN       Correccion de bug conversion de moneda
+
  * */
 
 class MODObligacionPago extends MODbase{
@@ -718,7 +720,7 @@ class MODObligacionPago extends MODbase{
 				$this->arreglo['monto_pago_mo'] = $f['monto_pago_mo'];
 				$this->arreglo['id_orden_trabajo'] = $f['id_orden_trabajo'];
 				$this->arreglo['id_concepto_ingas'] = $f['id_concepto_ingas'];
-                $this->arreglo['monto_pago_sg_mb'] = 0; //#13
+                $this->arreglo['monto_pago_sg_mo'] = 0; //#19
 				//Define los parametros para la funcion
 				$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
 				$this->setParametro('id_centro_costo','id_centro_costo','int4');
@@ -726,8 +728,9 @@ class MODObligacionPago extends MODbase{
 				$this->setParametro('monto_pago_mo','monto_pago_mo','numeric');
 				$this->setParametro('id_orden_trabajo','id_orden_trabajo','int4');
 				$this->setParametro('id_concepto_ingas','id_concepto_ingas','int4');
-                $this->setParametro('monto_pago_sg_mb','monto_pago_sg_mb','numeric');//#13
-				//Ejecuta la instruccion
+                $this->setParametro('monto_pago_sg_mo','monto_pago_sg_mo','numeric'); //#19
+
+                //Ejecuta la instruccion
 	            $this->armarConsulta();
 				$stmt = $link->prepare($this->consulta);		  
 			  	$stmt->execute();

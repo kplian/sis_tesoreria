@@ -1,3 +1,4 @@
+
 --------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION tes.f_calcular_factor_obligacion_det (
@@ -21,7 +22,7 @@ $body$
    	
  ISSUE            FECHA:		      AUTOR                                DESCRIPCION
  #7890          12-12-2018		   RAC (KPLIAN)          aumenta el calculo prorrateado del monto para la siguiente gestion en el detalle
-         
+ #19          25-01-2019         RAC (KPLIAN )         fix bun in calcs     
 ***************************************************************************/
 
 DECLARE
@@ -59,9 +60,9 @@ BEGIN
       ------------------------------------------------------------
       --calcula el factor de prorrateo de la obligacion  detalle
       -----------------------------------------------------------
-                        
+      -- #19  se corrigio el monto sobre el cual se calcula el prorrateo  (monto_pago_mo - monto_pago_sg_mo)
       update tes.tobligacion_det set
-      factor_porcentual =  (monto_pago_mo/v_total_ges_act) -- #7890 se calculo solo con el monto presupeustado para la gestion vigente, calculo anterior:      (monto_pago_mo/v_total_detalle)
+      factor_porcentual =  ((monto_pago_mo - monto_pago_sg_mo)/v_total_ges_act) -- #7890 se calculo solo con el monto presupeustado para la gestion vigente, calculo anterior:      (monto_pago_mo/v_total_detalle)
       where estado_reg = 'activo' and id_obligacion_pago=p_id_obligacion;
                         
       --testeo

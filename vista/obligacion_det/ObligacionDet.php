@@ -8,6 +8,7 @@
 * Issue			Fecha			Author          Descripcion
  * #1				21/09/2018		EGS				se arreglo para filtros del concepto y gasto con especial
  * #12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
+ * #19        25/01/2019      MMV ENDETRAN       Correccion de bug conversion de moneda
  * */
 
 header("content-type: text/javascript; charset=UTF-8");
@@ -356,7 +357,7 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
                 fieldLabel: 'Monto Sig. Ges. Mo',
                 currencyChar:' ',
                 allowBlank: true,
-                disabled:true,
+               // disabled:true, //#19
                 width: 100,
                 gwidth: 120,
                 maxLength:1245186
@@ -365,7 +366,7 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
             filters:{pfiltro:'obdet.monto_pago_sg_mo',type:'numeric'},
             id_grupo:1,
             grid:true,
-            form:false
+            form:true
         },
         {
             config:{
@@ -382,7 +383,7 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
             filters:{pfiltro:'obdet.monto_pago_sg_mb',type:'numeric'},
             id_grupo:1,
             grid:true,
-            form:true
+            form:false //#19
         },
         //#12
 		{
@@ -715,19 +716,35 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
 	bdel:true,
 	bsave:false,
     eventoCalculoGestion : function () {
-    this.cmpMontoPagoMo = this.getComponente('monto_pago_mo');
-    this.cmpPrecioSg = this.getComponente('monto_pago_sg_mb');
-    this.cmpPrecioGa = this.getComponente('precio_ga');
-    this.cmpMontoPagoMo.on('change',function(field){
-        var pTot = this.cmpMontoPagoMo.getValue();
-        this.cmpMontoPagoMo.setValue(pTot);
-        this.cmpPrecioGa.setValue(pTot);
-        this.cmpPrecioSg.setValue(0);
-    } ,this);
-    this.cmpPrecioSg.on('valid',function(field){
-        this.cmpPrecioGa.setValue(this.cmpMontoPagoMo.getValue() - this.cmpPrecioSg.getValue());
-    } ,this);
+        this.cmpMontoPagoMo = this.getComponente('monto_pago_mo');
+        this.cmpPrecioSg = this.getComponente('monto_pago_sg_mo'); //#19
+        this.cmpPrecioGa = this.getComponente('precio_ga');
+        this.cmpMontoPagoMo.on('change',function(field){
+            var pTot = this.cmpMontoPagoMo.getValue();
+            this.cmpMontoPagoMo.setValue(pTot);
+            this.cmpPrecioGa.setValue(pTot);
+            this.cmpPrecioSg.setValue(0);
+        } ,this);
+        this.cmpPrecioSg.on('valid',function(field){
+            this.cmpPrecioGa.setValue(this.cmpMontoPagoMo.getValue() - this.cmpPrecioSg.getValue());
+        } ,this);
+
+    },
+    //#19
+    onButtonEdit:function(resp){
+
+        this.cmpPrecioGa = this.getComponente('precio_ga');
+        this.cmpMontoPagoMo = this.getComponente('monto_pago_mo');
+        this.cmpPrecioSg = this.getComponente('monto_pago_sg_mo');
+        Phx.vista.ObligacionDet.superclass.onButtonEdit.call(this,resp);
+        console.log('entra',this.cmpMontoPagoMo.getValue(),this.cmpPrecioSg.getValue());
+        if(this.cmpMontoPagoMo.getValue() == 0 || this.cmpPrecioSg.getValue() == 0){
+            this.cmpPrecioGa.setValue(0);
+        }else {
+            this.cmpPrecioGa.setValue(this.cmpMontoPagoMo.getValue() - this.cmpPrecioSg.getValue());
+        }
     }
+    //#19
 	}
 )
 </script>	

@@ -18,6 +18,7 @@ $body$
  Issue			Fecha        Author				Descripcion
 #12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
 #13        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago formulario
+#19        25/01/2019      MMV ENDETRAN       Correccion de bug conversion de moneda
 ***************************************************************************/
 
 DECLARE
@@ -135,18 +136,27 @@ BEGIN
         from tes.tobligacion_pago op
         where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
 
-          if  v_parametros.monto_pago_sg_mb != 0 then --#13
-              v_monto_pago_sg_mb = param.f_convertir_moneda( 	v_id_moneda,
-                                                              NULL,   --por defecto moenda base
-                                                              v_parametros.monto_pago_sg_mb,
-                                                              v_fecha_ob,
-                                                               'O',-- tipo oficial, venta, compra
-                                                                 NULL);
-          else
+          -----------#19-----------------
+   		 v_monto_pago_sg_mb = 0;
+         IF  pxp.f_existe_parametro(p_tabla,'monto_pago_sg_mo') THEN
 
-       		  v_monto_pago_sg_mb = 0; --#13
+         --raise exception 'entra we.....';
+           	 v_monto_pago_sg_mb = param.f_convertir_moneda( 	v_id_moneda_sg,
+                                                                  NULL,   --por defecto moenda base
+                                                                  v_parametros.monto_pago_sg_mo,
+                                                                  v_fecha_ob,
+                                                                  'O',-- tipo oficial, venta, compra
+                                                                  NULL);
+          END IF;
 
-          end if;
+
+         if(v_parametros.monto_pago_sg_mo < 0)then
+        	raise exception 'El Monto Sig. Ges. Mo no puedes ser menor al Monto Total';
+        elsif (v_parametros.monto_pago_sg_mo >  v_parametros.monto_pago_mo)then
+        	raise exception 'El Monto Sig. Ges. Mo no puedes ser mayor al Monto Total';
+        end if;
+
+ 		-----------#19-----------------
              ---#12
 
           --Sentencia de la insercion
@@ -258,14 +268,20 @@ BEGIN
                 v_fecha_ob
         from tes.tobligacion_pago op
         where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
+        -----------#19-----------------
+        if(v_parametros.monto_pago_sg_mo < 0)then
+        	raise exception 'El Monto Sig. Ges. Mo no puedes ser menor al Monto Total';
+        elsif (v_parametros.monto_pago_sg_mo >  v_parametros.monto_pago_mo)then
+        	raise exception 'El Monto Sig. Ges. Mo no puedes ser mayor al Monto Total';
+        end if;
 
-
-        v_monto_pago_sg_mb = param.f_convertir_moneda( 	v_id_moneda,
+        v_monto_pago_sg_mb = param.f_convertir_moneda( 	v_id_moneda_sg,
                                                        	NULL,   --por defecto moenda base
-                                                      	v_parametros.monto_pago_sg_mb,
+                                                      	v_parametros.monto_pago_sg_mo,
                                                        	v_fecha_ob,
                                                       	 'O',-- tipo oficial, venta, compra
-                                                 NULL);
+                                                 		NULL);
+         -----------#19-----------------
          ---#12
 
       --Sentencia de la modificacion

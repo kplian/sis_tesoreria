@@ -7,6 +7,8 @@
 *@description Clase que envia los parametros requeridos a la Base de datos para la ejecucion de las funciones, y que recibe la respuesta del resultado de la ejecucion de las mismas
 Issue			Fecha        Author				Descripcion
 #12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
+#19        25/01/2019      MMV ENDETRAN       Correccion de bug conversion de moneda
+
  */
 
 class MODObligacionDet extends MODbase{
@@ -78,7 +80,7 @@ class MODObligacionDet extends MODbase{
 		$this->setParametro('id_partida_ejecucion_com','id_partida_ejecucion_com','int4');
         $this->setParametro('descripcion','descripcion','text');
 		$this->setParametro('id_orden_trabajo','id_orden_trabajo','int4');
-        $this->setParametro('monto_pago_sg_mb','monto_pago_sg_mb','numeric'); //#12
+        $this->setParametro('monto_pago_sg_mo','monto_pago_sg_mo','numeric'); //#19
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -108,7 +110,7 @@ class MODObligacionDet extends MODbase{
 		$this->setParametro('id_partida_ejecucion_com','id_partida_ejecucion_com','int4');
         $this->setParametro('descripcion','descripcion','text');
 		$this->setParametro('id_orden_trabajo','id_orden_trabajo','int4');
-        $this->setParametro('monto_pago_sg_mb','monto_pago_sg_mb','numeric'); //#12
+        $this->setParametro('monto_pago_sg_mo','monto_pago_sg_mo','numeric'); //#19
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
