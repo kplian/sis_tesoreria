@@ -111,7 +111,7 @@ BEGIN
   FROM  tes.tobligacion_pago  op
   where op.id_obligacion_pago = p_id_obligacion_pago;
  
-  
+ 
       IF p_operacion = 'comprometer' THEN
         
           --compromete al finalizar el registro de la obligacion
@@ -119,7 +119,7 @@ BEGIN
            v_tes_anticipo_ejecuta_pres = pxp.f_get_variable_global('tes_anticipo_ejecuta_pres');
            
            -- verifica que solicitud
-       
+      
           FOR v_registros in ( 
                             SELECT
                                     opd.id_obligacion_det,
@@ -199,6 +199,8 @@ BEGIN
              
              END LOOP;
              
+           
+             
               IF v_i > 0 THEN 
               
                     --llamada a la funcion de compromiso
@@ -233,8 +235,7 @@ BEGIN
                    END LOOP;
              END IF;
       
-      
-      
+         
         ELSEIF p_operacion = 'revertir_old' THEN
        
         -- revierte el presupuesto total que se encuentre comprometido
@@ -779,17 +780,18 @@ BEGIN
           --compromete al finalizar el registro de la obligacion
            v_i = 0;  
            v_sw_error = FALSE;
-           v_mensage_error ='';       
+           v_mensage_error =''; 
+           v_tes_anticipo_ejecuta_pres = pxp.f_get_variable_global('tes_anticipo_ejecuta_pres');      
            -- verifica que solicitud
-       
+        
           FOR v_registros in (
           						SELECT
                                         opd.id_centro_costo,
                                         op.id_gestion,
                                         op.id_obligacion_pago,
                                         opd.id_partida,
-                                        sum(opd.monto_pago_mb) as monto_pago_mb,
-                                        sum(opd.monto_pago_mo) as monto_pago_mo,
+                                        --sum(opd.monto_pago_mb - opd.monto_pago_sg_mb - factor_porcentual*COALESCE(monto_ajuste_ret_anticipo_par_ga,0)) as monto_pago_mb,
+                                        sum(opd.monto_pago_mo - opd.monto_pago_sg_mo - factor_porcentual*COALESCE(monto_ajuste_ret_anticipo_par_ga,0)) as monto_pago_mo,
                                         p.id_presupuesto,
                                         op.id_moneda,
                                         op.fecha,
@@ -799,7 +801,9 @@ BEGIN
                                         par.nombre_partida,
                                         p.codigo_cc,
                                         par.sw_movimiento,
-                                        tp.movimiento
+                                        tp.movimiento,
+                                        op.monto_ajuste_ret_anticipo_par_ga,
+                                        op,comprometer_iva
                                                               
                                     FROM  tes.tobligacion_pago  op
                                     INNER JOIN tes.tobligacion_det opd  on  opd.id_obligacion_pago = op.id_obligacion_pago and opd.estado_reg = 'activo'
@@ -824,7 +828,19 @@ BEGIN
                                               par.nombre_partida,
                                               p.codigo_cc,
                                               par.sw_movimiento,
-      										  tp.movimiento) LOOP
+      										  tp.movimiento,
+                                              op.monto_ajuste_ret_anticipo_par_ga,
+                                              op,comprometer_iva) LOOP
+                                              
+                                              
+                       
+                               v_monto_det_comprometer = v_registros.monto_pago_mo ;
+                               --#12 si comproemter el iva es igual  a NO restamos el 13 % 
+                               IF  v_registros.comprometer_iva = 'no'  THEN
+                                   v_monto_det_comprometer = v_monto_det_comprometer * 0.87;  --#12 solo compromete el 87%
+                               END IF;              
+                                              
+                                              
                                      
                               IF v_registros.sw_movimiento = 'flujo'  THEN
                               
@@ -837,7 +853,7 @@ BEGIN
                                     v_resp_pre = pre.f_verificar_presupuesto_partida ( v_registros.id_presupuesto,
                                                                         v_registros.id_partida,
                                                                         v_registros.id_moneda,
-                                                                        v_registros.monto_pago_mo);
+                                                                        v_monto_det_comprometer); --#12
                                                                         
                                    IF   v_resp_pre = 'false' THEN                                   
                                       v_mensage_error = v_mensage_error||format('Presupuesto:  %s, partida (%s) %s <BR/>', v_registros.codigo_cc, v_registros.codigo,v_registros.nombre_partida);    
@@ -852,7 +868,7 @@ BEGIN
           
           END LOOP;
           
-          
+        
             
          IF v_sw_error THEN
              raise exception 'No se tiene suficiente presupeusto para; <BR/>%', v_mensage_error;

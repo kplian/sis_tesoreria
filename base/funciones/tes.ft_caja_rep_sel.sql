@@ -21,7 +21,12 @@ $body$
  DESCRIPCION:	
  AUTOR:			
  FECHA:		
+***************************************************************************
+
+* ISSUE SIS       EMPRESA      FECHA:		      AUTOR       		DESCRIPCION
+ #20 TES       		ETR         01/02/2019      MANUEL GUERRA       agregacion de gestion para reportes mensuales
 ***************************************************************************/
+
 
 DECLARE
 
@@ -53,7 +58,14 @@ DECLARE
 	v_tipo_c 			varchar[];
     v_tam				integer;
     v_mes				integer;
+    v_anio_ciere		integer;
     v_int				record;
+    v_lp				record;
+    v_total 			numeric;
+    v_sw	 			integer;
+    v_gestion 			integer;
+    v_ini    			integer;
+    v_anios   			record;
 BEGIN
 
 	v_nombre_funcion = 'tes.ft_caja_rep_sel';
@@ -67,130 +79,175 @@ BEGIN
     ***********************************/
     if(p_transaccion='TES_CAJA_REP_MEN_SEL') then
     	begin
-          	
-             SELECT
-              pc.id_proceso_caja, 
-              pc.fecha,
-              pc.tipo,
-              pc.estado
-              INTO v_int
-              FROM tes.tproceso_caja pc
-              INNER JOIN tes.tcaja caja on pc.id_caja=caja.id_caja
-              WHERE caja.id_caja = v_parametros.id_caja
-              and pc.estado='cerrado';
-            	
-              v_resultado=0;
-              v_auxiliar=v_parametros.mes-1;
-                             	
-              IF v_int.tipo='CIERRE' and v_parametros.mes>EXTRACT(MONTH FROM v_int.fecha) THEN
-              	v_mes=EXTRACT(MONTH FROM v_int.fecha);
-              ELSE
-              	v_mes =0;	 
-              END IF; 
-                             --                                     
-                WHILE v_auxiliar > v_mes LOOP	
+            SELECT
+            pc.id_proceso_caja, 
+            pc.fecha,
+            pc.tipo,
+            pc.estado
+            INTO v_int
+            FROM tes.tproceso_caja pc
+            INNER JOIN tes.tcaja caja on pc.id_caja=caja.id_caja
+            WHERE caja.id_caja = v_parametros.id_caja
+            and pc.estado='cerrado' and pc.estado_reg='activo';            	                                            
+                             
+            SELECT g.gestion
+            INTO v_lp
+            FROM param.tgestion g
+            WHERE g.id_gestion=v_parametros.id_gestion;                		        
+                                	
+        	SELECT COALESCE(k.id_gestion,0)as id_gestion
+            INTO v_anios
+            FROM param.tgestion k
+            WHERE k.gestion= EXTRACT(YEAR FROM v_int.fecha);  			
+            
+            IF v_anios.id_gestion IS NULL THEN
+            	v_anios.id_gestion =0;
+            END IF;  
+            
+            v_total=0;
+            v_anio_ciere = v_anios.id_gestion;
+            --id_gestion esel 1er año habilitado donde existe movimiento
+            v_ini = 2;         
+
+            WHILE v_ini <= v_parametros.id_gestion LOOP                                                                                                       			               
+                v_resultado=0;
+              	v_auxiliar=v_parametros.mes-1; 
+                
+                IF v_ini = v_anio_ciere THEN
+                    v_mes=EXTRACT(MONTH FROM v_int.fecha);
+                ELSE
+                    v_mes =0;  
+                END IF; 
+                           
+              	IF v_ini != v_parametros.id_gestion THEN
+                    v_auxiliar=12;	
+                END IF;
+                                                       	
+            	WHILE v_auxiliar > v_mes LOOP 
                     v_resultado = v_resultado ||','||v_auxiliar;                     
                     v_auxiliar = v_auxiliar-1;
-                END LOOP;
-                
+                END LOOP;  
+             
                 IF v_parametros.id_caja=135 THEN
-                	v_aux = 'dc.fecha';
-                    
+                  v_aux = 'dc.fecha';                    
                     v_consulta:='select 
-                      sum(COALESCE(debe,0))-sum(COALESCE(haber,0)) as saldo                                 
-                    from ( 
-                      select 
-                      sum(ren.monto) as debe,
-                      0::numeric as haber
-                      from tes.tproceso_caja ren
-                      left join tes.ttipo_proceso_caja tpc on tpc.id_tipo_proceso_caja=ren.id_tipo_proceso_caja 
-                      left join tes.tcaja cj on cj.id_caja=ren.id_caja
-                      where cj.id_caja= '||v_parametros.id_caja||' and ren.motivo NOT ILIKE ''%RENDICION%'' 
-                      and tpc.codigo!=''SOLREN'' 
-                      and tpc.codigo!=''CIERRE''
-                      and (EXTRACT(MONTH FROM ren.fecha)) in ('||v_resultado||')
-
-                      union all
-
-                      select           
-                      sum(solefe.monto)as debe,
-                      0::numeric as haber
-                      from tes.tsolicitud_efectivo solefe
-                      inner join tes.tcaja caja on caja.id_caja=solefe.id_caja
-                      where caja.id_caja= '||v_parametros.id_caja||' and solefe.estado=''ingresado'' and (EXTRACT(MONTH FROM solefe.fecha_mod))in ('||v_resultado||')
-
-                      union all
-
-                      select 
-                      sum(0::numeric) as debe,
-                      sum(dc.importe_pago_liquido)::numeric as haber
-                      from tes.tsolicitud_rendicion_det rend
-                      inner join tes.tsolicitud_efectivo solren on solren.id_solicitud_efectivo = rend.id_solicitud_efectivo
-                      inner join tes.tsolicitud_efectivo solefe on solefe.id_solicitud_efectivo = solren.id_solicitud_efectivo_fk
-                      inner join tes.tcaja caja on caja.id_caja = solefe.id_caja
-                      left join conta.tdoc_compra_venta dc on dc.id_doc_compra_venta = rend.id_documento_respaldo
-                      where caja.id_caja= '||v_parametros.id_caja||' and solren.estado=''rendido'' and (EXTRACT(MONTH FROM dc.fecha )) in ('||v_resultado||')
-                    )as resultado';                     
-                ELSE
-                	v_aux = 'dc.fecha';
-                    
-                    v_consulta:='select 
-                      sum(COALESCE(debe,0))-sum(COALESCE(haber,0)) as saldo                                     
-                    from ( 
-                      select 
-                      sum(ren.monto) as debe,
-                      0::numeric as haber
-                      from tes.tproceso_caja ren
-                      left join tes.ttipo_proceso_caja tpc on tpc.id_tipo_proceso_caja=ren.id_tipo_proceso_caja 
-                      left join tes.tcaja cj on cj.id_caja=ren.id_caja
-                      where cj.id_caja= '||v_parametros.id_caja||'  
-                      and ren.motivo NOT ILIKE ''%RENDICION%'' 
-                      and tpc.codigo!=''SOLREN'' 
-                      and tpc.codigo!=''CIERRE''
-                      and (EXTRACT(MONTH FROM ren.fecha)) in ('||v_resultado||')
-
-                      union all
-
-                      select           
-                      sum(solefe.monto)as debe,
-                      0::numeric as haber
-                      from tes.tsolicitud_efectivo solefe
-                      inner join tes.tcaja caja on caja.id_caja=solefe.id_caja
-                      where caja.id_caja= '||v_parametros.id_caja||' and solefe.estado=''ingresado'' and (EXTRACT(MONTH FROM solefe.fecha_mod)) in ('||v_resultado||')
-
-                      union all
-
-                      select 
-                      sum(0::numeric) as debe,
-                      sum(dc.importe_pago_liquido)::numeric as haber
-                      from tes.tsolicitud_rendicion_det rend
-                      inner join tes.tsolicitud_efectivo solren on solren.id_solicitud_efectivo = rend.id_solicitud_efectivo
-                      inner join tes.tsolicitud_efectivo solefe on solefe.id_solicitud_efectivo = solren.id_solicitud_efectivo_fk
-                      inner join tes.tcaja caja on caja.id_caja = solefe.id_caja
-                      left join conta.tdoc_compra_venta dc on dc.id_doc_compra_venta = rend.id_documento_respaldo
-                      where caja.id_caja= '||v_parametros.id_caja||' and solren.estado=''rendido'' and (EXTRACT(MONTH FROM dc.fecha)) in ('||v_resultado||')
-                    )as resultado';                                                            
-                END IF;          
-                
-                
-                 
+                          sum(COALESCE(debe,0))-sum(COALESCE(haber,0)) as saldo                                 
+                                from ( 
+                                    select 
+                                    sum(ren.monto) as debe,
+                                    0::numeric as haber
+                                    from tes.tproceso_caja ren
+                                    left join tes.ttipo_proceso_caja tpc on tpc.id_tipo_proceso_caja=ren.id_tipo_proceso_caja 
+                                    left join tes.tcaja cj on cj.id_caja=ren.id_caja
+                                    join param.tgestion g on g.id_gestion = '||v_ini||'
+                                    where cj.id_caja= '||v_parametros.id_caja||' and 
+                                    ren.motivo NOT ILIKE ''%RENDICION%'' 
+                                    and tpc.codigo!=''SOLREN'' 
+                                    and tpc.codigo!=''CIERRE''
+                                    and (EXTRACT(MONTH FROM ren.fecha)) in ('||v_resultado||')
+                                    and (EXTRACT(YEAR FROM ren.fecha)) = g.gestion
                             
-                EXECUTE(v_consulta)into v_saldo_ant;                                   
-                                                                                 
-                IF v_int.tipo='CIERRE' and v_parametros.mes=EXTRACT(MONTH FROM v_int.fecha)+1 THEN
-                   v_saldo_ant=0;
-                END IF;
+                                    union all
+
+                                    select           
+                                    sum(solefe.monto)as debe,
+                                    0::numeric as haber
+                                    from tes.tsolicitud_efectivo solefe
+                                    inner join tes.tcaja caja on caja.id_caja=solefe.id_caja
+                                    join param.tgestion g on g.id_gestion = '||v_ini||'
+                                    where caja.id_caja= '||v_parametros.id_caja||' and 
+                                    solefe.estado=''ingresado'' and 
+                                    (EXTRACT(MONTH FROM solefe.fecha_mod))in ('||v_resultado||') and
+                                    (EXTRACT(YEAR FROM solefe.fecha_mod))= g.gestion
+                                      
+                                    union all
+
+                                    select 
+                                    sum(0::numeric) as debe,
+                                    sum(dc.importe_pago_liquido)::numeric as haber
+                                    from tes.tsolicitud_rendicion_det rend
+                                    inner join tes.tsolicitud_efectivo solren on solren.id_solicitud_efectivo = rend.id_solicitud_efectivo
+                                    inner join tes.tsolicitud_efectivo solefe on solefe.id_solicitud_efectivo = solren.id_solicitud_efectivo_fk
+                                    inner join tes.tcaja caja on caja.id_caja = solefe.id_caja
+                                    left join conta.tdoc_compra_venta dc on dc.id_doc_compra_venta = rend.id_documento_respaldo
+                                    join param.tgestion g on g.id_gestion = '||v_ini||'
+                                    where caja.id_caja= '||v_parametros.id_caja||' and 
+                                    solren.estado=''rendido'' and 
+                                    (EXTRACT(MONTH FROM dc.fecha)) in ('||v_resultado||') AND
+                                    (EXTRACT(YEAR FROM dc.fecha)) = g.gestion                      
+                                )as resultado';                     
+              ELSE
+                  v_aux = 'dc.fecha';                    
+                  v_consulta:='select 
+                              sum(COALESCE(debe,0))-sum(COALESCE(haber,0)) as saldo                                     
+                              from ( 
+                                  select 
+                                  sum(ren.monto) as debe,
+                                  0::numeric as haber
+                                  from tes.tproceso_caja ren
+                                  left join tes.ttipo_proceso_caja tpc on tpc.id_tipo_proceso_caja=ren.id_tipo_proceso_caja 
+                                  left join tes.tcaja cj on cj.id_caja=ren.id_caja
+                                  join param.tgestion g on g.id_gestion = '||v_ini||'
+                                  where cj.id_caja= '||v_parametros.id_caja||'  
+                                  and ren.motivo NOT ILIKE ''%RENDICION%'' 
+                                  and tpc.codigo!=''SOLREN'' 
+                                  and tpc.codigo!=''CIERRE''
+                                  and (EXTRACT(MONTH FROM ren.fecha)) in ('||v_resultado||')
+                                  AND (EXTRACT(YEAR FROM ren.fecha))= g.gestion
+
+                                  union all
+
+                                  select           
+                                  sum(solefe.monto)as debe,
+                                  0::numeric as haber
+                                  from tes.tsolicitud_efectivo solefe
+                                  inner join tes.tcaja caja on caja.id_caja=solefe.id_caja
+                                  join param.tgestion g on g.id_gestion = '||v_ini||'
+                                  where caja.id_caja= '||v_parametros.id_caja||' and 
+                                  solefe.estado=''ingresado'' and 
+                                  (EXTRACT(MONTH FROM solefe.fecha_mod)) in ('||v_resultado||') AND
+                                  (EXTRACT(year FROM solefe.fecha_mod)) = g.gestion
+                                   
+                                  union all
+
+                                  select 
+                                  sum(0::numeric) as debe,
+                                  sum(dc.importe_pago_liquido)::numeric as haber
+                                  from tes.tsolicitud_rendicion_det rend
+                                  inner join tes.tsolicitud_efectivo solren on solren.id_solicitud_efectivo = rend.id_solicitud_efectivo
+                                  inner join tes.tsolicitud_efectivo solefe on solefe.id_solicitud_efectivo = solren.id_solicitud_efectivo_fk
+                                  inner join tes.tcaja caja on caja.id_caja = solefe.id_caja
+                                  left join conta.tdoc_compra_venta dc on dc.id_doc_compra_venta = rend.id_documento_respaldo
+                                join param.tgestion g on g.id_gestion = '||v_ini||'
+                                where caja.id_caja= '||v_parametros.id_caja||' and 
+                                solren.estado=''rendido'' and 
+                                (EXTRACT(MONTH FROM dc.fecha)) in ('||v_resultado||') and
+                                (EXTRACT(YEAR FROM dc.fecha)) = g.gestion                       
+                              )as resultado';                                                            
+                END IF;  
+                 
+                EXECUTE(v_consulta)into v_saldo_ant;             	                    
+              	v_total = v_total + v_saldo_ant;
+				v_ini = v_ini + 1;   
+                 
+            END LOOP;
+                          
+            --RAISE NOTICE 'total=>%',v_total;
+			--RAISE EXCEPTION 'total=>%',v_total;      
+                                                                          
+            IF v_int.tipo='CIERRE' and v_parametros.mes=EXTRACT(MONTH FROM v_int.fecha)+1 THEN
+               v_saldo_ant=0;
+            END IF;
       
-                IF v_parametros.mes=1 and v_parametros.id_caja=128 THEN
-             		v_aux = 'dc.fecha';
-            	END IF;   
-                IF v_parametros.mes=1 THEN
-             		v_saldo_ant=0;
-            	END IF;   
-				--raise exception '%',v_aux; 
+            IF v_parametros.mes=1 and v_parametros.id_caja=128 THEN
+                v_aux = 'dc.fecha';
+            END IF;   
+            IF v_parametros.mes=1 THEN
+                v_saldo_ant=0;
+            END IF;   
+            --raise exception '%',v_aux; 
                    
-				v_consulta := '
-                			  (select 
+			v_consulta := '(select 
                   			  '||v_saldo_ant||'::numeric as saldo,
                               ''SALDO MES ANTERIOR''::varchar as nro_tramite,
                               ''''::varchar as desc_plantilla,
@@ -234,7 +291,11 @@ BEGIN
                               from tes.tproceso_caja ren
                               left join tes.ttipo_proceso_caja tpc on tpc.id_tipo_proceso_caja=ren.id_tipo_proceso_caja 
                               left join tes.tcaja cj on cj.id_caja=ren.id_caja
-                              where cj.id_caja='||v_parametros.id_caja||' and  tpc.codigo=''CIERRE'' and (EXTRACT(MONTH FROM ren.fecha))= '||v_parametros.mes||'
+                              join param.tgestion g on g.id_gestion = '||v_parametros.id_gestion||'
+                              where cj.id_caja='||v_parametros.id_caja||' 
+                              and  tpc.codigo=''CIERRE'' 
+                              and (EXTRACT(MONTH FROM ren.fecha))= '||v_parametros.mes||'
+                              and (EXTRACT(YEAR FROM ren.fecha))= g.gestion
 
                               UNION all
                               
@@ -259,8 +320,14 @@ BEGIN
                               from tes.tproceso_caja ren
                               left join tes.ttipo_proceso_caja tpc on tpc.id_tipo_proceso_caja=ren.id_tipo_proceso_caja 
                               left join tes.tcaja cj on cj.id_caja=ren.id_caja
-                              where cj.id_caja='||v_parametros.id_caja||' and ren.motivo NOT ILIKE ''%RENDICION%'' AND tpc.codigo!=''CIERRE'' and  tpc.codigo!=''SOLREN'' and (EXTRACT(MONTH FROM ren.fecha))= '||v_parametros.mes||'
-
+                              join param.tgestion g on g.id_gestion = '||v_parametros.id_gestion||'
+                              where cj.id_caja='||v_parametros.id_caja||' and 
+                              ren.motivo NOT ILIKE ''%RENDICION%'' AND 
+                              tpc.codigo!=''CIERRE'' and 
+                              tpc.codigo!=''SOLREN'' and 
+                              (EXTRACT(MONTH FROM ren.fecha))= '||v_parametros.mes||'and
+							  (EXTRACT(YEAR FROM ren.fecha))= g.gestion
+                              
                               union all
 
                               select 
@@ -287,7 +354,11 @@ BEGIN
                               inner join orga.vfuncionario fun on fun.id_funcionario = solefe.id_funcionario
                               left join segu.tusuario usu2 on usu2.id_usuario = solefe.id_usuario_mod
                               left join tes.tsolicitud_efectivo solpri on solpri.id_solicitud_efectivo=solefe.id_solicitud_efectivo_fk
-                              where caja.id_caja='||v_parametros.id_caja||' and solefe.estado=''ingresado'' and (EXTRACT(MONTH FROM solefe.fecha_mod))= '||v_parametros.mes||' 
+                              join param.tgestion g on g.id_gestion = '||v_parametros.id_gestion||'
+                              where caja.id_caja='||v_parametros.id_caja||' and 
+                              solefe.estado=''ingresado'' and 
+                              (EXTRACT(MONTH FROM solefe.fecha_mod))= '||v_parametros.mes||' and
+                              (EXTRACT(YEAR FROM solefe.fecha_mod))= g.gestion 
 
                               union all
 
@@ -316,8 +387,11 @@ BEGIN
                               left join conta.tdoc_compra_venta dc on dc.id_doc_compra_venta = rend.id_documento_respaldo
                               left join param.tplantilla pla on pla.id_plantilla = dc.id_plantilla
                               left join tes.tproceso_caja tc on tc.id_proceso_caja=rend.id_proceso_caja
-                              where caja.id_caja='||v_parametros.id_caja||' and solren.estado=''rendido''                                                                                         
-                              and (EXTRACT(MONTH FROM '|| v_aux ||'))= '||v_parametros.mes||'
+                              join param.tgestion g on g.id_gestion = '||v_parametros.id_gestion||'
+                              where caja.id_caja='||v_parametros.id_caja||' and 
+                              solren.estado=''rendido'' and 
+                              (EXTRACT(MONTH FROM '|| v_aux ||'))= '||v_parametros.mes||' AND
+                              (EXTRACT(YEAR FROM '|| v_aux ||'))= g.gestion
                               order by fecha asc ';                                 
    
 				return v_consulta;

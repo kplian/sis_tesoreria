@@ -6,6 +6,10 @@
 *@date 21-12-2015 20:15:22
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
 */
+/*
+ ISSUE      FORK         FECHA:		         AUTOR                              DESCRIPCION
+ #20     endeETR      01/02/2019         MANUEL GUERRA        			enviando el id_gestion  
+*/ 
 
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -730,7 +734,8 @@ Phx.vista.ProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			url:'../../sis_tesoreria/control/ProcesoCaja/reportemensual',
 			params:
 			{		
-				'id_caja':resp.id_caja,			
+				'id_caja':resp.id_caja,	
+				'id_gestion':resp.id_gestion,		
 				'mes':resp.mes				
 			},
 			success: this.successExport,		
