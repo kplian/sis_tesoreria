@@ -1,5 +1,9 @@
 <?php
 
+/*
+ ISSUE      FORK         FECHA:		         AUTOR                              DESCRIPCION
+ #20     endeETR      01/02/2019         MANUEL GUERRA        			agregacion del combo gestion  
+*/ 
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
@@ -20,7 +24,6 @@ Phx.vista.FormReporteCaja=Ext.extend(Phx.frmInterfaz,{
 			config:{
 				name: 'id_caja',
 				fieldLabel: 'Caja',
-				allowBlank: true,
 				valueField: 'id_caja',
 				anchor: '80%',
 				gwidth: 50	
@@ -29,12 +32,25 @@ Phx.vista.FormReporteCaja=Ext.extend(Phx.frmInterfaz,{
 			form:false,		
 		},{
 			config:{
+				name : 'id_gestion',
+				origen : 'GESTION',
+				fieldLabel : 'Gestion',
+				gdisplayField: 'desc_gestion',
+				allowBlank : false,
+				width: 150
+			},
+			type : 'ComboRec',
+			id_grupo : 0,
+			form : true
+		},{
+			config:{
 				name:'mes',
 				fieldLabel:'Mes',
 				typeAhead: true,
 				triggerAction: 'all',
 				lazyRender:true,
 				mode: 'local',
+				allowBlank : false,
 				//valueField: 'mes',
 				gwidth: 15,
 				store:new Ext.data.ArrayStore({
@@ -80,6 +96,7 @@ Phx.vista.FormReporteCaja=Ext.extend(Phx.frmInterfaz,{
 	getValues:function(){				
 		var resp = {			
 			mes:this.Cmp.mes.getValue(),
+			id_gestion:this.Cmp.id_gestion.getValue(),
 			id_caja:caja
 		}
 		return resp;

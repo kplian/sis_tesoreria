@@ -7,6 +7,12 @@
 *@description Clase que envia los parametros requeridos a la Base de datos para la ejecucion de las funciones, y que recibe la respuesta del resultado de la ejecucion de las mismas
 */
 
+
+/*
+ ISSUE      FORK         FECHA:		         AUTOR                              DESCRIPCION
+ #20     endeETR      01/02/2019         MANUEL GUERRA        			agregacion de gestion para reportes mensuales
+*/ 
+
 class MODProcesoCaja extends MODbase{
 
 	function __construct(CTParametro $pParam){
@@ -390,7 +396,7 @@ class MODProcesoCaja extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
-	//
+	//#20
 	function listarReporteMenCaja(){
 		//Definicion de variables para ejecucion del procedimientp
 		$this->procedimiento='tes.ft_caja_rep_sel';
@@ -398,6 +404,7 @@ class MODProcesoCaja extends MODbase{
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
 		$this-> setCount(false);
 		$this->setParametro('id_caja','id_caja','int4');
+		$this->setParametro('id_gestion','id_gestion','int4');
 		$this->setParametro('mes','mes','int4');			
 		//Definicion de la lista del resultado del query
 		$this->captura('saldo','numeric');

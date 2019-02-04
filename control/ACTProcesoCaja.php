@@ -6,6 +6,13 @@
 *@date 21-12-2015 20:15:22
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
 */
+
+
+/*
+ ISSUE      FORK         FECHA:		         AUTOR                              DESCRIPCION
+ #20     endeETR      01/02/2019         MANUEL GUERRA        			agregacion de gestion para reportes mensuales
+*/ 
+
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
 require_once(dirname(__FILE__).'/../reportes/RMemoCajaChica.php');
@@ -214,10 +221,10 @@ class ACTProcesoCaja extends ACTbase{
 			return dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo;
 		}		
 	}
-	//
+	//#20
 	function listarReporteMenCaja(){
 		if($this->objParam->getParametro('id_caja')!=''){
-			$this->objParam->addFiltro("caja.id_caja =".$this->objParam->getParametro('id_caja')." AND "."ren.id_proceso_caja =".$this->objParam->getParametro('id_proceso_caja'));    
+			$this->objParam->addFiltro("caja.id_caja =".$this->objParam->getParametro('id_caja')." AND "."ren.id_proceso_caja =".$this->objParam->getParametro('id_proceso_caja')." AND "."param.id_gestion =".$this->objParam->getParametro('id_gestion'));
 		}
 		$this->objFunc=$this->create('MODProcesoCaja');		
 		$cbteHeader = $this->objFunc->listarReporteMenCaja($this->objParam);					
