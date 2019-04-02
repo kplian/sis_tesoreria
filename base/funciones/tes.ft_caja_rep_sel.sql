@@ -25,6 +25,7 @@ $body$
 
 * ISSUE SIS       EMPRESA      FECHA:		      AUTOR       		DESCRIPCION
  #20 TES       		ETR         01/02/2019      MANUEL GUERRA       agregacion de gestion para reportes mensuales
+ #24 TES       		ETR         02/04/2019      MANUEL GUERRA       agregando saldo anterior al reporte mensual
 ***************************************************************************/
 
 
@@ -226,7 +227,8 @@ BEGIN
                               )as resultado';                                                            
                 END IF;  
                  
-                EXECUTE(v_consulta)into v_saldo_ant;             	                    
+                EXECUTE(v_consulta)into v_saldo_ant;     
+                --#24        	                    
               	v_total = v_total + v_saldo_ant;
 				v_ini = v_ini + 1;   
                  
@@ -234,7 +236,7 @@ BEGIN
                           
             --RAISE NOTICE 'total=>%',v_total;
 			--RAISE EXCEPTION 'total=>%',v_total;      
-                                                                          
+                                                                       
             IF v_int.tipo='CIERRE' and v_parametros.mes=EXTRACT(MONTH FROM v_int.fecha)+1 THEN
                v_saldo_ant=0;
             END IF;
@@ -245,10 +247,9 @@ BEGIN
             IF v_parametros.mes=1 THEN
                 v_saldo_ant=0;
             END IF;   
-            --raise exception '%',v_aux; 
-                   
+            --#24                   
 			v_consulta := '(select 
-                  			  '||v_saldo_ant||'::numeric as saldo,
+                  			  '||v_total||'::numeric as saldo,
                               ''SALDO MES ANTERIOR''::varchar as nro_tramite,
                               ''''::varchar as desc_plantilla,
                               null::date as fecha,
