@@ -24,7 +24,8 @@ $body$
 ***************************************************************************
 
 * ISSUE SIS       EMPRESA      FECHA:		      AUTOR       		DESCRIPCION
- #20 TES       		ETR         01/02/2019      MANUEL GUERRA       agregacion de gestion para reportes mensuales
+ #20 TES       		ETR         01/02/2019      MANUEL GUERRA       
+ #23 TES       		ETR         02/03/2019      MANUEL GUERRA       agregar saldo anterior al reporte de caja mensual
 ***************************************************************************/
 
 
@@ -234,17 +235,17 @@ BEGIN
                           
             --RAISE NOTICE 'total=>%',v_total;
 			--RAISE EXCEPTION 'total=>%',v_total;      
-                                                                          
+            v_saldo_ant=v_total;                                                              
             IF v_int.tipo='CIERRE' and v_parametros.mes=EXTRACT(MONTH FROM v_int.fecha)+1 THEN
                v_saldo_ant=0;
             END IF;
-      
+      		/*
             IF v_parametros.mes=1 and v_parametros.id_caja=128 THEN
                 v_aux = 'dc.fecha';
             END IF;   
             IF v_parametros.mes=1 THEN
                 v_saldo_ant=0;
-            END IF;   
+            END IF;   */
             --raise exception '%',v_aux; 
                    
 			v_consulta := '(select 
