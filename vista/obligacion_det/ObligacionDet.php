@@ -680,7 +680,8 @@ Phx.vista.ObligacionDet=Ext.extend(Phx.gridInterfaz,{
          
           if(this.maestro&&(this.maestro.estado ==  'borrador' && this.maestro.tipo_obligacion=='adquisiciones' )){
                
-               this.getBoton('edit').enable();
+               this.getBoton('edit').disable();//#25 endetr Juan Bloque de menu editar en adquisiciones
+               //this.getBoton('edit').enable();
                this.getBoton('new').disable();
                this.getBoton('del').disable();
                this.getBoton('btnProrrateo').disable();

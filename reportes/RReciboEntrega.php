@@ -91,14 +91,19 @@ Class RReciboEntrega extends Report {
 		
 		$this->pdf->SetFont('', 'B');
         $this->pdf->Cell($width2, $height, 'CAJA: ', 1, 0, 'L', false, '', 0, false, 'T', 'C');
+		
 		$this->pdf->SetFont('', '');      		
         $this->pdf->Cell($width4, $height, $this->getDataSource()->getParameter('codigo'), 1, 1, 'L', false, '', 0, false, 'T', 'C');
+		
 		$this->pdf->SetFont('', 'B');
         $this->pdf->Cell($width2, $height, 'CAJERO: ', 1, 0, 'L', false, '', 0, false, 'T', 'C');
+		
 		$this->pdf->SetFont('', '');
 		$this->pdf->Cell($width4, $height, $this->getDataSource()->getParameter('cajero'), 1, 1, 'L', false, '', 0, false, 'T', 'C');
+		
 		$this->pdf->SetFont('', 'B');
         $this->pdf->Cell($width2, $height, 'UNIDAD SOLICITANTE: ', 1, 0, 'L', false, '', 0, false, 'T', 'C');
+		
 		$this->pdf->SetFont('', '');		
         $this->pdf->Cell($width4, $height, $this->getDataSource()->getParameter('nombre_unidad'), 1, 1, 'L', false, '', 0, false, 'T', 'C');
         $this->pdf->SetFont('', 'B');
@@ -125,11 +130,13 @@ Class RReciboEntrega extends Report {
     		
 		$this->pdf->SetFont('', 'B');   
 		  
-        $this->pdf->Cell($width3+31, $height*5, 'A FAVOR DE:', 1, 0, 'C', false, '', 0, false, 'T', 'T');
+        
 		if($this->getDataSource()->getParameter('codigo_proc') == 'INGEFE' ){
+			$this->pdf->Cell($width3+31, $height*5, 'PAGADO POR:', 1, 0, 'C', false, '', 0, false, 'T', 'T');
 			$this->pdf->Cell($width3+31, $height*5, 'RECIBIDO POR:', 1, 0, 'C', false, '', 0, false, 'T', 'T');
 		}  
-		else{			
+		else{
+			$this->pdf->Cell($width3+31, $height*5, 'A FAVOR DE:', 1, 0, 'C', false, '', 0, false, 'T', 'T');			
 			$this->pdf->Cell($width3+31, $height*5, 'PAGADO POR:', 1, 0, 'C', false, '', 0, false, 'T', 'T');
 		}
         
