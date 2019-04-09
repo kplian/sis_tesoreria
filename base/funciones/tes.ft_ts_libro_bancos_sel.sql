@@ -21,6 +21,9 @@ $body$
  DESCRIPCION:
  AUTOR:
  FECHA:
+ 
+ ISSUE 		   FECHA   			 AUTOR				 DESCRIPCION:
+  #27 		 09/04/2019		  Manuel Guerra	      quitar el campo nro_cheque en reporte
 ***************************************************************************/
 
 DECLARE
@@ -441,6 +444,7 @@ BEGIN
  	#TRANSACCION:  'TES_RELIBA_SEL'
  	#DESCRIPCION:	Reporte libro de bancos
  	#AUTOR:		Gonzalo Sarmiento Sejas
+    #27
 	***********************************/
 
 	ELSEIF (p_transaccion = 'TES_RELIBA_SEL') THEN
@@ -598,7 +602,7 @@ BEGIN
                             lb.fecha::date >= '''||v_parametros.fecha_ini_reg||''' and
                             lb.fecha is not null 
                             )  
-                            order by fecha_reg, indice, nro_cheque asc';
+                            order by fecha_reg, indice asc';
           					raise notice '%',v_consulta;
                             --raise exception '%',v_consulta;
      	ELSE
@@ -782,7 +786,7 @@ BEGIN
                             else LB.id_finalidad in ('||v_parametros.id_finalidad||')
                             end
                             )  
-                            order by fecha, indice, nro_cheque asc';
+                            order by fecha, indice asc';
 		  END IF;
           raise notice '%',v_consulta;
          --raise exception '%',v_consulta;
