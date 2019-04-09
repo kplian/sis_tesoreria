@@ -867,6 +867,7 @@ CREATE INDEX tobligacion_pago_id_gestion ON tes.tobligacion_pago
 
 
 
+DROP VIEW  IF EXISTS tes.vcuenta_bancaria;
 
 CREATE OR REPLACE VIEW tes.vcuenta_bancaria(
     id_cuenta_bancaria,
@@ -934,7 +935,7 @@ CREATE OR REPLACE VIEW tes.vcomp_devtesprov_det_plan_pago(
 
 
 --------------- SQL ---------------
-
+DROP VIEW  IF EXISTS tes.vpago_pendientes_al_dia;
 CREATE OR REPLACE VIEW tes.vpago_pendientes_al_dia(
     id_plan_pago,
     fecha_tentativa,
@@ -1053,6 +1054,7 @@ AS
            op.id_proceso_wf,
            op.estado;
 -------
+
 CREATE OR REPLACE VIEW tes.vobligaciones_contrato_20000(
     fecha,
     num_tramite,
@@ -1104,6 +1106,7 @@ AS
   HAVING sum(od.monto_pago_mb) >= 20000::numeric
   ORDER BY op.fecha DESC;
 
+DROP VIEW  IF EXISTS tes.vcomp_devtesprov_plan_pago_2;
 ---------------------
 CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago_2(
     id_plan_pago,
@@ -1510,7 +1513,7 @@ group by
 --------
 
 --------------- SQL ---------------
-
+DROP VIEW IF EXISTS tes.vpagos_relacionados;
 CREATE OR REPLACE VIEW tes.vpagos_relacionados(
     desc_proveedor,
     num_tramite,
@@ -1575,7 +1578,7 @@ WITH detalle AS(
             'anulado'::character varying::text, 'vbsolicitante'::character
             varying::text ]));
 -----
-
+DROP VIEW IF EXISTS tes.vproceso_caja;
 CREATE OR REPLACE VIEW tes.vproceso_caja (
     id_proceso_caja,
     id_cajero,
@@ -1618,7 +1621,7 @@ AS
   
 
 -----
-
+DROP VIEW IF EXISTS tes.vsrd_doc_compra_venta;
 CREATE OR REPLACE VIEW tes.vsrd_doc_compra_venta(
     id_solicitud_rendicion_det,
     id_solicitud_efectivo,
@@ -2642,7 +2645,7 @@ WITH detalle AS(
 
 
 /***********************************I-DEP-RAC-TES-0-27/11/2017****************************************/
-
+/*
 CREATE OR REPLACE VIEW tes.vcontratos_det(
     desc_proveedor,
     id_proveedor,
@@ -2748,7 +2751,7 @@ WITH contrato_lst AS(
              c.numero,
              c.objeto,
              c.monto;
-
+*/
 
 /***********************************F-DEP-RAC-TES-0-27/11/2017****************************************/
 
@@ -3836,14 +3839,14 @@ AS
 
 ALTER TABLE tes.tobligacion_pago
   DROP CONSTRAINT chk_tobligacion_pago__tipo_obligacion RESTRICT;
-
+/*
 ALTER TABLE tes.tobligacion_pago
   ADD CONSTRAINT tobligacion_pago_fk FOREIGN KEY (id_contrato)
     REFERENCES leg.tcontrato(id_contrato)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     NOT DEFERRABLE;
-
+*/
 ALTER TABLE tes.tobligacion_pago
   ADD CONSTRAINT chk_tobligacion_pago__tipo_obligacion CHECK ((tipo_obligacion)::text = ANY (ARRAY[('adquisiciones'::character varying)::text, ('pago_unico'::character varying)::text, ('pago_especial'::character varying)::text, ('caja_chica'::character varying)::text, ('viaticos'::character varying)::text, ('fondos_en_avance'::character varying)::text, ('pago_directo'::character varying)::text, ('rrhh'::character varying)::text]));
 
