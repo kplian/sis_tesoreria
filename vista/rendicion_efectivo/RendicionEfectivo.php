@@ -796,14 +796,16 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 		Phx.CP.loadingHide();
 		resp.argument.wizard.panel.destroy()
 		this.reload();
-		
-		if(resp.argument.wizard.Cmp.id_tipo_estado.lastSelectionText=='rendido'){
+		//manu
+		console.log('->',resp);
+	
+		/*if(resp.argument.wizard.Cmp.id_tipo_estado.lastSelectionText=='rendido'){
 			if (resp.argument.id_proceso_wf) {
 				Phx.CP.loadingShow();
 				Ext.Ajax.request({
 					url : '../../sis_tesoreria/control/SolicitudEfectivo/reporteRendicionEfectivo',
 					params : {
-						'id_proceso_wf' : resp.argument.id_proceso_wf
+						'id_proceso_wf' : resp.argument.id_proceso_wf				
 					},
 					success : this.successExport,
 					failure : this.conexionFailure,
@@ -811,7 +813,7 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 					scope : this
 				});
 			}
-		}
+		}*/
 	},
 	
 	tabsouth:

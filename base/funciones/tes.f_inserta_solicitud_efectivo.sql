@@ -20,11 +20,12 @@ $body$
 
     HISTORIAL DE MODIFICACIONES:
     
- ISSUE            FECHA:              AUTOR                 DESCRIPCION
+ ISSUE      FORK       FECHA:              AUTOR                 DESCRIPCION
    
  #0              10-02-2015        Gonzalo Sarmiento       creacion de la funcion
  #0              30/11/2017        Rensi Arteaga           Ingreso de pasos por caja provinientes de cuenta documentada y viaticos
  #146 IC         04/12/2017        RAC                     COnsiderar ingresos de efectivo en caja
+  #28      ETR     22/04/2019      MANUEL GUERRA           Bloquea el boton de devoluciona todos los funcionarios que no tengan el rol de cajero
 ***************************************************************************/
 
 DECLARE
@@ -63,6 +64,7 @@ DECLARE
     v_codigo_caja           varchar;
     v_reg_caja              record;
     v_id_caja               integer;
+    v_cuenta_cajeto         varchar;
 BEGIN
             v_nombre_funcion = 'tes.f_inserta_solicitud_efectivo';
 
@@ -94,17 +96,28 @@ BEGIN
             ------------------------------------------------------------------------------
             --  CASO DE QUE EXISTAN DEVOLUCIONES DE DINERO DEL SOLICITANTE AL CAJERO
             ---------------------------------------------------------------------------    
-                
+            --#28    
             ELSIF (p_hstore->'tipo_solicitud')::varchar = 'devolucion' THEN
                 
                 v_tipo = 'DEVEFE';
-
+                
                 select sol.estado, sol.monto into v_estado, v_monto_rendicion
                 from tes.tsolicitud_efectivo sol
                 where sol.id_solicitud_efectivo_fk=(p_hstore->'id_solicitud_efectivo_fk')::integer;
 
                 IF v_monto_rendicion > 0.00 AND v_estado not in ('rendido') THEN
                     raise exception 'No puede realizar una devolucion mientras tenga rendiciones pendientes';
+                END IF;
+                
+                SELECT DISTINCT(u.cuenta)
+                INTO v_cuenta_cajeto
+                FROM tes.tcajero c
+                JOIN orga.tfuncionario f on f.id_funcionario=c.id_funcionario
+                JOIN segu.tusuario u on u.id_persona=f.id_persona
+                WHERE u.id_usuario =p_id_usuario;
+
+				IF v_cuenta_cajeto is NULL THEN
+                    raise exception 'Solo el cajero puede realizar esta accion';      
                 END IF;
                 
             ---------------------------------------------------------------------------------
