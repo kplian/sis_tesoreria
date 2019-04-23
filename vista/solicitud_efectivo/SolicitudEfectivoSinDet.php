@@ -5,6 +5,10 @@
 *@author  (gsarmiento)
 *@date 24-11-2015 12:59:51
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
+ * 
+ * 
+  ISSUE      FORK       FECHA:              AUTOR                 DESCRIPCION
+  #28      ETR     22/04/2019      MANUEL GUERRA           Bloquea el boton de devoluciona todos los funcionarios que no tengan el rol de cajero
 */
 
 header("content-type: text/javascript; charset=UTF-8");
@@ -171,7 +175,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		this.init();
 		this.store.baseParams.pes_estado = 'borrador';
 		this.store.baseParams.tipo_interfaz = this.vista;
-		
+		this.store.baseParams.id_usuario = Phx.CP.config_ini.id_usuario;
 		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:this.vista}})
 		
 		this.finCons = true;
@@ -388,7 +392,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			config:{
 				name: 'monto',
 				fieldLabel: 'Solicitado',
-				allowBlank: true,
+				allowBlank: false,
 				anchor: '80%',
 				gwidth: 60,
 				maxLength:1179650
@@ -784,6 +788,10 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 							'fecha':new Date()
 							},
 						success:this.successDevolucion,
+						argument:
+						{
+							id_proceso_wf : rec.data.id_proceso_wf
+						},
 						failure: this.conexionFailure,
 						timeout:this.timeout,
 						scope:this
@@ -963,10 +971,21 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 				scope:this
 			});
 		},
-		
+		//#28
 		successDevolucion:function(resp){
-			Phx.CP.loadingHide();
-            this.reload();
+			this.reload();
+			Ext.Ajax.request({
+				url : '../../sis_tesoreria/control/SolicitudEfectivo/reporteReciboEntrega',
+				params : {
+					'id_proceso_wf' : resp.argument.id_proceso_wf,
+					'aux': 'INGEFE'
+				},
+				success : this.successExport,
+				failure : this.conexionFailure,
+				timeout : this.timeout,
+				scope : this
+			});
+			Phx.CP.loadingHide();            
 		},
 		
 		successWizard:function(resp){

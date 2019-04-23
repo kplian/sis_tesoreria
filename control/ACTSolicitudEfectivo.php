@@ -307,6 +307,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 		{
 			$this->objParam-> addFiltro('sol.id_proceso_wf ='.$this->objParam->getParametro('id_proceso_wf'));
 		}
+		
 
 		$this->objParam->addParametroConsulta('ordenacion','sol.id_solicitud_efectivo');
 		$this->objParam->addParametroConsulta('dir_ordenacion','ASC');
@@ -323,7 +324,10 @@ class ACTSolicitudEfectivo extends ACTbase{
 		}
 
 		$datosSolicitud = $resultSolicitud->getDatos();		
-
+		if($this->objParam->getParametro('aux')!='')
+		{
+			$datosSolicitud[0]['codigo_proc']='INGEFE';
+		}
 		//armamos el array parametros y metemos ahi los data sets de las otras tablas
 		$dataSource->putParameter('codigo_proc', $datosSolicitud[0]['codigo_proc']);
 		$dataSource->putParameter('fecha_entrega', $datosSolicitud[0]['fecha_entrega']);
@@ -348,6 +352,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$this->objParam->addParametro('firmar',$firmar);
 		$this->objParam->addParametro('fecha_firma',$fecha_firma);
 		$this->objParam->addParametro('usuario_firma',$usuario_firma);
+		
 		//build the report
 		$reporte = new RReciboEntrega($this->objParam);
 
@@ -375,7 +380,6 @@ class ACTSolicitudEfectivo extends ACTbase{
 	}
 	
 	function reporteRendicionEfectivo($create_file=false, $onlyData = false){
-			
 		$dataSource = new DataSource();
 		//captura datos de firma
 		if ($this->objParam->getParametro('firmar') == 'si') {
