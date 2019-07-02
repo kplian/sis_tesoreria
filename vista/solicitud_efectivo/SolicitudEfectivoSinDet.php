@@ -1,14 +1,7 @@
 <?php
-/**
-*@package pXP
-*@file SolicitudEfectivoSinDet.php
-*@author  (gsarmiento)
-*@date 24-11-2015 12:59:51
-*@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
- * 
- * 
+/*
   ISSUE      FORK       FECHA:              AUTOR                 DESCRIPCION
-  #28      ETR     22/04/2019      MANUEL GUERRA           Bloquea el boton de devoluciona todos los funcionarios que no tengan el rol de cajero
+  #28      ETR     01/04/2019        MANUEL GUERRA           Bloquea el boton de devoluciona todos los funcionarios que no tengan el rol de cajero
 */
 
 header("content-type: text/javascript; charset=UTF-8");
@@ -23,12 +16,14 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 					   {name:'entregado',title:'<H1 align="center"><i class="fa fa-file-o"></i> Entregados</h1>',grupo:2,height:0},
                        {name:'finalizado',title:'<H1 align="center"><i class="fa fa-thumbs-o-up"></i> Finalizados</h1>',grupo:3,height:0}],
 	
-	actualizarSegunTab: function(name, indice){
+	actualizarSegunTab: function(name, indice){		
 		
-    	if(this.finCons){
-    		 this.store.baseParams.pes_estado = name;
-    	     this.load({params:{start:0, limit:this.tam_pag}});
-    	   }
+		
+			if(this.finCons){    		    					
+		    	this.store.baseParams.pes_estado = name;
+		    	this.load({params:{start:0, limit:this.tam_pag}});			    		
+			}
+				
     },
 	
 	beditGroups: [0],
@@ -39,39 +34,37 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 	
 	constructor:function(config){
 		this.maestro=config.maestro;
-		this.Atributos[this.getIndAtributo('monto_rendido')].config.renderer = function(value, p, record) {			
-				    var saldo = parseFloat(record.data.monto) + parseFloat(record.data.monto_repuesto) - parseFloat(record.data.monto_rendido) - parseFloat(record.data.monto_devuelto);
-					if (record.data.estado == 'entregado' || record.data.estado == 'finalizado') {
-						return String.format("<font color = 'red'>Rendido: {0}</font><br>"+
-											 "<font color = 'slategray' >Devuelto a Caja:{1}</font><br>"+
-											 "<font color = 'green' >Devuelto a Solicitante:{2}</font><br>"											 
-											 ,record.data.monto_rendido, record.data.monto_devuelto, record.data.monto_repuesto											 
-											 );
-					} 
-					else {
-						return String.format('');
-					}
-			};
 		
-		this.Atributos[this.getIndAtributo('tiempo_rendicion')].config.renderer = function(value, p, record) {
-					
-					if (record.data.estado == 'entregado' || record.data.estado == 'finalizado') {
-						if(record.data.dias_no_rendido < 0){
-							return String.format("<font color = 'red'>Dias máximo rendir: {0}</font><br>"+
-											 "<font color = 'red' >Dias restantes:{1}</font><br>"											 
-											 ,record.data.dias_maximo_rendicion, record.data.dias_no_rendido
-											 );
-						}else{
-							return String.format("<font color = 'green'>Dias máximo rendir: {0}</font><br>"+
-											 "<font color = 'green' >Dias restantes:{1}</font><br>"											 
-											 ,record.data.dias_maximo_rendicion, record.data.estado == 'finalizado'?0:record.data.dias_no_rendido
-											 );
-						}
-					} 
-					else {
-						return String.format('');
-					}
-			};
+		//this.initButtons = [this.cmbGestion];		
+		this.Atributos[this.getIndAtributo('monto_rendido')].config.renderer = function(value, p, record) {			
+			var saldo = parseFloat(record.data.monto) + parseFloat(record.data.monto_repuesto) - parseFloat(record.data.monto_rendido) - parseFloat(record.data.monto_devuelto);
+			if (record.data.estado == 'entregado' || record.data.estado == 'finalizado') {	
+				return String.format("<font color = 'red'>Rendido: {0}</font><br>"+
+						 "<font color = 'slategray' >Devuelto a Caja:{1}</font><br>"+
+						 "<font color = 'green' >Devuelto a Solicitante:{2}</font><br>"											 
+						,record.data.monto_rendido, record.data.monto_devuelto, record.data.monto_repuesto);
+			} 
+			else {
+				return String.format('');
+			}
+		};
+		
+		this.Atributos[this.getIndAtributo('tiempo_rendicion')].config.renderer = function(value, p, record) {					
+			if (record.data.estado == 'entregado' || record.data.estado == 'finalizado') {
+				if(record.data.dias_no_rendido < 0){
+					return String.format("<font color = 'red'>Dias máximo rendir: {0}</font><br>"+
+									 "<font color = 'red' >Dias restantes:{1}</font><br>"											 
+									 ,record.data.dias_maximo_rendicion, record.data.dias_no_rendido );
+				}else{
+					return String.format("<font color = 'green'>Dias máximo rendir: {0}</font><br>"+
+									 "<font color = 'green' >Dias restantes:{1}</font><br>"											 
+									 ,record.data.dias_maximo_rendicion, record.data.estado == 'finalizado'?0:record.data.dias_no_rendido);
+				}
+			} 
+			else {
+				return String.format('');
+			}
+		};
 			
     	//llama al constructor de la clase padre
 		Phx.vista.SolicitudEfectivoSinDet.superclass.constructor.call(this,config);		
@@ -173,11 +166,19 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		});
 		*/
 		this.init();
+		if(this.store.baseParams.pes_estado=='finalizado'){
+			/*this.cmbGestion.on('select', function(combo, record, index){
+	            this.capturaFiltros();
+	            this.iniciarEvento();              	
+				this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:this.vista}}); 
+	        },this);*/
+		}
+		
 		this.store.baseParams.pes_estado = 'borrador';
 		this.store.baseParams.tipo_interfaz = this.vista;
 		this.store.baseParams.id_usuario = Phx.CP.config_ini.id_usuario;
 		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:this.vista}})
-		
+
 		this.finCons = true;
 	},
 			
@@ -670,7 +671,6 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 	 preparaMenu:function(n){
           var data = this.getSelectedData();
           var tb =this.tbar;
-
           this.getBoton('btnChequeoDocumentosWf').enable();
           Phx.vista.SolicitudEfectivoSinDet.superclass.preparaMenu.call(this,n);
           if (data['estado'] == 'borrador'){
@@ -678,6 +678,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('edit').enable();
 			  this.getBoton('del').enable();
 			  this.getBoton('btnRendicion').hide();
+			  // this.getBoton('btnRendicion').hide();
 			  //this.getCmp
 			  this.getBoton('diagrama_gantt').enable();
 			  //this.getBoton('btnReciboEntrega').disable();
@@ -730,6 +731,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
      },
 
 	liberaMenu:function(){
+
 		var tb = Phx.vista.SolicitudEfectivoSinDet.superclass.liberaMenu.call(this);
 		if(tb) {
 			this.getBoton('btnChequeoDocumentosWf').disable();
@@ -739,12 +741,35 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			this.getBoton('btnRendiciones').disable();
 			//this.getBoton('btnDevol').enable();
 		}
+		/*this.cmbGestion.on('select', function(combo, record, index){
+            this.capturaFiltros();
+            this.iniciarEventos();            
+			//this.store.baseParams.pes_estado = 'finalizado';
+			//this.store.baseParams.tipo_interfaz = this.vista;		
+			this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:this.vista}}); 
+        },this);*/
+        /*if(!this.validarFiltros()){
+            alert('Especifique el año antes')
+        }
+        else{
+            this.store.baseParams.id_gestion=this.cmbGestion.getValue();
+            Phx.vista.SolicitudIngreso.superclass.onButtonAct.call(this);
+        }*/
+       /*if(this.store.baseParams.pes_estado=='finalizado'){			
+			this.cmbGestion.on('select', function(combo, record, index){
+	            this.capturaFiltros();
+	            this.iniciarEvento();              	
+				this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:this.vista}}); 
+	        },this);
+		}*/
 	},
 	 
-	 iniciarEventos : function(){		 
+	 iniciarEventos : function(){	
+		
 		this.cmpFecha=this.getComponente('fecha');
 		this.cmpFuncionario=this.getComponente('id_funcionario');
 		this.cmpFuncionario.store.baseParams.fecha = this.cmpFecha.getValue().dateFormat(this.cmpFecha.format);
+		//this.store.baseParams.id_gestion = this.cmbGestion.getValue();			
 	 },
 	 
 	 onButtonEdit: function(){
@@ -995,8 +1020,73 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		 },
 	 
 	bdel:true,
-	bsave:true
-	}
+	bsave:true,
+	//
+	/*cmbGestion: new Ext.form.ComboBox({
+		fieldLabel: 'Gestion',
+		grupo:[3],
+		allowBlank: false,
+		blankText:'... ?',
+		emptyText:'Gestion...',
+		name:'id_gestion',	    
+		store:new Ext.data.JsonStore(
+		{
+			url: '../../sis_parametros/control/Gestion/listarGestion',
+			id: 'id_gestion',
+			root: 'datos',
+			sortInfo:{
+				field: 'gestion',
+				direction: 'DESC'
+			},
+			totalProperty: 'total',
+			fields: ['id_gestion','gestion'],
+			// turn on remote sorting
+			remoteSort: true,
+			baseParams:{par_filtro:'gestion'}
+		}),
+		valueField: 'id_gestion',
+		triggerAction: 'all',
+		displayField: 'gestion',
+	    hiddenName: 'id_gestion',
+		mode:'remote',
+		pageSize:50,
+		queryDelay:500,
+		listWidth:'280',
+		width:80,
+		grupo:[3],
+	}),	
+	//
+	//
+	capturaFiltros:function(combo, record, index){
+        this.desbloquearOrdenamientoGrid();       
+        if(this.validarFiltros()){
+            this.store.baseParams.id_gestion = this.cmbGestion.getValue();
+            this.load();
+        }
+
+    },
+    //    
+    onButtonAct:function(){
+        if(!this.validarFiltros()){
+            alert('Especifique el año antes')
+        }
+        else{
+            this.store.baseParams.id_gestion=this.cmbGestion.getValue();
+            Phx.vista.SolicitudEfectivoSinDet.superclass.onButtonAct.call(this);
+        }
+    }, 
+    //
+    validarFiltros:function(){
+        if(this.cmbGestion.isValid()){
+            return true;
+        }
+        else{
+            return false;
+        }        
+    }
+    */
+    
+}
 )
 </script>
 		

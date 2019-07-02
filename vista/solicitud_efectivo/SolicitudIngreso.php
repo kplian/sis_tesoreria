@@ -1,10 +1,7 @@
 <?php
-/**
-*@package pXP
-*@file SolicitudIngreso.php
-*@author  (gsarmiento)
-*@date 24-11-2015 12:59:51
-*@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
+/*
+ISSUE      FORK       FECHA:              AUTOR                 DESCRIPCION
+  #29      ETR     01/04/2019        MANUEL GUERRA          el cajero puede visualizar los ingresos
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -13,12 +10,9 @@ Phx.vista.SolicitudIngreso = Ext.extend(Phx.gridInterfaz,{
 
 	vista:'ingreso_caja',
 	
-	gruposBarraTareas:[{name:'borrador',title:'<H1 align="center"><i class="fa fa-thumbs-o-down"></i> Borradores</h1>',grupo:0,height:0},
-                       {name:'iniciado',title:'<H1 align="center"><i class="fa fa-eye"></i> Iniciados</h1>',grupo:1,height:0},
-					   {name:'finalizado',title:'<H1 align="center"><i class="fa fa-thumbs-o-up"></i> Finalizados</h1>',grupo:3,height:0}],
+	gruposBarraTareas:[{name:'finalizado',title:'<H1 align="center"><i class="fa fa-thumbs-o-up"></i> Finalizados</h1>',grupo:3,height:0}],
 	
-	actualizarSegunTab: function(name, indice){
-		
+	actualizarSegunTab: function(name, indice){		
     	if(this.finCons){
     		 this.store.baseParams.pes_estado = name;
     	     this.load({params:{start:0, limit:this.tam_pag}});
@@ -33,8 +27,7 @@ Phx.vista.SolicitudIngreso = Ext.extend(Phx.gridInterfaz,{
 	
 	constructor:function(config){
 		this.maestro=config.maestro;
-		
-    	//llama al constructor de la clase padre
+		//llama al constructor de la clase padre
 		Phx.vista.SolicitudIngreso.superclass.constructor.call(this,config);		
 		this.iniciarEventos();
 		
@@ -65,7 +58,7 @@ Phx.vista.SolicitudIngreso = Ext.extend(Phx.gridInterfaz,{
 				argument: {estado: 'anterior'},
 				iconCls: 'batras',
 				disabled:false,
-				grupo:[3],
+				//grupo:[3],
 				handler:this.antEstado,
 				tooltip: '<b>Anterior</b><p>Pasa al anterior estado</p>'
 			}
@@ -83,41 +76,37 @@ Phx.vista.SolicitudIngreso = Ext.extend(Phx.gridInterfaz,{
 		);
 		
 		this.addButton('btnImprimir', {
-			    grupo:[0,1,2,3],
-				text : 'Imprimir',
-				iconCls : 'bprint',
-				disabled : true,
-				handler : this.imprimirCbte,
-				tooltip : '<b>Imprimir Comprobante de Caja</b><br/>Imprime el Comprobante en el formato oficial'
-			});
-
-		
-		this.init();
-		this.store.baseParams.pes_estado = 'borrador';
+		    grupo:[0,1,2,3],
+			text : 'Imprimir',
+			iconCls : 'bprint',
+			disabled : true,
+			handler : this.imprimirCbte,
+			tooltip : '<b>Imprimir Comprobante de Caja</b><br/>Imprime el Comprobante en el formato oficial'
+		});
+		this.init();    	
+    	this.store.baseParams.pes_estado = 'finalizado';
 		this.store.baseParams.tipo_interfaz = this.vista;
-		
-		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:this.vista}})
-		
+		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:this.vista}});	
 		this.finCons = true;
 	},
 	
+    //
 	imprimirCbte : function() {
-			var rec = this.sm.getSelected();
-			var data = rec.data;
-			if (data) {
-				Phx.CP.loadingShow();
-				Ext.Ajax.request({
-					url : '../../sis_tesoreria/control/SolicitudEfectivo/reporteReciboEntrega',
-					params : {
-						'id_proceso_wf' : data.id_proceso_wf
-					},
-					success : this.successExport,
-					failure : this.conexionFailure,
-					timeout : this.timeout,
-					scope : this
-				});
-			}
-
+		var rec = this.sm.getSelected();
+		var data = rec.data;
+		if (data) {
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+				url : '../../sis_tesoreria/control/SolicitudEfectivo/reporteReciboEntrega',
+				params : {
+					'id_proceso_wf' : data.id_proceso_wf
+				},
+				success : this.successExport,
+				failure : this.conexionFailure,
+				timeout : this.timeout,
+				scope : this
+			});
+		}
 	},
 	
 			
@@ -257,7 +246,7 @@ Phx.vista.SolicitudIngreso = Ext.extend(Phx.gridInterfaz,{
 				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
 			},
 				type:'DateField',
-				filters:{pfiltro:'solefe.fecha_entrega',type:'date'},
+				filters:{pfiltro:'solefe.fecha',type:'date'},
 				id_grupo:1,
 				grid:true,
 				form:false
@@ -627,9 +616,7 @@ Phx.vista.SolicitudIngreso = Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('del').disable();
 			  this.getBoton('diagrama_gantt').enable();
           }
-           this.getBoton('btnImprimir').enable();
-
-		 
+           this.getBoton('btnImprimir').enable();		 
      },
 
 	liberaMenu:function(){
@@ -639,15 +626,16 @@ Phx.vista.SolicitudIngreso = Ext.extend(Phx.gridInterfaz,{
 			this.getBoton('diagrama_gantt').disable();
 			this.getBoton('fin_registro').disable();
 			this.getBoton('btnImprimir').disable();	
-		}
-		
+		}		
 	},
 	 
 	
-	 iniciarEventos : function(){		 
+	 iniciarEventos : function(){		
 		this.cmpFecha=this.getComponente('fecha');
 		this.cmpFuncionario=this.getComponente('id_funcionario');
 		this.cmpFuncionario.store.baseParams.fecha = this.cmpFecha.getValue().dateFormat(this.cmpFecha.format);
+		//
+		//this.store.baseParams.id_gestion = this.cmbGestion.getValue();
 	 },
 	 
 	 onButtonEdit: function(){
@@ -673,42 +661,42 @@ Phx.vista.SolicitudIngreso = Ext.extend(Phx.gridInterfaz,{
 
 
 	loadCheckDocumentosSolWf:function() {
-			var rec=this.sm.getSelected();
-			rec.data.nombreVista = this.nombreVista;
-			Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
-					'Chequear documento del WF',
-					{
-						width:'90%',
-						height:500
-					},
-					rec.data,
-					this.idContenedor,
-					'DocumentoWf'
+		var rec=this.sm.getSelected();
+		rec.data.nombreVista = this.nombreVista;
+		Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
+			'Chequear documento del WF',
+			{
+				width:'90%',
+				height:500
+			},
+			rec.data,
+			this.idContenedor,
+			'DocumentoWf'
 		)
 	},
 		
 	
 	
 	sigEstado:function(){                   
-	  var rec=this.sm.getSelected();
-	  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
-								'Estado de Wf',
-								{
-									modal:true,
-									width:700,
-									height:450
-								}, {data:{
-									   id_estado_wf:rec.data.id_estado_wf,
-									   id_proceso_wf:rec.data.id_proceso_wf									  
-									}}, this.idContenedor,'FormEstadoWf',
-								{
-									config:[{
-											  event:'beforesave',
-											  delegate: this.onSaveWizard												  
-											}],
-									
-									scope:this
-								 });        
+		var rec=this.sm.getSelected();
+		this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+		'Estado de Wf',
+		{
+			modal:true,
+			width:700,
+			height:450
+		}, {data:{
+			   id_estado_wf:rec.data.id_estado_wf,
+			   id_proceso_wf:rec.data.id_proceso_wf									  
+			}}, this.idContenedor,'FormEstadoWf',
+		{
+			config:[{
+					  event:'beforesave',
+					  delegate: this.onSaveWizard												  
+					}],
+			
+			scope:this
+		 });        
 			   
 	 },
 	 
@@ -768,10 +756,7 @@ Phx.vista.SolicitudIngreso = Ext.extend(Phx.gridInterfaz,{
         Phx.CP.loadingHide();
         resp.argument.wizard.panel.destroy()
         this.reload();
-     }, 
-     
-     
-	
+     },         
 	 
 	 onSaveWizard:function(wizard,resp){
 			Phx.CP.loadingShow();
@@ -808,7 +793,8 @@ Phx.vista.SolicitudIngreso = Ext.extend(Phx.gridInterfaz,{
 		 },
 	 
 	bdel:true,
-	bsave:true
+	bsave:true,
+    
 	}
 )
 </script>	

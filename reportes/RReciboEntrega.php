@@ -1,4 +1,9 @@
 <?php
+
+/*
+  ISSUE      FORK       FECHA:              AUTOR                 DESCRIPCION
+  #29      ETR     01/04/2019      MANUEL GUERRA           el inmediato superior sera responsable de los funcionarios inactivos
+*/
 require_once dirname(__FILE__).'/../../pxp/lib/lib_reporte/ReportePDFFormulario.php';
 require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
  class CustomReporte extends ReportePDFFormulario{
@@ -107,15 +112,18 @@ Class RReciboEntrega extends Report {
 		$this->pdf->SetFont('', '');		
         $this->pdf->Cell($width4, $height, $this->getDataSource()->getParameter('nombre_unidad'), 1, 1, 'L', false, '', 0, false, 'T', 'C');
         $this->pdf->SetFont('', 'B');
-        $this->pdf->Cell($width2, $height, 'A FAVOR DE: ', 1, 0, 'L', false, '', 0, false, 'T', 'C');
+        $this->pdf->Cell($width2, $height, 'FUNCIONARIO: ', 1, 0, 'L', false, '', 0, false, 'T', 'C');
 		$this->pdf->SetFont('', '');		
         $this->pdf->Cell($width4, $height, $this->getDataSource()->getParameter('solicitante'), 1, 1, 'L', false, '', 0, false, 'T', 'C');
         $this->pdf->SetFont('', 'B');
         $this->pdf->Cell($width2, $height, 'MOTIVO: ', 1, 0, 'L', false, '', 0, false, 'T', 'C');
 		$this->pdf->SetFont('', '');	
-			
 
-		$this->pdf->Cell($width4, $height, $this->getDataSource()->getParameter('motivo'), 1, 1, 'L', false, '', 1, false, 'T', 'C');  
+		$this->pdf->Cell($width4, $height,  $this->getDataSource()->getParameter('motivo') , 1, 1, 'L', false, '', 1, false, 'T', 'C');	
+		if($this->getDataSource()->getParameter('superior') != null){
+			$this->pdf->SetFont('', 'B');
+			$this->pdf->Cell($width4+40, $height,  'El funcionario solicitante esta inactivo, el responsable sera el inmediato superior  '. ($this->getDataSource()->getParameter('superior')), 1, 1, 'L', false, '', 1, false, 'T', 'C');	
+		}		 		
         /*$this->pdf->Ln();
 		$this->pdf->MultiCell($width4, $height, $this->getDataSource()->getParameter('motivo'), 1, 1, 'L', false, '', 0, true, 'T', 'C');
         $this->pdf->Ln();*/
@@ -141,10 +149,38 @@ Class RReciboEntrega extends Report {
 		}
         
         $this->pdf->Ln();
-		$this->pdf->Cell($width3+31, $height, $this->getDataSource()->getParameter('solicitante'),0,0,'C');
-		$this->pdf->Cell($width3+31, $height, $this->getDataSource()->getParameter('cajero'),0,0,'C');
+		if($this->getDataSource()->getParameter('superior') != null){
+			$this->pdf->Cell($width3+31, $height, $this->getDataSource()->getParameter('superior'),0,0,'C');				
+			$this->pdf->Cell($width3+31, $height, $this->getDataSource()->getParameter('cajero'),0,0,'C');
+			$this->pdf->Ln();
+			$this->pdf->Cell($width3+31, $height, '('.$this->getDataSource()->getParameter('solicitante').')',0,0,'C');	
+		
+		}else{
+			$this->pdf->Cell($width3+31, $height, $this->getDataSource()->getParameter('solicitante'),0,0,'C');	
+			$this->pdf->Cell($width3+31, $height, $this->getDataSource()->getParameter('cajero'),0,0,'C');
+		
+		}
+		
 		//$this->Cell(145, $height, 'RECIBO DE ENTREGA DE EFECTIVO', 0, 0, 'C', false, '', 1, false, 'T', 'C');
 		$this->pdf->Output($this->pdf->url_archivo, 'F');			
     }
+
+	function cortar_cadena($cadena, $longitud) {
+	    // Inicializamos las variables	    
+	    $contador = 0;
+	    $texto = '';
+
+	    $arrayTexto = explode(' ', $cadena);
+
+		while($longitud >= strlen($texto) + strlen($arrayTexto[$contador])) {
+			$texto .= ' '.$arrayTexto[$contador];
+			$contador++;
+		}
+	     
+	    if(strlen($cadena)>$longitud){
+	        $texto .= '';
+	    }
+	    return trim($texto);
+	}
 }
 ?>
