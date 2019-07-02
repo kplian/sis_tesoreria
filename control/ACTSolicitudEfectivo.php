@@ -1,10 +1,7 @@
 <?php
-/**
-*@package pXP
-*@file gen-ACTSolicitudEfectivo.php
-*@author  (gsarmiento)
-*@date 24-11-2015 12:59:51
-*@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
+/*
+  ISSUE      FORK       FECHA:              AUTOR                 DESCRIPCION
+  #29      ETR     01/04/2019      MANUEL GUERRA           el inmediato superior sera responsable de los funcionarios inactivos
 */
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
@@ -38,7 +35,8 @@ class ACTSolicitudEfectivo extends ACTbase{
 			}
 			if($this->objParam->getParametro('pes_estado')=='finalizado'){
 				 $this->objParam->addFiltro("solefe.estado in (''finalizado'')");
-			}
+				 //$this->objParam-> addFiltro('ge.id_gestion ='.$this->objParam->getParametro('id_gestion'));				
+			} 
 		}
 
 		if($this->objParam->getParametro('id_caja')!='')
@@ -116,7 +114,12 @@ class ACTSolicitudEfectivo extends ACTbase{
 		{
 			$this->objParam-> addFiltro('solefe.fk_id_solicitud_efectivo ='.$this->objParam->getParametro('id_solicitud_efectivo'));
 		}
-
+		//
+		/*ssif($this->objParam->getParametro('id_gestion')!='')
+		{
+			$this->objParam-> addFiltro('ge.id_gestion ='.$this->objParam->getParametro('id_gestion'));
+		}*/
+		//
 		if($this->objParam->getParametro('id_solicitud_efectivo_fk')!='')
 		{
 			$this->objParam-> addFiltro('solefe.id_solicitud_efectivo_fk ='.$this->objParam->getParametro('id_solicitud_efectivo_fk'));
@@ -337,6 +340,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$dataSource->putParameter('cajero', $datosSolicitud[0]['cajero']);
 		$dataSource->putParameter('nombre_unidad', $datosSolicitud[0]['nombre_unidad']);
 		$dataSource->putParameter('solicitante', $datosSolicitud[0]['solicitante']);
+		$dataSource->putParameter('superior', $datosSolicitud[0]['superior']);
 		$dataSource->putParameter('motivo', $datosSolicitud[0]['motivo']);
 		$dataSource->putParameter('monto', $datosSolicitud[0]['monto']);
 		
@@ -416,7 +420,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$dataSource->putParameter('codigo', $datosReciboEntrega[0]['codigo']);
 		$dataSource->putParameter('cajero', $datosReciboEntrega[0]['cajero']);
 		$dataSource->putParameter('nombre_unidad', $datosReciboEntrega[0]['nombre_unidad']);
-		$dataSource->putParameter('solicitante', $datosReciboEntrega[0]['solicitante']);
+		$dataSource->putParameter('solicitante', $datosReciboEntrega[0]['solicitante']);		
 		$dataSource->putParameter('motivo', $datosReciboEntrega[0]['motivo']);
 		$dataSource->putParameter('monto', $datosReciboEntrega[0]['monto']);
 		$dataSource->putParameter('fecha_rendicion', $datosReciboEntrega[0]['fecha_rendicion']);

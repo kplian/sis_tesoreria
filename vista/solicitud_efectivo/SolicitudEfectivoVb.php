@@ -592,10 +592,10 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 	
 	onSaveWizard:function(wizard,resp){
 		Phx.CP.loadingShow();
-		console.log('-----------');
+		/*console.log('-----------');
 		console.log('-->',wizard);
 		console.log('-->',resp);
-		console.log('-----------');
+		console.log('-----------');*/
 		Ext.Ajax.request({
 			url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
 			params:{

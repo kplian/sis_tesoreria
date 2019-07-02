@@ -1,10 +1,7 @@
 <?php
-/**
-*@package pXP
-*@file gen-MODSolicitudEfectivo.php
-*@author  (gsarmiento)
-*@date 24-11-2015 12:59:51
-*@description Clase que envia los parametros requeridos a la Base de datos para la ejecucion de las funciones, y que recibe la respuesta del resultado de la ejecucion de las mismas
+/*
+  ISSUE      FORK       FECHA:              AUTOR                 DESCRIPCION
+  #29      ETR     01/04/2019      MANUEL GUERRA           el inmediato superior sera responsable de los funcionarios inactivos
 */
 
 class MODSolicitudEfectivo extends MODbase{
@@ -22,7 +19,7 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->setParametro('id_funcionario_usu','id_funcionario_usu','int4');
 		$this->setParametro('tipo_interfaz','tipo_interfaz','varchar');
 		$this->setParametro('historico','historico','varchar');
-
+		$this->setParametro('pes_estado','pes_estado','varchar');	
 		//Definicion de la lista del resultado del query
 		$this->captura('id_solicitud_efectivo','int4');
 		$this->captura('id_caja','int4');
@@ -318,6 +315,7 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
 		$this->setCount(false);
 		
+		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');
 		//Definicion de la lista del resultado del query		
 		$this->captura('codigo_proc','varchar');
 		$this->captura('fecha_entrega','date');
@@ -327,6 +325,7 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->captura('cajero','text');		
 		$this->captura('nombre_unidad','varchar');
 		$this->captura('solicitante','text');
+		$this->captura('superior','varchar');
 		$this->captura('motivo','text');
 		$this->captura('monto','numeric');
 		$this->captura('fecha_rendicion','date');
