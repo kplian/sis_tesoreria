@@ -2,6 +2,7 @@
 /*
 ISSUE      FORK       FECHA:              AUTOR                 DESCRIPCION
   #29      ETR     01/04/2019        MANUEL GUERRA          el cajero puede visualizar los ingresos
+  #30    ETR     02/07/2019        MANUEL GUERRA 			mostrar la pestaña de iniciados en ingresos
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -10,13 +11,14 @@ Phx.vista.SolicitudIngreso = Ext.extend(Phx.gridInterfaz,{
 
 	vista:'ingreso_caja',
 	
-	gruposBarraTareas:[{name:'finalizado',title:'<H1 align="center"><i class="fa fa-thumbs-o-up"></i> Finalizados</h1>',grupo:3,height:0}],
+	gruposBarraTareas:[{name:'iniciado',title:'<H1 align="center"><i class="fa fa-eye"></i> Iniciados</h1>',grupo:1,height:0},
+					   {name:'finalizado',title:'<H1 align="center"><i class="fa fa-thumbs-o-up"></i> Finalizados</h1>',grupo:3,height:0}],
 	
 	actualizarSegunTab: function(name, indice){		
     	if(this.finCons){
-    		 this.store.baseParams.pes_estado = name;
-    	     this.load({params:{start:0, limit:this.tam_pag}});
-    	   }
+			this.store.baseParams.pes_estado = name;
+	    	this.load({params:{start:0, limit:this.tam_pag}});
+	   	}
     },
 	
 	beditGroups: [0],
