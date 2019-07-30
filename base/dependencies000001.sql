@@ -4005,7 +4005,7 @@ AS
      LEFT JOIN tes.tplan_pago pr ON pr.id_plan_pago = pp.id_plan_pago_fk
      LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra = op.id_categoria_compra;
 
-/**********************************I-DEP-EGS-TES-0-28/03/2019****************************************/
+/**********************************F-DEP-EGS-TES-0-28/03/2019****************************************/
 
 
 
