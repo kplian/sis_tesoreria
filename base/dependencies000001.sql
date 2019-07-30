@@ -3892,7 +3892,7 @@ select pxp.f_insert_testructura_gui ('CONPLAPAG', 'REPOP');
 /***********************************F-DEP-JJA-TES-0-05/12/2018****************************************/
 
 
-/**********************************I-DEP-EGS-TES-0-28/03/2019/02/2018****************************************/
+/**********************************I-DEP-EGS-TES-0-28/03/2019****************************************/
 ---se agrego campo descuento de ley----------
 CREATE OR REPLACE VIEW tes.vcomp_devtesprov_plan_pago (
     id_plan_pago,
@@ -4007,7 +4007,46 @@ AS
      JOIN param.vproveedor p ON p.id_proveedor = op.id_proveedor
      LEFT JOIN tes.tplan_pago pr ON pr.id_plan_pago = pp.id_plan_pago_fk
      LEFT JOIN adq.tcategoria_compra cac ON cac.id_categoria_compra = op.id_categoria_compra;
-/**********************************F-DEP-EGS-TES-0-28/03/2019/02/2018****************************************/
+
+/**********************************I-DEP-EGS-TES-0-28/03/2019****************************************/
+
+
+
+/**********************************I-DEP-RAC-TES-0-25/07/2019****************************************/
+
+--------------- SQL ---------------
+
+ -- object recreation
+DROP VIEW tes.vcomp_devtesprov_det_plan_pago;
+
+CREATE VIEW tes.vcomp_devtesprov_det_plan_pago
+AS
+  SELECT od.id_concepto_ingas,
+         od.id_partida,
+         od.id_partida_ejecucion_com,
+         pro.monto_ejecutar_mo AS monto_pago_mo,
+         pro.monto_ejecutar_mb AS monto_pago_mb,
+         od.id_centro_costo,
+         od.descripcion,
+         pro.id_plan_pago,
+         pro.id_prorrateo,
+         pro.id_int_transaccion,
+         od.id_orden_trabajo,
+         ci.id_taza_impuesto
+  FROM tes.tprorrateo pro
+  JOIN tes.tobligacion_det od ON od.id_obligacion_det = pro.id_obligacion_det
+  JOIN param.tconcepto_ingas ci ON ci.id_concepto_ingas = od.id_concepto_ingas;
+
+ALTER TABLE tes.vcomp_devtesprov_det_plan_pago
+  OWNER TO postgres;
+
+GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES, TRIGGER, TRUNCATE
+  ON tes.vcomp_devtesprov_det_plan_pago TO postgres;
+GRANT SELECT
+  ON tes.vcomp_devtesprov_det_plan_pago TO lectura;
+  
+  
+/**********************************F-DEP-RAC-TES-0-25/07/2019****************************************/
 
 
  
