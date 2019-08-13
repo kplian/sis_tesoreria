@@ -1,7 +1,10 @@
 <?php
 /*
-  ISSUE      FORK       FECHA:              AUTOR                 DESCRIPCION
-  #29      ETR     01/04/2019      MANUEL GUERRA           el inmediato superior sera responsable de los funcionarios inactivos
+***************************************************************************
+  ISSUE    SIS   	EMPRESA     FECHA           AUTOR               DESCRIPCION
+  #29      TES 		ETR     	01/04/2019      MANUEL GUERRA       el inmediato superior sera responsable de los funcionarios inactivos
+  #61	   TES		ETR 	  	01/08/2019	    RCM 	      		Actualizacion PHP 7 problema Count
+ ***************************************************************************
 */
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
@@ -23,7 +26,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 		if($this->objParam->getParametro('tipo_interfaz')=='SinDetalle')
 		{
 			$this->objParam-> addFiltro("caja.tipo_ejecucion = ''sin_detalle''");
-			
+
 			if($this->objParam->getParametro('pes_estado')=='borrador'){
 				 $this->objParam->addFiltro("solefe.estado in (''borrador'')");
 			}
@@ -35,8 +38,8 @@ class ACTSolicitudEfectivo extends ACTbase{
 			}
 			if($this->objParam->getParametro('pes_estado')=='finalizado'){
 				 $this->objParam->addFiltro("solefe.estado in (''finalizado'')");
-				 //$this->objParam-> addFiltro('ge.id_gestion ='.$this->objParam->getParametro('id_gestion'));				
-			} 
+				 //$this->objParam-> addFiltro('ge.id_gestion ='.$this->objParam->getParametro('id_gestion'));
+			}
 		}
 
 		if($this->objParam->getParametro('id_caja')!='')
@@ -82,24 +85,24 @@ class ACTSolicitudEfectivo extends ACTbase{
     function listarSolicitudIngreso(){
 		$this->objParam->defecto('ordenacion','id_solicitud_efectivo');
 		$this->objParam->defecto('dir_ordenacion','asc');
-		
+
 		if($this->objParam->getParametro('tipo_interfaz')=='ingreso_caja')
 		{
 			$this->objParam-> addFiltro("caja.tipo_ejecucion = ''sin_detalle''");
-			
+
 			if($this->objParam->getParametro('pes_estado')=='borrador'){
 				 $this->objParam->addFiltro("solefe.estado in (''borrador'')");
 			}
 			if($this->objParam->getParametro('pes_estado')=='iniciado'){
 				$this->objParam->addFiltro("solefe.estado in (''vbjefe'',''vbcajero'',''vbfin'')");
 			}
-			
+
 			if($this->objParam->getParametro('pes_estado')=='finalizado'){
 				 $this->objParam->addFiltro("solefe.estado in (''ingresado'')");
 			}
 		}
 
-		
+
 		if($this->objParam->getParametro('id_caja')!='')
 		{
 			if($this->objParam->getParametro('tipo_interfaz')=='efectivoCaja'){
@@ -244,7 +247,7 @@ class ACTSolicitudEfectivo extends ACTbase{
     $modSolicitudEfecitovDet = $this->create('MODSolicitudEfectivoDet');
     //lista el detalle de la solicitud
     $resultSolicitudEfectivoDet = $modSolicitudEfecitovDet->listarSolicitudEfectivoDet();
-	
+
 	//agrupa el detalle de la solcitud por centros de costos y partidas
     $solicitudEfectivoDetAgrupado = $this->groupArray($resultSolicitudEfectivoDet->getDatos(), 'desc_ingas','codigo_cc', $datosSolicitud[0]['id_moneda'],$datosSolicitud[0]['estado'],$onlyData);
     //var_dump($solicitudEfectivoDetAgrupado); exit;
@@ -272,7 +275,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 
 		$reporte->setDataSource($dataSource);
 
-		$reporte->write();
+		$reporte->write1();//#61: cambio nombre de función
 
 			if(!$create_file){
 						$mensajeExito = new Mensaje();
@@ -310,7 +313,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 		{
 			$this->objParam-> addFiltro('sol.id_proceso_wf ='.$this->objParam->getParametro('id_proceso_wf'));
 		}
-		
+
 
 		$this->objParam->addParametroConsulta('ordenacion','sol.id_solicitud_efectivo');
 		$this->objParam->addParametroConsulta('dir_ordenacion','ASC');
@@ -320,13 +323,13 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$this->objFunc = $this->create('MODSolicitudEfectivo');
 
 		$resultSolicitud = $this->objFunc->reporteReciboEntrega();
-		
+
 		if($resultSolicitud->getTipo() != 'EXITO'){
 			$resultSolicitud->imprimirRespuesta($resultSolicitud->generarJson());
 			exit;
 		}
 
-		$datosSolicitud = $resultSolicitud->getDatos();		
+		$datosSolicitud = $resultSolicitud->getDatos();
 		if($this->objParam->getParametro('aux')!='')
 		{
 			$datosSolicitud[0]['codigo_proc']='INGEFE';
@@ -343,7 +346,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$dataSource->putParameter('superior', $datosSolicitud[0]['superior']);
 		$dataSource->putParameter('motivo', $datosSolicitud[0]['motivo']);
 		$dataSource->putParameter('monto', $datosSolicitud[0]['monto']);
-		
+
 		if ($onlyData){
 
 			return $dataSource;
@@ -356,7 +359,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$this->objParam->addParametro('firmar',$firmar);
 		$this->objParam->addParametro('fecha_firma',$fecha_firma);
 		$this->objParam->addParametro('usuario_firma',$usuario_firma);
-		
+
 		//build the report
 		$reporte = new RReciboEntrega($this->objParam);
 
@@ -382,7 +385,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 
 			}
 	}
-	
+
 	function reporteRendicionEfectivo($create_file=false, $onlyData = false){
 		$dataSource = new DataSource();
 		//captura datos de firma
@@ -411,7 +414,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 
 		$resultReciboEntrega = $this->objFunc->reporteReciboEntrega();
 
-		$datosReciboEntrega = $resultReciboEntrega->getDatos();		
+		$datosReciboEntrega = $resultReciboEntrega->getDatos();
 		//armamos el array parametros y metemos ahi los data sets de las otras tablas
 		$dataSource->putParameter('codigo_proc', $datosReciboEntrega[0]['codigo_proc']);
 		$dataSource->putParameter('fecha_entrega', $datosReciboEntrega[0]['fecha_entrega']);
@@ -420,12 +423,12 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$dataSource->putParameter('codigo', $datosReciboEntrega[0]['codigo']);
 		$dataSource->putParameter('cajero', $datosReciboEntrega[0]['cajero']);
 		$dataSource->putParameter('nombre_unidad', $datosReciboEntrega[0]['nombre_unidad']);
-		$dataSource->putParameter('solicitante', $datosReciboEntrega[0]['solicitante']);		
+		$dataSource->putParameter('solicitante', $datosReciboEntrega[0]['solicitante']);
 		$dataSource->putParameter('motivo', $datosReciboEntrega[0]['motivo']);
 		$dataSource->putParameter('monto', $datosReciboEntrega[0]['monto']);
 		$dataSource->putParameter('fecha_rendicion', $datosReciboEntrega[0]['fecha_rendicion']);
 		$dataSource->putParameter('monto_dev', $datosReciboEntrega[0]['monto_dev']);
-		
+
 		$this->objParam->defecto('ordenacion', 'fecha');
 		$this->objParam->defecto('cantidad', 1000);
 		$this->objParam->defecto('puntero', 0);
@@ -433,18 +436,18 @@ class ACTSolicitudEfectivo extends ACTbase{
 		$modRendicionEfectivo = $this->create('MODSolicitudEfectivo');
 		//lista el detalle de la rendicion
 		$resultRendicionEfectivo = $modRendicionEfectivo->reporteRendicionEfectivo();
-		
+
 		//var_dump($resultRendicionEfectivo); exit;
 		//agrupa el detalle de la rendicion por centros de costos y partidas
 		//$solicitudRendicionEfectivoAgrupado = $this->groupArray($resultRendicionEfectivo->getDatos(), 'desc_ingas','codigo_cc', $datosSolicitud[0]['id_moneda'],$datosSolicitud[0]['estado'],$onlyData);
-		
-		
+
+
 		$solicitudRendicionEfectivoDataSource = new DataSource();
 		$solicitudRendicionEfectivoDataSource->setDataSet($resultRendicionEfectivo->getDatos());
 
 		//inserta el detalle de la solicitud como origen de datos
 		$dataSource->putParameter('detalleDataSource', $solicitudRendicionEfectivoDataSource);
-		
+
 		if ($onlyData){
 
 			return $dataSource;
@@ -486,58 +489,58 @@ class ACTSolicitudEfectivo extends ACTbase{
 	function groupArray($array,$groupkey,$groupkeyTwo,$id_moneda,$estado_sol, $onlyData){
 	 if (count($array)>0)
 	 {
-	 	//recupera las llaves del array    
+	 	//recupera las llaves del array
 	 	$keys = array_keys($array[0]);
-	 	
+
 	 	$removekey = array_search($groupkey, $keys);
 	 	$removekeyTwo = array_search($groupkeyTwo, $keys);
-	 	
+
 		if ($removekey===false)
  		     return array("Clave \"$groupkey\" no existe");
 		if($removekeyTwo===false)
  		     return array("Clave \"$groupkeyTwo\" no existe");
- 		     
-	 	
+
+
 	 	//crea los array para agrupar y para busquedas
 	 	$groupcriteria = array();
 	 	$arrayResp=array();
-	 	
+
 	 	//recorre el resultado de la consulta de oslicitud detalle
 	 	foreach($array as $value)
 	 	{
-	 		//por cada registro almacena el valor correspondiente en $item     
+	 		//por cada registro almacena el valor correspondiente en $item
 	 		$item=null;
 	 		foreach ($keys as $key)
 	 		{
 	 			$item[$key] = $value[$key];
 	 		}
-	 		
+
 	 		//buscar si el grupo ya se incerto
 	 	 	$busca = array_search($value[$groupkey].$value[$groupkeyTwo], $groupcriteria);
-	 		
+
 	 		if ($busca === false)
 	 		{
 	 		     //si el grupo no existe lo crea
 	 		    //en la siguiente posicicion de crupcriteria agrega el identificador del grupo
 	 			$groupcriteria[]=$value[$groupkey].$value[$groupkeyTwo];
-	 			
-	 			//en la siguiente posivion cre ArrayResp cre un btupo con el identificaor nuevo  
+
+	 			//en la siguiente posivion cre ArrayResp cre un btupo con el identificaor nuevo
 	 			//y un bubgrupo para acumular los detalle de semejaste caracteristicas
-	 			
+
 	 			$arrayResp[]=array($groupkey.$groupkeyTwo=>$value[$groupkey].$value[$groupkeyTwo],'groupeddata'=>array(),'presu_verificado'=>"false");
 	 			$arrayPresuVer[]=
 	 			//coloca el indice en la ultima posicion insertada
 	 			$busca=count($arrayResp)-1;
-	 			
-	 			
-	 			
+
+
+
 	 		}
-	 		
+
 	 		//inserta el registro en el subgrupo correspondiente
 	 		$arrayResp[$busca]['groupeddata'][]=$item;
-	 		
+
 	 	}
-	 	
+
 	 	return $arrayResp;
 	 }
 	 else
