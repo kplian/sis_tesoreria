@@ -6,7 +6,8 @@
 *@date 20-09-2011 10:22:05
 *@description Archivo con la interfaz de usuario que permite 
 *dar el visto a solicitudes de compra
-*
+* Issue Autor  fecha       Descripcion
+*  #32  Juan   27/09/2019  Corrección de close de estado Wf 
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -160,6 +161,8 @@ Phx.vista.ObligacionPagoVb = {
             	this.wEstado.hide();
             	this.successSinc(r1,r2,r3)
             },
+            
+
             failure: function(r1,r2,r3){
             	this.conexionFailure(r1,r2,r3);
             	var d= this.sm.getSelected().data;
@@ -169,7 +172,6 @@ Phx.vista.ObligacionPagoVb = {
         });
     	
     },
-    
     showObsEstado: function(){
     	this.wEstado.buttons[0].hide();
         this.wEstado.buttons[1].show();
@@ -210,8 +212,12 @@ Phx.vista.ObligacionPagoVb = {
 		            }); 	
             }
                 
-      },    
-   
+      },  
+      successSinc:function (){ //#32
+        Phx.CP.loadingHide(); //#32
+        this.wEstado.hide(); //#32
+        this.reload(); //#32
+      }, //#32
     
      tabsouth:[
             { 
@@ -310,7 +316,6 @@ Phx.vista.ObligacionPagoVb = {
        	  
 			       	   this.conexionFailure(resp1,resp2,resp3);
 			       	   var d= this.sm.getSelected().data;
-			       	   
 			       	  
 			       },
                 timeout:this.timeout,
