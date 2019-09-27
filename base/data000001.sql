@@ -20,7 +20,7 @@ Para  definir la la metadata, menus, roles, etc
 */
 
 INSERT INTO segu.tsubsistema ( codigo, nombre, prefijo, estado_reg, nombre_carpeta, id_subsis_orig)
-VALUES ('TES', 'Sistema de Tesoreria', 'TES', 'activo', 'tesoreria', NULL);
+VALUES ('TES', 'Sistema de Tesoreria', 'TES', 'activo', 'tesoreria', NULL) ON CONFLICT  (codigo) WHERE estado_reg = 'activo' DO NOTHING;
 
 -------------------------------------
 --DEFINICION DE INTERFACES

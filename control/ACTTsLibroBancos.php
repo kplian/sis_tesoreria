@@ -6,6 +6,11 @@
 *@date 01-12-2013 09:10:17
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
 */
+/*
+HISTORIAL DE MODIFICACIONES:
+ISSUE 		   FECHA   			 AUTOR				 DESCRIPCION:
+#61        	14/08/2019		  	Manuel Guerra  	 Correccion de bugs
+*/
 include_once(dirname(__FILE__).'/../../lib/lib_general/funciones.inc.php');
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
 require_once(dirname(__FILE__).'/../../sis_tesoreria/reportes/RLibroBancos.php');
@@ -140,8 +145,8 @@ class ACTTsLibroBancos extends ACTbase{
 		
 		$fichero= 'HTMLReporteCheque.php';
 		$fichero_salida = dirname(__FILE__).'/../../reportes_generados/'.$fichero;
-		
-		$fp=fopen($fichero_salida,w);
+		#61
+		$fp=fopen($fichero_salida,'w');
 		
 		$funciones = new funciones();
 		
@@ -202,7 +207,7 @@ class ACTTsLibroBancos extends ACTbase{
 		$fichero= 'HTMLReporteCheque2.php';
 		$fichero_salida = dirname(__FILE__).'/../../reportes_generados/'.$fichero;
 		
-		$fp=fopen($fichero_salida,w);
+		$fp=fopen($fichero_salida,'w');
 		
 		$funciones = new funciones();
 		
@@ -263,7 +268,7 @@ class ACTTsLibroBancos extends ACTbase{
 		$fichero= 'HTMLReporteCheque.php';
 		$fichero_salida = dirname(__FILE__).'/../../reportes_generados/'.$fichero;
 		
-		$fp=fopen($fichero_salida,w);
+		$fp=fopen($fichero_salida,'w');
 		
 		$funciones = new funciones();
 		
@@ -314,7 +319,7 @@ class ACTTsLibroBancos extends ACTbase{
 		$fichero= 'HTMLReporteCheque.php';
 		$fichero_salida = dirname(__FILE__).'/../../reportes_generados/'.$fichero;
 		
-		$fp=fopen($fichero_salida,w);
+		$fp=fopen($fichero_salida,'w');
 		
 		$funciones = new funciones();
 		
