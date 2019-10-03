@@ -18,6 +18,7 @@ $body$
  #31, ETR       23/11/2017        RAC KPLIAN        al validar si el presupesuto alcanza apra generar el cbte considerar si el anticipo ejecuo presupeusto  
  #33, ETR       06/03/2018        RAC KPLIAN        Si tiene credito fiscal restar el 13% al validar el presupeusto   
  #33 ETR        12/04/2018        RAC KPLIAN        Calculo defactor de monto excento y anticipo para  obligacioens de apgo con  prorrateo 
+ #34 ETR       02/10/2019        RAC KPLIAN        BUG al sincronizar presupuesto en procesos de adquisiciones con varias lineas pero mismos presupuestos y partida 
  
 ***************************************************************************/
 
@@ -60,6 +61,7 @@ DECLARE
     v_iva		numeric;
     v_factor_excento  numeric;
     v_factor_anticipo numeric;
+    v_desc_tcc        varchar; --#34 ++
 	
     
 BEGIN
@@ -171,6 +173,8 @@ BEGIN
 
            		--verifica si el presupuesto comprometido sobrante alcanza para pagar el monto de la cuota prorrateada correspondiente al pago
 
+                 /* #34  --agrupa por centro de costo
+                 
                   FOR  v_registros_pro in (
                                  select
                                    pro.id_prorrateo,
@@ -191,9 +195,33 @@ BEGIN
 
 
                                  where  pro.id_plan_pago = p_id_plan_pago
-                                   and pro.estado_reg = 'activo') LOOP
-
-
+                                   and pro.estado_reg = 'activo') LOOP*/
+                       
+                 
+                 FOR  v_registros_pro in (
+                                             
+                                   select                                      
+                                       sum(pro.monto_ejecutar_mb) as monto_ejecutar_mb,
+                                       sum(pro.monto_ejecutar_mo) as monto_ejecutar_mo,
+                                       max(od.id_partida_ejecucion_com) as id_partida_ejecucion_com,
+                                       max(od.id_concepto_ingas) as id_concepto_ingas,
+                                       par.sw_movimiento,
+                                       tp.movimiento,
+                                       od.id_centro_costo,
+                                       sum(od.factor_porcentual)  as factor_porcentual
+                                     from  tes.tprorrateo pro
+                                     inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det
+                                     INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = od.id_centro_costo
+                                     INNER JOIN pre.tpartida par on par.id_partida  = od.id_partida
+                                     INNER JOIN pre.ttipo_presupuesto tp on tp.codigo = p.tipo_pres
+                                     WHERE  pro.id_plan_pago = p_id_plan_pago  and pro.estado_reg = 'activo'
+                                     GROUP BY
+                                        od.id_centro_costo,
+                                        par.sw_movimiento,
+                                        tp.movimiento
+                                      ) LOOP
+                                   
+                                   
                         v_comprometido=0;
                         v_ejecutado=0;
 
@@ -260,9 +288,17 @@ BEGIN
                           v_desc_ingas
                          from  param.tconcepto_ingas cig
                          where cig.id_concepto_ingas  = v_registros_pro.id_concepto_ingas;
+                         
+                         --#34 recuperar centro de costo
+                         select 
+                           cc.descripcion_tcc
+                          INTO
+                           v_desc_tcc
+                         from param.vcentro_costo cc
+                         where cc.id_centro_costo = v_registros_pro.id_centro_costo;
 
                           --sinc_presupuesto
-                          v_mensaje_verificacion =v_mensaje_verificacion ||v_cont::varchar||') '||v_desc_ingas||'('||  substr(v_registros_pro.descripcion, 0, 15)   ||'...)'||' Presup. '||v_registros_pro.id_centro_costo||' monto faltante ' || (v_registros_pro.monto_ejecutar_mo - (v_comprometido - (v_ejecutado - v_des_antipo_si_ejecuta )))::varchar||' \n';
+                          v_mensaje_verificacion =v_mensaje_verificacion ||v_cont::varchar||') '||v_desc_ingas||'... '||' Presup. '||v_registros_pro.id_centro_costo|| ' ' ||v_desc_tcc||' monto faltante ' || (v_registros_pro.monto_ejecutar_mo - (v_comprometido - (v_ejecutado - v_des_antipo_si_ejecuta )))::varchar||' \n';
                           v_sw_verificacion=false;
                           v_cont = v_cont +1;
                      

@@ -32,7 +32,8 @@ $body$
  #101   ETR       02/07/2018        RAC KPLIAN        Considera facturas con monto excento al sicronizar presupuestos
  #7777  ETR       13/12/2018        RAC KPLIAN        Determinar si el anticipo es de la misma gestion que la obligacion de pago y si es necesario realizar la conversion 
  #7890  ETR       13/12/2018        RAC KPLIAN        Al aprobacion una olbigacion de pago colo comprometer el monto previsto para la gestion actual  (restar monto_sg_mo)
- #12    ETR       10/01/2018        RAC KPLIAN        Si la obigacion de la bandera comprometer_iva = no, le restamso el 13% a total que se tiene que comprometer   
+ #12    ETR       10/01/2018        RAC KPLIAN        Si la obigacion de la bandera comprometer_iva = no, le restamso el 13% a total que se tiene que comprometer  
+ #34    ETR       02/10/2019        RAC KPLIAN        BUG al sincronizar presupuesto en procesos de adquisiciones con varias lineas pero mismos presupuestos y partida 
 ***************************************************************************/
 
 DECLARE
@@ -576,6 +577,7 @@ BEGIN
        --   las ventajas de trasaccion en mismo sistema de presupuesto 
        --   y que considera si el iva compromete o no presupeusto
        --   #101  considera monto excento
+       --   #34  considerar agrupacion de presupeustos y partidas
        -------------------------------------------------------------------------------------
        
        ELSEIF p_operacion = 'sincronizar_presupuesto' THEN
@@ -608,21 +610,21 @@ BEGIN
                FROM  conta.f_get_detalle_plantilla_calculo(v_id_plantilla, 'IVA-CF');
                
                v_total_iva = (v_monto_ejecutar_total_mo -  COALESCE(v_monto_excento,0) )*  COALESCE(v_registros.ps_monto_porc, 0);
+               
+               --raise exception 'monto % ', v_monto_ejecutar_total_mo;
            
                v_i = 0;
                --1) determinar cuanto es el faltante para la cuota ee moneda base, si sobra no hacer nada
+               -- OJO esta consulta esta asumiendo que no existe control por partida solo por centro de costo
                FOR  v_registros_pro in ( 
-                                     select  
-                                       pro.id_prorrateo,
-                                       pro.monto_ejecutar_mb,
-                                       pro.monto_ejecutar_mo,
-                                       od.id_partida_ejecucion_com,
-                                       od.descripcion,
-                                       od.id_concepto_ingas,
-                                       od.id_partida,
+                                     select                                        
+                                       sum(pro.monto_ejecutar_mb) as monto_ejecutar_mb,
+                                       sum(pro.monto_ejecutar_mo) as monto_ejecutar_mo,                                      
+                                       max(od.id_partida_ejecucion_com) as id_partida_ejecucion_com, 
+                                       max(pro.id_obligacion_det) as id_obligacion_det,                                       
+                                       max(od.id_partida) as id_partida,   --OJO con esto cuando el control es por partida la consulta deberia cambiar
                                        p.id_presupuesto,
-                                       od.id_obligacion_pago,
-                                       od.id_obligacion_det,
+                                       od.id_obligacion_pago,                                      
                                        op.id_moneda,
                                        op.fecha,
                                        op.num_tramite,
@@ -630,18 +632,31 @@ BEGIN
                                        par.sw_movimiento,
                                        tp.movimiento,
                                        pp.monto_ejecutar_total_mo,
-                                       pro.monto_ejecutar_mo / pp.monto_ejecutar_total_mo as  factor_pro,
+                                       sum(pro.monto_ejecutar_mo) / sum(pp.monto_ejecutar_total_mo) as  factor_pro,
                                        pp.descuento_anticipo,
                                        par.codigo as codigo_partida
+                                       
                                      from  tes.tprorrateo pro
                                      INNER JOIN tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det   and od.estado_reg = 'activo'
                                      INNER JOIN tes.tobligacion_pago op on op.id_obligacion_pago = od.id_obligacion_pago
                                      INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = od.id_centro_costo  
                                      INNER JOIN pre.ttipo_presupuesto tp on tp.codigo = p.tipo_pres
-   									 INNER JOIN pre.tpartida par on par.id_partida  = od.id_partida
+                                     INNER JOIN pre.tpartida par on par.id_partida  = od.id_partida
                                      INNER JOIN tes.tplan_pago pp on pp.id_plan_pago = pro.id_plan_pago
-                                     where  pro.id_plan_pago = p_id_plan_pago
-                                       and pro.estado_reg = 'activo') LOOP 
+                                     WHERE  pro.id_plan_pago = p_id_plan_pago  and pro.estado_reg = 'activo'
+                                     GROUP BY
+                                       p.id_presupuesto,
+                                       od.id_obligacion_pago,
+                                       op.id_moneda,
+                                       op.fecha,
+                                       op.num_tramite,
+                                       op.tipo_cambio_conv,
+                                        pp.monto_ejecutar_total_mo,
+                                        pp.descuento_anticipo,
+                                        par.sw_movimiento,
+                                        par.codigo,
+                                        tp.movimiento
+                                     ) LOOP 
                                        
                                        
                                --Revisar el tipo de documento y ver si tiene IVA
@@ -660,7 +675,8 @@ BEGIN
                                      END IF;
                                ELSE 
                                   v_comprometido=0;
-                                  v_ejecutado=0;        				        
+                                  v_ejecutado=0;   
+                                       				        
                                   SELECT 
                                        ps_comprometido, 
                                        COALESCE(ps_ejecutado,0)  
@@ -678,6 +694,8 @@ BEGIN
                                v_descuento_anticipo = 0;
                           END IF;     
                               
+                          -- raise exception 'v_comprometido %, v_ejecutado  % < monto_ejecutar_mo % - v_descuento_anticipo % - v_desc_iva %', v_comprometido, v_ejecutado,v_registros_pro.monto_ejecutar_mo , v_descuento_anticipo  , v_desc_iva;
+                                   
                        
                           --verifica si el presupuesto comprometido sobrante alcanza para devengar
                           IF  ( v_comprometido - v_ejecutado)  <  (v_registros_pro.monto_ejecutar_mo - v_descuento_anticipo  - v_desc_iva) and  v_registros_pro.sw_movimiento != 'flujo' THEN
@@ -715,7 +733,7 @@ BEGIN
                                   incrementado_mo = COALESCE(incrementado_mo,0) + v_aux
                                   where  od.id_obligacion_det= v_registros_pro.id_obligacion_det;
                                   
-                                  
+                                 -- raise exception '... mb %, usd %, % ----anticipo %', v_aux_mb , v_aux , v_registros_pro.id_moneda, v_descuento_anticipo;
                                                                  
                                        v_resultado_ges = pre.f_gestionar_presupuesto_individual(
                                                           p_id_usuario,
@@ -772,6 +790,8 @@ BEGIN
                  IF v_sw_error THEN
                     raise exception 'Error al procesar presupuesto: %', v_mensaje_error;
                  END IF;
+       
+      --raise exception 'llega al final';
        
        ELSEIF p_operacion = 'verificar' THEN
        
