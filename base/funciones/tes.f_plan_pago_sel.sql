@@ -22,6 +22,7 @@ ISSUE 			FECHA: 			AUTOR:						DESCRIPCION:
  #5  EndeETR    27/12/2018		EGS							se aumento en la sentencia de la transsancion   TES_PLAPAREP_SEL  el codigo de proveedor
  #6  ENDETR		27/12/2018		JUAN						se agrego la columna (monto_ajuste_ret_garantia_ga) en reporte obligaciones de pagos pendientes
  #15 ENDETR     16/01/2019      JUAN                        se agrego la columna moneda en reporte de obligaciones de pagos pendientes
+ #35 ETR        07/10/2019      RAC                         Adicionar descuento de anticipos en reporte de plan de pagos
 ***************************************************************************/
 
 DECLARE
@@ -506,7 +507,8 @@ BEGIN
                                   ''''
                                   end)::varchar as nro_contrato,
                                   pg.pago_borrador,
-                                  pv.codigo as codigo_proveedor --- #5 EndeETR  27/12/2018 EGS	
+                                  pv.codigo as codigo_proveedor, --- #5 EndeETR  27/12/2018 EGS	
+                                  pg.descuento_anticipo::NUMERIC --#35 
                         from tes.tplan_pago pg
                         inner join tes.tobligacion_pago op on op.id_obligacion_pago=pg.id_obligacion_pago
                         inner join param.vproveedor pv on pv.id_proveedor=op.id_proveedor
@@ -519,8 +521,6 @@ BEGIN
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
---raise NOTICE 'error pr %',v_consulta;
---RAISE EXCEPTION 'err %',v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 

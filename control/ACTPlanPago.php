@@ -10,6 +10,7 @@
 *@description añadida la columna retenciones de garantía para mostrar el reporte de solicitud de pago
 		ISSUE	FORK 	   FECHA			AUTHOR			DESCRIPCION
  		  #5	EndeETR		27/12/2018		EGS				Se añadio el dato de codigo de proveedor
+ *        #35   ETR         07/10/2019      RAC            Adicionar descuento de anticipos en reporte de plan de pagos 
  * */
 
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
@@ -145,6 +146,7 @@ class ACTPlanPago extends ACTbase{
         		$dataSource->putParameter('nro_contrato',$datosPlanPago[0]['nro_contrato']);
 				$dataSource->putParameter('pago_borrador',$datosPlanPago[0]['pago_borrador']);
 				$dataSource->putParameter('codigo_proveedor',$datosPlanPago[0]['codigo_proveedor']);
+				$dataSource->putParameter('descuento_anticipo',$datosPlanPago[0]['descuento_anticipo']); //#35
         		
         		
         		//preapra conslta del prorrateo
