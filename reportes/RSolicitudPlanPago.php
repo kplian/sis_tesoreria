@@ -4,6 +4,7 @@
 *@description añadida la columna retenciones de garantía para mostrar el reporte de solicitud de pago
 		ISSUE	FORK 	   FECHA			AUTHOR			DESCRIPCION
  		  #5	EndeETR		27/12/2018		EGS				Se añadio el dato de codigo de proveedor
+ *        #35   ETR         07/10/2019      RAC             Adicionar descuento de anticipos en reporte de plan de pagos 
  * 
  * */
 require_once dirname(__FILE__).'/../../pxp/pxpReport/Report.php';
@@ -237,7 +238,15 @@ Class RSolicitudPlanPago extends Report {
         $pdf->SetFont('', '');
         $pdf->Cell($width3, $height, $this->getDataSource()->getParameter('descuento_ley'), 0, 0, 'R', false, '', 0, false, 'T', 'C');
         $pdf->Ln();
-        
+		
+		//#35 anhade descuento por anticipo
+		$pdf->Cell($width2+$width3, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+        $pdf->SetFont('', 'B');
+        $pdf->Cell($width2*2, $height, ' Descuento de Anticipo ('.$this->getDataSource()->getParameter('codigo_moneda').'):', 0, 0, 'R', false, '', 0, false, 'T', 'C');
+        $pdf->SetFont('', '');
+        $pdf->Cell($width3, $height, $this->getDataSource()->getParameter('descuento_anticipo'), 0, 0, 'R', false, '', 0, false, 'T', 'C');
+        $pdf->Ln();
+        //end #35
 		$pdf->Cell($width2+$width3, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
 		$pdf->SetFont('', 'B');
         $pdf->Cell($width2*2, $height, 'Monto Ejecutado Total ('.$this->getDataSource()->getParameter('codigo_moneda').'):', 0, 0, 'R', false, '', 0, false, 'T', 'C');

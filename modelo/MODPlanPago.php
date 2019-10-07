@@ -8,8 +8,9 @@
 *@date 30/08/2018
 *@description añadida la columna retenciones de garantía para mostrar el reporte de solicitud de pago
 *	ISSUE   	    Fecha 		 Autor				Descripcion	
-*   #1			    16/102016		EGS				Se aumento el campo pago borrador y sus respectivas validaciones 
- 	#5	 EndeETR		27/12/2018		EGS				Se añadio el dato de codigo de proveedor
+*   #1			        16/102016		EGS			Se aumento el campo pago borrador y sus respectivas validaciones 
+ 	#5	 EndeETR		27/12/2018		EGS			Se añadio el dato de codigo de proveedor
+ *  #35  ETR            07/10/2019      RAC         Adicionar descuento de anticipos en reporte de plan de pagos 
  * * */
 
 class MODPlanPago extends MODbase{
@@ -566,6 +567,9 @@ class MODPlanPago extends MODbase{
 		
 		$this->captura('pago_borrador','varchar');
 		$this->captura('codigo_proveedor','varchar');
+		$this->captura('descuento_anticipo','numeric'); //#35
+		
+		
 		
 		  
 		//Ejecuta la respuesta
