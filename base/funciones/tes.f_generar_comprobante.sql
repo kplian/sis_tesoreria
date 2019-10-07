@@ -18,7 +18,8 @@ $body$
  #31, ETR       23/11/2017        RAC KPLIAN        al validar si el presupesuto alcanza apra generar el cbte considerar si el anticipo ejecuo presupeusto  
  #33, ETR       06/03/2018        RAC KPLIAN        Si tiene credito fiscal restar el 13% al validar el presupeusto   
  #33 ETR        12/04/2018        RAC KPLIAN        Calculo defactor de monto excento y anticipo para  obligacioens de apgo con  prorrateo 
- #34 ETR       02/10/2019        RAC KPLIAN        BUG al sincronizar presupuesto en procesos de adquisiciones con varias lineas pero mismos presupuestos y partida 
+ #34 ETR        02/10/2019        RAC KPLIAN        BUG al sincronizar presupuesto en procesos de adquisiciones con varias lineas pero mismos presupuestos y partida 
+ #36 ETR        07/10/2019        RAC KPLIAN        Validar condición de carrera al generar cbte de contabilidad desde la interface de plan de pagos, en TES_SOLDEVPAG_IME	
  
 ***************************************************************************/
 
@@ -97,7 +98,8 @@ BEGIN
              pp.id_plantilla,
              plt.tipo_informe,
              plt.tipo_excento,
-             pp.monto_excento
+             pp.monto_excento,
+             pp.id_int_comprobante  --#36
            into
               v_registros
            FROM tes.tplan_pago pp
@@ -105,6 +107,12 @@ BEGIN
            inner join tes.ttipo_plan_pago tpp on tpp.codigo = pp.tipo and tpp.estado_reg = 'activo'
            left JOIN param.tplantilla plt on plt.id_plantilla = pp.id_plantilla
            where pp.id_plan_pago = p_id_plan_pago;
+           
+           
+           --#36 verifica que no exista un cbte asociado al plan de pago
+           IF v_registros.id_int_comprobante is not NULL THEN
+              raise exception 'Ya existe un cbte asociado a esta cuota del plan de pago (ID cbte = %)',v_registros.id_int_comprobante;
+           END IF;
            
           
                     
