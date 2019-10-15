@@ -20,7 +20,7 @@ $body$
  #33 ETR        12/04/2018        RAC KPLIAN        Calculo defactor de monto excento y anticipo para  obligacioens de apgo con  prorrateo 
  #34 ETR        02/10/2019        RAC KPLIAN        BUG al sincronizar presupuesto en procesos de adquisiciones con varias lineas pero mismos presupuestos y partida 
  #36 ETR        07/10/2019        RAC KPLIAN        Validar condición de carrera al generar cbte de contabilidad desde la interface de plan de pagos, en TES_SOLDEVPAG_IME	
- 
+ #37 ETR        10/10/2019        RAC KPLIAN        retroceder cambio de agrupación por partida y centro , al sincronizar presupuestos
 ***************************************************************************/
 
 
@@ -115,7 +115,7 @@ BEGIN
            END IF;
            
           
-                    
+                  
           -- verifica el depto de conta, si no tiene lo modifica
           
           
@@ -176,12 +176,14 @@ BEGIN
           v_cont =1;
 
 
+          
+
           IF v_registros.tipo in ('devengado_pagado','devengado','devengado_pagado_1c','ant_aplicado','rendicion') and  v_pre_integrar_presupuestos = 'true'  THEN
 
 
            		--verifica si el presupuesto comprometido sobrante alcanza para pagar el monto de la cuota prorrateada correspondiente al pago
 
-                 /* #34  --agrupa por centro de costo
+                 -- #34  --agrupa por centro de costo
                  
                   FOR  v_registros_pro in (
                                  select
@@ -194,42 +196,21 @@ BEGIN
                                    par.sw_movimiento,
                                    tp.movimiento,
                                    od.id_centro_costo,
-                                   od.factor_porcentual
+                                   od.factor_porcentual,
+                                   pro.monto_ejecutar_mo / pp.monto_ejecutar_total_mo as  factor_pro,  --#37 seadciona factor exacto, considera prorrateo manual
+                                   pp.descuento_anticipo  
                                  from  tes.tprorrateo pro
                                  inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det
                                  INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = od.id_centro_costo
    								 INNER JOIN pre.tpartida par on par.id_partida  = od.id_partida
                                  INNER JOIN pre.ttipo_presupuesto tp on tp.codigo = p.tipo_pres
+                                 INNER JOIN tes.tplan_pago pp on pp.id_plan_pago = pro.id_plan_pago
 
 
                                  where  pro.id_plan_pago = p_id_plan_pago
-                                   and pro.estado_reg = 'activo') LOOP*/
+                                   and pro.estado_reg = 'activo') LOOP
                        
-                 
-                 FOR  v_registros_pro in (
-                                             
-                                   select                                      
-                                       sum(pro.monto_ejecutar_mb) as monto_ejecutar_mb,
-                                       sum(pro.monto_ejecutar_mo) as monto_ejecutar_mo,
-                                       max(od.id_partida_ejecucion_com) as id_partida_ejecucion_com,
-                                       max(od.id_concepto_ingas) as id_concepto_ingas,
-                                       par.sw_movimiento,
-                                       tp.movimiento,
-                                       od.id_centro_costo,
-                                       sum(od.factor_porcentual)  as factor_porcentual
-                                     from  tes.tprorrateo pro
-                                     inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det
-                                     INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = od.id_centro_costo
-                                     INNER JOIN pre.tpartida par on par.id_partida  = od.id_partida
-                                     INNER JOIN pre.ttipo_presupuesto tp on tp.codigo = p.tipo_pres
-                                     WHERE  pro.id_plan_pago = p_id_plan_pago  and pro.estado_reg = 'activo'
-                                     GROUP BY
-                                        od.id_centro_costo,
-                                        par.sw_movimiento,
-                                        tp.movimiento
-                                      ) LOOP
-                                   
-                                   
+                
                         v_comprometido=0;
                         v_ejecutado=0;
 
@@ -244,10 +225,6 @@ BEGIN
                             FROM pre.f_verificar_com_eje_pag(v_registros_pro.id_partida_ejecucion_com, v_registros.id_moneda,p_conexion);
 
                         END IF;
-                        
-                                                                 
-          
-                        
                         
                       --31/11/2017,  si los anticipos ejecutas presupeusto se considera ese monto (SE RESTA EL DSECUENTO DE ANTICIPO)
                       
@@ -274,22 +251,17 @@ BEGIN
                           IF COALESCE(v_iva,0) > 0 THEN
                               
                               --si existe monto excento calcular el factor del monto excento
-                              v_des_antipo_si_ejecuta =  COALESCE(v_des_antipo_si_ejecuta *  v_registros_pro.factor_porcentual,0) + ((v_registros_pro.monto_ejecutar_mo - COALESCE(v_registros.monto_excento *  v_registros_pro.factor_porcentual,0)) * v_iva) ;
+                              v_des_antipo_si_ejecuta =  COALESCE(v_des_antipo_si_ejecuta *  v_registros_pro.factor_pro,0) + ((v_registros_pro.monto_ejecutar_mo - COALESCE(v_registros.monto_excento *  v_registros_pro.factor_pro,0)) * v_iva) ;
                           END IF;
                           
                       
                       END IF;
                       
-                       IF p_id_usuario = 429  THEN
-                          --  raise exception 'falla   % , % , % , %',v_comprometido, v_ejecutado, v_des_antipo_si_ejecuta, v_registros_pro.monto_ejecutar_mo;                   
-                        END  IF;  
-                        
-
+                      
                       --verifica si el presupuesto comprometido sobrante alcanza para devengar
-                      IF  round((v_comprometido - (v_ejecutado - v_des_antipo_si_ejecuta )),2)  <  round(v_registros_pro.monto_ejecutar_mo,2)  and v_registros_pro.sw_movimiento != 'flujo' THEN
+                      IF  round((v_comprometido - (v_ejecutado)),2)  <  round(v_registros_pro.monto_ejecutar_mo - v_des_antipo_si_ejecuta,2)  and v_registros_pro.sw_movimiento != 'flujo' THEN
 
-                         -- raise EXCEPTION  '% - % = % < %',v_comprometido,v_ejecutado,v_comprometido - v_ejecutado, v_registros_pro.monto_ejecutar_mb;
-
+                        
                          select
                           cig.desc_ingas
                          into
@@ -316,6 +288,7 @@ BEGIN
                 
                    END LOOP;
                   
+                  
                   IF not v_sw_verificacion THEN
                   
                      
@@ -332,13 +305,7 @@ BEGIN
            
           END IF;
           
-          IF p_id_usuario = 429  THEN
-                --  raise exception 'PASA   % , % , % , %',v_comprometido, v_ejecutado, v_des_antipo_si_ejecuta, v_registros_pro.monto_ejecutar_mo;                   
-           END  IF;  
-          
-          
-          
-          
+        
           ------------------------------------
           -- validacion del prorrateo--    no estoy seguro si funciona la misma idea para el pago
           ------------------------------------
@@ -422,6 +389,7 @@ BEGIN
             v_prioridad_depto_conta_inter = pxp.f_get_variable_global('conta_prioridad_depto_internacional');
             
           
+          -- raise exception 'llega ... 444444'; 
             IF v_sincronizar_internacional = 'true' and (v_prioridad_depto_conta::varchar = v_prioridad_depto_conta_inter::varchar) THEN
              -- recupera la estacion destino
              -- utiliza la plantilla segun estacion destino, para generar el comprobante 
@@ -487,6 +455,7 @@ BEGIN
  v_respuesta[1]= 'TRUE';
  
   
+          -- raise exception 'llega al final ...  %', v_respuesta;  
 
 RETURN   v_respuesta;
 
