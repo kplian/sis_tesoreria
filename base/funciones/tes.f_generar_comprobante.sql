@@ -21,6 +21,7 @@ $body$
  #34 ETR        02/10/2019        RAC KPLIAN        BUG al sincronizar presupuesto en procesos de adquisiciones con varias lineas pero mismos presupuestos y partida 
  #36 ETR        07/10/2019        RAC KPLIAN        Validar condición de carrera al generar cbte de contabilidad desde la interface de plan de pagos, en TES_SOLDEVPAG_IME	
  #37 ETR        10/10/2019        RAC KPLIAN        retroceder cambio de agrupación por partida y centro , al sincronizar presupuestos
+ #38 ETR        26/11/2019        RAC KPLIAN        BUG caso no considerado al anticipo y factor de prorrateo 
 ***************************************************************************/
 
 
@@ -197,7 +198,7 @@ BEGIN
                                    tp.movimiento,
                                    od.id_centro_costo,
                                    od.factor_porcentual,
-                                   pro.monto_ejecutar_mo / pp.monto_ejecutar_total_mo as  factor_pro,  --#37 seadciona factor exacto, considera prorrateo manual
+                                   pro.monto_ejecutar_mo / pp.monto_ejecutar_total_mo as  factor_pro,  --#37 se adiciona factor exacto, considera prorrateo manual
                                    pp.descuento_anticipo  
                                  from  tes.tprorrateo pro
                                  inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det
@@ -230,8 +231,9 @@ BEGIN
                       
                       v_tes_anticipo_ejecuta_pres = pxp.f_get_variable_global('tes_anticipo_ejecuta_pres');
                       v_des_antipo_si_ejecuta = 0;
-                      IF v_tes_anticipo_ejecuta_pres = 'si' and  v_registros.descuento_anticipo > 0  THEN                         
-                         v_des_antipo_si_ejecuta =  v_registros.descuento_anticipo;                         
+                      IF v_tes_anticipo_ejecuta_pres = 'si' and  v_registros.descuento_anticipo > 0  THEN 
+                        --#38  incluye el factor_pro                        
+                         v_des_antipo_si_ejecuta =   COALESCE(v_registros_pro.descuento_anticipo *  v_registros_pro.factor_pro,0);                         
                       END IF;
                       
                       
@@ -251,7 +253,8 @@ BEGIN
                           IF COALESCE(v_iva,0) > 0 THEN
                               
                               --si existe monto excento calcular el factor del monto excento
-                              v_des_antipo_si_ejecuta =  COALESCE(v_des_antipo_si_ejecuta *  v_registros_pro.factor_pro,0) + ((v_registros_pro.monto_ejecutar_mo - COALESCE(v_registros.monto_excento *  v_registros_pro.factor_pro,0)) * v_iva) ;
+                              --#38 el calculo v_des_antipo_si_ejecuta ya incluye el factor_pro
+                              v_des_antipo_si_ejecuta =  COALESCE(v_des_antipo_si_ejecuta,0) + ((v_registros_pro.monto_ejecutar_mo - COALESCE(v_registros.monto_excento *  v_registros_pro.factor_pro,0)) * v_iva) ;
                           END IF;
                           
                       

@@ -35,6 +35,7 @@ $body$
  #12    ETR       10/01/2018        RAC KPLIAN        Si la obigacion de la bandera comprometer_iva = no, le restamso el 13% a total que se tiene que comprometer  
  #34    ETR       02/10/2019        RAC KPLIAN        BUG al sincronizar presupuesto en procesos de adquisiciones con varias lineas pero mismos presupuestos y partida 
  #37   ETR        10/10/2019        RAC KPLIAN        retroceder cambio de agrupación por partida y centro , al sincronizar presupuestos
+ #38   ETR        26/11/2019        RAC KPLIAN        BUG caso no considerado al anticipo y factor de prorrateo 
 ***************************************************************************/
 
 DECLARE
@@ -646,7 +647,8 @@ BEGIN
                                              pp.monto_ejecutar_total_mo,
                                              sum(pro.monto_ejecutar_mo) / sum(pp.monto_ejecutar_total_mo) as  factor_pro,
                                              pp.descuento_anticipo,                                             
-                                             tct.id_tipo_cc_techo                                             
+                                             tct.id_tipo_cc_techo  
+                                             --,od.id_partida --TODO                                           
                                          from  tes.tprorrateo pro
                                          INNER JOIN tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det   and od.estado_reg = 'activo'
                                          INNER JOIN tes.tobligacion_pago op on op.id_obligacion_pago = od.id_obligacion_pago
@@ -668,6 +670,7 @@ BEGIN
                                            par.sw_movimiento,                                           
                                            tp.movimiento,
                                            tct.id_tipo_cc_techo
+                                           --,od.id_partida
                                      ) LOOP 
                                
                              
@@ -697,6 +700,7 @@ BEGIN
                                        v_comprometido,
                                        v_ejecutado
                                   FROM pre.f_verificar_com_eje_pag_tipo_cc(v_registros_pro.id_partida_ejecucion_com, v_registros_pro.id_moneda);
+                                 -- FROM pre.f_verificar_com_eje_pag(v_registros_pro.id_partida_ejecucion_com, v_registros_pro.id_moneda);
                               END IF;
                               
                           --#39 calcular el decuento de anticipo,   y no comprometerlo
@@ -709,18 +713,14 @@ BEGIN
                           
                           v_aux =  (v_registros_pro.monto_ejecutar_mo - v_descuento_anticipo - v_desc_iva) -  (v_comprometido - v_ejecutado);
                                  
-                              
-                           --raise exception 'v_comprometido %, v_ejecutado  % < monto_ejecutar_mo % - v_descuento_anticipo % - v_desc_iva %', v_comprometido, v_ejecutado,v_registros_pro.monto_ejecutar_mo , v_descuento_anticipo  , v_desc_iva;
-                                   
-                       
-                          -- verifica si el presupuesto comprometido sobrante alcanza para devengar
-                          IF  ( v_comprometido - v_ejecutado)  <  (v_registros_pro.monto_ejecutar_mo - v_descuento_anticipo  - v_desc_iva) and  v_registros_pro.sw_movimiento != 'flujo' THEN
-                          
-                           --raise exception 'entra';
-                            ----------------------------------------------------------------------------
-                            -- si el comprometido no alcanza incremetamso presupuesto por cada detalle
-                            -----------------------------------------------------------------------------
-                            
+                           
+                          --IF v_registros_pro.id_partida_ejecucion_com not in (817360,817359)  THEN 
+                          -- raise exception 'id_partida_ejecucion_com %, v_comprometido %, v_ejecutado  % < monto_ejecutar_mo % - v_descuento_anticipo % - v_desc_iva %', v_registros_pro.id_partida_ejecucion_com, v_comprometido, v_ejecutado,v_registros_pro.monto_ejecutar_mo , v_descuento_anticipo  , v_desc_iva;
+                          --END IF;         
+                         
+                           ----------------------------------------------------------------------------
+                           -- incremetamos presupuesto por cada detalle
+                           -----------------------------------------------------------------------------
                             
                             FOR v_registros_det IN (
                                      select  
@@ -875,10 +875,6 @@ BEGIN
                                       
                                       
                                   END LOOP;
-                                
-                             END IF;
-                          
-                            
                        END LOOP;
              
              --2)  llamar a la funcion de incremeto presupuestario
