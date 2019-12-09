@@ -665,7 +665,8 @@ BEGIN
             monto_anticipo = v_monto_anticipo,
             fecha_costo_ini = v_parametros.fecha_costo_ini, 
             fecha_costo_fin = v_parametros.fecha_costo_fin,
-            pago_borrador = v_parametros.pago_borrador		 --#1			16/10/2018		EGS 	
+            pago_borrador = v_parametros.pago_borrador,		 --#1			16/10/2018		EGS
+			codigo_tipo_anticipo = v_parametros.codigo_tipo_anticipo
             where id_plan_pago = v_parametros.id_plan_pago;
            
            

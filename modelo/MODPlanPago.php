@@ -124,7 +124,7 @@ class MODPlanPago extends MODbase{
 		$this->captura('id_periodo','integer');
 		
 		$this->captura('pago_borrador','varchar'); //#1			16/102016		EGS	
-
+        $this->captura('codigo_tipo_anticipo', 'varchar');
 		
 		
 		//Ejecuta la instruccion
@@ -211,7 +211,7 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('fecha_costo_ini','fecha_costo_ini','date');
 		$this->setParametro('fecha_costo_fin','fecha_costo_fin','date');
 		$this->setParametro('es_ultima_cuota','es_ultima_cuota','boolean');
-
+        $this->setParametro('codigo_tipo_anticipo', 'codigo_tipo_anticipo', 'varchar');
 		
 
 
@@ -271,7 +271,7 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('es_ultima_cuota','es_ultima_cuota','boolean');
 	
 		$this->setParametro('pago_borrador','pago_borrador','varchar');/// #1			16/102016		EGS	
-
+        $this->setParametro('codigo_tipo_anticipo', 'codigo_tipo_anticipo', 'varchar');
 		
 
         

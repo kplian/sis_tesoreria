@@ -440,7 +440,8 @@ BEGIN
                   porc_monto_excento_var,
                   monto_excento,
                   fecha_costo_ini,
-                  fecha_costo_fin
+                  fecha_costo_fin,
+                  codigo_tipo_anticipo
               )
                values
               (
@@ -486,7 +487,8 @@ BEGIN
                 v_porc_monto_excento_var,
                 v_monto_excento,
                 (p_hstore->'fecha_costo_ini')::date, 
-                (p_hstore->'fecha_costo_fin')::date				
+                (p_hstore->'fecha_costo_fin')::date,
+                (p_hstore -> 'codigo_tipo_anticipo')::varchar
             )RETURNING id_plan_pago into v_id_plan_pago;
             
             
