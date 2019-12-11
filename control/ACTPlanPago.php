@@ -110,11 +110,12 @@ class ACTPlanPago extends ACTbase{
 							
 		$this->objFunc=$this->create('MODPlanPago');
 		$resultPlanPago = $this->objFunc->reportePlanPago($this->objParam);
-		
+        $this->objFunc1 = $this->create('MODPlanPago');
 		if($resultPlanPago->getTipo()=='EXITO'){
         	        
         	    $datosPlanPago = $resultPlanPago->getDatos();
-        	    
+                $resultGCCPlanPago = $this->objFunc1->reporteGCCPlanPago($this->objParam);
+                $listaCentroCosto = $resultGCCPlanPago->getDatos();
         		$dataSource->putParameter('estado',$datosPlanPago[0]['estado']);							
         		$dataSource->putParameter('numero_oc',$datosPlanPago[0]['numero_oc']);
         		$dataSource->putParameter('proveedor',$datosPlanPago[0]['proveedor']);
@@ -147,7 +148,7 @@ class ACTPlanPago extends ACTbase{
 				$dataSource->putParameter('pago_borrador',$datosPlanPago[0]['pago_borrador']);
 				$dataSource->putParameter('codigo_proveedor',$datosPlanPago[0]['codigo_proveedor']);
 				$dataSource->putParameter('descuento_anticipo',$datosPlanPago[0]['descuento_anticipo']); //#35
-        		
+        		$dataSource->putParameter("lista_centro_costo",$listaCentroCosto);
         		
         		//preapra conslta del prorrateo
         		
