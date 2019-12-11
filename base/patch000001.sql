@@ -1929,4 +1929,7 @@ IS 'si esta bandera esta habilita le resta el 13% del iva al momento de comproem
 
 /*************************F-SCP-RAC-TES-12-13/12/2018*************/
 
-
+/*************************I-SCP-VAN-TES-13-06/12/2019*************/
+alter table tes.tplan_pago
+	add codigo_tipo_anticipo varchar(50) default null;
+/*************************F-SCP-VAN-TES-13-06/12/2019*************/

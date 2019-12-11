@@ -1009,6 +1009,30 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             form:true
         },
         {
+            config: {
+                name: 'codigo_tipo_anticipo',
+                fieldLabel: 'Tipo Anticipo',
+                anchor: '95%',
+                tinit: false,
+                allowBlank: false,
+                origen: 'CATALOGO',
+                gdisplayField: 'tipo',
+                hiddenName: 'id_tipo',
+                gwidth: 55,
+                baseParams: {
+                    cod_subsistema: 'TES',
+                    catalogo_tipo: 'tipo_anticipo'
+                },
+                valueField: 'codigo',
+                hidden: true
+            },
+            type: 'ComboRec',
+            id_grupo: 1,
+            filters: {pfiltro: 'conalm.tipo', type: 'string'},
+            grid: true,
+            form: true
+        },
+        {
             config:{
                 name: 'obs_otros_descuentos',
                 fieldLabel: 'Obs. otros desc.',
@@ -1315,7 +1339,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 			
 		//#1			16/102016		EGS	
 		{name:'pago_borrador', type: 'string'},
-		//#1			16/102016		EGS	
+        //#1			16/102016		EGS
+        {name: 'codigo_tipo_anticipo', type: 'string'},
 	],
 	
    arrayDefaultColumHidden:['id_fecha_reg','id_fecha_mod',
@@ -1999,7 +2024,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 //#1			16/102016		EGS	
                 me.ocultarComponente(me.Cmp.pago_borrador);
                 //#1			16/102016		EGS	
-                
+             me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
            },
            
            'devengado_rrhh':function(me){
@@ -2022,7 +2047,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 //#1			16/102016		EGS	
                  me.ocultarComponente(me.Cmp.pago_borrador);
                  //#1			16/102016		EGS	
-                
+               me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
                 
            },
            
@@ -2048,7 +2073,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                
                me.mostrarComponente(me.Cmp.pago_borrador);
               //#1			16/102016		EGS	
-               
+              me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
               
         
         
@@ -2059,7 +2084,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                me.setTipoPago['devengado_pagado'](me);
                 //#1			16/102016		EGS	
                 me.ocultarComponente(me.Cmp.pago_borrador);      
-                //#1			16/102016		EGS	 
+                //#1			16/102016		EGS
+               me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
                      
            },
            
@@ -2076,8 +2102,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                  
                //#1			16/102016		EGS	
                 me.ocultarComponente(me.Cmp.pago_borrador);
-                //#1			16/102016		EGS	
-              
+                //#1			16/102016		EGS
+               me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
           },
            'dev_garantia':function(me){
               me.ocultarComponente(me.Cmp.id_plantilla);
@@ -2096,7 +2122,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
              //#1			16/102016		EGS	
                me.ocultarComponente(me.Cmp.pago_borrador);
                //#1			16/102016		EGS	
-             
+               me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
               
            },
           
@@ -2117,7 +2143,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
              //#1			16/102016		EGS	
                me.ocultarComponente(me.Cmp.pago_borrador);
               //#1			16/102016		EGS	
-              
+              me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
           },
            
          'pagado':function(me){
@@ -2133,7 +2159,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
               //#1			16/102016		EGS	
                me.ocultarComponente(me.Cmp.pago_borrador);
                //#1			16/102016		EGS	
-              
+             me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
         }, 
         'pagado_rrhh':function(me){
                me.Cmp.id_plantilla.disable();
@@ -2148,6 +2174,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
          		 //#1			16/102016		EGS	
           	   me.ocultarComponente(me.Cmp.pago_borrador);
           	   //#1			16/102016		EGS	    
+            me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
         },
         'ant_parcial':function(me){
                 me.ocultarComponente(me.Cmp.id_plantilla);
@@ -2200,7 +2227,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 //#1			16/102016		EGS	
                  me.ocultarComponente(me.Cmp.pago_borrador);
                  //#1			16/102016		EGS	
-                
+            me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
          },
          'ant_aplicado':function(me, data){
          	
@@ -2228,11 +2255,13 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 }
                 
                 me.mostrarGrupo(3);
+             me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
           }
     },
     
     mostrarComponentesPago:function(me){
         me.mostrarComponente(me.Cmp.nombre_pago);
+        me.mostrarComponente(me.Cmp.codigo_tipo_anticipo);
         if(me.Cmp.id_cuenta_bancaria){
         	
            me.mostrarComponente(me.Cmp.id_depto_lb);

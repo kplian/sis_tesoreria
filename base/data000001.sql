@@ -508,7 +508,12 @@ select wf.f_import_ttipo_proceso_origen ('insert','TOPD','TES-PD','TOPD','finali
 /***********************************I-DAT-JJA-TES-0-05/12/2018*****************************************/
 select pxp.f_insert_tgui ('Consulta OP por plan de pagos', 'Consulta OP  por plan de pagos', 'CONPLAPAG', 'si', 1, 'sis_tesoreria/reportes/formularios/ConsultaOpPlanPago.php', 3, '', 'ConsultaOpPlanPago', 'TES');
 /***********************************F-DAT-JJA-TES-0-05/12/2018*****************************************/
-
+/***********************************I-DAT-VAN-TES-0-06/12/2019*****************************************/
+select param.f_import_tcatalogo_tipo ('insert','tipo_anticipo','TES','tplan_pago');
+select param.f_import_tcatalogo ('insert','TES','Anticipo','ant','tipo_anticipo');
+select param.f_import_tcatalogo ('insert','TES','Contra Documentos Embarque','CDE','tipo_anticipo');
+select param.f_import_tcatalogo ('insert','TES','Pruebas FAT','PFAT','tipo_anticipo');
+/***********************************F-DAT-VAN-TES-0-06/12/2019*****************************************/
 
 
 
