@@ -1022,16 +1022,20 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 gdisplayField: 'tipo',
                 hiddenName: 'id_tipo',
                 gwidth: 55,
+
                 baseParams:{
                     cod_subsistema:'TES',
                     catalogo_tipo:'tipo_anticipo'
+
                 },
                 valueField: 'codigo',
                 hidden: true
             },
             type: 'ComboRec',
             id_grupo: 1,
+
             filters:{pfiltro:'conalm.tipo',type:'string'},
+
             grid: true,
             form: true
         },
@@ -1342,8 +1346,10 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 			
 		//#1			16/102016		EGS	
 		{name:'pago_borrador', type: 'string'},
+
 		//#1			16/102016		EGS
         {name:'codigo_tipo_anticipo', type: 'string'},
+
 	],
 	
    arrayDefaultColumHidden:['id_fecha_reg','id_fecha_mod',
@@ -2190,7 +2196,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
              
          		 //#1			16/102016		EGS	
           	   me.ocultarComponente(me.Cmp.pago_borrador);
+
           	   //#1			16/102016		EGS
+
             me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
         },
         'ant_parcial':function(me){

@@ -167,7 +167,22 @@ Class RSolicitudPlanPago extends Report {
         $pdf->Cell($width2*2, $height, 'Tipo de Pago: ', 0, 0, 'L', false, '', 0, false, 'T', 'C');
         $pdf->SetFont('', '');
         $pdf->Cell($width3, $height, $this->getDataSource()->getParameter('tipo_pago'), 0, 0, 'L', false, '', 0, false, 'T', 'C');
-		
+        $pdf->Ln();
+        $pdf->SetFont('', 'B');
+        $pdf->Cell($width2 * 2, $height, 'Proyecto/CC: ', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+        $pdf->SetFont('', '');
+        $listaCentros = $this->getDataSource()->getParameter('lista_centro_costo');
+        for ($i = 0; $i < sizeof($listaCentros); $i++) {
+            if ($i == 0) {
+                $pdf->Cell($width3, $height, $listaCentros[$i]['nombre_proyecto'] . ' / ' . $listaCentros[$i]['codigo_cc'], 0, 0, 'L', false, '', 0, false, 'T', 'C');
+            } else {
+                $pdf->Ln();
+                $pdf->SetFont('', 'B');
+                $pdf->Cell($width2 * 2, $height, '  ', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+                $pdf->SetFont('', '');
+                $pdf->Cell($width3, $height, $listaCentros[$i]['nombre_proyecto'] . ' / ' . $listaCentros[$i]['codigo_cc'], 0, 0, 'L', false, '', 0, false, 'T', 'C');
+            }
+        }
 		$pdf->Ln();
 		if($this->getDataSource()->getParameter('nro_contrato') != ''){
 		        $pdf->SetFont('', 'B');

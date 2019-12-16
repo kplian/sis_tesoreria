@@ -113,6 +113,7 @@ class ACTPlanPago extends ACTbase{
 							
 		$this->objFunc=$this->create('MODPlanPago');
 		$resultPlanPago = $this->objFunc->reportePlanPago($this->objParam);
+
         $this->objFunc1=$this->create('MODPlanPago');
 
 		if($resultPlanPago->getTipo()=='EXITO'){
