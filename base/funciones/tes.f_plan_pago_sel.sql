@@ -39,7 +39,7 @@ DECLARE
     v_strg_pp         varchar;
     v_strg_obs         varchar;
     va_id_depto        integer[];
-
+    v_techo            record;
 
 BEGIN
 
@@ -267,7 +267,7 @@ BEGIN
                             where plapa.fecha_pag between fecha_ini and fecha_fin
                             limit 1 offset 0) as id_periodo,
                             plapa.pago_borrador,
-                        plapa.codigo_tipo_anticipo
+                            plapa.codigo_tipo_anticipo
 
                         from tes.tplan_pago plapa
                         inner join wf.tproceso_wf pwf on pwf.id_proceso_wf = plapa.id_proceso_wf
