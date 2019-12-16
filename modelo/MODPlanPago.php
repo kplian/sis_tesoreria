@@ -7,10 +7,13 @@
 *@description Clase que envia los parametros requeridos a la Base de datos para la ejecucion de las funciones, y que recibe la respuesta del resultado de la ejecucion de las mismas
 *@date 30/08/2018
 *@description añadida la columna retenciones de garantía para mostrar el reporte de solicitud de pago
-*	ISSUE   	    Fecha 		 Autor				Descripcion
-*   #1			        16/102016		EGS			Se aumento el campo pago borrador y sus respectivas validaciones
+
+*	ISSUE FORK 	        Fecha 		 Autor				Descripcion	
+*   #1			        16/102016		EGS			Se aumento el campo pago borrador y sus respectivas validaciones 
  	#5	 EndeETR		27/12/2018		EGS			Se añadio el dato de codigo de proveedor
- *  #35  ETR            07/10/2019      RAC         Adicionar descuento de anticipos en reporte de plan de pagos
+ *  #35  ETR            07/10/2019      RAC         Adicionar descuento de anticipos en reporte de plan de pagos 
+ *  #41  ENDETR         16/12/2019      JUAN        Reporte de información de pago
+
  * * */
 
 class MODPlanPago extends MODbase{
@@ -122,6 +125,7 @@ class MODPlanPago extends MODbase{
 		//$this->captura('es_ultima_cuota','boolean');
 		$this->captura('id_gestion','integer');
 		$this->captura('id_periodo','integer');
+
 
 		$this->captura('pago_borrador','varchar'); //#1			16/102016		EGS
         $this->captura('codigo_tipo_anticipo', 'varchar');
@@ -270,9 +274,9 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('id_depto_lb','id_depto_lb','int4');
 		$this->setParametro('es_ultima_cuota','es_ultima_cuota','boolean');
 
+
 		$this->setParametro('pago_borrador','pago_borrador','varchar');/// #1			16/102016		EGS
         $this->setParametro('codigo_tipo_anticipo', 'codigo_tipo_anticipo', 'varchar');
-
 
 
 		//Ejecuta la instruccion
@@ -1099,17 +1103,16 @@ function listarPagos(){
        //Devuelve la respuesta
         return $this->respuesta;
 	}
+    function reporteGCCPlanPago(){
 
-    function reporteGCCPlanPago()
-    {
-        $this->procedimiento = 'tes.f_plan_pago_gcc_sel';
-        $this->transaccion = 'TES_PLAPAGCCREP_SEL';
-        $this->tipo_procedimiento = 'SEL';
+        $this->procedimiento='tes.f_plan_pago_gcc_sel';
+        $this->transaccion='TES_PLAPAGCCREP_SEL';
+        $this->tipo_procedimiento='SEL';
         $this->setCount(false);
 
-        $this->setParametro('id_obligacion_pago', 'id_obligacion_pago', 'int4');
-        $this->captura('nombre_proyecto', 'varchar');
-        $this->captura('codigo_cc', 'varchar');
+        $this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
+        $this->captura('nombre_proyecto','varchar');
+        $this->captura('codigo_cc','varchar');
 
 
         //Ejecuta la respuesta
@@ -1118,6 +1121,42 @@ function listarPagos(){
         //Devuelve la respuesta
         return $this->respuesta;
     }
+	function ReporteInfPago(){//#41			
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.f_plan_pago_sel';
+		$this->transaccion='TES_REPINFPAG_SEL';
+		$this->tipo_procedimiento='SEL';
+		$this->setCount(false);		
+		//
+		$this->setParametro('id_plan_pago','id_plan_pago','int4');		
+		//Definicion de la lista del resultado del query
+		$this->captura('id_plan_pago','int4');
+		$this->captura('num_tramite','varchar');
+		$this->captura('nro_cuota','varchar');
+		$this->captura('des_funcionario','varchar');		
+		$this->captura('descripcion','varchar');
+		$this->captura('codigo_cc','varchar');
+		$this->captura('moneda','varchar');
+
+		$this->captura('importe','numeric');
+		$this->captura('monto_retgar_mb','numeric');
+		$this->captura('descuento_ley','numeric');
+		$this->captura('descuento_anticipo','numeric');
+		$this->captura('otros_descuentos','numeric');
+		$this->captura('liquido_pagable','numeric');	
+        $this->captura('orden_compra','varchar');
+        $this->captura('descripcion_techo','varchar');		
+        $this->captura('codigo_proceso','varchar');	
+        
+        $this->captura('requiere_contrato','varchar');	
+		$this->captura('tipo','varchar');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();		
+		//Devuelve la respuesta
+
+		return $this->respuesta;
+	}
 
 
 }

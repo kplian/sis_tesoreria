@@ -23,6 +23,7 @@ ISSUE 			FECHA: 			AUTOR:						DESCRIPCION:
  #6  ENDETR		27/12/2018		JUAN						se agrego la columna (monto_ajuste_ret_garantia_ga) en reporte obligaciones de pagos pendientes
  #15 ENDETR     16/01/2019      JUAN                        se agrego la columna moneda en reporte de obligaciones de pagos pendientes
  #35 ETR        07/10/2019      RAC                         Adicionar descuento de anticipos en reporte de plan de pagos
+ #41 ENDETR     16/12/2019      JUAN                        Reporte de información de pago
 ***************************************************************************/
 
 DECLARE
@@ -1115,6 +1116,83 @@ BEGIN
 			return v_consulta;
 
 		end;
+    elsif(p_transaccion='TES_REPINFPAG_SEL')then --#41
+
+    begin
+            -- consulta temporal para pruebas
+            with Techo as (
+            select 
+                 vtcc.descripcion_techo,
+                 cc.codigo_cc
+                 from tes.tplan_pago pp
+                 left join tes.tobligacion_pago op on op.id_obligacion_pago=pp.id_obligacion_pago
+                 left join tes.tobligacion_det od on od.id_obligacion_pago=op.id_obligacion_pago
+                 left join param.vcentro_costo cc on cc.id_centro_costo=od.id_centro_costo
+                 left join param.vtipo_cc_techo vtcc on vtcc.id_tipo_cc=cc.id_tipo_cc
+                 left join tes.tprorrateo p on p.id_plan_pago=pp.id_plan_pago
+            where pp.id_plan_pago=v_parametros.id_plan_pago
+            group by cc.codigo_cc,vtcc.descripcion_techo,cc.id_centro_costo
+            order by cc.id_centro_costo
+            )
+            select 
+               '<strong>=></strong> '||array_to_string(array_agg(t.descripcion_techo), '<br> <strong>=></strong> ' )::varchar descripcion_techo,
+               '<strong><br> =></strong> '||array_to_string(array_agg(t.codigo_cc),  '<br> <strong>=></strong> ' )::varchar as codigo_cc
+               into 
+               v_techo 
+            from Techo t;
+            
+            
+      v_consulta:='select 
+                         pp.id_plan_pago,
+                         op.num_tramite::varchar,
+                         pp.nro_cuota::varchar,
+                         pp.nombre_pago::varchar as des_funcionario,
+                         pp.obs_monto_no_pagado::varchar as descripcion,
+                         '''||v_techo.codigo_cc||'''::varchar as codigo_cc,
+                         m.codigo::varchar as moneda,
+                         
+                         pp.monto::numeric as importe,
+                         pp.monto_retgar_mo::numeric as monto_retgar_mb,  
+                         pp.descuento_ley::numeric,
+                         pp.descuento_anticipo::numeric,
+                         pp.otros_descuentos::numeric,
+                         pp.liquido_pagable::numeric,
+                         (case when cot.requiere_contrato =''no''then
+                         cot.numero_oc
+                         else
+                         ct.numero
+                         end)::varchar as orden_compra,
+                         '''||v_techo.descripcion_techo||'''::varchar  as descripcion_techo,
+                         pc.codigo_proceso::varchar as codigo_proceso,
+                         cot.requiere_contrato::varchar,
+                         case when pp.tipo = ''devengado_pagado'' and pp.pago_borrador =''no'' then
+                         ''Devengar y pagar''
+                         when pp.tipo=''devengado'' then
+                         ''Devengo''
+                         when pp.tipo=''anticipo'' or pp.tipo=''ant_parcial'' then
+                         ''Anticipo''
+                         when pp.tipo = ''devengado_pagado'' and pp.pago_borrador =''si'' then
+                         ''Devengo''
+                         else
+                         pp.tipo
+                         end::varchar as tipo
+                         from tes.tplan_pago pp
+                 left        join tes.tobligacion_pago op on op.id_obligacion_pago=pp.id_obligacion_pago
+                 left        join tes.tobligacion_det od on od.id_obligacion_pago=op.id_obligacion_pago
+                         left join param.vcentro_costo cc on cc.id_centro_costo=od.id_centro_costo
+                 left        join param.tmoneda m on m.id_moneda=op.id_moneda
+                 left        join adq.tproceso_compra pc on pc.num_tramite=op.num_tramite
+                         left join param.vtipo_cc_techo vtcc on vtcc.id_tipo_cc=cc.id_tipo_cc
+                 left        join adq.tcotizacion cot on cot.id_obligacion_pago=op.id_obligacion_pago 
+                         left join leg.tcontrato ct on ct.id_cotizacion=cot.id_cotizacion
+                         where pp.id_plan_pago = '||v_parametros.id_plan_pago||' ';
+
+
+            raise notice '% .',v_consulta;
+
+      return v_consulta;
+
+    end;
     else
 
 

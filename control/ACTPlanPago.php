@@ -11,6 +11,7 @@
 		ISSUE	FORK 	   FECHA			AUTHOR			DESCRIPCION
  		  #5	EndeETR		27/12/2018		EGS				Se añadio el dato de codigo de proveedor
  *        #35   ETR         07/10/2019      RAC            Adicionar descuento de anticipos en reporte de plan de pagos 
+ *        #41   ENDETR      16/12/2019      JUAN           Reporte de información de pago
  * */
 
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
@@ -21,6 +22,8 @@ require_once(dirname(__FILE__).'/../reportes/RProcesoConRetencionXLS.php');
 
 require_once(dirname(__FILE__).'/../reportes/RConsultaOpObligacionPagoXls.php');
 require_once(dirname(__FILE__).'/../reportes/RObligacionPagosPendientesXls.php');
+
+require_once(dirname(__FILE__).'/../reportes/RInfPago.php');
 
 class ACTPlanPago extends ACTbase{    
 			
@@ -110,7 +113,9 @@ class ACTPlanPago extends ACTbase{
 							
 		$this->objFunc=$this->create('MODPlanPago');
 		$resultPlanPago = $this->objFunc->reportePlanPago($this->objParam);
-        $this->objFunc1 = $this->create('MODPlanPago');
+
+        $this->objFunc1=$this->create('MODPlanPago');
+
 		if($resultPlanPago->getTipo()=='EXITO'){
         	        
         	    $datosPlanPago = $resultPlanPago->getDatos();
@@ -495,6 +500,42 @@ class ACTPlanPago extends ACTbase{
 
         } 
 	}	
+	function datosCabeceraInfPago(){//#41
+		$dataSource = new DataSource();			
+	
+		$this->objFunc = $this->create('MODPlanPago');	
+		$cbteHeader = $this->objFunc->ReporteInfPago($this->objParam);
+
+		if($cbteHeader->getTipo() == 'EXITO'){							
+			$dataSource->putParameter('cabecera',$cbteHeader->getDatos());								
+			return $dataSource;
+		}
+		else{
+			$cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+		}
+	}
+	function ReporteInfPago(){	//#41
+		$dataSource = $this->datosCabeceraInfPago();				
+
+		$nombreArchivo = uniqid(md5(session_id()).'-InfPago') . '.pdf'; 		
+		$tamano = 'LETTER';
+		$orientacion = 'p';
+		$this->objParam->addParametro('orientacion',$orientacion);
+		$this->objParam->addParametro('tamano',$tamano);		
+		$this->objParam->addParametro('titulo_archivo',$titulo);        
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+		
+		$reporte = new RInfPago($this->objParam); 		
+		$reporte->datosHeader($dataSource);
+		$reporte->generarReporte();
+		$reporte->output($reporte->url_archivo,'F');
+		
+		$this->mensajeExito=new Mensaje();
+		$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se generó con éxito el reporte: '.$nombreArchivo,'control');
+		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+	}	
+
 }
 
 ?>
