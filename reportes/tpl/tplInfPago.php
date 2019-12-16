@@ -120,7 +120,25 @@
 <br><br>
 <table border="1" style="padding: 10px 10px 10px 10px">
 	<tr >
-       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><b>DPTO. ADQUISICIONES</b></td>
+       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;">
+        <?php 
+		$var= $this->datos[0]["num_tramite"];
+		$partes = explode("-",$var);
+
+        if($partes[0] =="PU"){
+        ?>
+           <b>RESPONSABLE</b>
+        <?PHP 
+        }
+        else{
+        ?>	
+           <b>DPTO. ADQUISICIONES</b>
+        <?PHP 
+        }
+        ?>
+       	
+
+       </td>
        <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><b>DPTO. CONTABILIDAD</b></td>
        <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><b>DPTO. FINANZAS</b></td>
     </tr>
