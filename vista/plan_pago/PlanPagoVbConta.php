@@ -7,6 +7,8 @@
 *@description Archivo con la interfaz de usuario que permite 
 *dar el visto a solicitudes de compra
 *
+* ISSUE       Fecha         Autor       Descripcion 
+* #41         16/12/2019    JUAN        Reporte de información de pago
 */
 header("content-type: text/javascript; charset=UTF-8"); 
 ?>
@@ -186,6 +188,7 @@ Phx.vista.PlanPagoVbConta = {
     
     
     onSubmitDepto:function(x,y,id_depto_conta){
+
            var data = this.getSelectedData();
           
            if(this.formDEPTO.getForm().isValid() || id_depto_conta){
@@ -367,6 +370,7 @@ Phx.vista.PlanPagoVbConta = {
                        }
                }
                this.getBoton('SolPlanPago').enable(); 
+               this.getBoton('InfPago').enable(); //#41
                if(data['sinc_presupuesto']=='si' && data['estado']== 'vbconta'){
                     this.getBoton('SincPresu').enable();
                }
@@ -396,6 +400,7 @@ Phx.vista.PlanPagoVbConta = {
            this.getBoton('sig_estado').disable();
            this.getBoton('SolDevPag').disable();
            this.getBoton('SolPlanPago').disable();
+           this.getBoton('InfPago').disable();//#41
            this.getBoton('diagrama_gantt').disable();
            this.getBoton('btnChequeoDocumentosWf').disable();
            this.getBoton('btnPagoRel').disable(); 

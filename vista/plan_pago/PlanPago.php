@@ -7,7 +7,7 @@
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
 *	ISSUE    	  Fecha 		Autor				Descripcion	
 * #1			16/102016		EGS					Se aumento el campo pago borrador y sus respectivas validaciones 
-* 
+* #41           16/12/2019      JUAN                Reporte de información de pago
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -85,6 +85,9 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
         this.addButton('ant_estado',{ grupo:[0,1], argument: {estado: 'anterior'},text:'Anterior',iconCls: 'batras',disabled:true,handler:this.antEstado,tooltip: '<b>Pasar al Anterior Estado</b>'});
         this.addButton('sig_estado',{ grupo:[0,1], text:'Aprobar/Sig.',iconCls: 'badelante',disabled:true,handler:this.sigEstado,tooltip: '<b>Apueba y pasar al Siguiente Estado</b>'});
         this.addButton('SolPlanPago',{ grupo:[0,1], text:'Sol. Plan Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnSolPlanPago,tooltip: '<b>Solicitud Plan Pago</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
+
+        this.addButton('InfPago',{ grupo:[0,1], text:'Inf. Pago.',iconCls: 'bpdf32',disabled:true,handler:this.onBtnInfPago,tooltip: '<b>Información de Pago</b><br/> Exporta la información de pago en pdf'}); //#41
+
 		this.addButton('btnChequeoDocumentosWf',
             {
                 text: 'Documentos',
@@ -1000,13 +1003,37 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 allowBlank: true,
                 anchor: '80%',
                 gwidth: 100,
-                maxLength:300
+                maxLength:800
             },
             type:'TextArea',
             filters:{pfiltro:'plapa.obs_monto_no_pagado',type:'string'},
             id_grupo:1,
             grid:true,
             form:true
+        },
+        {
+            config: {
+                name: 'codigo_tipo_anticipo',
+                fieldLabel: 'Tipo Anticipo',
+                anchor: '95%',
+                tinit: false,
+                allowBlank: false,
+                origen: 'CATALOGO',
+                gdisplayField: 'tipo',
+                hiddenName: 'id_tipo',
+                gwidth: 55,
+                baseParams:{
+                    cod_subsistema:'TES',
+                    catalogo_tipo:'tipo_anticipo'
+                },
+                valueField: 'codigo',
+                hidden: true
+            },
+            type: 'ComboRec',
+            id_grupo: 1,
+            filters:{pfiltro:'conalm.tipo',type:'string'},
+            grid: true,
+            form: true
         },
         {
             config:{
@@ -1315,7 +1342,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
 			
 		//#1			16/102016		EGS	
 		{name:'pago_borrador', type: 'string'},
-		//#1			16/102016		EGS	
+		//#1			16/102016		EGS
+        {name:'codigo_tipo_anticipo', type: 'string'},
 	],
 	
    arrayDefaultColumHidden:['id_fecha_reg','id_fecha_mod',
@@ -1617,7 +1645,22 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
             
         
     } ,
-     
+    onBtnInfPago:function(){  //#41
+
+        var rec=this.sm.getSelected();
+        Ext.Ajax.request({
+            url:'../../sis_tesoreria/control/PlanPago/ReporteInfPago',
+            params:{'id_plan_pago':rec.data.id_plan_pago},
+            success: this.successExport,
+            failure: function() {
+                console.log("fail");
+            },
+            timeout: function() {
+                console.log("timeout");
+            },
+            scope:this
+        }); 
+    },
     onBtnSolPlanPago:function(){        
         var rec=this.sm.getSelected();
         Ext.Ajax.request({
@@ -1712,12 +1755,11 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
          else{
          	this.tmp_porc_monto_excento_var = undefined;
          }
-        
+
         Phx.vista.PlanPago.superclass.onButtonEdit.call(this); 
         if(this.Cmp.id_plantilla.getValue()){
         	this.getPlantilla(this.Cmp.id_plantilla.getValue());
         }
-        
     },
 
     getPlantilla: function(id_plantilla){
@@ -1999,7 +2041,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 //#1			16/102016		EGS	
                 me.ocultarComponente(me.Cmp.pago_borrador);
                 //#1			16/102016		EGS	
-                
+             me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
            },
            
            'devengado_rrhh':function(me){
@@ -2022,7 +2064,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 //#1			16/102016		EGS	
                  me.ocultarComponente(me.Cmp.pago_borrador);
                  //#1			16/102016		EGS	
-                
+               me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
                 
            },
            
@@ -2048,7 +2090,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                
                me.mostrarComponente(me.Cmp.pago_borrador);
               //#1			16/102016		EGS	
-               
+              me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
               
         
         
@@ -2059,7 +2101,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                me.setTipoPago['devengado_pagado'](me);
                 //#1			16/102016		EGS	
                 me.ocultarComponente(me.Cmp.pago_borrador);      
-                //#1			16/102016		EGS	 
+                //#1			16/102016		EGS
+               me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
                      
            },
            
@@ -2076,8 +2119,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                  
                //#1			16/102016		EGS	
                 me.ocultarComponente(me.Cmp.pago_borrador);
-                //#1			16/102016		EGS	
-              
+                //#1			16/102016		EGS
+               me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
           },
            'dev_garantia':function(me){
               me.ocultarComponente(me.Cmp.id_plantilla);
@@ -2096,7 +2139,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
              //#1			16/102016		EGS	
                me.ocultarComponente(me.Cmp.pago_borrador);
                //#1			16/102016		EGS	
-             
+               me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
               
            },
           
@@ -2117,7 +2160,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
              //#1			16/102016		EGS	
                me.ocultarComponente(me.Cmp.pago_borrador);
               //#1			16/102016		EGS	
-              
+              me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
           },
            
          'pagado':function(me){
@@ -2133,7 +2176,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
               //#1			16/102016		EGS	
                me.ocultarComponente(me.Cmp.pago_borrador);
                //#1			16/102016		EGS	
-              
+             me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
         }, 
         'pagado_rrhh':function(me){
                me.Cmp.id_plantilla.disable();
@@ -2147,7 +2190,8 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
              
          		 //#1			16/102016		EGS	
           	   me.ocultarComponente(me.Cmp.pago_borrador);
-          	   //#1			16/102016		EGS	    
+          	   //#1			16/102016		EGS
+            me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
         },
         'ant_parcial':function(me){
                 me.ocultarComponente(me.Cmp.id_plantilla);
@@ -2200,7 +2244,7 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 //#1			16/102016		EGS	
                  me.ocultarComponente(me.Cmp.pago_borrador);
                  //#1			16/102016		EGS	
-                
+            me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
          },
          'ant_aplicado':function(me, data){
          	
@@ -2228,11 +2272,13 @@ Phx.vista.PlanPago=Ext.extend(Phx.gridInterfaz,{
                 }
                 
                 me.mostrarGrupo(3);
+             me.ocultarComponente(me.Cmp.codigo_tipo_anticipo);
           }
     },
     
     mostrarComponentesPago:function(me){
         me.mostrarComponente(me.Cmp.nombre_pago);
+        me.mostrarComponente(me.Cmp.codigo_tipo_anticipo);
         if(me.Cmp.id_cuenta_bancaria){
         	
            me.mostrarComponente(me.Cmp.id_depto_lb);
