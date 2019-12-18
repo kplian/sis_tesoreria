@@ -2,6 +2,7 @@
 <!--
  *	ISSUE   FORK	     Fecha 		     Autor		 Descripcion	
  *  #41     ENDETR       16/12/2019      JUAN        Reporte de información de pago
+ *  #42     ENDETR       18/12/2019      JUAN        Separador de miles en reporte de información de pago
 * * -->
 
 <!-- INICIO #41 -->
@@ -65,7 +66,6 @@
 	</tr>
 	<tr>
 		<table border="1" style="padding: 5px 5px 5px 5px">
-
 			<tr style="background-color: #D6ECFF">
 		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><b>Concepto</b></td>
 		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><b>Moneda</b></td>
@@ -74,32 +74,32 @@
 			<tr >
 		       <td style="font-size:11px; height: 25px; text-align: left; vertical-align: middle;">Importe </td>
 		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo $this->datos[0]["moneda"];?></td>
-		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo $this->datos[0]["importe"];?></td>
+		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo number_format($this->datos[0]["importe"],'2', ',','.') ;?></td>   <!-- #42 -->
 	        </tr>
 			<tr >
 		       <td style="font-size:11px; height: 25px; text-align: left; vertical-align: middle;">Retención de Garantía </td>
 		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo $this->datos[0]["moneda"];?></td>
-		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo $this->datos[0]["monto_retgar_mb"];?></td>
+		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo number_format($this->datos[0]["monto_retgar_mb"],'2', ',','.');?></td><!-- #42 -->
 	        </tr>
 			<tr >
 		       <td style="font-size:11px; height: 25px; text-align: left; vertical-align: middle;">Descuentos de Ley </td>
 		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo $this->datos[0]["moneda"];?></td>
-		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo $this->datos[0]["descuento_ley"];?></td>
+		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo number_format($this->datos[0]["descuento_ley"],'2', ',','.');?></td><!-- #42 -->
 	        </tr>
 			<tr>
 		       <td style="font-size:11px; height: 25px; text-align: left; vertical-align: middle;">Descuentos de Anticipo </td>
 		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo $this->datos[0]["moneda"];?></td>
-		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo $this->datos[0]["descuento_anticipo"];?></td>
+		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo number_format($this->datos[0]["descuento_anticipo"],'2', ',','.');?></td><!-- #42 -->
 	        </tr>
 			<tr>
 		       <td style="font-size:11px; height: 25px; text-align: left; vertical-align: middle;">Otros Descuentos</td>
 		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo $this->datos[0]["moneda"];?></td>
-		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo $this->datos[0]["otros_descuentos"];?></td>
+		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo number_format($this->datos[0]["otros_descuentos"],'2', ',','.');?></td><!-- #42 -->
 	        </tr>
 			<tr>
 		       <td style="font-size:11px; height: 25px; text-align: left; vertical-align: middle;">Liquido Pagable</td>
 		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo $this->datos[0]["moneda"];?></td>
-		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo $this->datos[0]["liquido_pagable"];?></td>
+		       <td style="font-size:11px; height: 25px; text-align: center; vertical-align: middle;"><?php echo number_format($this->datos[0]["liquido_pagable"],'2', ',','.');?></td><!-- #42 -->
 	        </tr>
 		</table>
 	</tr>
@@ -109,7 +109,7 @@
 <table border="1" style="padding: 5px 5px 5px 5px">
 	<tr>
        <td style="font-size:11px; left: 25px; text-align: left; vertical-align: middle;">Tipo solicitud</td>
-       <td style="font-size:11px; left: 25px; text-align: left; vertical-align: middle;" colspan="2"> <?php echo $this->datos[0]["tipo"];?></td>
+       <td style="font-size:11px; left: 25px; text-align: left; vertical-align: middle;" colspan="2"> <?php echo ($this->datos[0]["tipo"]=='especial')?'pago': $this->datos[0]["tipo"];?></td><!-- #42 -->
     </tr>
 	<tr>
        <td style="font-size:11px; height: 25px; text-align: left; vertical-align: middle;">N° Cheque</td>
@@ -125,7 +125,7 @@
 		$var= $this->datos[0]["num_tramite"];
 		$partes = explode("-",$var);
 
-        if($partes[0] =="PU"){
+        if($partes[0] =="PU"  || $this->datos[0]["tipo"]=='especial' ){ //#42 
         ?>
            <b>RESPONSABLE</b>
         <?PHP 
