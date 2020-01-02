@@ -24,6 +24,7 @@ ISSUE 			FECHA: 			AUTOR:						DESCRIPCION:
  #15 ENDETR     16/01/2019      JUAN                        se agrego la columna moneda en reporte de obligaciones de pagos pendientes
  #35 ETR        07/10/2019      RAC                         Adicionar descuento de anticipos en reporte de plan de pagos
  #41 ENDETR     16/12/2019      JUAN                        Reporte de información de pago
+ #43 ENDETR     02/01/2020      JUAN                        Sumar monto_no_pagado a otros_descuentos en reporte información de pago
 ***************************************************************************/
 
 DECLARE
@@ -1155,7 +1156,7 @@ BEGIN
                          pp.monto_retgar_mo::numeric as monto_retgar_mb,  
                          pp.descuento_ley::numeric,
                          pp.descuento_anticipo::numeric,
-                         pp.otros_descuentos::numeric,
+                         (pp.otros_descuentos+pp.monto_no_pagado)::numeric as otros_descuentos,--#43
                          pp.liquido_pagable::numeric,
                          (case when cot.requiere_contrato =''no''then
                          cot.numero_oc
