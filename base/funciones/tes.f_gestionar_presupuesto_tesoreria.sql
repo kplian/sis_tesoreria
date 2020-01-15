@@ -36,6 +36,7 @@ $body$
  #34    ETR       02/10/2019        RAC KPLIAN        BUG al sincronizar presupuesto en procesos de adquisiciones con varias lineas pero mismos presupuestos y partida 
  #37   ETR        10/10/2019        RAC KPLIAN        retroceder cambio de agrupación por partida y centro , al sincronizar presupuestos
  #38   ETR        26/11/2019        RAC KPLIAN        BUG caso no considerado al anticipo y factor de prorrateo 
+ #44   ETR        15/01/2019        RAC KPLIAN        Mejora de mensajes de error para centros de costos bloqueados 
 ***************************************************************************/
 
 DECLARE
@@ -1101,7 +1102,7 @@ BEGIN
                                IF v_resultado_ges[1] = 0 THEN
                                                          
                                          --  recuperamos datos del presupuesto
-                                         v_mensaje_error = v_mensaje_error || conta.f_armar_error_presupuesto(v_resultado_ges, 
+                                         v_mensaje_error = COALESCE(v_mensaje_error, '') || conta.f_armar_error_presupuesto(v_resultado_ges, 
                                                                                v_registros_pro.id_centro_costo, 
                                                                                v_registros_pro.codigo_partida, 
                                                                                v_registros.id_moneda, 
@@ -1110,10 +1111,12 @@ BEGIN
                                                                                v_monto_ejecutar_mb);
                                          v_sw_error = true;
                                                                
-                               END IF; --fin id de error                            
-                                               
+                               END IF; --fin id de error  
+                                              
                                                
                   END LOOP; 
+                  
+                  
                   
                   IF p_id_usuario =  429 THEN
                      -- raise exception 'llega ... % - %',v_monto_ejecutar, v_registros_pro.id_partida;
@@ -1233,7 +1236,7 @@ BEGIN
                                      IF v_resultado_ges[1] = 0 THEN
                                                                
                                                --  recuperamos datos del presupuesto
-                                               v_mensaje_error = v_mensaje_error || conta.f_armar_error_presupuesto(v_resultado_ges, 
+                                               v_mensaje_error = COALESCE(v_mensaje_error, '') || conta.f_armar_error_presupuesto(v_resultado_ges, 
                                                                                      v_registros_pro.id_centro_costo, 
                                                                                      v_registros_pro.codigo_partida, 
                                                                                      v_registros.id_moneda, 
