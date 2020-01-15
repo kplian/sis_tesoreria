@@ -36,7 +36,7 @@ $body$
  #34    ETR       02/10/2019        RAC KPLIAN        BUG al sincronizar presupuesto en procesos de adquisiciones con varias lineas pero mismos presupuestos y partida 
  #37   ETR        10/10/2019        RAC KPLIAN        retroceder cambio de agrupación por partida y centro , al sincronizar presupuestos
  #38   ETR        26/11/2019        RAC KPLIAN        BUG caso no considerado al anticipo y factor de prorrateo 
- #44   ETR        15/01/2019        RAC KPLIAN        Mejora de mensajes de error para centros de costos bloqueados 
+ #44   ETR        15/01/2020        RAC KPLIAN        Mejora de mensajes de error para centros de costos bloqueados 
 ***************************************************************************/
 
 DECLARE
