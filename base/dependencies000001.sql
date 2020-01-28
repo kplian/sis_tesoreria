@@ -4049,4 +4049,85 @@ GRANT SELECT
 /**********************************F-DEP-RAC-TES-0-25/07/2019****************************************/
 
 
+
+
+/**********************************I-DEP-RAC-TES-45-27/01/2020****************************************/
+
+CREATE OR REPLACE VIEW tes.vsrd_doc_compra_venta_efectivo_provisorio_det_v2(
+    id_solicitud_rendicion_det,
+    id_proceso_caja,
+    id_moneda,
+    id_int_comprobante,
+    id_plantilla,
+    importe_doc,
+    importe_excento,
+    importe_total_excento,
+    importe_descuento,
+    importe_descuento_ley,
+    importe_ice,
+    importe_it,
+    importe_iva,
+    importe_pago_liquido,
+    nro_documento,
+    nro_dui,
+    nro_autorizacion,
+    razon_social,
+    revisado,
+    manual,
+    obs,
+    nit,
+    fecha,
+    codigo_control,
+    sw_contabilizar,
+    tipo,
+    id_doc_compra_venta,
+    descripcion,
+    nro_tramite_auxiliar,
+    importe_neto,
+    id_auxiliar)
+AS
+  SELECT srd.id_solicitud_rendicion_det,
+         srd.id_proceso_caja,
+         dcv.id_moneda,
+         dcv.id_int_comprobante,
+         dcv.id_plantilla,
+         dcv.importe_doc,
+         dcv.importe_excento,
+         COALESCE(dcv.importe_excento, 0::NUMERIC) + COALESCE(dcv.importe_ice, 0
+           ::NUMERIC) AS importe_total_excento,
+         dcv.importe_descuento,
+         dcv.importe_descuento_ley,
+         dcv.importe_ice,
+         dcv.importe_it,
+         dcv.importe_iva,
+         dcv.importe_pago_liquido,
+         dcv.nro_documento,
+         dcv.nro_dui,
+         dcv.nro_autorizacion,
+         dcv.razon_social,
+         dcv.revisado,
+         dcv.manual,
+         dcv.obs,
+         dcv.nit,
+         dcv.fecha,
+         dcv.codigo_control,
+         dcv.sw_contabilizar,
+         dcv.tipo,
+         dcv.id_doc_compra_venta,
+         (((dcv.razon_social::TEXT || ' - '::TEXT) || ' ( '::TEXT) ||
+           ' ) Nro Doc: '::TEXT) || COALESCE(dcv.nro_documento)::TEXT AS
+           descripcion,
+         sol.nro_tramite AS nro_tramite_auxiliar,
+         dcv.importe_neto,
+         dcv.id_auxiliar
+  FROM tes.tsolicitud_rendicion_det srd
+       JOIN conta.tdoc_compra_venta dcv ON srd.id_documento_respaldo =
+         dcv.id_doc_compra_venta
+       JOIN param.tplantilla pl ON pl.id_plantilla = dcv.id_plantilla
+       JOIN tes.tsolicitud_efectivo sol ON sol.id_solicitud_efectivo =
+         srd.id_solicitud_efectivo
+  WHERE pl.tipo_informe::TEXT = 'efectivo'::TEXT;
+ 
+
+/**********************************F-DEP-RAC-TES-45-27/01/2020****************************************/
  
