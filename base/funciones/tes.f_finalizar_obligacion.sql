@@ -10,13 +10,17 @@ CREATE OR REPLACE FUNCTION tes.f_finalizar_obligacion (
 RETURNS varchar [] AS
 $body$
 /*
-*
-*  Autor:   RAC
-*  DESC:     Finaliza la obligacion de pago
-*  Fecha:   10/06/2013
-*
-*/
+  Autor:   RAC
+  DESC:     Finaliza la obligacion de pago
+  Fecha:   10/06/2013
 
+    
+     HISTORIAL DE MODIFICACIONES:
+       
+ ISSUE            FECHA:              AUTOR                                DESCRIPCION
+ #0         10/06/2013             RAC (KPLIAN)            Creacion
+ #46        30/01/2020             RAC                     Al finalizar Obligaciones  permitir cbtes en estado pendiente issue. (Vamos asumir que los planes  de pago con cbte generado están finalizados para permitir la extension de la obligación de pago) #46
+*/
 DECLARE
 
 	v_nombre_funcion   	text;
@@ -73,7 +77,9 @@ BEGIN
        v_registros_obli
        from tes.tobligacion_pago op
        where op.id_obligacion_pago = p_id_obligacion_pago;
-    
+       
+       
+       
     
     
        --  verificamos que el total de cuotas esten en su estado final
@@ -82,10 +88,25 @@ BEGIN
                    from tes.tplan_pago pp
                    where pp.id_obligacion_pago =  p_id_obligacion_pago  
                         and pp.estado_reg = 'activo'
-                         and pp.estado not in ('devengado','pagado', 'anticipado', 'aplicado', 'devuelto','contabilizado')) THEN
+                        and pp.estado not in ('devengado','pagado', 'anticipado', 'aplicado', 'devuelto','contabilizado')
+                        
+                        ) THEN
           
-          
-             raise exception 'existen cuotas pendientes de finanización';
+                -- #46 solo admitira planes del tipo pagado (pagos) que esten en estado pendiente (con cbte generaod, estos cbte no podra eliminarse si la obligacion es finalizada)
+                IF  EXISTS( 
+                           
+                             select 
+                                    1
+                               from tes.tplan_pago pp
+                               where pp.id_obligacion_pago =  p_id_obligacion_pago  
+                                    and pp.estado_reg = 'activo'
+                                    and pp.estado not in ('devengado','pagado', 'anticipado', 'aplicado', 'devuelto','contabilizado')
+                                    and pp.estado != 'pendiente' and pp.tipo != 'pagado'
+                                  
+                                  ) THEN
+                  
+                         raise exception 'existen cuotas pendientes de finanización';
+                 END IF;
           
           END IF;
           
@@ -287,6 +308,7 @@ BEGIN
               END IF;
        END IF;
       
+      --raise 'llega al final';
       
      v_respuesta[1] = 'true'; 
 
