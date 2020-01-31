@@ -16,6 +16,12 @@ Fecha:   6 junio de 2013
 Descripcion  Esta funcion retrocede el estado de los planes de pago cuando los comprobantes son eliminados
 
   
+    HISTORIAL DE MODIFICACIONES:
+       
+ ISSUE            FECHA:              AUTOR                                DESCRIPCION
+ #0         6 junio de 2013        RAC (KPLIAN)            Creacion
+ #47        30/01/2020             RAC                     Bloquear eliminacion de cbte con obligacion es finalizadas
+
 
 */
 
@@ -91,7 +97,8 @@ BEGIN
           pp.monto_retgar_mo,
           op.numero,
           c.temporal,
-          c.estado_reg as estadato_cbte
+          c.estado_reg as estadato_cbte,
+          op.estado as estado_op  --#47
       into
           v_registros
       from  tes.tplan_pago pp
@@ -103,11 +110,18 @@ BEGIN
     --2) Validar que tenga un plan de pago
     
     
-     IF  v_registros.id_plan_pago is NULL  THEN
-     
+     IF  v_registros.id_plan_pago is NULL  THEN     
         raise exception 'El comprobante no esta relacionado con nigun plan de pagos';
-     
      END IF;
+     
+     
+     --#47
+     IF  v_registros.estado_op = 'finalizado'  THEN     
+        raise exception 'No puede eliminar el Cbte por que la obligación de pago que lo origino ha sido finalizada';
+     END IF;
+     
+     
+     
      
      
      
