@@ -523,6 +523,28 @@ class ACTObligacionPago extends ACTbase{
 		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+    function listarObligacionPagoFiltro(){//#48
+        $this->objParam->defecto('ordenacion','id_obligacion_pago');
+        $this->objParam->defecto('dir_ordenacion','asc');
+        $this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]);
+
+        if($this->objParam->getParametro('pago_simple')=='si'){
+            $this->objParam->addFiltro("obpg.estado  in (''registrado'',''en_pago'',''finalizado'')");
+        }
+        if($this->objParam->getParametro('id_proveedor')){
+            $this->objParam->addFiltro("obpg.id_proveedor = ".$this->objParam->getParametro('id_proveedor'));
+        }
+
+        if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+            $this->objReporte = new Reporte($this->objParam,$this);
+            $this->res = $this->objReporte->generarReporteListado('MODObligacionPago','listarObligacionPagoPS');
+        } else{
+            $this->objFunc=$this->create('MODObligacionPago');
+
+            $this->res=$this->objFunc->listarObligacionPagoPS($this->objParam);
+        }
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
 	function editAntiRet(){
 		$this->objFunc=$this->create('MODObligacionPago');	
 		$this->res=$this->objFunc->editAntiRet($this->objParam);

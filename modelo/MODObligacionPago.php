@@ -15,8 +15,8 @@
 #13        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago formulario
 #16        16/01/2019    	MMV ENDETRAN      Incluir comprometer al 100% pago único sin contrato
 #19        25/01/2019      MMV ENDETRAN       Correccion de bug conversion de moneda
-
- * */
+#48        31/12/2020     JJA                  Agregar tipo de relación en obligacion de pago
+ */
 
 class MODObligacionPago extends MODbase{
 	
@@ -102,8 +102,8 @@ class MODObligacionPago extends MODbase{
 		$this->captura('fin_forzado','varchar'); //#7890
 		$this->captura('monto_sg_mo','numeric'); //#7890
         $this->captura('comprometer_iva','varchar'); //#12
-		
-		
+
+
 		
 		
 		//Ejecuta la instruccion
@@ -194,7 +194,10 @@ class MODObligacionPago extends MODbase{
 		$this->captura('monto_sg_mo','numeric'); //#7890
         $this->captura('comprometer_iva','varchar');  //#16
 
-        
+		$this->captura('cod_tipo_relacion','varchar'); //#48
+		$this->captura('id_obligacion_pago_extendida_relacion','int4'); //#48
+		$this->captura('desc_obligacion_pago','varchar'); //#48
+
         //Ejecuta la instruccion
         $this->armarConsulta();
         $this->ejecutarConsulta();
@@ -246,8 +249,8 @@ class MODObligacionPago extends MODbase{
 		$this->setParametro('tipo_anticipo','tipo_anticipo','varchar');
 		$this->setParametro('id_contrato','id_contrato','int4');
         $this->setParametro('comprometer_iva','comprometer_iva','varchar');//#12
-		
-		
+		$this->setParametro('cod_tipo_relacion','cod_tipo_relacion','varchar');//#48
+		$this->setParametro('id_obligacion_pago_extendida_relacion','id_obligacion_pago_extendida_relacion','int4');//#48
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -288,8 +291,8 @@ class MODObligacionPago extends MODbase{
 
 		$this->setParametro('id_funcionario_responsable','id_funcionario_responsable','int4');
         $this->setParametro('comprometer_iva','comprometer_iva','varchar'); //#12
-        
-        
+		$this->setParametro('cod_tipo_relacion','cod_tipo_relacion','varchar');//#48
+		$this->setParametro('id_obligacion_pago_extendida_relacion','id_obligacion_pago_extendida_relacion','int4');//#48
         
         
        
@@ -945,6 +948,8 @@ class MODObligacionPago extends MODbase{
 		//Funcionario responsable de el plan de pagos
 		$this->captura('id_funcionario_responsable','integer');
 		$this->captura('desc_fun_responsable','text');
+
+		$this->captura('gestion','integer');//48
 	
 		//Ejecuta la instruccion
 		$this->armarConsulta();

@@ -8,7 +8,7 @@
 Issue			Fecha        Author				Descripcion
 #12        10/01/2019      NMMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
 #17         18/01/2019      MMV ENDETRAN       Plan de pago consulta obligaciones de pago
-*
+#48        31/12/2020     JJA                  Agregar tipo de relación en obligacion de pago
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -199,8 +199,24 @@ Phx.vista.ObligacionPagoSol = {
 			//this.Cmp.id_contrato.store.baseParams.filtro_directo = "((CON.fecha_fin is null) or ((con.fecha_fin + interval ''3 month'')::date >= now()::date))";
             //calvarez 31/01/2018 solo para listar los contratos que están vencidos, para regularizar obligaciones de pago 
 			//RESTAURAR ESTA FILA O IGNORAR EL MERGE this.Cmp.id_contrato.store.baseParams.filtro_directo = "((CON.fecha_fin is null) or ((con.fecha_fin)::date >= now()::date))";
-            
+
             this.Cmp.id_contrato.modificado = true;
+
+            if(this.Cmp.cod_tipo_relacion.getValue()!=''){//#48
+                this.Cmp.cod_tipo_relacion.disable();//#48
+                this.Cmp.cod_tipo_relacion.modificado = true;//#48
+
+                this.Cmp.id_obligacion_pago_extendida_relacion.store.setBaseParam('id_proveedor',this.Cmp.id_proveedor.getValue());//#48
+                this.Cmp.id_obligacion_pago_extendida_relacion.modificado = true;//#48
+            }//#48
+            else{
+                this.Cmp.cod_tipo_relacion.enable();//#48
+                this.Cmp.cod_tipo_relacion.modificado = true;//#48
+
+                this.Cmp.id_obligacion_pago_extendida_relacion.store.setBaseParam('id_proveedor',this.Cmp.id_proveedor.getValue());//#48
+                this.Cmp.id_obligacion_pago_extendida_relacion.modificado = true;//#48
+            }
+
 		}, this);
 		
 		
@@ -213,6 +229,29 @@ Phx.vista.ObligacionPagoSol = {
         	this.Cmp.id_depto.modificado = true;
         	this.Cmp.id_depto.enable();
         }, this);
+
+       this.Cmp.cod_tipo_relacion.on('select',function(com,dat,index){//#48
+
+           if(this.Cmp.cod_tipo_relacion.getValue()=='contrato'){//#48
+               this.Cmp.id_contrato.enable();//#48
+               this.Cmp.id_contrato.modificado = true;//#48
+               this.mostrarComponente(this.Cmp.id_contrato);//#48
+               this.ocultarComponente(this.Cmp.id_obligacion_pago_extendida_relacion);//#48
+               this.Cmp.id_contrato.allowBlank=false;//#48
+               this.Cmp.id_obligacion_pago_extendida_relacion.allowBlank=true;//#48
+           }
+           if(this.Cmp.cod_tipo_relacion.getValue()=='obpag'){//#48
+               this.ocultarComponente(this.Cmp.id_contrato);//#48
+               this.mostrarComponente(this.Cmp.id_obligacion_pago_extendida_relacion);//#48
+               this.Cmp.id_contrato.allowBlank=true;//#48
+               this.Cmp.id_obligacion_pago_extendida_relacion.allowBlank=false;//#48
+
+
+
+               this.Cmp.id_obligacion_pago_extendida_relacion.store.setBaseParam('id_proveedor',this.Cmp.id_proveedor.getValue());
+               this.Cmp.id_obligacion_pago_extendida_relacion.modificado = true;
+           }//#48
+       }, this);//#48
     
     },
     
@@ -268,6 +307,28 @@ Phx.vista.ObligacionPagoSol = {
        	this.Cmp.total_nro_cuota.enable();
        	this.Cmp.comprometer_iva.enable();//#12
        }
+
+        this.Cmp.cod_tipo_relacion.enable();//#48
+        this.Cmp.cod_tipo_relacion.modificado = true;//#48
+        if(this.Cmp.cod_tipo_relacion.getValue()=='contrato'){//#48
+            this.Cmp.id_contrato.enable();//#48
+            this.Cmp.id_contrato.modificado = true;//#48
+            this.mostrarComponente(this.Cmp.id_contrato);//#48
+            this.ocultarComponente(this.Cmp.id_obligacion_pago_extendida_relacion);//#48
+            this.Cmp.id_contrato.allowBlank=false;//#48
+            this.Cmp.id_obligacion_pago_extendida_relacion.allowBlank=true;//#48
+        }
+        if(this.Cmp.cod_tipo_relacion.getValue()=='obpag'){//#48
+            this.ocultarComponente(this.Cmp.id_contrato);//#48
+            this.mostrarComponente(this.Cmp.id_obligacion_pago_extendida_relacion);//#48
+            this.Cmp.id_contrato.allowBlank=false;//#48
+            this.Cmp.id_obligacion_pago_extendida_relacion.allowBlank=false;//#48
+
+            this.Cmp.id_contrato.disable();//#48
+            this.Cmp.id_obligacion_pago_extendida_relacion.disable();//#48
+        }
+        this.Cmp.cod_tipo_relacion.disable();//#48
+
            
     },
     
