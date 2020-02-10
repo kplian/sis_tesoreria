@@ -37,6 +37,7 @@ $body$
  #37   ETR        10/10/2019        RAC KPLIAN        retroceder cambio de agrupación por partida y centro , al sincronizar presupuestos
  #38   ETR        26/11/2019        RAC KPLIAN        BUG caso no considerado al anticipo y factor de prorrateo 
  #44   ETR        15/01/2020        RAC KPLIAN        Mejora de mensajes de error para centros de costos bloqueados 
+ #49 ETR        05/02/2020        RAC KPLIAN        bug, si tenemos dos detalle mismo centro de costo y partida el presupuesto formualdo es suficiente para ambos por separado pero no para os dos sumados, no fue encontrada una solucion
 ***************************************************************************/
 
 DECLARE
@@ -103,6 +104,10 @@ DECLARE
   v_aux_det				             numeric;   --#37
   v_aux_mb_det			             numeric;   --#37
   v_monto_a_comprometer              numeric;   --#37
+  
+  
+  
+  v_mont_det_acumulado              numeric;
   		
   
 
@@ -649,7 +654,7 @@ BEGIN
                                              sum(pro.monto_ejecutar_mo) / sum(pp.monto_ejecutar_total_mo) as  factor_pro,
                                              pp.descuento_anticipo,                                             
                                              tct.id_tipo_cc_techo  
-                                             --,od.id_partida --TODO                                           
+                                             ,od.id_partida --TODO                                           
                                          from  tes.tprorrateo pro
                                          INNER JOIN tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det   and od.estado_reg = 'activo'
                                          INNER JOIN tes.tobligacion_pago op on op.id_obligacion_pago = od.id_obligacion_pago
@@ -671,54 +676,13 @@ BEGIN
                                            par.sw_movimiento,                                           
                                            tp.movimiento,
                                            tct.id_tipo_cc_techo
-                                           --,od.id_partida
+                                           ,od.id_partida
                                      ) LOOP 
                                
-                             
-                               --Revisar el tipo de documento y ver si tiene IVA
-                               
-                               -- si tine IVA reducir el porcenta correpondiente al comprometido faltante  
-                               --(tambiend eberia prorratearce con la mayor cantidad de decimales)  
-                               v_desc_iva = 0;
-                               
-                               IF v_conta_revertir_iva_comprometido = 'no' THEN
-                                 v_desc_iva = v_total_iva * v_registros_pro.factor_pro;                               
-                               END IF;      
-                             
-                             
-                              IF v_registros_pro.sw_movimiento = 'flujo'  THEN                              
-                                     IF v_registros_pro.movimiento != 'administrativo'  THEN
-                                           raise exception 'partida de flujo solo son admitidas con presupuestos administrativos';
-                                     END IF;
-                               ELSE 
-                                  v_comprometido=0;
-                                  v_ejecutado=0;   
-                                                                         				        
-                                  SELECT 
-                                       ps_comprometido, 
-                                       COALESCE(ps_ejecutado,0)  
-                                   into 
-                                       v_comprometido,
-                                       v_ejecutado
-                                  FROM pre.f_verificar_com_eje_pag_tipo_cc(v_registros_pro.id_partida_ejecucion_com, v_registros_pro.id_moneda);
-                                 -- FROM pre.f_verificar_com_eje_pag(v_registros_pro.id_partida_ejecucion_com, v_registros_pro.id_moneda);
-                              END IF;
-                              
-                          --#39 calcular el decuento de anticipo,   y no comprometerlo
-                         
-                          IF v_tes_anticipo_ejecuta_pres = 'si' THEN
-                               v_descuento_anticipo = v_registros_pro.factor_pro * v_registros_pro.descuento_anticipo;
-                          ELSE
-                               v_descuento_anticipo = 0;
-                          END IF;   
-                          
-                          v_aux =  (v_registros_pro.monto_ejecutar_mo - v_descuento_anticipo - v_desc_iva) -  (v_comprometido - v_ejecutado);
-                                 
-                           
-                          --IF v_registros_pro.id_partida_ejecucion_com not in (817360,817359)  THEN 
-                          -- raise exception 'id_partida_ejecucion_com %, v_comprometido %, v_ejecutado  % < monto_ejecutar_mo % - v_descuento_anticipo % - v_desc_iva %', v_registros_pro.id_partida_ejecucion_com, v_comprometido, v_ejecutado,v_registros_pro.monto_ejecutar_mo , v_descuento_anticipo  , v_desc_iva;
-                          --END IF;         
-                         
+                                
+                               v_mont_det_acumulado = 0;  --inica acumulado en cero
+               
+                      
                            ----------------------------------------------------------------------------
                            -- incremetamos presupuesto por cada detalle
                            -----------------------------------------------------------------------------
@@ -755,8 +719,10 @@ BEGIN
                                      INNER JOIN  param.tcentro_costo cc ON cc.id_centro_costo = p.id_centro_costo
                                      INNER JOIN param.vtipo_cc_techo tct ON tct.id_tipo_cc = cc.id_tipo_cc
                                      where  tct.id_tipo_cc_techo = v_registros_pro.id_tipo_cc_techo
+                                            and par.id_partida =  v_registros_pro.id_partida
                                             and pro.estado_reg = 'activo'
-                                            and pro.id_plan_pago = p_id_plan_pago 
+                                            and pro.id_plan_pago = p_id_plan_pago
+                                     order by par.id_partida
                             
                             )LOOP
                                              
@@ -790,22 +756,28 @@ BEGIN
                                            v_descuento_anticipo_det = 0;
                                       END IF;
                                         
-                                        --considerar el descuento de anticipo 
-                                       v_aux_det =  (v_registros_det.monto_ejecutar_mo - v_descuento_anticipo_det - v_desc_iva_det) -  (v_comprometido_det - v_ejecutado_det);
-                                     
-                                       --raise exception '%-%-%-%-%',v_registros_det.monto_ejecutar_mo, v_descuento_anticipo_det , v_desc_iva_det,v_comprometido_det, v_ejecutado_det;
+                                       --considerar el descuento de anticipo 
+                                       --  aux_det   =  (Lo que debo  ejecutar) - (Lo que tengo comprometido disponible - el cumulado del grupo)
+                                       -- Si es negativo me sobre el comprometido 
+                                       -- si es positivo es el monto que me hace falta comprometer
+                                       
+                                       v_aux_det =  (v_registros_det.monto_ejecutar_mo - v_descuento_anticipo_det - v_desc_iva_det) -  ((v_comprometido_det - v_ejecutado_det) - v_mont_det_acumulado);
+                                       
+                                       
+                                       v_mont_det_acumulado = v_mont_det_acumulado +  (v_registros_det.monto_ejecutar_mo - v_descuento_anticipo_det - v_desc_iva_det);
                                         
-                                     --  raise exception 'nn  %', v_aux_det;
+                                       --   (Lo que debo ejecutar)  < (lo que tengo comprometido disponible) 
                                        
-                                      v_monto_a_comprometer = 0;
-                                       
-                                      IF (v_registros_det.monto_ejecutar_mo - v_descuento_anticipo_det - v_desc_iva_det) < v_aux_det THEN
-                                          v_monto_a_comprometer = v_registros_det.monto_ejecutar_mo - v_descuento_anticipo_det - v_desc_iva_det;
-                                      ELSE 
-                                          v_monto_a_comprometer = v_aux_det;
+                                      IF  (v_aux_det -  trunc(v_aux_det,2)) > 0 THEN
+                                         
+                                         v_monto_a_comprometer = trunc(v_aux_det,2) +  0.01;   --fuera el redondeo al inmediato superior
+                                      
+                                      ELSE
+                                         v_monto_a_comprometer = v_aux_det;
                                       END IF;
+                                      
                                                                               
-                                      IF (v_monto_a_comprometer) > 0 THEN
+                                      IF v_monto_a_comprometer > 0 THEN
                                        
                                           v_i = v_i +1; 
                                           --si la el año de pago es mayor que el año del devengado , el pago va con fecha de 31 de diciembre del año del devengado
@@ -834,7 +806,7 @@ BEGIN
                                         incrementado_mo = COALESCE(incrementado_mo,0) + v_aux_det
                                         where  od.id_obligacion_det= v_registros_det.id_obligacion_det;
                                         
-                                       -- raise exception '... mb %, usd %, % ----anticipo %', v_aux_mb , v_aux , v_registros_pro.id_moneda, v_descuento_anticipo;
+                                       -- raise exception '... %',v_monto_a_comprometer;
                                                                        
                                              v_resultado_ges = pre.f_gestionar_presupuesto_individual(
                                                                 p_id_usuario,
@@ -866,12 +838,14 @@ BEGIN
                                                                                            v_registros_det.id_moneda, 
                                                                                            v_id_moneda_base, 
                                                                                            'comprometer', 
-                                                                                           v_aux),'' );
+                                                                                           v_monto_a_comprometer),'' );
                                                      v_sw_error = true;
                                                                            
                                            END IF; --fin id de error                               
                                                                        
-                                        v_aux = v_aux - v_monto_a_comprometer;
+                                        --v_aux = v_aux - v_monto_a_comprometer;
+                                        
+                                        
                                       END IF;
                                       
                                       
@@ -888,6 +862,8 @@ BEGIN
                          where  pp.id_plan_pago =  p_id_plan_pago;
                  
                  END IF;
+                 
+                -- raise exception 'llega al final de la sincronizacion .... %,  i = %',v_sw_error, v_i;
                  
                  IF v_sw_error THEN
                     raise exception 'Error al procesar presupuesto: %', v_mensaje_error;
