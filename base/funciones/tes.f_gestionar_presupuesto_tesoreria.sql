@@ -1084,14 +1084,13 @@ BEGIN
                                                                                v_registros.id_moneda, 
                                                                                v_id_moneda_base, 
                                                                                'ejecutado', 
-                                                                               v_monto_ejecutar_mb);
+                                                                               v_monto_ejecutar);
                                          v_sw_error = true;
                                                                
                                END IF; --fin id de error  
                                               
                                                
                   END LOOP; 
-                  
                   
                   
                   IF p_id_usuario =  429 THEN
@@ -1101,8 +1100,6 @@ BEGIN
                   IF v_sw_error THEN
                      raise exception 'Error al procesar presupuesto: %', v_mensaje_error;
                   END IF;
-                  
-                  
                   
             END IF;
        -----------------------------------------------------------------------    
