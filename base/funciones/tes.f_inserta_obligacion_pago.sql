@@ -403,10 +403,6 @@ BEGIN
            num_tramite =v_rec_obpag.num_tramite
            where id_obligacion_pago=v_id_obligacion_pago ;
 
-           update tes.tobligacion_pago  --#48
-               set id_obligacion_pago_extendida = v_id_obligacion_pago::integer --#48
-           where id_obligacion_pago=(p_hstore->'id_obligacion_pago_extendida_relacion')::integer; --#48
-
            update wf.tproceso_wf --#48
            set nro_tramite=v_rec_obpag.num_tramite --#48
            where id_proceso_wf=v_id_proceso_wf; --#48
