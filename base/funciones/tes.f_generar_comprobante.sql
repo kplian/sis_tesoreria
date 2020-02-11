@@ -261,7 +261,7 @@ BEGIN
                       v_des_antipo_si_ejecuta = 0;
                       IF v_tes_anticipo_ejecuta_pres = 'si' and  v_registros.descuento_anticipo > 0  THEN 
                         --#38  incluye el factor_pro                        
-                         v_des_antipo_si_ejecuta =   COALESCE(v_registros_pro.descuento_anticipo *  v_registros_pro.factor_pro,0);                         
+                         v_des_antipo_si_ejecuta =   COALESCE(v_registros.descuento_anticipo *  v_registros_pro.factor_pro,0);                         
                       END IF;
                       
                       
