@@ -5,6 +5,7 @@
 *@author  Gonzalo Sarmiento Sejas
 *@date 02-04-2013 16:01:32
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
+#48        31/12/2020     JJA                  Agregar tipo de relación en obligacion de pago
 */
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
 require_once(dirname(__FILE__).'/../reportes/RComEjePag.php');
