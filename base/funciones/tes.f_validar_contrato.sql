@@ -35,7 +35,8 @@ BEGIN
     select 
       op.id_contrato,
       op.tipo_obligacion,
-      ope.id_obligacion_pago  as id_op_original --#7891 
+      ope.id_obligacion_pago  as id_op_original, --#7891
+      op.cod_tipo_relacion  --#48
     into 
       v_registros_op
     from tes.tobligacion_pago op
