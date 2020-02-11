@@ -483,7 +483,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                     fields: ['id_obligacion_pago','num_tramite','fecha','obs','tipo_obligacion','total_pago','tipo_solicitud','desc_funcionario1','desc_proveedor','gestion','id_proveedor'],
                     // turn on remote sorting
                     remoteSort: true,
-                    baseParams:{par_filtro:'obpg.num_tramite#pv.desc_proveedor#obpg.id_proveedor',  pago_simple : 'si' }
+                    baseParams:{par_filtro:'obpg.num_tramite#pv.desc_proveedor#obpg.id_proveedor',  pago_simple : 'si' ,requiere_contrato:'si' }
                 }),
                 valueField: 'id_obligacion_pago',
                 displayField: 'num_tramite',

@@ -533,7 +533,11 @@ class ACTObligacionPago extends ACTbase{
         }
         if($this->objParam->getParametro('id_proveedor')){
             $this->objParam->addFiltro("obpg.id_proveedor = ".$this->objParam->getParametro('id_proveedor'));
+
         }
+        if($this->objParam->getParametro('requiere_contrato')=='si'){//#48
+            $this->objParam->addFiltro("cot.requiere_contrato= ''no''");//#48
+        }//#48
 
         if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
             $this->objReporte = new Reporte($this->objParam,$this);
