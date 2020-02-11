@@ -20,7 +20,9 @@ $body$
  ISSUE            FECHA:              AUTOR                                DESCRIPCION
  #0         10/06/2013             RAC (KPLIAN)            Creacion
  #46        30/01/2020             RAC                     Al finalizar Obligaciones  permitir cbtes en estado pendiente issue. (Vamos asumir que los planes  de pago con cbte generado están finalizados para permitir la extension de la obligación de pago) #46
- #49 ETR    05/02/2020             RAC KPLIAN              BUG, permitia finalizar ofligaciones con pago en estado borrador 
+ #49 ETR    05/02/2020             RAC KPLIAN              BUG, permitia finalizar ofligaciones con pago en estado borrador
+ #51        11/01/2020             JUAN                    Corrección de error (PARALLEL UNSAFE) en la función f_finalizar_obligación
+ PARALLEL UNSAFE
 */
 DECLARE
 
@@ -336,5 +338,4 @@ LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
 SECURITY INVOKER
-PARALLEL UNSAFE
 COST 100;
