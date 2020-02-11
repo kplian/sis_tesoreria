@@ -22,6 +22,7 @@ $body$
  #36 ETR        07/10/2019        RAC KPLIAN        Validar condición de carrera al generar cbte de contabilidad desde la interface de plan de pagos, en TES_SOLDEVPAG_IME	
  #37 ETR        10/10/2019        RAC KPLIAN        retroceder cambio de agrupación por partida y centro , al sincronizar presupuestos
  #38 ETR        26/11/2019        RAC KPLIAN        BUG caso no considerado al anticipo y factor de prorrateo 
+ #49 ETR        05/02/2020        RAC KPLIAN        bug, si tenemos dos detalle mismo centro de costo y partida el presupuesto formualdo es suficiente para ambos por separado pero no para os dos sumados, no fue encontrada una solucion
 ***************************************************************************/
 
 
@@ -177,7 +178,7 @@ BEGIN
           v_cont =1;
 
 
-          
+         
 
           IF v_registros.tipo in ('devengado_pagado','devengado','devengado_pagado_1c','ant_aplicado','rendicion') and  v_pre_integrar_presupuestos = 'true'  THEN
 
@@ -185,7 +186,34 @@ BEGIN
            		--verifica si el presupuesto comprometido sobrante alcanza para pagar el monto de la cuota prorrateada correspondiente al pago
 
                  -- #34  --agrupa por centro de costo
-                 
+                 --#49 agrupa por centro de costo y por partida
+                FOR  v_registros_pro in (
+
+                                   select                                      
+                                       sum(pro.monto_ejecutar_mb) as monto_ejecutar_mb,
+                                       sum(pro.monto_ejecutar_mo) as monto_ejecutar_mo,
+                                       max(od.id_partida_ejecucion_com) as id_partida_ejecucion_com,
+                                       max(od.id_concepto_ingas) as id_concepto_ingas,
+                                       par.sw_movimiento,
+                                       tp.movimiento,
+                                       od.id_centro_costo,
+                                       od.id_partida,
+                                       sum(od.factor_porcentual)  as factor_porcentual,
+                                       sum(pro.monto_ejecutar_mo / pp.monto_ejecutar_total_mo) as  factor_pro  --#37 se adiciona factor exacto, considera prorrateo manual
+                                     from  tes.tprorrateo pro
+                                     inner join tes.tobligacion_det od on od.id_obligacion_det = pro.id_obligacion_det
+                                     INNER JOIN pre.tpresupuesto   p  on p.id_centro_costo = od.id_centro_costo
+                                     INNER JOIN pre.tpartida par on par.id_partida  = od.id_partida
+                                     INNER JOIN pre.ttipo_presupuesto tp on tp.codigo = p.tipo_pres
+                                     INNER JOIN tes.tplan_pago pp on pp.id_plan_pago = pro.id_plan_pago
+                                     WHERE  pro.id_plan_pago = p_id_plan_pago  and pro.estado_reg = 'activo'
+                                     GROUP BY
+                                        od.id_centro_costo,
+                                        par.sw_movimiento,
+                                        tp.movimiento,
+                                        od.id_partida
+                                      ) LOOP
+                 /*
                   FOR  v_registros_pro in (
                                  select
                                    pro.id_prorrateo,
@@ -209,7 +237,7 @@ BEGIN
 
 
                                  where  pro.id_plan_pago = p_id_plan_pago
-                                   and pro.estado_reg = 'activo') LOOP
+                                   and pro.estado_reg = 'activo') LOOP*/
                        
                 
                         v_comprometido=0;
@@ -290,11 +318,14 @@ BEGIN
                      
                 
                    END LOOP;
+                   
+                  -- raise exception 'v_sw_verificacion %' , v_sw_verificacion;
                   
                   
                   IF not v_sw_verificacion THEN
                   
-                     
+                      
+                      
                       UPDATE  tes.tplan_pago pp set
                        sinc_presupuesto = 'si'
                       where  pp.id_plan_pago=p_id_plan_pago;  
@@ -308,7 +339,7 @@ BEGIN
            
           END IF;
           
-        
+         
           ------------------------------------
           -- validacion del prorrateo--    no estoy seguro si funciona la misma idea para el pago
           ------------------------------------
@@ -458,7 +489,6 @@ BEGIN
  v_respuesta[1]= 'TRUE';
  
   
-          -- raise exception 'llega al final ...  %', v_respuesta;  
 
 RETURN   v_respuesta;
 

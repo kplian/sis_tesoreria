@@ -20,17 +20,18 @@ $body$
  ISSUE            FECHA:              AUTOR                                DESCRIPCION
  #0         10/06/2013             RAC (KPLIAN)            Creacion
  #46        30/01/2020             RAC                     Al finalizar Obligaciones  permitir cbtes en estado pendiente issue. (Vamos asumir que los planes  de pago con cbte generado están finalizados para permitir la extension de la obligación de pago) #46
+ #49 ETR    05/02/2020             RAC KPLIAN              BUG, permitia finalizar ofligaciones con pago en estado borrador 
 */
 DECLARE
 
-	v_nombre_funcion   	text;
-    v_resp    			varchar;
-    v_registros   		record;
-    v_registros_obli   	record;
-    v_ejecutado 		numeric;
-    v_comprometido		numeric;
-    v_tipo_sol			varchar;
-    v_monto_ejecutar_mo	numeric;
+    v_nombre_funcion       text;
+    v_resp                varchar;
+    v_registros           record;
+    v_registros_obli       record;
+    v_ejecutado         numeric;
+    v_comprometido        numeric;
+    v_tipo_sol            varchar;
+    v_monto_ejecutar_mo    numeric;
     
     va_id_tipo_estado   integer[];
     va_codigo_estado    varchar[];
@@ -38,7 +39,7 @@ DECLARE
     va_regla            varchar[];
     va_prioridad        integer[];
     
-    v_id_estado_actual	integer;
+    v_id_estado_actual    integer;
     v_id_moneda_base   integer;
     
     v_sw_verificacion  boolean;
@@ -52,12 +53,12 @@ DECLARE
     v_saldo_x_pagar   numeric;
     v_mensaje_cuotas varchar;
     v_mensaje_error  varchar;
-    v_pre_integrar_presupuestos		varchar;
-	
+    v_pre_integrar_presupuestos        varchar;
+    
     
 BEGIN
 
-	v_nombre_funcion = 'tes.f_finalizar_obligacion';
+    v_nombre_funcion = 'tes.f_finalizar_obligacion';
     v_id_moneda_base =  param.f_get_moneda_base();
     v_pre_integrar_presupuestos = pxp.f_get_variable_global('pre_integrar_presupuestos');
       
@@ -84,15 +85,17 @@ BEGIN
     
        --  verificamos que el total de cuotas esten en su estado final
          IF EXISTS( select 
-                 		1
+                         1
                    from tes.tplan_pago pp
                    where pp.id_obligacion_pago =  p_id_obligacion_pago  
                         and pp.estado_reg = 'activo'
                         and pp.estado not in ('devengado','pagado', 'anticipado', 'aplicado', 'devuelto','contabilizado')
                         
                         ) THEN
-          
-                -- #46 solo admitira planes del tipo pagado (pagos) que esten en estado pendiente (con cbte generaod, estos cbte no podra eliminarse si la obligacion es finalizada)
+                    
+                
+                -- #46, #49 solo admitira planes del tipo pagado (pagos) que esten en estado pendiente (con cbte generaod, estos cbte no podra eliminarse si la obligacion es finalizada)
+                
                 IF  EXISTS( 
                            
                              select 
@@ -100,11 +103,13 @@ BEGIN
                                from tes.tplan_pago pp
                                where pp.id_obligacion_pago =  p_id_obligacion_pago  
                                     and pp.estado_reg = 'activo'
-                                    and pp.estado not in ('devengado','pagado', 'anticipado', 'aplicado', 'devuelto','contabilizado')
-                                    and pp.estado != 'pendiente' and pp.tipo != 'pagado'
+                                    and  pp.estado = 'pendiente'
+                                    and pp.tipo = 'pagado'
                                   
                                   ) THEN
-                  
+                                  
+                                  
+                 ELSE
                          raise exception 'existen cuotas pendientes de finanización';
                  END IF;
           
@@ -116,6 +121,7 @@ BEGIN
           
           v_mensaje_error = '';
           
+          --raise exception 'pasa la validacion';
            
           -- validar que  si tiene anticipo parciales exista retenciones por el total
           v_monto_total= tes.f_determinar_total_faltante(p_id_obligacion_pago, 'ant_parcial_descontado');
@@ -317,17 +323,18 @@ RETURN   v_respuesta;
 
 
 EXCEPTION
-					
-	WHEN OTHERS THEN
-			v_resp='';
-			v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
-			v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
-			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
-			raise exception '%',v_resp;
+                    
+    WHEN OTHERS THEN
+            v_resp='';
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+            v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
+            v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+            raise exception '%',v_resp;
 END;
 $body$
 LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
 SECURITY INVOKER
+PARALLEL UNSAFE
 COST 100;

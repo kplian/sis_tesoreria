@@ -9,9 +9,10 @@
  #1			21/09/2018		EGS					se aumento variables para q los campos igualen con el new con obligacion de pago especial.php
  #7890      18/12/2018      RAC KPLIAN          se adicionan columnas onto sigueinte gestion y si es forzado a finalizar
  #12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
- #16        16/01/2019     MMV ENDETRAN      					 Incluir comprometer al 100% pago único sin contrato
- #17         18/01/2019      MMV ENDETRAN       Plan de pago consulta obligaciones de pago
- #48        31/12/2020     JJA                  Agregar tipo de relación en obligacion de pago
+ #16        16/01/2019      MMV ENDETRAN      					 Incluir comprometer al 100% pago único sin contrato
+ #17         18/01/2019     MMV ENDETRAN       Plan de pago consulta obligaciones de pago
+ #50        10/02/2020      RAC KPLIAN         habilitar plan de pago en procesos finalizados extendidos #50
+
  *********************************************************************************************************************************************/
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -126,10 +127,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
           
 	
 	   this.construyeVariablesContratos();
-
-	   this.ocultarComponente(this.Cmp.id_contrato); //#48
-	   this.ocultarComponente(this.Cmp.id_obligacion_pago_extendida_relacion);//#48
-
+	
 	},
 	tam_pag:50,
 			
@@ -366,35 +364,6 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 			grid: true,
 			form: true
 		},
-        {//#48
-            config:{
-                name: 'cod_tipo_relacion',
-                fieldLabel: 'Tipo Relación',
-                allowBlank: false,
-                anchor: '80%',
-                emptyText:'Tipo Relación',
-                store:new Ext.data.ArrayStore({
-                    fields: ['variable', 'valor'],
-                    data : [
-                        ['contrato','Contrato'],
-                        ['obpag','Obligación de pago']
-                    ]
-                }),
-                valueField: 'variable',
-                displayField: 'valor',
-                forceSelection: true,
-                triggerAction: 'all',
-                lazyRender: true,
-                mode: 'local',
-                wisth: 250,
-                disabled: true,
-            },
-            type:'ComboBox',
-            filters:{pfiltro:'cod_tipo_relacion',type:'string'},
-            id_grupo:1,
-            grid:true,
-            form:true
-        },
 		{
 			config: {
 				name: 'id_contrato',
@@ -402,7 +371,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Contrato',
 				typeAhead: false,
 				forceSelection: false,
-				allowBlank: true,
+				allowBlank: false,
 				disabled: true,
 				emptyText: 'Contratos...',
 				store: new Ext.data.JsonStore({
@@ -510,6 +479,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:true
         },
+
         {
             config:{
                 name: 'total_pago',
@@ -887,8 +857,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 			id_grupo:1,
 			grid:true,
 			form:false
-		},
-
+		}
 	],
 	
 	title:'Obligaciones de Pago',
@@ -948,10 +917,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 		'pedido_sap',
 		'fin_forzado',  //#7890
 		'monto_sg_mo',   //#7890
-		'comprometer_iva', // #12
-        'cod_tipo_relacion', // #48
-        'id_obligacion_pago_extendida_relacion',// #48
-        'desc_obligacion_pago',// #48
+		'comprometer_iva' // #12
 	],
 	
 	arrayDefaultColumHidden:['id_fecha_reg','id_fecha_mod','fecha_mod','usr_reg','estado_reg','fecha_reg','usr_mod',
@@ -1010,7 +976,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 
 	
 	iniciarEventos:function(){
-
+			
 		this.cmpProveedor = this.getComponente('id_proveedor');
 		this.cmpFuncionario = this.getComponente('id_funcionario');
 		this.cmpFuncionarioProveedor = this.getComponente('funcionario_proveedor');
@@ -1058,16 +1024,8 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 			
 			
 			this.Cmp.id_contrato.modificado = true;
-
-            if(!this.Cmp.id_obligacion_pago){//#48
-                this.Cmp.cod_tipo_relacion.enable();//#48
-                this.Cmp.cod_tipo_relacion.modificado = true;//#48
-
-                this.Cmp.id_obligacion_pago_extendida_relacion.store.setBaseParam('id_proveedor',this.Cmp.id_proveedor.getValue());//#48
-                this.Cmp.id_obligacion_pago_extendida_relacion.modificado = true;//#48
-            }//#48
-
-        }, this);
+			
+		}, this);
 		
 		this.cmpTipoObligacion.on('select',function(c,rec,ind){
 				
@@ -1123,26 +1081,7 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
 		    }
 		    
 		},this);
-        this.Cmp.cod_tipo_relacion.on('select',function(com,dat,index){//#48
-
-            if(this.Cmp.cod_tipo_relacion.getValue()=='contrato'){//#48
-                this.Cmp.id_contrato.enable();//#48
-                this.Cmp.id_contrato.modificado = true;//#48
-                this.mostrarComponente(this.Cmp.id_contrato);//#48
-                this.ocultarComponente(this.Cmp.id_obligacion_pago_extendida_relacion);//#48
-                this.Cmp.id_contrato.allowBlank=false;//#48
-                this.Cmp.id_obligacion_pago_extendida_relacion.allowBlank=true;//#48
-            }
-            if(this.Cmp.cod_tipo_relacion.getValue()=='obpag'){//#48
-                this.ocultarComponente(this.Cmp.id_contrato);//#48
-                this.mostrarComponente(this.Cmp.id_obligacion_pago_extendida_relacion);//#48
-                this.Cmp.id_contrato.allowBlank=true;//#48
-                this.Cmp.id_obligacion_pago_extendida_relacion.allowBlank=false;//#48
-
-                this.Cmp.id_obligacion_pago_extendida_relacion.store.setBaseParam('id_proveedor',this.Cmp.id_proveedor.getValue());
-                this.Cmp.id_obligacion_pago_extendida_relacion.modificado = true;
-            }
-        }, this);//#48
+		
 		
 		
 	},
@@ -1348,10 +1287,12 @@ Phx.vista.ObligacionPago = Ext.extend(Phx.gridInterfaz,{
                     this.getBoton('ant_estado').disable();
                     this.getBoton('fin_registro').disable();
                     this.getBoton('est_anticipo').disable();
-                   this.enableTabConsulta(); //#17
-                    //this.enableTabPagos();  //7890 OJO .....RAC 10/12/2018 solo prueba, descomentar solo apra mostras plan de pagos en procesos finalizados
+                    this.enableTabConsulta(); //#17
+                    
+                    
                     if(data['id_obligacion_pago_extendida']=='' || !data['id_obligacion_pago_extendida'] ){
                     	this.getBoton('extenderop').enable();
+                    	this.enableTabPagos();  //#50 mostrar plan de pagos en procesos finalizados extendidos
                     }
                     else{
                     	this.getBoton('extenderop').disable();
