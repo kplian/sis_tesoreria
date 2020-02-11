@@ -16,7 +16,8 @@ $body$
  ISSUE            FECHA:		      AUTOR                 DESCRIPCION
    
 #1        		                    Jaime KPLIAN          Creaciòn
-#7891        	05/12/2018          RAC KPLIAN           omite validacion para  obligaciones extendidad
+#7891        	05/12/2018          RAC KPLIAN            omite validacion para  obligaciones extendidad
+#48           31/01/2020          JJA ENDETRAN          Agregar tipo de relación en obligacion de pago
 ***************************************************************************/
 
 DECLARE
@@ -34,7 +35,8 @@ BEGIN
     select 
       op.id_contrato,
       op.tipo_obligacion,
-      ope.id_obligacion_pago  as id_op_original --#7891 
+      ope.id_obligacion_pago  as id_op_original, --#7891
+      op.cod_tipo_relacion  --#48
     into 
       v_registros_op
     from tes.tobligacion_pago op
@@ -54,7 +56,9 @@ BEGIN
     
     IF v_count > 0  and v_registros_op.tipo_obligacion = 'pago_directo' and v_registros_op.id_op_original is null THEN -- #7891 
        IF v_registros_op.id_contrato is null then
-              raise exception 'Para esta obligacion de pago es requerido un contrato de referencia';
+          IF v_registros_op.cod_tipo_relacion !='obpag' THEN--#48
+            raise exception 'Para esta obligacion de pago es requerido un contrato ó una obligacion de pago de referencia';--#48
+          END IF;--#48
        END IF;
     END IF;
     

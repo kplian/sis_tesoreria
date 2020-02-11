@@ -1105,6 +1105,7 @@ BEGIN
                 left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
                 left join orga.vfuncionario fresp ON fresp.id_funcionario = obpg.id_funcionario_responsable
                 join param.tgestion g on g.id_gestion=obpg.id_gestion --#48
+                left join  adq.tcotizacion cot on cot.id_obligacion_pago=obpg.id_obligacion_pago --#48
                 where ';
 
             --Definicion de la respuesta
@@ -1140,6 +1141,8 @@ BEGIN
                 left join param.tplantilla pla on pla.id_plantilla = obpg.id_plantilla
                 left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
                 left join orga.vfuncionario fresp ON fresp.id_funcionario = obpg.id_funcionario_responsable
+                join param.tgestion g on g.id_gestion=obpg.id_gestion --#48
+                left join  adq.tcotizacion cot on cot.id_obligacion_pago=obpg.id_obligacion_pago --#48
                 where ';
 
             --Definicion de la respuesta
