@@ -7,11 +7,12 @@
  *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
 Issue			Fecha        Author				Descripcion
 #1			21/09/2018		EGS					se aumento variables para q los campos igualen con el new con obligacion de pago especial.php
-#7890      18/12/2018      RAC KPLIAN          se adicionan columnas onto sigueinte gestion y si es forzado a finalizar
-#12        10/01/2019      MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
-#16        16/01/2019     MMV ENDETRAN      					 Incluir comprometer al 100% pago único sin contrato
-#17         18/01/2019      MMV ENDETRAN       Plan de pago consulta obligaciones de pago
-#48        31/12/2020     JJA                  Agregar tipo de relación en obligacion de pago
+#7890      18/12/2018       RAC KPLIAN          se adicionan columnas onto sigueinte gestion y si es forzado a finalizar
+#12        10/01/2019       MMV ENDETRAN        Considerar restar el iva al comprometer obligaciones de pago
+#16        16/01/2019       MMV ENDETRAN        Incluir comprometer al 100% pago único sin contrato
+#17         18/01/2019      MMV ENDETRAN        Plan de pago consulta obligaciones de pago
+#48        31/12/2020       JJA                 Agregar tipo de relación en obligacion de pago
+#50        10/02/2020       RAC KPLIAN          habilitar plan de pago en procesos finalizados extendidos #5
  *********************************************************************************************************************************************/
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -1352,6 +1353,7 @@ header("content-type: text/javascript; charset=UTF-8");
                     //this.enableTabPagos();  //7890 OJO .....RAC 10/12/2018 solo prueba, descomentar solo apra mostras plan de pagos en procesos finalizados
                     if(data['id_obligacion_pago_extendida']=='' || !data['id_obligacion_pago_extendida'] ){
                         this.getBoton('extenderop').enable();
+                        this.enableTabPagos();  //#50 mostrar plan de pagos en procesos finalizados extendidos
                     }
                     else{
                         this.getBoton('extenderop').disable();
