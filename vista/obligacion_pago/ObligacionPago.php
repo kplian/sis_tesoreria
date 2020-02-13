@@ -1280,11 +1280,14 @@ header("content-type: text/javascript; charset=UTF-8");
 
             }
         },
-        ////#17
-        enableTabConsulta:function(){
+        ////#17 , #55 add set_active parameter
+        enableTabConsulta:function(set_active){
             if(this.TabPanelSouth.get(2)){
                 this.TabPanelSouth.get(2).enable();
-                this.TabPanelSouth.setActiveTab(2)
+                if(set_active) {
+                	this.TabPanelSouth.setActiveTab(2)
+                }
+                
             }
         },
 
@@ -1341,7 +1344,7 @@ header("content-type: text/javascript; charset=UTF-8");
                 if (data['estado'] == 'anulado'){
                     this.getBoton('fin_registro').disable();
                     this.disableTabPagos();
-                    this.enableTabConsulta(); //#17
+                    this.enableTabConsulta(true); //#17
                     this.getBoton('ant_estado').disable();
                     this.getBoton('est_anticipo').disable();
                 }
@@ -1349,14 +1352,18 @@ header("content-type: text/javascript; charset=UTF-8");
                     this.getBoton('ant_estado').disable();
                     this.getBoton('fin_registro').disable();
                     this.getBoton('est_anticipo').disable();
-                    this.enableTabConsulta(); //#17
+                    
+                   
                     //this.enableTabPagos();  //7890 OJO .....RAC 10/12/2018 solo prueba, descomentar solo apra mostras plan de pagos en procesos finalizados
                     if(data['id_obligacion_pago_extendida']=='' || !data['id_obligacion_pago_extendida'] ){
                         this.getBoton('extenderop').enable();
-                        this.enableTabPagos();  //#50 mostrar plan de pagos en procesos finalizados extendidos
+                        this.enableTabConsulta(true); //#55 
+                                             
                     }
                     else{
                         this.getBoton('extenderop').disable();
+                        this.enableTabPagos();  //#50 mostrar plan de pagos en procesos finalizados extendidos
+                        this.enableTabConsulta(false); //#55 
                     }
 
                 }
