@@ -1933,3 +1933,8 @@ IS 'si esta bandera esta habilita le resta el 13% del iva al momento de comproem
 alter table tes.tplan_pago
 	add codigo_tipo_anticipo varchar(50) default null;
 /*************************F-SCP-VAN-TES-13-06/12/2019*************/
+
+/*************************I-SCP-JUAN-TES-13-30/01/2020*************/
+ALTER TABLE tes.tobligacion_pago--#48
+  ADD COLUMN cod_tipo_relacion VARCHAR(50);--#48
+/*************************F-SCP-JUAN-TES-13-30/01/2020*************/

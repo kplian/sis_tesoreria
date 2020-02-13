@@ -26,6 +26,7 @@ $body$
  #7890            18/12/2018     RAC KPLIAN                          Se incluye la bandera que muestra que una obligacion a sido forzada a finalizar en los listados de obligaciones de pago
  #12        	  10/01/2019     MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
  #16              16/01/2019     MMV ENDETRAN      					 Incluir comprometer al 100% pago único sin contrato
+ #48              31/01/2020     JJA ENDETRAN                        Agregar tipo de relación en obligacion de pago
 ***************************************************************************/
 
 DECLARE
@@ -491,9 +492,13 @@ BEGIN
                               obpg.pedido_sap,                              
                               obpg.fin_forzado,   --#7890
                               obpg.monto_sg_mo,    --#7890
-                              obpg.comprometer_iva	  --#16
+                              obpg.comprometer_iva,	  --#16
 
+                              obpg.cod_tipo_relacion, --#48
+                              opr.id_obligacion_pago_extendida as id_obligacion_pago_extendida_relacion, --#48
+                              opr.num_tramite::varchar as desc_obligacion_pago --#48
                               from tes.tobligacion_pago obpg
+                              left join tes.tobligacion_pago opr on opr.id_obligacion_pago_extendida=obpg.id_obligacion_pago --#48
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
                               left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
                               left join param.vproveedor pv on pv.id_proveedor=obpg.id_proveedor
@@ -1086,7 +1091,8 @@ BEGIN
                 obpg.obs_poa,
                 obpg.uo_ex,
                 obpg.id_funcionario_responsable,
-                fresp.desc_funcionario1 AS desc_fun_responsable
+                fresp.desc_funcionario1 AS desc_fun_responsable,
+                g.gestion::integer --#48
                 from tes.tobligacion_pago obpg
                 inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
                 left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
@@ -1098,6 +1104,8 @@ BEGIN
                 left join param.tplantilla pla on pla.id_plantilla = obpg.id_plantilla
                 left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
                 left join orga.vfuncionario fresp ON fresp.id_funcionario = obpg.id_funcionario_responsable
+                join param.tgestion g on g.id_gestion=obpg.id_gestion --#48
+                left join  adq.tcotizacion cot on cot.id_obligacion_pago=obpg.id_obligacion_pago --#48
                 where ';
 
             --Definicion de la respuesta
@@ -1133,6 +1141,8 @@ BEGIN
                 left join param.tplantilla pla on pla.id_plantilla = obpg.id_plantilla
                 left join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
                 left join orga.vfuncionario fresp ON fresp.id_funcionario = obpg.id_funcionario_responsable
+                join param.tgestion g on g.id_gestion=obpg.id_gestion --#48
+                left join  adq.tcotizacion cot on cot.id_obligacion_pago=obpg.id_obligacion_pago --#48
                 where ';
 
             --Definicion de la respuesta

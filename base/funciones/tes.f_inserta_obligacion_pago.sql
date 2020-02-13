@@ -19,7 +19,7 @@ $body$
 #7891        		05/12/2018      RAC KPLIAN            agrega logica para que al extender un proceso tome el nro de tramite del original
 --#9 endetr         03/01/2019      chros            	  corrección de creación de OP en base a un contrato
  #12        	  10/01/2019     MMV ENDETRAN      		 Considerar restar el iva al comprometer obligaciones de pago
-
+ #48              31/01/2020     JJA ENDETRAN                        Agregar tipo de relación en obligacion de pago
 ***************************************************************************/
 
 DECLARE
@@ -53,7 +53,7 @@ DECLARE
     v_rec                       record;
     v_extendida                 varchar; --#7891
     v_rec_op_ext                record;  --#7891
-
+    v_rec_obpag                 record; --#48
 
 
 BEGIN
@@ -351,8 +351,8 @@ BEGIN
           tipo_anticipo,
           id_funcionario_gerente,
           id_contrato,
-          comprometer_iva --#12
-
+          comprometer_iva, --#12
+          cod_tipo_relacion --#48
         ) values(
           (p_hstore->'id_proveedor')::integer,
           v_codigo_estado,
@@ -386,11 +386,28 @@ BEGIN
           (p_hstore->'tipo_anticipo')::varchar,
            va_id_funcionario_gerente[1],
           (p_hstore->'id_contrato')::integer,
-          (p_hstore->'comprometer_iva')::varchar --#12
+          (p_hstore->'comprometer_iva')::varchar, --#12
+          (p_hstore->'cod_tipo_relacion')::varchar --#48
 
         )RETURNING id_obligacion_pago into v_id_obligacion_pago;
 
+        IF((p_hstore->'cod_tipo_relacion')::varchar ='obpag' )THEN--#48
+           select op.id_proceso_wf,op.id_estado_wf,op.num_tramite  --#48
+           into  --#48
+           v_rec_obpag  --#48
+           from  tes.tobligacion_pago op --#48
+           where id_obligacion_pago=(p_hstore->'id_obligacion_pago_extendida_relacion')::integer; --#48
 
+           update tes.tobligacion_pago
+           set --id_proceso_wf=v_rec_obpag.id_proceso_wf,
+           num_tramite =v_rec_obpag.num_tramite
+           where id_obligacion_pago=v_id_obligacion_pago ;
+
+           update wf.tproceso_wf --#48
+           set nro_tramite=v_rec_obpag.num_tramite --#48
+           where id_proceso_wf=v_id_proceso_wf; --#48
+        END IF;--#48
+        
         -- inserta documentos en estado borrador si estan configurados
         v_resp_doc =  wf.f_inserta_documento_wf(p_id_usuario, v_id_proceso_wf, v_id_estado_wf);
         -- verificar documentos
