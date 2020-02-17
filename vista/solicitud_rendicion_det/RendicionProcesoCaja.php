@@ -1,3 +1,7 @@
+<!--
+*	ISSUE   FORK	     Fecha 		     Autor		        Descripcion
+*  #56     ENDETR       17/02/2020      Manuel Guerra      cambio de fechas(periodo) de un documento en la rendcion
+-->
 <?php
 /**
 *@package pXP
@@ -10,6 +14,7 @@
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
+
 Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 	tipoDoc: 'compra',
 	constructor:function(config){
@@ -17,7 +22,6 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
     	//llama al constructor de la clase padre
 		Phx.vista.RendicionProcesoCaja.superclass.constructor.call(this,config);
 		this.init();
-		
 		/*
 		this.addButton('excluir',
 			{	text:'Excluir',
@@ -28,13 +32,21 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			}
 		);
 		*/
+		this.addButton('Modificar',
+			{	text:'Modificar Documento',
+				iconCls: 'bengineremove',
+				disabled: true,
+				handler: this.onModDoc,
+				tooltip: '<b>Modificar Documento</b>'
+			}
+		);
+		
 		this.iniciarEventos();
-		var dataPadre = Phx.CP.getPagina(this.idContenedorPadre).getSelectedData()
+		var dataPadre = Phx.CP.getPagina(this.idContenedorPadre).getSelectedData();
 		if(dataPadre){
 			this.onEnablePanel(this, dataPadre);
 		}
-		else
-		{
+		else{
 			this.bloquearMenus();
 		}
 		//this.load({params:{start:0, limit:this.tam_pag}})
@@ -451,76 +463,72 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 		{name:'nro_tramite', type: 'string'},
 		
 	],
+		
+	bnew:false,
+	bedit:false,
+	bdel:false,
+	bsave:false,
 	sortInfo:{
 		field: 'id_solicitud_rendicion_det',
 		direction: 'ASC'
 	},
-		
+	postReloadPage:function(data){
+		console.log('-',data);
+		estado: data.estado;
+		tipo: data.tipo;		
+	},	
 	onReloadPage : function(m) {
 		this.maestro = m;
 		this.store.baseParams={id_proceso_caja:this.maestro.id_proceso_caja};
-		this.load({params:{start:0, limit:this.tam_pag}});			
+		this.load({params:{start:0, limit:this.tam_pag}});
 	},
-
-	/*
-	excluir:function(res,eve)
-	{                   
-		var d= this.sm.getSelected().data;
-		Phx.CP.loadingShow();
-		console.log(d);
-		Ext.Ajax.request({
-			url:'../../sis_tesoreria/control/SolicitudRendicionDet/excluirFactura',
-			params:{id_solicitud_rendicion_det:d.id_solicitud_rendicion_det,
-					id_doc_compra_venta: d.id_doc_compra_venta},
-			success:this.successSinc,
-			failure: this.conexionFailure,
-			timeout:this.timeout,
-			scope:this
-		});     
-	},
-	*/
-	/*
-	successSinc:function(resp){
-		Phx.CP.loadingHide();
-		var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
-		console.log(reg.ROOT.datos);
-		if(reg.ROOT.datos.resultado!='falla'){                
-			Phx.CP.getPagina(this.idContenedorPadre).reload()
-			//this.reload();
-		 }else{
-			alert(reg.ROOT.datos.mensaje)
-		}
-	},
-	*/
+    //
 	preparaMenu:function(n){
-         
-         Phx.vista.RendicionProcesoCaja.superclass.preparaMenu.call(this,n);
-
-		 if(this.maestro.estado == 'rendido'){
-			 this.getBoton('excluir').disable();
-		 }else{
-			 this.getBoton('excluir').enable();
-		 }
-     },
-
+	    Phx.vista.RendicionProcesoCaja.superclass.preparaMenu.call(this,n);
+        var data = this.getSelectedData();
+        console.log('--',data);
+        this.getBoton('Modificar').enable();
+    },
+	//
 	iniciarEventos:function(){
 		var vistaPadre = Phx.CP.getPagina(this.idContenedorPadre).nombreVista;
-		/*
-		if(vistaPadre == 'ProcesoCajaCajero' || vistaPadre == 'ProcesoCajaVbFondos'){
-			this.getBoton('excluir').setVisible(false);
+		if(vistaPadre == 'ProcesoCajaVbConta'){
+			this.getBoton('Modificar').setVisible(true);
+			this.getBoton('Modificar').enable();
 		}else{
-			this.getBoton('excluir').setVisible(true);
-		}*/
-
+			this.getBoton('Modificar').setVisible(false);
+			this.getBoton('Modificar').disable();
+		}
 	},
-	
-	
-	bnew:false,
-	bedit:false,
-	bdel:false,
-	bsave:false
-	}
-)
+    //
+    liberaMenu: function(){
+        var tb = Phx.vista.RendicionProcesoCaja.superclass.liberaMenu.call(this);
+        if(tb){
+            this.getBoton('Modificar').disable();
+        }
+        return tb
+    },
+    //
+    onModDoc:function()
+	{             	
+		var rec = this.sm.getSelected();
+		console.log('rec',rec);
+		Phx.CP.loadWindows('../../../sis_tesoreria/vista/proceso_caja/ModificarDocumento.php',
+		'Modificar Documento',
+		{
+			width:450,
+			height:200
+		},{
+            'id_doc_compra_venta': rec.data.id_doc_compra_venta,
+            'id_solicitud_rendicion_det': rec.data.id_solicitud_rendicion_det,
+            'fecha':rec.data.fecha,
+            'nro_documento':rec.data.nro_documento,
+        },
+		this.idContenedor,
+		'ModificarDocumento');
+	},
+
+})
 </script>
 		
 		
