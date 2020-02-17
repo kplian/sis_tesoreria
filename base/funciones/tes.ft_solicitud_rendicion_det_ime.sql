@@ -18,11 +18,6 @@ $body$
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
 
- DESCRIPCION:
- AUTOR:
- FECHA:
-
-
  #56 	etr 	manuel guerra		cambio de fechas(periodo) de un documento en la rendcion
 ***************************************************************************/
 
@@ -219,11 +214,12 @@ BEGIN
             FROM param.tperiodo t
             WHERE v_parametros.fecha::date between t.fecha_ini and t.fecha_fin;
 
-            IF NOT EXISTS
+            IF EXISTS
             	(SELECT 1
-                FROM tes.tsolicitud_rendicion_det sol
-                JOIN tes.tproceso_caja pc on pc.id_proceso_caja=sol.id_proceso_caja
-                WHERE sol.id_solicitud_efectivo=v_parametros.id_solicitud_rendicion_det and pc.id_int_comprobante is null) THEN
+                FROM tes.tsolicitud_rendicion_det ren
+                JOIN tes.tproceso_caja pc on pc.id_proceso_caja=ren.id_proceso_caja
+                JOIN tes.tsolicitud_efectivo sol on sol.id_solicitud_efectivo = ren.id_solicitud_efectivo
+                WHERE pc.id_int_comprobante is null and ren.id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det) THEN
                       UPDATE conta.tdoc_compra_venta
                       SET id_periodo=v_id_periodo, fecha=v_parametros.fecha
                       WHERE id_doc_compra_venta=v_parametros.id_doc_compra_venta;
