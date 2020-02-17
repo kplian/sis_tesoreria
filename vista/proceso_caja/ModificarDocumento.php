@@ -1,7 +1,3 @@
-<!--
-*	ISSUE   FORK	     Fecha 		     Autor		        Descripcion
-*  #56     ENDETR       17/02/2020      Manuel Guerra      cambio de fechas(periodo) de un documento en la rendcion
--->
 <?php
 /**
 *@package pXP
@@ -9,6 +5,9 @@
 *@author  Manuel Guerra
 *@date    22-03-2012
 *@description permites subir archivos a la tabla de documento_sol
+ *
+ * *	ISSUE   FORK	     Fecha 		     Autor		        Descripcion
+ *  #56     ENDETR       17/02/2020      Manuel Guerra      cambio de fechas(periodo) de un documento en la rendcion
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>

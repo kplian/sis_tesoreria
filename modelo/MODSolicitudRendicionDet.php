@@ -1,8 +1,3 @@
-<!--
-*	ISSUE   FORK	     Fecha 		     Autor		        Descripcion
-*  #56     ENDETR       17/02/2020      Manuel Guerra      cambio de fechas(periodo) de un documento en la rendcion
--->
-
 <?php
 /**
 *@package pXP
@@ -10,6 +5,10 @@
 *@author  (gsarmiento)
 *@date 16-12-2015 15:14:01
 *@description Clase que envia los parametros requeridos a la Base de datos para la ejecucion de las funciones, y que recibe la respuesta del resultado de la ejecucion de las mismas
+ *
+ *
+ * *	ISSUE   FORK	     Fecha 		     Autor		        Descripcion
+ *  #56     ENDETR       17/02/2020      Manuel Guerra      cambio de fechas(periodo) de un documento en la rendcion
 */
 
 class MODSolicitudRendicionDet extends MODbase{

@@ -1,7 +1,4 @@
-<!--
-*	ISSUE   FORK	     Fecha 		     Autor		        Descripcion
-*  #56     ENDETR       17/02/2020      Manuel Guerra      cambio de fechas(periodo) de un documento en la rendcion
--->
+
 <?php
 /**
 *@package pXP
@@ -9,6 +6,10 @@
 *@author  (gsarmiento)
 *@date 16-12-2015 15:14:01
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
+ *
+ *
+ *	ISSUE   FORK	     Fecha 		     Autor		        Descripcion
+ *  #56     ENDETR       17/02/2020      Manuel Guerra      cambio de fechas(periodo) de un documento en la rendcion
 */
 
 header("content-type: text/javascript; charset=UTF-8");
