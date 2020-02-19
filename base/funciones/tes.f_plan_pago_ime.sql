@@ -150,6 +150,7 @@ DECLARE
     v_exception_context			varchar;
     v_id_uo						integer;
     v_especial					numeric;
+    v_total_desc_ant			numeric;
 
 
 BEGIN
@@ -749,7 +750,8 @@ BEGIN
             pp.id_estado_wf,
             pp.id_plan_pago_fk,
             pp.monto_ejecutar_total_mo,
-            op.tipo_obligacion
+            op.tipo_obligacion,
+            pp.monto_anticipo  --#53
           into v_registros
            from tes.tplan_pago pp
            inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
@@ -787,8 +789,20 @@ BEGIN
                      IF v_nro_cuota != v_registros.nro_cuota THEN
                      	--#53
                        	--raise exception 'Elimine primero la ultima cuota';
+                        IF pxp.f_get_variable_global('tes_control_pagos')='si' THEN
+                        	select sum(pp.descuento_anticipo_mb)
+                            into v_total_desc_ant
+                            from tes.tplan_pago pp
+                            inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
+                            where op.id_obligacion_pago = v_registros.id_obligacion_pago and pp.id_plan_pago!=v_parametros.id_plan_pago;
+                            IF v_total_desc_ant > v_registros.monto_anticipo THEN
+                            	raise exception 'no se puede eliminar poruqe el anticipo es mayor al total de descuentos de anticipos';
+                            END IF;
+                        ELSE
+                        	raise exception 'No se puede eliminar, variable global';
+                        END IF;
                      END IF;
-
+					 --#53
                      --recuperamos el id_tipo_proceso en el WF para el estado anulado
                      --ya que este es un estado especial que no tiene padres definidos
 
