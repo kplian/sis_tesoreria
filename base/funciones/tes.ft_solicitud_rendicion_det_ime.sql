@@ -18,9 +18,7 @@ $body$
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
 
- DESCRIPCION:
- AUTOR:
- FECHA:
+ #56 	etr 	manuel guerra		cambio de fechas(periodo) de un documento en la rendcion
 ***************************************************************************/
 
 DECLARE
@@ -42,6 +40,7 @@ DECLARE
     v_importe_maximo        numeric;
     v_fecha_solicitud       date;
     v_fecha_documento       date;
+    v_id_periodo			integer;
 
 BEGIN
 
@@ -198,7 +197,42 @@ BEGIN
             return v_resp;
 
         end;
+  	/*********************************
+    #TRANSACCION:  'TES_MODDOC_IME'
+    #DESCRIPCION:   edicion de registros de documentos
+    #AUTOR:     mguerra    			#56
+    #FECHA:     16-12-2015 15:14:01
+    ***********************************/
 
+    elsif(p_transaccion='TES_MODDOC_IME')then
+
+        begin
+            --Sentencia de la eliminacion
+
+			SELECT id_periodo
+            INTO v_id_periodo
+            FROM param.tperiodo t
+            WHERE v_parametros.fecha::date between t.fecha_ini and t.fecha_fin;
+
+            IF EXISTS
+            	(SELECT 1
+                FROM tes.tsolicitud_rendicion_det ren
+                JOIN tes.tproceso_caja pc on pc.id_proceso_caja=ren.id_proceso_caja
+                JOIN tes.tsolicitud_efectivo sol on sol.id_solicitud_efectivo = ren.id_solicitud_efectivo
+                WHERE pc.id_int_comprobante is null and ren.id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det) THEN
+                      UPDATE conta.tdoc_compra_venta
+                      SET id_periodo=v_id_periodo, fecha=v_parametros.fecha
+                      WHERE id_doc_compra_venta=v_parametros.id_doc_compra_venta;
+            ELSE
+            	raise exception 'No puede modificarse debido a que ya tiene un cbte asociado y validado';
+            END IF;
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Documento modificado');
+            v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_rendicion_det',v_parametros.id_solicitud_rendicion_det::varchar);
+            --Devuelve la respuesta
+            return v_resp;
+
+        end;
     /*********************************
     #TRANSACCION:  'TES_REND_ELI'
     #DESCRIPCION:   Eliminacion de registros
@@ -328,6 +362,9 @@ BEGIN
             return v_resp;
 
         end;
+
+
+
     else
 
         raise exception 'Transaccion inexistente: %',p_transaccion;

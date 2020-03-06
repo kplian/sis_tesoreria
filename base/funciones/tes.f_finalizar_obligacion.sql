@@ -1,13 +1,13 @@
 --------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION tes.f_finalizar_obligacion (
-    p_id_obligacion_pago integer,
-    p_id_usuario integer,
-    p_id_usuario_ai integer,
-    p_usuario_ai varchar,
-    p_forzar_fin varchar = 'no'::character varying
+  p_id_obligacion_pago integer,
+  p_id_usuario integer,
+  p_id_usuario_ai integer,
+  p_usuario_ai varchar,
+  p_forzar_fin varchar = 'no'::character varying
 )
-    RETURNS varchar [] AS
+RETURNS varchar [] AS
 $body$
 /*
   Autor:   RAC
@@ -22,7 +22,8 @@ $body$
  #46        30/01/2020             RAC                     Al finalizar Obligaciones  permitir cbtes en estado pendiente issue. (Vamos asumir que los planes  de pago con cbte generado están finalizados para permitir la extension de la obligación de pago) #46
  #49 ETR    05/02/2020             RAC KPLIAN              BUG, permitia finalizar ofligaciones con pago en estado borrador
  #51        11/01/2020             JUAN                    Corrección de error (PARALLEL UNSAFE) en la función f_finalizar_obligación
- #54        13/02/2020             EGS                      modificando validación de finalizar obligación de pago
+ #54        13/02/2020             EGS                     modificando validación de finalizar obligación de pago
+ #57        19/02/2020             RAC KPLIAN              Adicionar validación para anticipos deferidos para cubrir el casos de anticipos que fueron descontados y que no fueron pagados #57
 
  PARALLEL UNSAFE
 */
@@ -86,14 +87,13 @@ BEGIN
 
 
 
-
     --  verificamos que el total de cuotas esten en su estado final
     IF EXISTS( select
                    1
                from tes.tplan_pago pp
                where pp.id_obligacion_pago =  p_id_obligacion_pago
                  and pp.estado_reg = 'activo'
-                 and pp.estado not in ('devengado','pagado', 'anticipado', 'aplicado', 'devuelto','contabilizado')
+                 and pp.estado not in ('devengado','pagado', 'anticipado', 'aplicado', 'devuelto','contabilizado','diferido') --#57 agregado estado diferido
 
         ) THEN
 
@@ -336,8 +336,8 @@ EXCEPTION
         raise exception '%',v_resp;
 END;
 $body$
-    LANGUAGE 'plpgsql'
-    VOLATILE
-    CALLED ON NULL INPUT
-    SECURITY INVOKER
-    COST 100;
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;

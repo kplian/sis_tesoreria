@@ -5,6 +5,10 @@
 *@author  (gsarmiento)
 *@date 16-12-2015 15:14:01
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
+ *
+ *
+ * *	ISSUE   FORK	     Fecha 		     Autor		        Descripcion
+ *  #56     ENDETR       17/02/2020      Manuel Guerra      cambio de fechas(periodo) de un documento en la rendcion
 */
 
 class ACTSolicitudRendicionDet extends ACTbase{    
@@ -147,6 +151,12 @@ class ACTSolicitudRendicionDet extends ACTbase{
 		
 		$this->objFunc=$this->create('MODSolicitudRendicionDet');			
 		$this->res=$this->objFunc->listarSolicitudIngresoDet($this->objParam);		
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	//
+	function ModificarDocumento(){
+		$this->objFunc=$this->create('MODSolicitudRendicionDet');
+		$this->res=$this->objFunc->ModificarDocumento($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 }

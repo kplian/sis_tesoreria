@@ -5,8 +5,13 @@
 *@author  (rarteaga)
 *@date 20-09-2011 10:22:05
 *@description consulta de planes de pago
-*
-*/
+ * 
+ * 
+ * 
+ * Issue			Fecha        Author				Descripcion
+#1			0-09-2011		 RAC KPLIAN          creacion
+#55         13/02/2020       RAC KPLIAN          fix bug al desplegar pal de pago consulta, no se muestra la interface 
+ *********************************************************************************************************************************************/
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
@@ -26,17 +31,16 @@ Phx.vista.PlanPagoConsulta = {
 		
 	    this.maestro=config.maestro;
 	    Phx.vista.PlanPagoConsulta.superclass.constructor.call(this,config);
+	    this.init();	
         ////formulario de departamentos
         //this.crearFormularioEstados();
         //si la interface es pestanha este código es para iniciar 
-          var dataPadre = Phx.CP.getPagina(this.idContenedorPadre).getSelectedData()
-          if(dataPadre){
+        var dataPadre = Phx.CP.getPagina(this.idContenedorPadre).getSelectedData()
+        if(dataPadre){
              this.onEnablePanel(this, dataPadre);
-          }
-          else
-          {
+        } else {
              this.bloquearMenus();
-          }
+        }
           
           
         

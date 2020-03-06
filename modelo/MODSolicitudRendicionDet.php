@@ -5,6 +5,10 @@
 *@author  (gsarmiento)
 *@date 16-12-2015 15:14:01
 *@description Clase que envia los parametros requeridos a la Base de datos para la ejecucion de las funciones, y que recibe la respuesta del resultado de la ejecucion de las mismas
+ *
+ *
+ * *	ISSUE   FORK	     Fecha 		     Autor		        Descripcion
+ *  #56     ENDETR       17/02/2020      Manuel Guerra      cambio de fechas(periodo) de un documento en la rendcion
 */
 
 class MODSolicitudRendicionDet extends MODbase{
@@ -633,6 +637,23 @@ class MODSolicitudRendicionDet extends MODbase{
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}	
+	//#56
+	function ModificarDocumento(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_solicitud_rendicion_det_ime';
+		$this->transaccion='TES_MODDOC_IME';
+		$this->tipo_procedimiento='IME';				
+		//Define los parametros para la funcion
+		$this->setParametro('id_solicitud_rendicion_det','id_solicitud_rendicion_det','int4');
+		$this->setParametro('id_doc_compra_venta','id_doc_compra_venta','int4');		
+		$this->setParametro('fecha','fecha','date');	
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}			
