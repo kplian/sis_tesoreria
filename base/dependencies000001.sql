@@ -4134,6 +4134,7 @@ AS
 
 /**********************************I-DEP-RAC-TES-59-10/03/2020****************************************/
 
+
 with plan_pago_proveedor as (
   select
     op.id_proveedor,

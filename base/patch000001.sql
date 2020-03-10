@@ -1943,6 +1943,7 @@ ALTER TABLE tes.tobligacion_pago--#48
 
 
 /*************************I-SCP-RAC-TES-59-06/03/2020*************/
+
 CREATE INDEX tobligacion_pago_idx2 ON tes.tobligacion_pago
   USING btree (num_tramite);
   
