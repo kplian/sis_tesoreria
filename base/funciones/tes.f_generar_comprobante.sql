@@ -23,6 +23,7 @@ $body$
  #37 ETR        10/10/2019        RAC KPLIAN        retroceder cambio de agrupación por partida y centro , al sincronizar presupuestos
  #38 ETR        26/11/2019        RAC KPLIAN        BUG caso no considerado al anticipo y factor de prorrateo 
  #49 ETR        05/02/2020        RAC KPLIAN        bug, si tenemos dos detalle mismo centro de costo y partida el presupuesto formualdo es suficiente para ambos por separado pero no para os dos sumados, no fue encontrada una solucion
+ #58 ETR        19/02/2020        RAC KPLIAN        Control de pagos ordenados configurable con variable global  
 ***************************************************************************/
 
 
@@ -61,10 +62,11 @@ DECLARE
     v_codigo_plt_cbte				varchar;
     v_tes_anticipo_ejecuta_pres	    varchar;
     v_des_antipo_si_ejecuta			numeric;
-    v_iva		numeric;
-    v_factor_excento  numeric;
-    v_factor_anticipo numeric;
-    v_desc_tcc        varchar; --#34 ++
+    v_iva		                    numeric;
+    v_factor_excento                numeric;
+    v_factor_anticipo               numeric;
+    v_desc_tcc                      varchar; --#34 ++
+    v_tes_control_sol_pago          varchar; --#58
 	
     
 BEGIN
@@ -155,17 +157,18 @@ BEGIN
           
           -- RAC 02/02/2018,  coemntado temporalmente --03062018  ...  descomentado
           --  12/04/2018 coemntado nuevamente a solicitud de jefe de contadores autorizado por genrete financiero
+          
+          --#58 control de solicitud de pagos ordenados configurable en variable global
+          v_tes_control_sol_pago = pxp.f_get_variable_global('tes_control_sol_pago');
 
-                IF  EXISTS (SELECT 1
-                FROM tes.tplan_pago pp
-                WHERE pp.id_obligacion_pago = v_registros.id_obligacion_pago
-                      and (pp.estado != 'devengado' and pp.estado != 'pagado' and pp.estado != 'anulado' and pp.estado != 'anticipado' and pp.estado != 'aplicado' and pp.estado != 'devuelto' and pp.estado!='pago_exterior' and pp.estado!='contabilizado')
-                      and pp.estado_reg = 'activo'
-                      and  pp.nro_cuota < v_registros.nro_cuota ) THEN
-
-
-                   -- raise exception 'Antes de Continuar,  la cuotas anteriores tienes que estar finalizadas';
-
+                IF v_tes_control_sol_pago = 'si' AND 
+                   EXISTS (SELECT 1
+                           FROM tes.tplan_pago pp
+                            WHERE pp.id_obligacion_pago = v_registros.id_obligacion_pago
+                                  and (pp.estado != 'devengado' and pp.estado != 'pagado' and pp.estado != 'anulado' and pp.estado != 'anticipado' and pp.estado != 'aplicado' and pp.estado != 'devuelto' and pp.estado!='pago_exterior' and pp.estado!='contabilizado')
+                                  and pp.estado_reg = 'activo'
+                                  and  pp.nro_cuota < v_registros.nro_cuota ) THEN
+                    raise exception 'Antes de Continuar,  la cuotas anteriores tienes que estar finalizadas';
 
                  END IF;
                  

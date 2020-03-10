@@ -150,6 +150,7 @@ DECLARE
     v_exception_context			varchar;
     v_id_uo						integer;
     v_especial					numeric;
+    v_total_desc_ant			numeric;
 
 
 BEGIN
@@ -749,7 +750,8 @@ BEGIN
             pp.id_estado_wf,
             pp.id_plan_pago_fk,
             pp.monto_ejecutar_total_mo,
-            op.tipo_obligacion
+            op.tipo_obligacion,
+            pp.monto_anticipo  --#53
           into v_registros
            from tes.tplan_pago pp
            inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
@@ -783,16 +785,15 @@ BEGIN
                          and   pp.estado_reg = 'activo';
 
                      v_nro_cuota = floor(COALESCE(v_nro_cuota,0));
-
+                     
+                     
                      IF v_nro_cuota != v_registros.nro_cuota THEN
-                     	--#53
-                       	--raise exception 'Elimine primero la ultima cuota';
+                          raise exception 'Elimine primero la ultima cuota';
                      END IF;
-
+                     
+                   
                      --recuperamos el id_tipo_proceso en el WF para el estado anulado
                      --ya que este es un estado especial que no tiene padres definidos
-
-
                      select
                       te.id_tipo_estado
                      into
@@ -804,9 +805,7 @@ BEGIN
 
 
                      IF  v_id_tipo_estado is NULL THEN
-
                          raise exception 'no existe el estado anulado en la cofiguacion de WF para este tipo de proceso';
-
                      END IF;
                      -- pasamos la cotizacion al siguiente estado
 

@@ -517,3 +517,17 @@ select param.f_import_tcatalogo ('insert','TES','Pruebas FAT','PFAT','tipo_antic
 
 
 
+/****************************I-DAT-MGM-TES-1-19/02/2020******************/
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES (E'tes_control_pagos', E'no', E'Realiza el control para poder eliminar cualquier pago sin importar el el orden');
+
+/****************************F-DAT-MGM-TES-1-30/05/2020******************/
+
+
+/****************************I-DAT-RAC-TES-57-19/02/2020******************/
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES 
+  (E'tes_control_sol_pago', E'si', E'Si o no, controla la solictudes de pagos ordenados');  
+
+/****************************F-DAT-RAC-TES-57-19/02/2020******************/ 
