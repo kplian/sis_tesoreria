@@ -4274,4 +4274,54 @@ where pe.columna_origen = 'pre.tpartida_ejecucion_tmp' and pe.tipo_movimiento = 
 
 
 
+/**********************************I-DEP-RAC-TES-60-11/03/2020****************************************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD CONSTRAINT tts_libro_bancos_fk2 FOREIGN KEY (id_usuario_reg)
+    REFERENCES segu.tusuario(id_usuario)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+ 
+ --------------- SQL ---------------
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD CONSTRAINT tts_libro_bancos_fk3 FOREIGN KEY (id_estado_wf)
+    REFERENCES wf.testado_wf(id_estado_wf)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+    
+--------------- SQL ---------------
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD CONSTRAINT tts_libro_bancos_fk4 FOREIGN KEY (id_proceso_wf)
+    REFERENCES wf.tproceso_wf(id_proceso_wf)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+    
+--------------- SQL ---------------
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD CONSTRAINT tts_libro_bancos_fk5 FOREIGN KEY (id_int_comprobante)
+    REFERENCES conta.tint_comprobante(id_int_comprobante)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+    
+--------------- SQL ---------------
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD CONSTRAINT tts_libro_bancos_fk6 FOREIGN KEY (id_depto)
+    REFERENCES param.tdepto(id_depto)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+    
+            
+/**********************************F-DEP-RAC-TES-60-11/03/2020****************************************/    
+
  

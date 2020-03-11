@@ -1949,3 +1949,20 @@ CREATE INDEX tobligacion_pago_idx2 ON tes.tobligacion_pago
   
 
 /*************************F-SCP-RAC-TES-59-06/03/2020*************/
+
+
+
+
+/*************************I-SCP-RAC-TES-60-11/03/2020*************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD CONSTRAINT tts_libro_bancos_fk1 FOREIGN KEY (id_cuenta_bancaria)
+    REFERENCES tes.tcuenta_bancaria(id_cuenta_bancaria)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+    
+ 
+/*************************F-SCP-RAC-TES-60-11/03/2020*************/   
