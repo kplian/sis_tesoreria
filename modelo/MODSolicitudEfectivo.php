@@ -2,6 +2,7 @@
 /*
   ISSUE      FORK       FECHA:              AUTOR                 DESCRIPCION
   #29      ETR     01/04/2019      MANUEL GUERRA           el inmediato superior sera responsable de los funcionarios inactivos
+#62      ETR       18/03/2020        MANUEL GUERRA           envio de param, para la paginacion, toolbar ayuda, botones de envio de correo y rechazo de sol por tiempo
 */
 
 class MODSolicitudEfectivo extends MODbase{
@@ -9,7 +10,7 @@ class MODSolicitudEfectivo extends MODbase{
 	function __construct(CTParametro $pParam){
 		parent::__construct($pParam);
 	}
-			
+	//	#62
 	function listarSolicitudEfectivo(){
 		//Definicion de variables para ejecucion del procedimientp
 		$this->procedimiento='tes.ft_solicitud_efectivo_sel';
@@ -51,6 +52,10 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->captura('usr_reg','varchar');
 		$this->captura('usr_mod','varchar');
 		$this->captura('solicitud_efectivo_padre','varchar');
+        $this->captura('fecha_mov','date');
+        $this->captura('diferencia','int4');
+        $this->captura('id_tipo_solicitud','int4');
+        $this->captura('nombre','varchar');
 		$this->captura('saldo','numeric');
 		
 		//Ejecuta la instruccion
@@ -390,7 +395,7 @@ class MODSolicitudEfectivo extends MODbase{
 		return $this->respuesta;
 	}
 	
-	function insertarSolicitudEfectivoCompleta(){
+    function insertarSolicitudEfectivoCompleta(){
 		
 		//Abre conexion con PDO
 		$cone = new conexion();
@@ -510,5 +515,38 @@ class MODSolicitudEfectivo extends MODbase{
 	    
 	    return $this->respuesta;
 	}
+    //#62
+    function rechazarSol(){
+        //Definicion de variables para ejecucion del procedimientp
+        $this->procedimiento='tes.ft_solicitud_efectivo_ime';
+        $this->transaccion='TES_RECSOL_IME';
+        $this->tipo_procedimiento='IME';
+
+        $this->setParametro('id_solicitud_efectivo','id_solicitud_efectivo','int4');
+        $this->setParametro('id_proceso_wf','id_proceso_wf','int4');
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+    //#62
+    function envioCorreo(){
+        //Definicion de variables para ejecucion del procedimientp
+        $this->procedimiento='tes.ft_solicitud_efectivo_ime';
+        $this->transaccion='TES_ENVCOR_IME';
+        $this->tipo_procedimiento='IME';
+
+        $this->setParametro('id_solicitud_efectivo','id_solicitud_efectivo','int4');
+        $this->setParametro('id_proceso_wf','id_proceso_wf','int4');
+        $this->setParametro('id_funcionario','id_funcionario','int4');
+        $this->setParametro('id_usuario_reg','id_usuario_reg','int4');
+        $this->setParametro('nro_tramite','nro_tramite','varchar');
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
 }
 ?>

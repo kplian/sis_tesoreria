@@ -1,10 +1,8 @@
 <?php
 /**
-*@package pXP
-*@file RendicionEfectivo.php
-*@author  (gsarmiento)
-*@date 12-02-2016
-*@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
+ISSUE      FORK       FECHA:              AUTOR                 DESCRIPCION
+#62      ETR       18/03/2020        MANUEL GUERRA           envio de param, para la paginacion
+ *
 */
 
 header("content-type: text/javascript; charset=UTF-8");
@@ -68,6 +66,7 @@ Phx.vista.RendicionEfectivo=Ext.extend(Phx.gridInterfaz,{
 		});
 		//carga de grilla
 		if(this.nombreVista == 'RendicionEfectivo'){
+            this.store.baseParams = {tipo_interfaz: this.nombreVista};
 			this.load({params:{start:0, limit: this.tam_pag, tipo_interfaz:this.nombreVista, id_caja:this.id_caja}});
 		}
 		

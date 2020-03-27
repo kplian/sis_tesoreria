@@ -4,6 +4,7 @@
   ISSUE    SIS   	EMPRESA     FECHA           AUTOR               DESCRIPCION
   #29      TES 		ETR     	01/04/2019      MANUEL GUERRA       el inmediato superior sera responsable de los funcionarios inactivos
   #61	   TES		ETR 	  	01/08/2019	    RCM 	      		Actualizacion PHP 7 problema Count
+#62      ETR       18/03/2020        MANUEL GUERRA           envio de param, para la paginacion, toolbar ayuda, botones de envio de correo y rechazo de sol por tiempo
  ***************************************************************************
 */
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
@@ -17,7 +18,7 @@ class ACTSolicitudEfectivo extends ACTbase{
 	function listarSolicitudEfectivo(){
 		$this->objParam->defecto('ordenacion','id_solicitud_efectivo');
 		$this->objParam->defecto('dir_ordenacion','asc');
-
+//var_dump($this->objParam);
 		if($this->objParam->getParametro('tipo_interfaz')=='ConDetalle')
 		{
 			$this->objParam-> addFiltro("caja.tipo_ejecucion = ''con_detalle''");
@@ -545,7 +546,19 @@ class ACTSolicitudEfectivo extends ACTbase{
 	 }
 	 else
 	 	return array();
+	 }
+	 //#62
+	function rechazarSol(){
+		$this->objFunc=$this->create('MODSolicitudEfectivo');
+		$this->res=$this->objFunc->rechazarSol($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+    //#62
+    function envioCorreo(){
+        $this->objFunc=$this->create('MODSolicitudEfectivo');
+        $this->res=$this->objFunc->envioCorreo($this->objParam);
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
 }
 
 ?>

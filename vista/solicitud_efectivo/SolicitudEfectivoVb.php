@@ -1,23 +1,22 @@
 <?php
 /**
-*@package pXP
-*@file SolicitudEfectivoVb.php
-*@author  (gsarmiento)
-*@date 14-12-2015 12:59:51
-*@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
+ISSUE      FORK       FECHA:              AUTOR                 DESCRIPCION
+ #62      ETR       18/03/2020        MANUEL GUERRA           envio de param, para la paginacion, toolbar ayuda, botones de envio de correo y rechazo de sol por tiempo
+ *
 */
 
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
-		
+
 	constructor:function(config){
 		this.maestro=config.maestro;
     	//llama al constructor de la clase padre
 		Phx.vista.SolicitudEfectivoVb.superclass.constructor.call(this,config);
 		this.init();
-					
+        this.store.baseParams = {tipo_interfaz: 'vbSolicitudEfectivo'};
+        this.load({params:{start:0, limit:50}});
 		this.addButton('ant_estado',
 			{	text:'Anterior',
 				argument: {estado: 'anterior'},
@@ -38,13 +37,13 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 		);
 
 		this.addButton('btnChequeoDocumentosWf',
-				{
-					text: 'Documentos',
-					iconCls: 'bchecklist',
-					disabled: true,
-					handler: this.loadCheckDocumentosSolWf,
-					tooltip: '<b>Documentos de la Solicitud</b><br/>Los documetos de la solicitud seleccionada.'
-				}
+            {
+                text: 'Documentos',
+                iconCls: 'bchecklist',
+                disabled: true,
+                handler: this.loadCheckDocumentosSolWf,
+                tooltip: '<b>Documentos de la Solicitud</b><br/>Los documetos de la solicitud seleccionada.'
+            }
 		);
 
 		this.addButton('diagrama_gantt',
@@ -56,23 +55,37 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
                 tooltip: '<b>Diagrama Gantt de Solicitud de Efectivo</b>'
             }
         );
-			
-		this.addButton('btnImprimir', {
-				text : 'Imprimir',
-				iconCls : 'bprint',
-				disabled : true,
-				handler : this.imprimirCbte,
-				tooltip : '<b>Imprimir Comprobante de Caja</b><br/>Imprime el Comprobante en el formato oficial'
-			});
-				
-		this.iniciarEventos();
+        //
+        this.addButton('btnImprimir', {
+            text : 'Imprimir',
+            iconCls : 'bprint',
+            disabled : true,
+            handler : this.imprimirCbte,
+            tooltip : '<b>Imprimir Comprobante de Caja</b><br/>Imprime el Comprobante en el formato oficial'
+        });
+        //#62
+        this.addButton('btnRechazar', {
+            text : 'Rechaza Solicitud',
+            iconCls : 'bven1',
+            disabled : false,
+            handler : this.rechazarSol,
+            tooltip : '<b>Rechaza la solicitud</b><br/>Dias desde la aprobacion de su proceso'
+        });
+        //#62
+        this.addButton('btnEnvioCorreo', {
+            text : 'Envio de correo',
+            iconCls : 'bven1',
+            disabled : false,
+            handler : this.envioCorreo,
+            tooltip : '<b>Envio de correo</b><br/>solicitudes pendientes'
+        });
 
 		if(config.filtro_directo){
 			this.store.baseParams.filtro_valor = config.filtro_directo.valor;
 			this.store.baseParams.filtro_campo = config.filtro_directo.campo;
 		}
+        this.addHelp();//#62
 
-		this.load({params:{start:0, limit:this.tam_pag, tipo_interfaz:'vbSolicitudEfectivo'}})
 	},
 			
 	Atributos:[
@@ -128,7 +141,60 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 			filters: {pfiltro: 'caja.codigo',type: 'string'},
 			grid: true,
 			form: true
-		},	
+		},	{
+            config:{
+                name: 'fecha_mov',
+                fieldLabel: 'Fecha de solicitud',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 100,
+                format: 'd/m/Y',
+                //#62
+                renderer: function (value, p, record){
+                    if(record.data.diferencia == -1 ){
+                        return String.format('<b><font color="#006400">{0}</font></b>', value?value.dateFormat('d/m/Y'):'');
+                    } else{
+                        if(record.data.diferencia >= 0 ) {
+                            return String.format('<b><font color="#006400">{0}</font></b>', value?value.dateFormat('d/m/Y'):'');
+                        }else{
+                            if(record.data.diferencia < -1 ) {
+                                return String.format('<b><font color="red">{0}</font></b>', value?value.dateFormat('d/m/Y'):'');
+                            }
+                        }
+                    }
+                }
+            },
+            type:'DateField',
+            filters:{pfiltro:'ewf.fecha_reg',type:'date'},
+            id_grupo:1,
+            grid:true,
+            form:false
+        },{
+            config:{
+                name: 'diferencia',
+                fieldLabel: 'Fecha Limite',
+                allowBlank: false,
+                anchor: '20%',
+                gwidth: 55,
+                renderer: function (value, p, record){
+                    if(record.data.diferencia == -1 ){
+                        return String.format('<b><font color="#9acd32">{0}</font></b>', value);
+                    } else{
+                        if(record.data.diferencia >= 0 ) {
+                            return String.format('<b><font color="#228b22">{0}</font></b>', value);
+                        }else{
+                            if(record.data.diferencia < -1 ) {
+                                return String.format('<b><font color="red">{0}</font></b>', value);
+                            }
+                        }
+                    }
+                }
+            },
+            type:'Field',
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
 		{
 			config:{
 				name: 'fecha',
@@ -142,7 +208,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				type:'DateField',
 				filters:{pfiltro:'solefe.fecha',type:'date'},
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:true
 		},	
 		{
@@ -151,7 +217,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Num Tramite',
 				allowBlank: false,
 				anchor: '100%',
-				gwidth: 150,
+				gwidth: 200,
 				maxLength:300
 			},
 				type:'TextField',
@@ -170,15 +236,18 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
                 gwidth:200,
    				valueField: 'id_funcionario',
    			    gdisplayField: 'desc_funcionario',   			    
-      			renderer:function(value, p, record){return String.format('{0}', record.data['desc_funcionario']);}
-       	     },
+      			renderer:function(value, p, record)
+                {
+                    return String.format('{0}', record.data['desc_funcionario']);
+                }
+       	    },
    			type:'ComboRec',//ComboRec
    			id_grupo:0,
    			filters:{pfiltro:'fun.desc_funcionario1',type:'string'},
    			bottom_filter:true,
    		    grid:true,
    			form:true
-		 },
+        },
 		{
 			config: {
 				name: 'id_estado_wf',
@@ -231,11 +300,11 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				gwidth: 100,
 				maxLength:1179650
 			},
-				type:'NumberField',
-				filters:{pfiltro:'solefe.monto',type:'numeric'},
-				id_grupo:1,
-				grid:true,
-				form:true
+            type:'NumberField',
+            filters:{pfiltro:'solefe.monto',type:'numeric'},
+            id_grupo:1,
+            grid:true,
+            form:true
 		},	
 		{
 			config: {
@@ -289,11 +358,11 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				gwidth: 100,
 				maxLength:50
 			},
-				type:'TextField',
-				filters:{pfiltro:'solefe.estado',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:false
+            type:'TextField',
+            filters:{pfiltro:'solefe.estado',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:false
 		},
 		{
 			config:{
@@ -301,7 +370,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Motivo',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 150,
 				maxLength:500,
 				renderer:function(value,p,record){
 					if (record.data['motivo'].match(/Reposición.*/)) {
@@ -311,11 +380,11 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 					}
 				}
 			},
-				type:'TextField',
-				filters:{pfiltro:'solefe.motivo',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:false
+            type:'TextField',
+            filters:{pfiltro:'solefe.motivo',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:false
 		},
 		{
 			config:{
@@ -326,11 +395,11 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				gwidth: 100,
 				maxLength:10
 			},
-				type:'TextField',
-				filters:{pfiltro:'solefe.estado_reg',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:false
+            type:'TextField',
+            filters:{pfiltro:'solefe.estado_reg',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:false
 		},
 		{
 			config:{
@@ -341,11 +410,11 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				gwidth: 100,
 				maxLength:4
 			},
-				type:'Field',
-				filters:{pfiltro:'solefe.id_usuario_ai',type:'numeric'},
-				id_grupo:1,
-				grid:false,
-				form:false
+            type:'Field',
+            filters:{pfiltro:'solefe.id_usuario_ai',type:'numeric'},
+            id_grupo:1,
+            grid:false,
+            form:false
 		},
 		{
 			config:{
@@ -354,14 +423,14 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-							format: 'd/m/Y', 
-							renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
+                format: 'd/m/Y',
+                renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
 			},
-				type:'DateField',
-				filters:{pfiltro:'solefe.fecha_reg',type:'date'},
-				id_grupo:1,
-				grid:true,
-				form:false
+            type:'DateField',
+            filters:{pfiltro:'solefe.fecha_reg',type:'date'},
+            id_grupo:1,
+            grid:true,
+            form:false
 		},
 		{
 			config:{
@@ -372,11 +441,11 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				gwidth: 100,
 				maxLength:300
 			},
-				type:'TextField',
-				filters:{pfiltro:'solefe.usuario_ai',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:false
+            type:'TextField',
+            filters:{pfiltro:'solefe.usuario_ai',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:false
 		},
 		{
 			config:{
@@ -387,11 +456,11 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				gwidth: 100,
 				maxLength:4
 			},
-				type:'Field',
-				filters:{pfiltro:'usu1.cuenta',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:false
+            type:'Field',
+            filters:{pfiltro:'usu1.cuenta',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:false
 		},
 		{
 			config:{
@@ -402,11 +471,11 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				gwidth: 100,
 				maxLength:4
 			},
-				type:'Field',
-				filters:{pfiltro:'usu2.cuenta',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:false
+            type:'Field',
+            filters:{pfiltro:'usu2.cuenta',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:false
 		},
 		{
 			config:{
@@ -415,14 +484,14 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-							format: 'd/m/Y', 
-							renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
+                format: 'd/m/Y',
+                renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
 			},
-				type:'DateField',
-				filters:{pfiltro:'solefe.fecha_mod',type:'date'},
-				id_grupo:1,
-				grid:true,
-				form:false
+            type:'DateField',
+            filters:{pfiltro:'solefe.fecha_mod',type:'date'},
+            id_grupo:1,
+            grid:true,
+            form:false
 		},
 		{
 			config:{
@@ -433,17 +502,18 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				gwidth: 100,
 				maxLength: 10,
 				renderer: function(value, p, record) {
-					return String.format('{0}', record.data['nombre_tipo_solicitud']);
+					return String.format('{0}', record.data['nombre']);
 				},
-				hidden: true
+				//hidden: true
 			},
-				type:'TextField',
-				id_grupo:1,
-				grid:true,
-				form:false
-		}
+            type:'TextField',
+            id_grupo:1,
+            grid:true,
+            form:false
+		},
+
 	],
-	tam_pag:50,	
+	tam_pag:50,
 	title:'Solicitud Efectivo Con Detalle',
 	ActSave:'../../sis_tesoreria/control/SolicitudEfectivo/insertarSolicitudEfectivo',
 	ActDel:'../../sis_tesoreria/control/SolicitudEfectivo/eliminarSolicitudEfectivo',
@@ -465,16 +535,19 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 		{name:'desc_funcionario', type: 'string'},
 		{name:'fecha', type: 'date',dateFormat:'Y-m-d'},
 		{name:'id_usuario_ai', type: 'numeric'},
-		{name:'fecha_reg', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
+		{name:'fecha_reg', type: 'date',dateFormat:'Y-m-d'},
 		{name:'usuario_ai', type: 'string'},
 		{name:'id_usuario_reg', type: 'numeric'},
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
+        {name:'nombre', type: 'string'},
 		{name:'id_tipo_solicitud', type: 'numeric'},
 		{name:'codigo_tipo_solicitud', type: 'string'},
-		{name:'nombre_tipo_solicitud', type: 'string'}
+		{name:'nombre_tipo_solicitud', type: 'string'},
+        {name:'fecha_mov', type: 'date',dateFormat:'Y-m-d'},
+        {name:'diferencia', type: 'numeric'},
 	],
 	sortInfo:{
 		field: 'id_solicitud_efectivo',
@@ -484,31 +557,27 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 	bsave:false,
 	bedit:false,
 	bnew:false,
-	
 	preparaMenu:function(n){
-          var data = this.getSelectedData();
-          var tb =this.tbar;          
-          		  
-          Phx.vista.SolicitudEfectivoVb.superclass.preparaMenu.call(this,n);
-          this.getBoton('diagrama_gantt').enable();
-          if (data['estado']!= 'borrador'){    
-              this.getBoton('fin_registro').enable();
-			  this.getBoton('ant_estado').enable();
-			  this.getBoton('btnChequeoDocumentosWf').enable();
-          }
-          else{            
-              this.getBoton('fin_registro').disable();
-			  this.getBoton('ant_estado').disable();
-          }
-          
-           if (data['estado']== 'vbcajero'){ 
-           	 this.getBoton('btnImprimir').enable();
-           }
-           else{
-           	 this.getBoton('btnImprimir').disable();
-           }
-          
-          
+        var data = this.getSelectedData();
+        var tb =this.tbar;
+        Phx.vista.SolicitudEfectivoVb.superclass.preparaMenu.call(this,n);
+        this.getBoton('diagrama_gantt').enable();
+        if (data['estado']!= 'borrador'){
+            this.getBoton('fin_registro').enable();
+            this.getBoton('ant_estado').enable();
+            this.getBoton('btnChequeoDocumentosWf').enable();
+        }
+        else{
+            this.getBoton('fin_registro').disable();
+            this.getBoton('ant_estado').disable();
+        }
+
+        if (data['estado']== 'vbcajero'){
+            this.getBoton('btnImprimir').enable();
+        }
+        else{
+            this.getBoton('btnImprimir').disable();
+        }
      },
 
 	liberaMenu:function() {
@@ -524,48 +593,47 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 	
 	antEstado:function(res){
          var rec=this.sm.getSelected();
-         Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/AntFormEstadoWf.php',
-            'Estado de Wf',
-            {
-                modal:true,
-                width:450,
-                height:250
-            }, { data:rec.data, estado_destino: res.argument.estado }, this.idContenedor,'AntFormEstadoWf',
-            {
-                config:[{
-                          event:'beforesave',
-                          delegate: this.onAntEstado,
-                        }
-                        ],
-               scope:this
-             })
-   },
+         Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/AntFormEstadoWf.php', 'Estado de Wf',
+        {
+            modal:true,
+            width:450,
+            height:250
+        }, { data:rec.data, estado_destino: res.argument.estado }, this.idContenedor,'AntFormEstadoWf',
+        {
+            config:
+                [{
+                    event:'beforesave',
+                    delegate: this.onAntEstado,
+                }],
+            scope:this
+        })
+    },
    
-   onAntEstado: function(wizard,resp){
-            Phx.CP.loadingShow();
-            Ext.Ajax.request({
-                // form:this.form.getForm().getEl(),
-                url:'../../sis_tesoreria/control/SolicitudEfectivo/anteriorEstadoSolicitudEfectivo',
-                params:{
-                        id_proceso_wf: resp.id_proceso_wf,
-                        id_estado_wf:  resp.id_estado_wf,  
-                        obs: resp.obs,
-                        estado_destino: resp.estado_destino
-                 },
-                argument:{wizard:wizard},  
-                success:this.successEstadoSinc,
-                failure: this.conexionFailure,
-                timeout:this.timeout,
-                scope:this
-            });
+    onAntEstado: function(wizard,resp){
+        Phx.CP.loadingShow();
+        Ext.Ajax.request({
+            // form:this.form.getForm().getEl(),
+            url:'../../sis_tesoreria/control/SolicitudEfectivo/anteriorEstadoSolicitudEfectivo',
+            params:{
+                id_proceso_wf: resp.id_proceso_wf,
+                id_estado_wf:  resp.id_estado_wf,
+                obs: resp.obs,
+                estado_destino: resp.estado_destino
+            },
+            argument:{wizard:wizard},
+            success:this.successEstadoSinc,
+            failure: this.conexionFailure,
+            timeout:this.timeout,
+            scope:this
+        });
            
-     },
+    },
      
-   successEstadoSinc:function(resp){
+    successEstadoSinc:function(resp){
         Phx.CP.loadingHide();
         resp.argument.wizard.panel.destroy()
         this.reload();
-     }, 
+    },
 	 
 	sigEstado:function(){
 		var rec=this.sm.getSelected();
@@ -592,10 +660,6 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 	
 	onSaveWizard:function(wizard,resp){
 		Phx.CP.loadingShow();
-		/*console.log('-----------');
-		console.log('-->',wizard);
-		console.log('-->',resp);
-		console.log('-----------');*/
 		Ext.Ajax.request({
 			url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
 			params:{
@@ -626,7 +690,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 		Phx.CP.loadingHide();
 		resp.argument.wizard.panel.destroy();
 		this.reload();
-		console.log(resp.argument.wizard.Cmp.id_tipo_estado.lastSelectionText);
+		//console.log(resp.argument.wizard.Cmp.id_tipo_estado.lastSelectionText);
 		if(resp.argument.wizard.Cmp.id_tipo_estado.lastSelectionText=='entregado'
 		|| resp.argument.wizard.Cmp.id_tipo_estado.lastSelectionText=='ingresado'){
 			if (resp.argument.id_proceso_wf) {
@@ -646,7 +710,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 		}			
 	},
 
-	loadCheckDocumentosSolWf:function() {
+    loadCheckDocumentosSolWf:function() {
 		var rec=this.sm.getSelected();
 		rec.data.nombreVista = this.nombreVista;
 		Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
@@ -675,24 +739,89 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
     },
     
     imprimirCbte : function() {
-			var rec = this.sm.getSelected();
-			var data = rec.data;
-			if (data) {
-				Phx.CP.loadingShow();
-				Ext.Ajax.request({
-					url : '../../sis_tesoreria/control/SolicitudEfectivo/reporteReciboEntrega',
-					params : {
-						'id_proceso_wf' : data.id_proceso_wf
-					},
-					success : this.successExport,
-					failure : this.conexionFailure,
-					timeout : this.timeout,
-					scope : this
-				});
-			}
-
+        var rec = this.sm.getSelected();
+        var data = rec.data;
+        if (data) {
+            Phx.CP.loadingShow();
+            Ext.Ajax.request({
+                url : '../../sis_tesoreria/control/SolicitudEfectivo/reporteReciboEntrega',
+                params : {
+                    'id_proceso_wf' : data.id_proceso_wf
+                },
+                success : this.successExport,
+                failure : this.conexionFailure,
+                timeout : this.timeout,
+                scope : this
+            });
+        }
 	},
-	
+    //#62
+    rechazarSol : function() {
+        var rec = this.sm.getSelected();
+        var data = rec.data;
+        console.log(data.nombre);
+        if (data.nombre==='solicitud') {
+            Phx.CP.loadingShow();
+            Ext.Ajax.request({
+                url:'../../sis_tesoreria/control/SolicitudEfectivo/rechazarSol',
+                params:{
+                    'id_solicitud_efectivo' : data.id_solicitud_efectivo,
+                    'id_proceso_wf' : data.id_proceso_wf
+                },
+                success:this.successActual,
+                failure: this.conexionFailure,
+                timeout:this.timeout,
+                scope:this
+            });
+        }else{
+            alert('Solo aplica a las solicitudes ');
+        }
+    },
+    //#62
+    envioCorreo : function() {
+        var rec = this.sm.getSelected();
+        var data = rec.data;
+        console.log(data);
+        //alert('ssss');
+        Phx.CP.loadingShow();
+        Ext.Ajax.request({
+            url : '../../sis_tesoreria/control/SolicitudEfectivo/envioCorreo',
+            params : {
+                'id_solicitud_efectivo' : data.id_solicitud_efectivo,
+                'id_proceso_wf' : data.id_proceso_wf,
+                'id_funcionario' : data.id_funcionario,
+                'id_usuario_reg' : data.id_usuario_reg,
+                'nro_tramite': data.nro_tramite,
+            },
+            success : this.successActual,
+            failure : this.conexionFailure,
+            timeout : this.timeout,
+            scope : this
+        });
+    },
+    successActual:function(){
+        Phx.CP.loadingHide();
+        this.reload();
+    },
+    //#62
+    addHelp: function () {
+        this.addButton('lbl-color', {
+            xtype: 'label',
+            disabled: false,
+            style: {
+                position: 'absolute',
+                top: '5px',
+                right: 0,
+                width: '90px',
+                'margin-right': '10px',
+                float: 'right'
+            },
+            html: '<div style="display: inline-flex">&nbsp;<div>Fechas de Solicitud</div></div><br/>' +
+                '<div style="display: inline-flex"><div style="background-color:#006400;width:10px;height:10px;"></div>&nbsp;<div>Procesos</div></div><br/>' +
+                '<div style="display: inline-flex"><div style="background-color:#FF0000;width:10px;height:10px;"></div>&nbsp;<div>Vencidos</div></div>'
+        });
+    },
+    //
 	tabsouth:[
             { 
              url:'../../../sis_tesoreria/vista/solicitud_efectivo_det/SolicitudEfectivoDetVb.php',
