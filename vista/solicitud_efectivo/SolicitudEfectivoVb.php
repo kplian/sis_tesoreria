@@ -696,7 +696,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 			if (resp.argument.id_proceso_wf) {
 				Phx.CP.loadingShow();
 				Ext.Ajax.request({
-					url : '../../sis_tesoreria/control/SolicitudEfectivo/reporteReciboEntrega',
+					url : '../../sis_tesoreria/control/SolicitudEfectivo/rEntregaEfectivo',
 					params : {
 						'id_proceso_wf' : resp.argument.id_proceso_wf,
 						'id_estado_wf':   resp.argument.id_estado_wf,
@@ -744,7 +744,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
         if (data) {
             Phx.CP.loadingShow();
             Ext.Ajax.request({
-                url : '../../sis_tesoreria/control/SolicitudEfectivo/reporteReciboEntrega',
+                url : '../../sis_tesoreria/control/SolicitudEfectivo/rEntregaEfectivo',
                 params : {
                     'id_proceso_wf' : data.id_proceso_wf
                 },

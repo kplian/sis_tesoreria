@@ -1,10 +1,7 @@
 <?php
 /**
-*@package pXP
-*@file SolicitudEfectivo.php
-*@author  (gsarmiento)
-*@date 24-11-2015 12:59:51
-*@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
+ISSUE    SIS   	EMPRESA     FECHA           AUTOR               DESCRIPCION
+#64      ETR       18/03/2020        MANUEL GUERRA           mejora en reporte de entrega de efectivo
 */
 
 header("content-type: text/javascript; charset=UTF-8");
@@ -245,7 +242,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Num Tramite',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 150,
+				gwidth: 200,
 				maxLength:50
 			},
 				type:'TextField',
@@ -758,7 +755,7 @@ Phx.vista.SolicitudEfectivo=Ext.extend(Phx.gridInterfaz,{
 	onBtnReciboEntrega : function() {
 		var rec=this.sm.getSelected();
         Ext.Ajax.request({
-            url:'../../sis_tesoreria/control/SolicitudEfectivo/reporteReciboEntrega',
+            url:'../../sis_tesoreria/control/SolicitudEfectivo/rEntregaEfectivo',//#64
             params:{'id_solicitud_efectivo':rec.data.id_solicitud_efectivo},
             success: this.successExport,
             failure: this.conexionFailure,
