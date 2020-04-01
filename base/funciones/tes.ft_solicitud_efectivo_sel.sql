@@ -153,7 +153,7 @@ BEGIN
                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (solefe.estado in (''vbjefe'',''vbcajero'',''vbfin'')) and  solefe.id_tipo_solicitud in (select id_tipo_solicitud from tes.ttipo_solicitud where codigo in (''SOLEFE'',''INGEFE'',''REPEFE'')) and ';
                  ELSE
                      v_filtro = '(solefe.estado in (''vbjefe'',''vbcajero'',''vbfin'')) and
-                     solefe.id_tipo_solicitud in (select id_tipo_solicitud from tes.ttipo_solicitud where codigo in (''SOLEFE'',''INGEFE'')) and ';
+                     solefe.id_tipo_solicitud in (select id_tipo_solicitud from tes.ttipo_solicitud where codigo in (''SOLEFE'',''INGEFE'',''REPEFE'')) and ';--#62
                 END IF;
             END IF;
 
@@ -344,7 +344,7 @@ BEGIN
                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' ) and  (solefe.estado in (''vbjefe'',''vbcajero'',''vbfin'')) and  solefe.id_tipo_solicitud in (select id_tipo_solicitud from tes.ttipo_solicitud where codigo in (''SOLEFE'',''INGEFE'',''REPEFE'')) and ';
                  ELSE
                      v_filtro = '(solefe.estado in (''vbjefe'',''vbcajero'',''vbfin'')) and
-                     solefe.id_tipo_solicitud in (select id_tipo_solicitud from tes.ttipo_solicitud where codigo in (''SOLEFE'',''INGEFE'')) and ';
+                     solefe.id_tipo_solicitud in (select id_tipo_solicitud from tes.ttipo_solicitud where codigo in (''SOLEFE'',''INGEFE'',''REPEFE'')) and ';--#62
                 END IF;
             END IF;
 
