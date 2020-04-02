@@ -151,21 +151,21 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 		},	{
             config:{
                 name: 'fecha_mov',
-                fieldLabel: 'Fecha Aprobacion',
+                fieldLabel: 'Fecha Aprobaciones',
                 allowBlank: true,
                 anchor: '80%',
                 gwidth: 100,
                 format: 'd/m/Y',
                 //#62
                 renderer: function (value, p, record){
-                    if(record.data.diferencia == -1 ){
-                        return String.format('<b><font color="#006400">{0}</font></b>', value?value.dateFormat('d/m/Y'):'');
+                    if(record.data.diferencia == 0 || record.data.diferencia == -1 ){
+                        return String.format('<h1 style="color: #008042;">{0}</h1>', value?value.dateFormat('d/m/Y'):'');
                     } else{
-                        if(record.data.diferencia >= 0 ) {
-                            return String.format('<b><font color="#006400">{0}</font></b>', value?value.dateFormat('d/m/Y'):'');
+                        if(record.data.diferencia == -2 ) {
+                            return String.format('<h1 style="color: #807f12;">{0}</h1>', value?value.dateFormat('d/m/Y'):'');
                         }else{
-                            if(record.data.diferencia < -1 ) {
-                                return String.format('<b><font color="red">{0}</font></b>', value?value.dateFormat('d/m/Y'):'');
+                            if(record.data.diferencia < -2 ) {
+                                return String.format('<h1 style="color: #ff0005;">{0}</h1>', value?value.dateFormat('d/m/Y'):'');
                             }
                         }
                     }
@@ -184,14 +184,14 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
                 anchor: '20%',
                 gwidth: 55,
                 renderer: function (value, p, record){
-                    if(record.data.diferencia == -1 ){
-                        return String.format('<b><font color="#9acd32">{0}</font></b>', value);
+                    if(record.data.diferencia == 0 || record.data.diferencia == -1 ){
+                        return String.format('<h1 style="color: #008042;">{0}</h1>', value);
                     } else{
-                        if(record.data.diferencia >= 0 ) {
-                            return String.format('<b><font color="#228b22">{0}</font></b>', value);
+                        if(record.data.diferencia == -2 ) {
+                            return String.format('<h1 style="color: #807f12;">{0}</h1>', value);
                         }else{
-                            if(record.data.diferencia < -1 ) {
-                                return String.format('<b><font color="red">{0}</font></b>', value);
+                            if(record.data.diferencia < -2 ) {
+                                return String.format('<h1 style="color: #ff0005;">{0}</h1>', value);
                             }
                         }
                     }
@@ -854,8 +854,9 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
                 float: 'right'
             },
             html: '<div style="display: inline-flex">&nbsp;<div>Fechas de Aprobacion</div></div><br/>' +
-                '<div style="display: inline-flex"><div style="background-color:#006400;width:10px;height:10px;"></div>&nbsp;<div>En proceso</div></div><br/>' +
-                '<div style="display: inline-flex"><div style="background-color:#FF0000;width:10px;height:10px;"></div>&nbsp;<div>Vencidos</div></div>'
+                '<div style="display: inline-flex"><div style="background-color:#008042;width:10px;height:10px;"></div>&nbsp;<div>En proceso</div></div><br/>' +
+                '<div style="display: inline-flex"><div style="background-color:#807f12;width:10px;height:10px;"></div>&nbsp;<div>Por fenecer</div></div><br/>' +
+                '<div style="display: inline-flex"><div style="background-color:#ff0005;width:10px;height:10px;"></div>&nbsp;<div>Vencidos</div></div>'
         });
     },
     //devBanco
