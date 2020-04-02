@@ -809,7 +809,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
         Ext.Msg.show({
             title:'Confirmación',
             scope: this,
-            msg: 'Esta seguro de devolver a borrador? Tramite: '+ data.nro_tramite + ' Si esta de acuerdo presione el botón "Si"',
+            msg: 'Esta seguro de enviar una notifiacion? Tramite: '+ data.nro_tramite + ' Si esta de acuerdo presione el botón "Si"',
             buttons: Ext.Msg.YESNO,
             fn: function(id, value, opt) {
                 if (id == 'yes') {
