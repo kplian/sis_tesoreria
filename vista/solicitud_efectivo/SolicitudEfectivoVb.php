@@ -79,7 +79,14 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
             handler : this.envioCorreo,
             tooltip : '<b>Envio de correo</b><br/>solicitudes pendientes'
         });
-
+        //#62
+        this.addButton('btnDevRep', {
+            text : 'Devolver un FA/VI a banco',
+            iconCls : 'bven1',
+            disabled : false,
+            handler : this.devBanco,
+            tooltip : '<b>Devolucion a la vista Reposicion y Devolucion</b>'
+        });
 		if(config.filtro_directo){
 			this.store.baseParams.filtro_valor = config.filtro_directo.valor;
 			this.store.baseParams.filtro_campo = config.filtro_directo.campo;
@@ -144,7 +151,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 		},	{
             config:{
                 name: 'fecha_mov',
-                fieldLabel: 'Fecha de solicitud',
+                fieldLabel: 'Fecha Aprobacion',
                 allowBlank: true,
                 anchor: '80%',
                 gwidth: 100,
@@ -172,7 +179,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
         },{
             config:{
                 name: 'diferencia',
-                fieldLabel: 'Fecha Limite',
+                fieldLabel: 'Dias Transcurridos',
                 allowBlank: false,
                 anchor: '20%',
                 gwidth: 55,
@@ -198,7 +205,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'fecha',
-				fieldLabel: 'Fecha',
+				fieldLabel: 'Fecha Solicitud',
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
@@ -208,7 +215,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 				type:'DateField',
 				filters:{pfiltro:'solefe.fecha',type:'date'},
 				id_grupo:1,
-				grid:false,
+				grid:true,
 				form:true
 		},	
 		{
@@ -561,6 +568,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
         var data = this.getSelectedData();
         var tb =this.tbar;
         Phx.vista.SolicitudEfectivoVb.superclass.preparaMenu.call(this,n);
+        this.getBoton('btnDevRep').hide();
         this.getBoton('diagrama_gantt').enable();
         if (data['estado']!= 'borrador'){
             this.getBoton('fin_registro').enable();
@@ -583,6 +591,7 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
 	liberaMenu:function() {
 		var tb = Phx.vista.SolicitudEfectivoVb.superclass.liberaMenu.call(this);
 		if (tb) {
+            this.getBoton('btnDevRep').hide();
 			this.getBoton('fin_registro').disable();
 			this.getBoton('ant_estado').disable();
 			this.getBoton('btnChequeoDocumentosWf').disable();
@@ -761,18 +770,32 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
         var data = rec.data;
         console.log(data.nombre);
         if (data.nombre==='solicitud') {
-            Phx.CP.loadingShow();
-            Ext.Ajax.request({
-                url:'../../sis_tesoreria/control/SolicitudEfectivo/rechazarSol',
-                params:{
-                    'id_solicitud_efectivo' : data.id_solicitud_efectivo,
-                    'id_proceso_wf' : data.id_proceso_wf
+            Ext.Msg.show({
+                title:'Confirmación',
+                scope: this,
+                msg: 'Esta seguro de devolver a borrador? Tramite: '+ data.nro_tramite + ' Si esta de acuerdo presione el botón "Si"',
+                buttons: Ext.Msg.YESNO,
+                fn: function(id, value, opt) {
+                    if (id == 'yes') {
+                        Phx.CP.loadingShow();
+                        Ext.Ajax.request({
+                            url:'../../sis_tesoreria/control/SolicitudEfectivo/rechazarSol',
+                            params:{
+                                'id_solicitud_efectivo' : data.id_solicitud_efectivo,
+                                'id_proceso_wf' : data.id_proceso_wf
+                            },
+                            success:this.successActual,
+                            failure: this.conexionFailure,
+                            timeout:this.timeout,
+                            scope:this
+                        });
+                    } else {
+                        opt.hide;
+                    }
                 },
-                success:this.successActual,
-                failure: this.conexionFailure,
-                timeout:this.timeout,
-                scope:this
-            });
+                animEl: 'elId',
+                icon: Ext.MessageBox.WARNING
+            }, this);
         }else{
             alert('Solo aplica a las solicitudes ');
         }
@@ -783,21 +806,35 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
         var data = rec.data;
         console.log(data);
         //alert('ssss');
-        Phx.CP.loadingShow();
-        Ext.Ajax.request({
-            url : '../../sis_tesoreria/control/SolicitudEfectivo/envioCorreo',
-            params : {
-                'id_solicitud_efectivo' : data.id_solicitud_efectivo,
-                'id_proceso_wf' : data.id_proceso_wf,
-                'id_funcionario' : data.id_funcionario,
-                'id_usuario_reg' : data.id_usuario_reg,
-                'nro_tramite': data.nro_tramite,
+        Ext.Msg.show({
+            title:'Confirmación',
+            scope: this,
+            msg: 'Esta seguro de devolver a borrador? Tramite: '+ data.nro_tramite + ' Si esta de acuerdo presione el botón "Si"',
+            buttons: Ext.Msg.YESNO,
+            fn: function(id, value, opt) {
+                if (id == 'yes') {
+                    Phx.CP.loadingShow();
+                    Ext.Ajax.request({
+                        url : '../../sis_tesoreria/control/SolicitudEfectivo/envioCorreo',
+                        params : {
+                            'id_solicitud_efectivo' : data.id_solicitud_efectivo,
+                            'id_proceso_wf' : data.id_proceso_wf,
+                            'id_funcionario' : data.id_funcionario,
+                            'id_usuario_reg' : data.id_usuario_reg,
+                            'nro_tramite': data.nro_tramite,
+                        },
+                        success : this.successActual,
+                        failure : this.conexionFailure,
+                        timeout : this.timeout,
+                        scope : this
+                    });
+                } else {
+                    opt.hide;
+                }
             },
-            success : this.successActual,
-            failure : this.conexionFailure,
-            timeout : this.timeout,
-            scope : this
-        });
+            animEl: 'elId',
+            icon: Ext.MessageBox.WARNING
+        }, this);
     },
     successActual:function(){
         Phx.CP.loadingHide();
@@ -816,10 +853,46 @@ Phx.vista.SolicitudEfectivoVb=Ext.extend(Phx.gridInterfaz,{
                 'margin-right': '10px',
                 float: 'right'
             },
-            html: '<div style="display: inline-flex">&nbsp;<div>Fechas de Solicitud</div></div><br/>' +
-                '<div style="display: inline-flex"><div style="background-color:#006400;width:10px;height:10px;"></div>&nbsp;<div>Procesos</div></div><br/>' +
+            html: '<div style="display: inline-flex">&nbsp;<div>Fechas de Aprobacion</div></div><br/>' +
+                '<div style="display: inline-flex"><div style="background-color:#006400;width:10px;height:10px;"></div>&nbsp;<div>En proceso</div></div><br/>' +
                 '<div style="display: inline-flex"><div style="background-color:#FF0000;width:10px;height:10px;"></div>&nbsp;<div>Vencidos</div></div>'
         });
+    },
+    //devBanco
+    devBanco : function() {
+        var rec = this.sm.getSelected();
+        var data = rec.data;
+        console.log(data);
+        if (data.nombre!=='solicitud') {
+            Ext.Msg.show({
+                title:'Confirmación',
+                scope: this,
+                msg: 'Esta seguro de devolver a banco? Tramite: '+ data.nro_tramite + ' Si esta de acuerdo presione el botón "Si"',
+                buttons: Ext.Msg.YESNO,
+                fn: function(id, value, opt) {
+                    if (id == 'yes') {
+                        Phx.CP.loadingShow();
+                        Ext.Ajax.request({
+                            url:'../../sis_tesoreria/control/SolicitudEfectivo/devolverSol',
+                            params:{
+                                'id_solicitud_efectivo' : data.id_solicitud_efectivo,
+                                'id_proceso_wf' : data.id_proceso_wf
+                            },
+                            success:this.successActual,
+                            failure: this.conexionFailure,
+                            timeout:this.timeout,
+                            scope:this
+                        });
+                    } else {
+                        opt.hide;
+                    }
+                },
+                animEl: 'elId',
+                icon: Ext.MessageBox.WARNING
+            }, this);
+        }else{
+            alert('Solo aplica a las solicitudes ');
+        }
     },
     //
 	tabsouth:[

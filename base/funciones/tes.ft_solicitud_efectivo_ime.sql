@@ -1142,6 +1142,101 @@ BEGIN
             return v_resp;
         end;
 
+	/*********************************
+    #TRANSACCION:  'TES_DEVSOL_IME'
+    #DESCRIPCION:   retroceso de solicitud hacia la interfaz dev-rep de cuenta documentada
+    #AUTOR:    MANU
+    #FECHA:    01-04-2020
+    ***********************************/
+
+    elsif(p_transaccion='TES_DEVSOL_IME')then
+
+        BEGIN
+        	IF v_parametros.id_solicitud_efectivo IS NOT NULL THEN
+            	--SOLEFE SE VUELVE INACTIVO
+            	UPDATE tes.tsolicitud_efectivo
+              	SET estado_reg='inactivo'
+              	WHERE id_solicitud_efectivo=v_parametros.id_solicitud_efectivo;
+
+                --hijo cuenta documentada
+                SELECT c.id_proceso_wf,c.id_estado_wf,c.id_cuenta_doc_fk
+                INTO v_id_proceso_wf,v_id_estado_actual,v_id_cuenta_doc
+                FROM cd.tcuenta_doc c
+                WHERE c.id_solicitud_efectivo = v_parametros.id_solicitud_efectivo;
+                --inactivo el ultimo estadowf de la cd
+                UPDATE wf.testado_wf
+                SET estado_reg='inactivo',fecha_mod=NOW(),id_usuario_mod = p_id_usuario
+                WHERE id_estado_wf=v_id_estado_actual;
+                --obtengo el codigo y estado de wf
+                SELECT te.codigo,te.id_tipo_estado
+                INTO v_registros1
+                FROM wf.ttipo_estado te
+                WHERE te.codigo='vbtesoreria' and te.nombre_estado='APROBACION MODALIDAD DE PAGO';
+                --nuevo estado del hijo
+                INSERT INTO wf.testado_wf(id_usuario_reg,id_proceso_wf,id_tipo_estado,id_estado_anterior)
+                VALUES (p_id_usuario,v_id_proceso_wf,v_registros1.id_tipo_estado,v_id_estado_actual)
+                RETURNING id_estado_wf
+                INTO v_id_estado_wf;
+                --hijo
+             	UPDATE cd.tcuenta_doc
+              	SET
+                estado = v_registros1.codigo,
+                id_estado_wf = v_id_estado_wf,
+                sw_nodo=null,
+                dev_tipo=NULL,
+                dev_a_favor_de=NULL,
+                dev_saldo=NULL,
+                dev_saldo_original=NULL,
+                dev_nombre_cheque=NULL,
+                id_caja_dev = NULL,
+                id_moneda_dev = null,
+                id_usuario_mod = p_id_usuario,
+                fecha_mod = now()
+              	WHERE id_solicitud_efectivo = v_parametros.id_solicitud_efectivo;
+                -- setear
+                v_id_proceso_wf=NULL;
+                v_id_cuenta_doc=NULL;
+                v_registros1=NULL;
+				--padre
+                SELECT c.id_proceso_wf,c.id_cuenta_doc
+                INTO v_id_proceso_wf,v_id_cuenta_doc
+                FROM cd.tcuenta_doc c
+                WHERE id_cuenta_doc=v_id_cuenta_doc;
+                --
+                --inactivo el ultimo estadowf de la cd
+                UPDATE wf.testado_wf
+                SET estado_reg='inactivo',fecha_mod=NOW(),id_usuario_mod = p_id_usuario
+                WHERE id_estado_wf=v_id_estado_actual;
+                --obtengo el codigo y estado de wf
+                SELECT te.codigo,te.id_tipo_estado
+                INTO v_registros1
+                FROM wf.ttipo_estado te
+                WHERE te.codigo='contabilizado' and te.nombre_estado='Contabilizado';
+                --nuevo estado del hijo
+                INSERT INTO wf.testado_wf(id_usuario_reg,id_proceso_wf,id_tipo_estado,id_estado_anterior)
+                VALUES (p_id_usuario,v_id_proceso_wf,v_registros1.id_tipo_estado,v_id_estado_actual)
+                RETURNING id_estado_wf
+                INTO v_id_estado_wf;
+                --actuliazcion del padre
+                UPDATE cd.tcuenta_doc
+                SET
+                estado = v_registros1.codigo,
+                id_estado_wf = v_id_estado_wf,
+                id_usuario_mod = p_id_usuario,
+                fecha_mod = now()
+                WHERE id_cuenta_doc=v_id_cuenta_doc;
+
+                --Definicion de la respuesta
+                v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Devolucion aceptada)');
+                v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_efectivo',v_parametros.id_solicitud_efectivo::varchar);
+            ELSE
+            	RAISE EXCEPTION 'Error, no existe ese registro';
+            END IF;
+
+            --Devuelve la respuesta
+            return v_resp;
+
+        end;
 
 
     else

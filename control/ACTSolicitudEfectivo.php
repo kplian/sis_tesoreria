@@ -612,6 +612,12 @@ class ACTSolicitudEfectivo extends ACTbase{
         $this->mensajeExito->setArchivoGenerado($nombreArchivo);
         $this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
     }
+    //#62
+    function devolverSol(){
+        $this->objFunc=$this->create('MODSolicitudEfectivo');
+        $this->res=$this->objFunc->devolverSol($this->objParam);
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
 }
 
 ?>
