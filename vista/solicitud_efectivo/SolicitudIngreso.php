@@ -3,6 +3,7 @@
 ISSUE      FORK       FECHA:              AUTOR                 DESCRIPCION
   #29      ETR     01/04/2019        MANUEL GUERRA          el cajero puede visualizar los ingresos
   #30    ETR     02/07/2019        MANUEL GUERRA 			mostrar la pestaña de iniciados en ingresos
+#64      ETR       18/03/2020        MANUEL GUERRA           mejora en reporte de entrega de efectivo
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -99,7 +100,7 @@ Phx.vista.SolicitudIngreso = Ext.extend(Phx.gridInterfaz,{
 		if (data) {
 			Phx.CP.loadingShow();
 			Ext.Ajax.request({
-				url : '../../sis_tesoreria/control/SolicitudEfectivo/reporteReciboEntrega',
+				url : '../../sis_tesoreria/control/SolicitudEfectivo/rEntregaEfectivo',//#64
 				params : {
 					'id_proceso_wf' : data.id_proceso_wf
 				},

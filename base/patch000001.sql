@@ -1938,3 +1938,31 @@ alter table tes.tplan_pago
 ALTER TABLE tes.tobligacion_pago--#48
   ADD COLUMN cod_tipo_relacion VARCHAR(50);--#48
 /*************************F-SCP-JUAN-TES-13-30/01/2020*************/
+
+
+
+
+/*************************I-SCP-RAC-TES-59-06/03/2020*************/
+
+CREATE INDEX tobligacion_pago_idx2 ON tes.tobligacion_pago
+  USING btree (num_tramite);
+  
+
+/*************************F-SCP-RAC-TES-59-06/03/2020*************/
+
+
+
+
+/*************************I-SCP-RAC-TES-60-11/03/2020*************/
+
+--------------- SQL ---------------
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD CONSTRAINT tts_libro_bancos_fk1 FOREIGN KEY (id_cuenta_bancaria)
+    REFERENCES tes.tcuenta_bancaria(id_cuenta_bancaria)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+    
+ 
+/*************************F-SCP-RAC-TES-60-11/03/2020*************/   

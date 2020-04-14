@@ -2,6 +2,7 @@
 /*
   ISSUE      FORK       FECHA:              AUTOR                 DESCRIPCION
   #28      ETR     01/04/2019        MANUEL GUERRA           Bloquea el boton de devoluciona todos los funcionarios que no tengan el rol de cajero
+#64      ETR       18/03/2020        MANUEL GUERRA           mejora en reporte de entrega de efectivo
 */
 
 header("content-type: text/javascript; charset=UTF-8");
@@ -16,14 +17,11 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 					   {name:'entregado',title:'<H1 align="center"><i class="fa fa-file-o"></i> Entregados</h1>',grupo:2,height:0},
                        {name:'finalizado',title:'<H1 align="center"><i class="fa fa-thumbs-o-up"></i> Finalizados</h1>',grupo:3,height:0}],
 	
-	actualizarSegunTab: function(name, indice){		
-		
-		
-			if(this.finCons){    		    					
-		    	this.store.baseParams.pes_estado = name;
-		    	this.load({params:{start:0, limit:this.tam_pag}});			    		
-			}
-				
+	actualizarSegunTab: function(name, indice){
+        if(this.finCons){
+            this.store.baseParams.pes_estado = name;
+            this.load({params:{start:0, limit:this.tam_pag}});
+        }
     },
 	
 	beditGroups: [0],
@@ -34,7 +32,6 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 	
 	constructor:function(config){
 		this.maestro=config.maestro;
-		
 		//this.initButtons = [this.cmbGestion];		
 		this.Atributos[this.getIndAtributo('monto_rendido')].config.renderer = function(value, p, record) {			
 			var saldo = parseFloat(record.data.monto) + parseFloat(record.data.monto_repuesto) - parseFloat(record.data.monto_rendido) - parseFloat(record.data.monto_devuelto);
@@ -668,12 +665,13 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		direction: 'DESC'
 	},
 		 
-	 preparaMenu:function(n){
-          var data = this.getSelectedData();
-          var tb =this.tbar;
-          this.getBoton('btnChequeoDocumentosWf').enable();
-          Phx.vista.SolicitudEfectivoSinDet.superclass.preparaMenu.call(this,n);
-          if (data['estado'] == 'borrador'){
+    preparaMenu:function(n)
+    {
+        var data = this.getSelectedData();
+        var tb =this.tbar;
+        this.getBoton('btnChequeoDocumentosWf').enable();
+        Phx.vista.SolicitudEfectivoSinDet.superclass.preparaMenu.call(this,n);
+        if (data['estado'] == 'borrador'){
               this.getBoton('fin_registro').enable();
 			  this.getBoton('edit').enable();
 			  this.getBoton('del').enable();
@@ -696,14 +694,14 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			//else
 			this.getBoton('btnRendicion').enable();
 			//this.getBoton('btnReciboEntrega').enable();
-		}else if (data['estado'] == 'finalizado'){
+		} else if (data['estado'] == 'finalizado'){
 			  this.getBoton('fin_registro').disable();
 			  this.getBoton('edit').disable();
 			  this.getBoton('del').disable();
 			  this.getBoton('btnRendicion').disable();
 			  this.getBoton('btnRendiciones').enable();
 			this.getBoton('diagrama_gantt').enable();
-		  }else if(data['estado'] == 'vbjefe'){
+        }else if(data['estado'] == 'vbjefe'){
 			  this.getBoton('fin_registro').disable();
 			  this.getBoton('edit').disable();
 			  this.getBoton('del').disable();
@@ -711,7 +709,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('diagrama_gantt').enable();
 			  //this.getBoton('btnReciboEntrega').disable();
 			  //this.getBoton('btnRendicionEfectivo').disable();
-		  }else{
+		} else{
               this.getBoton('fin_registro').disable();
 			  this.getBoton('edit').disable();
 			  this.getBoton('del').disable();
@@ -719,19 +717,18 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			  this.getBoton('diagrama_gantt').enable();
 			  //this.getBoton('btnReciboEntrega').disable();
 			  //this.getBoton('btnRendicionEfectivo').disable();
-          }
+        }
 
-		  if(data['saldo'] == 0.00){
-			  this.getBoton('btnDevol').disable();
-			  this.getBoton('btnRendicion').disable();
-		  }else{
-			  this.getBoton('btnDevol').enable();
-			  this.getBoton('btnRendicion').enable();
-		  }
-     },
+		if(data['saldo'] == 0.00){
+            this.getBoton('btnDevol').disable();
+			this.getBoton('btnRendicion').disable();
+        }else{
+		    this.getBoton('btnDevol').enable();
+			this.getBoton('btnRendicion').enable();
+		}
+    },
 
 	liberaMenu:function(){
-
 		var tb = Phx.vista.SolicitudEfectivoSinDet.superclass.liberaMenu.call(this);
 		if(tb) {
 			this.getBoton('btnChequeoDocumentosWf').disable();
@@ -840,17 +837,17 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 	},
 
 	loadCheckDocumentosSolWf:function() {		
-			var rec=this.sm.getSelected();
-			rec.data.nombreVista = this.nombreVista;
-			Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
-					'Chequear documento del WF',
-					{
-						width:'90%',
-						height:500
-					},
-					rec.data,
-					this.idContenedor,
-					'DocumentoWf'
+        var rec=this.sm.getSelected();
+        rec.data.nombreVista = this.nombreVista;
+        Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
+            'Chequear documento del WF',
+            {
+                width:'90%',
+                height:500
+            },
+            rec.data,
+            this.idContenedor,
+            'DocumentoWf'
 		)
 	},
 		
@@ -865,12 +862,11 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
             scope:this
         }); 
 	},
-	 
-	 
+
 	onBtnReciboEntrega : function() {
 		var rec=this.sm.getSelected();
         Ext.Ajax.request({
-            url:'../../sis_tesoreria/control/SolicitudEfectivo/reporteReciboEntrega',
+            url:'../../sis_tesoreria/control/SolicitudEfectivo/rEntregaEfectivo',//#63
             params:{'id_proceso_wf':rec.data.id_proceso_wf},
             success: this.successExport,
             failure: this.conexionFailure,
@@ -880,9 +876,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 	},
 	
 	onBtnRendicionEfectivo : function() {
-		
 		var rec=this.sm.getSelected();
-		
         Ext.Ajax.request({
             url:'../../sis_tesoreria/control/SolicitudEfectivo/reporteRendicionEfectivo',
             params:{'id_proceso_wf':rec.data.id_proceso_wf},
@@ -893,30 +887,31 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
         }); 
 	},
 	
-	sigEstado:function(){                   
-	  var rec=this.sm.getSelected();
-	  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
-								'Estado de Wf',
-								{
-									modal:true,
-									width:700,
-									height:450
-								}, {data:{
-									   id_estado_wf:rec.data.id_estado_wf,
-									   id_proceso_wf:rec.data.id_proceso_wf									  
-									}}, this.idContenedor,'FormEstadoWf',
-								{
-									config:[{
-											  event:'beforesave',
-											  delegate: this.onSaveWizard												  
-											}],
-									
-									scope:this
-								 });        
-			   
-	 },
+	sigEstado:function(){
+	    var rec=this.sm.getSelected();
+	    this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+            'Estado de Wf',
+            {
+                modal:true,
+                width:700,
+                height:450
+            }, {
+	            data:{
+                   id_estado_wf:rec.data.id_estado_wf,
+                   id_proceso_wf:rec.data.id_proceso_wf
+                }
+            }, this.idContenedor,'FormEstadoWf',
+            {
+                config:[{
+                    event:'beforesave',
+                    delegate: this.onSaveWizard
+                }],
+                scope:this
+            }
+        );
+	},
 	 
-	 antEstado:function(res){
+	antEstado:function(res){
          var rec=this.sm.getSelected();
          Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/AntFormEstadoWf.php',
             'Estado de Wf',
@@ -935,7 +930,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
              })
      },
    
-     onAntEstado: function(wizard,resp){
+    onAntEstado: function(wizard,resp){
             Phx.CP.loadingShow();
             Ext.Ajax.request({
                 // form:this.form.getForm().getEl(),
@@ -976,7 +971,6 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 	 
 	 onSaveWizard:function(wizard,resp){
 			Phx.CP.loadingShow();
-			
 			Ext.Ajax.request({
 				url:'../../sis_tesoreria/control/SolicitudEfectivo/siguienteEstadoSolicitudEfectivo',
 				params:{
@@ -1000,7 +994,7 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 		successDevolucion:function(resp){
 			this.reload();
 			Ext.Ajax.request({
-				url : '../../sis_tesoreria/control/SolicitudEfectivo/reporteReciboEntrega',
+				url : '../../sis_tesoreria/control/SolicitudEfectivo/rEntregaEfectivo',
 				params : {
 					'id_proceso_wf' : resp.argument.id_proceso_wf,
 					'aux': 'INGEFE'
@@ -1013,11 +1007,11 @@ Phx.vista.SolicitudEfectivoSinDet=Ext.extend(Phx.gridInterfaz,{
 			Phx.CP.loadingHide();            
 		},
 		
-		successWizard:function(resp){
-			Phx.CP.loadingHide();
-			resp.argument.wizard.panel.destroy()
-			this.reload();
-		 },
+    successWizard:function(resp){
+        Phx.CP.loadingHide();
+        resp.argument.wizard.panel.destroy()
+        this.reload();
+    },
 	 
 	bdel:true,
 	bsave:true,
