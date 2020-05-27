@@ -515,19 +515,7 @@ select param.f_import_tcatalogo ('insert','TES','Contra Documentos Embarque','CD
 select param.f_import_tcatalogo ('insert','TES','Pruebas FAT','PFAT','tipo_anticipo');
 /***********************************F-DAT-VAN-TES-0-06/12/2019*****************************************/
 
+/***********************************I-DAT-JJA-TES-0-26/05/2020*****************************************/
+select pxp.f_insert_tgui ('Saldo por pagar de proceso de compra', 'Saldo por pagar de proceso de compra', 'SALPAGPROCOM', 'si', 12, 'sis_tesoreria/reportes/formularios/Saldo_pagar_proceso_compra.php', 3, '', 'Saldo_pagar_proceso_compra', 'TES'); --#65
+/***********************************F-DAT-JJA-TES-0-26/05/2020*****************************************/
 
-
-/****************************I-DAT-MGM-TES-1-19/02/2020******************/
-INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
-VALUES (E'tes_control_pagos', E'no', E'Realiza el control para poder eliminar cualquier pago sin importar el el orden');
-
-/****************************F-DAT-MGM-TES-1-30/05/2020******************/
-
-
-/****************************I-DAT-RAC-TES-57-19/02/2020******************/
-
-INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
-VALUES 
-  (E'tes_control_sol_pago', E'si', E'Si o no, controla la solictudes de pagos ordenados');  
-
-/****************************F-DAT-RAC-TES-57-19/02/2020******************/ 

@@ -13,7 +13,7 @@
  	#5	 EndeETR		27/12/2018		EGS			Se añadio el dato de codigo de proveedor
  *  #35  ETR            07/10/2019      RAC         Adicionar descuento de anticipos en reporte de plan de pagos 
  *  #41  ENDETR         16/12/2019      JUAN        Reporte de información de pago
-
+ *  #65  ENDETR         26/05/2020      JUAN        SALDO POR PAGAR DE PROCESOS DE COMPRA
  * * */
 
 class MODPlanPago extends MODbase{
@@ -1150,6 +1150,51 @@ function listarPagos(){
         
         $this->captura('requiere_contrato','varchar');	
 		$this->captura('tipo','varchar');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();		
+		//Devuelve la respuesta
+
+		return $this->respuesta;
+	}
+	function ReporteSaldoPagarProcesoCompra(){//#65			
+
+		$this->procedimiento='tes.f_plan_pago_sel';
+		$this->transaccion='TES_SAPAGPROCOM_SEL';
+		$this->tipo_procedimiento='SEL';
+		$this->setCount(false);		
+
+		$this->captura('num_tramite','varchar');
+		$this->captura('nro_contrato','varchar');
+		$this->captura('codigo_proceso','varchar');
+		$this->captura('estado','varchar');		
+		$this->captura('rotulo_comercial','varchar');
+		$this->captura('cantidad_adju','int4');
+		$this->captura('precio_unitario_mb','numeric');
+
+		$this->captura('adjudicado_mb','numeric');
+		$this->captura('tipo_entrega','varchar');
+		$this->captura('ceco_techo','varchar');
+		$this->captura('tipo','varchar');
+		$this->captura('ceco','varchar');
+		$this->captura('partida','varchar');	
+        $this->captura('importe_mb','numeric');
+        $this->captura('descuento_anticipo','numeric');		
+        $this->captura('fecha','date');	
+        
+        $this->captura('mes','integer');	
+		$this->captura('anio','integer');
+		$this->captura('desc_plantilla','varchar');
+		$this->captura('sistema_procedencia','varchar');
+		$this->captura('estado_cuota','varchar');
+		$this->captura('desc_uo','varchar');
+		$this->captura('cuenta','varchar');
+		$this->captura('pais_proveedor','varchar');
+		
+		$this->captura('id_tipo_cc','int4');
+		$this->captura('id_gestion','int4');
+		$this->captura('id_periodo','int4');
+
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();		
