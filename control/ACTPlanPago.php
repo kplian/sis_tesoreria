@@ -12,6 +12,7 @@
  		  #5	EndeETR		27/12/2018		EGS				Se añadio el dato de codigo de proveedor
  *        #35   ETR         07/10/2019      RAC            Adicionar descuento de anticipos en reporte de plan de pagos 
  *        #41   ENDETR      16/12/2019      JUAN           Reporte de información de pago
+ *        #65   ENDETR      26/05/2020      JUAN           SALDO POR PAGAR DE PROCESOS DE COMPRA
  * */
 
 require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
@@ -24,6 +25,7 @@ require_once(dirname(__FILE__).'/../reportes/RConsultaOpObligacionPagoXls.php');
 require_once(dirname(__FILE__).'/../reportes/RObligacionPagosPendientesXls.php');
 
 require_once(dirname(__FILE__).'/../reportes/RInfPago.php');
+require_once(dirname(__FILE__).'/../reportes/RSaldoPagarProcesoCompra.php');
 
 class ACTPlanPago extends ACTbase{    
 			
@@ -534,6 +536,40 @@ class ACTPlanPago extends ACTbase{
 		$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se generó con éxito el reporte: '.$nombreArchivo,'control');
 		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
 		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+	}
+	function ReporteSaldoPagarProcesoCompra(){//#65
+        if($this->objParam->getParametro('id_gestion')){
+            $this->objParam->addFiltro(" (g.id_gestion = ''".$this->objParam->getParametro('id_gestion')."'' )");
+        }
+        if($this->objParam->getParametro('id_periodo')){
+            $this->objParam->addFiltro(" (p.id_periodo = ''".$this->objParam->getParametro('id_periodo')."'' )");
+        }
+        if($this->objParam->getParametro('id_tipo_cc')){
+            $this->objParam->addFiltro(" (t.id_tipo_cc = ''".$this->objParam->getParametro('id_tipo_cc')."'' )");
+        }
+
+        $this->objFunc = $this->create('MODPlanPago');
+        $this->res = $this->objFunc->ReporteSaldoPagarProcesoCompra($this->objParam);
+        $titulo = 'SALDO POR PAGAR DE PROCESOS DE COMPRA';
+        $nombreArchivo = uniqid(md5(session_id()) . $titulo);
+        $nombreArchivo .= '.xls';
+        $this->objParam->addParametro('nombre_archivo', $nombreArchivo);
+
+        /*$this->objParam->addParametro('fecha_ini', $this->objParam->getParametro('fecha_ini'));
+        $this->objParam->addParametro('fecha_fin', $this->objParam->getParametro('fecha_fin'));*/
+
+        //var_dump($this->res->datos); exit;
+
+        $this->objParam->addParametro('datos', $this->res->datos);
+        //Instancia la clase de excel
+        $this->objReporteFormato = new RSaldoPagarProcesoCompra($this->objParam);
+        $this->objReporteFormato->generarDatos();
+        $this->objReporteFormato->generarReporte();
+
+        $this->mensajeExito = new Mensaje();
+        $this->mensajeExito->setMensaje('EXITO', 'Reporte.php', 'Reporte generado','Se generó con éxito el reporte: ' . $nombreArchivo, 'control');
+        $this->mensajeExito->setArchivoGenerado($nombreArchivo);
+        $this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
 	}	
 
 }
