@@ -141,7 +141,7 @@ class RSaldoPagarProcesoCompra
         $this->docexcel->getActiveSheet()->getStyle('A5:Y5')->getAlignment()->setWrapText(true);
         $this->docexcel->getActiveSheet()->getStyle('A5:Y5')->applyFromArray($styleTitulos2);
 
-
+ 
 
         //*************************************Cabecera*****************************************
         $this->docexcel->getActiveSheet()->setCellValue('A5','Nº');
@@ -167,8 +167,8 @@ class RSaldoPagarProcesoCompra
         $this->docexcel->getActiveSheet()->setCellValue('T5','DESCRIPCIÓN PLANTILLA');
         $this->docexcel->getActiveSheet()->setCellValue('U5','SISTEMA PROCEDENCIA');
         $this->docexcel->getActiveSheet()->setCellValue('V5','ESTADO CUOTA');
-        $this->docexcel->getActiveSheet()->setCellValue('W5','DESC UO');
-        $this->docexcel->getActiveSheet()->setCellValue('X5','CUENTA');
+        $this->docexcel->getActiveSheet()->setCellValue('W5','GERENCIA');
+        $this->docexcel->getActiveSheet()->setCellValue('X5','GESTOR O SOLICITANTE');
         $this->docexcel->getActiveSheet()->setCellValue('Y5','PAÍS PROVEEDOR');
 
         /*$this->docexcel->getActiveSheet()->setCellValue('J5','SUBTOTAL C = A - B');
