@@ -19,7 +19,7 @@ header("content-type: text/javascript; charset=UTF-8");
 
         Atributos : [
 
-            {
+            /*{
                 config:{
                     name: 'id_entidad',
                     fieldLabel: 'Entidad',
@@ -63,12 +63,12 @@ header("content-type: text/javascript; charset=UTF-8");
                 egrid: true,
                 grid:true,
                 form:true
-            },
+            },*/
 			{
 	            config:{
 	                name:'id_gestion',
 	                fieldLabel:'Gestión',
-	                allowBlank:false,
+	                allowBlank:true,
 	                emptyText:'Gestión...',
 	                store: new Ext.data.JsonStore({
 	                         url: '../../sis_parametros/control/Gestion/listarGestion',
