@@ -5,6 +5,8 @@
 *@author  (admin)
 *@date 16-04-2013 01:45:48
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
+ ** ISSUE       AUTHOR          FECHA           DESCRIPCION
+    #66         EGS             30/07/2020      Se puede editar cuando el plan de pago este en pago y borrador
 */
 
 header("content-type: text/javascript; charset=UTF-8");
@@ -311,7 +313,7 @@ Phx.vista.Prorrateo=Ext.extend(Phx.gridInterfaz,{
           var tb =this.tbar;
           Phx.vista.Prorrateo.superclass.preparaMenu.call(this,n); 
           
-          if(this.maestro.estado != 'devengado' && this.maestro.estado != 'pagado'  && this.maestro.tipo != 'pagado'){
+          if(this.maestro.estado != 'devengado' && this.maestro.estado != 'pagado'  && this.maestro.tipo != 'borrador'){//#66
               
                this.getBoton('edit').enable();
           }
