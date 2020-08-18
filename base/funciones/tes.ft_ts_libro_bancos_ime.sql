@@ -1,13 +1,18 @@
---------------- SQL ---------------
+-- FUNCTION: tes.ft_ts_libro_bancos_ime(integer, integer, character varying, character varying)
 
-CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_ime (
-  p_administrador integer,
-  p_id_usuario integer,
-  p_tabla varchar,
-  p_transaccion varchar
-)
-RETURNS varchar AS
-$body$
+-- DROP FUNCTION tes.ft_ts_libro_bancos_ime(integer, integer, character varying, character varying);
+
+CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_ime(
+	p_administrador integer,
+	p_id_usuario integer,
+	p_tabla character varying,
+	p_transaccion character varying)
+    RETURNS character varying
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
 /**************************************************************************
  SISTEMA:		Tesoreria
  FUNCION: 		tes.ft_ts_libro_bancos_ime
@@ -21,6 +26,9 @@ $body$
  DESCRIPCION:
  AUTOR:
  FECHA:
+ ISSUE            FECHA:		      AUTOR                 DESCRIPCION
+
+ #67        	18-08-2020        MZM KPLIAN        actualizacion de proveedor por LB
 ***************************************************************************/
 
 DECLARE
@@ -468,7 +476,23 @@ BEGIN
             nro_deposito = v_parametros.nro_deposito
             WHERE id_libro_bancos=v_parametros.id_libro_bancos;
         end if;
-
+		
+		--#67
+		IF(v_parametros.tipo = 'cheque' and coalesce(v_parametros.id_proveedor,0)!=0) then
+		    if exists (select 1 from param.tproveedor where id_proveedor=v_parametros.id_proveedor and tipo='institucion') then
+			   update param.tinstitucion set
+			   email1=v_parametros.correo_proveedor
+			   where id_institucion=(select id_institucion from param.tproveedor where id_proveedor=v_parametros.id_proveedor);
+			else
+  			   update segu.tpersona set
+			   correo=v_parametros.correo_proveedor
+			   where id_persona=(select id_persona from param.tproveedor where id_proveedor=v_parametros.id_proveedor);
+			
+			end if;
+			
+		end if;
+		
+		
 			--Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Depósitos modificado(a)');
             v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_parametros.id_libro_bancos::varchar);
@@ -1205,9 +1229,7 @@ EXCEPTION
 		raise exception '%',v_resp;
 
 END;
-$body$
-LANGUAGE 'plpgsql'
-VOLATILE
-CALLED ON NULL INPUT
-SECURITY INVOKER
-COST 100;
+$BODY$;
+
+ALTER FUNCTION tes.ft_ts_libro_bancos_ime(integer, integer, character varying, character varying)
+    OWNER TO postgres;

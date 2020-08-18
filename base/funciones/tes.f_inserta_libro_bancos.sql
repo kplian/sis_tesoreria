@@ -1,12 +1,17 @@
---------------- SQL ---------------
+-- FUNCTION: tes.f_inserta_libro_bancos(integer, integer, hstore)
 
-CREATE OR REPLACE FUNCTION tes.f_inserta_libro_bancos (
-  p_administrador integer,
-  p_id_usuario integer,
-  p_hstore public.hstore
-)
-RETURNS varchar AS
-$body$
+-- DROP FUNCTION tes.f_inserta_libro_bancos(integer, integer, hstore);
+
+CREATE OR REPLACE FUNCTION tes.f_inserta_libro_bancos(
+	p_administrador integer,
+	p_id_usuario integer,
+	p_hstore hstore)
+    RETURNS character varying
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
 /**************************************************************************
  SISTEMA:		Tesoreria
  FUNCION: 		tes.f_inserta_libro_bancos
@@ -17,9 +22,9 @@ $body$
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
 
- DESCRIPCION:	
- AUTOR:			
- FECHA:		
+ ISSUE            FECHA:		      AUTOR                 DESCRIPCION
+
+ #67        		14-08-2020        MZM KPLIAN        		insertar id_proveedor en libro bancos para cheques a proveedores
 ***************************************************************************/
 
 DECLARE
@@ -53,6 +58,8 @@ DECLARE
     v_codigo_tipo_pro	varchar;
     v_sistema_origen	varchar;
     g_fecha			date;
+    v_id_proveedor	integer;
+    
     		    
 BEGIN
 
@@ -91,7 +98,7 @@ BEGIN
          ELSE 
          	g_fecha = p_hstore->'fecha';
          END IF;
-         
+        
          select id_periodo into v_id_periodo from
                         param.tperiodo per 
                        where per.fecha_ini <= g_fecha::date 
@@ -136,7 +143,7 @@ BEGIN
         -- 28 /04/2018  RAC - KPLIAN
         --Modificamos esta condiciones, siempre que tenga comprobante el proceso se generara de maneras disparada
         -- 
-        
+         
 		IF (p_hstore->'id_int_comprobante')::int4 is null THEN
         
         
@@ -256,6 +263,15 @@ BEGIN
                 
             END IF;    
 
+			--14.08.2020
+			select ob.id_proveedor 
+            into v_id_proveedor
+            from  conta.tint_comprobante cbte 
+            inner join tes.tplan_pago pp on pp.id_int_comprobante=cbte.id_int_comprobante
+            inner join tes.tobligacion_pago ob on ob.id_obligacion_pago=pp.id_obligacion_pago
+            inner join param.vproveedor prov on prov.id_proveedor=ob.id_proveedor
+            where cbte.id_int_comprobante=(p_hstore->'id_int_comprobante')::integer;
+
             IF(p_hstore ? 'fecha' = false)THEN
 
             	insert into tes.tts_libro_bancos(
@@ -286,6 +302,7 @@ BEGIN
                 comprobante_sigma,
                 id_int_comprobante,
                 nro_deposito
+                ,id_proveedor --14.08.2020
                 ) values(            
                 (p_hstore->'id_cuenta_bancaria')::integer,
                 upper(translate ((p_hstore->'a_favor')::varchar, 'áéíóúÁÉÍÓÚäëïöüÄËÏÖÜñ', 'aeiouAEIOUaeiouAEIOUÑ')),
@@ -314,10 +331,11 @@ BEGIN
                 (p_hstore->'comprobante_sigma')::varchar,
                 (p_hstore->'id_int_comprobante')::integer,				
                 (p_hstore->'nro_deposito')::integer
+                ,v_id_proveedor --14082020
                 )RETURNING id_libro_bancos into v_id_libro_bancos;    		
             
             ELSE
-              
+
               insert into tes.tts_libro_bancos(
                   id_cuenta_bancaria,
                   fecha,
@@ -347,6 +365,7 @@ BEGIN
                   comprobante_sigma,
                   id_int_comprobante,
                   nro_deposito
+                  ,id_proveedor --14082020
                   ) values(            
                   (p_hstore->'id_cuenta_bancaria')::integer,
                   (p_hstore->'fecha')::date,
@@ -375,7 +394,8 @@ BEGIN
                   (p_hstore->'sistema_origen')::varchar,
                   (p_hstore->'comprobante_sigma')::varchar,
                   (p_hstore->'id_int_comprobante')::integer,
-                  (p_hstore->'nro_deposito')::integer				
+                  (p_hstore->'nro_deposito')::integer	
+                  ,v_id_proveedor --14082020			
                   )RETURNING id_libro_bancos into v_id_libro_bancos;
     		
             END IF;
@@ -403,9 +423,7 @@ EXCEPTION
 		raise exception '%',v_resp;
 				        
 END;
-$body$
-LANGUAGE 'plpgsql'
-VOLATILE
-CALLED ON NULL INPUT
-SECURITY INVOKER
-COST 100;
+$BODY$;
+
+ALTER FUNCTION tes.f_inserta_libro_bancos(integer, integer, hstore)
+    OWNER TO postgres;
