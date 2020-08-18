@@ -5,6 +5,9 @@
 *@author  (admin)
 *@date 01-12-2013 09:10:17
 *@description Clase que envia los parametros requeridos a la Base de datos para la ejecucion de las funciones, y que recibe la respuesta del resultado de la ejecucion de las mismas
+ HISTORIAL DE MODIFICACIONES:
+     ISSUE 		   FECHA   			 AUTOR				 		DESCRIPCION:
+ * * #67           14/08/2020		 Mercedes Zambrana KPLIAN	Adicion de correo proveedor
 */
 
 class MODTsLibroBancos extends MODbase{
@@ -60,10 +63,14 @@ class MODTsLibroBancos extends MODbase{
 		$this->captura('notificado','varchar');
 		$this->captura('fondo_devolucion_retencion','varchar');
 		
+		$this->captura('correo_proveedor','varchar');//#67
+		$this->captura('id_proveedor','integer');//#67
+		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
 		//Devuelve la respuesta
+		//echo $this->getConsulta(); exit;
 		return $this->respuesta;
 	}
 		
@@ -170,7 +177,7 @@ class MODTsLibroBancos extends MODbase{
 		return $this->respuesta;
 	}
 			
-	function modificarTsLibroBancos(){
+	function modificarTsLibroBancos(){ 
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.ft_ts_libro_bancos_ime';
 		$this->transaccion='TES_LBAN_MOD';
@@ -197,11 +204,13 @@ class MODTsLibroBancos extends MODbase{
 		$this->setParametro('tipo','tipo','varchar');
 		$this->setParametro('id_finalidad','id_finalidad','int4');
 		$this->setParametro('nro_deposito','nro_deposito','int4');
-
+		//#67
+		$this->setParametro('id_proveedor','id_proveedor','int4');
+		$this->setParametro('correo_proveedor','correo_proveedor','varchar');
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
-
+//echo $this->getConsulta(); exit;
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
