@@ -19,6 +19,7 @@ $body$
  HISTORIAL DE MODIFICACIONES:
 * ISSUE       AUTHOR          FECHA           DESCRIPCION
    #66         EGS             30/07/2020      Se puede editar cuando el plan de pago este en pago y borrador
+   #MSA-30      EGS             25/08/2020      Se comenta validacion de prorrateo
 ***************************************************************************/
 
 DECLARE
@@ -132,13 +133,13 @@ BEGIN
             where pro.id_plan_pago = v_parametros.id_plan_pago
               and pro.estado_reg='activo' ;
 
-
+            /*#MSA-30 Se comenta validacion de control de prorrateo por no ser cuerente
             IF  (v_monto_registrado - COALESCE(v_registros.monto_ejecutar_mo,0) + COALESCE(v_parametros.monto_ejecutar_mo,0)  )  >  v_monto_ejecutar_total_mo THEN
 
               raise exception 'El total prorrateado no puede ser mayor que el monto a ejecutar para la cuota. (Total %, faltan %)',v_monto_ejecutar_total_mo,v_monto_ejecutar_total_mo-(v_monto_registrado - COALESCE(v_registros.monto_ejecutar_mo,0));
 
 
-            END IF;
+            END IF;*/
 
             --asumimos que el tipo de cambio del pagado es igual al tipo de cambio del devengado
             --recupera el tipo de cambio del devengado
