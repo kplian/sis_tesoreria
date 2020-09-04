@@ -4222,6 +4222,7 @@ GRANT ALL ON TABLE tes.vlibro_bancos TO postgres;
  /***********************************F-DEP-MZM-TES-67-17/08/2020****************************************/
 
  /***********************************I-DEP-MZM-TES-67-02/09/2020****************************************/
+ DROP VIEW tes.vlibro_bancos;
  CREATE OR REPLACE VIEW tes.vlibro_bancos(
     id_libro_bancos,
     num_tramite,
