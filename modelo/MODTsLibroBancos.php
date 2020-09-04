@@ -8,6 +8,7 @@
  HISTORIAL DE MODIFICACIONES:
      ISSUE 		   FECHA   			 AUTOR				 		DESCRIPCION:
  * * #67           14/08/2020		 Mercedes Zambrana KPLIAN	Adicion de correo proveedor
+ * * #67           02/09/2020		 Mercedes Zambrana KPLIAN	extension de correo proveedor para todos los origenes
 */
 
 class MODTsLibroBancos extends MODbase{
@@ -64,7 +65,9 @@ class MODTsLibroBancos extends MODbase{
 		$this->captura('fondo_devolucion_retencion','varchar');
 		
 		$this->captura('correo_proveedor','varchar');//#67
-		$this->captura('id_proveedor','integer');//#67
+		$this->captura('tabla_correo','varchar');//#67
+		$this->captura('columna_correo','varchar');//#67
+		$this->captura('id_columna_correo','integer');//#67
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -168,7 +171,7 @@ class MODTsLibroBancos extends MODbase{
 		$this->setParametro('estado_reg','estado_reg','varchar');
 		$this->setParametro('tipo','tipo','varchar');
 		$this->setParametro('id_finalidad','id_finalidad','int4');
-
+		$this->setParametro('correo_proveedor','correo_proveedor','varchar');
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
@@ -205,8 +208,12 @@ class MODTsLibroBancos extends MODbase{
 		$this->setParametro('id_finalidad','id_finalidad','int4');
 		$this->setParametro('nro_deposito','nro_deposito','int4');
 		//#67
-		$this->setParametro('id_proveedor','id_proveedor','int4');
+		
 		$this->setParametro('correo_proveedor','correo_proveedor','varchar');
+		$this->setParametro('tabla_correo','tabla_correo','varchar');
+		$this->setParametro('columna_correo','columna_correo','varchar');
+		$this->setParametro('id_columna_correo','id_columna_correo','int4');
+		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();

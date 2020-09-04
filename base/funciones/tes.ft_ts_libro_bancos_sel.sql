@@ -102,7 +102,8 @@ BEGIN
                         sistema_origen,
                         notificado,
                         fondo_devolucion_retencion
-						,correo_proveedor, id_proveedor
+						,correo_proveedor, tabla_correo,
+                        columna_correo, id_columna_correo
                         from tes.vlibro_bancos lban
 				        where  ';
 

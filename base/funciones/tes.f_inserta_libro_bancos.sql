@@ -25,6 +25,7 @@ AS $BODY$
  ISSUE            FECHA:		      AUTOR                 DESCRIPCION
 
  #67        		14-08-2020        MZM KPLIAN        		insertar id_proveedor en libro bancos para cheques a proveedores
+ #67				03.09.2020		  MZM KPLIAN        		ampliar y generalizar el registro de correo para todos los origenes de LB
 ***************************************************************************/
 
 DECLARE
@@ -59,6 +60,11 @@ DECLARE
     v_sistema_origen	varchar;
     g_fecha			date;
     v_id_proveedor	integer;
+    v_detalle record;
+    v_tabla varchar;
+    v_campo	varchar;
+    v_id	integer;
+    v_correo varchar;
     
     		    
 BEGIN
@@ -264,13 +270,74 @@ BEGIN
             END IF;    
 
 			--14.08.2020
-			select ob.id_proveedor 
+/*			select ob.id_proveedor 
             into v_id_proveedor
             from  conta.tint_comprobante cbte 
             inner join tes.tplan_pago pp on pp.id_int_comprobante=cbte.id_int_comprobante
             inner join tes.tobligacion_pago ob on ob.id_obligacion_pago=pp.id_obligacion_pago
             inner join param.vproveedor prov on prov.id_proveedor=ob.id_proveedor
-            where cbte.id_int_comprobante=(p_hstore->'id_int_comprobante')::integer;
+            where cbte.id_int_comprobante=(p_hstore->'id_int_comprobante')::integer;*/
+            
+
+            
+         select a.* into v_detalle from ( (select distinct   t.id_auxiliar ,0 as id_proveedor, a.codigo_auxiliar,
+            t.id_int_comprobante, 1 as orden
+            from conta.tint_transaccion t 
+            inner join conta.tauxiliar a on t.id_auxiliar=a.id_auxiliar  and t.id_int_comprobante=(p_hstore->'id_int_comprobante')::integer
+            and ( a.codigo_auxiliar like 'FUN%' 
+            or a.codigo_auxiliar like 'ODT%'))
+		    union            
+            ( select distinct   t.id_auxiliar , p.id_proveedor, a.codigo_auxiliar,
+            t.id_int_comprobante, 2 as orden
+            from conta.tint_transaccion t 
+            inner join conta.tauxiliar a on t.id_auxiliar=a.id_auxiliar  and t.id_int_comprobante=(p_hstore->'id_int_comprobante')::integer
+            inner join param.tproveedor p on p.id_auxiliar = a.id_auxiliar 
+             )) as a  order by a.orden limit 1;
+            
+			--if (v_detalle.codigo_auxiliar is not null) then
+                if (v_detalle.codigo_auxiliar like 'FUN%' 
+                    or v_detalle.codigo_auxiliar like 'ODT%') then  -- es funcionario
+                    --validamos q este activo
+                    select id_funcionario , email_empresa
+                    into v_id_proveedor,v_correo
+                    from orga.tfuncionario where codigo=v_detalle.codigo_auxiliar;
+
+                    if (v_id_proveedor is not null) then
+                        if (plani.f_es_funcionario_vigente(v_id_proveedor, now()::date)) then
+                        	v_tabla='orga.tfuncionario' ;
+	    					v_campo='id_funcionario'	;
+    						v_id=v_id_proveedor	;
+                        end if;
+                    else
+                    	raise exception 'el auxiliar es de un funcionario pero el mismo no existe';
+                    end if;
+                else
+                	if(v_detalle.id_proveedor is not null) then
+                      select email,  id_proveedor
+                      into v_correo, v_id
+                      from param.vproveedor  where id_proveedor=v_detalle.id_proveedor;
+                      
+                      v_tabla='param.tproveedor' ;
+                      v_campo='id_proveedor'	;
+    				
+					end if;
+                end if;
+          
+
+          
+            
+            if (p_hstore->'correo_proveedor' is not null and length(p_hstore->'correo_proveedor')!=0 ) then
+               v_correo:=p_hstore->'correo_proveedor';
+            end if;
+            --si no encontro nada es q no es funcionario ni proveedor, intentamos ubicar de los registros historicos de libro_bancos
+            if (v_correo is null ) then
+            
+            	select correo into v_correo from tes.tts_libro_bancos where 
+                upper(a_favor)= upper(translate ((rtrim(p_hstore->'a_favor'))::varchar, 'áéíóúÁÉÍÓÚäëïöüÄËÏÖÜñ', 'aeiouAEIOUaeiouAEIOUÑ'))
+                order by id_libro_bancos desc limit 1;
+             end if;
+
+
 
             IF(p_hstore ? 'fecha' = false)THEN
 
@@ -302,7 +369,12 @@ BEGIN
                 comprobante_sigma,
                 id_int_comprobante,
                 nro_deposito
-                ,id_proveedor --14.08.2020
+                --,id_proveedor --14.08.2020
+                ,tabla_correo,
+                columna_correo,
+                id_columna_correo,
+                correo
+                
                 ) values(            
                 (p_hstore->'id_cuenta_bancaria')::integer,
                 upper(translate ((p_hstore->'a_favor')::varchar, 'áéíóúÁÉÍÓÚäëïöüÄËÏÖÜñ', 'aeiouAEIOUaeiouAEIOUÑ')),
@@ -331,7 +403,11 @@ BEGIN
                 (p_hstore->'comprobante_sigma')::varchar,
                 (p_hstore->'id_int_comprobante')::integer,				
                 (p_hstore->'nro_deposito')::integer
-                ,v_id_proveedor --14082020
+                --,v_id_proveedor --14082020
+                ,v_tabla,
+                v_campo,
+                v_id,
+                v_correo
                 )RETURNING id_libro_bancos into v_id_libro_bancos;    		
             
             ELSE
@@ -365,7 +441,11 @@ BEGIN
                   comprobante_sigma,
                   id_int_comprobante,
                   nro_deposito
-                  ,id_proveedor --14082020
+                  --,id_proveedor --14082020
+                  ,tabla_correo,
+                  columna_correo,
+                  id_columna_correo,
+                  correo
                   ) values(            
                   (p_hstore->'id_cuenta_bancaria')::integer,
                   (p_hstore->'fecha')::date,
@@ -395,7 +475,11 @@ BEGIN
                   (p_hstore->'comprobante_sigma')::varchar,
                   (p_hstore->'id_int_comprobante')::integer,
                   (p_hstore->'nro_deposito')::integer	
-                  ,v_id_proveedor --14082020			
+                  --,v_id_proveedor --14082020			
+                   ,v_tabla,
+                  v_campo,
+                  v_id,
+                  v_correo
                   )RETURNING id_libro_bancos into v_id_libro_bancos;
     		
             END IF;
