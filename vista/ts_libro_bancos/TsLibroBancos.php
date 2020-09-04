@@ -651,13 +651,31 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			id_grupo:1,
 			grid:true,
 			form:true
-		},
-		{
+
+		},{
 			//configuracion del componente
 			config:{
 					labelSeparator:'',
 					inputType:'hidden',
-					name: 'id_proveedor'
+					name: 'tabla_correo'
+			},
+			type:'Field',
+			form:true 
+		},{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'columna_correo'
+			},
+			type:'Field',
+			form:true 
+		},{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_columna_correo'
 			},
 			type:'Field',
 			form:true 
@@ -710,7 +728,10 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		{name:'nombre_regional', type: 'string'},
 		{name:'sistema_origen', type: 'string'},
 		{name:'correo_proveedor', type: 'string'}//#67
-		,{name:'id_proveedor', type: 'numeric'}//#67
+		
+		,{name:'tabla_correo', type: 'string'}//#67
+		,{name:'columna_correo', type: 'string'}//#67
+		,{name:'id_columna_correo', type: 'numeric'}//#67
 	],
 	sortInfo:{
 		field: 'fecha',
@@ -1130,9 +1151,9 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			if(confirm('¿Está seguro de imprimir el cheque?'))
 			{				
 				var data=this.sm.getSelected().data;
-				console.log(data);
 				
-				if(data.nro_cheque==null || (data.tipo=='cheque' && data.correo_proveedor==null && data.id_proveedor>0 ) ){ 
+				
+				if(data.nro_cheque==null || data.correo_proveedor==null ){ 
 					Ext.MessageBox.alert('Estado', 'Edite el registro, y agregue los datos faltantes');
 				}else{
 					Phx.CP.loadingShow();

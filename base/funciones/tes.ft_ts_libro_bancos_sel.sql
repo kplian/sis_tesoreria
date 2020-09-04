@@ -102,7 +102,8 @@ BEGIN
                         sistema_origen,
                         notificado,
                         fondo_devolucion_retencion
-						,correo_proveedor, id_proveedor
+						,correo_proveedor, tabla_correo,
+                        columna_correo, id_columna_correo
                         from tes.vlibro_bancos lban
 				        where  ';
 
@@ -813,6 +814,6 @@ EXCEPTION
 			raise exception '%',v_resp;
 END;
 $BODY$;
-
+ 
 ALTER FUNCTION tes.ft_ts_libro_bancos_sel(integer, integer, character varying, character varying)
     OWNER TO postgres;
