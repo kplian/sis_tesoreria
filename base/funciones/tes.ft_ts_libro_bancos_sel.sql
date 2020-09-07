@@ -1,13 +1,18 @@
---------------- SQL ---------------
+-- FUNCTION: tes.ft_ts_libro_bancos_sel(integer, integer, character varying, character varying)
 
-CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_sel (
-  p_administrador integer,
-  p_id_usuario integer,
-  p_tabla varchar,
-  p_transaccion varchar
-)
-RETURNS varchar AS
-$body$
+-- DROP FUNCTION tes.ft_ts_libro_bancos_sel(integer, integer, character varying, character varying);
+
+CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_sel(
+	p_administrador integer,
+	p_id_usuario integer,
+	p_tabla character varying,
+	p_transaccion character varying)
+    RETURNS character varying
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
 /**************************************************************************
  SISTEMA:		Tesoreria
  FUNCION: 		tes.ft_ts_libro_bancos_sel
@@ -24,6 +29,7 @@ $body$
  
  ISSUE 		   FECHA   			 AUTOR				 DESCRIPCION:
   #27 		 09/04/2019		  Manuel Guerra	      quitar el campo nro_cheque en reporte
+  #67		 14.08.2020		  Mercedes Zambrana KPLIAN	listar correo proveedor
 ***************************************************************************/
 
 DECLARE
@@ -96,6 +102,8 @@ BEGIN
                         sistema_origen,
                         notificado,
                         fondo_devolucion_retencion
+						,correo_proveedor, tabla_correo,
+                        columna_correo, id_columna_correo
                         from tes.vlibro_bancos lban
 				        where  ';
 
@@ -512,7 +520,6 @@ BEGIN
 
                                               ) as saldo,
 
-
                             (Select sum(lbr.importe_deposito)
                                              From tes.tts_libro_bancos lbr
                                              where lbr.fecha BETWEEN  '''||v_parametros.fecha_ini_reg||''' and LB.fecha
@@ -588,10 +595,8 @@ BEGIN
                                               end
                                               ) as total_haber,
 
-
                            coalesce( LB.indice,0),
                             LB.fecha
-
 
                             FROM tes.tts_libro_bancos LB
                             LEFT JOIN tes.tts_libro_bancos lbp on lbp.id_libro_bancos=LB.id_libro_bancos_fk
@@ -666,7 +671,6 @@ BEGIN
                                              and ((lbr.fecha < LB.fecha) or (lbr.fecha = LB.fecha and lbr.indice <= LB.indice))
 
                                               )  as saldo,
-
 
                              (Select sum(lbr.importe_deposito)
                                              From tes.tts_libro_bancos lbr
@@ -743,10 +747,8 @@ BEGIN
                                               end
                                               )  as total_haber,
 
-
                             LB.indice,
                             LB.fecha
-
 
                             FROM tes.tts_libro_bancos LB
                             LEFT JOIN tes.tts_libro_bancos lbp on lbp.id_libro_bancos=LB.id_libro_bancos_fk
@@ -811,9 +813,7 @@ EXCEPTION
 			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
 			raise exception '%',v_resp;
 END;
-$body$
-LANGUAGE 'plpgsql'
-VOLATILE
-CALLED ON NULL INPUT
-SECURITY INVOKER
-COST 100;
+$BODY$;
+ 
+ALTER FUNCTION tes.ft_ts_libro_bancos_sel(integer, integer, character varying, character varying)
+    OWNER TO postgres;

@@ -1,13 +1,18 @@
---------------- SQL ---------------
+-- FUNCTION: tes.ft_ts_libro_bancos_ime(integer, integer, character varying, character varying)
 
-CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_ime (
-  p_administrador integer,
-  p_id_usuario integer,
-  p_tabla varchar,
-  p_transaccion varchar
-)
-RETURNS varchar AS
-$body$
+-- DROP FUNCTION tes.ft_ts_libro_bancos_ime(integer, integer, character varying, character varying);
+
+CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_ime(
+	p_administrador integer,
+	p_id_usuario integer,
+	p_tabla character varying,
+	p_transaccion character varying)
+    RETURNS character varying
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
 /**************************************************************************
  SISTEMA:		Tesoreria
  FUNCION: 		tes.ft_ts_libro_bancos_ime
@@ -21,6 +26,9 @@ $body$
  DESCRIPCION:
  AUTOR:
  FECHA:
+ ISSUE            FECHA:		      AUTOR                 DESCRIPCION
+
+ #67        	18-08-2020        MZM KPLIAN        actualizacion de proveedor por LB
 ***************************************************************************/
 
 DECLARE
@@ -79,6 +87,9 @@ DECLARE
 	g_origen				varchar;
     g_nro_tramite			varchar;
     g_id_int_comprobante	integer;
+    v_correo	varchar; --#67
+    
+    
 BEGIN
     v_nombre_funcion = 'tes.ft_ts_libro_bancos_ime';
     v_parametros = pxp.f_get_record(p_tabla);
@@ -259,7 +270,7 @@ BEGIN
 
 	elsif(p_transaccion='TES_LBAN_MOD')then
 
-		begin
+		begin 
 
         	--VERIFICA EXISTENCIA DEL REGISTRO
             IF NOT EXISTS(SELECT 1 FROM tes.tts_libro_bancos LBRBAN
@@ -468,7 +479,45 @@ BEGIN
             nro_deposito = v_parametros.nro_deposito
             WHERE id_libro_bancos=v_parametros.id_libro_bancos;
         end if;
-
+		
+		--#67
+		--IF(v_parametros.tipo = 'cheque' and coalesce(v_parametros.id_proveedor,0)!=0) then
+		   -- if exists (select 1 from param.tproveedor where id_proveedor=v_parametros.id_proveedor and tipo='institucion') then
+			 /*  update param.tinstitucion set
+			   email1=v_parametros.correo_proveedor
+			   where id_institucion=(select id_institucion from param.tproveedor where id_proveedor=v_parametros.id_proveedor);
+			else
+  			   update segu.tpersona set
+			   correo=v_parametros.correo_proveedor
+			   where id_persona=(select id_persona from param.tproveedor where id_proveedor=v_parametros.id_proveedor);
+			
+			end if;*/
+			
+		--end if; 
+        --#67
+        if (v_parametros.tabla_correo='orga.tfuncionario') then
+            update orga.tfuncionario
+            set email_empresa=v_parametros.correo_proveedor
+            where id_funcionario=v_parametros.id_columna_correo;
+        elsif (v_parametros.tabla_correo='param.tproveedor') then
+        	if exists (select 1 from param.tproveedor where id_proveedor=v_parametros.id_columna_correo and tipo='institucion') then
+			   update param.tinstitucion set
+			   email1=v_parametros.correo_proveedor
+			   where id_institucion=(select id_institucion from param.tproveedor where id_proveedor=v_parametros.id_columna_correo);
+			else
+  			   update segu.tpersona set
+			   correo=v_parametros.correo_proveedor
+			   where id_persona=(select id_persona from param.tproveedor where id_proveedor=v_parametros.id_columna_correo);
+			
+			end if;
+        end if;
+        
+        
+        update tes.tts_libro_bancos 
+        set correo=v_parametros.correo_proveedor
+        where id_libro_bancos=v_parametros.id_libro_bancos;
+        
+        
 			--Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Depósitos modificado(a)');
             v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_parametros.id_libro_bancos::varchar);
@@ -593,6 +642,7 @@ BEGIN
             lb.id_cuenta_bancaria,
             lb.fecha,
             lb.indice
+            ,lb.correo --#67
         into
             v_id_libro_bancos,
             v_id_proceso_wf,
@@ -603,6 +653,7 @@ BEGIN
             v_id_cuenta_bancaria,
             g_fecha,
             g_indice
+            ,v_correo --#67
         from tes.tts_libro_bancos  lb
         --inner  join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
         where lb.id_proceso_wf  = v_parametros.id_proceso_wf_act;
@@ -681,7 +732,7 @@ BEGIN
                                                              v_tipo_noti,
                                                              --NULL);
                                                              v_titulo);
-
+                                                          
           --------------------------------------
           -- registra los procesos disparados
           --------------------------------------
@@ -897,6 +948,11 @@ BEGIN
           if(v_codigo_estado_siguiente='impreso')then
           	if(v_tipo='cheque' AND v_nro_cheque is null)then
             	raise exception 'No puede pasar al siguiente estado si no esta registrado el numero de cheque';
+            end if;
+            
+            --02.09.2020
+            if (v_correo is null or length(v_correo)=0) then
+              raise exception 'No puede pasar al siguiente estado si no esta registrado el correo para la noificacion';
             end if;
 
             if(v_origen='FONDOS_AVANCE')then
@@ -1205,9 +1261,7 @@ EXCEPTION
 		raise exception '%',v_resp;
 
 END;
-$body$
-LANGUAGE 'plpgsql'
-VOLATILE
-CALLED ON NULL INPUT
-SECURITY INVOKER
-COST 100;
+$BODY$;
+
+ALTER FUNCTION tes.ft_ts_libro_bancos_ime(integer, integer, character varying, character varying)
+    OWNER TO postgres;

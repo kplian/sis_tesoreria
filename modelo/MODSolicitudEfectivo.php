@@ -2,6 +2,7 @@
 /*
   ISSUE      FORK       FECHA:              AUTOR                 DESCRIPCION
   #29      ETR     01/04/2019      MANUEL GUERRA           el inmediato superior sera responsable de los funcionarios inactivos
+#62      ETR       18/03/2020        MANUEL GUERRA           envio de param, para la paginacion, toolbar ayuda, botones de envio de correo y rechazo de sol por tiempo
 */
 
 class MODSolicitudEfectivo extends MODbase{
@@ -9,10 +10,10 @@ class MODSolicitudEfectivo extends MODbase{
 	function __construct(CTParametro $pParam){
 		parent::__construct($pParam);
 	}
-			
+	//	#62
 	function listarSolicitudEfectivo(){
 		//Definicion de variables para ejecucion del procedimientp
-		$this->procedimiento='tes.ft_solicitud_efectivo_sel';
+        $this->procedimiento='tes.ft_solicitud_efectivo_sel';
 		$this->transaccion='TES_SOLEFE_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
 		
@@ -51,6 +52,10 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->captura('usr_reg','varchar');
 		$this->captura('usr_mod','varchar');
 		$this->captura('solicitud_efectivo_padre','varchar');
+        $this->captura('fecha_mov','date');
+        $this->captura('diferencia','int4');
+        $this->captura('id_tipo_solicitud','int4');
+        $this->captura('nombre','varchar');
 		$this->captura('saldo','numeric');
 		
 		//Ejecuta la instruccion
@@ -61,7 +66,7 @@ class MODSolicitudEfectivo extends MODbase{
 	}
 
    function listarSolicitudIngreso(){
-		//Definicion de variables para ejecucion del procedimientp
+        //Definicion de variables para ejecucion del procedimientp
 		$this->procedimiento='tes.ft_solicitud_efectivo_sel';
 		$this->transaccion='TES_INGRESOL_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
@@ -102,18 +107,14 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->captura('usr_mod','varchar');
 		$this->captura('solicitud_efectivo_padre','varchar');
 		$this->captura('saldo','numeric');
-		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
 		//Devuelve la respuesta
 		return $this->respuesta;
-	}
+   }
 
-
-
-			
-	function insertarSolicitudEfectivo(){
+   function insertarSolicitudEfectivo(){
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.ft_solicitud_efectivo_ime';
 		$this->transaccion='TES_SOLEFE_INS';
@@ -130,24 +131,21 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->setParametro('motivo','motivo','text');
 		$this->setParametro('id_funcionario','id_funcionario','int4');
 		$this->setParametro('fecha','fecha','date');
-		
 		$this->setParametro('tipo_solicitud','tipo_solicitud','varchar');
 		$this->setParametro('id_solicitud_efectivo_fk','id_solicitud_efectivo_fk','int4');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
-
 		//Devuelve la respuesta
 		return $this->respuesta;
-	}
+   }
 			
 	function modificarSolicitudEfectivo(){
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.ft_solicitud_efectivo_ime';
 		$this->transaccion='TES_SOLEFE_MOD';
 		$this->tipo_procedimiento='IME';
-				
 		//Define los parametros para la funcion
 		$this->setParametro('id_solicitud_efectivo','id_solicitud_efectivo','int4');
 		$this->setParametro('id_caja','id_caja','int4');
@@ -160,13 +158,10 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->setParametro('motivo','motivo','text');
 		$this->setParametro('id_funcionario','id_funcionario','int4');
 		$this->setParametro('fecha','fecha','date');
-
 		$this->setParametro('tipo_solicitud','tipo_solicitud','varchar');
-			
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
-
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
@@ -176,33 +171,26 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->procedimiento='tes.ft_solicitud_efectivo_ime';
 		$this->transaccion='TES_SOLEFE_ELI';
 		$this->tipo_procedimiento='IME';
-				
 		//Define los parametros para la funcion
 		$this->setParametro('id_solicitud_efectivo','id_solicitud_efectivo','int4');
-
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
-
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
 
 	function ampliarDiasRendicion(){
-
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='tes.ft_solicitud_efectivo_ime';
 		$this->transaccion='TES_AMPREN_IME';
 		$this->tipo_procedimiento='IME';//tipo de transaccion
-
 		//Define los parametros para la funcion
 		$this->setParametro('id_solicitud_efectivo','id_solicitud_efectivo','int4');
 		$this->setParametro('dias_ampliado','dias_ampliado','int4');
-
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
-
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
@@ -212,7 +200,6 @@ class MODSolicitudEfectivo extends MODbase{
         $this->procedimiento='tes.ft_solicitud_efectivo_ime';
         $this->transaccion='TES_SIGESOLEFE_IME';
         $this->tipo_procedimiento='IME';
-        
         //Define los parametros para la funcion
         $this->setParametro('id_proceso_wf_act','id_proceso_wf_act','int4');
         $this->setParametro('id_estado_wf_act','id_estado_wf_act','int4');
@@ -221,14 +208,11 @@ class MODSolicitudEfectivo extends MODbase{
         $this->setParametro('id_funcionario_wf','id_funcionario_wf','int4');
         $this->setParametro('id_depto_wf','id_depto_wf','int4');
         $this->setParametro('obs','obs','text');
-		
         $this->setParametro('saldo','saldo','numeric');
-        $this->setParametro('devolucion_dinero','devolucion_dinero','varchar');		
-
+        $this->setParametro('devolucion_dinero','devolucion_dinero','varchar');
         //Ejecuta la instruccion
         $this->armarConsulta();
         $this->ejecutarConsulta();
-
         //Devuelve la respuesta
         return $this->respuesta;
     }
@@ -248,11 +232,9 @@ class MODSolicitudEfectivo extends MODbase{
         $this->setParametro('id_depto_wf','id_depto_wf','int4');
         $this->setParametro('obs','obs','text');
         $this->setParametro('json_procesos','json_procesos','text');
-
         //Ejecuta la instruccion
         $this->armarConsulta();
         $this->ejecutarConsulta();
-
         //Devuelve la respuesta
         return $this->respuesta;
     }
@@ -286,7 +268,6 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->procedimiento='tes.ft_solicitud_efectivo_sel';
 		$this->transaccion='TES_REPEFE_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
-				
 		//Definicion de la lista del resultado del query
 		$this->captura('codigo','varchar');
 		$this->captura('monto','numeric');		
@@ -343,11 +324,9 @@ class MODSolicitudEfectivo extends MODbase{
 		$this->procedimiento='tes.ft_solicitud_efectivo_sel';
 		$this->transaccion='TES_MEMOCJ_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
-		$this->setCount(false);		
-		
+		$this->setCount(false);
 		//$this->setParametro('id_libro_bancos','id_libro_bancos','int4');
 		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');
-
 		//Definicion de la lista del resultado del query
 		$this->captura('fecha','date');
 		$this->captura('nro_cheque','int4');		
@@ -390,7 +369,7 @@ class MODSolicitudEfectivo extends MODbase{
 		return $this->respuesta;
 	}
 	
-	function insertarSolicitudEfectivoCompleta(){
+    function insertarSolicitudEfectivoCompleta(){
 		
 		//Abre conexion con PDO
 		$cone = new conexion();
@@ -399,12 +378,9 @@ class MODSolicitudEfectivo extends MODbase{
 		try {
 			$link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);		
 		  	$link->beginTransaction();
-			
 			/////////////////////////
 			//  inserta cabecera de la solicitud de compra
 			///////////////////////
-			
-			
 			//Definicion de variables para ejecucion del procedimiento
 			$this->procedimiento = 'tes.ft_solicitud_efectivo_ime';
 			$this->transaccion = 'TES_SOLEFE_INS';
@@ -435,21 +411,15 @@ class MODSolicitudEfectivo extends MODbase{
 				throw new Exception("Error al ejecutar en la bd", 3);
 			}
 			$respuesta = $resp_procedimiento['datos'];
-			
-			$id_solicitud_efectivo = $respuesta['id_solicitud_efectivo'];
+            $id_solicitud_efectivo = $respuesta['id_solicitud_efectivo'];
 			
 			//////////////////////////////////////////////
 			//inserta detalle de la solicitud de compra
 			/////////////////////////////////////////////
-			
-			
-			
 			//decodifica JSON  de detalles 
-			$json_detalle = $this->aParam->_json_decode($this->aParam->getParametro('json_new_records'));			
-			
+			$json_detalle = $this->aParam->_json_decode($this->aParam->getParametro('json_new_records'));
 			//var_dump($json_detalle)	;
 			foreach($json_detalle as $f){
-				
 				$this->resetParametros();
 				//Definicion de variables para ejecucion del procedimiento
 			    $this->procedimiento='tes.ft_solicitud_efectivo_det_ime';
@@ -483,12 +453,7 @@ class MODSolicitudEfectivo extends MODbase{
 				if ($resp_procedimiento['tipo_respuesta']=='ERROR') {
 					throw new Exception("Error al insertar detalle  en la bd", 3);
 				}
-                    
-                        
             }
-			
-			
-			
 			//si todo va bien confirmamos y regresamos el resultado
 			$link->commit();
 			$this->respuesta=new Mensaje();
@@ -496,19 +461,65 @@ class MODSolicitudEfectivo extends MODbase{
 			$this->respuesta->setDatos($respuesta);
 		} 
 	    catch (Exception $e) {			
-		    	$link->rollBack();
-				$this->respuesta=new Mensaje();
-				if ($e->getCode() == 3) {//es un error de un procedimiento almacenado de pxp
-					$this->respuesta->setMensaje($resp_procedimiento['tipo_respuesta'],$this->nombre_archivo,$resp_procedimiento['mensaje'],$resp_procedimiento['mensaje_tec'],'base',$this->procedimiento,$this->transaccion,$this->tipo_procedimiento,$this->consulta);
-				} else if ($e->getCode() == 2) {//es un error en bd de una consulta
-					$this->respuesta->setMensaje('ERROR',$this->nombre_archivo,$e->getMessage(),$e->getMessage(),'modelo','','','','');
-				} else {//es un error lanzado con throw exception
-					throw new Exception($e->getMessage(), 2);
-				}
-				
-		}    
-	    
+            $link->rollBack();
+            $this->respuesta=new Mensaje();
+            if ($e->getCode() == 3) {//es un error de un procedimiento almacenado de pxp
+                $this->respuesta->setMensaje($resp_procedimiento['tipo_respuesta'],$this->nombre_archivo,$resp_procedimiento['mensaje'],$resp_procedimiento['mensaje_tec'],'base',$this->procedimiento,$this->transaccion,$this->tipo_procedimiento,$this->consulta);
+            } else if ($e->getCode() == 2) {//es un error en bd de una consulta
+                $this->respuesta->setMensaje('ERROR',$this->nombre_archivo,$e->getMessage(),$e->getMessage(),'modelo','','','','');
+            } else {//es un error lanzado con throw exception
+                throw new Exception($e->getMessage(), 2);
+            }
+		}
 	    return $this->respuesta;
 	}
+    //#62
+    function rechazarSol(){
+        //Definicion de variables para ejecucion del procedimientp
+        $this->procedimiento='tes.ft_solicitud_efectivo_ime';
+        $this->transaccion='TES_RECSOL_IME';
+        $this->tipo_procedimiento='IME';
+
+        $this->setParametro('id_solicitud_efectivo','id_solicitud_efectivo','int4');
+        $this->setParametro('id_proceso_wf','id_proceso_wf','int4');
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+    //#62
+    function envioCorreo(){
+        //Definicion de variables para ejecucion del procedimientp
+        $this->procedimiento='tes.ft_solicitud_efectivo_ime';
+        $this->transaccion='TES_ENVCOR_IME';
+        $this->tipo_procedimiento='IME';
+
+        $this->setParametro('id_solicitud_efectivo','id_solicitud_efectivo','int4');
+        $this->setParametro('id_proceso_wf','id_proceso_wf','int4');
+        $this->setParametro('id_funcionario','id_funcionario','int4');
+        $this->setParametro('id_usuario_reg','id_usuario_reg','int4');
+        $this->setParametro('nro_tramite','nro_tramite','varchar');
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+    //#62
+    function devolverSol(){
+        //Definicion de variables para ejecucion del procedimientp
+        $this->procedimiento='tes.ft_solicitud_efectivo_ime';
+        $this->transaccion='TES_DEVSOL_IME';
+        $this->tipo_procedimiento='IME';
+
+        $this->setParametro('id_solicitud_efectivo','id_solicitud_efectivo','int4');
+        $this->setParametro('id_proceso_wf','id_proceso_wf','int4');
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
 }
 ?>

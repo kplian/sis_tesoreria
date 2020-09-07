@@ -17,13 +17,14 @@ $body$
  COMENTARIOS:
 ***************************************************************************
      HISTORIAL DE MODIFICACIONES:
-    
+
  ISSUE            FECHA:          AUTOR                 DESCRIPCION
-   
+
  #0            10-02-2015        Gonzalo Sarmiento      Funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'tes.tsolicitud_efectivo'
  #0            30/11/2017        Rensi Arteaga          BUG, Restituciones queda en borrador ....
  #146 SC       04/12/2017        RAC             		Validacion de vbcasjero para ingreso de caja, los pasa directoa finalizado
- #147 SC       10/10/2018        Manu Guerra     		puede generar solicitud efectivo, a pesar del cierre, se comentó  
+ #147 SC       10/10/2018        Manu Guerra     		puede generar solicitud efectivo, a pesar del cierre, se comentó
+ #62           18/03/2020        MANUEL GUERRA           envio de param, para la paginacion, toolbar ayuda, botones de envio de correo y rechazo de sol por tiempo
 ***************************************************************************/
 
 DECLARE
@@ -91,6 +92,7 @@ DECLARE
     v_temp_rec          record;
     v_id_solicitud_efectivo_tmp  varchar[];
     v_sw_finalilzar_automatica   BOOLEAN;
+    v_correo 				VARCHAR;
 
 BEGIN
 
@@ -284,7 +286,7 @@ BEGIN
         $this->setParametro('id_depto_wf','id_depto_wf','int4');
         $this->setParametro('obs','obs','text');
         */
-        
+
         ------------------------------------------------
         --  EXISTEN DIFERENTES TIPOS DE SOLICITUD DE EFECTIVO:  solicitud, rendicion, reposicion, devolucion
         --  30/11/2017, es funcion tiene defecto que no controla el flujo por tipo
@@ -307,13 +309,13 @@ BEGIN
                   se.id_estado_wf,
                   ca.id_depto,
                   se.motivo
-              into           
+              into
                   v_rec
               from tes.tsolicitud_efectivo se
               inner join tes.tcaja ca on ca.id_caja = se.id_caja
               where se.id_proceso_wf  = v_parametros.id_proceso_wf_act;
-              
-              
+
+
 
               SELECT cj.tipo_ejecucion, cj.id_depto into v_caja
               from tes.tsolicitud_efectivo se
@@ -353,7 +355,7 @@ BEGIN
              v_parametros_ad = '';
              v_tipo_noti = 'notificacion';
              v_titulo  = '';
-             
+
              IF   v_codigo_estado_siguiente in('vbjefe', 'vbfin' ,'vbcajero')   THEN
                   v_acceso_directo = '../../../sis_tesoreria/vista/solicitud_efectivo/SolicitudEfectivoVb.php';
                   v_clase = 'SolicitudEfectivoVb';
@@ -361,17 +363,17 @@ BEGIN
                   v_tipo_noti = 'notificacion';
                   v_titulo  = 'Visto Bueno Solicitud Efectivo';
              END IF;
-            
-           
+
+
            --------------------------------------------
-           --  Cunado  Cajero en la soclitud de efectivo entrega el dinero pasa estado 
+           --  Cunado  Cajero en la soclitud de efectivo entrega el dinero pasa estado
            --  ENTREGADO
            ---------------------------------------------
 
-           
+
             IF v_codigo_estado_siguiente = 'entregado' THEN
-                
-                
+
+
                 --  verifica saldo de caja
                 select id_caja, monto
                 into v_solicitud_efectivo
@@ -390,11 +392,11 @@ BEGIN
 
                 -----------------------------------------------------------------------------------------------------------
                 -- RAC 28/11/2017
-                -- Verifica si viene de viaticos para terminar el flujo 
+                -- Verifica si viene de viaticos para terminar el flujo
                 -- y generar automaticamente el documento de rendicion
                 -----------------------------------------------------------------------------------------------------------
                 if exists(select 1 from cd.tcuenta_doc  where id_solicitud_efectivo = v_rec.id_solicitud_efectivo) then
-                    
+
                           --Obtencion del depto de conta
                           select dede.id_depto_destino
                           into v_id_depto_conta
@@ -421,10 +423,10 @@ BEGIN
                           if v_fun.id_auxiliar is null then
                               raise exception 'No existe registrado un auxiliar para %. Comuniquese con el depto. contable.',v_fun.desc_funcionario;
                           end if;
-                          
-                          
+
+
                            -------------------------------------------------------------
-                          
+
                           --Finaliza el registro de la solicitud de efectivo
                           select te.id_tipo_estado
                           into v_id_tipo_estado
@@ -457,11 +459,11 @@ BEGIN
                           id_usuario_ai = v_parametros._id_usuario_ai,
                           usuario_ai = v_parametros._nombre_usuario_ai
                           where id_solicitud_efectivo  = v_rec.id_solicitud_efectivo;
-                          
+
                           -------------------------------------
-                          
-                          
-                          
+
+
+
                           --Obtener el ID de la plantilla de documento para viaticos
                           select id_plantilla
                           into v_id_plantilla
@@ -479,7 +481,7 @@ BEGIN
                               raise exception 'Tipo documento compra venta invalido';
                           end if;
 
-                         
+
                           --Obtencion de datos
                           select
                           v_rec.id_caja as id_caja,
@@ -492,14 +494,14 @@ BEGIN
 
                           select v_rec.id_solicitud_efectivo as id_solicitud_efectivo_fk, 'rendicion' as tipo_solicitud
                           into v_registros1;
-                          
-                          
+
+
                           -------------------------------------------
                           --Creacion de la rendicion
                           -----------------------------------
-                          
+
                           --RAC, 06/04/2018, se modifica la fecha del documento , vale provisorio para que sea la fecha de regisotr conincidiendo con la fecha de entrega del dinero en cajas
-                          
+
                           v_resp = tes.f_inserta_solicitud_efectivo(0,p_id_usuario,hstore(v_registros)||hstore(v_registros1));
                           v_id_solicitud_efectivo_rend = pxp.f_obtiene_clave_valor(v_resp,'id_solicitud_efectivo','','','valor')::integer;
 
@@ -671,15 +673,15 @@ BEGIN
                               where id_cuenta_doc = v_rec1.id_cuenta_doc;
 
                           end if;
-                           
-                          
+
+
                 end if; --RCM, FIN SIE ES VIATICO O CUENTA DOCUMENTADA
 
             END IF;   -- FIN estado entregado de la colicitud de efectivo
 
-            
+
             --registra id_funcionario_jefe
-            
+
             IF v_codigo_estado_siguiente = 'vbjefe' THEN
                 UPDATE tes.tsolicitud_efectivo
                 SET id_funcionario_jefe_aprobador = v_parametros.id_funcionario_wf
@@ -727,19 +729,19 @@ BEGIN
                 fecha_mod=now()
                 where id_proceso_wf = v_parametros.id_proceso_wf_act;
             end if;
-            
-            ----------------------------------------------------------  
-            -- solo en caso de rendicion se compromete presupuesto    
-            -- TODO ,   no considera el tipo de solictud        
+
             ----------------------------------------------------------
-              
-            
+            -- solo en caso de rendicion se compromete presupuesto
+            -- TODO ,   no considera el tipo de solictud
+            ----------------------------------------------------------
+
+
             IF v_codigo_estado_siguiente='rendido' THEN
-            
-                
-            
-            
-              
+
+
+
+
+
                 FOR v_doc_compra_venta IN (select doc.id_doc_compra_venta
                                          from tes.tsolicitud_rendicion_det rendet
                                          inner join conta.tdoc_compra_venta doc on doc.id_doc_compra_venta=rendet.id_documento_respaldo
@@ -755,38 +757,38 @@ BEGIN
 
                       END IF;
                 END LOOP;
-                
-          
+
+
 
               IF pxp.f_existe_parametro(p_tabla,'devolucion_dinero') and pxp.f_existe_parametro(p_tabla,'saldo')THEN
-                  
+
                       IF v_parametros.devolucion_dinero = 'si' THEN
-                      
-                            select  
-                                 id_caja, 
-                                 id_funcionario, 
+
+                            select
+                                 id_caja,
+                                 id_funcionario,
                                  current_date as fecha,
-                              case 
-                                  when v_parametros.saldo > 0 then 
-                                     'devolucion' 
-                                 else 
-                                     'reposicion' 
+                              case
+                                  when v_parametros.saldo > 0 then
+                                     'devolucion'
+                                 else
+                                     'reposicion'
                                  end as tipo_solicitud,
-                              case 
-                                 when v_parametros.saldo > 0 then 
-                                     v_parametros.saldo 
-                                 else 
-                                    v_parametros.saldo * (-1) 
+                              case
+                                 when v_parametros.saldo > 0 then
+                                     v_parametros.saldo
+                                 else
+                                    v_parametros.saldo * (-1)
                                  end as monto,
-                              case 
+                              case
                                   when v_parametros.saldo > 0 then
                                      'Devolucion de dinero del solicitante al cajero'
                                   else
-                                     'Solicitud de reposicion de dinero al solicitante, gasto excedido' 
+                                     'Solicitud de reposicion de dinero al solicitante, gasto excedido'
                                   end as motivo,
                              id_solicitud_efectivo_fk as id_solicitud_efectivo_fk,
                              id_estado_wf
-                          into 
+                          into
                             v_solicitud_efectivo
                           from tes.tsolicitud_efectivo
                           where id_solicitud_efectivo=v_rec.id_solicitud_efectivo;
@@ -794,16 +796,16 @@ BEGIN
                           -- crear devolucion o ampliacion
                           v_resp=tes.f_inserta_solicitud_efectivo(p_administrador,p_id_usuario,hstore(v_parametros)||hstore(v_solicitud_efectivo));
                           v_id_solicitud_efectivo_tmp = pxp.f_recupera_clave(v_resp, 'id_solicitud_efectivo');
-                          
-                          select * into v_temp_rec from 
-                          tes.tsolicitud_efectivo s 
+
+                          select * into v_temp_rec from
+                          tes.tsolicitud_efectivo s
                           where s.id_solicitud_efectivo = v_id_solicitud_efectivo_tmp[1]::integer;
-                        
-                          
-                               
+
+
+
                       END IF;
-                      
-                   
+
+
                       --RAC 30/11/2017, este codigo se encotnraba comentado, para la finalizacion automatica
                      --finalizar solicitud efectivo--------------------
                      -- si sobra se devuelve o se repone, nunca ambos
@@ -814,36 +816,36 @@ BEGIN
                       ELSE
                          raise exception 'No se puede finalizar la solcitud, la referencia de la rendición esta nula';
                      END IF;
-                   
-                
-                
+
+
+
             ELSE
-            
-              
-                 
+
+
+
                 --si no hay devoluciones, entonces no hay saldo se peude finalizar directamente
                 --RAC 30/11/2017, este codigo se encotnraba comentado, para la finalizacion automatica
-                  
+
                  IF v_rec.id_solicitud_efectivo_fk is not null  THEN
                      IF tes.f_finalizar_solicitud_efectivo(p_id_usuario, v_rec.id_solicitud_efectivo_fk) = false THEN
                           raise exception 'No se pudo finalizar la solicitud de efectivo automaticamente';
                      END IF;
                  ELSE
                     raise exception 'No se peude finalizar la solcitud, la referencia de la rendición esta nula';
-                 END IF;   
-                
+                 END IF;
+
             END IF;
 
           END IF;
-          
-          
-          
+
+
+
           --raise exception 'PASA';
-          
+
 
           IF v_codigo_estado_siguiente='finalizado' THEN
-           
-          
+
+
               select sum(sol.monto) into v_monto_rendido
               from tes.tsolicitud_efectivo sol
               where sol.id_solicitud_efectivo_fk = v_rec.id_solicitud_efectivo and sol.estado='rendido';
@@ -859,15 +861,15 @@ BEGIN
               select sum(sol.monto) into v_monto_solicitado
               from tes.tsolicitud_efectivo sol
               where sol.id_solicitud_efectivo = v_rec.id_solicitud_efectivo;
-              
+
               --calcular saldo solicitud efectivo
               v_saldo = v_monto_solicitado - COALESCE(v_monto_rendido,0) - COALESCE(v_monto_devuelto,0) + COALESCE(v_monto_repuesto,0);
-              
+
                --RAC 30/11/2017, cambia la regla del IF , saldo > 0 , antes estaba saldo != 0, esto generaba devolicioones negativas
                --RAC 30/11/2017 hay que considera lso casos que el saldo se negativo
 
               IF v_saldo > 0 THEN
-                      
+
                 select id_caja, id_funcionario, current_date as fecha,
                        'devolucion' as tipo_solicitud,
                        v_saldo as monto,
@@ -877,21 +879,21 @@ BEGIN
                 into v_solicitud_efectivo
                 from tes.tsolicitud_efectivo
                 where id_solicitud_efectivo=v_rec.id_solicitud_efectivo;
-                        
+
                 --crear devolucion
-                       
+
                 v_resp=tes.f_inserta_solicitud_efectivo(p_administrador,p_id_usuario,hstore(v_parametros)||hstore(v_solicitud_efectivo)||hstore(v_caja));
-                      
+
               ELSEIF v_saldo < 0 THEN
                  raise exception 'Consulte con el administrador de sistemas, se tiene un saldo negativo de %, ID: %',v_saldo, v_rec.id_solicitud_efectivo;
               END IF;
-                  
-               
-                  
+
+
+
           END IF;
-          
+
           --raise exception 'llega';
-         
+
           -- si hay mas de un estado disponible  preguntamos al usuario
           v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado de la solicitud de efectivo)');
           v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
@@ -991,8 +993,8 @@ BEGIN
 
         END;
 
-        
-/*********************************    
+
+/*********************************
     #TRANSACCION:  'TES_AMPREN_IME'
     #DESCRIPCION:   Ampliar dias para rendir solicitud efectivo
     #AUTOR:     Gonzalo Sarmiento
@@ -1014,16 +1016,228 @@ BEGIN
                 fecha_mod = now()
             where id_solicitud_efectivo = v_parametros.id_solicitud_efectivo;
 
-               
+
             --Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Dias de rendicion ampliados)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Dias de rendicion ampliados)');
             v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_efectivo',v_parametros.id_solicitud_efectivo::varchar);
-               
+
             --Devuelve la respuesta
             return v_resp;
-            
-        end;     
-         
+
+        end;
+
+
+        /*********************************
+        #TRANSACCION:  'TES_RECSOL_IME'
+        #DESCRIPCION:   lleva un proceso a borrador
+        #AUTOR:     manu
+        #FECHA:     10-04-2017
+        ***********************************/
+
+    	elsif(p_transaccion='TES_RECSOL_IME')then
+
+        begin
+			SELECT wfw.id_estado_wf
+            into v_id_estado_actual
+            FROM wf.testado_wf wfw
+            WHERE v_parametros.id_proceso_wf = wfw.id_proceso_wf and wfw.estado_reg='activo';
+
+            UPDATE wf.testado_wf
+            SET estado_reg='inactivo',fecha_mod=NOW(),id_usuario_mod = p_id_usuario
+            WHERE id_estado_wf=v_id_estado_actual;
+
+            SELECT te.codigo,te.id_tipo_estado
+            INTO v_registros1
+            FROM wf.ttipo_estado te
+            JOIN wf.ttipo_proceso tp on tp.id_tipo_proceso=te.id_tipo_proceso
+            WHERE tp.codigo='SOLEFE' and te.nombre_estado='Borrador';
+
+            INSERT INTO wf.testado_wf(id_usuario_reg,id_proceso_wf,id_tipo_estado,id_estado_anterior)
+            VALUES (p_id_usuario,v_parametros.id_proceso_wf,v_registros1.id_tipo_estado,v_id_estado_actual)
+            RETURNING id_estado_wf
+            INTO v_id_estado_wf;
+
+            UPDATE tes.tsolicitud_efectivo
+            SET id_usuario_mod = p_id_usuario,
+                fecha_mod = now(),
+                estado=v_registros1.codigo,
+                id_estado_wf=v_id_estado_wf
+            WHERE id_solicitud_efectivo = v_parametros.id_solicitud_efectivo and id_proceso_wf=v_parametros.id_proceso_wf;
+
+
+            v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_efectivo',v_parametros.id_solicitud_efectivo::varchar);
+            raise notice '%',v_resp;
+
+            return v_resp;
+        end;
+
+        /*********************************
+        #TRANSACCION:  'TES_ENVCOR_IME'
+        #DESCRIPCION:   lleva un proceso a borrador
+        #AUTOR:     manu  --62
+        #FECHA:     10-04-2017
+        ***********************************/
+
+    	elsif(p_transaccion='TES_ENVCOR_IME')then
+
+        begin
+
+            select email_empresa
+            into v_correo
+            from orga.tfuncionario
+            where id_funcionario = v_parametros.id_funcionario;
+
+            insert into param.talarma(
+                acceso_directo,
+                id_funcionario,
+                fecha,
+                estado_reg,
+                descripcion,
+                id_usuario_reg,
+                fecha_reg,
+                id_usuario_mod,
+                fecha_mod,
+                tipo,
+                obs,
+                clase,
+                titulo,
+                parametros,
+                id_usuario,
+                titulo_correo,
+                correos,
+                documentos,
+                id_proceso_wf,
+                id_estado_wf,
+                id_plantilla_correo,
+                estado_envio, --posible
+                sw_correo,
+                pendiente
+                ) values(
+                '../../../sis_tesoreria/vista/solicitud_efectivo/SolicitudEfectivoVb.php', --acceso_directo
+                v_parametros.id_funcionario::INTEGER,  --par_id_funcionario 562 manu
+                now(), --par_fecha
+                'activo',
+                '<font color="000000" size="5"><font size="4"> </font> </font><br><br><b></b>El motivo de la presente es solicitar evalúes el curso  de : <b>'||v_parametros.nro_tramite||'</b><br> '||v_parametros.nro_tramite||'El cuestionario de evaluación se encuentra en el ENDESIS <br>en el siguiente enlace<br> <a href="http://172.18.79.204/etr/sis_seguridad/vista/_adm/index.php#main-tabs:CUE">Evaluar curso</a><br> Agradezco de antemano la colaboración.<br>  Saludos<br> ',--par_descripcion
+                1, --par_id_usuario admin
+                now(),
+                null,
+                null,
+                'notificacion',--par_tipo
+                ''::varchar, --par_obs
+                'SolicitudEfectivoVb',--par_clase
+                'SOLICITUD DE EFECTIVO PENDIENTE',--par_titulo
+                '',--par_parametros
+                v_parametros.id_usuario_reg::INTEGER,--par_id_usuario_alarma 381 manu
+                'SOLICITUD DE EFECTIVO PENDIENTE',--par_titulo correo
+                v_correo,--'manuel.guerra@endetransmision.bo',--v_correo,--'',--par_correos
+                '',--par_documentos
+                NULL,--p_id_proceso_wf
+                NULL,--p_id_estado_wf
+                NULL,--p_id_plantilla_correo
+                'exito'::character varying, --v_estado_envio
+                1,
+                'no'
+              );
+
+            return v_resp;
+        end;
+
+	/*********************************
+    #TRANSACCION:  'TES_DEVSOL_IME'
+    #DESCRIPCION:   retroceso de solicitud hacia la interfaz dev-rep de cuenta documentada
+    #AUTOR:    MANU
+    #FECHA:    01-04-2020
+    ***********************************/
+
+    elsif(p_transaccion='TES_DEVSOL_IME')then
+
+        BEGIN
+        	IF v_parametros.id_solicitud_efectivo IS NOT NULL THEN
+            	--SOLEFE SE VUELVE INACTIVO
+            	UPDATE tes.tsolicitud_efectivo
+              	SET estado_reg='inactivo'
+              	WHERE id_solicitud_efectivo=v_parametros.id_solicitud_efectivo;
+
+                --hijo cuenta documentada
+                SELECT c.id_proceso_wf,c.id_estado_wf,c.id_cuenta_doc_fk
+                INTO v_id_proceso_wf,v_id_estado_actual,v_id_cuenta_doc
+                FROM cd.tcuenta_doc c
+                WHERE c.id_solicitud_efectivo = v_parametros.id_solicitud_efectivo;
+                --inactivo el ultimo estadowf de la cd
+                UPDATE wf.testado_wf
+                SET estado_reg='inactivo',fecha_mod=NOW(),id_usuario_mod = p_id_usuario
+                WHERE id_estado_wf=v_id_estado_actual;
+                --obtengo el codigo y estado de wf
+                SELECT te.codigo,te.id_tipo_estado
+                INTO v_registros1
+                FROM wf.ttipo_estado te
+                WHERE te.codigo='vbtesoreria' and te.nombre_estado='APROBACION MODALIDAD DE PAGO';
+                --nuevo estado del hijo
+                INSERT INTO wf.testado_wf(id_usuario_reg,id_proceso_wf,id_tipo_estado,id_estado_anterior)
+                VALUES (p_id_usuario,v_id_proceso_wf,v_registros1.id_tipo_estado,v_id_estado_actual)
+                RETURNING id_estado_wf
+                INTO v_id_estado_wf;
+                --hijo
+             	UPDATE cd.tcuenta_doc
+              	SET
+                estado = v_registros1.codigo,
+                id_estado_wf = v_id_estado_wf,
+                sw_nodo=null,
+                dev_tipo=NULL,
+                dev_a_favor_de=NULL,
+                dev_saldo=NULL,
+                dev_saldo_original=NULL,
+                dev_nombre_cheque=NULL,
+                id_caja_dev = NULL,
+                id_moneda_dev = null,
+                id_usuario_mod = p_id_usuario,
+                fecha_mod = now()
+              	WHERE id_solicitud_efectivo = v_parametros.id_solicitud_efectivo;
+                -- setear
+                v_id_proceso_wf=NULL;
+                v_id_cuenta_doc=NULL;
+                v_registros1=NULL;
+				--padre
+                SELECT c.id_proceso_wf,c.id_cuenta_doc
+                INTO v_id_proceso_wf,v_id_cuenta_doc
+                FROM cd.tcuenta_doc c
+                WHERE id_cuenta_doc=v_id_cuenta_doc;
+                --
+                --inactivo el ultimo estadowf de la cd
+                UPDATE wf.testado_wf
+                SET estado_reg='inactivo',fecha_mod=NOW(),id_usuario_mod = p_id_usuario
+                WHERE id_estado_wf=v_id_estado_actual;
+                --obtengo el codigo y estado de wf
+                SELECT te.codigo,te.id_tipo_estado
+                INTO v_registros1
+                FROM wf.ttipo_estado te
+                WHERE te.codigo='contabilizado' and te.nombre_estado='Contabilizado';
+                --nuevo estado del hijo
+                INSERT INTO wf.testado_wf(id_usuario_reg,id_proceso_wf,id_tipo_estado,id_estado_anterior)
+                VALUES (p_id_usuario,v_id_proceso_wf,v_registros1.id_tipo_estado,v_id_estado_actual)
+                RETURNING id_estado_wf
+                INTO v_id_estado_wf;
+                --actuliazcion del padre
+                UPDATE cd.tcuenta_doc
+                SET
+                estado = v_registros1.codigo,
+                id_estado_wf = v_id_estado_wf,
+                id_usuario_mod = p_id_usuario,
+                fecha_mod = now()
+                WHERE id_cuenta_doc=v_id_cuenta_doc;
+
+                --Definicion de la respuesta
+                v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Devolucion aceptada)');
+                v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_efectivo',v_parametros.id_solicitud_efectivo::varchar);
+            ELSE
+            	RAISE EXCEPTION 'Error, no existe ese registro';
+            END IF;
+
+            --Devuelve la respuesta
+            return v_resp;
+
+        end;
+
 
     else
 
@@ -1046,4 +1260,5 @@ LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
 SECURITY INVOKER
+PARALLEL UNSAFE
 COST 100;

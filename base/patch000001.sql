@@ -1938,3 +1938,24 @@ alter table tes.tplan_pago
 ALTER TABLE tes.tobligacion_pago--#48
   ADD COLUMN cod_tipo_relacion VARCHAR(50);--#48
 /*************************F-SCP-JUAN-TES-13-30/01/2020*************/
+
+
+/*************************I-SCP-MZM-TES-67-17/08/2020*************/
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN id_proveedor INTEGER;
+/*************************F-SCP-MZM-TES-67-17/08/2020*************/
+
+/*************************I-SCP-MZM-TES-67-02/09/2020*************/
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN correo VARCHAR(100);
+  
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN tabla_correo VARCHAR(200);
+  
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN columna_correo VARCHAR(100);
+  
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN id_columna_correo INTEGER;  
+  
+/*************************F-SCP-MZM-TES-67-02/09/2020*************/  

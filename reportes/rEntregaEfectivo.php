@@ -1,23 +1,27 @@
-<!--
-*	ISSUE   FORK	     Fecha 		     Autor		        Descripcion
-*  #56     ENDETR       17/02/2020      Manuel Guerra      cambio de fechas(periodo) de un documento en la rendcion
--->
 <?php
-
-class rEntregaEfectivo extends ReportePDF{
+/*
+ISSUE      FORK       FECHA:              AUTOR                 DESCRIPCION
+#64      ETR       18/03/2020        MANUEL GUERRA           mejora en reporte de entrega de efectivo
+*/
+class rEntregaEfectivo extends ReportePDF {
 
     //
-    function datosHeader () {
+    function datosHeader ($detalle) {
         $this->ancho_hoja = $this->getPageWidth() - PDF_MARGIN_LEFT - PDF_MARGIN_RIGHT-10;
         $this->SetMargins(10, 17, 10,10);
+        $this->detalle = $detalle;
+
     }
     //
     function Header() {
     }
     //
-    function generarReporte($datos) {
+    function generarReporte() {
+
         $this->AddPage();
-        if ($datos->getParameter('codigo_proc') == 'INGEFE'){
+        $datos = $this->detalle;
+       // var_dump($this->detalle[0]['fecha_entrega']);
+        if ($this->detalle[0]['codigo_proc'] == 'INGEFE'){
             $this->datos= 'RECIBO DE INGRESO DE CAJA';
             $this->de = 'PAGADO POR:';
             $this->a ='RECIBIDO POR:';
@@ -27,24 +31,24 @@ class rEntregaEfectivo extends ReportePDF{
             $this->a ='PAGADO POR:';
         }
 
-        $this->fecha = $datos->getParameter('fecha_entrega');
-        $this->moneda = $datos->getParameter('moneda');
-        $this->nro_tramite = $datos->getParameter('nro_tramite');
-        $this->codigo = $datos->getParameter('codigo');
-        $this->cajero = $datos->getParameter('cajero');
-        $this->nombre_unidad = $datos->getParameter('nombre_unidad');
-        $this->solicitante = $datos->getParameter('solicitante');
-        $this->motivo = $datos->getParameter('motivo');
-        $this->monto = $datos->getParameter('monto');
-        if($datos->getParameter('superior') != null){
-            $this->mensaje = 'El funcionario solicitante esta inactivo, el responsable sera el inmediato superior  '. $datos->getParameter('superior') ;
-            $this->superior = $datos->getParameter('superior');
-            $this->cajero = $datos->getParameter('cajero');
-            $this->solicitante = $datos->getParameter('solicitante');
+        $this->fecha = $this->detalle[0]['fecha_entrega'];
+        $this->moneda = $this->detalle[0]['moneda'];
+        $this->nro_tramite = $this->detalle[0]['nro_tramite'];
+        $this->codigo = $this->detalle[0]['codigo'];
+        $this->cajero = $this->detalle[0]['cajero'];
+        $this->nombre_unidad = $this->detalle[0]['nombre_unidad'];
+        $this->solicitante = $this->detalle[0]['solicitante'];
+        $this->motivo = $this->detalle[0]['motivo'];
+        $this->monto =$this->detalle[0]['monto'];
+        if($this->detalle[0]['superior'] != null){
+            $this->mensaje = 'El funcionario solicitante esta inactivo, el responsable sera el inmediato superior  '. $this->detalle[0]['superior'];;
+            $this->superior = $this->detalle[0]['superior'];
+            $this->cajero = $this->detalle[0]['cajero'];
+            $this->solicitante = $this->detalle[0]['solicitante'];
         }else{
             $this->mensaje = '';
-            $this->cajero = $datos->getParameter('cajero');
-            $this->solicitante = $datos->getParameter('solicitante');
+            $this->cajero = $this->detalle[0]['cajero'];
+            $this->solicitante = $this->detalle[0]['solicitante'];
         }
         ob_start();
         include(dirname(__FILE__).'/../reportes/tpl/EntregaEfect.php');
@@ -89,4 +93,3 @@ class rEntregaEfectivo extends ReportePDF{
     }
 
 }
-?>

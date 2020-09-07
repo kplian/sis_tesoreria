@@ -5,7 +5,9 @@
 *@author  (admin)
 *@date 01-12-2013 09:10:17
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
-*/
+  ISSUE 		   FECHA   			 AUTOR				 		DESCRIPCION:
+ * * #67           14/08/2020		 Mercedes Zambrana KPLIAN	Adicion de correo proveedor
+ * */
 
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -633,6 +635,50 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				id_grupo:1,
 				grid:true,
 				form:false
+		},
+		{
+			config:{//#67
+				name: 'correo_proveedor',
+				fieldLabel: 'Email',
+				allowBlank: true,
+				vtype:'email',
+				width: "100%",
+				gwidth: 100,
+				maxLength:100
+			},
+			type:'TextField',
+			filters:{pfiltro:'correo_proveedor',type:'string'},
+			id_grupo:1,
+			grid:true,
+			form:true
+
+		},{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'tabla_correo'
+			},
+			type:'Field',
+			form:true 
+		},{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'columna_correo'
+			},
+			type:'Field',
+			form:true 
+		},{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_columna_correo'
+			},
+			type:'Field',
+			form:true 
 		}
 	],
 	tam_pag:50,	
@@ -680,7 +726,12 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		{name:'color', type: 'string'},
 		{name:'saldo_deposito', type: 'numeric'},
 		{name:'nombre_regional', type: 'string'},
-		{name:'sistema_origen', type: 'string'}
+		{name:'sistema_origen', type: 'string'},
+		{name:'correo_proveedor', type: 'string'}//#67
+		
+		,{name:'tabla_correo', type: 'string'}//#67
+		,{name:'columna_correo', type: 'string'}//#67
+		,{name:'id_columna_correo', type: 'numeric'}//#67
 	],
 	sortInfo:{
 		field: 'fecha',
@@ -714,10 +765,23 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			this.mostrarComponente(this.cmpNroCheque);
 			this.mostrarComponente(this.cmpImporteCheque);
 			this.cmpNroCheque.allowBlank=false;
+			//#67
+			if(data.id_proveedor!=''){
+				this.mostrarComponente(this.correo_proveedor);
+				this.correo_proveedor.allowBlank=false;
+			}else{
+				this.ocultarComponente(this.correo_proveedor);
+				this.correo_proveedor.allowBlank=true;
+			}
+			
 		}
 		else{
 			this.ocultarComponente(this.cmpNroCheque);
 			this.cmpNroCheque.allowBlank=true;
+			//#67
+			this.ocultarComponente(this.correo_proveedor);
+			this.correo_proveedor.allowBlank=true;
+			
 			if(data.tipo=='deposito'){
 				this.mostrarComponente(this.cmpImporteDeposito);
 				this.ocultarComponente(this.cmpImporteCheque);
@@ -1087,9 +1151,9 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			if(confirm('¿Está seguro de imprimir el cheque?'))
 			{				
 				var data=this.sm.getSelected().data;
-				console.log(data);
 				
-				if(data.nro_cheque==null){
+				
+				if(data.nro_cheque==null || data.correo_proveedor==null ){ 
 					Ext.MessageBox.alert('Estado', 'Edite el registro, y agregue los datos faltantes');
 				}else{
 					Phx.CP.loadingShow();
