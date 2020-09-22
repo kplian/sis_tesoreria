@@ -22,11 +22,13 @@ $body$
 
  ISSUE      FORK       FECHA:              AUTOR                 DESCRIPCION
 
- #0              10-02-2015        Gonzalo Sarmiento       creacion de la funcion
- #0              30/11/2017        Rensi Arteaga           Ingreso de pasos por caja provinientes de cuenta documentada y viaticos
- #146 IC         04/12/2017        RAC                     COnsiderar ingresos de efectivo en caja
-  #28      ETR     22/04/2019      MANUEL GUERRA           Bloquea el boton de devoluciona todos los funcionarios que no tengan el rol de cajero
-   #62       10/10/2018        Manu Guerra    			correccion de id_tipo_solicitud, para reposiciom
+#0              10-02-2015        Gonzalo Sarmiento       creacion de la funcion
+#0              30/11/2017        Rensi Arteaga           Ingreso de pasos por caja provinientes de cuenta documentada y viaticos
+#146 IC         04/12/2017        RAC                     COnsiderar ingresos de efectivo en caja
+#28      ETR     22/04/2019      MANUEL GUERRA           Bloquea el boton de devoluciona todos los funcionarios que no tengan el rol de cajero
+#62       10/10/2018        Manu Guerra    			correccion de id_tipo_solicitud, para reposiciom
+#ETR-985  22/09/2020        Manu Guerra    			agregando el tipo reposicion para las solicitudes
+         
 ***************************************************************************/
 
 DECLARE
@@ -131,9 +133,12 @@ BEGIN
             --  SOLICTUD DE EFECTIVO EN CAJA
             ---------------------------------------------
             ELSIF (p_hstore->'tipo_solicitud')::varchar = 'solicitud' or (p_hstore->'tipo_solicitud')::varchar = 'reposicion' THEN
-
-
-                v_tipo='SOLEFE';
+				--#ETR-985
+				IF (p_hstore->'tipo_solicitud')::varchar = 'reposicion' THEN
+                	v_tipo='REPEFE';
+                ELSE
+                	v_tipo='SOLEFE';
+                END IF;
 
                 v_saldo_caja = tes.f_calcular_saldo_caja((p_hstore->'id_caja')::integer);
 
@@ -236,7 +241,7 @@ BEGIN
             IF p_id_cuenta_doc is  null  THEN
 
                 -- TODO 30/11/2017, unir  procesos derivados, derivaciones, rendiciones, devolcuiones etc
-
+		
                 IF (p_hstore->'tipo_solicitud')::varchar  not in ('devolucion', 'reposicion','rendicion') THEN
                       -- inciar el tramite en el sistema de WF
                        SELECT
@@ -319,12 +324,16 @@ BEGIN
                        raise exception 'Nose encontro la cuenta documentada dolicitada ID: %',p_id_cuenta_doc;
                      END IF;
 
-                    IF (p_hstore->'tipo_solicitud')::varchar in ('solicitud','reposicion') THEN
+                    IF (p_hstore->'tipo_solicitud')::varchar in ('solicitud') THEN
                         v_cod_proc = 'SOLEFE';
                     ELSE
                        v_cod_proc = 'INGEFE';
                     END IF;
-
+                    
+					IF (p_hstore->'tipo_solicitud')::varchar in ('reposicion') THEN
+                        v_cod_proc = 'REPEFE';
+                    END IF;
+                    
                     SELECT
                              ps_id_proceso_wf,ps_id_estado_wf, ps_codigo_estado, ps_nro_tramite
                        into
