@@ -18,9 +18,8 @@ $body$
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
 
- DESCRIPCION:	
- AUTOR:			
- FECHA:		
+#ISSUE          FECHA        AUTOR        			DESCRIPCION
+#ETR-1074           23/09/2020      manuel guerrra       muestra el listado de cuentas de bancos que crea el usuario
 ***************************************************************************/
 
 DECLARE
@@ -160,7 +159,8 @@ BEGIN
                         left join param.tmoneda mon on mon.id_moneda =  ctaban.id_moneda                        
                         left join tes.tfinalidad fin on fin.id_finalidad=ANY(ctaban.id_finalidad) ';
                 IF p_administrador !=1 THEN
-               		v_consulta = v_consulta || 'inner join tes.tusuario_cuenta_banc usrbanc on usrbanc.id_cuenta_bancaria=ctaban.id_cuenta_bancaria ';
+                	--#ETR-1074 
+               		v_consulta = v_consulta || 'inner join tes.tusuario_cuenta_banc usrbanc on usrbanc.id_cuenta_bancaria=ctaban.id_cuenta_bancaria or usrbanc.id_usuario='||p_id_usuario||'';
             	END IF;                        
                     v_consulta = v_consulta || 'inner join segu.tusuario usu1 on usu1.id_usuario = ctaban.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = ctaban.id_usuario_mod
@@ -206,7 +206,7 @@ BEGIN
                         left join tes.tfinalidad fin on fin.id_finalidad=ANY(ctaban.id_finalidad) ';
             
             IF p_administrador !=1 THEN
-        	v_consulta = v_consulta || 'inner join tes.tusuario_cuenta_banc usrbanc on usrbanc.id_cuenta_bancaria=ctaban.id_cuenta_bancaria ';
+            	v_consulta = v_consulta || 'inner join tes.tusuario_cuenta_banc usrbanc on usrbanc.id_cuenta_bancaria=ctaban.id_cuenta_bancaria or usrbanc.id_usuario='||p_id_usuario||'';
             END IF; 
             
             v_consulta = v_consulta || 'inner join segu.tusuario usu1 on usu1.id_usuario = ctaban.id_usuario_reg
@@ -247,4 +247,5 @@ LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
 SECURITY INVOKER
+PARALLEL UNSAFE
 COST 100;
