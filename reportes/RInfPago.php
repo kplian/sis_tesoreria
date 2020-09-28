@@ -3,6 +3,8 @@
 /**
  *	ISSUE   FORK	     Fecha 		     Autor		 Descripcion	
  *  #41     ENDETR       16/12/2019      JUAN        Reporte de información de pago
+    # ETR-1023           29/09/2020      JUAN        Pago Único (PU) 765-2020, ATLAS - No puedo descargar el PDF "Inf. Pago"
+
 * * */
 class RInfPago extends ReportePDF {//#41
 	var $cabecera;
@@ -50,7 +52,7 @@ class RInfPago extends ReportePDF {//#41
 		$this->Cell($ancho, 0, "Fecha Impresion : ".$fecha_rep, '', 0, 'L');
 		$this->Ln($line_width);
 		$this->Ln();
-		$barcode = $this->getBarcode();
+		//$barcode = $this->getBarcode(); // # ETR-1023
 		$style = array(
 					'position' => $this->rtl?'R':'L',
 					'align' => $this->rtl?'R':'L',
@@ -64,7 +66,9 @@ class RInfPago extends ReportePDF {//#41
 					'text' => false,
 					'position' => 'R'
 				);
-		$this->write1DBarcode($barcode, 'C128B', $ancho*2, $cur_y + $line_width+5, '', (($this->getFooterMargin() / 3) - $line_width), 0.3, $style, '');
+
+		//# ETR-1023 comentado barcode por problemas de string
+		$this->write1DBarcode("se rompe para algunos usuarios", 'C128B', $ancho*2, $cur_y + $line_width+5, '', (($this->getFooterMargin() / 3) - $line_width), 0.3, $style, '');
 	}
 
 }
