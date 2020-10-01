@@ -24,3 +24,17 @@ UPDATE tes.tsolicitud_efectivo SET monto=1776.10 WHERE id_solicitud_efectivo =32
 UPDATE tes.tsolicitud_rendicion_det SET monto=1776.10 WHERE id_solicitud_efectivo =21617;
 
 /********************************************F-DAUP-MGM-TES-1-30/09/2020********************************************/
+
+/********************************************I-DAUP-MGM-TES-2-30/09/2020********************************************/
+--rollback
+--UPDATE tes.tsolicitud_rendicion_det SET monto=1578.76 WHERE id_solicitud_rendicion_det =21617;
+--commit
+UPDATE tes.tsolicitud_rendicion_det SET monto=1776.10 WHERE id_solicitud_rendicion_det =21617;
+
+--rollback
+--UPDATE tes.tsolicitud_rendicion_det SET monto=1776.10 WHERE id_solicitud_efectivo =21617;
+--commit
+UPDATE tes.tsolicitud_rendicion_det SET monto=1578.76 WHERE id_solicitud_efectivo =21617;
+
+
+/********************************************F-DAUP-MGM-TES-2-30/09/2020********************************************/
