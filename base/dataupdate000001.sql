@@ -38,3 +38,37 @@ UPDATE tes.tsolicitud_rendicion_det SET monto=1578.76 WHERE id_solicitud_efectiv
 
 
 /********************************************F-DAUP-MGM-TES-2-30/09/2020********************************************/
+
+/********************************************I-DAUP-EGS-TES-2-02/10/2020********************************************/
+--Devengdo Rollback
+-- BEGIN;
+-- Update tes.tplan_pago Set
+-- monto_retgar_mo = 0,
+-- liquido_pagable = 29164
+-- Where id_plan_pago = 16629;
+-- COMMIT;
+--Commit
+BEGIN;
+Update tes.tplan_pago Set
+monto_retgar_mo = 2041.48,
+liquido_pagable = 27122.52
+Where id_plan_pago = 16629;
+COMMIT;
+
+--Roolback de Pago
+-- BEGIN;
+-- UPDATE tes.tplan_pago SET
+-- otros_descuentos =  2041.48,
+-- monto_retgar_mo = 0
+-- WHERE id_plan_pago = 16659;
+-- COMMIT;
+--Commit
+BEGIN;
+UPDATE tes.tplan_pago SET
+otros_descuentos = 0,
+monto_retgar_mo = 2041.48
+WHERE id_plan_pago = 16659;
+COMMIT;
+/********************************************F-DAUP-EGS-TES-2-02/10/2020********************************************/
+
+
