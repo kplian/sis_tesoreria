@@ -39,6 +39,10 @@ UPDATE tes.tsolicitud_rendicion_det SET monto=1578.76 WHERE id_solicitud_efectiv
 
 /********************************************F-DAUP-MGM-TES-2-30/09/2020********************************************/
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> remotes/origin/test
 /********************************************I-DAUP-EGS-TES-2-02/10/2020********************************************/
 --Devengdo Rollback
 -- BEGIN;
@@ -71,4 +75,25 @@ WHERE id_plan_pago = 16659;
 COMMIT;
 /********************************************F-DAUP-EGS-TES-2-02/10/2020********************************************/
 
-
+/********************************************I-DAUP-MGM-TES-2-05/10/2020********************************************/
+BEGIN;
+--elimina los concepto, NO GENERARON REGISTRO PARTIDA-EJEC
+delete from conta.tdoc_concepto where id_doc_compra_venta = 182532;
+delete from conta.tdoc_concepto where id_doc_compra_venta = 182533;
+delete from conta.tdoc_concepto where id_doc_compra_venta = 182534;
+delete from conta.tdoc_concepto where id_doc_compra_venta = 182535;
+--elimina los respaldos
+delete from tes.tsolicitud_rendicion_det where id_documento_respaldo=182532;
+delete from tes.tsolicitud_rendicion_det where id_documento_respaldo=182533;
+delete from tes.tsolicitud_rendicion_det where id_documento_respaldo=182534;
+delete from tes.tsolicitud_rendicion_det where id_documento_respaldo=182535;
+--elimina los documentos creados
+delete from conta.tdoc_compra_venta where id_doc_compra_venta = 182532; 
+delete from conta.tdoc_compra_venta where id_doc_compra_venta = 182533;
+delete from conta.tdoc_compra_venta where id_doc_compra_venta = 182534;
+delete from conta.tdoc_compra_venta where id_doc_compra_venta = 182535;
+--solicitud efectivo, quitan esas solicitudes
+delete from tes.tsolicitud_efectivo where id_solicitud_efectivo= 32336;
+delete from tes.tsolicitud_efectivo where id_solicitud_efectivo= 32249;
+COMMIT;
+/********************************************F-DAUP-MGM-TES-2-05/10/2020********************************************/
