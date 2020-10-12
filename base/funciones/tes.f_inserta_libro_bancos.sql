@@ -1,17 +1,12 @@
--- FUNCTION: tes.f_inserta_libro_bancos(integer, integer, hstore)
+--------------- SQL ---------------
 
--- DROP FUNCTION tes.f_inserta_libro_bancos(integer, integer, hstore);
-
-CREATE OR REPLACE FUNCTION tes.f_inserta_libro_bancos(
-	p_administrador integer,
-	p_id_usuario integer,
-	p_hstore hstore)
-    RETURNS character varying
-    LANGUAGE 'plpgsql'
-
-    COST 100
-    VOLATILE 
-AS $BODY$
+CREATE OR REPLACE FUNCTION tes.f_inserta_libro_bancos (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_hstore public.hstore
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Tesoreria
  FUNCION: 		tes.f_inserta_libro_bancos
@@ -26,6 +21,7 @@ AS $BODY$
 
  #67        		14-08-2020        MZM KPLIAN        		insertar id_proveedor en libro bancos para cheques a proveedores
  #67				03.09.2020		  MZM KPLIAN        		ampliar y generalizar el registro de correo para todos los origenes de LB
+ #ETR-1294			12/10/2020	  	  manuel guerra				cambiar el tipo bigint al campo nro_deposito
 ***************************************************************************/
 
 DECLARE
@@ -368,7 +364,7 @@ BEGIN
                 sistema_origen,
                 comprobante_sigma,
                 id_int_comprobante,
-                nro_deposito
+                nro_deposito  --#ETR-1294
                 --,id_proveedor --14.08.2020
                 ,tabla_correo,
                 columna_correo,
@@ -402,7 +398,7 @@ BEGIN
                 (p_hstore->'sistema_origen')::varchar,
                 (p_hstore->'comprobante_sigma')::varchar,
                 (p_hstore->'id_int_comprobante')::integer,				
-                (p_hstore->'nro_deposito')::integer
+                (p_hstore->'nro_deposito')::bigint  --#ETR-1294
                 --,v_id_proveedor --14082020
                 ,v_tabla,
                 v_campo,
@@ -440,7 +436,7 @@ BEGIN
                   sistema_origen,
                   comprobante_sigma,
                   id_int_comprobante,
-                  nro_deposito
+                  nro_deposito     --#ETR-1294
                   --,id_proveedor --14082020
                   ,tabla_correo,
                   columna_correo,
@@ -474,7 +470,7 @@ BEGIN
                   (p_hstore->'sistema_origen')::varchar,
                   (p_hstore->'comprobante_sigma')::varchar,
                   (p_hstore->'id_int_comprobante')::integer,
-                  (p_hstore->'nro_deposito')::integer	
+                  (p_hstore->'nro_deposito')::bigint	 --#ETR-1294
                   --,v_id_proveedor --14082020			
                    ,v_tabla,
                   v_campo,
@@ -507,7 +503,10 @@ EXCEPTION
 		raise exception '%',v_resp;
 				        
 END;
-$BODY$;
-
-ALTER FUNCTION tes.f_inserta_libro_bancos(integer, integer, hstore)
-    OWNER TO postgres;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+PARALLEL UNSAFE
+COST 100;

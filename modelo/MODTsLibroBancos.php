@@ -43,7 +43,7 @@ class MODTsLibroBancos extends MODbase{
 		$this->captura('indice','numeric');
 		$this->captura('estado_reg','varchar');
 		$this->captura('tipo','varchar');
-		$this->captura('nro_deposito','integer');
+		$this->captura('nro_deposito','bigint');
 		$this->captura('fecha_reg','timestamp');
 		$this->captura('id_usuario_reg','int4');
 		$this->captura('fecha_mod','timestamp');
@@ -156,7 +156,7 @@ class MODTsLibroBancos extends MODbase{
 		$this->setParametro('fecha','fecha','date');
 		$this->setParametro('a_favor','a_favor','varchar');
 		$this->setParametro('nro_cheque','nro_cheque','int4');
-		$this->setParametro('nro_deposito','nro_deposito','int4');
+		$this->setParametro('nro_deposito','nro_deposito','varchar');
 		$this->setParametro('importe_deposito','importe_deposito','numeric');
 		$this->setParametro('nro_liquidacion','nro_liquidacion','varchar');
 		$this->setParametro('detalle','detalle','text');
@@ -206,7 +206,7 @@ class MODTsLibroBancos extends MODbase{
 		$this->setParametro('estado_reg','estado_reg','varchar');
 		$this->setParametro('tipo','tipo','varchar');
 		$this->setParametro('id_finalidad','id_finalidad','int4');
-		$this->setParametro('nro_deposito','nro_deposito','int4');
+		$this->setParametro('nro_deposito','nro_deposito','bigint');
 		//#67
 		
 		$this->setParametro('correo_proveedor','correo_proveedor','varchar');
