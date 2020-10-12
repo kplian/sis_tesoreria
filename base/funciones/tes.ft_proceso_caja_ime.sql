@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION tes.ft_proceso_caja_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -637,12 +639,7 @@ BEGIN
                ELSE
                   raise exception 'Tipo de Deposito inexistente';
               END IF;
-              
-              
-           --   
-       
-         
-
+      
               select 
                   fecha_ini, 
                   fecha_fin 
@@ -657,14 +654,14 @@ BEGIN
               where id_cuenta_bancaria=v_parametros.id_cuenta_bancaria::integer
               and fondo_devolucion_retencion='si' and (fecha between v_fecha_inicio and v_fecha_fin);
 
-                     
+
               v_resp2 = pxp.f_intermediario_ime(p_id_usuario::int4,NULL,NULL::varchar,'v58gc566o75102428i2usu08i4',13313,'172.17.45.202','99:99:99:99:99:99','tes.ft_ts_libro_bancos_ime','TES_LBAN_INS',NULL,'no',NULL,
                         array['filtro','ordenacion','dir_ordenacion','puntero','cantidad','_id_usuario_ai','_nombre_usuario_ai','id_cuenta_bancaria','id_depto','fecha','a_favor','nro_cheque','importe_deposito','nro_liquidacion','detalle','origen','observaciones','importe_cheque','id_libro_bancos_fk','nro_comprobante','comprobante_sigma','tipo','id_finalidad','id_int_comprobante','sistema_origen','nro_deposito'],
                         array[' 0 = 0 ','','','','','NULL','NULL',v_parametros.id_cuenta_bancaria::varchar,v_cuenta_bancaria.id_depto::varchar,''||v_parametros.fecha::varchar||'',(v_cuenta_bancaria.nombre||' '||v_cuenta_bancaria.nro_cuenta||' DEPOSITO')::varchar,''::varchar,v_parametros.importe_deposito::varchar,'','DEPOSITADO POR '||v_depositante::varchar,v_parametros.origen::varchar,v_parametros.observaciones::varchar,'0'::varchar,'NULL','','','deposito'::varchar,v_id_finalidad::varchar,''::varchar,'CAJA_CHICA'::varchar,v_parametros.nro_deposito::varchar],
-                        array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','date','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','int4','varchar','int4']
+                        array['varchar','varchar','varchar','integer','integer','int4','varchar','int4','int4','date','varchar','int4','numeric','varchar','text','varchar','text','numeric','int4','varchar','varchar','varchar','int4','int4','varchar','varchar']
                         ,'',NULL,NULL);
 
-                v_respuesta = substring(v_resp2 from '%#"tipo_respuesta":"_____"#"%' for '#');
+                v_respuesta = substring(v_resp2 from '%#"tipo_respuesta":"_____"#"%' for '#');    
 
                 IF v_respuesta = 'tipo_respuesta":"ERROR"' THEN
                     v_posicion_inicial = position('"mensaje":"' in v_resp2) + 11;
@@ -674,6 +671,8 @@ BEGIN
                     v_posicion_inicial = position('"id_libro_bancos":"' in v_resp2) + 19;
                     v_posicion_final = position('"}' in v_resp2);
                     v_id_deposito=substring(v_resp2 from v_posicion_inicial for (v_posicion_final-v_posicion_inicial));
+        
+        
 
                 END IF;--fin error respuesta
 
@@ -681,9 +680,7 @@ BEGIN
                 SET fondo_devolucion_retencion = 'si'
                 WHERE id_libro_bancos=v_id_deposito;
 
-                     
              
-
 
               v_respuesta = substring(v_resp2 from '%#"tipo_respuesta":"_____"#"%' for '#');
 
@@ -920,4 +917,5 @@ LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
 SECURITY INVOKER
+PARALLEL UNSAFE
 COST 100;
