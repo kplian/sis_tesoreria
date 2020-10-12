@@ -99,3 +99,15 @@ COMMIT;
 
 
 
+/********************************************I-DAUP-MGM-TES-3-12/10/2020********************************************/
+
+--BEGIN;
+--UPDATE tes.tsolicitud_efectivo SET fecha='07/09/2020'  WHERE id_solicitud_efectivo =32414;
+--COMMIT;
+
+BEGIN;
+UPDATE tes.tsolicitud_efectivo SET fecha='07/10/2020'  WHERE id_solicitud_efectivo =32414;
+COMMIT;
+/********************************************F-DAUP-MGM-TES-3-12/10/2020********************************************/
+
+
