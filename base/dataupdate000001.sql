@@ -39,10 +39,6 @@ UPDATE tes.tsolicitud_rendicion_det SET monto=1578.76 WHERE id_solicitud_efectiv
 
 /********************************************F-DAUP-MGM-TES-2-30/09/2020********************************************/
 
-<<<<<<< HEAD
-=======
-
->>>>>>> remotes/origin/test
 /********************************************I-DAUP-EGS-TES-2-02/10/2020********************************************/
 --Devengdo Rollback
 -- BEGIN;
@@ -107,3 +103,35 @@ BEGIN;
 UPDATE tes.tsolicitud_efectivo SET fecha='07/10/2020'  WHERE id_solicitud_efectivo =32414;
 COMMIT;
 /********************************************F-DAUP-MGM-TES-3-12/10/2020********************************************/
+/********************************************I-DAUP-EGS-TES-3-13/10/2020********************************************/
+--Devengdo Rollback
+-- BEGIN;
+-- Update tes.tplan_pago Set
+-- monto_retgar_mo = 0,
+-- liquido_pagable = 27600,
+-- Where id_plan_pago = 37627;
+-- COMMIT;
+--Commit
+BEGIN;
+Update tes.tplan_pago Set
+       monto_retgar_mo = 1932.00,
+       liquido_pagable = 25668.00
+Where id_plan_pago = 37627;
+COMMIT;
+
+--pago Rollback
+-- BEGIN;
+-- Update tes.tplan_pago Set
+-- monto_retgar_mo = 0,
+-- liquido_pagable = 27600,
+-- Where id_plan_pago = 37631;
+-- COMMIT;
+--Commit
+BEGIN;
+Update tes.tplan_pago Set
+       monto_retgar_mo = 1932.00,
+       liquido_pagable = 25668.00
+Where id_plan_pago = 37631;
+COMMIT;
+
+/********************************************F-DAUP-EGS-TES-3-13/10/2020********************************************/
