@@ -20,6 +20,7 @@ $body$
 ISUUE		FECHA:			 AUTOR:	 		DESCRIPCION:
 #1			16/10/2018		EGS 			se agrego el campo pago_borrador en la sentencia de modificacion en TES_PLAPA_MOD
 #53			13/2/2020		manuel guerra   quitar la validación de la eliminación de obligación de pago
+#MSA-37     14/0/2020       EGS             Se agrega el alias de v_parametros a la variable del raise exception
 ***************************************************************************/
 
 DECLARE
@@ -555,7 +556,7 @@ BEGIN
                     v_monto_ant_parcial_descontado = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'ant_parcial_descontado' );
                     -- si el descuento anticipo es mayor a cero verificar que nose sobrepase el total anticipado
                     IF v_monto_ant_parcial_descontado + v_registros_pp.descuento_anticipo <  v_parametros.descuento_anticipo  THEN
-                        raise exception 'El decuento por anticipo no puede exceder el falta por descontar que es  %',v_monto_ant_parcial_descontado+descuento_anticipo;
+                        raise exception 'El decuento por anticipo no puede exceder el falta por descontar que es  %',v_monto_ant_parcial_descontado+v_parametros.descuento_anticipo;--//#MSA-37
                      END IF;
 
                    ------------------------------------------------------------
