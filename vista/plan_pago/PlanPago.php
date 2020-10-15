@@ -1762,6 +1762,9 @@ header("content-type: text/javascript; charset=UTF-8");
         },
 
         onButtonEdit:function(){
+            this.liquido_base=0;//#MSA-31
+            this.desc_anticipo_base=0;//#MSA-31
+            this.monto_base=0;//#MSA-31
             this.accionFormulario = 'EDIT';
             var data = this.getSelectedData();
             //deshabilita el cambio del tipo de pago
@@ -1789,6 +1792,31 @@ header("content-type: text/javascript; charset=UTF-8");
             if(this.Cmp.id_plantilla.getValue()){
                 this.getPlantilla(this.Cmp.id_plantilla.getValue());
             }
+            if(data.estado == 'vbconta'){ //#MSA-31
+                this.Cmp.liquido_pagable.disable(true);
+                this.Cmp.monto_ejecutar_total_mo.disable(true);
+                this.Cmp.otros_descuentos.disable(true);
+                this.Cmp.monto_no_pagado.disable(true);
+                this.Cmp.monto_retgar_mo.disable(true);
+                this.Cmp.descuento_anticipo.disable(true);
+                this.Cmp.monto_anticipo.disable(true);
+                this.Cmp.monto.disable(true);
+                this.Cmp.descuento_ley.disable(true);
+                this.Cmp.descuento_inter_serv.disable(true);
+
+            }else{
+                this.Cmp.liquido_pagable.enable(true);
+                this.Cmp.monto_ejecutar_total_mo.enable(true);
+                this.Cmp.otros_descuentos.enable(true);
+                this.Cmp.monto_no_pagado.enable(true);
+                this.Cmp.monto_retgar_mo.enable(true);
+                this.Cmp.descuento_anticipo.enable(true);
+                this.Cmp.monto_anticipo.enable(true);
+                this.Cmp.monto.enable(true);
+                this.Cmp.descuento_ley.enable(true);
+                this.Cmp.descuento_inter_serv.enable(true);
+            };
+
         },
 
         getPlantilla: function(id_plantilla){
