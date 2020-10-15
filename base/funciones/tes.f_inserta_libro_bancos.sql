@@ -22,6 +22,7 @@ $body$
  #67        		14-08-2020        MZM KPLIAN        		insertar id_proveedor en libro bancos para cheques a proveedores
  #67				03.09.2020		  MZM KPLIAN        		ampliar y generalizar el registro de correo para todos los origenes de LB
  #ETR-1294			12/10/2020	  	  manuel guerra				cambiar el tipo bigint al campo nro_deposito
+ #ETR-1396			15/10/2020		  MANUEL GUERRA				AGREGAR VALIDACION DE VALORES NULOS
 ***************************************************************************/
 
 DECLARE
@@ -61,7 +62,7 @@ DECLARE
     v_campo	varchar;
     v_id	integer;
     v_correo varchar;
-    
+    v_nro_deposito_aux BIGINT;
     		    
 BEGIN
 
@@ -317,14 +318,12 @@ BEGIN
                       v_campo='id_proveedor'	;
     				
 					end if;
-                end if;
-          
-
-          
+                end if;                    
             
             if (p_hstore->'correo_proveedor' is not null and length(p_hstore->'correo_proveedor')!=0 ) then
                v_correo:=p_hstore->'correo_proveedor';
             end if;
+            
             --si no encontro nada es q no es funcionario ni proveedor, intentamos ubicar de los registros historicos de libro_bancos
             if (v_correo is null ) then
             
@@ -332,9 +331,13 @@ BEGIN
                 upper(a_favor)= upper(translate ((rtrim(p_hstore->'a_favor'))::varchar, 'áéíóúÁÉÍÓÚäëïöüÄËÏÖÜñ', 'aeiouAEIOUaeiouAEIOUÑ'))
                 order by id_libro_bancos desc limit 1;
              end if;
-
-
-
+			--#ETR-1396
+			if (p_hstore->'nro_deposito' is null or length(p_hstore->'nro_deposito')=0 ) then
+               	v_nro_deposito_aux=null;
+            ELSE
+            	v_nro_deposito_aux=(p_hstore->'nro_deposito');
+            end if;
+            
             IF(p_hstore ? 'fecha' = false)THEN
 
             	insert into tes.tts_libro_bancos(
@@ -398,7 +401,7 @@ BEGIN
                 (p_hstore->'sistema_origen')::varchar,
                 (p_hstore->'comprobante_sigma')::varchar,
                 (p_hstore->'id_int_comprobante')::integer,				
-                (p_hstore->'nro_deposito')::bigint  --#ETR-1294
+                v_nro_deposito_aux--(p_hstore->'nro_deposito')::bigint  --#ETR-1294
                 --,v_id_proveedor --14082020
                 ,v_tabla,
                 v_campo,
@@ -470,7 +473,7 @@ BEGIN
                   (p_hstore->'sistema_origen')::varchar,
                   (p_hstore->'comprobante_sigma')::varchar,
                   (p_hstore->'id_int_comprobante')::integer,
-                  (p_hstore->'nro_deposito')::bigint	 --#ETR-1294
+                  v_nro_deposito_aux--(p_hstore->'nro_deposito')::bigint	 --#ETR-1294
                   --,v_id_proveedor --14082020			
                    ,v_tabla,
                   v_campo,
