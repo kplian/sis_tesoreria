@@ -135,3 +135,20 @@ Where id_plan_pago = 37631;
 COMMIT;
 
 /********************************************F-DAUP-EGS-TES-3-13/10/2020********************************************/
+/********************************************I-DAUP-EGS-TES-4-16/10/2020********************************************/
+-- BEGIN;
+-- Update tes.tplan_pago Set
+--      otros_descuentos= 0.00,
+--      monto_retgar_mo = 0.00,
+--      liquido_pagable = 5250.00
+-- Where id_plan_pago = 32304;
+-- COMMIT;
+BEGIN;
+Update tes.tplan_pago Set
+      otros_descuentos= 126.00,
+      monto_retgar_mo = 3560.00,
+      liquido_pagable = 1564.00
+Where id_plan_pago = 32304;
+COMMIT;
+/********************************************F-DAUP-EGS-TES-4-16/10/2020********************************************/
+
