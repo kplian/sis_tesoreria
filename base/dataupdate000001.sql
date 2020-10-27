@@ -166,4 +166,81 @@ Update tes.tplan_pago Set
 Where id_plan_pago = 37832;
 COMMIT;
 /********************************************F-DAUP-EGS-TES-5-20/10/2020********************************************/
+/********************************************I-DAUP-EGS-TES-6-27/10/2020********************************************/
+/*
+---pago y devengado 2020
+BEGIN;
+Update tes.tplan_pago Set
+      monto_retgar_mo = 0.00,
+      liquido_pagable = 17715.00
+Where id_plan_pago = 34317;
+COMMIT;
+BEGIN;
+Update tes.tplan_pago Set
+      monto_retgar_mo = 0.00,
+      liquido_pagable = 4543.79
+Where id_plan_pago = 37996;
+COMMIT;
+*/
+--devengado 2020
+BEGIN;
+Update tes.tplan_pago Set
+      monto_retgar_mo = 1240.05,
+      liquido_pagable = 16474.95
+Where id_plan_pago = 34317;
+COMMIT;
+--pago 2020
+BEGIN;
+Update tes.tplan_pago Set
+      monto_retgar_mo = 1240.05,
+      liquido_pagable = 3303.74
+Where id_plan_pago = 37996;
+COMMIT;
+--obligacion de pago 2020 añadiendo saldo retencion de garantia 2019
+-- BEGIN;
+-- Update tes.tobligacion_pago Set
+--     monto_ajuste_ret_garantia_ga = 0.00
+-- Where id_obligacion_pago = 12699;
+-- COMMIT;
+BEGIN;
+Update tes.tobligacion_pago Set
+    monto_ajuste_ret_garantia_ga = 4568.48
+Where id_obligacion_pago = 12699;
+COMMIT;
+
+--ajustando devengado y pago en 2019
+-- --devengado
+-- BEGIN;
+-- Update tes.tplan_pago Set
+--       monto_retgar_mo = 0.00,
+--       otros_descuentos= 0.00,
+--       liquido_pagable = 65264
+-- Where id_plan_pago = 31530;
+-- COMMIT;
+-- --pago 2020
+-- BEGIN;
+-- Update tes.tplan_pago Set
+--           monto_retgar_mo = 0.00,
+--           otros_descuentos= 0.00,
+--           liquido_pagable = 65264
+-- Where id_plan_pago = 32550;
+-- COMMIT;
+--devengado
+BEGIN;
+Update tes.tplan_pago Set
+      monto_retgar_mo = 4568.48,
+      otros_descuentos= 5351.65,
+      liquido_pagable = 55343.87
+Where id_plan_pago = 31530;
+COMMIT;
+--pago 2020
+BEGIN;
+Update tes.tplan_pago Set
+      monto_retgar_mo = 4568.48,
+      otros_descuentos= 5351.65,
+      liquido_pagable = 55343.87
+Where id_plan_pago = 32550;
+COMMIT;
+
+/********************************************F-DAUP-EGS-TES-6-27/10/2020********************************************/
 
