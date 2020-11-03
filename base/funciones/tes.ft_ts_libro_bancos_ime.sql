@@ -1,18 +1,13 @@
--- FUNCTION: tes.ft_ts_libro_bancos_ime(integer, integer, character varying, character varying)
+--------------- SQL ---------------
 
--- DROP FUNCTION tes.ft_ts_libro_bancos_ime(integer, integer, character varying, character varying);
-
-CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_ime(
-	p_administrador integer,
-	p_id_usuario integer,
-	p_tabla character varying,
-	p_transaccion character varying)
-    RETURNS character varying
-    LANGUAGE 'plpgsql'
-
-    COST 100
-    VOLATILE 
-AS $BODY$
+CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_ime (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Tesoreria
  FUNCION: 		tes.ft_ts_libro_bancos_ime
@@ -29,6 +24,7 @@ AS $BODY$
  ISSUE            FECHA:		      AUTOR                 DESCRIPCION
 
  #67        	18-08-2020        MZM KPLIAN        actualizacion de proveedor por LB
+ #ETR-1606      03/11-2020        manuel guerra     agregar estado de borrador y anulado, para el saldo de banco
 ***************************************************************************/
 
 DECLARE
@@ -110,6 +106,7 @@ BEGIN
 	if(p_transaccion='TES_LBAN_INS')then
 
         begin
+
         	select ctaban.centro into g_centro
             from tes.tcuenta_bancaria ctaban
             where ctaban.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria;
@@ -167,6 +164,7 @@ BEGIN
                           into g_saldo_cuenta_bancaria
                   From tes.tts_libro_bancos lbr
                   where  lbr.fecha is not null and -- lbr.fecha <= g_fecha and   --OJO  27/03/2018   COMENTADO para VALIDAR, comentado
+                  lbr.estado not in ('borrador','anulado') and --#ETR-1606
                   lbr.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria;
 
                   IF(v_parametros.importe_cheque > g_saldo_cuenta_bancaria) Then
@@ -1261,7 +1259,10 @@ EXCEPTION
 		raise exception '%',v_resp;
 
 END;
-$BODY$;
-
-ALTER FUNCTION tes.ft_ts_libro_bancos_ime(integer, integer, character varying, character varying)
-    OWNER TO postgres;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+PARALLEL UNSAFE
+COST 100;
