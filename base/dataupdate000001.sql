@@ -243,4 +243,19 @@ Where id_plan_pago = 32550;
 COMMIT;
 
 /********************************************F-DAUP-EGS-TES-6-27/10/2020********************************************/
+/********************************************I-DAUP-EGS-TES-7-04/11/2020********************************************/
+/*
+UPDATE tes.tobligacion_pago SET
+total_anticipo = 658800.00,
+monto_ajuste_ret_anticipo_par_ga = 658800.00
+WHERE id_obligacion_pago = 12302;
+*/
+BEGIN;
+UPDATE tes.tobligacion_pago SET
+    total_anticipo = 219600.00,
+    monto_ajuste_ret_anticipo_par_ga = 219600.00
+WHERE id_obligacion_pago = 12302;
+COMMIT;
+/********************************************F-DAUP-EGS-TES-7-04/11/2020********************************************/
+
 
