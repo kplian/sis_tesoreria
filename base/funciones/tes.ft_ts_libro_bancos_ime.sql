@@ -25,6 +25,7 @@ $body$
 
  #67        	18-08-2020        MZM KPLIAN        actualizacion de proveedor por LB
  #ETR-1606      03/11-2020        manuel guerra     agregar estado de borrador y anulado, para el saldo de banco
+ #67			04.11.2020		  MZM KPLIAN		omision de actualizacion de correo empresarial para funcionario
 ***************************************************************************/
 
 DECLARE
@@ -494,10 +495,10 @@ BEGIN
 			
 		--end if; 
         --#67
-        if (v_parametros.tabla_correo='orga.tfuncionario') then
-            update orga.tfuncionario
+        if (v_parametros.tabla_correo='orga.tfuncionario') then --#67 04.11.2020
+           /* update orga.tfuncionario
             set email_empresa=v_parametros.correo_proveedor
-            where id_funcionario=v_parametros.id_columna_correo;
+            where id_funcionario=v_parametros.id_columna_correo;*/
         elsif (v_parametros.tabla_correo='param.tproveedor') then
         	if exists (select 1 from param.tproveedor where id_proveedor=v_parametros.id_columna_correo and tipo='institucion') then
 			   update param.tinstitucion set
