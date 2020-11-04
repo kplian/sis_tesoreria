@@ -333,9 +333,10 @@ BEGIN
                                                                                                             From tes.tts_libro_bancos li
                                                                                                             Where li.id_libro_bancos = v_parametros.id_libro_bancos) , 0)
             Into g_saldo_cuenta_bancaria
-             From tes.tts_libro_bancos lbr
-             where lbr.fecha is not null and --lbr.fecha <= v_parametros.fecha  and  --OJO  27/03/2018   COMENTADO APRA VALIDAR, comentado
-                  lbr.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria;
+            From tes.tts_libro_bancos lbr
+            where lbr.fecha is not null and --lbr.fecha <= v_parametros.fecha  and  --OJO  27/03/2018   COMENTADO APRA VALIDAR, comentado
+            lbr.estado not in ('borrador','anulado') and --#ETR-1606
+            lbr.id_cuenta_bancaria = v_parametros.id_cuenta_bancaria;
 
             --Comparamos el saldo de la cuenta bancaria con el importe del cheque
             IF(v_parametros.importe_cheque > g_saldo_cuenta_bancaria) Then
