@@ -257,5 +257,35 @@ UPDATE tes.tobligacion_pago SET
 WHERE id_obligacion_pago = 12302;
 COMMIT;
 /********************************************F-DAUP-EGS-TES-7-04/11/2020********************************************/
+/********************************************I-DAUP-EGS-TES-8-04/11/2020********************************************/
+--Devengdo Rollback
+-- BEGIN;
+-- Update tes.tplan_pago Set
+-- monto_retgar_mo = 0,
+-- liquido_pagable = 71330.00,
+-- Where id_plan_pago = 37082;
+-- COMMIT;
+--Commit
+BEGIN;
+Update tes.tplan_pago Set
+      monto_retgar_mo = 4993.10,
+      liquido_pagable = 66336.90
+Where id_plan_pago = 37082;
+COMMIT;
 
+--pago Rollback
+-- BEGIN;
+-- Update tes.tplan_pago Set
+-- monto_retgar_mo = 0,
+-- liquido_pagable = 71330.00,
+-- Where id_plan_pago = 37084;
+-- COMMIT;
+--Commit
+BEGIN;
+Update tes.tplan_pago Set
+      monto_retgar_mo = 4993.10,
+      liquido_pagable = 66336.90
+Where id_plan_pago = 37084;
+COMMIT;
 
+/********************************************F-DAUP-EGS-TES-8-04/11/2020********************************************/
