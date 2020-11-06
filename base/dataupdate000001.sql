@@ -289,3 +289,19 @@ Where id_plan_pago = 37084;
 COMMIT;
 
 /********************************************F-DAUP-EGS-TES-8-04/11/2020********************************************/
+<<<<<<< HEAD
+=======
+
+/********************************************I-DAUP-EGS-TES-9-05/11/2020********************************************/
+/*
+UPDATE tes.tplan_pago SET
+id_plantilla =8
+WHERE id_plan_pago = 37395;
+*/
+BEGIN;
+UPDATE tes.tplan_pago SET
+    id_plantilla =1
+WHERE id_plan_pago = 37395;
+COMMIT;
+/********************************************F-DAUP-EGS-TES-9-05/11/2020********************************************/
+>>>>>>> 74c0025... #ETR-1681 modificacion de tipo de documento ADQ-488-2020
