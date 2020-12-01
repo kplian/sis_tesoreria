@@ -1958,4 +1958,15 @@ ALTER TABLE tes.tts_libro_bancos
 ALTER TABLE tes.tts_libro_bancos
   ADD COLUMN id_columna_correo INTEGER;  
   
-/*************************F-SCP-MZM-TES-67-02/09/2020*************/  
+/*************************F-SCP-MZM-TES-67-02/09/2020*************/
+/*************************I-SCP-EGS-TES-1-24/11/2020*************/
+ALTER TABLE tes.tplan_pago
+    ADD COLUMN fecha_documento DATE;
+ALTER TABLE tes.tplan_pago
+    ADD COLUMN fecha_derivacion DATE;
+ALTER TABLE tes.tplan_pago
+    ADD COLUMN "dias_limite" INTEGER;
+
+COMMENT ON COLUMN tes.tplan_pago."dias_limite"
+    IS 'Dias habiles limite para el pago contractual';
+/*************************F-SCP-EGS-TES-1-24/11/2020*************/

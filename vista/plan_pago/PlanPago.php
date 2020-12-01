@@ -9,7 +9,7 @@
  * #1			16/102016		EGS					Se aumento el campo pago borrador y sus respectivas validaciones
  * #41           16/12/2019      JUAN                Reporte de información de pago
 #MSA-31        25/08/2020      EGS        			Se respeta el liquido pagable en la cuota de pagon con repecto a su devengado
-
+ * ETR-1914             01/12/2020      EGS         Se agregan campor fecha derivacion, fecha documento y dias limite
  */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -77,7 +77,18 @@ header("content-type: text/javascript; charset=UTF-8");
                             buttons: [{ text: 'Dividir gasto', handler: me.calcularAnticipo, scope: me, tooltip: 'Según las fechas,  ayuda con el calculo  del importe anticipado'}],
                             id_grupo: 3,
                             flex: 1
-                        }
+                        },
+                        {//#ETR-1914
+                            xtype: 'fieldset',
+                            title: 'Fechas Documentacion',
+                            autoHeight: true,
+                            items: [],
+                            hiden: true,
+                            id_grupo:4,
+                            margins:'2 2 2 2',
+                            flex:1
+                        },
+
                     ]
 
                 }];
@@ -1183,6 +1194,48 @@ header("content-type: text/javascript; charset=UTF-8");
                 grid:true,
                 form:false
             },
+            {//#ETR-1914
+                config:{
+                    name: 'fecha_documento',
+                    fieldLabel: 'Fecha Documento',
+                    allowBlank: false,
+                    gwidth: 80,
+                    format: 'd/m/Y',
+                    renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+                },
+                type:'DateField',
+                id_grupo:4,
+                grid:true,
+                form:true
+            },
+            {//#ETR-1914
+                config:{
+                    name: 'fecha_derivacion',
+                    fieldLabel: 'Fecha Derivacion',
+                    allowBlank: false,
+                    gwidth: 80,
+                    format: 'd/m/Y',
+                    renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+                },
+                type:'DateField',
+                id_grupo:4,
+                grid:true,
+                form:true
+            },
+            {//#ETR-1914
+                config:{
+                    name: 'dias_limite',
+                    fieldLabel: 'Dias Limite',
+                    allowBlank: false,
+                    anchor: '80%',
+                    gwidth: 100,
+                    maxLength:4
+                },
+                type:'NumberField',
+                id_grupo:4,
+                grid:true,
+                form:true
+            },
 
             {
                 config:{
@@ -1354,6 +1407,9 @@ header("content-type: text/javascript; charset=UTF-8");
 
             //#1			16/102016		EGS
             {name:'codigo_tipo_anticipo', type: 'string'},
+            {name:'fecha_documento',  type: 'date',dateFormat:'Y-m-d'},//#ETR-1914
+            {name:'fecha_derivacion', type: 'date',dateFormat:'Y-m-d'},//#ETR-1914
+            {name:'dias_limite', type: 'numeric'},//#ETR-1914
 
         ],
 

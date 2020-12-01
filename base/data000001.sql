@@ -518,4 +518,9 @@ select param.f_import_tcatalogo ('insert','TES','Pruebas FAT','PFAT','tipo_antic
 /***********************************I-DAT-JJA-TES-0-26/05/2020*****************************************/
 select pxp.f_insert_tgui ('Saldo por pagar de proceso de compra', 'Saldo por pagar de proceso de compra', 'SALPAGPROCOM', 'si', 12, 'sis_tesoreria/reportes/formularios/Saldo_pagar_proceso_compra.php', 3, '', 'Saldo_pagar_proceso_compra', 'TES'); --#65
 /***********************************F-DAT-JJA-TES-0-26/05/2020*****************************************/
+/***********************************I-DAT-EGS-TES-ETR-1914-01/12/2020*****************************************/
+INSERT INTO param.ttipo_envio_correo ("id_usuario_reg", "estado_reg", "codigo", "descripcion", "dias_envio", "dias_consecutivo", "habilitado", "dias_vencimiento")
+VALUES
+(1, E'activo', E'PPG', E'Recordatorio de plan de pagos', E'15,10', E'5', E'no', 3);
+/***********************************F-DAT-EGS-TES-ETR-1914-01/12/2020*****************************************/
 

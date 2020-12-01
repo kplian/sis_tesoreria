@@ -14,6 +14,7 @@
  *  #35  ETR            07/10/2019      RAC         Adicionar descuento de anticipos en reporte de plan de pagos 
  *  #41  ENDETR         16/12/2019      JUAN        Reporte de información de pago
  *  #65  ENDETR         26/05/2020      JUAN        SALDO POR PAGAR DE PROCESOS DE COMPRA
+ * ETR-1914             01/12/2020      EGS         Se agregan campor fecha derivacion, fecha documento y dias limite
  * * */
 
 class MODPlanPago extends MODbase{
@@ -129,9 +130,13 @@ class MODPlanPago extends MODbase{
 
 		$this->captura('pago_borrador','varchar'); //#1			16/102016		EGS
         $this->captura('codigo_tipo_anticipo', 'varchar');
+        $this->captura('fecha_documento','date');//#ETR-1914
+        $this->captura('fecha_derivacion','date');//#ETR-1914
+        $this->captura('dias_limite','integer');//#ETR-1914
 
 
-		//Ejecuta la instruccion
+
+        //Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
 
@@ -217,6 +222,10 @@ class MODPlanPago extends MODbase{
 		$this->setParametro('es_ultima_cuota','es_ultima_cuota','boolean');
         $this->setParametro('codigo_tipo_anticipo', 'codigo_tipo_anticipo', 'varchar');
 
+        $this->setParametro('fecha_documento', 'fecha_documento', 'varchar');//#ETR-1914
+        $this->setParametro('fecha_derivacion', 'fecha_derivacion', 'varchar');//#ETR-1914
+        $this->setParametro('dias_limite', 'dias_limite', 'integer');//#ETR-1914
+
 
 
 		//Ejecuta la instruccion
@@ -277,6 +286,10 @@ class MODPlanPago extends MODbase{
 
 		$this->setParametro('pago_borrador','pago_borrador','varchar');/// #1			16/102016		EGS
         $this->setParametro('codigo_tipo_anticipo', 'codigo_tipo_anticipo', 'varchar');
+
+        $this->setParametro('fecha_documento', 'fecha_documento', 'date');//#ETR-1914
+        $this->setParametro('fecha_derivacion', 'fecha_derivacion', 'date');//#ETR-1914
+        $this->setParametro('dias_limite', 'dias_limite', 'integer');//#ETR-1914
 
 
 		//Ejecuta la instruccion
@@ -1202,6 +1215,22 @@ function listarPagos(){
 
 		return $this->respuesta;
 	}
+    function alertarPlazoPagos(){//--##ETR-1914
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.f_alerta_plazo_pagos_ime';
+        $this->transaccion='TES_PLAPAG_IME';
+        $this->tipo_procedimiento='IME';
+        //definicion de variables
+        $this->tipo_conexion='seguridad';
+        $this->setParametro('id_usuario','id_usuario','integer');
+        $this->setParametro('habilitado','habilitado','varchar');
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
 
 
 }
