@@ -547,7 +547,8 @@ BEGIN
         pago_borrador,  -- #1				16/10/2018		EGS
         fecha_documento,--##ETR-1914
         fecha_derivacion,--##ETR-1914
-        dias_limite --##ETR-1914
+        dias_limite, --##ETR-1914
+        fecha_vencimiento --##ETR-1914
     ) values(
                 'activo',
                 v_nro_cuota,
@@ -598,7 +599,8 @@ BEGIN
                 v_pago_borrador::varchar,  -- #1				16/10/2018		EGS
                 (p_hstore->'fecha_documento')::date,--##ETR-1914
                 (p_hstore->'fecha_derivacion')::date,--##ETR-1914
-                (p_hstore->'dias_limite')::integer --##ETR-1914
+                (p_hstore->'dias_limite')::integer, --##ETR-1914
+                (p_hstore->'fecha_vencimiento')::date --##ETR-1914
             )RETURNING id_plan_pago into v_id_plan_pago;
 
 
