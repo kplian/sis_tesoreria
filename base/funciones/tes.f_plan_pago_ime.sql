@@ -153,6 +153,7 @@ DECLARE
     v_id_uo                        integer;
     v_especial                    numeric;
     v_total_desc_ant            numeric;
+    v_fecha_vencimiento             date;
 
 
 BEGIN
@@ -672,7 +673,8 @@ BEGIN
                                       codigo_tipo_anticipo = v_parametros.codigo_tipo_anticipo,
                                       fecha_documento = v_parametros.fecha_documento,--##ETR-1914
                                       fecha_derivacion = v_parametros.fecha_derivacion,--##ETR-1914
-                                      dias_limite = v_parametros.dias_limite--#ETR-1914
+                                      dias_limite = v_parametros.dias_limite,--#ETR-1914
+                                      fecha_vencimiento = v_parametros.fecha_vencimiento--#ETR-1914
 
             where id_plan_pago = v_parametros.id_plan_pago;
 
@@ -1703,6 +1705,26 @@ BEGIN
             --Devuelve la respuesta
             return v_resp;
         end;
+        /*********************************
+        #TRANSACCION:  'TES_ADDPLPAG_IME'
+        #DESCRIPCION:    recupera la suma de las fecha
+        #AUTOR:        EGS
+        #FECHA:        03/12/2020
+       ***********************************/
+
+    elsif(p_transaccion='TES_ADDPLPAG_IME')then
+
+        begin
+            --raise exception 'llega % % ',v_parametros.fecha,v_parametros.dias;
+            v_fecha_vencimiento = pxp.f_add_dias_fecha(v_parametros.fecha,v_parametros.dias,'calendario');
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Suma de fecha con dias');
+            v_resp = pxp.f_agrega_clave(v_resp,'fecha_vencimiento',v_fecha_vencimiento::varchar);
+
+            --Devuelve la respuesta
+            return v_resp;
+        end;
+
 
 
 

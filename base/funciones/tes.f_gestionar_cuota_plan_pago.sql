@@ -124,9 +124,10 @@ BEGIN
         dpl.prioridad as prioridad_libro,
         c.temporal,
         pp.pago_borrador, ---#1				16/10/2018			EGS
-        pp.fecha_documento,
-        pp.fecha_derivacion,
-        pp.dias_limite
+        pp.fecha_documento,--#ETR-1914
+        pp.fecha_derivacion,--#ETR-1914
+        pp.dias_limite,--#ETR-1914
+        pp.fecha_vencimiento--#ETR-1914
     into
         v_registros
     from  tes.tplan_pago pp
@@ -361,7 +362,8 @@ BEGIN
             id_depto_conta,
             fecha_documento,--#ETR-1914
             fecha_derivacion,--#ETR-1914
-            dias_limite--#ETR-1914
+            dias_limite,--#ETR-1914
+            fecha_vencimiento--#ETR-1914
         )
         VALUES (
                    p_id_usuario,
@@ -410,7 +412,8 @@ BEGIN
                    v_registros.id_depto_conta,
                    v_registros.fecha_documento,--#ETR-1914
                    v_registros.fecha_derivacion,--#ETR-1914
-                   v_registros.dias_limite --#ETR-1914
+                   v_registros.dias_limite, --#ETR-1914
+                   v_registros.fecha_vencimiento
                )RETURNING id_plan_pago into v_id_plan_pago;
 
 

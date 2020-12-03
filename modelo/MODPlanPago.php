@@ -133,6 +133,7 @@ class MODPlanPago extends MODbase{
         $this->captura('fecha_documento','date');//#ETR-1914
         $this->captura('fecha_derivacion','date');//#ETR-1914
         $this->captura('dias_limite','integer');//#ETR-1914
+        $this->captura('fecha_vencimiento','date');//#ETR-1914
 
 
 
@@ -225,6 +226,7 @@ class MODPlanPago extends MODbase{
         $this->setParametro('fecha_documento', 'fecha_documento', 'varchar');//#ETR-1914
         $this->setParametro('fecha_derivacion', 'fecha_derivacion', 'varchar');//#ETR-1914
         $this->setParametro('dias_limite', 'dias_limite', 'integer');//#ETR-1914
+        $this->setParametro('fecha_vencimiento', 'fecha_vencimiento', 'date');//#ETR-1914
 
 
 
@@ -290,6 +292,7 @@ class MODPlanPago extends MODbase{
         $this->setParametro('fecha_documento', 'fecha_documento', 'date');//#ETR-1914
         $this->setParametro('fecha_derivacion', 'fecha_derivacion', 'date');//#ETR-1914
         $this->setParametro('dias_limite', 'dias_limite', 'integer');//#ETR-1914
+        $this->setParametro('fecha_vencimiento', 'fecha_vencimiento', 'date');//#ETR-1914
 
 
 		//Ejecuta la instruccion
@@ -1231,6 +1234,24 @@ function listarPagos(){
         //Devuelve la respuesta
         return $this->respuesta;
     }
+    function addDiasFecha(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.f_plan_pago_ime';
+        $this->transaccion='TES_ADDPLPAG_IME';
+        $this->tipo_procedimiento='IME';
+
+        //Define los parametros para la funcion
+        $this->setParametro('fecha','fecha','date');
+        $this->setParametro('dias','dias','integer');
+
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+
 
 
 }

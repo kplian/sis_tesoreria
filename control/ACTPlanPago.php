@@ -570,7 +570,16 @@ class ACTPlanPago extends ACTbase{
         $this->mensajeExito->setMensaje('EXITO', 'Reporte.php', 'Reporte generado','Se generó con éxito el reporte: ' . $nombreArchivo, 'control');
         $this->mensajeExito->setArchivoGenerado($nombreArchivo);
         $this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
-	}	
+	}
+    function addDiasFecha(){
+
+        $this->objFunc=$this->create('MODPlanPago');
+
+        $this->res=$this->objFunc->addDiasFecha($this->objParam);
+
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
+
 
 }
 
