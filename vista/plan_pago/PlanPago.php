@@ -137,6 +137,24 @@ header("content-type: text/javascript; charset=UTF-8");
             });
             this.addButton('SincPresu',{grupo:[0,1], text:'Inc. Pres.',iconCls: 'balert',disabled:true,handler:this.onBtnSincPresu,tooltip: '<b>Incrementar Presupuesto</b><br/> Incremeta el presupuesto exacto para proceder con el pago'});
 
+            this.Cmp.fecha_documento.on('change',function(combo, record, index){
+
+                let dias_limite =this.Cmp.dias_limite.getValue();
+                if (dias_limite == undefined || dias_limite =='' ){
+                    dias_limite = 1 ;
+                }
+
+                this.sumarDiasFecha(record,dias_limite);
+
+            } ,this);
+
+            this.Cmp.dias_limite.on('change',function(combo, record, index){
+                let fecha_documento =this.Cmp.fecha_documento.getValue();
+                this.sumarDiasFecha(fecha_documento,record);
+            } ,this);
+
+            this.Cmp.fecha_vencimiento.disable(true);
+
         },
         tam_pag:50,
 
@@ -1236,7 +1254,20 @@ header("content-type: text/javascript; charset=UTF-8");
                 grid:true,
                 form:true
             },
-
+            {//#ETR-1914
+                config:{
+                    name: 'fecha_vencimiento',
+                    fieldLabel: 'Fecha Vencimiento',
+                    allowBlank: true,
+                    gwidth: 80,
+                    format: 'd/m/Y',
+                    renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+                },
+                type:'DateField',
+                id_grupo:4,
+                grid:true,
+                form:true
+            },
             {
                 config:{
                     name: 'estado_reg',
@@ -1410,6 +1441,7 @@ header("content-type: text/javascript; charset=UTF-8");
             {name:'fecha_documento',  type: 'date',dateFormat:'Y-m-d'},//#ETR-1914
             {name:'fecha_derivacion', type: 'date',dateFormat:'Y-m-d'},//#ETR-1914
             {name:'dias_limite', type: 'numeric'},//#ETR-1914
+            {name:'fecha_vencimiento', type: 'date',dateFormat:'Y-m-d'},//#ETR-1914
 
         ],
 
@@ -2466,6 +2498,7 @@ header("content-type: text/javascript; charset=UTF-8");
             Phx.vista.PlanPago.superclass.onButtonNew.call(this);
             this.ocultarGrupo(2); //ocultar el grupo de ajustes
             this.ocultarGrupo(3); //ocultar el grupo de ajustes
+
         },
 
         successAplicarDesc:function(resp){
@@ -2591,7 +2624,29 @@ header("content-type: text/javascript; charset=UTF-8");
                 this.idContenedor,
                 'Obs'
             )
+        },
+        sumarDiasFecha:function (fecha,dias) {
+            Phx.CP.loadingShow();
+            Ext.Ajax.request({
+                url:'../../sis_tesoreria/control/PlanPago/addDiasFecha',
+                params:{
+                    fecha: fecha,
+                    dias:dias
+                },
+                success: function(resp){
+                    Phx.CP.loadingHide();
+                    var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+                    //console.log('holas',reg.ROOT.datos.fecha_vencimiento);
+                    this.Cmp.fecha_vencimiento.setValue(reg.ROOT.datos.fecha_vencimiento);
+
+                },
+                failure: this.conexionFailure,
+                timeout: this.timeout,
+                scope:this
+            });
         }
+
+
 
     })
 </script>

@@ -1970,3 +1970,8 @@ ALTER TABLE tes.tplan_pago
 COMMENT ON COLUMN tes.tplan_pago."dias_limite"
     IS 'Dias habiles limite para el pago contractual';
 /*************************F-SCP-EGS-TES-1-24/11/2020*************/
+/*************************I-SCP-EGS-TES-ETR-1914-03/12/2020*************/
+
+ALTER TABLE tes.tplan_pago
+    ADD COLUMN fecha_vencimiento DATE;
+/*************************F-SCP-EGS-TES-ETR-1914-03/12/2020*************/

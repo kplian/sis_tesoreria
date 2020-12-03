@@ -444,7 +444,8 @@ BEGIN
         codigo_tipo_anticipo,
         fecha_documento,--##ETR-1914
         fecha_derivacion,--##ETR-1914
-        dias_limite --##ETR-1914
+        dias_limite,--##ETR-1914
+        fecha_vencimiento--##ETR-1914
     )
     values
     (
@@ -494,7 +495,8 @@ BEGIN
         (p_hstore -> 'codigo_tipo_anticipo')::varchar,
         (p_hstore->'fecha_documento')::date,--##ETR-1914
         (p_hstore->'fecha_derivacion')::date,--##ETR-1914
-        (p_hstore->'dias_limite')::integer --##ETR-1914
+        (p_hstore->'dias_limite')::integer, --##ETR-1914
+        (p_hstore->'fecha_vencimiento')::date --##ETR-1914
     )RETURNING id_plan_pago into v_id_plan_pago;
 
 

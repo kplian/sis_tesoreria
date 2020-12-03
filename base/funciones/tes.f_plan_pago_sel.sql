@@ -272,7 +272,8 @@ BEGIN
                             plapa.codigo_tipo_anticipo,
                             plapa.fecha_documento,--##ETR-1914
                             plapa.fecha_derivacion,--##ETR-1914
-                            plapa.dias_limite --##ETR-1914
+                            plapa.dias_limite, --##ETR-1914
+                            plapa.fecha_vencimiento --##ETR-1914
 
                         from tes.tplan_pago plapa
                         inner join wf.tproceso_wf pwf on pwf.id_proceso_wf = plapa.id_proceso_wf
