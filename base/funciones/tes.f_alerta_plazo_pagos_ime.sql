@@ -131,7 +131,7 @@ BEGIN
                     FROM tes.tplan_pago p
                              left join tes.tobligacion_pago ob on ob.id_obligacion_pago = p.id_obligacion_pago
                              left join param.vproveedor pr on pr.id_proveedor = ob.id_proveedor
-                    WHERE p.estado not in ('anulado','contabilizado','devengado')
+                    WHERE p.estado not in ('anulado','pagado','devengado','aplicado','devuelto','anticipado')
                       and (p.dias_limite is not null or p.dias_limite <> null)
 
                 )LOOP
