@@ -322,3 +322,16 @@ UPDATE tes.tplan_pago SET
 WHERE id_plan_pago = 36472;
 COMMIT;
 /********************************************F-DAUP-EGS-TES-ETR-2155-11/12/2020********************************************/
+
+/********************************************I-DAUP-EGS-TES-ETR-2169-14/12/2020********************************************/
+/*
+UPDATE tes.tplan_pago SET
+id_plantilla =48
+WHERE id_plan_pago = 36472;
+*/
+BEGIN;
+UPDATE tes.tplan_pago SET
+    id_plantilla =8
+WHERE id_plan_pago = 36472;
+COMMIT;
+/********************************************F-DAUP-EGS-TES-ETR-2169-14/12/2020********************************************/
