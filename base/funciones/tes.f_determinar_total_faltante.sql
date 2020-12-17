@@ -1,12 +1,17 @@
---------------- SQL ---------------
+-- FUNCTION: tes.f_determinar_total_faltante(integer, character varying, integer)
 
-CREATE OR REPLACE FUNCTION tes.f_determinar_total_faltante (
-  p_id_obligacion_pago integer,
-  p_filtro varchar = 'registrado'::character varying,
-  p_id_plan_pago integer = NULL::integer
-)
-RETURNS numeric AS
-$body$
+-- DROP FUNCTION tes.f_determinar_total_faltante(integer, character varying, integer);
+
+CREATE OR REPLACE FUNCTION tes.f_determinar_total_faltante(
+	p_id_obligacion_pago integer,
+	p_filtro character varying DEFAULT 'registrado'::character varying,
+	p_id_plan_pago integer DEFAULT NULL::integer)
+    RETURNS numeric
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
 /*
 *
 *  Autor:   RAC  (KPLIAN)
@@ -17,7 +22,7 @@ $body$
 
  ISSUE            FECHA:              AUTOR                 DESCRIPCION
  #MSA-31          25/08/2020       	  EGS        			Se respeta el liquido pagable en la cuota de pagon con repecto a su devengado
-
+ #68			  18.09.2020		  MZM-KPLIAN			Se incluye el tipo=devengado en el caso ant_parcial_descontado para obtener el importe de descuento de anticipo, dado que ahora el anticipo se descuenta en cbte de diario y ya no de pago
 */
 
 DECLARE
@@ -412,8 +417,22 @@ BEGIN
                          v_monto_ant_descontado
                         from tes.tplan_pago pp
                         where  pp.estado_reg='activo'
-                              and pp.tipo in('pagado','devengado_pagado_1c')          --un supeusto es que los descuentos de anticipo solo se hacen en el comprobante de pago
-                              and pp.id_obligacion_pago = p_id_obligacion_pago;
+                              and pp.tipo in('pagado','devengado_pagado_1c')  --un supeusto es que los descuentos de anticipo solo se hacen en el comprobante de pago 
+                              and pp.id_obligacion_pago = p_id_obligacion_pago
+                              and pp.fecha_reg<'2020-12-16'
+                              ;
+                              
+      				
+                       --#68 si la fecha es posterior a xxx entonces consultar por el devengado, dado q ahora se considera desc de anticipo en devengado
+                       v_monto_ant_descontado:=coalesce(v_monto_ant_descontado,0)+ coalesce((
+                       select
+                         sum(pp.descuento_anticipo)
+                       from tes.tplan_pago pp
+                        where  pp.estado_reg='activo'
+                              and pp.tipo in('devengado','devengado_pagado_1c')  --un supeusto es quce los descuentos de anticipo solo se hacen en el comprobante de pago 
+                              and pp.id_obligacion_pago = p_id_obligacion_pago
+                              and pp.fecha_reg>='2020-12-16'),0);
+                              
 
 
                       --todos los  devengado_pagado   que no tienen pago registrado (--basta con que tenga uno ya no se lo cnsidera)
@@ -429,8 +448,10 @@ BEGIN
                                                              pp2.id_plan_pago_fk
                                                         from tes.tplan_pago pp2
                                                         where  pp2.estado_reg='activo'
-                                                              and pp2.tipo in('pagado')
+                                                              and pp2.tipo in('pagado') 
                                                               and pp2.id_obligacion_pago = p_id_obligacion_pago);
+
+
 
                     --EGS --#MSA-31
                      --devolver la diferencias, el monto que falta descontar
@@ -445,6 +466,16 @@ BEGIN
                               and pp.id_plan_pago_fk = p_id_plan_pago;
                         return v_record.descuento_anticipo - COALESCE(v_monto_ant_descontado,0);
 
+					ELSEIF ( v_record.estado = 'devengado' and v_record.tipo = 'devengado' ) THEN --#68 ****
+						 select
+                         sum(pp.descuento_anticipo)
+                        into
+                         v_monto_ant_descontado
+                        from tes.tplan_pago pp
+                        where  pp.estado_reg='activo'
+                              and pp.tipo in('devengado_pagado_1c','devengado') --#68 se añade "devengado"         --un supeusto es que los descuentos de anticipo solo se hacen en el comprobante de pago 
+                              and pp.id_plan_pago = p_id_plan_pago;
+						 return COALESCE(v_monto_ant_descontado,0);
                     ELSE
                         return COALESCE(v_monto_total_registrado,0) + COALESCE(v_monto_ajuste,0)  - COALESCE(v_monto_ant_descontado,0) - COALESCE(v_monto_aux,0);
                     END IF;
@@ -827,9 +858,7 @@ EXCEPTION
 			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
 			raise exception '%',v_resp;
 END;
-$body$
-LANGUAGE 'plpgsql'
-VOLATILE
-CALLED ON NULL INPUT
-SECURITY INVOKER
-COST 100;
+$BODY$;
+
+ALTER FUNCTION tes.f_determinar_total_faltante(integer, character varying, integer)
+    OWNER TO postgres;
