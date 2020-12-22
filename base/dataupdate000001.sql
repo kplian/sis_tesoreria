@@ -325,3 +325,33 @@ UPDATE tes.tplan_pago SET
 WHERE id_plan_pago = 36472;
 COMMIT;
 /********************************************F-DAUP-EGS-TES-ETR-2169-14/12/2020********************************************/
+
+/********************************************I-DAUP-MGM-TES-ETR-1-22/12/2020********************************************/
+/*
+DELETE FROM tes.tsolicitud_rendicion_det ren WHERE ren.id_solicitud_efectivo=33744;
+DELETE FROM tes.tsolicitud_efectivo sol WHERE sol.id_solicitud_efectivo=33744;
+
+DELETE FROM conta.tdoc_concepto c WHERE c.id_doc_compra_venta = 199947;
+DELETE FROM conta.tdoc_compra_venta doc WHERE doc.id_doc_compra_venta = 199947;
+
+DELETE FROM conta.tdoc_concepto c WHERE c.id_doc_compra_venta = 199949;
+DELETE FROM conta.tdoc_compra_venta doc WHERE doc.id_doc_compra_venta = 199949;
+
+DELETE FROM conta.tdoc_concepto c WHERE c.id_doc_compra_venta = 199952;
+DELETE FROM conta.tdoc_compra_venta doc WHERE doc.id_doc_compra_venta = 199952;
+*/
+
+BEGIN;
+DELETE FROM tes.tsolicitud_rendicion_det ren WHERE ren.id_solicitud_efectivo=33744;
+DELETE FROM tes.tsolicitud_efectivo sol WHERE sol.id_solicitud_efectivo=33744;
+
+DELETE FROM conta.tdoc_concepto c WHERE c.id_doc_compra_venta = 199947;
+DELETE FROM conta.tdoc_compra_venta doc WHERE doc.id_doc_compra_venta = 199947;
+
+DELETE FROM conta.tdoc_concepto c WHERE c.id_doc_compra_venta = 199949;
+DELETE FROM conta.tdoc_compra_venta doc WHERE doc.id_doc_compra_venta = 199949;
+
+DELETE FROM conta.tdoc_concepto c WHERE c.id_doc_compra_venta = 199952;
+DELETE FROM conta.tdoc_compra_venta doc WHERE doc.id_doc_compra_venta = 199952;
+COMMIT;
+/********************************************F-DAUP-MGM-TES-ETR-1-22/12/2020********************************************/
