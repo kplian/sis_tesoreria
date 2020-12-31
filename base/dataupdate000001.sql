@@ -355,3 +355,11 @@ DELETE FROM conta.tdoc_concepto c WHERE c.id_doc_compra_venta = 199952;
 DELETE FROM conta.tdoc_compra_venta doc WHERE doc.id_doc_compra_venta = 199952;
 COMMIT;
 /********************************************F-DAUP-MGM-TES-ETR-1-22/12/2020********************************************/
+
+
+/********************************************I-DAUP-MGM-TES-ETR-1-31/12/2020********************************************/
+--rollback
+--UPDATE tes.tsolicitud_efectivo SET monto=3812,51 WHERE id_solicitud_efectivo =34081;
+--commit
+UPDATE tes.tsolicitud_efectivo SET monto=2252,51 WHERE id_solicitud_efectivo =34081;
+/********************************************F-DAUP-MGM-TES-ETR-1-31/12/2020********************************************/
