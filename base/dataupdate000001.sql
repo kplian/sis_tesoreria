@@ -359,7 +359,7 @@ COMMIT;
 
 /********************************************I-DAUP-MGM-TES-ETR-1-31/12/2020********************************************/
 --rollback
---UPDATE tes.tsolicitud_efectivo SET monto=3812,51 WHERE id_solicitud_efectivo =34081;
+--UPDATE tes.tsolicitud_efectivo SET monto=3812.51 WHERE id_solicitud_efectivo =34081;
 --commit
-UPDATE tes.tsolicitud_efectivo SET monto=2252,51 WHERE id_solicitud_efectivo =34081;
+UPDATE tes.tsolicitud_efectivo SET monto=2252.51 WHERE id_solicitud_efectivo =34081;
 /********************************************F-DAUP-MGM-TES-ETR-1-31/12/2020********************************************/
