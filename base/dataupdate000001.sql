@@ -363,3 +363,11 @@ COMMIT;
 --commit
 UPDATE tes.tsolicitud_efectivo SET monto=2252.51 WHERE id_solicitud_efectivo =34081;
 /********************************************F-DAUP-MGM-TES-ETR-1-31/12/2020********************************************/
+
+
+/********************************************I-DAUP-MGM-TES-ETR-1-04/01/2020********************************************/
+--rollback
+--UPDATE tes.tcajero SET fecha_fin='31/12/2020' WHERE fecha_fin='31/12/2020';
+--commit
+UPDATE tes.tcajero SET fecha_fin='31/12/2022' WHERE fecha_fin='31/12/2020';
+/********************************************F-DAUP-MGM-TES-ETR-1-04/01/2020********************************************/
