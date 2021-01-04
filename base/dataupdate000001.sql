@@ -371,3 +371,11 @@ UPDATE tes.tsolicitud_efectivo SET monto=2252.51 WHERE id_solicitud_efectivo =34
 --commit
 UPDATE tes.tcajero SET fecha_fin='31/12/2022' WHERE fecha_fin='31/12/2020';
 /********************************************F-DAUP-MGM-TES-ETR-1-04/01/2020********************************************/
+
+
+/********************************************I-DAUP-MGM-TES-ETR-2-04/01/2020********************************************/
+--rollback
+--UPDATE tes.tcaja SET importe_maximo_item=2000 WHERE id_caja=128;
+--commit
+UPDATE tes.tcaja SET importe_maximo_item=50000 WHERE id_caja=128;
+/********************************************F-DAUP-MGM-TES-ETR-2-04/01/2020********************************************/
