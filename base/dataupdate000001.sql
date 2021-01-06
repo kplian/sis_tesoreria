@@ -496,7 +496,7 @@ UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1193424;
 --commit
 UPDATE cd.tcuenta_doc SET estado='vbtesoreria',id_estado_wf=1193424,id_moneda_dev= NULL,dev_saldo_original=NULL,id_int_comprobante_devrep = NULL,dev_saldo=NULL,dev_tipo=NULL,dev_a_favor_de=NULL WHERE id_cuenta_doc=32079;
 
-
+/********************************************F-DAUP-MGM-TES-ETR-1-05/01/2020********************************************/
 
 /********************************************I-DAUP-MGM-TES-ETR-1-06/01/2020********************************************/
 --rollback
