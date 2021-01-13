@@ -500,7 +500,7 @@ UPDATE cd.tcuenta_doc SET estado='vbtesoreria',id_estado_wf=1193424,id_moneda_de
 
 /********************************************I-DAUP-MGM-TES-ETR-1-06/01/2020********************************************/
 --rollback
---UPDATE tes.tsolicitud_efectivo SET fecha='04/01/2021',fecha_ult_mov='04/01/2021',fecha_mod='04/01/2021 10:56:06' WHERE id_solicitud_efectivo=34208
+--UPDATE tes.tsolicitud_efectivo SET fecha='04/01/2021',fecha_ult_mov='04/01/2021',fecha_mod='04/01/2021 10:56:06' WHERE id_solicitud_efectivo=34208;
 --commit
-UPDATE tes.tsolicitud_efectivo SET fecha='31/12/2020',fecha_ult_mov='31/12/2020',fecha_mod='31/12/2020' WHERE id_solicitud_efectivo=34208
+UPDATE tes.tsolicitud_efectivo SET fecha='31/12/2020',fecha_ult_mov='31/12/2020',fecha_mod='31/12/2020' WHERE id_solicitud_efectivo=34208;
 /********************************************F-DAUP-MGM-TES-ETR-1-06/01/2020********************************************/

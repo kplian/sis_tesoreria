@@ -6,9 +6,90 @@
 
 /********************************************I-DAUP-MGM-TES-1-06/01/2021********************************************/
 --rollback
---UPDATE tes.tsolicitud_efectivo SET fecha='04/01/2021',fecha_ult_mov='06/01/2021',fecha_mod='06/01/2021 10:08:38' WHERE id_solicitud_efectivo=34242
+--UPDATE tes.tsolicitud_efectivo SET fecha='04/01/2021',fecha_ult_mov='06/01/2021',fecha_mod='06/01/2021 10:08:38' WHERE id_solicitud_efectivo=34242;
 --commit
-UPDATE tes.tsolicitud_efectivo SET fecha='31/12/2020',fecha_ult_mov='31/12/2020',fecha_mod='31/12/2020 10:08:38' WHERE id_solicitud_efectivo=34242
+UPDATE tes.tsolicitud_efectivo SET fecha='31/12/2020',fecha_ult_mov='31/12/2020',fecha_mod='31/12/2020 10:08:38' WHERE id_solicitud_efectivo=34242;
 
 /********************************************F-DAUP-MGM-TES-1-06/01/2021********************************************/
+
+
+/********************************************I-DAUP-MGM-TES-ETR-3-04/01/2020********************************************/
+--finalizado
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1186135;
+--commit
+UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1186135;
+
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1159578;
+--commit
+UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1159578;
+
+
+--rollback
+--UPDATE cd.tcuenta_doc SET estado='finalizado',id_estado_wf=1186135 WHERE id_cuenta_doc=30699;
+--commit
+UPDATE cd.tcuenta_doc SET estado='contabilizado',id_estado_wf=1159578 WHERE id_cuenta_doc=30699;
+
+--rendido
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1186134;
+--commit
+UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1186134;
+
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1165092;
+--commit
+UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1165092;
+
+
+--rollback
+--UPDATE cd.tcuenta_doc SET estado='rendido',id_estado_wf=1186134,id_moneda_dev= 1,dev_saldo_original=371,id_int_comprobante_devrep = 104079,dev_saldo=371,dev_tipo='deposito',dev_a_favor_de='empresa' WHERE id_cuenta_doc=30860;
+--commit
+UPDATE cd.tcuenta_doc SET estado='vbtesoreria',id_estado_wf=1165092,id_moneda_dev= NULL,dev_saldo_original=NULL,id_int_comprobante_devrep = NULL,dev_saldo=NULL,dev_tipo=NULL,dev_a_favor_de=NULL WHERE id_cuenta_doc=30860;
+
+
+
+/********************************************F-DAUP-MGM-TES-ETR-3-04/01/2020********************************************/
+
+
+
+/********************************************I-DAUP-MGM-TES-ETR-3-04/01/2020********************************************/
+--finalizado
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1139373;
+--commit
+UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1139373;
+
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1106799;
+--commit
+UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1106799;
+
+
+--rollback
+--UPDATE cd.tcuenta_doc SET estado='finalizado',id_estado_wf=1139373 WHERE id_cuenta_doc=28947;
+--commit
+UPDATE cd.tcuenta_doc SET estado='contabilizado',id_estado_wf=1106799 WHERE id_cuenta_doc=28947;
+
+--rendido
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1139372;
+--commit
+UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1139372;
+
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1137629;
+--commit
+UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1137629;
+
+
+--rollback
+--UPDATE cd.tcuenta_doc SET estado='rendido',id_estado_wf=1139372,id_moneda_dev= 1,dev_saldo_original=271.97,id_int_comprobante_devrep = 99511,dev_saldo=271.97,dev_tipo='deposito',dev_a_favor_de='empresa',importe=2871.97 WHERE id_cuenta_doc=29953;
+--commit
+UPDATE cd.tcuenta_doc SET estado='vbtesoreria',id_estado_wf=1137629,id_moneda_dev= NULL,dev_saldo_original=NULL,id_int_comprobante_devrep = NULL,dev_saldo=NULL,dev_tipo=NULL,dev_a_favor_de=NULL WHERE id_cuenta_doc=29953;
+
+
+
+/********************************************F-DAUP-MGM-TES-ETR-3-04/01/2020********************************************/
 
