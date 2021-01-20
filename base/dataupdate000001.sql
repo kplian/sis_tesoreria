@@ -110,4 +110,82 @@ UPDATE tes.tsolicitud_efectivo SET fecha_ult_mov='31/12/2022' WHERE id_solicitud
 /********************************************F-DAUP-MGM-TES-ETR-1-20/01/2021********************************************/
 
 
+/********************************************I-DAUP-MGM-TES-ETR-2-20/01/2021********************************************/
+--finalizado
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1197390;
+--commit
+UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1197390;
+
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1166098;
+--commit
+UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1166098;
+
+
+--rollback
+--UPDATE cd.tcuenta_doc SET estado='finalizado',id_estado_wf=1197390 WHERE id_cuenta_doc=30819;
+--commit
+UPDATE cd.tcuenta_doc SET estado='contabilizado',id_estado_wf=1166098 WHERE id_cuenta_doc=30819;
+
+--rendido
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1197389;
+--commit
+UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1197389;
+
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1190863;
+--commit
+UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1190863;
+
+
+--rollback
+--UPDATE cd.tcuenta_doc SET estado='rendido',id_estado_wf=1197389,id_moneda_dev= 1,dev_saldo_original=4124.98,id_int_comprobante_devrep = null,dev_saldo=null,dev_tipo=null,dev_a_favor_de=null',importe=2429 WHERE id_cuenta_doc=32007;
+--commit
+UPDATE cd.tcuenta_doc SET estado='vbtesoreria',id_estado_wf=1190863,id_moneda_dev= NULL,dev_saldo_original=NULL,id_int_comprobante_devrep = NULL,dev_saldo=NULL,dev_tipo=NULL,dev_a_favor_de=NULL WHERE id_cuenta_doc=32007;
+
+
+
+
+--finalizado
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1197231;
+--commit
+UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1197231;
+
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1139379;
+--commit
+UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1139379;
+
+
+--rollback
+--UPDATE cd.tcuenta_doc SET estado='finalizado',id_estado_wf=1197231 WHERE id_cuenta_doc=29775;
+--commit
+UPDATE cd.tcuenta_doc SET estado='contabilizado',id_estado_wf=1139379 WHERE id_cuenta_doc=29775;
+
+--rendido
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1197230;
+--commit
+UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1197230;
+
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1174678;
+--commit
+UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1174678;
+
+
+--rollback
+--UPDATE cd.tcuenta_doc SET estado='rendido',id_estado_wf=1197230,id_moneda_dev= 1,dev_saldo_original=401.45,id_int_comprobante_devrep = null,dev_saldo=null,dev_tipo=null,dev_a_favor_de=null',importe=784.54 WHERE id_cuenta_doc=31357;
+--commit
+UPDATE cd.tcuenta_doc SET estado='vbtesoreria',id_estado_wf=1174678,id_moneda_dev= NULL,dev_saldo_original=NULL,id_int_comprobante_devrep = NULL,dev_saldo=NULL,dev_tipo=NULL,dev_a_favor_de=NULL WHERE id_cuenta_doc=31357;
+
+
+/********************************************F-DAUP-MGM-TES-ETR-2-20/01/2021********************************************/
+
+
+
+
 
