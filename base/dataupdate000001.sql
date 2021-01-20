@@ -184,6 +184,20 @@ UPDATE cd.tcuenta_doc SET estado='vbtesoreria',id_estado_wf=1174678,id_moneda_de
 
 
 /********************************************F-DAUP-MGM-TES-ETR-2-20/01/2021********************************************/
+/********************************************I-DAUP-EGS-TES-ETR-2618-20/01/2021********************************************/
+-- BEGIN;
+-- Update tes.tobligacion_pago Set
+--     id_obligacion_pago_extendida = 13204
+-- Where id_obligacion_pago = 10935;
+-- COMMIT;
+BEGIN;
+Update tes.tobligacion_pago Set
+    id_obligacion_pago_extendida = null
+Where id_obligacion_pago = 10935;
+COMMIT;
+/********************************************F-DAUP-EGS-TES-ETR-2618-20/01/2021********************************************/
+
+
 
 
 
