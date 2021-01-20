@@ -101,3 +101,13 @@ UPDATE cd.tcuenta_doc SET estado='vbtesoreria',id_estado_wf=1137629,id_moneda_de
 UPDATE tes.tcajero SET fecha_fin='31/12/2022' WHERE id_funcionario=418;
 /********************************************F-DAUP-MGM-TES-ETR-1-20/01/2021********************************************/
 
+
+/********************************************I-DAUP-MGM-TES-ETR-1-20/01/2021********************************************/
+--rollback
+--UPDATE tes.tsolicitud_efectivo SET fecha_ult_mov='07/01/2020' WHERE id_solicitud_efectivo=34275;
+--commit
+UPDATE tes.tsolicitud_efectivo SET fecha_ult_mov='31/12/2022' WHERE id_solicitud_efectivo=34275;
+/********************************************F-DAUP-MGM-TES-ETR-1-20/01/2021********************************************/
+
+
+
