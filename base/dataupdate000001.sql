@@ -200,6 +200,13 @@ COMMIT;
 
 
 
+/********************************************I-DAUP-MGM-TES-ETR-1-21/01/2021********************************************/
+--rollback
+--UPDATE tes.tsolicitud_efectivo SET fecha='07/01/2021',fecha_ult_mov='07/01/2021',fecha_mod='07/01/2021' WHERE id_solicitud_efectivo=34275;
+--commit
+UPDATE tes.tsolicitud_efectivo SET fecha='31/12/2020',fecha_ult_mov='31/12/2020',fecha_mod='31/12/2020' WHERE id_solicitud_efectivo=34275;
+/********************************************F-DAUP-MGM-TES-ETR-1-21/01/2021********************************************/
+
 
 
 
