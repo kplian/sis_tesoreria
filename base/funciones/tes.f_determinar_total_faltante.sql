@@ -1,17 +1,12 @@
--- FUNCTION: tes.f_determinar_total_faltante(integer, character varying, integer)
+--------------- SQL ---------------
 
--- DROP FUNCTION tes.f_determinar_total_faltante(integer, character varying, integer);
-
-CREATE OR REPLACE FUNCTION tes.f_determinar_total_faltante(
-	p_id_obligacion_pago integer,
-	p_filtro character varying DEFAULT 'registrado'::character varying,
-	p_id_plan_pago integer DEFAULT NULL::integer)
-    RETURNS numeric
-    LANGUAGE 'plpgsql'
-
-    COST 100
-    VOLATILE 
-AS $BODY$
+CREATE OR REPLACE FUNCTION tes.f_determinar_total_faltante (
+  p_id_obligacion_pago integer,
+  p_filtro varchar = 'registrado'::character varying,
+  p_id_plan_pago integer = NULL::integer
+)
+RETURNS numeric AS
+$body$
 /*
 *
 *  Autor:   RAC  (KPLIAN)
@@ -429,7 +424,7 @@ BEGIN
                          sum(pp.descuento_anticipo)
                        from tes.tplan_pago pp
                         where  pp.estado_reg='activo'
-                              and pp.tipo in('devengado','devengado_pagado_1c')  --un supeusto es quce los descuentos de anticipo solo se hacen en el comprobante de pago 
+                              and pp.tipo in('devengado_pagado','devengado_pagado_1c')  --un supeusto es quce los descuentos de anticipo solo se hacen en el comprobante de pago 
                               and pp.id_obligacion_pago = p_id_obligacion_pago
                               and pp.fecha_reg>='2020-12-21'),0);
                               
@@ -858,7 +853,10 @@ EXCEPTION
 			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
 			raise exception '%',v_resp;
 END;
-$BODY$;
-
-ALTER FUNCTION tes.f_determinar_total_faltante(integer, character varying, integer)
-    OWNER TO postgres;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+PARALLEL UNSAFE
+COST 100;
