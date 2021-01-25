@@ -206,6 +206,16 @@ COMMIT;
 --commit
 UPDATE tes.tsolicitud_efectivo SET fecha='31/12/2020',fecha_ult_mov='31/12/2020',fecha_mod='31/12/2020' WHERE id_solicitud_efectivo=34275;
 /********************************************F-DAUP-MGM-TES-ETR-1-21/01/2021********************************************/
+/********************************************I-DAUP-EGS-TES-ETR-2674-25/01/2021********************************************/
+--rollback
+--UPDATE tes.tobligacion_pago SET
+-- monto_ajuste_ret_anticipo_par_ga = 6926590.40
+-- WHERE id_obligacion_pago = 14597;
+--commit
+UPDATE tes.tobligacion_pago SET
+    monto_ajuste_ret_anticipo_par_ga = 674398.09
+WHERE id_obligacion_pago = 14597;
+/********************************************F-DAUP-MGM-TES-ETR-2674-25/01/2021********************************************/
 
 
 
