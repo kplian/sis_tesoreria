@@ -216,7 +216,26 @@ UPDATE tes.tobligacion_pago SET
     monto_ajuste_ret_anticipo_par_ga = 674398.09
 WHERE id_obligacion_pago = 14597;
 /********************************************F-DAUP-MGM-TES-ETR-2674-25/01/2021********************************************/
-
+/********************************************I-DAUP-EGS-TES-ETR-2830-04/02/2021********************************************/
+--rollback
+--UPDATE tes.tobligacion_pago SET
+-- tipo_anticipo = 'si
+-- WHERE id_obligacion_pago = 14806;
+--commit
+UPDATE tes.tobligacion_pago SET
+    tipo_anticipo = 'no'
+WHERE id_obligacion_pago = 14806;
+/********************************************F-DAUP-MGM-TES-ETR-2830-04/02/2021********************************************/
+/********************************************I-DAUP-EGS-TES-ETR-2829-04/02/2021********************************************/
+--rollback
+--UPDATE tes.tobligacion_pago SET
+-- tipo_anticipo = 'si
+-- WHERE id_obligacion_pago = 14812;
+--commit
+UPDATE tes.tobligacion_pago SET
+    tipo_anticipo = 'no'
+WHERE id_obligacion_pago = 14812;
+/********************************************F-DAUP-MGM-TES-ETR-2829-04/02/2021********************************************/
 
 
 
