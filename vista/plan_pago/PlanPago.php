@@ -1824,7 +1824,7 @@ header("content-type: text/javascript; charset=UTF-8");
 
             monto_ret_gar =  this.Cmp.monto_retgar_mo.getValue();
 
-            console.log('edit'+this.accionFormulario );
+            
             var liquido =  this.Cmp.monto.getValue()  -  this.Cmp.monto_no_pagado.getValue() -  this.Cmp.otros_descuentos.getValue() - monto_ret_gar -  this.Cmp.descuento_ley.getValue() -  this.Cmp.descuento_inter_serv.getValue() -  this.Cmp.descuento_anticipo.getValue();
             if (this.liquido_base != 0 && (this.Cmp.tipo.getValue()=='pagado' || this.Cmp.tipo.getValue()=='pagado_rrhh')){//--#MSA-31
                 if ( liquido > this.liquido_base  && this.accionFormulario != 'EDIT_PAGO'){
@@ -1837,7 +1837,7 @@ header("content-type: text/javascript; charset=UTF-8");
                 }else {
                     this.Cmp.liquido_pagable.setValue(liquido > 0 ? liquido : 0);
                 }
-                58-2021
+                
             }else{
                 this.liquido_base=liquido;
                 this.desc_anticipo_base=this.Cmp.descuento_anticipo.getValue();
