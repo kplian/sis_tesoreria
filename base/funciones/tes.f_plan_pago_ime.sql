@@ -22,6 +22,7 @@ ISUUE        FECHA:             AUTOR:             DESCRIPCION:
 #53            13/2/2020        manuel guerra   quitar la validación de la eliminación de obligación de pago
 #MSA-37         14/0/2020       EGS             Se agrega el alias de v_parametros a la variable del raise exception
 #ETR-1914       21/11/2020      EGS             Se agregan campos de fecha_documento,fecha_derivacion,dias_limite
+#ETR-2849      18/02/2021       EGS             Se revalidan los campos de liuido pagable y descuento de anticipos en los pago cuando se modifican
 ***************************************************************************/
 
 DECLARE
@@ -154,6 +155,12 @@ DECLARE
     v_especial                    numeric;
     v_total_desc_ant            numeric;
     v_fecha_vencimiento             date;
+
+    v_registros_pp_padre            record;
+    v_total_monto                   NUMERIC;
+    v_total_desc_anticipo           NUMERIC;
+    v_total_monto_ejecutar          NUMERIC;
+    v_total_liquido_pagable         NUMERIC;
 
 
 BEGIN
@@ -330,6 +337,26 @@ BEGIN
             from tes.tplan_pago pp
             where pp.estado_reg='activo'
               and  pp.id_plan_pago= v_parametros.id_plan_pago ;
+
+
+            IF v_registros_pp.id_plan_pago_fk is not null THEN
+                select
+                    ppp.monto,
+                    ppp.estado,
+                    ppp.tipo,
+                    ppp.id_plan_pago_fk,
+                    ppp.porc_monto_retgar,
+                    ppp.descuento_anticipo,
+                    ppp.monto_ejecutar_total_mo,
+                    ppp.monto_anticipo,
+                    ppp.liquido_pagable
+                into
+                    v_registros_pp_padre
+                from tes.tplan_pago ppp
+                where ppp.estado_reg='activo'
+                  and  ppp.id_plan_pago= v_registros_pp.id_plan_pago_fk ;
+
+            END IF;
 
 
             IF v_codigo_estado = 'borrador' or v_codigo_estado = 'pagado'  or v_codigo_estado = 'pendiente' or v_codigo_estado = 'devengado' or v_codigo_estado = 'anulado' THEN
@@ -557,9 +584,9 @@ BEGIN
                 --valida que la retencion de anticipo no sobre pase el total anticipado
                 v_monto_ant_parcial_descontado = tes.f_determinar_total_faltante(v_parametros.id_obligacion_pago, 'ant_parcial_descontado' );
                 -- si el descuento anticipo es mayor a cero verificar que nose sobrepase el total anticipado
-                IF v_monto_ant_parcial_descontado + v_registros_pp.descuento_anticipo <  v_parametros.descuento_anticipo  THEN
-                    raise exception 'El decuento por anticipo no puede exceder el falta por descontar que es  %',v_monto_ant_parcial_descontado+v_parametros.descuento_anticipo;--//#MSA-37
-                END IF;
+                /*      IF v_monto_ant_parcial_descontado + v_registros_pp.descuento_anticipo <  v_parametros.descuento_anticipo  THEN
+                          raise exception 'Mod El decuento por anticipo no puede exceder el falta por descontar que es  %',v_monto_ant_parcial_descontado+v_parametros.descuento_anticipo;--//#MSA-37
+                      END IF;*/
 
                 ------------------------------------------------------------
                 --   si es  un pago no variable  (si es una cuota de devengao_pagado, devegando_pagado_1c, pagado)
@@ -572,19 +599,52 @@ BEGIN
                     -- saldo_x_descontar = determinar cuanto falta por descontar del anticipo
                     v_saldo_x_descontar = v_monto_ant_parcial_descontado;
 
-                    -- saldo_x_descontar - descuento_anticipo >  sando_x_pagar
+                    /*-- saldo_x_descontar - descuento_anticipo >  sando_x_pagar
                     IF (v_saldo_x_descontar + v_registros_pp.descuento_anticipo -  COALESCE(v_parametros.descuento_anticipo,0))  > (v_saldo_x_pagar + v_registros_pp.monto - COALESCE(v_parametros.monto,0)) THEN
                         raise exception 'El saldo a pagar no es sufuciente para recuperar el anticipo (%)',v_saldo_x_descontar;
-                    END IF;
+                    END IF;*/
                 END IF;
-
-
-                -- calcula el liquido pagable y el monto a ejecutar presupeustaria mente
-                --  en cuota de pago el monoto no pagado no se considera
 
                 v_liquido_pagable = COALESCE(v_parametros.monto,0)  - COALESCE(v_parametros.otros_descuentos,0) - COALESCE( v_parametros.monto_retgar_mo,0)  - COALESCE(v_parametros.descuento_ley,0)- COALESCE(v_parametros.descuento_anticipo,0)- COALESCE(v_parametros.descuento_inter_serv,0);
                 v_monto_ejecutar_total_mo  = COALESCE(v_parametros.monto,0);  -- TODO ver si es necesario el monto no pagado
                 v_porc_monto_retgar= COALESCE(v_registros_pp.porc_monto_retgar,0);
+
+                IF v_registros_pp.id_plan_pago_fk is not null THEN  --ETR-2849
+
+                    SELECT
+                        sum( COALESCE( plp.monto,0)),
+                        sum(COALESCE(plp.descuento_anticipo,0)),
+                        sum(COALESCE(plp.monto_ejecutar_total_mo,0)),
+                        sum(COALESCE(plp.liquido_pagable,0))
+                    INTO
+                        v_total_monto,
+                        v_total_desc_anticipo,
+                        v_total_monto_ejecutar,
+                        v_total_liquido_pagable
+                    FROM tes.tplan_pago plp
+                    WHERE plp.id_plan_pago_fk = v_registros_pp.id_plan_pago_fk
+                      and plp.estado_reg = 'activo'
+                      and plp.tipo in ('pagado','pagado_rrhh')
+                      and plp.id_plan_pago <> v_parametros.id_plan_pago;
+
+                    IF COALESCE(v_registros_pp_padre.descuento_anticipo,0) <( COALESCE(v_total_desc_anticipo,0) + COALESCE(v_parametros.descuento_anticipo,0)) THEN
+
+                        RAISE EXCEPTION 'la suma de los descuentos de anticipo de los pago (%) son mayores al descuento de anticipo registrado en el devengado %',( COALESCE(v_total_desc_anticipo,0) + COALESCE(v_parametros.descuento_anticipo,0)), COALESCE(v_registros_pp_padre.descuento_anticipo,0) ;
+
+                    END IF;
+
+                    IF COALESCE(v_registros_pp_padre.liquido_pagable,0) <( COALESCE(v_total_liquido_pagable,0) + COALESCE(v_liquido_pagable,0)) THEN
+
+                        RAISE EXCEPTION 'la suma de los liquidos pagables de los pago (%) son mayores al liquido pagable registrado en el devengado %',( COALESCE(v_total_liquido_pagable,0) + COALESCE(v_liquido_pagable,0)), COALESCE(v_registros_pp_padre.liquido_pagable,0) ;
+
+                    END IF;
+
+                END IF;
+
+                -- calcula el liquido pagable y el monto a ejecutar presupeustaria mente
+                --  en cuota de pago el monoto no pagado no se considera
+
+
 
                 IF   v_liquido_pagable  < 0  or v_monto_ejecutar_total_mo < 0  THEN
                     raise exception ' Ni el  monto a ejecutar   ni el liquido pagable  puede ser menor a cero';

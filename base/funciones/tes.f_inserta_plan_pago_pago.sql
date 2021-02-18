@@ -27,6 +27,7 @@ $body$
  #7890            29/11/2018     RAC KPLIAN               se considera el caso de no tener retenciones
  #MSA-31          25/08/2020       	  EGS        			Se respeta el liquido pagable en la cuota de pagon con repecto a su devengado
  #ETR-1914        21/11/2020          EGS                    Se agregan campos de fecha_documento,fecha_derivacion,dias_limite
+#ETR-2849      18/02/2021       EGS             Se revalidan los campos de liuido pagable y descuento de anticipos en los pago cuando se inserta
 
 ***************************************************************************/
 
@@ -75,6 +76,11 @@ DECLARE
     v_id_depto_lb 						 integer;
     v_id_plantilla						 integer;
 
+    v_registros_pp_padre                record;
+    v_total_monto                       NUMERIC;
+    v_total_desc_anticipo               NUMERIC;
+    v_total_monto_ejecutar              NUMERIC;
+    v_total_liquido_pagable             NUMERIC;
 
 
 
@@ -182,6 +188,26 @@ BEGIN
              inner join tes.tobligacion_pago op on op.id_obligacion_pago = pp.id_obligacion_pago
     where pp.id_plan_pago  = (p_hstore->'id_plan_pago_fk')::integer;
 
+    --recuperamos el devengado del pago
+
+    IF (p_hstore->'id_plan_pago_fk')::integer is not null THEN
+        select
+            ppp.monto,
+            ppp.estado,
+            ppp.tipo,
+            ppp.id_plan_pago_fk,
+            ppp.porc_monto_retgar,
+            ppp.descuento_anticipo,
+            ppp.monto_ejecutar_total_mo,
+            ppp.monto_anticipo
+        into
+            v_registros_pp_padre
+        from tes.tplan_pago ppp
+        where ppp.estado_reg='activo'
+          and  ppp.id_plan_pago= (p_hstore->'id_plan_pago_fk')::integer ;
+
+    END IF;
+
 
     -------------------------
     --CAlcular el nro de cuota
@@ -223,7 +249,7 @@ BEGIN
         --valida que la retencion de anticipo no sobre pase el total anticipado
         v_monto_ant_parcial_descontado = tes.f_determinar_total_faltante((p_hstore->'id_obligacion_pago')::integer, 'ant_parcial_descontado',(p_hstore->'id_plan_pago_fk')::integer ); --#MSA-31
         IF v_monto_ant_parcial_descontado <  (p_hstore->'descuento_anticipo')::numeric  THEN
-            raise exception 'El decuento por anticipo no puede exceder el falta por descontar que es  %',v_monto_ant_parcial_descontado;
+            raise exception '(Ins) El decuento por anticipo no puede exceder el falta por descontar que es  %',v_monto_ant_parcial_descontado;
         END IF;
 
         --  si es  un pago no variable  (si es una cuota de devengao_pagado, devegando_pagado_1c, pagado)
@@ -239,12 +265,48 @@ BEGIN
 
             --raise exception '1) %, 2) % 3) %, 4) %', v_saldo_x_descontar,   COALESCE((p_hstore->'descuento_anticipo')::numeric,0) ,v_saldo_x_pagar  , COALESCE((p_hstore->'monto')::numeric,0);
 
-            -- saldo_x_descontar - descuento_anticipo >  sando_x_pagar
+/*            -- saldo_x_descontar - descuento_anticipo >  sando_x_pagar
             IF (v_saldo_x_descontar -  COALESCE((p_hstore->'descuento_anticipo')::numeric,0))  > 0  THEN   --7890  17/12/2018  RAC valdiacion
                 IF (v_saldo_x_descontar -  COALESCE((p_hstore->'descuento_anticipo')::numeric,0))  > (v_saldo_x_pagar  - COALESCE((p_hstore->'monto')::numeric,0)) THEN
                     raise exception 'El saldo a pagar no es sufuciente para recuperar el anticipo (%)',v_saldo_x_descontar;
                 END IF;
+            END IF;*/
+
+            IF (p_hstore->'id_plan_pago_fk')::numeric is not null THEN --ETR-2849
+
+                SELECT
+                    sum( COALESCE( plp.monto,0)),
+                    sum(COALESCE(plp.descuento_anticipo,0)),
+                    sum(COALESCE(plp.monto_ejecutar_total_mo,0)),
+                    sum(COALESCE(plp.liquido_pagable,0))
+                INTO
+                    v_total_monto,
+                    v_total_desc_anticipo,
+                    v_total_monto_ejecutar,
+                    v_total_liquido_pagable
+                FROM tes.tplan_pago plp
+                WHERE plp.id_plan_pago_fk = (p_hstore->'id_plan_pago_fk')::numeric
+                  and plp.estado_reg = 'activo'
+                  and plp.tipo in ('pagado','pagado_rrhh');
+
+                ---verificamos que el total de los descuento de anticipo no sobrepasen al devengado
+                IF COALESCE(v_registros_pp_padre.descuento_anticipo,0) <( COALESCE(v_total_desc_anticipo,0) + COALESCE((p_hstore->'descuento_anticipo')::numeric,0)) THEN
+
+                    RAISE EXCEPTION 'la suma de los descuentos de anticipo de los pago (%) son mayores al descuento de anticipo registrado en el devengado %',( COALESCE(v_total_desc_anticipo,0) + COALESCE((p_hstore->'descuento_anticipo')::numeric,0)), COALESCE(v_registros_pp_padre.descuento_anticipo,0) ;
+
+                END IF;
+                --verififcamos que cuando se cumpla el tota del devengado el descuento de anticipo sea cumplid
+
+                IF v_registros_pp_padre.monto =  (v_total_monto + (p_hstore->'monto')::numeric) AND
+                   COALESCE(v_registros_pp_padre.descuento_anticipo,0)<>
+                   (COALESCE(v_total_desc_anticipo,0) + COALESCE((p_hstore->'descuento_anticipo')::numeric,0)) THEN
+
+                    RAISE EXCEPTION 'El saldo del devengado se ha cumplio pero el total de los pagos en los descuentos de anticipo (%) no es igual al registrado en el devengado %',(COALESCE(v_total_desc_anticipo,0) + COALESCE((p_hstore->'descuento_anticipo')::numeric,0)),COALESCE(v_registros_pp_padre.descuento_anticipo,0);
+
+                END IF;
+
             END IF;
+
 
         END IF;
 
