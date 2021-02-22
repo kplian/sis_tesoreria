@@ -416,7 +416,7 @@ BEGIN
         where  pp.estado_reg='activo'
           and pp.tipo in('pagado','devengado_pagado_1c')  --un supeusto es que los descuentos de anticipo solo se hacen en el comprobante de pago
           and pp.id_obligacion_pago = p_id_obligacion_pago
-          and pp.fecha_reg<'2020-12-21'
+          and pp.fecha_reg<'2018-12-21'
         ;
 
 
@@ -428,7 +428,7 @@ BEGIN
                                                                                  where  pp.estado_reg='activo'
                                                                                    and pp.tipo in('devengado_pagado','devengado_pagado_1c')  --un supeusto es quce los descuentos de anticipo solo se hacen en el comprobante de pago
                                                                                    and pp.id_obligacion_pago = p_id_obligacion_pago
-                                                                                   and pp.fecha_reg>='2020-12-21'),0);
+                                                                                   and pp.fecha_reg>='2018-12-21'),0);
 
 
 
