@@ -119,7 +119,7 @@ BEGIN
                         FOR v_cajas in (select id_caja
                                         from tes.tcajero c
                                         where id_funcionario=v_parametros.id_funcionario_usu
-                                        and tipo='responsable'  and c.estado_Reg = 'activo')LOOP
+                                        and tipo in ('auxiliar','responsable')  and c.estado_Reg = 'activo')LOOP
                             v_id_caja[v_i] = v_cajas.id_caja;
                             v_i = v_i + 1;
                         END LOOP;
@@ -317,7 +317,7 @@ BEGIN
                         FOR v_cajas in (select id_caja
                                         from tes.tcajero c
                                         where id_funcionario=v_parametros.id_funcionario_usu
-                                        and tipo='responsable'   and c.estado_Reg = 'activo')LOOP
+                                        and tipo in ('auxiliar','responsable') and c.estado_Reg = 'activo')LOOP
                             v_id_caja[v_i] = v_cajas.id_caja;
                             v_i = v_i + 1;
                         END LOOP;
