@@ -249,3 +249,25 @@ WHERE id_obligacion_pago = 14878;
 
 
 
+/********************************************I-DAUP-MGM-TES-25/02/2021********************************************/
+--rollback
+--UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=3020 WHERE id_solicitud_rendicion_det=23492;
+--UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=3020 WHERE id_solicitud_rendicion_det=23493;
+--commit
+
+
+UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=3024 WHERE id_solicitud_rendicion_det=23492;
+UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=3024 WHERE id_solicitud_rendicion_det=23493;
+
+--rollback
+--UPDATE tes.tproceso_caja SET monto=1379.13 WHERE id_proceso_caja=3024;
+--UPDATE tes.tproceso_caja SET monto=1980.9  WHERE id_proceso_caja=3020;
+--commit
+
+UPDATE tes.tproceso_caja SET monto=1733.03 WHERE id_proceso_caja=3024;
+UPDATE tes.tproceso_caja SET monto=1627  WHERE id_proceso_caja=3020;
+
+/********************************************F-DAUP-MGM-TES-25/02/2021********************************************/
+
+
+
