@@ -270,4 +270,26 @@ UPDATE tes.tproceso_caja SET monto=1627  WHERE id_proceso_caja=3020;
 /********************************************F-DAUP-MGM-TES-25/02/2021********************************************/
 
 
+/********************************************I-DAUP-MGM-TES-26/02/2021********************************************/
 
+--rollback
+--UPDATE cd.tcuenta_doc SET dev_saldo_original=34,dev_saldo=34,dev_nombre_cheque='JUAN GABRIEL AQUINO MERINO',dev_a_favor_de='funcionario',dev_tipo='cheque' WHERE id_cuenta_doc=32654;
+--commit
+UPDATE cd.tcuenta_doc SET dev_saldo_original=NULL,dev_saldo=null,dev_nombre_cheque=null,dev_a_favor_de=null,dev_tipo=null WHERE id_cuenta_doc=32654;
+
+--rollback
+--UPDATE cd.tcuenta_doc SET dev_saldo_original=34,dev_saldo=34,dev_nombre_cheque='JUAN VILLARROEL ZAMBRANA',dev_a_favor_de='funcionario',dev_tipo='cheque' WHERE id_cuenta_doc=32787;
+--commit
+UPDATE cd.tcuenta_doc SET dev_saldo_original=NULL,dev_saldo=null,dev_nombre_cheque=null,dev_a_favor_de=null,dev_tipo=null WHERE id_cuenta_doc=32787;
+
+--rollback
+--UPDATE cd.tcuenta_doc SET dev_saldo_original=1095.4,dev_saldo=1095.4,dev_nombre_cheque='DANIELA ROSSIO VALLEJOS',dev_a_favor_de='funcionario',dev_tipo='cheque' WHERE id_cuenta_doc=32792;
+--commit
+UPDATE cd.tcuenta_doc SET dev_saldo_original=NULL,dev_saldo=null,dev_nombre_cheque=null,dev_a_favor_de=null,dev_tipo=null WHERE id_cuenta_doc=32792;
+
+--rollback
+--UPDATE cd.tcuenta_doc SET dev_saldo_original=4283.42,dev_saldo=4283.42,dev_nombre_cheque='IVAN CRUZ MAMANI',dev_a_favor_de='funcionario',dev_tipo='cheque' WHERE id_cuenta_doc=33088;
+--commit
+UPDATE cd.tcuenta_doc SET dev_saldo_original=NULL,dev_saldo=null,dev_nombre_cheque=null,dev_a_favor_de=null,dev_tipo=null WHERE id_cuenta_doc=33088;
+
+/********************************************F-DAUP-MGM-TES-26/02/2021********************************************/
