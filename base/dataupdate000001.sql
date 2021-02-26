@@ -293,3 +293,14 @@ UPDATE cd.tcuenta_doc SET dev_saldo_original=NULL,dev_saldo=null,dev_nombre_cheq
 UPDATE cd.tcuenta_doc SET dev_saldo_original=NULL,dev_saldo=null,dev_nombre_cheque=null,dev_a_favor_de=null,dev_tipo=null WHERE id_cuenta_doc=33088;
 
 /********************************************F-DAUP-MGM-TES-26/02/2021********************************************/
+
+
+/********************************************I-DAUP-MGM-TES-1-26/02/2021********************************************/
+
+--rollback
+--UPDATE tes.tsolicitud_efectivo SET monto=4011.02 WHERE id_solicitud_efectivo=35502; 
+--commit
+
+UPDATE tes.tsolicitud_efectivo SET monto=3761.02 WHERE id_solicitud_efectivo=35502;
+
+/********************************************F-DAUP-MGM-TES-1-26/02/2021********************************************/
