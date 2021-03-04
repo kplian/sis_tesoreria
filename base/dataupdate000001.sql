@@ -308,35 +308,35 @@ UPDATE tes.tsolicitud_efectivo SET monto=3761.02 WHERE id_solicitud_efectivo=355
 --Devengdo Rollback
 -- BEGIN;
 -- Update tes.tplan_pago Set
---       tipo = 'anticipo',
+--       tipo = 'anticipo'
 --       Where id_plan_pago = 40760;
 -- COMMIT;
 BEGIN;
 Update tes.tplan_pago Set
-      tipo = 'ant_parcial',
+      tipo = 'ant_parcial'
       Where id_plan_pago = 40760;
 COMMIT;
 
 --Devengdo Rollback
 -- BEGIN;
 -- Update tes.tplan_pago Set
---       tipo = 'anticipo',
+--       tipo = 'anticipo'
 --       Where id_plan_pago = 40752;
 -- COMMIT;
 BEGIN;
 Update tes.tplan_pago Set
-      tipo = 'ant_parcial',
+      tipo = 'ant_parcial'
       Where id_plan_pago = 40752;
 COMMIT;
 --Devengdo Rollback
 -- BEGIN;
 -- Update tes.tplan_pago Set
---       tipo = 'anticipo',
+--       tipo = 'anticipo'
 --       Where id_plan_pago = 40218;
 -- COMMIT;
 BEGIN;
 Update tes.tplan_pago Set
-      tipo = 'ant_parcial',
+      tipo = 'ant_parcial'
       Where id_plan_pago = 40218;
 COMMIT;
 
