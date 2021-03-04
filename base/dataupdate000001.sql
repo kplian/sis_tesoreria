@@ -304,3 +304,41 @@ UPDATE cd.tcuenta_doc SET dev_saldo_original=NULL,dev_saldo=null,dev_nombre_cheq
 UPDATE tes.tsolicitud_efectivo SET monto=3761.02 WHERE id_solicitud_efectivo=35502;
 
 /********************************************F-DAUP-MGM-TES-1-26/02/2021********************************************/
+/********************************************I-DAUP-EGS-TES-ETR-5158-04/03/2021********************************************/
+--Devengdo Rollback
+-- BEGIN;
+-- Update tes.tplan_pago Set
+--       tipo = 'anticipo',
+--       Where id_plan_pago = 40760;
+-- COMMIT;
+BEGIN;
+Update tes.tplan_pago Set
+      tipo = 'ant_parcial',
+      Where id_plan_pago = 40760;
+COMMIT;
+
+--Devengdo Rollback
+-- BEGIN;
+-- Update tes.tplan_pago Set
+--       tipo = 'anticipo',
+--       Where id_plan_pago = 40752;
+-- COMMIT;
+BEGIN;
+Update tes.tplan_pago Set
+      tipo = 'ant_parcial',
+      Where id_plan_pago = 40752;
+COMMIT;
+--Devengdo Rollback
+-- BEGIN;
+-- Update tes.tplan_pago Set
+--       tipo = 'anticipo',
+--       Where id_plan_pago = 40218;
+-- COMMIT;
+BEGIN;
+Update tes.tplan_pago Set
+      tipo = 'ant_parcial',
+      Where id_plan_pago = 40218;
+COMMIT;
+
+
+/********************************************F-DAUP-EGS-TES-ETR-5158-04/03/2021********************************************/
