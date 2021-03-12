@@ -36,6 +36,12 @@ class MODConsultaCbte extends MODbase
         $this->captura('glosa', 'varchar');
         $this->captura('fecha_documento', 'date');
         $this->captura('cento_consto', 'text');
+        $this->captura('codigo', 'varchar');
+        $this->captura('temporal', 'varchar');
+        $this->captura('vbregional', 'varchar');
+        $this->captura('id_depto', 'integer');
+        $this->captura('id_gestion', 'integer');
+
 
         //Ejecuta la instruccion
         $this->armarConsulta();

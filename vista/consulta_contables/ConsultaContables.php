@@ -72,10 +72,12 @@ header("content-type: text/javascript; charset=UTF-8");
                         maxLength: 10
                     },
                     type: 'TextField',
-                    // filters:{pfiltro:'cajero.estado_reg',type:'string'},
+                    filters:{pfiltro:'incbte.id_int_comprobante',type:'numeric'},
                     id_grupo: 1,
                     grid: true,
-                    form: false
+                    form: false,
+                    bottom_filter: true,
+
                 },
                 {
                     config: {
@@ -145,8 +147,8 @@ header("content-type: text/javascript; charset=UTF-8");
                 },
                 {
                     config: {
-                        name: 'tipo_cambio',
-                        fieldLabel: 'Tipo Cambio',
+                        name: 'codigo',
+                        fieldLabel: 'Moneda',
                         allowBlank: true,
                         anchor: '80%',
                         gwidth: 100,
@@ -187,7 +189,7 @@ header("content-type: text/javascript; charset=UTF-8");
                     },
                     type: 'TextArea',
                     filters: {
-                        pfiltro: 'incbte.glosa1',
+                        pfiltro: 'incbte.glosa',
                         type: 'string'
                     },
                     id_grupo: 0,
@@ -219,14 +221,15 @@ header("content-type: text/javascript; charset=UTF-8");
                         fieldLabel: 'Cento Consto',
                         allowBlank: true,
                         anchor: '80%',
-                        gwidth: 100,
+                        gwidth: 300,
                         maxLength: 10
                     },
                     type: 'TextField',
-                    // filters:{pfiltro:'cajero.estado_reg',type:'string'},
+                    filters:{pfiltro:'incbte.cento_consto',type:'string'},
                     id_grupo: 1,
                     grid: true,
-                    form: false
+                    form: false,
+                    bottom_filter: true,
                 }
             ],
             title: 'Reporte',
@@ -244,7 +247,8 @@ header("content-type: text/javascript; charset=UTF-8");
                 {name: 'liquido_pagable', type: 'numeric'},
                 {name: 'glosa', type: 'string'},
                 {name: 'fecha_documento', type: 'date', dateFormat: 'Y-m-d'},
-                {name: 'cento_consto', type: 'string'}
+                {name: 'cento_consto', type: 'string'},
+                {name: 'codigo', type: 'string'}
             ],
 
             sortInfo: {
@@ -327,6 +331,7 @@ header("content-type: text/javascript; charset=UTF-8");
                 listWidth: '280',
                 width: 80
             }),
+
             capturaFiltros: function (combo, record, index) {
                 this.store.baseParams.id_deptos = this.cmbDepto.getValue();
                 this.store.baseParams.id_gestion = this.cmbGestion.getValue();
