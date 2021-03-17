@@ -342,8 +342,6 @@ COMMIT;
 
 
 /********************************************F-DAUP-EGS-TES-ETR-5158-04/03/2021********************************************/
-<<<<<<< HEAD
-=======
 
 /********************************************I-DAUP-EGS-TES-ETR-3195-05/03/2021********************************************/
 --rollback
@@ -355,4 +353,19 @@ UPDATE tes.tobligacion_pago SET
     monto_ajuste_ret_anticipo_par_ga = 123966.62
 WHERE id_obligacion_pago = 14820;
 /********************************************F-DAUP-EGS-TES-ETR-3195-05/03/2021********************************************/
->>>>>>> 2ba8df5... #ETR-3195 cambio descuento anticipo por retener
+/********************************************I-DAUP-EGS-TES-ETR-3320-17/03/2021********************************************/
+--pago Rollback
+-- BEGIN;
+-- Update tes.tplan_pago Set
+-- descuento_anticipo = 548712.98,
+-- liquido_pagable = 290812.95,
+-- Where id_plan_pago = 41418;
+-- COMMIT;
+--Commit
+BEGIN;
+Update tes.tplan_pago Set
+      descuento_anticipo = 167905.19,
+      liquido_pagable = 671620.74
+Where id_plan_pago = 41418;
+COMMIT;
+/********************************************F-DAUP-EGS-TES-ETR-3320-17/03/2021********************************************/
