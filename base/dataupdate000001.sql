@@ -371,11 +371,11 @@ COMMIT;
 /********************************************F-DAUP-EGS-TES-ETR-3320-17/03/2021********************************************/
 
 /********************************************I-DAUP-EGS-TES-ETR-3619-09/04/2021********************************************/
-/*
-UPDATE tes.tplan_pago SET
-id_plantilla =1
-WHERE id_plan_pago = 42144;
-*/
+
+-- UPDATE tes.tplan_pago SET
+-- id_plantilla =1
+-- WHERE id_plan_pago = 42144;
+
 BEGIN;
 UPDATE tes.tplan_pago SET
     id_plantilla =49
