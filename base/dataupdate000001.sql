@@ -382,8 +382,6 @@ UPDATE tes.tplan_pago SET
 WHERE id_plan_pago = 42144;
 COMMIT;
 /********************************************F-DAUP-EGS-TES-ETR-3619-09/04/2021********************************************/
-<<<<<<< HEAD
-=======
 /********************************************I-DAUP-EGS-TES-ETR-3619-01-09/04/2021********************************************/
 
 -- UPDATE tes.tplan_pago SET
@@ -396,4 +394,13 @@ UPDATE tes.tplan_pago SET
 WHERE id_plan_pago = 39438;
 COMMIT;
 /********************************************F-DAUP-EGS-TES-ETR-3619-01-09/04/2021********************************************/
->>>>>>> 0901b59... #ETR-3619 cambio de documento ADQ-000892-2020al anticipo
+/********************************************I-DAUP-EGS-TES-ETR-3654-14/04/2021********************************************/
+--rollback
+--UPDATE tes.tobligacion_pago SET
+-- monto_ajuste_ret_anticipo_par_ga = 1809502.3
+-- WHERE id_obligacion_pago = 14754;
+--commit
+UPDATE tes.tobligacion_pago SET
+    monto_ajuste_ret_anticipo_par_ga = 1558579.89
+WHERE id_obligacion_pago = 14754;
+/********************************************F-DAUP-EGS-TES-ETR-3654-14/04/2021********************************************/
