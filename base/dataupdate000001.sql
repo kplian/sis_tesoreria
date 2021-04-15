@@ -404,3 +404,11 @@ UPDATE tes.tobligacion_pago SET
     monto_ajuste_ret_anticipo_par_ga = 1558579.89
 WHERE id_obligacion_pago = 14754;
 /********************************************F-DAUP-EGS-TES-ETR-3654-14/04/2021********************************************/
+
+
+/********************************************I-DAUP-MGM-TES-ETR-3612-15/04/2021********************************************/
+--rollback
+--UPDATE tes.tcajero SET estado='activo' WHERE id_caja=133;
+--commit
+UPDATE tes.tcajero SET estado='inactivo' WHERE id_caja=133;
+/********************************************F-DAUP-MGM-TES-ETR-3612-15/04/2021********************************************/

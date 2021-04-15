@@ -109,7 +109,7 @@ BEGIN
                     	v_id_caja[v_i] = v_cajas.id_caja;
                         v_i = v_i + 1;
                     END LOOP;
-
+					
                     IF v_i > 1 THEN
                     	v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and caja.id_caja in('||array_to_string(v_id_caja,',')||') and ';
                     ELSE
@@ -120,7 +120,6 @@ BEGIN
 	            	v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and ';
                	END IF;
             END IF;
-
 			IF lower(v_parametros.tipo_interfaz) = 'solicitudcaja' THEN
             	v_aux := '';
                 IF p_administrador !=1 THEN
@@ -132,7 +131,7 @@ BEGIN
                     	v_id_caja[v_i] = v_cajas.id_caja;
                         v_i = v_i + 1;
                     END LOOP;
-
+                    
                     IF v_i > 1 THEN
                     	v_filtro = '(caja.estado = ''abierto'') and (pc.tipo=''apertura'') and caja.id_caja in('||array_to_string(v_id_caja,',')||') and ';
                     ELSE
@@ -199,8 +198,8 @@ BEGIN
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
-			raise notice '%', v_consulta;
-            --raise EXCEPTION '%', v_consulta;
+			raise notice '%', v_parametros.id_funcionario_usu;
+            --raise EXCEPTION '%', v_parametros.id_funcionario_usu;
 			--Devuelve la respuesta
 			return v_consulta;
 
@@ -273,7 +272,7 @@ BEGIN
                 	FOR v_cajas in (select id_caja
                     				from tes.tcajero c
                     				where id_funcionario=v_parametros.id_funcionario_usu
-				                    and tipo='responsable'  and  c.estado_reg = 'activo')LOOP
+				                    and tipo='responsable'  and  c.estado_reg = 'activo' and c.estado = 'activo')LOOP
                     	v_id_caja[v_i] = v_cajas.id_caja;
                         v_i = v_i + 1;
                     END LOOP;
