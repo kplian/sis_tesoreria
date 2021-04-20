@@ -6,7 +6,8 @@
  *@date 20-09-2011 10:22:05
  *@description Archivo con la interfaz de usuario que permite
  *dar el visto a solicitudes de compra
- *
+ * ISSUE        FECHA           AUTOR           DESCRIPCION
+ *#ETR-3653     2004/2021       EGS             Se habilito el boton de sol plan pago
  */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -36,7 +37,7 @@ header("content-type: text/javascript; charset=UTF-8");
             this.getBoton('ini_estado').setVisible(false);
             this.getBoton('ant_estado').setVisible(false);
             this.getBoton('sig_estado').setVisible(false);
-            this.getBoton('SolPlanPago').setVisible(false);
+            //this.getBoton('SolPlanPago').setVisible(false);//#ETR-3653
             this.getBoton('btnChequeoDocumentosWf').setVisible(false);
             this.getBoton('btnPagoRel').setVisible(false);
             this.getBoton('btnObs').setVisible(false);
