@@ -433,7 +433,7 @@ UPDATE tes.tsolicitud_efectivo SET estado_reg='activo',estado='vbcajero',id_esta
 --UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf= 1311439;
 UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf= 1311439;
 --UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf= 1280550;
-UPDATE wf.testado_wf SET estado='activo' WHERE id_estado_wf= 1280550;
+UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf= 1280550;
 --UPDATE tes.tsolicitud_efectivo SET estado_reg='anulado',id_estado_wf= 1311439 WHERE id_solicitud_efectivo=35859;
 UPDATE tes.tsolicitud_efectivo SET estado='vbcajero',id_estado_wf= 1280550 WHERE id_solicitud_efectivo=35859;
 --vi804-2021
