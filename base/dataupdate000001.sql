@@ -444,6 +444,10 @@ UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf= 1309421;
 --UPDATE tes.tsolicitud_efectivo SET estado='anulado',id_estado_wf= 1311435 WHERE id_solicitud_efectivo=35859;
 UPDATE tes.tsolicitud_efectivo SET estado='vbcajero',id_estado_wf= 1309421 WHERE id_solicitud_efectivo=36659;
 /********************************************F-DAUP-MGM-TES-ETR-3607-01-26/04/2021********************************************/
+/********************************************I-DAUP-MGM-TES-ETR-3607-02-26/04/2021********************************************/
+--UPDATE wf.testado_wf SET id_funcionario=523 WHERE id_estado_wf=1324676;
+UPDATE wf.testado_wf SET id_funcionario=350 WHERE id_estado_wf=1324676;
+/********************************************F-DAUP-MGM-TES-ETR-3607-02-26/04/2021********************************************/
 
 
 
