@@ -412,3 +412,20 @@ WHERE id_obligacion_pago = 14754;
 --commit
 UPDATE tes.tcajero SET estado='inactivo' WHERE id_caja=133;
 /********************************************F-DAUP-MGM-TES-ETR-3612-15/04/2021********************************************/
+/********************************************I-DAUP-MGM-TES-ETR-3761-26/04/2021********************************************/
+--INSERT INTO tes.tsolicitud_rendicion_det ("id_usuario_reg", "id_usuario_mod", "fecha_reg", "fecha_mod", "estado_reg", "id_usuario_ai", "usuario_ai", "obs_dba", "id_solicitud_rendicion_det", "id_documento_respaldo", "id_solicitud_efectivo", "id_proceso_caja", "monto")VALUES (376, NULL, E'2021-04-23 13:26:49.050', NULL, E'activo', NULL, E'NULL', NULL, 24711, 224754, 37297, NULL, '1142');
+DELETE FROM tes.tsolicitud_efectivo_det WHERE id_solicitud_rendicion_det=24711;
+---
+--UPDATE tes.tsolicitud_efectivo SET monto=1142 WHERE id_solicitud_efectivo= 37297;
+UPDATE tes.tsolicitud_efectivo SET monto=0 WHERE id_solicitud_efectivo=37297;
+---
+--UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1325535;
+UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1325535;
+
+--UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1324676;
+UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1324676;
+
+--UPDATE tes.tsolicitud_efectivo SET estado_reg='finalizado',id_estado_wf= 1325535 WHERE id_solicitud_efectivo=37271;
+UPDATE tes.tsolicitud_efectivo SET estado_reg='vbcajero',id_estado_wf=1324676 WHERE id_solicitud_efectivo=37271;
+/********************************************F-DAUP-MGM-TES-ETR-3761-26/04/2021********************************************/
+
