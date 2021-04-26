@@ -428,4 +428,22 @@ UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1324676;
 --UPDATE tes.tsolicitud_efectivo SET estado_reg='finalizado',id_estado_wf= 1325535 WHERE id_solicitud_efectivo=37271;
 UPDATE tes.tsolicitud_efectivo SET estado_reg='activo',estado='vbcajero',id_estado_wf= 1324676 WHERE id_solicitud_efectivo=37271;
 /********************************************F-DAUP-MGM-TES-ETR-3761-02-26/04/2021********************************************/
+/********************************************I-DAUP-MGM-TES-ETR-3607-01-26/04/2021********************************************/
+--vi383-2021
+--UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf= 1311439;
+UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf= 1311439;
+--UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf= 1280550;
+UPDATE wf.testado_wf SET estado='activo' WHERE id_estado_wf= 1280550;
+--UPDATE tes.tsolicitud_efectivo SET estado_reg='anulado',id_estado_wf= 1311439 WHERE id_solicitud_efectivo=35859;
+UPDATE tes.tsolicitud_efectivo SET estado='vbcajero',id_estado_wf= 1280550 WHERE id_solicitud_efectivo=35859;
+--vi804-2021
+--UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf= 1311435;
+UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf= 1311435;
+--UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf= 1309421;
+UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf= 1309421;
+--UPDATE tes.tsolicitud_efectivo SET estado='anulado',id_estado_wf= 1311435 WHERE id_solicitud_efectivo=35859;
+UPDATE tes.tsolicitud_efectivo SET estado='vbcajero',id_estado_wf= 1309421 WHERE id_solicitud_efectivo=36659;
+/********************************************F-DAUP-MGM-TES-ETR-3607-01-26/04/2021********************************************/
+
+
 
