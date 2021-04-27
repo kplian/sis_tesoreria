@@ -1,12 +1,17 @@
---------------- SQL ---------------
+-- FUNCTION: tes.f_inserta_libro_bancos(integer, integer, hstore)
 
-CREATE OR REPLACE FUNCTION tes.f_inserta_libro_bancos (
-  p_administrador integer,
-  p_id_usuario integer,
-  p_hstore public.hstore
-)
-RETURNS varchar AS
-$body$
+-- DROP FUNCTION tes.f_inserta_libro_bancos(integer, integer, hstore);
+
+CREATE OR REPLACE FUNCTION tes.f_inserta_libro_bancos(
+	p_administrador integer,
+	p_id_usuario integer,
+	p_hstore hstore)
+    RETURNS character varying
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
 /**************************************************************************
  SISTEMA:		Tesoreria
  FUNCION: 		tes.f_inserta_libro_bancos
@@ -23,7 +28,9 @@ $body$
  #67				03.09.2020		  MZM KPLIAN        		ampliar y generalizar el registro de correo para todos los origenes de LB
  #ETR-1294			12/10/2020	  	  manuel guerra				cambiar el tipo bigint al campo nro_deposito
  #ETR-1396			15/10/2020		  MANUEL GUERRA				AGREGAR VALIDACION DE VALORES NULOS
-***************************************************************************/
+ #ETR-2687			26.01.2021		  MZM KPLIAN				Adicion de cuenta bancaria del beneficiario
+ 					02.02.2021		  MZM KPLIAN				Arreglo a casting date en hstore-fecha
+ ***************************************************************************/
 
 DECLARE
 
@@ -63,7 +70,10 @@ DECLARE
     v_id	integer;
     v_correo varchar;
     v_nro_deposito_aux BIGINT;
-    		    
+    --#ETR-2687
+    v_cta_bancaria	varchar;
+    v_id_inst_cta_bancaria	integer;
+	v_elegir_cta	varchar;    		    
 BEGIN
 
     v_nombre_funcion = 'f_inserta_libro_bancos';
@@ -304,6 +314,15 @@ BEGIN
                         	v_tabla='orga.tfuncionario' ;
 	    					v_campo='id_funcionario'	;
     						v_id=v_id_proveedor	;
+                            
+                            --#ETR-2687
+                            select f.nro_cuenta, f.id_institucion 
+                            into v_cta_bancaria, v_id_inst_cta_bancaria
+                            from orga.tfuncionario_cuenta_bancaria f
+                            where id_funcionario=v_id
+                            and f.estado_reg='activo' and  (p_hstore->'fecha')::date between f.fecha_ini and coalesce(f.fecha_fin,g_fecha);
+                            v_elegir_cta:='no';
+                            
                         end if;
                     else
                     	raise exception 'el auxiliar es de un funcionario pero el mismo no existe';
@@ -316,7 +335,20 @@ BEGIN
                       
                       v_tabla='param.tproveedor' ;
                       v_campo='id_proveedor'	;
-    				
+    				  v_elegir_cta:='no';
+                      --#ETR-2687
+                      select f.nro_cuenta, f.id_banco_beneficiario
+                      into v_cta_bancaria, v_id_inst_cta_bancaria
+                      from param.tproveedor_cta_bancaria f
+                      where f.id_proveedor=v_id
+                      and f.estado_reg='activo' limit 1;
+                            
+                      if ((select count(*) from param.tproveedor_cta_bancaria f
+                          where f.id_proveedor=v_id
+                          and f.estado_reg='activo')>1) then
+                          v_elegir_cta:='si';
+                      end if;
+                     
 					end if;
                 end if;                    
             
@@ -326,11 +358,25 @@ BEGIN
             
             --si no encontro nada es q no es funcionario ni proveedor, intentamos ubicar de los registros historicos de libro_bancos
             if (v_correo is null ) then
-            
             	select correo into v_correo from tes.tts_libro_bancos where 
                 upper(a_favor)= upper(translate ((rtrim(p_hstore->'a_favor'))::varchar, 'áéíóúÁÉÍÓÚäëïöüÄËÏÖÜñ', 'aeiouAEIOUaeiouAEIOUÑ'))
                 order by id_libro_bancos desc limit 1;
-             end if;
+            end if;
+            --#ETR-2687
+            if (p_hstore->'nro_cta_bancaria' is not null and length(p_hstore->'nro_cta_bancaria')!=0 ) then
+               v_cta_bancaria:=p_hstore->'nro_cta_bancaria';
+               v_id_inst_cta_bancaria:=p_hstore->'id_institucion_cta_bancaria';
+               v_elegir_cta:='no';
+            end if;
+
+            if (v_cta_bancaria is null ) then
+            	select nro_cta_bancaria into v_cta_bancaria from tes.tts_libro_bancos where 
+                upper(a_favor)= upper(translate ((rtrim(p_hstore->'a_favor'))::varchar, 'áéíóúÁÉÍÓÚäëïöüÄËÏÖÜñ', 'aeiouAEIOUaeiouAEIOUÑ'))
+                order by id_libro_bancos desc limit 1;
+            end if;
+            
+            
+            
 			--#ETR-1396
 			if (p_hstore->'nro_deposito' is null or length(p_hstore->'nro_deposito')=0 ) then
                	v_nro_deposito_aux=null;
@@ -373,7 +419,10 @@ BEGIN
                 columna_correo,
                 id_columna_correo,
                 correo
-                
+                --#ETR-2687
+                ,nro_cta_bancaria,
+                id_institucion_cta_bancaria,
+                elegir_cta
                 ) values(            
                 (p_hstore->'id_cuenta_bancaria')::integer,
                 upper(translate ((p_hstore->'a_favor')::varchar, 'áéíóúÁÉÍÓÚäëïöüÄËÏÖÜñ', 'aeiouAEIOUaeiouAEIOUÑ')),
@@ -407,6 +456,11 @@ BEGIN
                 v_campo,
                 v_id,
                 v_correo
+                --#ETR-2687
+				,v_cta_bancaria,
+    			v_id_inst_cta_bancaria,
+                v_elegir_cta
+                
                 )RETURNING id_libro_bancos into v_id_libro_bancos;    		
             
             ELSE
@@ -445,6 +499,10 @@ BEGIN
                   columna_correo,
                   id_columna_correo,
                   correo
+                  --#ETR-2687
+                  ,nro_cta_bancaria,
+                  id_institucion_cta_bancaria,
+                  elegir_cta
                   ) values(            
                   (p_hstore->'id_cuenta_bancaria')::integer,
                   (p_hstore->'fecha')::date,
@@ -479,6 +537,10 @@ BEGIN
                   v_campo,
                   v_id,
                   v_correo
+                  --#ETR-2687
+				  ,v_cta_bancaria,
+    			  v_id_inst_cta_bancaria,
+                  v_elegir_cta
                   )RETURNING id_libro_bancos into v_id_libro_bancos;
     		
             END IF;
@@ -506,10 +568,7 @@ EXCEPTION
 		raise exception '%',v_resp;
 				        
 END;
-$body$
-LANGUAGE 'plpgsql'
-VOLATILE
-CALLED ON NULL INPUT
-SECURITY INVOKER
-PARALLEL UNSAFE
-COST 100;
+$BODY$;
+
+ALTER FUNCTION tes.f_inserta_libro_bancos(integer, integer, hstore)
+    OWNER TO postgres;

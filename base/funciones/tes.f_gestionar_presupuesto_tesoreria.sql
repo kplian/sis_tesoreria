@@ -1,5 +1,4 @@
 --------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION tes.f_gestionar_presupuesto_tesoreria (
   p_id_obligacion_pago integer,
   p_id_usuario integer,

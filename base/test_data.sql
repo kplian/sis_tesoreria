@@ -85,3 +85,8 @@ select pxp.f_insert_trol_procedimiento_gui ('Responsable Obligacion de Pago', 'T
 -- FIN ROLES 
 -- Autor Gonzalo Sarmiento Sejas
 ------------------------------------------
+
+
+
+--variable_global
+--tes_documentos_porcentaje_anticipo: DDP, FACTURADO : Documentos en los cuales se controla el porcentaje de anticipo y de descuento en cuotas

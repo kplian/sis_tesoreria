@@ -1975,3 +1975,26 @@ COMMENT ON COLUMN tes.tplan_pago."dias_limite"
 ALTER TABLE tes.tplan_pago
     ADD COLUMN fecha_vencimiento DATE;
 /*************************F-SCP-EGS-TES-ETR-1914-03/12/2020*************/
+
+
+/*************************I-SCP-MZM-TES-ETR-2687-25/01/2021*************/
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN id_institucion_cta_bancaria INTEGER;
+
+COMMENT ON COLUMN tes.tts_libro_bancos.id_institucion_cta_bancaria
+IS 'institucion de la cta bancaria del proveedor o funcionario';
+
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN nro_cta_bancaria VARCHAR;
+
+COMMENT ON COLUMN tes.tts_libro_bancos.nro_cta_bancaria
+IS 'nro de cuenta bancaria del proveedor o funcionario';
+
+
+ALTER TABLE tes.tts_libro_bancos
+  ADD COLUMN elegir_cta VARCHAR(2);
+
+ALTER TABLE tes.tts_libro_bancos
+  ALTER COLUMN elegir_cta SET DEFAULT 'no';
+/*************************F-SCP-MZM-TES-ETR-2687-25/01/2021*************/

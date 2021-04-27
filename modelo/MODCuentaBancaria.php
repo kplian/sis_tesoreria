@@ -5,6 +5,8 @@
 *@author  Gonzalo Sarmiento Sejas
 *@date 24-04-2013 15:19:30
 *@description Clase que envia los parametros requeridos a la Base de datos para la ejecucion de las funciones, y que recibe la respuesta del resultado de la ejecucion de las mismas
+ *#ETR-2687	   26.01.2021		 MZM-KPLIAN					Adicion de cuenta bancaria del beneficiario
+ *#ETR-2687-1  28.02.2021		 MZM-KPLIAN					Adicion de estado de ultima transferencia bancaria LB
 */
 
 class MODCuentaBancaria extends MODbase{
@@ -75,8 +77,8 @@ class MODCuentaBancaria extends MODbase{
 		$this->captura('denominacion','varchar');
 		$this->captura('centro','varchar');
 		$this->captura('id_finalidads','varchar');
-		
-		
+		//#ETR-2687-1
+		$this->captura('estado_ult_transf','varchar');
 		
 		
 		//Ejecuta la instruccion
@@ -156,6 +158,31 @@ class MODCuentaBancaria extends MODbase{
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
 
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
+	
+	//#ETR-2687
+	function listarCuentaBancariaBeneficiario(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.f_obtener_cuenta_beneficiario_sel';
+		$this->transaccion='TS_CTABEN_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+				
+		$this->setParametro('beneficiario','beneficiario','varchar');
+		//Definicion de la lista del resultado del query
+		$this->captura('nro_cuenta','varchar');
+		$this->captura('nombre','varchar');
+		$this->captura('id_institucion','int4');
+		$this->captura('desc_cuenta','text');
+		$this->captura('id','int4');
+		$this->captura('tipo','text');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
+		
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}

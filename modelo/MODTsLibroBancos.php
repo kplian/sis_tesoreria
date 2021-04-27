@@ -9,6 +9,7 @@
      ISSUE 		   FECHA   			 AUTOR				 		DESCRIPCION:
  * * #67           14/08/2020		 Mercedes Zambrana KPLIAN	Adicion de correo proveedor
  * * #67           02/09/2020		 Mercedes Zambrana KPLIAN	extension de correo proveedor para todos los origenes
+ *   #ETR-2687	   26.01.2021		 MZM-KPLIAN					Adicion de campos cuenta_bancaria del beneficiario 
 */
 
 class MODTsLibroBancos extends MODbase{
@@ -68,7 +69,12 @@ class MODTsLibroBancos extends MODbase{
 		$this->captura('tabla_correo','varchar');//#67
 		$this->captura('columna_correo','varchar');//#67
 		$this->captura('id_columna_correo','integer');//#67
-	
+		//ETR-2687
+		$this->captura('nro_cta_bancaria','varchar');//#ETR-2687
+		$this->captura('banco','varchar');//#ETR-2687
+		$this->captura('elegir_cta','varchar');//#ETR-2687
+		$this->captura('id_institucion_cta_bancaria','integer');//#ETR-2687
+		$this->captura('desc_cuenta','text');//#ETR-2687
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
