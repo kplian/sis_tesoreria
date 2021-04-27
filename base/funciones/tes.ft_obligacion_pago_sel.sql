@@ -1,11 +1,18 @@
-CREATE OR REPLACE FUNCTION tes.ft_obligacion_pago_sel (
-  p_administrador integer,
-  p_id_usuario integer,
-  p_tabla varchar,
-  p_transaccion varchar
-)
-RETURNS varchar AS
-$body$
+-- FUNCTION: tes.ft_obligacion_pago_sel(integer, integer, character varying, character varying)
+
+-- DROP FUNCTION tes.ft_obligacion_pago_sel(integer, integer, character varying, character varying);
+
+CREATE OR REPLACE FUNCTION tes.ft_obligacion_pago_sel(
+	p_administrador integer,
+	p_id_usuario integer,
+	p_tabla character varying,
+	p_transaccion character varying)
+    RETURNS character varying
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
 /**************************************************************************
  SISTEMA:		Sistema de Tesoreria
  FUNCION: 		tes.ft_obligacion_pago_sel
@@ -27,6 +34,7 @@ $body$
  #12        	  10/01/2019     MMV ENDETRAN       Considerar restar el iva al comprometer obligaciones de pago
  #16              16/01/2019     MMV ENDETRAN      					 Incluir comprometer al 100% pago único sin contrato
  #48              31/01/2020     JJA ENDETRAN                        Agregar tipo de relación en obligacion de pago
+ #ETR-2074		  19.04.2021	 MZM-KPLIAN							 Adicion de campo que permita identificar la OP de la cual extiende para CD: Pago simple DUI
 ***************************************************************************/
 
 DECLARE
@@ -235,6 +243,7 @@ BEGIN
                               obpg.fin_forzado,   --#7890
                               obpg.monto_sg_mo,    --#7890
 							  obpg.comprometer_iva	 --#12
+                              
                               from tes.tobligacion_pago obpg
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
                               left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
@@ -1093,6 +1102,10 @@ BEGIN
                 obpg.id_funcionario_responsable,
                 fresp.desc_funcionario1 AS desc_fun_responsable,
                 g.gestion::integer --#48
+                ,(case when (obpg.id_obligacion_pago in (select id_obligacion_pago_extendida
+                              from tes.tobligacion_pago where estado!=''anulado'')) then 1
+                              else 0
+                              end) as tipo_op --#ETR-2470
                 from tes.tobligacion_pago obpg
                 inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
                 left join segu.tusuario usu2 on usu2.id_usuario = obpg.id_usuario_mod
@@ -1168,9 +1181,7 @@ EXCEPTION
 			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
 			raise exception '%',v_resp;
 END;
-$body$
-LANGUAGE 'plpgsql'
-VOLATILE
-CALLED ON NULL INPUT
-SECURITY INVOKER
-COST 100;
+$BODY$;
+
+ALTER FUNCTION tes.ft_obligacion_pago_sel(integer, integer, character varying, character varying)
+    OWNER TO postgres;
