@@ -1,12 +1,7 @@
---------------- SQL ---------------
-
-CREATE OR REPLACE FUNCTION tes.f_determinar_total_faltante (
-    p_id_obligacion_pago integer,
-    p_filtro varchar = 'registrado'::character varying,
-    p_id_plan_pago integer = NULL::integer
-)
-    RETURNS numeric AS
-$body$
+CREATE OR REPLACE FUNCTION tes.f_determinar_total_faltante(p_id_obligacion_pago integer, p_filtro character varying DEFAULT 'registrado'::character varying, p_id_plan_pago integer DEFAULT NULL::integer)
+ RETURNS numeric
+ LANGUAGE plpgsql
+AS $function$
 /*
 *
 *  Autor:   RAC  (KPLIAN)
@@ -19,7 +14,7 @@ $body$
  #MSA-31          25/08/2020       	  EGS        			Se respeta el liquido pagable en la cuota de pagon con repecto a su devengado
  #68			  18.09.2020		  MZM-KPLIAN			Se incluye el tipo=devengado en el caso ant_parcial_descontado para obtener el importe de descuento de anticipo, dado que ahora el anticipo se descuenta en cbte de diario y ya no de pago
  #ETR-2703        26/01/2021          EGS                   Se comenta monto_aux por que ahora el devengado es la base del descuento y no el pago
-
+ #ETR-0			  27.04.2021		  MZM-KPLIAN			Correccion de coalesce
 */
 
 DECLARE
@@ -267,7 +262,7 @@ BEGIN
           and pp.tipo = 'ant_aplicado'                --recupera la suma de los anticipos aplicados
           and pp.id_obligacion_pago = p_id_obligacion_pago;
 
-        v_monto_total  = COALESCE(v_monto,0) + COALESCE(v_total_anticipo,0)- COALESCE(v_monto_total_registrado,0) + COALESCE(v_monto_total_ajuste_ag,0) + COALESCE(v_monto_ajuste_anticipo) -  COALESCE(v_monto_ajuste_aplicado);
+        v_monto_total  = COALESCE(v_monto,0) + COALESCE(v_total_anticipo,0)- COALESCE(v_monto_total_registrado,0) + COALESCE(v_monto_total_ajuste_ag,0) + COALESCE(v_monto_ajuste_anticipo,0) -  COALESCE(v_monto_ajuste_aplicado,0); --#ETR-0
         return v_monto_total;
 
 
@@ -379,7 +374,7 @@ BEGIN
         END IF;
 
 
-        return (v_monto_total - COALESCE(v_monto_total_registrado) )*v_porc_ant;
+        return (v_monto_total - COALESCE(v_monto_total_registrado,0) )*v_porc_ant; --#ETR-0
 
 
         -------------------------------------
@@ -856,10 +851,5 @@ EXCEPTION
         v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
         raise exception '%',v_resp;
 END;
-$body$
-    LANGUAGE 'plpgsql'
-    VOLATILE
-    CALLED ON NULL INPUT
-    SECURITY INVOKER
-    PARALLEL UNSAFE
-    COST 100;
+$function$
+;
