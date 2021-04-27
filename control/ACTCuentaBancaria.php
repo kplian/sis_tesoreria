@@ -5,7 +5,8 @@
 *@author  Gonzalo Sarmiento Sejas
 *@date 24-04-2013 15:19:30
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
-*/
+*#ETR-2687	   26.01.2021		 MZM-KPLIAN					Adicion de cuenta bancaria del beneficiario
+ * */
 
 class ACTCuentaBancaria extends ACTbase{    
 			
@@ -89,7 +90,21 @@ class ACTCuentaBancaria extends ACTbase{
 		$this->res=$this->objFunc->eliminarCuentaBancaria($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
-				
+	
+	function listarCuentaBancariaBeneficiario(){//#ETR-2687
+		$this->objParam->defecto('ordenacion','id_cuenta_bancaria');
+
+		$this->objParam->defecto('dir_ordenacion','asc');
+		$beneficiario=$this->objParam->getParametro('beneficiario');
+		
+		$this->objParam->addParametro('esquema',$beneficiario);
+		
+		$this->objFunc=$this->create('MODCuentaBancaria');
+			
+		$this->res=$this->objFunc->listarCuentaBancariaBeneficiario($this->objParam);
+		
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}			
 }
 
 ?>
