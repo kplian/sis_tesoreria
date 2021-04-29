@@ -448,6 +448,11 @@ UPDATE tes.tsolicitud_efectivo SET estado='vbcajero',id_estado_wf= 1309421 WHERE
 --UPDATE wf.testado_wf SET id_funcionario=523 WHERE id_estado_wf=1324676;
 UPDATE wf.testado_wf SET id_funcionario=350 WHERE id_estado_wf=1324676;
 /********************************************F-DAUP-MGM-TES-ETR-3607-02-26/04/2021********************************************/
-
+/********************************************I-DAUP-MGM-TES-ETR-3607-03-29/04/2021********************************************/
+--UPDATE tes.tsolicitud_efectivo SET fecha_entregado_ult='23/04/2021' WHERE id_solicitud_efectivo=37271;
+UPDATE tes.tsolicitud_efectivo
+SET fecha_entregado_ult='26/04/2021'
+WHERE id_solicitud_efectivo = 37271;
+/********************************************F-DAUP-MGM-TES-ETR-3607-03-29/04/2021********************************************/
 
 
