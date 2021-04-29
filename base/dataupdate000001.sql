@@ -454,5 +454,11 @@ UPDATE tes.tsolicitud_efectivo
 SET fecha_entregado_ult='26/04/2021'
 WHERE id_solicitud_efectivo = 37271;
 /********************************************F-DAUP-MGM-TES-ETR-3607-03-29/04/2021********************************************/
+/********************************************I-DAUP-MGM-TES-ETR-3607-04-29/04/2021********************************************/
+--UPDATE tes.tsolicitud_efectivo SET fecha_ult_mov='23/04/2021' WHERE id_solicitud_efectivo=37271;
+UPDATE tes.tsolicitud_efectivo
+SET fecha_ult_mov='26/04/2021'
+WHERE id_solicitud_efectivo = 37271;
+/********************************************F-DAUP-MGM-TES-ETR-3607-04-29/04/2021********************************************/
 
 
