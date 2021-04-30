@@ -460,5 +460,9 @@ UPDATE tes.tsolicitud_efectivo
 SET fecha_ult_mov='26/04/2021'
 WHERE id_solicitud_efectivo = 37271;
 /********************************************F-DAUP-MGM-TES-ETR-3607-04-29/04/2021********************************************/
-
-
+/********************************************I-DAUP-MGM-TES-ETR-3816-01-30/04/2021********************************************/
+--UPDATE tes.tproceso_caja SET monto=9034.5 WHERE id_proceso_caja=3174;
+UPDATE tes.tproceso_caja SET monto=1996.9 WHERE id_proceso_caja=3174;
+--UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja = 3174 WHERE id_solicitud_rendicion_det IN (24818,24839,24840,24841,24842,24843,24802,24835);
+UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja = NULL WHERE id_solicitud_rendicion_det IN (24818,24839,24840,24841,24842,24843,24802,24835);
+/********************************************F-DAUP-MGM-TES-ETR-3816-01-30/04/2021********************************************/
