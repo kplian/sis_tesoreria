@@ -501,3 +501,22 @@ delete from wf.testado_wf where id_estado_wf=1340726;
 delete from wf.testado_wf where id_estado_wf=1340712;
 delete from wf.testado_wf where id_estado_wf=1340492;
 /********************************************F-DAUP-MGM-TES-ETR-3877-01-06/05/2021********************************************/
+
+/********************************************I-DAUP-EGS-TES-ETR-3879-01-07/05/2021********************************************/
+
+-- BEGIN;
+-- UPDATE tes.tplan_pago SET
+--       monto_retgar_mo =  0,
+--       porc_monto_retgar= 0,
+--       liquido_pagable = 16200
+-- WHERE id_plan_pago = 42829;
+-- COMMIT;
+
+BEGIN;
+UPDATE tes.tplan_pago SET
+    monto_retgar_mo =  1134,
+    porc_monto_retgar= 0.07,
+    liquido_pagable = 15066
+WHERE id_plan_pago = 42829;
+COMMIT;
+/********************************************F-DAUP-EGS-TES-ETR-3879-01-07/05/2021********************************************/
