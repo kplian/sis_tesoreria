@@ -93,6 +93,7 @@ DECLARE
     v_id_solicitud_efectivo_tmp  varchar[];
     v_sw_finalilzar_automatica   BOOLEAN;
     v_correo 				VARCHAR;
+    v_nombre_vista          varchar;
 
 BEGIN
 
@@ -593,7 +594,7 @@ BEGIN
                           inner join wf.ttipo_estado te on te.id_tipo_proceso = tp.id_tipo_proceso and te.codigo = 'rendido'
                           where se.id_solicitud_efectivo = v_id_solicitud_efectivo_rend;
 
-                          select se.id_estado_wf,se.id_proceso_wf
+                          select se.id_estado_wf,se.id_proceso_wf, se.nro_tramite
                           into v_rec1
                           from tes.tsolicitud_efectivo se
                           where se.id_solicitud_efectivo = v_id_solicitud_efectivo_rend;
@@ -893,7 +894,22 @@ BEGIN
           END IF;
 
           --raise exception 'llega';
-
+            if(v_codigo_estado_siguiente in ('vbjefedevsol','vbjefe')) then
+                IF(v_codigo_estado_siguiente = 'vbjefe')then
+                    v_nombre_vista = 'vbSolicitudEfectivo';
+                end if;
+                IF(v_codigo_estado_siguiente = 'vbjefedevsol')then
+                    v_nombre_vista = 'RendicionEfectivo';
+                end if;
+                 v_resp = param.f_insertar_notificacion(p_administrador, p_id_usuario, v_rec.id_solicitud_efectivo,
+                                                       v_rec.id_proceso_wf,
+                                                       v_rec.id_estado_wf, v_rec.id_funcionario,
+                                                        v_parametros.id_funcionario_wf, 'tesoreria', 'tes',
+                                                       'El tramite ' || v_rec.nro_tramite ||
+                                                       ' esta pendiente de liberación',
+                                                       'Solivitud de Efectivo - ' || v_rec.nro_tramite,
+                                                       v_nombre_vista);
+            end if;
           -- si hay mas de un estado disponible  preguntamos al usuario
           v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado de la solicitud de efectivo)');
           v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
