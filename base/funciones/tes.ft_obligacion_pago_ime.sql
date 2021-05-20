@@ -624,7 +624,8 @@ BEGIN
              op.pago_variable,
              op.comprometido,
              op.id_usuario_reg,
-             op.fecha
+             op.fecha,
+             op.num_tramite
       into v_id_proceso_wf,
            v_id_estado_wf,
            v_codigo_estado,
@@ -639,7 +640,8 @@ BEGIN
            v_pago_variable,
            v_comprometido,
            v_id_usuario_reg_op,
-           v_fecha_op
+           v_fecha_op,
+           v_num_tramite
       from tes.tobligacion_pago op
            left join param.vproveedor pr on pr.id_proveedor = op.id_proveedor
       where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
@@ -1149,7 +1151,16 @@ BEGIN
         set comprometido = v_comprometido
         where id_obligacion_pago = v_parametros.id_obligacion_pago;
       END IF;
-
+    IF v_codigo_estado_siguiente = 'liberacion' then
+        v_resp = param.f_insertar_notificacion(p_administrador, p_id_usuario, v_parametros.id_obligacion_pago,
+                                                               v_id_proceso_wf,
+                                                               v_id_estado_wf, v_id_funcionario,
+                                                                v_parametros.id_funcionario_wf, 'tesoreria', 'tes',
+                                                               'El tramite ' || v_num_tramite ||
+                                                               ' esta pendiente de liberación',
+                                                               'Obligación de Pago - ' || v_num_tramite,
+                                                               'ObligacionPagoVb');
+    end if;
       -- si hay mas de un estado disponible  preguntamos al usuario
       v_resp = pxp.f_agrega_clave(v_resp,'mensaje',
         'Se realizo el cambio de estado del plan de pagos)');
