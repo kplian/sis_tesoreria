@@ -520,3 +520,14 @@ UPDATE tes.tplan_pago SET
 WHERE id_plan_pago = 42829;
 COMMIT;
 /********************************************F-DAUP-EGS-TES-ETR-3879-01-07/05/2021********************************************/
+
+/********************************************I-DAUP-EGS-TES-ETR-4084-01-26/05/2021********************************************/
+--UPDATE tes.tsolicitud_rendicion_det SET id_documento_respaldo=231285 WHERE id_solicitud_efectivo=38305;
+UPDATE tes.tsolicitud_rendicion_det SET id_documento_respaldo=null WHERE id_solicitud_efectivo=38305;
+
+DELETE FROM tes.tsolicitud_rendicion_det WHERE id_solicitud_rendicion_det=25307;
+DELETE FROM tes.tsolicitud_efectivo WHERE id_solicitud_efectivo=38305;
+
+DELETE FROM conta.tdoc_concepto WHERE id_doc_compra_venta=231285;
+DELETE FROM conta.tdoc_compra_venta WHERE id_doc_compra_venta=231285;
+/********************************************F-DAUP-EGS-TES-ETR-4084-01-26/05/2021********************************************/
