@@ -531,3 +531,10 @@ DELETE FROM tes.tsolicitud_efectivo WHERE id_solicitud_efectivo=38305;
 DELETE FROM conta.tdoc_concepto WHERE id_doc_compra_venta=231285;
 DELETE FROM conta.tdoc_compra_venta WHERE id_doc_compra_venta=231285;
 /********************************************F-DAUP-EGS-TES-ETR-4084-01-26/05/2021********************************************/
+/********************************************I-DAUP-EGS-TES-ETR-4124-31/05/2021********************************************/
+--UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=3232 WHERE id_solicitud_rendicion_det=25485;
+UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=NULL WHERE id_solicitud_rendicion_det=25485;
+
+--UPDATE tes.tproceso_caja SET monto=2640.29 WHERE id_proceso_caja=3232;
+UPDATE tes.tproceso_caja SET monto=1699.29 WHERE id_proceso_caja=3232;
+/********************************************F-DAUP-EGS-TES-ETR-4124-31/05/2021********************************************/
