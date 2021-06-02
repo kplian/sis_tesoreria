@@ -26,7 +26,6 @@ $body$
  #67        	18-08-2020        MZM KPLIAN        actualizacion de proveedor por LB
  #ETR-1606      03/11-2020        manuel guerra     agregar estado de borrador y anulado, para el saldo de banco
  #67			04.11.2020		  MZM KPLIAN		omision de actualizacion de correo empresarial para funcionario
- #ETR-2687		26.01.2021		  MZM-KPLIAN		Adicion de datos de cuenta bancaria del beneficiario
 ***************************************************************************/
 
 DECLARE
@@ -481,52 +480,10 @@ BEGIN
             WHERE id_libro_bancos=v_parametros.id_libro_bancos;
         end if;
 		
-		--#67
-		--IF(v_parametros.tipo = 'cheque' and coalesce(v_parametros.id_proveedor,0)!=0) then
-		   -- if exists (select 1 from param.tproveedor where id_proveedor=v_parametros.id_proveedor and tipo='institucion') then
-			 /*  update param.tinstitucion set
-			   email1=v_parametros.correo_proveedor
-			   where id_institucion=(select id_institucion from param.tproveedor where id_proveedor=v_parametros.id_proveedor);
-			else
-  			   update segu.tpersona set
-			   correo=v_parametros.correo_proveedor
-			   where id_persona=(select id_persona from param.tproveedor where id_proveedor=v_parametros.id_proveedor);
-			
-			end if;*/
-			
-		--end if; 
-        --#67
-        if (v_parametros.tabla_correo='orga.tfuncionario') then --#67 04.11.2020
-           /* update orga.tfuncionario
-            set email_empresa=v_parametros.correo_proveedor
-            where id_funcionario=v_parametros.id_columna_correo;*/
-        elsif (v_parametros.tabla_correo='param.tproveedor') then
-        	if exists (select 1 from param.tproveedor where id_proveedor=v_parametros.id_columna_correo and tipo='institucion') then
-			   update param.tinstitucion set
-			   email1=v_parametros.correo_proveedor
-			   where id_institucion=(select id_institucion from param.tproveedor where id_proveedor=v_parametros.id_columna_correo);
-			else
-  			   update segu.tpersona set
-			   correo=v_parametros.correo_proveedor
-			   where id_persona=(select id_persona from param.tproveedor where id_proveedor=v_parametros.id_columna_correo);
-			
-			end if;
-			
-			--#ETR-2687
-            if not exists (select 1 from param.tproveedor_cta_bancaria where id_proveedor=v_parametros.id_columna_correo
-            and nro_cuenta=v_parametros.nro_cta_bancaria and estado_reg='activo' ) then
-            	insert into param.tproveedor_cta_bancaria (id_banco_beneficiario, nro_cuenta,id_proveedor) 
-                values (v_parametros.id_institucion_cta_bancaria,v_parametros.nro_cta_bancaria, v_parametros.id_columna_correo);
-                
-            end if;
-        end if;
-        
+               
         
         update tes.tts_libro_bancos 
         set correo=v_parametros.correo_proveedor
-         --#ETR-2687
-        ,id_institucion_cta_bancaria=v_parametros.id_institucion_cta_bancaria,
-        nro_cta_bancaria=v_parametros.nro_cta_bancaria
         where id_libro_bancos=v_parametros.id_libro_bancos;
         
         
