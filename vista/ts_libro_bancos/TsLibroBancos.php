@@ -7,7 +7,6 @@
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
   ISSUE 		   FECHA   			 AUTOR				 		DESCRIPCION:
  * * #67           14/08/2020		 Mercedes Zambrana KPLIAN	Adicion de correo proveedor
- * #ETR-2687	   26.01.2021		 MZM-KPLIAN					Adicion de cuenta bancaria del beneficiario
  * */
 
 header("content-type: text/javascript; charset=UTF-8");
@@ -679,132 +678,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			},
 			type:'Field',
 			form:true 
-		},
-		{
-			config:{
-				name: 'id_institucion_cta_bancaria',
-				fieldLabel: 'Banco Beneficiario',
-				allowBlank: true,
-				tinit:true,
-				origen:'INSTITUCION',
-				gdisplayField:'banco',
-				anchor: '80%',
-				gwidth: 100,
-				maxLength:100,
-				baseParams:{es_banco:'si'},
-	   			renderer:function (value, p, record){return String.format('{0}', record.data['banco']);}
-			},
-				type:'ComboRec',
-				filters:{pfiltro:'lban.banco',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:true
-		},
-		{
-			config:{
-				name: 'nro_cta_bancaria',
-				fieldLabel: 'Cta Beneficiario',
-				allowBlank: true,
-				anchor: '80%',
-				gwidth: 100,
-				maxLength:30
-			},
-				type:'TextField',
-				filters:{pfiltro:'lban.nro_cta_bancaria',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:true
-		},
-		{
-			config:{
-					labelSeparator:'',
-					inputType:'hidden',
-					name: 'elegir_cta'
-			},
-			type:'Field',
-			form:true 
-		},{
-			config:{
-					labelSeparator:'',
-					inputType:'hidden',
-					name: 'banco'
-			},
-			type:'Field',
-			form:true 
-		},
-		{
-            config:{
-                name:'id_cuenta_bancaria_beneficiario',
-                fieldLabel:'Cta Bancaria Beneficiario',
-                allowBlank:true,
-                emptyText:'Cta Bancaria Beneficiario...',
-                store: new Ext.data.JsonStore({
-                         url: '../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancariaBeneficiario',
-                         id: 'nro_cuenta',
-                         root: 'datos',
-                         sortInfo:{
-                            field: 'nro_cuenta',
-                            direction: 'ASC'
-                    },
-                    totalProperty: 'total',
-                    fields: ['nro_cuenta','nombre','id_institucion','desc_cuenta','id','tipo'],
-                    // turn on remote sorting
-                    remoteSort: true,
-                    baseParams: {par_filtro: 'nro_cuenta'}
-                    }),
-                valueField: 'nro_cuenta',
-                displayField: 'desc_cuenta',
-                tpl:'<tpl for="."><div class="x-combo-list-item"><p><b>{nro_cuenta}</b></p><p>{nombre}</p></div></tpl>',
-                hiddenName: 'nro_cuenta',
-                forceSelection:true,
-                typeAhead: false,
-                triggerAction: 'all',
-                lazyRender:true,
-                mode:'remote',
-                pageSize:10,
-                queryDelay:1000,
-                listWidth:600,
-                resizable:true,
-                anchor:'80%',
-                renderer : function(value, p, record) {
-					//return String.format(record.data['nombre_finalidad']);
-					return String.format('{0}', '<FONT COLOR="'+record.data['nombre']+'"><b>'+record.data['nro_cuenta']+'</b></FONT>');
-				}
-            },
-            type:'ComboBox',
-            id_grupo:0,
-            /*filters:{   
-                        pfiltro:'fin.nombre_finalidad',
-                        type:'string'
-                    },*/
-            grid:false,
-            form:true
-        },
-        {
-			config:{
-				name: 'id_proveedor_cta_bancaria',
-				fieldLabel: 'Cta Bancaria Beneficiario',
-				allowBlank: true,
-				tinit:true,
-				origen:'PROVCTABANC',
-				gdisplayField:'nro_cuenta',
-				tdisplayField: 'nro_cuenta',
-				displayField: 'desc_cuenta',
-				anchor: '80%',
-				gwidth: 100,
-				maxLength:100,
-				baseParams:{es_banco:'si'},
-				
-				renderer:function (value, p, record){//return String.format('{0}', record.data['nro_cuenta']);}
-				return String.format('{0}', '<FONT COLOR="'+record.data['nombre']+'"><b>'+record.data['nro_cuenta']+'</b><b>'+record.data['banco_beneficiario']+'</b></FONT>');}
-			},
-				type:'ComboRec',
-				filters:{pfiltro:'lban.banco',type:'string'},
-				id_grupo:1,
-				grid:false,
-				form:true
 		}
-
 	],
 	tam_pag:50,	
 	title:'Depósitos',
@@ -857,12 +731,6 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		,{name:'tabla_correo', type: 'string'}//#67
 		,{name:'columna_correo', type: 'string'}//#67
 		,{name:'id_columna_correo', type: 'numeric'}//#67
-		,{name:'nro_cta_bancaria', type: 'varchar'}//#ETR-2687
-		,{name:'banco', type: 'varchar'}//#ETR-2687
-		,{name:'elegir_cta', type: 'varchar'}//#ETR-2687
-		,{name:'id_institucion_cta_bancaria', type: 'numeric'},//#ETR-2687
-		,{name:'desc_cuenta', type: 'string'}//#ETR-2687
-
 	],
 	sortInfo:{
 		field: 'fecha',
@@ -885,96 +753,13 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		this.cmpDepto.enable();
 		this.cmpFecha.enable();
 		this.cmpTipo.enable();
-		
-		this.ocultarComponente(this.Cmp.id_cuenta_bancaria_beneficiario);
-		this.ocultarComponente(this.Cmp.id_institucion_cta_bancaria);
-		this.ocultarComponente(this.Cmp.nro_cta_bancaria);
-		this.ocultarComponente(this.Cmp.id_proveedor_cta_bancaria);
-
 	},
 	//
 	onButtonEdit:function(){
 		Phx.vista.TsLibroBancos.superclass.onButtonEdit.call(this);
 		//this.cmpTipo.disable();
 		var data = this.getSelectedData();			
-		
-		
-									
-		
-		
-		this.mostrarComponente(this.Cmp.id_cuenta_bancaria_beneficiario);
-		this.ocultarComponente(this.Cmp.id_institucion_cta_bancaria);
-		this.ocultarComponente(this.Cmp.nro_cta_bancaria);
-		this.Cmp.id_cuenta_bancaria_beneficiario.setValue(data.desc_cuenta); 
-		this.Cmp.nro_cta_bancaria.setValue(data.nro_cta_bancaria);
-		this.Cmp.id_institucion_cta_bancaria.setValue(data.id_institucion_cta_bancaria); 
-		
-		if(data.a_favor!=undefined && data.a_favor!=null &&  data.a_favor.length!=0){
-			Ext.Ajax.request({
-						url:'../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancariaBeneficiario',
-						params:{start:0, limit:this.tam_pag, beneficiario:data.a_favor},
-						success: function (resp){
-							var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
-						
-							if (reg.total>0){
-								this.mostrarComponente(this.Cmp.id_cuenta_bancaria_beneficiario);
-								this.ocultarComponente(this.Cmp.id_institucion_cta_bancaria);
-								this.ocultarComponente(this.Cmp.nro_cta_bancaria);
-								
-								if (reg.datos[0].tipo=='proveedor'){ 
-									this.ocultarComponente(this.Cmp.id_cuenta_bancaria_beneficiario);
-									this.mostrarComponente(this.Cmp.id_proveedor_cta_bancaria);
-									this.Cmp.id_proveedor_cta_bancaria.tdata={id_proveedor:reg.datos[0].id, sw:true}
-									this.Cmp.id_proveedor_cta_bancaria.store.baseParams.id_proveedor=reg.datos[0].id;
-									
-									this.Cmp.id_proveedor_cta_bancaria.modificado=true;
-									
-								}else if ( reg.datos[0].tipo=='lb'){
-									this.mostrarComponente(this.Cmp.id_institucion_cta_bancaria);
-									this.mostrarComponente(this.Cmp.nro_cta_bancaria);
-									this.ocultarComponente(this.Cmp.id_proveedor_cta_bancaria);
-									this.ocultarComponente(this.Cmp.id_cuenta_bancaria_beneficiario);
-									
-								}else{
-									this.mostrarComponente(this.Cmp.id_cuenta_bancaria_beneficiario);
-									this.ocultarComponente(this.Cmp.id_proveedor_cta_bancaria);
-								}
-
-
-								if (data.id_institucion_cta_bancaria != null && data.nro_cta_bancaria!=null){ 
-															
-									this.Cmp.id_cuenta_bancaria_beneficiario.setValue(data.desc_cuenta);
-									this.Cmp.id_cuenta_bancaria_beneficiario.setRawValue(data.desc_cuenta);
-									this.Cmp.id_institucion_cta_bancaria.setValue(this.Cmp.id_institucion_cta_bancaria.getValue());
-									this.Cmp.id_institucion_cta_bancaria.setRawValue(this.Cmp.banco.getValue());
-									this.Cmp.nro_cta_bancaria.setValue(this.Cmp.nro_cta_bancaria.getValue());
-									this.Cmp.id_proveedor_cta_bancaria.setValue(data.desc_cuenta);
-									
-								}else{ 
-									this.Cmp.id_cuenta_bancaria_beneficiario.setValue(reg.datos[0].nro_cuenta);
-									this.Cmp.id_cuenta_bancaria_beneficiario.setRawValue(reg.datos[0].desc_cuenta);
-									this.Cmp.id_institucion_cta_bancaria.setValue(reg.datos[0].id_institucion);
-									this.Cmp.id_institucion_cta_bancaria.setRawValue(reg.datos[0].nombre);
-									this.Cmp.nro_cta_bancaria.setValue(reg.datos[0].nro_cuenta);
-									this.Cmp.id_proveedor_cta_bancaria.setValue(reg.datos[0].desc_cuenta);
-								}
-							}else{
-								
-								this.ocultarComponente(this.Cmp.id_cuenta_bancaria_beneficiario);
-								this.mostrarComponente(this.Cmp.id_institucion_cta_bancaria);
-								this.mostrarComponente(this.Cmp.nro_cta_bancaria);
-								this.ocultarComponente(this.Cmp.id_proveedor_cta_bancaria);
-							}
-							
-						},
-						failure: this.conexionFailure,
-						timeout:this.timeout,
-						scope:this
-					});
-		}
-		
-		
-
+		//
 		if(data.tipo=='cheque'){
 			this.mostrarComponente(this.cmpNroCheque);
 			this.mostrarComponente(this.cmpImporteCheque);
@@ -1448,18 +1233,6 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		this.cmpFecha = this.getComponente('fecha');
 		this.cmpOrigen = this.getComponente('origen');
 		
-				//MZM
-		this.cmpIdCuentaBancariaBeneficiario = this.getComponente('id_cuenta_bancaria_beneficiario');
-		this.cmpIdInstitucionCtaBancaria= this.getComponente('id_institucion_cta_bancaria');
-		this.cmpNroCtaBancaria= this.getComponente('nro_cta_bancaria');
-		this.cmpBenef = this.getComponente('a_favor');
-		this.ocultarComponente(this.Cmp.id_cuenta_bancaria_beneficiario);
-		this.ocultarComponente(this.Cmp.id_proveedor_cta_bancaria);
-		this.ocultarComponente(this.Cmp.id_institucion_cta_bancaria);
-		this.ocultarComponente(this.Cmp.nro_cta_bancaria);
-		//this.cmpIdCuentaBancariaBeneficiario.store.baseParams.beneficiario = this.cmpBenef.getValue();
-
-		
 		this.ocultarComponente(this.cmpNroCheque);
 		this.ocultarComponente(this.cmpImporteDeposito);
 		this.ocultarComponente(this.cmpImporteCheque);
@@ -1534,94 +1307,6 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 					break;
 			  }
           },this);
-          
-                    this.cmpBenef.on('blur',function(componente){ 
-				
-				var benef = this.cmpBenef.getValue();
-				
-				if (benef!=undefined && benef!=null){
-					
-						Ext.Ajax.request({
-						url:'../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancariaBeneficiario',
-						params:{start:0, limit:this.tam_pag, beneficiario:benef},
-						success: function (resp){
-							var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
-							if (reg.total>0){
-								this.mostrarComponente(this.Cmp.id_cuenta_bancaria_beneficiario);
-								this.ocultarComponente(this.Cmp.id_institucion_cta_bancaria);
-								this.ocultarComponente(this.Cmp.nro_cta_bancaria);
-								
-								if (reg.datos[0].tipo=='proveedor' ){ 
-									this.ocultarComponente(this.Cmp.id_cuenta_bancaria_beneficiario);
-									this.mostrarComponente(this.Cmp.id_proveedor_cta_bancaria);
-									this.Cmp.id_proveedor_cta_bancaria.tdata={id_proveedor:reg.datos[0].id, sw:true};
-									this.Cmp.id_proveedor_cta_bancaria.store.baseParams.id_proveedor=reg.datos[0].id;
-									this.Cmp.id_proveedor_cta_bancaria.modificado=true;
-									
-								}else if( reg.datos[0].tipo=='lb') {
-									this.mostrarComponente(this.Cmp.id_institucion_cta_bancaria);
-								    this.mostrarComponente(this.Cmp.nro_cta_bancaria);
-								    this.ocultarComponente(this.Cmp.id_proveedor_cta_bancaria);
-								    this.ocultarComponente(this.Cmp.id_cuenta_bancaria_beneficiario);
-									
-								}else{
-									this.mostrarComponente(this.Cmp.id_cuenta_bancaria_beneficiario);
-									this.ocultarComponente(this.Cmp.id_proveedor_cta_bancaria);
-								}
-								
-									
-									this.Cmp.id_cuenta_bancaria_beneficiario.setValue(reg.datos[0].nro_cuenta);
-									this.Cmp.id_cuenta_bancaria_beneficiario.setRawValue(reg.datos[0].desc_cuenta);
-									this.Cmp.id_institucion_cta_bancaria.setValue(reg.datos[0].id_institucion);
-									this.Cmp.id_institucion_cta_bancaria.setRawValue(reg.datos[0].nombre);
-									this.Cmp.nro_cta_bancaria.setValue(reg.datos[0].nro_cuenta);	
-									this.Cmp.id_proveedor_cta_bancaria.setValue(reg.datos[0].nro_cuenta);
-									this.Cmp.id_proveedor_cta_bancaria.setRawValue(reg.datos[0].desc_cuenta);
-								
-								
-							}else{ 
-								this.ocultarComponente(this.Cmp.id_cuenta_bancaria_beneficiario);
-								this.mostrarComponente(this.Cmp.id_institucion_cta_bancaria);
-								this.mostrarComponente(this.Cmp.nro_cta_bancaria);
-								this.ocultarComponente(this.Cmp.id_proveedor_cta_bancaria);
-							}
-							
-						},
-						failure: this.conexionFailure,
-						timeout:this.timeout,
-						scope:this
-					});
-					
-					
-					this.Cmp.id_cuenta_bancaria_beneficiario.store.baseParams.beneficiario=benef; 
-					this.Cmp.id_cuenta_bancaria_beneficiario.modificado=true;
-				}
-			
-				
-				
-			},this);
-          
-          
-         				
-							
-		this.Cmp.id_cuenta_bancaria_beneficiario.on('select',function(com,dat){ 
-						
-		    this.Cmp.id_institucion_cta_bancaria.setValue(dat.data.id_institucion);
-			this.Cmp.id_institucion_cta_bancaria.setRawValue(dat.data.nombre);
-			this.Cmp.nro_cta_bancaria.setValue(dat.data.nro_cuenta);
-				
-			},this);
-			
-			
-		this.Cmp.id_proveedor_cta_bancaria.on('select',function(com,dat){ 
-						
-		    this.Cmp.id_institucion_cta_bancaria.setValue(dat.data.id_banco_beneficiario);
-			this.Cmp.id_institucion_cta_bancaria.setRawValue(dat.data.banco_beneficiario);
-			this.Cmp.nro_cta_bancaria.setValue(dat.data.nro_cuenta);
-				
-			},this);
-
-          
 	},	
 	
 	onReloadPage:function(m){
