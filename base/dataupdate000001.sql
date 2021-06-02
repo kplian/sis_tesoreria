@@ -448,6 +448,131 @@ UPDATE tes.tsolicitud_efectivo SET estado='vbcajero',id_estado_wf= 1309421 WHERE
 --UPDATE wf.testado_wf SET id_funcionario=523 WHERE id_estado_wf=1324676;
 UPDATE wf.testado_wf SET id_funcionario=350 WHERE id_estado_wf=1324676;
 /********************************************F-DAUP-MGM-TES-ETR-3607-02-26/04/2021********************************************/
+/********************************************I-DAUP-MGM-TES-ETR-3607-03-29/04/2021********************************************/
+--UPDATE tes.tsolicitud_efectivo SET fecha_entregado_ult='23/04/2021' WHERE id_solicitud_efectivo=37271;
+UPDATE tes.tsolicitud_efectivo
+SET fecha_entregado_ult='26/04/2021'
+WHERE id_solicitud_efectivo = 37271;
+/********************************************F-DAUP-MGM-TES-ETR-3607-03-29/04/2021********************************************/
+/********************************************I-DAUP-MGM-TES-ETR-3607-04-29/04/2021********************************************/
+--UPDATE tes.tsolicitud_efectivo SET fecha_ult_mov='23/04/2021' WHERE id_solicitud_efectivo=37271;
+UPDATE tes.tsolicitud_efectivo
+SET fecha_ult_mov='26/04/2021'
+WHERE id_solicitud_efectivo = 37271;
+/********************************************F-DAUP-MGM-TES-ETR-3607-04-29/04/2021********************************************/
+/********************************************I-DAUP-MGM-TES-ETR-3816-01-30/04/2021********************************************/
+--UPDATE tes.tproceso_caja SET monto=9034.5 WHERE id_proceso_caja=3174;
+UPDATE tes.tproceso_caja SET monto=1996.9 WHERE id_proceso_caja=3174;
+--UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja = 3174 WHERE id_solicitud_rendicion_det IN (24818,24839,24840,24841,24842,24843,24802,24835);
+UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja = NULL WHERE id_solicitud_rendicion_det IN (24818,24839,24840,24841,24842,24843,24802,24835);
+/********************************************F-DAUP-MGM-TES-ETR-3816-01-30/04/2021********************************************/
 
+/********************************************I-DAUP-MGM-TES-ETR-3877-01-06/05/2021********************************************/
+--procesocaja
+--UPDATE tes.tsolicitud_rendicion_det SET  id_proceso_caja = null WHERE id_solicitud_rendicion_det =24974;
+UPDATE tes.tsolicitud_rendicion_det SET  id_proceso_caja = null WHERE id_solicitud_rendicion_det =24974;
+--actualizar montos
+--UPDATE tes.tproceso_caja SET monto=3629.51 WHERE id_proceso_caja=3188;
+UPDATE tes.tproceso_caja SET monto=2753.51 WHERE id_proceso_caja=3188;
 
+--padre
+--UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1340727;
+UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1340727;
+--UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1340461;
+UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1340461;
 
+--UPDATE tes.tsolicitud_efectivo SET estado='finalizado',id_estado_wf=1340727 WHERE id_solicitud_efectivo= 37690;
+UPDATE tes.tsolicitud_efectivo SET estado='entregado',id_estado_wf=1340461 WHERE id_solicitud_efectivo= 37690;
+
+--hijo
+--UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1340726;
+UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1340726;
+--UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1340491;
+UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1340491;
+
+--UPDATE tes.tsolicitud_efectivo SET estado='rendido',id_estado_wf=1340726 WHERE id_solicitud_efectivo= 37698;
+UPDATE tes.tsolicitud_efectivo SET estado='borrador',id_estado_wf=1340491 WHERE id_solicitud_efectivo= 37698;
+
+--padre
+delete from wf.testado_wf where id_estado_wf=1340727;
+
+--hijo
+delete from wf.testado_wf where id_estado_wf=1340726;
+delete from wf.testado_wf where id_estado_wf=1340712;
+delete from wf.testado_wf where id_estado_wf=1340492;
+/********************************************F-DAUP-MGM-TES-ETR-3877-01-06/05/2021********************************************/
+
+/********************************************I-DAUP-EGS-TES-ETR-3879-01-07/05/2021********************************************/
+
+-- BEGIN;
+-- UPDATE tes.tplan_pago SET
+--       monto_retgar_mo =  0,
+--       porc_monto_retgar= 0,
+--       liquido_pagable = 16200
+-- WHERE id_plan_pago = 42829;
+-- COMMIT;
+
+BEGIN;
+UPDATE tes.tplan_pago SET
+    monto_retgar_mo =  1134,
+    porc_monto_retgar= 0.07,
+    liquido_pagable = 15066
+WHERE id_plan_pago = 42829;
+COMMIT;
+/********************************************F-DAUP-EGS-TES-ETR-3879-01-07/05/2021********************************************/
+
+/********************************************I-DAUP-EGS-TES-ETR-4084-01-26/05/2021********************************************/
+--UPDATE tes.tsolicitud_rendicion_det SET id_documento_respaldo=231285 WHERE id_solicitud_efectivo=38305;
+UPDATE tes.tsolicitud_rendicion_det SET id_documento_respaldo=null WHERE id_solicitud_efectivo=38305;
+
+DELETE FROM tes.tsolicitud_rendicion_det WHERE id_solicitud_rendicion_det=25307;
+DELETE FROM tes.tsolicitud_efectivo WHERE id_solicitud_efectivo=38305;
+
+DELETE FROM conta.tdoc_concepto WHERE id_doc_compra_venta=231285;
+DELETE FROM conta.tdoc_compra_venta WHERE id_doc_compra_venta=231285;
+/********************************************F-DAUP-EGS-TES-ETR-4084-01-26/05/2021********************************************/
+/********************************************I-DAUP-EGS-TES-ETR-4124-31/05/2021********************************************/
+--UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=3232 WHERE id_solicitud_rendicion_det=25485;
+UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=NULL WHERE id_solicitud_rendicion_det=25485;
+
+--UPDATE tes.tproceso_caja SET monto=2640.29 WHERE id_proceso_caja=3232;
+UPDATE tes.tproceso_caja SET monto=1699.29 WHERE id_proceso_caja=3232;
+/********************************************F-DAUP-EGS-TES-ETR-4124-31/05/2021********************************************/
+
+/********************************************I-DAUP-EGS-TES-ETR-4124-02-31/05/2021********************************************/
+--UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=3233 WHERE id_solicitud_rendicion_det=25516;
+UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=NULL WHERE id_solicitud_rendicion_det=25516;
+
+--UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=3233 WHERE id_solicitud_rendicion_det=25517;
+UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=NULL WHERE id_solicitud_rendicion_det=25517;
+
+--UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=3233 WHERE id_solicitud_rendicion_det=25485;
+UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=NULL WHERE id_solicitud_rendicion_det=25485;
+
+--UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=3233 WHERE id_solicitud_rendicion_det=25502;
+UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=NULL WHERE id_solicitud_rendicion_det=25502;
+
+--UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=3233 WHERE id_solicitud_rendicion_det=25503;
+UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=NULL WHERE id_solicitud_rendicion_det=25503;
+
+--UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=3233 WHERE id_solicitud_rendicion_det=25500;
+UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=NULL WHERE id_solicitud_rendicion_det=25500;
+
+--UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=3233 WHERE id_solicitud_rendicion_det=25501;
+UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=NULL WHERE id_solicitud_rendicion_det=25501;
+
+--UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=3233 WHERE id_solicitud_rendicion_det=25508;
+UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=NULL WHERE id_solicitud_rendicion_det=25508;
+
+--UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=3233 WHERE id_solicitud_rendicion_det=25509;
+UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=NULL WHERE id_solicitud_rendicion_det=25509;
+
+--UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=3233 WHERE id_solicitud_rendicion_det=25510;
+UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=NULL WHERE id_solicitud_rendicion_det=25510;
+
+--UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=3233 WHERE id_solicitud_rendicion_det=25512;
+UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=NULL WHERE id_solicitud_rendicion_det=25512;
+
+--UPDATE tes.tproceso_caja SET monto=6579.29 WHERE id_proceso_caja=3233;
+UPDATE tes.tproceso_caja SET monto=1699.29 WHERE id_proceso_caja=3233;
+/********************************************F-DAUP-EGS-TES-ETR-4124-02-31/05/2021********************************************/

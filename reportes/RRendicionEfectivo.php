@@ -200,7 +200,7 @@ Class RRendicionEfectivo extends Report {
 		
         $RowArray = array(
             			'fecha_entrega'  => 'Fecha',
-                        'desc_plantilla' => 'Tipo Documento',
+                        'desc_plantilla' => 'Detalle',
 						'rendicion' => 'Documento',
 						'importe_neto' => 'Total',
 						'impuesto_descuento_ley' => 'Retencion',

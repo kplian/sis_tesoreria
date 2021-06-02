@@ -632,7 +632,8 @@ BEGIN
             join wf.ttipo_proceso tp on tp.id_tipo_proceso=t.id_tipo_proceso
             where t.codigo_proceso like v_aux and tp.nombre='Solicitud de Efectivo';
 
-            v_consulta:=' select
+            v_consulta:='
+            			  select
                           sol.fecha_ult_mov as fecha,
                           sol.nro_tramite as desc_plantilla,
                           NULL as rendicion,
@@ -647,8 +648,9 @@ BEGIN
 
                           UNION ALL
 
-                          select doc.fecha,
-                          null as desc_plantilla,
+                          (select 
+                          doc.fecha,
+                          doc.obs::varchar as desc_plantilla,
                           ''Razon Social: ''       || doc.razon_social || '' N° Doc: '' ||
                           doc.nro_documento || ''Nit:'' || doc.nit || '' Nro Autorizacion:'' ||
                           doc.nro_autorizacion || '' Cod Control: '' || doc.codigo_control as rendicion,
@@ -664,13 +666,15 @@ BEGIN
                           inner join tes.tsolicitud_rendicion_det det on det.id_solicitud_efectivo = ren.id_solicitud_efectivo
                           inner join conta.tdoc_compra_venta doc on doc.id_doc_compra_venta = det.id_documento_respaldo
                           inner join param.tplantilla pla on pla.id_plantilla = doc.id_plantilla
-                          where ren.estado = ''rendido'' and sol.id_proceso_wf='||v_parametros.id_proceso_wf||' ';
+                          where ren.estado = ''rendido'' and sol.id_proceso_wf='||v_parametros.id_proceso_wf||'
+                          order by doc.fecha)';
 
 			--Definicion de la respuesta
             --v_consulta:=v_consulta||v_parametros.filtro;
 			--v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 
             raise notice '%', v_consulta;
+            --raise EXCEPTION '%', v_consulta;
 			return v_consulta;
 
 		end;
