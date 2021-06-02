@@ -955,7 +955,6 @@ BEGIN
 
      end;
 
-
     /*********************************
  	#TRANSACCION:  'TES_ANTELB_IME'
  	#DESCRIPCION:	Transaccion utilizada  pasar a  estados anterior en el libro bancos segun la operacion definida
