@@ -30,7 +30,6 @@ AS $BODY$
  ISSUE 		   FECHA   			 AUTOR				 DESCRIPCION:
   #27 		 09/04/2019		  Manuel Guerra	      quitar el campo nro_cheque en reporte
   #67		 14.08.2020		  Mercedes Zambrana KPLIAN	listar correo proveedor
-  #ETR-2687	 	25.01.2021		  MZM-KPLIAN			  	Adicion de cuenta bancaria del beneficiario
 ***************************************************************************/
 
 DECLARE
@@ -105,12 +104,6 @@ BEGIN
                         fondo_devolucion_retencion
 						,correo_proveedor, tabla_correo,
                         columna_correo, id_columna_correo
-                        --#ETR-2687
-                        , nro_cta_bancaria,
-                        (select i.nombre from param.tinstitucion i where id_institucion=lban.id_institucion_cta_bancaria) as banco
-                        ,elegir_cta, id_institucion_cta_bancaria,
-                        nro_cta_bancaria||''-''||(select i.nombre from param.tinstitucion i where id_institucion=lban.id_institucion_cta_bancaria) as desc_cuenta
-                       
                         from tes.vlibro_bancos lban
 				        where  ';
 
