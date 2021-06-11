@@ -38,14 +38,14 @@ BEGIN
     v_parametros = pxp.f_get_record(p_tabla);
 
     /*********************************
-     #TRANSACCION:  'TES_CBTE_SEL'
+     #TRANSACCION:  'TES_CXCO_SEL'
      #DESCRIPCION:	Consulta de datos
      #AUTOR:		MMV
      #FECHA:		03-03-2021
     ***********************************/
 
     if
-        (p_transaccion = 'TES_CAJERO_SEL') then
+        (p_transaccion = 'TES_CXCO_SEL') then
 
         begin
             v_id_moneda_base
@@ -167,14 +167,14 @@ BEGIN
         end;
 
         /*********************************
-         #TRANSACCION:  'TES_CBTE_CONT'
+         #TRANSACCION:  'TES_CXCO_CONT'
          #DESCRIPCION:	Conteo de registros
          #AUTOR:		MMV
          #FECHA:		03-03-2021
         ***********************************/
 
     elsif
-        (p_transaccion = 'TES_CAJERO_CONT') then
+        (p_transaccion = 'TES_CXCO_CONT') then
 
         begin
             v_id_moneda_base

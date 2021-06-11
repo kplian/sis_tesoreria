@@ -19,7 +19,7 @@ class MODConsultaCbte extends MODbase
     {
         //Definicion de variables para ejecucion del procedimientp
         $this->procedimiento = 'tes.f_consulta_cbte_sel';
-        $this->transaccion = 'TES_CAJERO_SEL';
+        $this->transaccion = 'TES_CXCO_SEL';
         $this->tipo_procedimiento = 'SEL';//tipo de transaccion
 
         $this->setParametro('id_funcionario_usu','id_funcionario_usu','int4');
