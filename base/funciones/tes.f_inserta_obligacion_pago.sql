@@ -352,7 +352,8 @@ BEGIN
           id_funcionario_gerente,
           id_contrato,
           comprometer_iva, --#12
-          cod_tipo_relacion --#48
+          cod_tipo_relacion, --#48
+		  id_funcionario_gestor
         ) values(
           (p_hstore->'id_proveedor')::integer,
           v_codigo_estado,
@@ -387,8 +388,8 @@ BEGIN
            va_id_funcionario_gerente[1],
           (p_hstore->'id_contrato')::integer,
           (p_hstore->'comprometer_iva')::varchar, --#12
-          (p_hstore->'cod_tipo_relacion')::varchar --#48
-
+          (p_hstore->'cod_tipo_relacion')::varchar, --#48
+		  (p_hstore->'id_funcionario_gestor')::integer
         )RETURNING id_obligacion_pago into v_id_obligacion_pago;
 
         IF((p_hstore->'cod_tipo_relacion')::varchar ='obpag' )THEN--#48

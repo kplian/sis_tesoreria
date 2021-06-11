@@ -727,6 +727,54 @@ header("content-type: text/javascript; charset=UTF-8");
                 grid:true,
                 form:true
             },
+			{
+                config : {
+                    name:'id_funcionario_gestor',
+                    fieldLabel : 'Gestor Responsable',
+                    resizable:true,
+                    allowBlank:true,
+                    emptyText:'Elija una opción...',
+                    store: new Ext.data.JsonStore({
+                        url: '../../sis_tesoreria/control/ObligacionPago/listarFuncionarioGestor',
+                        id: 'id_funcionario_gestor',
+                        root: 'datos',
+                        sortInfo:{
+                            field: 'desc_funcionario1',
+                            direction: 'ASC'
+                        },
+                        totalProperty: 'total',
+                        fields: ['id_funcionario_gestor','desc_funcionario1','codigo','cargo'],
+                        // turn on remote sorting
+                        remoteSort: true,
+                        baseParams: {par_filtro:'desc_funcionario1'}
+                    }),
+                    enableMultiSelect:true,
+                    valueField: 'id_funcionario_gestor',
+                    displayField: 'desc_funcionario1',
+                    gdisplayField: 'gestor_desc',
+                    tpl : '<tpl for="."><div class="x-combo-list-item"><p>Nombre: {desc_funcionario1}</p><p>Código: {codigo}</p><p>Cargo.: {cargo}</p></div></tpl>',
+                    triggerAction: 'all',
+                    lazyRender:true,
+                    mode:'remote',
+                    pageSize:15,
+                    queryDelay: 1000,
+                    anchor: '80%',
+                    gwidth: 100,
+                    renderer : function(value, p, record) {
+                        return String.format('{0}', record.data['gestor_desc']);
+                    },
+                    listeners: {
+                        beforequery: function(qe){
+                            delete qe.combo.lastQuery;
+                        }
+                    },
+                },
+                type:'ComboBox',
+                filters:{pfiltro:'desc_funcionario1',type:'string'},
+                id_grupo:0,
+                grid:true,
+                form:true
+            },
             {
                 config:{
                     name: 'fecha_pp_ini',
@@ -953,6 +1001,8 @@ header("content-type: text/javascript; charset=UTF-8");
             'cod_tipo_relacion', // #48
             'id_obligacion_pago_extendida_relacion',// #48
             'desc_obligacion_pago',// #48
+			{name:'id_funcionario_gestor', type: 'numeric'},
+            {name:'gestor_desc', type: 'string'},
         ],
 
         arrayDefaultColumHidden:['id_fecha_reg','id_fecha_mod','fecha_mod','usr_reg','estado_reg','fecha_reg','usr_mod',

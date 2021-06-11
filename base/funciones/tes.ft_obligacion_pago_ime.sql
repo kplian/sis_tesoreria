@@ -321,7 +321,8 @@ BEGIN
           tipo_anticipo = v_parametros.tipo_anticipo,
           id_funcionario_gerente = va_id_funcionario_gerente [ 1 ],
           id_contrato = v_id_contrato,
-          comprometer_iva = v_parametros.comprometer_iva --#12
+          comprometer_iva = v_parametros.comprometer_iva, --#12
+		  id_funcionario_gestor = v_parametros.id_funcionario_gestor
       where id_obligacion_pago = v_parametros.id_obligacion_pago;
 
       -------------------------------------

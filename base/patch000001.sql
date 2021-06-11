@@ -1975,3 +1975,10 @@ COMMENT ON COLUMN tes.tplan_pago."dias_limite"
 ALTER TABLE tes.tplan_pago
     ADD COLUMN fecha_vencimiento DATE;
 /*************************F-SCP-EGS-TES-ETR-1914-03/12/2020*************/
+
+/*************************I-SCP-YMR-TES-ETR-4227-11/06/2021*************/
+
+alter table tes.tobligacion_pago
+ add column id_funcionario_gestor integer;
+
+/*************************F-SCP-YMR-TES-ETR-4227-11/06/2021*************/

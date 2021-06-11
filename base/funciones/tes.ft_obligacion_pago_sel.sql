@@ -409,7 +409,7 @@ BEGIN
           IF  v_parametros.tipo_interfaz !=  'ObligacionPagoConta' THEN
             --no hay limitaciones ...
             IF   p_administrador != 1 THEN
-                   v_filadd = '(obpg.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or obpg.id_usuario_reg='||p_id_usuario||' ) and ';
+                   v_filadd = '(obpg.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or obpg.id_usuario_reg='||p_id_usuario||' or obpg.id_funcionario_gestor='||v_parametros.id_funcionario_usu::varchar||') and ';
             END IF;
           END IF;
 
@@ -496,7 +496,9 @@ BEGIN
 
                               obpg.cod_tipo_relacion, --#48
                               opr.id_obligacion_pago_extendida as id_obligacion_pago_extendida_relacion, --#48
-                              opr.num_tramite::varchar as desc_obligacion_pago --#48
+                              opr.num_tramite::varchar as desc_obligacion_pago, --#48
+							  obpg.id_funcionario_gestor,
+                              fun2.desc_funcionario1 as gestor_desc
                               from tes.tobligacion_pago obpg
                               left join tes.tobligacion_pago opr on opr.id_obligacion_pago_extendida=obpg.id_obligacion_pago --#48
                               inner join segu.tusuario usu1 on usu1.id_usuario = obpg.id_usuario_reg
@@ -507,7 +509,8 @@ BEGIN
                               inner join param.tdepto dep on dep.id_depto=obpg.id_depto
                               left join param.tplantilla pla on pla.id_plantilla = obpg.id_plantilla
                               inner join orga.vfuncionario fun on fun.id_funcionario=obpg.id_funcionario
-                              left join leg.tcontrato con on con.id_contrato = obpg.id_contrato
+                              left join orga.vfuncionario fun2 on fun2.id_funcionario=obpg.id_funcionario_gestor
+							  left join leg.tcontrato con on con.id_contrato = obpg.id_contrato
                               where  '||v_filadd;
 
                   --Definicion de la respuesta
@@ -1152,6 +1155,63 @@ BEGIN
             return v_consulta;
 
         end;
+		
+	/*********************************
+     #TRANSACCION:  'TES_OBPFUN_SEL'
+     #DESCRIPCION:    Consulta de datos
+     #AUTOR:        ymedina
+     #FECHA:        17-12-2020 18:26:27
+    ***********************************/
+
+    ELSIF (p_transaccion='TES_OBPFUN_SEL') THEN
+
+        BEGIN
+            --Sentencia de la consulta
+            v_consulta:= 'select fp.id_funcionario as id_funcionario_gestor,
+                          fp.codigo::varchar,
+                          fp.desc_funcionario1,
+                          depusu.cargo::varchar,
+                          depusu.sw_alerta::varchar
+                          from param.tdepto_usuario depusu 
+                          inner join segu.tusuario usudep on usudep.id_usuario=depusu.id_usuario
+                          inner join segu.vpersona person on person.id_persona=usudep.id_persona
+                          join orga.vfuncionario_persona fp on person.id_persona = fp.id_persona
+                          where depusu.id_depto = 5 and ';
+
+            --Definicion de la respuesta
+            v_consulta:=v_consulta||v_parametros.filtro;
+            v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+
+            --Devuelve la respuesta
+            RETURN v_consulta;
+
+        END;
+
+    /*********************************
+     #TRANSACCION:  'TES_OBPFUN_CONT'
+     #DESCRIPCION:    Conteo de registros
+     #AUTOR:        ymedina
+     #FECHA:        17-12-2020 18:26:27
+    ***********************************/
+
+    ELSIF (p_transaccion='TES_OBPFUN_CONT') THEN
+
+        BEGIN
+            --Sentencia de la consulta de conteo de registros
+            v_consulta:='SELECT COUNT(depusu.*)
+                          from param.tdepto_usuario depusu 
+                          inner join segu.tusuario usudep on usudep.id_usuario=depusu.id_usuario
+                          inner join segu.vpersona person on person.id_persona=usudep.id_persona
+                          join orga.vfuncionario_persona fp on person.id_persona = fp.id_persona
+                          where depusu.id_depto = 5 and ';
+
+            --Definicion de la respuesta
+            v_consulta:=v_consulta||v_parametros.filtro;
+
+            --Devuelve la respuesta
+            RETURN v_consulta;
+
+        END;	
 
    else
 

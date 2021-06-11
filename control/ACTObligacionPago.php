@@ -552,6 +552,12 @@ class ACTObligacionPago extends ACTbase{
 		$this->res=$this->objFunc->editAntiRet($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	
+	function listarFuncionarioGestor(){
+        $this->objFunc=$this->create('MODObligacionPago');
+        $this->res=$this->objFunc->listarFuncionarioGestor($this->objParam);
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
 
 }
 

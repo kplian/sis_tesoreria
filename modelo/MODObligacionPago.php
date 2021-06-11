@@ -197,7 +197,10 @@ class MODObligacionPago extends MODbase{
 		$this->captura('cod_tipo_relacion','varchar'); //#48
 		$this->captura('id_obligacion_pago_extendida_relacion','int4'); //#48
 		$this->captura('desc_obligacion_pago','varchar'); //#48
-
+		
+		$this->captura('id_funcionario_gestor','int4');
+		$this->captura('gestor_desc','text');
+		
         //Ejecuta la instruccion
         $this->armarConsulta();
         $this->ejecutarConsulta();
@@ -251,6 +254,7 @@ class MODObligacionPago extends MODbase{
         $this->setParametro('comprometer_iva','comprometer_iva','varchar');//#12
 		$this->setParametro('cod_tipo_relacion','cod_tipo_relacion','varchar');//#48
 		$this->setParametro('id_obligacion_pago_extendida_relacion','id_obligacion_pago_extendida_relacion','int4');//#48
+		$this->setParametro('id_funcionario_gestor','id_funcionario_gestor','int4');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -293,7 +297,7 @@ class MODObligacionPago extends MODbase{
         $this->setParametro('comprometer_iva','comprometer_iva','varchar'); //#12
 		$this->setParametro('cod_tipo_relacion','cod_tipo_relacion','varchar');//#48
 		$this->setParametro('id_obligacion_pago_extendida_relacion','id_obligacion_pago_extendida_relacion','int4');//#48
-        
+        $this->setParametro('id_funcionario_gestor','id_funcionario_gestor','int4');
         
        
 		//Ejecuta la instruccion
@@ -970,6 +974,27 @@ class MODObligacionPago extends MODbase{
 		$this->setParametro('monto_ajuste_ret_anticipo_par_ga','monto_ajuste_ret_anticipo_par_ga','numeric');
 		$this->setParametro('monto_ajuste_ret_garantia_ga','monto_ajuste_ret_garantia_ga','numeric');
 		$this->setParametro('pedido_sap','pedido_sap','varchar');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
+	function listarFuncionarioGestor(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.ft_obligacion_pago_sel';
+		$this->transaccion='TES_OBPFUN_SEL';
+		$this->tipo_procedimiento='SEL';
+
+		//Definicion de la lista del resultado del query
+		$this->captura('id_funcionario_gestor','int4');
+		$this->captura('codigo','varchar');
+		$this->captura('desc_funcionario1','text');
+		$this->captura('cargo','varchar');
+		$this->captura('sw_alerta','varchar');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
