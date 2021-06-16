@@ -260,7 +260,12 @@ class ACTProcesoCaja extends ACTbase{
 		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
 		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());		
 	}
-
+	//
+	function excluir(){
+		$this->objFunc=$this->create('MODProcesoCaja');
+		$this->res=$this->objFunc->excluir($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
 }
 
 ?>

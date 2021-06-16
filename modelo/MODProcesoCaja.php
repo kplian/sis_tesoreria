@@ -433,5 +433,23 @@ class MODProcesoCaja extends MODbase{
 		$this->ejecutarConsulta();
 		return $this->respuesta;
 	}
+	//
+	function excluir(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_proceso_caja_ime';
+		$this->transaccion='TES_EXCDOC_IME';
+		$this->tipo_procedimiento='IME';
+
+		//Define los parametros para la funcion
+		$this->setParametro('id_doc_compra_venta','id_doc_compra_venta','integer');
+		$this->setParametro('id_solicitud_rendicion_det','id_solicitud_rendicion_det','integer');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
 }
 ?>

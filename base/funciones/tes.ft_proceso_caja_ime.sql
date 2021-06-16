@@ -26,21 +26,21 @@ $body$
 
 DECLARE
 
-  v_nro_requerimiento     integer;
-  v_parametros            record;
-  v_id_requerimiento      integer;
-  v_resp                varchar;
+  	v_nro_requerimiento     integer;
+    v_parametros            record;
+    v_id_requerimiento      integer;
+    v_resp                varchar;
     v_resp2               varchar;
-  v_nombre_funcion        text;
-  v_mensaje_error         text;
-  v_id_proceso_caja integer;
+    v_nombre_funcion        text;
+    v_mensaje_error         text;
+    v_id_proceso_caja integer;
     v_codigo_tabla      varchar;
     v_num_rendicion     varchar;
     v_registros_trendicion  record;
     v_registros       record;
     v_id_estado_wf      integer;
     v_id_proceso_wf     integer;
-  v_codigo_estado     varchar;
+  	v_codigo_estado     varchar;
     v_id_tipo_estado    integer;
     v_pedir_obs       varchar;
     v_codigo_estado_siguiente varchar;
@@ -77,20 +77,20 @@ DECLARE
     v_fecha_inicio      date;
     v_fecha_fin       date;
 
-    v_codigo_proceso    varchar;
-    v_importe_deposito    numeric;
-    v_sistema_origen    varchar;
-    v_importe       numeric;
-    v_tabla         varchar;
-    v_id_solicitud_efectivo    integer[];
+    v_codigo_proceso    			varchar;
+    v_importe_deposito    			numeric;
+    v_sistema_origen    			varchar;
+    v_importe       				numeric;
+    v_tabla         				varchar;
+    v_id_solicitud_efectivo    		integer[];
     v_hstore_registros   hstore;
-    v_id_caja  integer;
+    v_id_caja  						integer;
     
     va_id_tipo_estado 				integer[];
-     va_codigo_estado 				varchar[];
-     va_disparador    				varchar[];
-     va_regla        				varchar[]; 
-     va_prioridad     				integer[];   
+    va_codigo_estado 				varchar[];
+    va_disparador    				varchar[];
+    va_regla        				varchar[]; 
+    va_prioridad     				integer[];   
 
 BEGIN
 
@@ -895,6 +895,52 @@ BEGIN
             return v_resp;
 
     end;
+
+    /*********************************
+    # TRANSACCION:  'TES_EXCDOC_IME'
+    # DESCRIPCION:  Quitar registro de proceso de caja
+    # AUTOR:    gsarmiento
+    # FECHA:    12-10-2016 20:15:22
+    ***********************************/
+    elsif(p_transaccion='TES_EXCDOC_IME')then
+    
+    begin	 
+    
+    	SELECT id_proceso_caja
+        INTO v_id_proceso_caja
+        FROM tes.tsolicitud_rendicion_det
+        WHERE id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
+        
+    	SELECT estado
+        INTO v_codigo_proceso
+        FROM tes.tproceso_caja 
+        WHERE id_proceso_caja=v_id_proceso_caja;
+  
+        IF v_codigo_proceso != 'borrador' THEN
+        	RAISE EXCEPTION 'No se puede realizar el movimiento en estado %',v_codigo_proceso;
+        END IF;
+        
+        UPDATE tes.tsolicitud_rendicion_det
+        SET id_proceso_caja=NULL
+        WHERE id_solicitud_rendicion_det=v_parametros.id_solicitud_rendicion_det;
+        
+        SELECT sum(monto)
+        INTO v_monto
+        FROM tes.tsolicitud_rendicion_det
+        WHERE id_proceso_caja=v_id_proceso_caja;
+
+        UPDATE tes.tproceso_caja 
+        SET monto=v_monto
+        WHERE id_proceso_caja=v_id_proceso_caja;
+        
+        
+        v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Modificacion'); 
+        v_resp = pxp.f_agrega_clave(v_resp,'Modificacion en ',v_id_proceso_caja::varchar);
+        --Devuelve la respuesta
+        return v_resp;
+    end;
+
+
         
   else
      

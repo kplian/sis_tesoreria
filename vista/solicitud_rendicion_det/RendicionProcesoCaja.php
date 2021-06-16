@@ -23,16 +23,16 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
     	//llama al constructor de la clase padre
 		Phx.vista.RendicionProcesoCaja.superclass.constructor.call(this,config);
 		this.init();
-		/*
+		
 		this.addButton('excluir',
-			{	text:'Excluir',
+			{	text:'Excluir Documentos',
 				iconCls: 'bengineremove',
 				disabled:false,
 				handler:this.excluir,
 				tooltip: '<b>Excluir</b><p>Excluir Factura de Rendicion</p>'
 			}
 		);
-		*/
+		
 		this.addButton('Modificar',
 			{	text:'Modificar Documento',
 				iconCls: 'bengineremove',
@@ -510,8 +510,8 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
         return tb
     },
     //
-    onModDoc:function()
-	{             	
+	onModDoc:function()
+	{
 		var rec = this.sm.getSelected();
 		console.log('rec',rec);
 		Phx.CP.loadWindows('../../../sis_tesoreria/vista/proceso_caja/ModificarDocumento.php',
@@ -520,16 +520,59 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			width:450,
 			height:200
 		},{
-            'id_doc_compra_venta': rec.data.id_doc_compra_venta,
-            'id_solicitud_rendicion_det': rec.data.id_solicitud_rendicion_det,
-            'fecha':rec.data.fecha,
-            'nro_documento':rec.data.nro_documento,
-        },
+			'id_doc_compra_venta': rec.data.id_doc_compra_venta,
+			'id_solicitud_rendicion_det': rec.data.id_solicitud_rendicion_det,
+			'fecha':rec.data.fecha,
+			'nro_documento':rec.data.nro_documento,
+		},
 		this.idContenedor,
 		'ModificarDocumento');
 	},
-
+	excluir:function()
+	{
+		var rec = this.sm.getSelected();
+		if (rec){
+			Ext.Msg.show({
+				title:'Confirmación',
+				scope: this,
+				msg: 'Esta seguro de excluir este documento? '+ rec.data.nro_tramite + ' Si esta de acuerdo presione el botón "Si"',
+				buttons: Ext.Msg.YESNO,
+				fn: function(id, value, opt) {
+					if (id == 'yes') {
+						Phx.CP.loadingShow();
+						Ext.Ajax.request({
+							url:'../../sis_tesoreria/control/ProcesoCaja/excluir',
+							params:{
+								id_doc_compra_venta : rec.data.id_doc_compra_venta,
+								id_solicitud_rendicion_det : rec.data.id_solicitud_rendicion_det,
+							},
+							success:this.successRevision,
+							failure: this.conexionFailure,
+							timeout:this.timeout,
+							scope:this
+						});
+					} else {
+						opt.hide;
+					}
+				},
+				animEl: 'elId',
+				icon: Ext.MessageBox.WARNING
+			}, this);
+			//
+		}
+		else
+		{
+			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un registro' );
+		}
+	},
+	//
+	successRevision: function(resp){
+		Phx.CP.loadingHide();
+		var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+		if(!reg.ROOT.error){
+			this.reload();
+			Phx.CP.getPagina(this.idContenedorPadre).reload();
+		}
+	},
 })
 </script>
-		
-		
