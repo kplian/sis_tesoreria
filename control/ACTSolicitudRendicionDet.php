@@ -159,6 +159,25 @@ class ACTSolicitudRendicionDet extends ACTbase{
 		$this->res=$this->objFunc->ModificarDocumento($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	//
+	function listarRendicion(){
+		$this->objParam->defecto('ordenacion','id_solicitud_rendicion_det');
+		$this->objParam->defecto('dir_ordenacion','asc');
+		if($this->objParam->getParametro('id_caja')!=''){
+			$this->objParam->addFiltro("efe.id_caja = ".$this->objParam->getParametro('id_caja'));	
+		}
+
+		$this->objFunc=$this->create('MODSolicitudRendicionDet');	
+		$this->res=$this->objFunc->listarRendicion($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	//
+	function insertarDocumentos()
+    {        
+        $this->objFunc = $this->create('MODSolicitudRendicionDet');
+        $this->res = $this->objFunc->insertarDocumentos($this->objParam);        
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
 }
 
 ?>

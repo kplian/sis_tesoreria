@@ -656,6 +656,44 @@ class MODSolicitudRendicionDet extends MODbase{
 
 		//Devuelve la respuesta
 		return $this->respuesta;
-	}			
+	}	
+	//
+	function listarRendicion(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.ft_solicitud_rendicion_det_sel';
+		$this->transaccion='TES_LISREND_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+				
+		//Definicion de la lista del resultado del query
+		$this->captura('id_solicitud_rendicion_det','int4');
+		$this->captura('nro_tramite','varchar');
+		$this->captura('nro_documento','varchar');
+		$this->captura('desc_plantilla','varchar');
+		$this->captura('fecha','date');
+		$this->captura('razon_social','varchar');
+		$this->captura('monto','numeric');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	//
+	function insertarDocumentos(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='tes.ft_solicitud_rendicion_det_ime';
+		$this->transaccion='TES_ADDOC_IME';
+		$this->tipo_procedimiento='IME';				
+		//Define los parametros para la funcion
+		$this->setParametro('id_caja','id_caja','int4');
+		$this->setParametro('id_proceso_caja','id_proceso_caja','int4');		
+		$this->setParametro('id_solicitud_rendicion_det','id_solicitud_rendicion_det','varchar');	
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
 }
 ?>

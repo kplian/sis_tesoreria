@@ -20,8 +20,11 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 	tipoDoc: 'compra',
 	constructor:function(config){
 		this.maestro=config.maestro;
+
     	//llama al constructor de la clase padre
 		Phx.vista.RendicionProcesoCaja.superclass.constructor.call(this,config);
+		this.grid.getTopToolbar().disable();
+		this.grid.getBottomToolbar().disable();
 		this.init();
 		
 		this.addButton('excluir',
@@ -41,8 +44,17 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Modificar Documento</b>'
 			}
 		);
-		
+
+		this.addButton('agregar',
+			{	text:'Agregar Documento',
+				iconCls: 'bengineadd',
+				disabled: true,
+				handler: this.agregar,
+				tooltip: '<b>Agregar Documento</b>'
+			}
+		);
 		this.iniciarEventos();
+
 		var dataPadre = Phx.CP.getPagina(this.idContenedorPadre).getSelectedData();
 		if(dataPadre){
 			this.onEnablePanel(this, dataPadre);
@@ -573,6 +585,18 @@ Phx.vista.RendicionProcesoCaja=Ext.extend(Phx.gridInterfaz,{
 			this.reload();
 			Phx.CP.getPagina(this.idContenedorPadre).reload();
 		}
+	},
+	//
+	agregar : function() {
+		Phx.CP.loadWindows('../../../sis_tesoreria/vista/solicitud_rendicion_det/agregarDocumentos.php', 
+		'Agregar ...', {
+			modal:true,
+			width : 400,
+			height : 150
+		}, 
+		this.maestro,
+		this.idContenedor, 
+		'agregarDocumentos');
 	},
 })
 </script>

@@ -240,6 +240,72 @@ BEGIN
 
 		end; 
     
+    
+    /*********************************    
+ 	#TRANSACCION:  'TES_LISREND_SEL'
+ 	#DESCRIPCION:	Consulta de datos
+ 	#AUTOR:		gsarmiento	
+ 	#FECHA:		16-12-2015 15:14:01
+	***********************************/
+
+	ELSIF(p_transaccion='TES_LISREND_SEL')then
+     				
+    	begin
+    		--Sentencia de la consulta
+			v_consulta:='select 
+                        r.id_solicitud_rendicion_det,
+                        efe.nro_tramite,
+                        d.nro_documento,
+                        pla.desc_plantilla,
+                        d.fecha,
+                        d.razon_social,
+                        efe.monto
+                        from tes.tsolicitud_rendicion_det r
+                        join tes.tsolicitud_efectivo efe on efe.id_solicitud_efectivo=r.id_solicitud_efectivo
+                        join conta.tdoc_compra_venta d on d.id_doc_compra_venta=r.id_documento_respaldo
+                        left join param.tplantilla pla on pla.id_plantilla = d.id_plantilla
+                        where r.id_proceso_caja is null 
+                        and efe.estado=''rendido''
+				        and';
+
+			--Definicion de la respuesta
+			v_consulta:=v_consulta||v_parametros.filtro;
+            raise notice '%',v_consulta;
+            --raise exception '%',v_consulta;
+			
+			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+            --Devuelve la respuesta
+			return v_consulta;
+
+		end;
+	
+        /*********************************
+        #TRANSACCION:  'TES_LISREND_CONT'
+        #DESCRIPCION:	Conteo de registros
+        #AUTOR:		gsarmiento
+        #FECHA:		16-12-2015 15:14:01
+        ***********************************/
+
+		elsif(p_transaccion='TES_LISREND_CONT')then
+
+		begin
+			--Sentencia de la consulta de conteo de registros
+			v_consulta:='select count(id_solicitud_rendicion_det)
+                 	    from tes.tsolicitud_rendicion_det r
+                        join tes.tsolicitud_efectivo efe on efe.id_solicitud_efectivo=r.id_solicitud_efectivo
+                        join conta.tdoc_compra_venta d on d.id_doc_compra_venta=r.id_documento_respaldo
+                        left join param.tplantilla pla on pla.id_plantilla = d.id_plantilla
+                        where r.id_proceso_caja is null 
+                        and efe.estado=''rendido''
+                        and ';
+			
+			--Definicion de la respuesta		    
+			v_consulta:=v_consulta||v_parametros.filtro;
+
+			--Devuelve la respuesta
+			return v_consulta;
+
+		end;
     				
 	else
 					     
@@ -261,4 +327,5 @@ LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
 SECURITY INVOKER
+PARALLEL UNSAFE
 COST 100;

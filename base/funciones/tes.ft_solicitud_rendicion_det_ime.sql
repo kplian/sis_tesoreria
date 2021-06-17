@@ -41,6 +41,7 @@ DECLARE
     v_fecha_solicitud       date;
     v_fecha_documento       date;
     v_id_periodo			integer;
+    v_id_rendiciones		integer[];
 
 BEGIN
 
@@ -363,6 +364,45 @@ BEGIN
 
         end;
 
+	        
+  	/*********************************
+    # TRANSACCION:  'TES_ADDOC_IME'
+    # DESCRIPCION:  agregar registro de proceso de caja
+    # AUTOR:    mguerra
+    # FECHA:    12-10-2016 20:15:22
+    ***********************************/
+    elsif(p_transaccion='TES_ADDOC_IME')then
+    
+    begin
+   	  
+    	SELECT estado
+        INTO v_tipo
+        FROM tes.tproceso_caja 
+        WHERE id_proceso_caja=v_parametros.id_proceso_caja;
+  
+        IF v_tipo != 'borrador' THEN
+        	RAISE EXCEPTION 'No se puede realizar el movimiento en estado %',v_tipo;
+        END IF;
+        v_id_rendiciones := string_to_array( v_parametros.id_solicitud_rendicion_det,',');
+
+        UPDATE tes.tsolicitud_rendicion_det
+        SET id_proceso_caja=v_parametros.id_proceso_caja
+        WHERE id_solicitud_rendicion_det =any (v_id_rendiciones);
+        
+        SELECT sum(monto)
+        INTO v_total_rendiciones
+        FROM tes.tsolicitud_rendicion_det
+        WHERE id_proceso_caja=v_parametros.id_proceso_caja;
+
+        UPDATE tes.tproceso_caja 
+        SET monto=v_total_rendiciones
+        WHERE id_proceso_caja=v_parametros.id_proceso_caja;
+            
+        v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Modificacion'); 
+        v_resp = pxp.f_agrega_clave(v_resp,'Modificacion en ',v_parametros.id_proceso_caja::varchar);
+        --Devuelve la respuesta
+        return v_resp;
+    end;
 
 
     else
@@ -386,4 +426,5 @@ LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
 SECURITY INVOKER
+PARALLEL UNSAFE
 COST 100;
