@@ -259,7 +259,7 @@ BEGIN
                         pla.desc_plantilla,
                         d.fecha,
                         d.razon_social,
-                        efe.monto
+                        d.importe_doc as monto
                         from tes.tsolicitud_rendicion_det r
                         join tes.tsolicitud_efectivo efe on efe.id_solicitud_efectivo=r.id_solicitud_efectivo
                         join conta.tdoc_compra_venta d on d.id_doc_compra_venta=r.id_documento_respaldo
