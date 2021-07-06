@@ -576,3 +576,16 @@ UPDATE tes.tsolicitud_rendicion_det SET id_proceso_caja=NULL WHERE id_solicitud_
 --UPDATE tes.tproceso_caja SET monto=6579.29 WHERE id_proceso_caja=3233;
 UPDATE tes.tproceso_caja SET monto=1699.29 WHERE id_proceso_caja=3233;
 /********************************************F-DAUP-EGS-TES-ETR-4124-02-31/05/2021********************************************/
+/********************************************I-DAUP-EGS-TES-ETR-4479-06/07/2021********************************************/
+--rollback
+--UPDATE tes.tobligacion_pago SET
+-- monto_ajuste_ret_anticipo_par_ga = 273182.18,
+--monto_ajuste_ret_garantia_ga = 247266.98
+-- WHERE id_obligacion_pago = 14819;
+--commit
+UPDATE tes.tobligacion_pago SET
+    monto_ajuste_ret_anticipo_par_ga = 313427.70,
+    monto_ajuste_ret_garantia_ga = 233181.05
+WHERE id_obligacion_pago = 14819;
+/********************************************F-DAUP-MGM-TES-ETR-4479-06/07/2021********************************************/
+
