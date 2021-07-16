@@ -588,4 +588,14 @@ UPDATE tes.tobligacion_pago SET
     monto_ajuste_ret_garantia_ga = 233181.05
 WHERE id_obligacion_pago = 14819;
 /********************************************F-DAUP-MGM-TES-ETR-4479-06/07/2021********************************************/
+/********************************************I-DAUP-MGM-TES-ETR-4626-16/07/2021********************************************/
+INSERT INTO tes.tsolicitud_efectivo("id_usuario_reg", "id_usuario_mod", "fecha_reg", "fecha_mod", "estado_reg", 
+"id_usuario_ai", "usuario_ai","obs_dba","id_funcionario", "id_proceso_wf", "id_estado_wf", "id_caja", "estado",
+"motivo", "nro_tramite", "fecha","monto", "id_solicitud_efectivo_fk","id_funcionario_jefe_aprobador", "id_gestion", "id_tipo_solicitud", "fecha_entrega", "id_funcionario_finanzas",
+"ingreso_extra", "id_proceso_caja_repo", "observaciones", "id_proceso_caja_rend", "ingreso_cd", "fecha_ult_mov", "fecha_entregado_ult","fecha_mod_bk")
+VALUES (272, NULL, E'2018-09-25 15:42:40.957', NULL, E'activo', NULL, E'NULL', NULL,514, 93921, 324984, 134, E'devuelto', 
+E'Devolucion de dinero del solicitante al cajero', E'CAJA-REG-TJA-SOLEFE-120-2021', E'2021-07-08','200', 39913, NULL, 5, 3, NULL, NULL, E'no', NULL, NULL, NULL, E'no', E'2021-07-08', E'2021-07-08', NULL);
+--UPDATE tes.tsolicitud_efectivo SET monto =969.74 WHERE id_solicitud_efectivo=39985;   
+UPDATE tes.tsolicitud_efectivo SET monto =769.74 WHERE id_solicitud_efectivo=39985;
+/********************************************F-DAUP-MGM-TES-ETR-4626-16/07/2021********************************************/
 
