@@ -195,6 +195,51 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				form:true
 		},
 		{
+			config: {
+				name: 'id_casa_oracion',
+                fieldLabel: 'Casa de Oración',
+                allowBlank: false,
+                forceSelection : true,
+                emptyText:'Casa...',
+                store:new Ext.data.JsonStore(
+                {
+                    url: '../../sis_admin/control/CasaOracion/listarCasaOracion',
+                    id: 'id_casa_oracion',
+                    root: 'datos',
+                    sortInfo:{
+                        field: 'nombre',
+                        direction: 'ASC'
+                    },
+                    totalProperty: 'total',
+                    fields: ['id_casa_oracion','codigo','nombre','desc_lugar','desc_region'],
+                    // turn on remote sorting
+                    remoteSort: true,    
+                    baseParams:{par_filtro:'caor.nombre#reg.nombre#reg.nombre'}
+                
+                }),
+                valueField: 'id_casa_oracion',
+                displayField: 'nombre',
+                gdisplayField:'casa_oracion',
+                hiddenName: 'id_casa_oracion',
+                triggerAction: 'all',
+                tpl:'<tpl for="."><div class="x-combo-list-item"><p>{nombre}</p><p>{desc_lugar} - {desc_region}</p> </div></tpl>',
+				
+                mode:'remote',
+                pageSize:50,
+                queryDelay:500,
+                listWidth:'280',
+                width:210,
+                minChars:2
+            },
+			type:'ComboBox',
+			filters:{pfiltro:'co.nombre',type:'string'},
+			bottom_filter: true,
+			id_grupo:1,
+			grid:true,
+			form:true
+			
+		},
+		{
 			config:{
 				name: 'a_favor',
 				fieldLabel: 'A favor de',
@@ -302,7 +347,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
                             fields: ['variable', 'valor'],
                             data : [ ['cheque','Cheque'],
 									 ['deposito','Depósito'],
-									 ['debito_automatico','Débito Automativo'],
+									 ['debito_automatico','Débito Automatico'],
 									 ['transferencia_carta','Transferencia con Carta']
                                     ]
                                     }),
@@ -395,14 +440,14 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				mode: 'local',
 				valueField: 'estilo',
 				gwidth: 60,
-				store:['CBB','SRZ','LPB','TJA','SRE','CIJ','TDD','UYU','MIA','MAD']
+				store:['CBB','SRZ','LPB','TJA','SRE','CIJ','TDD','UYU','MIA','MAD', 'PTS','ORU']
 			},
 			type:'ComboBox',
 			id_grupo:1,
 			filters:{	
 					 type: 'list',
 					  pfiltro:'lban.origen',
-					 options: ['CBB','SRZ','TJA','SRE','CIJ','TDD','UYU','ENDESIS','MIA','MAD'],	
+					 options: ['CBB','SRZ','TJA','SRE','CIJ','TDD','UYU','ENDESIS','MIA','MAD','PTS','ORU'],	
 				},
 			grid:true,
 			form:true
@@ -666,7 +711,9 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		{name:'color', type: 'string'},
 		{name:'saldo_deposito', type: 'numeric'},
 		{name:'nombre_regional', type: 'string'},
-		{name:'sistema_origen', type: 'string'}
+		{name:'sistema_origen', type: 'string'},		
+		{name:'id_casa_oracion', type: 'numeric'},
+		{name:'casa_oracion', type: 'string'},
 	],
 	sortInfo:{
 		field: 'fecha',

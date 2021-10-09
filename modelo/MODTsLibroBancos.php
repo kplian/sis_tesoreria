@@ -58,7 +58,11 @@ class MODTsLibroBancos extends MODbase{
 		$this->captura('nombre_regional','varchar');
 		$this->captura('sistema_origen','varchar');
 		$this->captura('notificado','varchar');
-		$this->captura('fondo_devolucion_retencion','varchar');
+		$this->captura('fondo_devolucion_retencion','varchar');		
+		$this->captura('id_casa_oracion','int4');
+		$this->captura('casa_oracion','varchar');
+		
+		
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -103,6 +107,8 @@ class MODTsLibroBancos extends MODbase{
 		$this->setParametro('estado','estado','varchar');
 		$this->setParametro('tipo','tipo','varchar');
 		$this->setParametro('id_finalidad','id_finalidad','int4');
+		$this->setParametro('id_regiones','id_regiones','varchar');
+		$this->setParametro('id_casa_oracions','id_casa_oracions','varchar');
 		$this->setCount(false);
 		
 		//Definicion de la lista del resultado del query
@@ -156,6 +162,7 @@ class MODTsLibroBancos extends MODbase{
 		$this->setParametro('estado_reg','estado_reg','varchar');
 		$this->setParametro('tipo','tipo','varchar');
 		$this->setParametro('id_finalidad','id_finalidad','int4');
+		$this->setParametro('id_casa_oracion','id_casa_oracion','int4');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -192,6 +199,7 @@ class MODTsLibroBancos extends MODbase{
 		$this->setParametro('tipo','tipo','varchar');
 		$this->setParametro('id_finalidad','id_finalidad','int4');
 		$this->setParametro('nro_deposito','nro_deposito','int4');
+		$this->setParametro('id_casa_oracion','id_casa_oracion','int4');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();

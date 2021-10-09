@@ -142,6 +142,97 @@ header("content-type: text/javascript; charset=UTF-8");
 		},
 		{
 			config:{
+				name: 'id_regiones',
+				fieldLabel: 'Region',
+				allowBlank: true,
+				forceSelection : true,
+				emptyText:'Region...',
+				store:new Ext.data.JsonStore(
+				{
+					url: '../../sis_admin/control/Region/listarRegion',
+					id: 'id_region',
+					root: 'datos',
+					sortInfo:{
+						field: 'nombre',
+						direction: 'ASC'
+					},
+					totalProperty: 'total',
+					fields: ['id_region','nombre'],
+					// turn on remote sorting
+					remoteSort: true,
+					baseParams:{par_filtro:'nombre',_adicionar:'todos'}
+				}),
+				valueField: 'id_region',
+				displayField: 'nombre',
+				gdisplayField:'desc_region',
+				hiddenName: 'id_region',
+    			triggerAction: 'all',
+    			lazyRender:true,
+				mode:'remote',
+				pageSize:50,
+				queryDelay:500,
+				listWidth:'280',
+				enableMultiSelect: true,
+				width:210,
+				gwidth:220,
+				minChars:2,
+				renderer:function (value, p, record){return String.format('{0}', record.data['desc_region']);}
+			},
+			type:'AwesomeCombo',
+			filters:{pfiltro:'reg.nombre',type:'string'},
+			id_grupo:1,
+			grid:true,
+			form:true
+		},
+		{
+			config: {
+				name: 'id_casa_oracions',
+                fieldLabel: 'Casa de Oración',
+                allowBlank: true,
+                forceSelection : true,
+                emptyText:'Casa...',
+                store:new Ext.data.JsonStore(
+                {
+                    url: '../../sis_admin/control/CasaOracion/listarCasaOracion',
+                    id: 'id_casa_oracion',
+                    root: 'datos',
+                    sortInfo:{
+                        field: 'nombre',
+                        direction: 'ASC'
+                    },
+                    totalProperty: 'total',
+                    fields: ['id_casa_oracion','codigo','nombre','desc_lugar','desc_region'],
+                    // turn on remote sorting
+                    remoteSort: true,    
+                    baseParams:{par_filtro:'caor.nombre#reg.nombre#reg.nombre'}
+                
+                }),
+                valueField: 'id_casa_oracion',
+                displayField: 'nombre',
+                gdisplayField:'desc_casa_oracion',
+                hiddenName: 'id_casa_oracion',
+                triggerAction: 'all',
+                //tpl:'<tpl for="."><div class="x-combo-list-item"><p>{nombre}</p><p>{desc_lugar} - {desc_region}</p> </div></tpl>',
+				tpl: '<tpl for="."><div class="x-combo-list-item" ><div class="awesomecombo-item {checked}"><p>{nombre}</p></div><p style="padding-left: 20px;">({desc_lugar} - {desc_region})</p> </div></tpl>',
+                        
+				enableMultiSelect: true,
+                mode:'remote',
+                pageSize:50,
+                queryDelay:500,
+                listWidth:'280',
+                width:210,
+                minChars:2
+            },
+			type:'AwesomeCombo',
+			filters:{pfiltro:'co.nombre',type:'string'},
+			bottom_filter: true,
+			id_grupo:1,
+			grid:true,
+			form:true
+			
+		},
+		{
+			config:{
 				name:'estado',
 				fieldLabel:'Estado',
 				typeAhead: true,

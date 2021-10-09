@@ -1,13 +1,7 @@
---------------- SQL ---------------
-
-CREATE OR REPLACE FUNCTION tes.ft_ts_libro_bancos_sel (  
-  p_administrador integer,
-  p_id_usuario integer,
-  p_tabla varchar,
-  p_transaccion varchar
-)
-RETURNS varchar AS
-$body$
+create function ft_ts_libro_bancos_sel(p_administrador integer, p_id_usuario integer, p_tabla character varying, p_transaccion character varying) returns character varying
+    language plpgsql
+as
+$$
 /**************************************************************************
  SISTEMA:		Tesoreria
  FUNCION: 		tes.ft_ts_libro_bancos_sel
@@ -25,30 +19,32 @@ $body$
 
 DECLARE
 
-	v_consulta    		varchar;
-	v_parametros  		record;
-	v_nombre_funcion   	text;
-	v_resp				varchar;
+    v_consulta    		varchar;
+    v_parametros  		record;
+    v_nombre_funcion   	text;
+    v_resp				varchar;
     v_filtro_saldo		varchar;
     v_fecha_anterior	date;
     v_cnx 				varchar;
+    v_filtro_co         varchar;
+    v_filtro_region     varchar;
 BEGIN
 
-	v_nombre_funcion = 'tes.ft_ts_libro_bancos_sel';
+    v_nombre_funcion = 'tes.ft_ts_libro_bancos_sel';
     v_parametros = pxp.f_get_record(p_tabla);
 
-	/*********************************
- 	#TRANSACCION:  'TES_LBAN_SEL'
- 	#DESCRIPCION:	Consulta de datos
- 	#AUTOR:		Gonzalo Sarmiento Sejas
- 	#FECHA:		17-11-2014
-	***********************************/
+    /*********************************
+     #TRANSACCION:  'TES_LBAN_SEL'
+     #DESCRIPCION:	Consulta de datos
+     #AUTOR:		Gonzalo Sarmiento Sejas
+     #FECHA:		17-11-2014
+    ***********************************/
 
-	if(p_transaccion='TES_LBAN_SEL')then
+    if(p_transaccion='TES_LBAN_SEL')then
 
-    	begin
-    		--Sentencia de la consulta
-			v_consulta:='select id_libro_bancos,
+        begin
+            --Sentencia de la consulta
+            v_consulta:='select id_libro_bancos,
                         num_tramite,
                         id_cuenta_bancaria,
                         fecha as fecha,
@@ -86,72 +82,74 @@ BEGIN
                         nombre_regional,
                         sistema_origen,
                         notificado,
-                        fondo_devolucion_retencion
-                        from tes.vlibro_bancos lban
+                        fondo_devolucion_retencion,
+                        id_casa_oracion,
+                        casa_oracion
+                        from tes.vlibro_bancos_ccb lban
 				        where  ';
 
-			--Definicion de la respuesta
-			v_consulta:=v_consulta||v_parametros.filtro;
-			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
-			raise notice 'consulta %', v_consulta;
-			--Devuelve la respuesta
-			return v_consulta;
+            --Definicion de la respuesta
+            v_consulta:=v_consulta||v_parametros.filtro;
+            v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+            raise notice 'consulta %', v_consulta;
+            --Devuelve la respuesta
+            return v_consulta;
 
-		end;
+        end;
 
-	/*********************************
- 	#TRANSACCION:  'TES_LBANCHQ_SEL'
- 	#DESCRIPCION:	Consulta el siguiente numero de cheque
- 	#AUTOR:		Gonzalo Sarmiento Sejas
-	***********************************/
+        /*********************************
+         #TRANSACCION:  'TES_LBANCHQ_SEL'
+         #DESCRIPCION:	Consulta el siguiente numero de cheque
+         #AUTOR:		Gonzalo Sarmiento Sejas
+        ***********************************/
 
-	elsif(p_transaccion='TES_LBANCHQ_SEL')then
+    elsif(p_transaccion='TES_LBANCHQ_SEL')then
 
-    	begin
-    		--Sentencia de la consulta
-			v_consulta:='select (max(lban.nro_cheque)+1) as num_cheque
+        begin
+            --Sentencia de la consulta
+            v_consulta:='select (max(lban.nro_cheque)+1) as num_cheque
 						from tes.tts_libro_bancos lban
 						where lban.id_cuenta_bancaria='||v_parametros.id_cuenta_bancaria||' and ';
 
-			--Definicion de la respuesta
-			v_consulta:=v_consulta||v_parametros.filtro;
-			--v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+            --Definicion de la respuesta
+            v_consulta:=v_consulta||v_parametros.filtro;
+            --v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 
-			--Devuelve la respuesta
-			return v_consulta;
+            --Devuelve la respuesta
+            return v_consulta;
 
-		end;
+        end;
 
-	/*********************************
- 	#TRANSACCION:  'TES_LBAN_CONT'
- 	#DESCRIPCION:	Conteo de registros
- 	#AUTOR:		Gonzalo Sarmiento Sejas
- 	#FECHA:		17-11-2014
-	***********************************/
+        /*********************************
+         #TRANSACCION:  'TES_LBAN_CONT'
+         #DESCRIPCION:	Conteo de registros
+         #AUTOR:		Gonzalo Sarmiento Sejas
+         #FECHA:		17-11-2014
+        ***********************************/
 
-	elsif(p_transaccion='TES_LBAN_CONT')then
+    elsif(p_transaccion='TES_LBAN_CONT')then
 
-		begin
-			--Sentencia de la consulta de conteo de registros
-			v_consulta:='select count(id_libro_bancos)
+        begin
+            --Sentencia de la consulta de conteo de registros
+            v_consulta:='select count(id_libro_bancos)
 					    from tes.vlibro_bancos lban
 					    where ';
 
-			--Definicion de la respuesta
-			v_consulta:=v_consulta||v_parametros.filtro;
+            --Definicion de la respuesta
+            v_consulta:=v_consulta||v_parametros.filtro;
 
-			--Devuelve la respuesta
-			return v_consulta;
+            --Devuelve la respuesta
+            return v_consulta;
 
-		end;
+        end;
 
-    /*********************************
- 	#TRANSACCION:  'TES_LBANSAL_SEL'
- 	#DESCRIPCION:	Consulta el los depositos con saldo
- 	#AUTOR:		Gonzalo Sarmiento Sejas
-	***********************************/
+        /*********************************
+         #TRANSACCION:  'TES_LBANSAL_SEL'
+         #DESCRIPCION:	Consulta el los depositos con saldo
+         #AUTOR:		Gonzalo Sarmiento Sejas
+        ***********************************/
 
-	ELSIF (p_transaccion='TES_LBANSAL_SEL') THEN
+    ELSIF (p_transaccion='TES_LBANSAL_SEL') THEN
         BEGIN
 
             v_consulta := 'SELECT LBRBAN.id_libro_bancos,
@@ -215,15 +213,15 @@ BEGIN
             v_consulta := v_consulta || v_filtro_saldo;
             v_consulta := v_consulta || v_parametros.filtro;
             v_consulta := v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
- 			raise notice '%', v_consulta;
+            raise notice '%', v_consulta;
             return v_consulta;
         END;
 
-	/*********************************
- 	#TRANSACCION:  'TES_LBANSAL_CONT'
- 	#DESCRIPCION:	Conteo de los depositos con saldo
- 	#AUTOR:		Gonzalo Sarmiento Sejas
-	***********************************/
+        /*********************************
+         #TRANSACCION:  'TES_LBANSAL_CONT'
+         #DESCRIPCION:	Conteo de los depositos con saldo
+         #AUTOR:		Gonzalo Sarmiento Sejas
+        ***********************************/
 
     ELSIF (p_transaccion='TES_LBANSAL_CONT') THEN
         BEGIN
@@ -271,66 +269,83 @@ BEGIN
         #FECHA:			27/12/2013
         ***********************************/
 
-        ELSIF(p_transaccion='TES_SOLFONAVA_SEL')then
+    ELSIF(p_transaccion='TES_SOLFONAVA_SEL')then
 
-            begin
+        begin
 
-                --1. Obtención de cadena de conexión a ENDESIS
-                /*
-                v_cnx = migra.f_obtener_cadena_conexion();
+            --1. Obtención de cadena de conexión a ENDESIS
+            /*
+            v_cnx = migra.f_obtener_cadena_conexion();
 
-                --1.1 Apertura de la conexión
-                v_resp = (SELECT dblink_connect(v_cnx));
+            --1.1 Apertura de la conexión
+            v_resp = (SELECT dblink_connect(v_cnx));
 
-                if v_resp != 'OK' then
-                    raise exception 'No se pudo conectar con el servidor: No existe ninguna ruta hasta el host';
-                end if;
+            if v_resp != 'OK' then
+                raise exception 'No se pudo conectar con el servidor: No existe ninguna ruta hasta el host';
+            end if;
 
-                --Sentencia de la consulta
-                v_consulta:='''Select emp.email2,
-				              COALESCE(emp.nombre,'''''''') || '''' '''' ||
-                              COALESCE(emp.apellido_paterno, '''''''') || '''' ''''||
-             				  COALESCE( emp.apellido_materno, '''''''')
-       						  From sci.tct_comprobante_libro_bancos cl
-            				  inner join tesoro.tts_cuenta_doc cd on cd.id_comprobante = cl.id_comprobante
-				              inner join kard.vkp_empleado emp on emp.id_empleado = cd.id_empleado
-						      where cl.id_libro_bancos_cheque ='||v_parametros.id_libro_bancos||'''';
+            --Sentencia de la consulta
+            v_consulta:='''Select emp.email2,
+                          COALESCE(emp.nombre,'''''''') || '''' '''' ||
+                          COALESCE(emp.apellido_paterno, '''''''') || '''' ''''||
+                           COALESCE( emp.apellido_materno, '''''''')
+                             From sci.tct_comprobante_libro_bancos cl
+                          inner join tesoro.tts_cuenta_doc cd on cd.id_comprobante = cl.id_comprobante
+                          inner join kard.vkp_empleado emp on emp.id_empleado = cd.id_empleado
+                          where cl.id_libro_bancos_cheque ='||v_parametros.id_libro_bancos||'''';
 
-                v_consulta := 'select *
-                              from dblink('||v_consulta||',true)
-                              as (
-                              email2 varchar,
-                               nombre_completo text)';
-            	*/
+            v_consulta := 'select *
+                          from dblink('||v_consulta||',true)
+                          as (
+                          email2 varchar,
+                           nombre_completo text)';
+            */
 
-                v_consulta:= 'Select emp.email_empresa,
+            v_consulta:= 'Select emp.email_empresa,
                                   emp.desc_funcionario1
                               from tes.tts_libro_bancos t
                               inner join cd.tcuenta_doc cd on cd.id_int_comprobante=t.id_int_comprobante
                               inner join orga.vfuncionario_persona emp on emp.id_funcionario=cd.id_funcionario
                               where t.id_libro_bancos='||v_parametros.id_libro_bancos||'';
 
-                UPDATE tes.tts_libro_bancos
-                SET notificado='si'
-                WHERE id_libro_bancos= v_parametros.id_libro_bancos;
+            UPDATE tes.tts_libro_bancos
+            SET notificado='si'
+            WHERE id_libro_bancos= v_parametros.id_libro_bancos;
 
-                return v_consulta;
+            return v_consulta;
 
-            end;
+        end;
 
-    /*********************************
- 	#TRANSACCION:  'TES_RELIBA_SEL'
- 	#DESCRIPCION:	Reporte libro de bancos
- 	#AUTOR:		Gonzalo Sarmiento Sejas
-	***********************************/
+        /*********************************
+         #TRANSACCION:  'TES_RELIBA_SEL'
+         #DESCRIPCION:	Reporte libro de bancos
+         #AUTOR:		Gonzalo Sarmiento Sejas
+        ***********************************/
 
-       ELSEIF (p_transaccion = 'TES_RELIBA_SEL') THEN
-       BEGIN
-        --to_char(now(), ''dd/mm/yyyy'') as fecha,
-        raise notice 'fecha unio %', v_parametros.fecha_ini;
-        v_fecha_anterior = to_char(v_parametros.fecha_ini-1, 'dd/mm/yyyy') ;
-        raise notice 'fecha anterior %', v_fecha_anterior;
-          v_consulta := '(SELECT
+    ELSEIF (p_transaccion = 'TES_RELIBA_SEL') THEN
+        BEGIN
+            --to_char(now(), ''dd/mm/yyyy'') as fecha,
+            raise notice 'fecha unio %', v_parametros.fecha_ini;
+            v_fecha_anterior = to_char(v_parametros.fecha_ini-1, 'dd/mm/yyyy') ;
+            raise notice 'fecha anterior %', v_fecha_anterior;
+
+            if v_parametros.id_casa_oracions = '' then
+                v_filtro_co = ' 0=0 ';
+            else
+                v_filtro_co = ' co.id_casa_oracion in ('||v_parametros.id_casa_oracions||') ';
+            end if;
+
+            if v_parametros.id_regiones = '' then
+                v_filtro_region = ' 0=0 ';
+            else
+                v_filtro_region = ' co.id_region in ('||v_parametros.id_regiones||') ';
+            end if;
+
+
+
+
+
+            v_consulta := '(SELECT
               '''||v_fecha_anterior||''' as fecha_reporte,
               ''SALDO ANTERIOR'' as a_favor,
               NULL as detalle,
@@ -344,8 +359,10 @@ BEGIN
               to_char(
                       coalesce((Select sum(Coalesce(lbr.importe_deposito,0))-sum(coalesce(lbr.importe_cheque,0))
                                From tes.tts_libro_bancos lbr
+                                 inner join ccb.tcasa_oracion co on co.id_casa_oracion = lbr.id_casa_oracion
                                Where lbr.fecha < '''||v_parametros.fecha_ini||'''
                                and lbr.id_cuenta_bancaria = '||v_parametros.id_cuenta_bancaria||'
+                               and '||v_filtro_region||'  and '||v_filtro_co||'
                                and lbr.estado not in (''anulado'', ''borrador'') ),0.00),''999G999G999G999D99'') as saldo,
               NULL as total_debe,
               NULL as total_haber,
@@ -354,18 +371,21 @@ BEGIN
               )
               ';
 
-          v_consulta := v_consulta || ' UNION (SELECT
+            v_consulta := v_consulta || ' UNION (SELECT
 
               to_char(LB.fecha, ''dd/mm/yyyy'') as fecha_reporte,
 
               LB.a_favor,
 			  case when LB.tipo=''transf_interna_debe'' then
-              LB.detalle ||''  -  Cbte destino: ''||COALESCE(lbp.nro_comprobante,'''')
+              upper(co.nombre)||''
+               ''||LB.detalle ||''  -  Cbte destino: ''||COALESCE(lbp.nro_comprobante,'''')
               when LB.tipo=''transf_interna_haber'' then
-              LB.detalle ||''  -  Cbte origen: ''||COALESCE(lbp.nro_comprobante,'''')
+              upper(co.nombre)||''
+               ''||LB.detalle ||''  -  Cbte origen: ''||COALESCE(lbp.nro_comprobante,'''')
               else
-              LB.detalle
-              end,
+              upper(co.nombre)||''
+               ''|| LB.detalle
+              end as detalle,
               LB.nro_liquidacion,
               LB.nro_comprobante,
               LB.comprobante_sigma,
@@ -383,9 +403,11 @@ BEGIN
 
               to_char((Select sum(lbr.importe_deposito) - sum(lbr.importe_cheque)
                                From tes.tts_libro_bancos lbr
+                               inner join ccb.tcasa_oracion co on co.id_casa_oracion = lbr.id_casa_oracion
                                where
                                lbr.id_cuenta_bancaria = LB.id_cuenta_bancaria
                                and lbr.estado not in (''anulado'',''borrador'')
+                               and '||v_filtro_region||'  and '||v_filtro_co||'
                                and ((lbr.fecha < LB.fecha) or (lbr.fecha = LB.fecha and lbr.indice <= LB.indice))
 
                                 ),''999G999G999G999D99'') as saldo,
@@ -393,8 +415,10 @@ BEGIN
 
               to_char((Select sum(lbr.importe_deposito)
                                From tes.tts_libro_bancos lbr
+                                inner join ccb.tcasa_oracion co on co.id_casa_oracion = lbr.id_casa_oracion
                                where lbr.fecha BETWEEN  '''||v_parametros.fecha_ini||''' and LB.fecha
                                and lbr.id_cuenta_bancaria = LB.id_cuenta_bancaria
+                               and '||v_filtro_region||'  and '||v_filtro_co||'
                                and case when ('''||v_parametros.estado||'''=''Todos'')
                                 then   lbr.estado in (''impreso'',
                                                          ''entregado'',''cobrado'',
@@ -431,8 +455,10 @@ BEGIN
 
               to_char((Select sum(lbr.importe_cheque)
                                From tes.tts_libro_bancos lbr
+                               inner join ccb.tcasa_oracion co on co.id_casa_oracion = lbr.id_casa_oracion
                                where lbr.fecha BETWEEN  '''||v_parametros.fecha_ini||''' and  LB.fecha
                                and lbr.id_cuenta_bancaria = LB.id_cuenta_bancaria
+                               and '||v_filtro_region||'  and '||v_filtro_co||'
                                and case when ('''||v_parametros.estado||'''=''Todos'')
                                 then   lbr.estado in (''impreso'',
                                                          ''entregado'',''cobrado'',
@@ -461,7 +487,7 @@ BEGIN
                                 end
                                 and
                                 case when ('||v_parametros.id_finalidad||'=0)
-                                then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
+                                then   lbr.id_finalidad in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,14,15,16,17)
                                 else lbr.id_finalidad in ('||v_parametros.id_finalidad||')
                                 end
                                 ),''999G999G999G999D99'') as total_haber,
@@ -472,11 +498,12 @@ BEGIN
 
 
               FROM tes.tts_libro_bancos LB
+              inner join ccb.tcasa_oracion co on co.id_casa_oracion = LB.id_casa_oracion
       		  LEFT JOIN tes.tts_libro_bancos lbp on lbp.id_libro_bancos=LB.id_libro_bancos_fk
               WHERE
+              '||v_filtro_region||'  and '||v_filtro_co||' and
               LB.id_cuenta_bancaria = '||v_parametros.id_cuenta_bancaria||' and
               LB.fecha BETWEEN  '''||v_parametros.fecha_ini||''' and   '''||v_parametros.fecha_fin||''' and
-
               case when ('''||v_parametros.estado||'''=''Todos'')
               then   LB.estado in (''impreso'',
                                        ''entregado'',''cobrado'',
@@ -511,30 +538,28 @@ BEGIN
 
               )  order by fecha, indice, nro_cheque asc';
 
-              raise notice '%',v_consulta||'';
+            raise notice 'conslta -> %',v_consulta||'';
 
-			 --Devuelve la respuesta
-		 	 return v_consulta;
-       END;
+            --Devuelve la respuesta
+            return v_consulta;
+        END;
 
-	else
+    else
 
-		raise exception 'Transaccion inexistente';
+        raise exception 'Transaccion inexistente';
 
-	end if;
+    end if;
 
 EXCEPTION
 
-	WHEN OTHERS THEN
-			v_resp='';
-			v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
-			v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
-			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
-			raise exception '%',v_resp;
+    WHEN OTHERS THEN
+        v_resp='';
+        v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+        v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
+        v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+        raise exception '%',v_resp;
 END;
-$body$
-LANGUAGE 'plpgsql'
-VOLATILE
-CALLED ON NULL INPUT
-SECURITY INVOKER
-COST 100;
+$$;
+
+alter function ft_ts_libro_bancos_sel(integer, integer, varchar, varchar) owner to postgres;
+

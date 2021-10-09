@@ -208,21 +208,21 @@ class ACTTsLibroBancos extends ACTbase{
 		$contenido = "<body onLoad='window.print();'>";
 		$contenido = $contenido. "<table border=0 style='line-height: 10px;'>";
 		$contenido = $contenido. "<td colspan='7'; style='text-align: left; width:35px; font-size:8pt'></td>";
-		$contenido = $contenido. "<td colspan='26'; style='text-align: left; width:25px; font-size:8pt'>".$nombre_lugar.", ".$fecha_cheque_literal."</td><tr>";
+		$contenido = $contenido. "<td colspan='26'; style='text-align: left; width:25px; font-size:8pt'>&nbsp;&nbsp;".$nombre_lugar.", ".$fecha_cheque_literal."</td><tr>";
 		$contenido = $contenido. "<td colspan='25'; style='text-align: left; width:35px; font-size:8pt'></td>";	
 		$contenido = $contenido. "<td colspan='3'; style='text-align: left; width:35px; font-size:8pt'>".number_format($importe_cheque,2)."</td><tr>";
 		$contenido = $contenido. "<td colspan='33'; style='text-align: left; width:35px; font-size:8pt'></td><tr>";
 		/*$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>";
 		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>";
 		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>"; */
-		$contenido = $contenido. "<td colspan='31'; style='text-align: left; width:35px; font-size:8pt'>".$a_favor."</td><tr>";
+		$contenido = $contenido. "<td colspan='31'; style='text-align: left; width:35px; font-size:8pt'>&nbsp;&nbsp;&nbsp;&nbsp;".$a_favor."</td><tr>";
 		$contenido = $contenido. "<td colspan='33'; style='text-align: left; width:35px; font-size:8pt'></td><tr>";
 		$contenido = $contenido. "<td colspan='33'; style='text-align: left; width:35px; font-size:8pt'></td><tr>";
 		$contenido = $contenido. "<td colspan='33'; style='text-align: left; width:35px; font-size:8pt'></td><tr>";
 		/*$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>";
 		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>";
 		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>";*/
-		$contenido = $contenido. "<td colspan='31'; style='text-align: left; width:35px; font-size:8pt'>".$funciones->num2letrasCheque($importe_cheque).'-----'."</td><tr>";
+		$contenido = $contenido. "<td colspan='31'; style='text-align: left; width:35px; font-size:8pt'>&nbsp;&nbsp;&nbsp;&nbsp;".$funciones->num2letrasCheque($importe_cheque).'-----'."</td><tr>";
 		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
 		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
 		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";

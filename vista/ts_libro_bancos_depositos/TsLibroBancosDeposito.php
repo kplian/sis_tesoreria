@@ -374,14 +374,14 @@ header("content-type: text/javascript; charset=UTF-8");
 				mode: 'local',
 				valueField: 'estilo',
 				gwidth: 60,
-				store:['CBB','SRZ','LPB','TJA','SRE','CIJ','TDD','UYU','MIA','MAD']
+				store:['CBB','SRZ','LPB','TJA','SRE','CIJ','TDD','UYU','MIA','MAD','ORU','PTS']
 			},
 			type:'ComboBox',
 			id_grupo:1,
 			filters:{	
 					 type: 'list',
 					  pfiltro:'lban.origen',
-					 options: ['CBB','SRZ','TJA','SRE','CIJ','TDD','UYU','MIA','MAD'],	
+					 options: ['CBB','SRZ','LPB','TJA','SRE','CIJ','TDD','UYU','MIA','MAD','ORU','PTS'],	
 				},
 			grid:true,
 			form:true
