@@ -4,7 +4,7 @@
 
 CREATE TABLE tes.tobligacion_pago (
   id_obligacion_pago SERIAL, 
-  id_proveedor INTEGER NOT NULL,
+  id_proveedor INTEGER,
   id_funcionario INTEGER,
   id_subsistema INTEGER, 
   id_moneda INTEGER, 
@@ -18,30 +18,134 @@ CREATE TABLE tes.tobligacion_pago (
   obs VARCHAR(1000), 
   porc_anticipo NUMERIC(4,2) DEFAULT 0, 
   porc_retgar NUMERIC(4,2) DEFAULT 0, 
-  tipo_cambio_conv NUMERIC(19,2), 
+  tipo_cambio_conv NUMERIC, 
   num_tramite VARCHAR(200), 
   tipo_obligacion VARCHAR(30), 
   comprometido VARCHAR(2) DEFAULT 'no'::character varying, 
   pago_variable VARCHAR(2) DEFAULT 'no'::character varying NOT NULL, 
-  nro_cuota_vigente NUMERIC(1,0) DEFAULT 0 NOT NULL,
+  nro_cuota_vigente NUMERIC(20,0) DEFAULT 0 NOT NULL,
   total_pago NUMERIC(19,2),  
+  id_depto_conta INTEGER,
+  total_nro_cuota INTEGER DEFAULT 0 NOT NULL,
+  id_plantilla INTEGER,
+  fecha_pp_ini DATE,
+  rotacion INTEGER DEFAULT 1,
+  ultima_cuota_pp NUMERIC(4,2),
+  ultimo_estado_pp VARCHAR(150),
+  tipo_anticipo VARCHAR(5) DEFAULT 'no' NOT NULL,
+  id_categoria_compra INTEGER,
+  tipo_solicitud VARCHAR(50) DEFAULT '' NOT NULL,
+  tipo_concepto_solicitud VARCHAR(50) DEFAULT '' NOT NULL,
+  id_funcionario_gerente INTEGER,
+  ajuste_anticipo NUMERIC(19,2) DEFAULT 0 NOT NULL,
+  ajuste_aplicado NUMERIC(19,2) DEFAULT 0 NOT NULL,
+  monto_estimado_sg NUMERIC(19,2) DEFAULT 0 NOT NULL,
+  id_obligacion_pago_extendida INTEGER,
+  monto_ajuste_ret_garantia_ga NUMERIC(19,2) DEFAULT 0 ,
+  monto_ajuste_ret_anticipo_par_ga NUMERIC(19,2) DEFAULT 0 ,
+  id_contrato INTEGER,
+  obs_presupuestos VARCHAR,
+  ultima_cuota_dev NUMERIC,
+  codigo_poa VARCHAR,
+  obs_poa VARCHAR,
+  uo_ex VARCHAR(4) DEFAULT 'no' NOT NULL,
+  id_funcionario_responsable INTEGER,
+  monto_total_adjudicado NUMERIC(19,2),
+  total_anticipo NUMERIC(19,2),
+  pedido_sap VARCHAR(100),
+  fin_forzado VARCHAR(2) DEFAULT 'no' NOT NULL,
+  monto_sg_mo NUMERIC(19,2) DEFAULT 0 NOT NULL,
+  comprometer_iva VARCHAR(2) DEFAULT 'si' NOT NULL,
+  bloqueado integer default 0,
+  cod_tipo_relacion VARCHAR(50),
+  id_funcionario_gestor integer,
   CONSTRAINT pk_tobligacion_pago__id_obligacion_pago PRIMARY KEY(id_obligacion_pago), 
-  CONSTRAINT chk_tobligacion_pago__estado CHECK ((estado)::text = ANY (ARRAY[('borrador'::character varying)::text, ('registrado'::character varying)::text,('en_pago'::character varying)::text, ('finalizado'::character varying)::text,('anulado'::character varying)::text])), 
-  CONSTRAINT chk_tobligacion_pago__tipo_obligacion CHECK ((tipo_obligacion)::text = ANY ((ARRAY['adquisiciones'::character varying, 'caja_chica'::character varying, 'viaticos'::character varying, 'fondos_en_avance'::character varying])::text[]))
+  CONSTRAINT chk_tobligacion_pago__estado CHECK ((estado)::text = ANY (ARRAY[('liberacion'::character varying)::text, ('borrador'::character varying)::text, ('registrado'::character varying)::text, ('en_pago'::character varying)::text, ('finalizado'::character varying)::text, ('vbpoa'::character varying)::text, ('vbpresupuestos'::character varying)::text, ('anulado'::character varying)::text])),
+  CONSTRAINT chk_tobligacion_pago__tipo_obligacion CHECK ((tipo_obligacion)::text = ANY (ARRAY[('adquisiciones'::character varying)::text, ('pago_unico'::character varying)::text, ('pago_especial'::character varying)::text, ('caja_chica'::character varying)::text, ('viaticos'::character varying)::text, ('fondos_en_avance'::character varying)::text, ('pago_directo'::character varying)::text, ('rrhh'::character varying)::text]))
+  
+
 ) INHERITS (pxp.tbase)
 WITHOUT OIDS;
 
---------------- SQL ---------------
+COMMENT ON COLUMN tes.tobligacion_pago.id_plantilla
+IS 'rAra registra el documento por defecto para los planes de pago';
 
- -- object recreation
-ALTER TABLE tes.tobligacion_pago
-  DROP CONSTRAINT chk_tobligacion_pago__tipo_obligacion RESTRICT;
+COMMENT ON COLUMN tes.tobligacion_pago.fecha_pp_ini
+IS 'Fecha tentativa inicial para los planes de pago';
 
-ALTER TABLE tes.tobligacion_pago
-  ADD CONSTRAINT chk_tobligacion_pago__tipo_obligacion CHECK ((tipo_obligacion)::text = ANY (ARRAY[('adquisiciones'::character varying)::text, ('caja_chica'::character varying)::text, ('viaticos'::character varying)::text, ('fondos_en_avance'::character varying)::text, ('pago_directo'::character varying)::text]));
+COMMENT ON COLUMN tes.tobligacion_pago.rotacion
+IS 'Cada cuantos meses se registrar las fechas tentaivas a partir de la inicial';
 
+COMMENT ON COLUMN tes.tobligacion_pago.ultima_cuota_pp
+IS 'eace referencia al numero de la ultima uocta modificada';
 
-ALTER TABLE tes.tobligacion_pago OWNER TO postgres;
+COMMENT ON COLUMN tes.tobligacion_pago.ultimo_estado_pp
+IS 'ultimo estado del plan de pago correpondiente a la cuota indicada en ultima_cuota_pp';
+
+COMMENT ON COLUMN tes.tobligacion_pago.tipo_anticipo
+IS 'tipo anticipo, si o no';
+
+COMMENT ON COLUMN tes.tobligacion_pago.id_categoria_compra
+IS 'ei la obligacion de pago es de adquisiciones para acceso mas rapido al datos copiamos la categoria dde compra que viene en la solicitud';
+
+COMMENT ON COLUMN tes.tobligacion_pago.tipo_solicitud
+IS 'cuando viene de adquisiciones para disminuir la complekidad de las consultas copiamos el tipo de la tabla solicitud de compra';
+
+COMMENT ON COLUMN tes.tobligacion_pago.tipo_concepto_solicitud
+IS 'cuando viene de adquisiciones para disminuir la complekidad de las consultas copiamos el tipo_concepto de la tabla solicitud de compra';
+
+COMMENT ON COLUMN tes.tobligacion_pago.id_funcionario_gerente
+IS 'se campo se define en funcion del funcionario solcitante,  se asigna el gerente de menor nivel en la escala jerarquica';
+
+COMMENT ON COLUMN tes.tobligacion_pago.ajuste_anticipo
+IS 'Ajuste de anticipo se utuliza para cuaadrar y poder cerrar el proceso de obligacion de pago cuando de falta en el monto anticipado. Se tiene un monto aplicado mayor que el monto aplicado';
+
+COMMENT ON COLUMN tes.tobligacion_pago.ajuste_aplicado
+IS 'Se utiliza para hacer cuadrad el monto anticipado total con el monto aplicado, se utilia cuando el monto anticipado total sobrepasa el monto aplicado';
+
+COMMENT ON COLUMN tes.tobligacion_pago.monto_estimado_sg
+IS 'monto estimado para ser pagado en la siguiente gestion , este campo afecta la validacion del total por pagar';
+
+COMMENT ON COLUMN tes.tobligacion_pago.id_obligacion_pago_extendida
+IS 'Este campo sirve para relacionar la obligacion que se extiende a la siguiente gestion por tener un saldo anticipado';
+
+COMMENT ON COLUMN tes.tobligacion_pago.monto_ajuste_ret_garantia_ga
+IS 'Este campo almacena en obligaciones extendidas saldo de retenciones de garantia por devolver';
+
+COMMENT ON COLUMN tes.tobligacion_pago.monto_ajuste_ret_anticipo_par_ga
+IS 'este campo almacena en obligaciones entendidas el saldo de anticipo parcial por retener de la gestion anterior';
+
+COMMENT ON COLUMN tes.tobligacion_pago.id_contrato
+IS 'si la obligacion tiene un contrato de referencia';
+
+COMMENT ON COLUMN tes.tobligacion_pago.obs_presupuestos
+IS 'para inotrducir obs en el area de presupuestos';
+
+COMMENT ON COLUMN tes.tobligacion_pago.ultima_cuota_dev
+IS 'identifica la ultima cuota  del tipo devengado para alertar sobre ultimo pago, sellena atravez de un triguer en la tabla de plan de pagos';
+
+COMMENT ON COLUMN tes.tobligacion_pago.codigo_poa
+IS 'Codigo de actividad POA';
+
+COMMENT ON COLUMN tes.tobligacion_pago.obs_poa
+IS 'par ainsertar al guna observacion de POA';
+
+COMMENT ON COLUMN tes.tobligacion_pago.uo_ex
+IS 'cuando la uo que aprueba se selecciona de la tabla de excepcion queda marcado como si';
+
+COMMENT ON COLUMN tes.tobligacion_pago.fin_forzado
+IS 'si o no, se marca como si si es que la obligacion fue forzada a finalizar con anticpos o retenciones  o pagos pendientes';
+
+COMMENT ON COLUMN tes.tobligacion_pago.id_funcionario_responsable
+IS 'Funcionario que esta a cargo del plan de pagos cuando el solicitante original designa por alguna razon deja sus funciones o esta de vacion asigna a otro funcionario para que este continue con los pagos pendientes.';
+
+COMMENT ON COLUMN tes.tobligacion_pago.monto_sg_mo
+IS 'monto para ser pagado en la sigueinbte gestion,  este monto no sera comprometido,  se prorrate entr_monto_sg_mo en la tabla obligacion_det';
+
+COMMENT ON COLUMN tes.tobligacion_pago.comprometer_iva
+IS 'si esta bandera esta habilita le resta el 13% del iva al momento de comproemter la obligacion de pago,   solo es validao para los que nacen en tesoreria, no considerado para lso que vienes de adquisiciones';
+
+ ALTER TABLE tes.tobligacion_pago OWNER TO postgres;
 
 --tabla tes.tobligacion_det
 
@@ -57,11 +161,29 @@ CREATE TABLE tes.tobligacion_det (
   descripcion TEXT, 
   monto_pago_mo NUMERIC(19,2), 
   monto_pago_mb NUMERIC(19,2), 
-   factor_porcentual NUMERIC, 
+  factor_porcentual NUMERIC, 
+  revertido_mb NUMERIC(19,2) DEFAULT 0 NOT NULL,
+  incrementado_mb NUMERIC(19,2) DEFAULT 0 NOT NULL,
+  incrementado_mo NUMERIC(19,2) DEFAULT 0 NOT NULL,
+  revertido_mo NUMERIC(19,2) DEFAULT 0 NOT NULL,
+  id_orden_trabajo INTEGER,
+  monto_pago_sg_mo NUMERIC(19,2) DEFAULT 0 NOT NULL,
+  monto_pago_sg_mb NUMERIC(19,2) DEFAULT 0 NOT NULL,
  
   CONSTRAINT pk_tobligacion_det__id_obligacion_det PRIMARY KEY(id_obligacion_det)
 ) INHERITS (pxp.tbase)
 WITHOUT OIDS;
+COMMENT ON COLUMN tes.tobligacion_det.incrementado_mb
+IS 'En este campo se almacenan los incrementos acumulados en el presupeussto comprometido';
+
+COMMENT ON COLUMN tes.tobligacion_det.id_orden_trabajo
+IS 'orden de trabajo';
+
+COMMENT ON COLUMN tes.tobligacion_det.monto_pago_sg_mo
+IS 'monto a pagar siguiente gestion en moneda original, este monto no comprometera presupuesto';
+
+COMMENT ON COLUMN tes.tobligacion_det.monto_pago_sg_mb
+IS 'monto para la siguiente gestion en moenda base, este monto no comprometera presupuestos';
 
 ALTER TABLE tes.tobligacion_det OWNER TO postgres;
 
@@ -73,7 +195,7 @@ CREATE TABLE tes.tplan_pago(
     id_plantilla int4,
     id_plan_pago_fk int4,
     id_cuenta_bancaria int4,
-    id_comprobante int4,
+    id_int_comprobante int4,
     id_estado_wf int4,
     id_proceso_wf int4,
     estado varchar(60),
@@ -86,7 +208,7 @@ CREATE TABLE tes.tplan_pago(
     fecha_tentativa date,
     fecha_dev date,
     fecha_pag date,
-    tipo_cambio numeric(19, 2) DEFAULT 0 NOT NULL,
+    tipo_cambio numeric(19, 2) DEFAULT 1 NOT NULL ,
     obs_descuentos_anticipo text,
     obs_monto_no_pagado text,
     obs_otros_descuentos text,
@@ -101,11 +223,117 @@ CREATE TABLE tes.tplan_pago(
     monto_ejecutar_total_mo numeric(19, 2) DEFAULT 0 NOT NULL,
     monto_ejecutar_total_mb numeric(19, 2) DEFAULT 0 NOT NULL,
     total_prorrateado numeric(19, 2) DEFAULT 0 NOT NULL, 
-      liquido_pagable NUMERIC(19,2) DEFAULT 0 NOT NULL, 
-  liquido_pagable_mb NUMERIC(19,2) DEFAULT 0 NOT NULL, 
+    liquido_pagable NUMERIC(19,2) DEFAULT 0 NOT NULL, 
+    liquido_pagable_mb NUMERIC(19,2) DEFAULT 0 NOT NULL, 
+    total_pagado NUMERIC(19,2) DEFAULT 0 NOT NULL,
+    sinc_presupuesto VARCHAR(2) DEFAULT 'no' NOT NULL,
+    monto_retgar_mo NUMERIC(19,2) DEFAULT 0 NOT NULL,
+    monto_retgar_mb NUMERIC(19,2) DEFAULT 0 NOT NULL,
+    descuento_ley NUMERIC(18,2) DEFAULT 0 NOT NULL,
+    obs_descuentos_ley TEXT,
+    descuento_ley_mb NUMERIC(18,2) DEFAULT 0 NOT NULL,
+    porc_descuento_ley NUMERIC DEFAULT 0 NOT NULL,
+    nro_cheque INTEGER NOT NULL DEFAULT 0,
+    nro_cuenta_bancaria VARCHAR(100) ,
+    id_cuenta_bancaria_mov integer,
+    monto_excento NUMERIC(12,2) DEFAULT 0 NOT NULL,
+    porc_monto_excento_var NUMERIC DEFAULT 0 NOT NULL,
+    descuento_inter_serv NUMERIC(19,2) DEFAULT 0 NOT NULL,
+    obs_descuento_inter_serv TEXT,
+    porc_monto_retgar NUMERIC,
+    revisado_asistente VARCHAR(5) DEFAULT 'no' NOT NULL,
+    conformidad TEXT,
+    fecha_conformidad DATE,
+    monto_ajuste_ag NUMERIC(19,2) DEFAULT 0 NOT NULL,
+    monto_ajuste_siguiente_pago NUMERIC(19,2) DEFAULT 0 NOT NULL,
+    monto_anticipo NUMERIC(19,2) DEFAULT 0 NOT NULL,
+    fecha_costo_ini DATE,
+    fecha_costo_fin DATE,
+    tiene_form500 VARCHAR(13) DEFAULT 'no' NOT NULL,
+    id_depto_lb INTEGER,
+    id_depto_conta INTEGER,
+    monto_anticipar_sg NUMERIC(19,2) DEFAULT 0 NOT NULL,
+    observaciones_pago TEXT,
+    es_ultima_cuota BOOLEAN,
+    pago_borrador VARCHAR(50) DEFAULT 'no'::character varying NOT NULL,
+    codigo_tipo_anticipo varchar(50) default null,
+    fecha_documento DATE,
+    fecha_derivacion DATE,
+    dias_limite INTEGER,
+    fecha_vencimiento DATE,
     PRIMARY KEY (id_plan_pago)) INHERITS (pxp.tbase);
     
+COMMENT ON COLUMN tes.tplan_pago.total_pagado
+IS 'ESta columana acumula el total de pago registrados, solo es util para cuotas del tipo devengado o devengado_pago';
   
+COMMENT ON COLUMN tes.tplan_pago.sinc_presupuesto
+IS 'este campo indica que falta presupuesto comprometido para realizar el pago, y es necesario incremetar con una sincronizacion';  
+
+COMMENT ON COLUMN tes.tplan_pago.monto_retgar_mo
+IS 'Aqui se almacenea el monto qeu se retrendra por concepto de garantia';
+
+COMMENT ON COLUMN tes.tplan_pago.monto_retgar_mb
+IS 'conto de retencion de garantia en moneda base';
+
+COMMENT ON COLUMN tes.tplan_pago.descuento_ley
+IS 'en este campo se registran los decuento asociados al tipo de documentos, por ejemplo si es recibo con retencion de bienes, se retiene 3% del IT y 5%del IUE';
+
+COMMENT ON COLUMN tes.tplan_pago.obs_descuentos_ley
+IS 'este campo espeficia los porcentajes aplicado a los decuentos, es solo descriptivo';
+
+COMMENT ON COLUMN tes.tplan_pago.descuento_ley_mb
+IS 'descuentos de ley en moneda base';
+
+COMMENT ON COLUMN tes.tplan_pago.porc_descuento_ley
+IS 'cste campo almacena el porcentaje de descuentos de ley, se utiliza para las cuotas de tipo pago';
+
+COMMENT ON COLUMN tes.tplan_pago.nro_cheque
+IS 'Número de cheque que se utilizará para realizar el pago';
+
+COMMENT ON COLUMN tes.tplan_pago.nro_cuenta_bancaria
+IS 'Número de cuenta bancaria para realizar el pago cuando es Transferencia';
+
+COMMENT ON COLUMN tes.tplan_pago.revisado_asistente
+IS 'este campo sirve para marcar los pagos revisados por las asistente';
+
+COMMENT ON COLUMN tes.tplan_pago.monto_ajuste_ag
+IS 'monto de ajuste anterior gestion, (se usa en anticipos parciales). Si sobro dinero de un anticipo en la anterior gestion se utuliza este campo para ajustar contra ese sobrante';
+
+COMMENT ON COLUMN tes.tplan_pago.monto_ajuste_siguiente_pago
+IS 'Se utiliza par la aplicacion de anticipos totales,  si falta dinero para cubrir la aplicacion en este monto,  en este campo ponemos el monto a cubrir con el siguiente anticipo';
+
+COMMENT ON COLUMN tes.tplan_pago.monto_anticipo
+IS 'monto anticipar que puede ser aplicado con otro comprobante  o puede ser llevado al gasto en la siguiente gestion,  si este valor es mayor a cero al cerrar la obligacion de pagos y no a sido totalmente aplicado, debe crearce una obligacion de pago extentida  para la siguiente gestion con un plan de pagos del tipo anticipo en estado anticipado por la suma de estos valores en registors activos';
+
+COMMENT ON COLUMN tes.tplan_pago.fecha_costo_ini
+IS 'Cuando un concepto de gasto es del tipo servicio, esta fecha indica el inico del costo';
+
+COMMENT ON COLUMN tes.tplan_pago.fecha_costo_fin
+IS 'Cuando un concepto de gasto es del tipo servicio, esta fecha indica el fin del costo';
+
+COMMENT ON COLUMN tes.tplan_pago.tipo
+IS 'det_rendicion, dev_garantia, ant_aplicado , pagado_rrh, pagado, ant_parcial, anticipo, rendicion, devengado_rrhh, devengado, devengado_pagado_1c, devengado_pagado';
+
+COMMENT ON COLUMN tes.tplan_pago.tiene_form500
+IS 'esta bander indica que el formulario 500 ya ue registrado';
+
+COMMENT ON COLUMN tes.tplan_pago.id_depto_lb
+IS 'identifica el libro de pango con el que se paga el cheque, sirve apra filtrar las cuentas bancarias que se peudne seleccionar';
+
+COMMENT ON COLUMN tes.tplan_pago.id_depto_conta
+IS 'define el depto de conta que contabiliza el pago, ...  no consideramos ep, cc (antes solo lo teneiamos en la obligacion de pago)';
+
+COMMENT ON COLUMN tes.tplan_pago.monto_anticipar_sg
+IS 'monto anticipar que puede ser aplicado con otro comprobante  o puede ser llevado al gasto en la siguiente gestion,  si este valor es mayor a cero al cerrar la obligacion de pagos y no a sido totalmente aplicado, debe crearce una obligacion de pago extentida  para la siguiente gestion con un plan de pagos del tipo anticipo en estado anticipado por la suma de estos valores en registors activos';
+
+COMMENT ON COLUMN tes.tplan_pago.es_ultima_cuota
+IS 'Campo que nos sirve para verificar si es la ultima cuota de pago.';
+
+COMMENT ON COLUMN tes.tplan_pago."dias_limite"
+    IS 'Dias habiles limite para el pago contractual';
+-----------------------------------------
+
+
  CREATE TABLE tes.tprorrateo(
     id_prorrateo SERIAL NOT NULL,
     id_plan_pago int4 NOT NULL,
@@ -116,9 +344,17 @@ CREATE TABLE tes.tplan_pago(
     id_transaccion_pag int4,
     monto_ejecutar_mo numeric(19, 2),
     monto_ejecutar_mb numeric(19, 2),
+    id_int_transaccion INTEGER,
+    id_prorrateo_fk INTEGER,
     PRIMARY KEY (id_prorrateo))
-     INHERITS (pxp.tbase); 
+    INHERITS (pxp.tbase); 
     
+    COMMENT ON COLUMN tes.tprorrateo.id_int_transaccion
+    IS 'relaciona el prorrateo del devengado con la transaccion don de se ejecuta el presupuesto'; 
+
+    COMMENT ON COLUMN tes.tprorrateo.id_prorrateo_fk
+    IS 'solo sirve para prorrateos de pago, referencia el prorrateo del devengado';
+
 
 /***********************************F-SCP-GSS-TES-45-01/04/2013****************************************/
 
@@ -128,14 +364,22 @@ CREATE TABLE tes.tplan_pago(
 CREATE TABLE tes.tcuenta_bancaria (
   id_cuenta_bancaria SERIAL, 
   id_institucion INTEGER NOT NULL, 
-  id_cuenta INTEGER NOT NULL, 
-  id_auxiliar INTEGER, 
   nro_cuenta VARCHAR, 
   fecha_alta DATE, 
   fecha_baja DATE, 
+  id_moneda INTEGER,
+  centro VARCHAR(4) DEFAULT 'si' NOT NULL,
+  denominacion VARCHAR(100),
+  id_finalidad INTEGER[],
   CONSTRAINT pk_tcuenta_bancaria_id_cuenta_bancaria PRIMARY KEY(id_cuenta_bancaria)
 ) INHERITS (pxp.tbase)
 WITHOUT OIDS;
+COMMENT ON COLUMN tes.tcuenta_bancaria.centro
+IS 'Identifica si es de la regional central o no. Viene por la integracionde cuenta bancaria endesis';
+
+COMMENT ON COLUMN tes.tcuenta_bancaria.id_finalidad
+IS 'arreglo que almacena los ids de la tabla finalidad al cual corresponde la cuenta bancaria';
+
 
 --tabla tes.chequera
 
@@ -149,164 +393,6 @@ CREATE TABLE tes.tchequera (
 WITHOUT OIDS;
 
 /***********************************F-SCP-GSS-TES-121-24/04/2013***************************************/
-
-
-
-/***********************************I-SCP-RAC-TES-0-04/06/2013***************************************/
-
-
--- object recreation
-ALTER TABLE tes.tobligacion_pago
-  DROP CONSTRAINT chk_tobligacion_pago__estado RESTRICT;
-
-ALTER TABLE tes.tobligacion_pago
-  ADD CONSTRAINT chk_tobligacion_pago__estado CHECK ((estado)::text = ANY (ARRAY[('borrador'::character varying)::text, ('registrado'::character varying)::text, ('en_pago'::character varying)::text, ('finalizado'::character varying)::text, ('anulado'::character varying)::text]));
-
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN total_pagado NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tplan_pago.total_pagado
-IS 'ESta columana acumula el total de pago registrados, solo es util para cuotas del tipo devengado o devengado_pago';
-  
-
-/***********************************F-SCP-RAC-TES-0-04/06/2013***************************************/
-
-/***********************************I-SCP-RAC-TES-170-19/06/2013***************************************/
-ALTER TABLE tes.tcuenta_bancaria
-  DROP COLUMN id_cuenta;
-  
-  --------------- SQL ---------------
-
-ALTER TABLE tes.tcuenta_bancaria
-  DROP COLUMN id_auxiliar;
-  
--------------------------------
-  
-  ALTER TABLE tes.tcuenta_bancaria
-  ADD COLUMN id_moneda INTEGER;
-  
-  
-/***********************************F-SCP-RAC-TES-170-19/06/2013***************************************/
-
-
-/***********************************I-SCP-RAC-TES-0-04/07/2013***************************************/
-
-ALTER TABLE tes.tobligacion_det
-  ADD COLUMN revertido_mb NUMERIC(19,2) DEFAULT 0 NOT NULL;
-  
-ALTER TABLE tes.tplan_pago
-  ALTER COLUMN tipo_cambio SET DEFAULT 1;  
-  
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN sinc_presupuesto VARCHAR(2) DEFAULT 'no' NOT NULL;
-
-COMMENT ON COLUMN tes.tplan_pago.sinc_presupuesto
-IS 'este campo indica que falta presupuesto comprometido para realizar el pago, y es necesario incremetar con una sincronizacion';  
-
-ALTER TABLE tes.tobligacion_det
-  ADD COLUMN incrementado_mb NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tobligacion_det.incrementado_mb
-IS 'En este campo se almacenan los incrementos acumulados en el presupeussto comprometido';
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN monto_retgar_mo NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tplan_pago.monto_retgar_mo
-IS 'Aqui se almacenea el monto qeu se retrendra por concepto de garantia';
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN monto_retgar_mb NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tplan_pago.monto_retgar_mb
-IS 'conto de retencion de garantia en moneda base';
-
-
-/***********************************F-SCP-RAC-TES-0-04/07/2013***************************************/
-
-
-/***********************************I-SCP-RAC-TES-0-20/08/2013***************************************/
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN id_depto_conta INTEGER;
-  
-/***********************************F-SCP-RAC-TES-0-20/08/2013***************************************/
-  
-  
-/***********************************I-SCP-RAC-TES-0-09/09/2013***************************************/
-  
-ALTER TABLE tes.tplan_pago
-  RENAME COLUMN id_comprobante TO id_int_comprobante;  
-
-/***********************************F-SCP-RAC-TES-0-09/09/2013***************************************/
- 
-/***********************************I-SCP-RAC-TES-0-18/09/2013***************************************/
-
-ALTER TABLE tes.tprorrateo
-  ADD COLUMN id_int_transaccion INTEGER;
-
-COMMENT ON COLUMN tes.tprorrateo.id_int_transaccion
-IS 'relaciona el prorrateo del devengado con la transaccion don de se ejecuta el presupuesto'; 
-
-ALTER TABLE tes.tprorrateo
-  ADD COLUMN id_prorrateo_fk INTEGER;
-
-COMMENT ON COLUMN tes.tprorrateo.id_prorrateo_fk
-IS 'solo sirve para prorrateos de pago, referencia el prorrateo del devengado';
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN descuento_ley NUMERIC(18,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tplan_pago.descuento_ley
-IS 'en este campo se registran los decuento asociados al tipo de documentos, por ejemplo si es recibo con retencion de bienes, se retiene 3% del IT y 5%del IUE';
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN obs_descuentos_ley TEXT;
-
-COMMENT ON COLUMN tes.tplan_pago.obs_descuentos_ley
-IS 'este campo espeficia los porcentajes aplicado a los decuentos, es solo descriptivo';
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN descuento_ley_mb NUMERIC(18,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tplan_pago.descuento_ley_mb
-IS 'descuentos de ley en moneda base';
-
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN porc_descuento_ley NUMERIC(4,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tplan_pago.porc_descuento_ley
-IS 'cste campo almacena el porcentaje de descuentos de ley, se utiliza para las cuotas de tipo pago';
-
-/***********************************F-SCP-RAC-TES-0-18/09/2013***************************************/
-
-/***********************************I-SCP-RCM-TES-0-05/12/2013***************************************/ 
- 
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN nro_cheque INTEGER;
-
-COMMENT ON COLUMN tes.tplan_pago.nro_cheque
-IS 'Número de cheque que se utilizará para realizar el pago';
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN nro_cuenta_bancaria VARCHAR(50);
-
-COMMENT ON COLUMN tes.tplan_pago.nro_cuenta_bancaria
-IS 'Número de cuenta bancaria para realizar el pago cuando es Transferencia';
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN id_cuenta_bancaria_mov integer;
-
-/***********************************F-SCP-RCM-TES-0-05/12/2013***************************************/
-
 
 /***********************************I-SCP-RCM-TES-0-12/12/2013***************************************/
 
@@ -343,14 +429,28 @@ CREATE TABLE tes.tcaja (
   id_caja SERIAL, 
   id_depto INTEGER NOT NULL, 
   id_moneda INTEGER NOT NULL, 
-  codigo VARCHAR(20) NOT NULL, 
   tipo VARCHAR(20) NOT NULL, 
-  estado VARCHAR(20) NOT NULL, 
-  importe_maximo NUMERIC(18,2) NOT NULL, 
-  porcentaje_compra NUMERIC(6,2) NOT NULL, 
-  CONSTRAINT pk_tcaja__id_caja PRIMARY KEY(id_caja)
+  estado VARCHAR(20) NOT NULL DEFAULT 'cerrado', 
+  codigo varchar(20) NOT NULL,
+  importe_maximo_caja NUMERIC(18,2) NOT NULL,
+  importe_maximo_item NUMERIC(18,2) NOT NULL,
+  tipo_ejecucion VARCHAR(25) NOT NULL,
+  id_cuenta_bancaria INTEGER,
+  fecha_apertura DATE,
+  fecha_cierre DATE,
+  id_depto_lb INTEGER,
+  dias_maximo_rendicion INTEGER,
+  CONSTRAINT pk_tcaja__id_caja PRIMARY KEY(id_caja),
+  CONSTRAINT tcaja_codigo_key UNIQUE (codigo)
 ) INHERITS (pxp.tbase)
 WITHOUT OIDS;
+
+COMMENT ON COLUMN tes.tcaja.fecha_apertura
+IS 'ultima fecha de apertura de caja';
+
+
+COMMENT ON COLUMN tes.tcaja.fecha_cierre
+IS 'ultima fecha de cierre de caja';
 /***********************************F-SCP-ECR-TES-0-20/12/2013***************************************/
 
 /***********************************I-SCP-ECR-TES-2-20/12/2013***************************************/
@@ -360,143 +460,12 @@ CREATE TABLE tes.tcajero (
   tipo VARCHAR(20) NOT NULL, 
   estado VARCHAR(20) NOT NULL, 
   id_caja INTEGER, 
+  fecha_inicio DATE NOT NULL,
+  fecha_fin DATE,
   CONSTRAINT pk_tcajero__id_cajero PRIMARY KEY(id_cajero)
 ) INHERITS (pxp.tbase)
 WITHOUT OIDS;
 /***********************************F-SCP-ECR-TES-2-20/12/2013***************************************/
-
-
-
-/***********************************I-SCP-RAC-TES-0-17/12/2014***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tcuenta_bancaria
-  ADD COLUMN centro VARCHAR(4) DEFAULT 'si' NOT NULL;
-
-COMMENT ON COLUMN tes.tcuenta_bancaria.centro
-IS 'Identifica si es de la regional central o no. Viene por la integracionde cuenta bancaria endesis';
-
-
-/***********************************F-SCP-RAC-TES-0-17/12/2014***************************************/
-
-
-
-/***********************************I-SCP-RAC-TES-0-29/01/2014***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_det
-  ADD COLUMN revertido_mo NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_det
-  ADD COLUMN incrementado_mo NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
-ALTER TABLE tes.tplan_pago
-  ALTER COLUMN nro_cheque SET DEFAULT 0;
-
-ALTER TABLE tes.tplan_pago
-  ALTER COLUMN nro_cheque SET NOT NULL;
-
-
-/***********************************F-SCP-RAC-TES-0-29/01/2014***************************************/
-
-
-
-
-/***********************************I-SCP-RAC-TES-0-05/02/2014***************************************/
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN total_nro_cuota INTEGER DEFAULT 0 NOT NULL;
-
-
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN id_plantilla INTEGER;
-
-COMMENT ON COLUMN tes.tobligacion_pago.id_plantilla
-IS 'rAra registra el documento por defecto para los planes de pago';
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN fecha_pp_ini DATE;
-
-COMMENT ON COLUMN tes.tobligacion_pago.fecha_pp_ini
-IS 'Fecha tentativa inicial para los planes de pago';
-
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN rotacion INTEGER;
-
-ALTER TABLE tes.tobligacion_pago
-  ALTER COLUMN rotacion SET DEFAULT 1;
-
-COMMENT ON COLUMN tes.tobligacion_pago.rotacion
-IS 'Cada cuantos meses se registrar las fechas tentaivas a partir de la inicial';
-
-
-
-/***********************************F-SCP-RAC-TES-0-05/02/2014***************************************/
-
-
-
-/***********************************I-SCP-RAC-TES-0-08/02/2014***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN monto_excento NUMERIC(12,2) DEFAULT 0 NOT NULL;
-  
-  
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN porc_monto_excento_var NUMERIC DEFAULT 0 NOT NULL;
-/***********************************F-SCP-RAC-TES-0-08/02/2014***************************************/
-
-
-
-/***********************************I-SCP-RAC-TES-0-05/03/2014***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ALTER COLUMN nro_cuota_vigente TYPE NUMERIC(20,0);
-  
-/***********************************F-SCP-RAC-TES-0-05/03/2014***************************************/
-
-/***********************************I-SCP-JRR-TES-0-01/04/2014***************************************/
-ALTER TABLE tes.tcuenta_bancaria
-  ADD COLUMN denominacion VARCHAR(100);
-
-/***********************************F-SCP-JRR-TES-0-01/04/2014***************************************/
-
-
-/***********************************I-SCP-RAC-TES-0-19/05/2014***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN ultima_cuota_pp NUMERIC(4,2);
-
-COMMENT ON COLUMN tes.tobligacion_pago.ultima_cuota_pp
-IS 'eace referencia al numero de la ultima uocta modificada';
-
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN ultimo_estado_pp VARCHAR(150);
-
-COMMENT ON COLUMN tes.tobligacion_pago.ultimo_estado_pp
-IS 'ultimo estado del plan de pago correpondiente a la cuota indicada en ultima_cuota_pp';
-
-/***********************************F-SCP-RAC-TES-0-19/05/2014***************************************/
-
 
 
 /***********************************I-SCP-RAC-TES-0-08/07/2014***************************************/
@@ -507,6 +476,7 @@ CREATE TABLE tes.ttipo_plan_pago (
   descripcion VARCHAR, 
   codigo_proceso_llave_wf VARCHAR NOT NULL, 
   codigo_plantilla_comprobante VARCHAR, 
+  tipo_ejecucion VARCHAR(20),
   PRIMARY KEY(id_tipo_plan_pago)
 ) INHERITS (pxp.tbase)
 WITHOUT OIDS;
@@ -517,28 +487,9 @@ IS 'relaciona con tipo de proocesos wf para este pago';
 COMMENT ON COLUMN tes.ttipo_plan_pago.codigo_plantilla_comprobante
 IS 'relaciona con la plantilla de comprobante para este tipo de pago';
 
---------------- SQL ---------------
+COMMENT ON COLUMN tes.ttipo_plan_pago.tipo_ejecucion
+IS 'bandera que permite marcar cuales devengan, pagan o no ejecutan para ser considerados en el reporte de gary';
 
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN tipo_anticipo VARCHAR(5) DEFAULT 'no' NOT NULL;
-
-COMMENT ON COLUMN tes.tobligacion_pago.tipo_anticipo
-IS 'tipo anticipo, si o no';
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN descuento_inter_serv NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN obs_descuento_inter_serv TEXT;
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN porc_monto_retgar NUMERIC;
 
 /***********************************F-SCP-RAC-TES-0-08/07/2014***************************************/
 
@@ -551,189 +502,12 @@ CREATE TABLE tes.ttipo_prorrateo (
   descripcion TEXT,
   es_plantilla VARCHAR (2) NOT NULL,
   tiene_cuenta VARCHAR (2) NOT NULL,  
+  tiene_lugar VARCHAR(2),
   CONSTRAINT ttipo_prorrateo_pkey PRIMARY KEY(id_tipo_prorrateo)
 ) INHERITS (pxp.tbase)
 WITHOUT OIDS;
 
 /***********************************F-SCP-JRR-TES-0-31/07/2014***************************************/
-
-
-/***********************************I-SCP-JRR-TES-0-01/08/2014***************************************/
-
-ALTER TABLE tes.ttipo_prorrateo
-  ADD COLUMN tiene_lugar VARCHAR(2);
-
-/***********************************F-SCP-JRR-TES-0-01/08/2014***************************************/
-
-
-/***********************************I-SCP-RAC-TES-0-01/08/2014***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN id_categoria_compra INTEGER;
-
-COMMENT ON COLUMN tes.tobligacion_pago.id_categoria_compra
-IS 'ei la obligacion de pago es de adquisiciones para acceso mas rapido al datos copiamos la categoria dde compra que viene en la solicitud';
-
-
-/***********************************F-SCP-RAC-TES-0-01/08/2014***************************************/
-
-
-
-/***********************************I-SCP-RAC-TES-0-19/08/2014***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN tipo_solicitud VARCHAR(50) DEFAULT '' NOT NULL;
-
-COMMENT ON COLUMN tes.tobligacion_pago.tipo_solicitud
-IS 'cuando viene de adquisiciones para disminuir la complekidad de las consultas copiamos el tipo de la tabla solicitud de compra';
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN tipo_concepto_solicitud VARCHAR(50) DEFAULT '' NOT NULL;
-
-COMMENT ON COLUMN tes.tobligacion_pago.tipo_concepto_solicitud
-IS 'cuando viene de adquisiciones para disminuir la complekidad de las consultas copiamos el tipo_concepto de la tabla solicitud de compra';
-/***********************************F-SCP-RAC-TES-0-19/08/2014***************************************/
-
-
-
-
-
-
-
-/***********************************I-SCP-RAC-TES-0-1/09/2014***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_det
-  ADD COLUMN id_orden_trabajo INTEGER;
-
-COMMENT ON COLUMN tes.tobligacion_det.id_orden_trabajo
-IS 'orden de trabajo';
-
-/***********************************F-SCP-RAC-TES-0-1/09/2014***************************************/
-
-
-/***********************************I-SCP-RAC-TES-0-12/09/2014***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN id_funcionario_gerente INTEGER;
-
-COMMENT ON COLUMN tes.tobligacion_pago.id_funcionario_gerente
-IS 'se campo se define en funcion del funcionario solcitante,  se asigna el gerente de menor nivel en la escala jerarquica';
-
-
-/***********************************F-SCP-RAC-TES-0-12/09/2014***************************************/
-
-
-/***********************************I-SCP-RAC-TES-0-18/09/2014***************************************/
-
---------------- SQL ---------------
-
- -- object recreation
-ALTER TABLE tes.tobligacion_pago
-  DROP CONSTRAINT chk_tobligacion_pago__estado RESTRICT;
-
-ALTER TABLE tes.tobligacion_pago
-  ADD CONSTRAINT chk_tobligacion_pago__estado CHECK ((estado)::text = ANY (ARRAY[('borrador'::character varying)::text, ('registrado'::character varying)::text, ('en_pago'::character varying)::text, ('finalizado'::character varying)::text, ('vbpresupuestos'::character varying)::text,('anulado'::character varying)::text]));
-
-/***********************************F-SCP-RAC-TES-0-18/09/2014***************************************/
-
-
-/***********************************I-SCP-RAC-TES-0-23/09/2014***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN revisado_asistente VARCHAR(5) DEFAULT 'no' NOT NULL;
-
-COMMENT ON COLUMN tes.tplan_pago.revisado_asistente
-IS 'este campo sirve para marcar los pagos revisados por las asistente';
-
-/***********************************F-SCP-RAC-TES-0-23/09/2014***************************************/
-
-
-
-
-
-/***********************************I-SCP-RAC-TES-0-25/09/2014***************************************/
-
-
-ALTER TABLE tes.tplan_pago
-  ALTER COLUMN nro_cuenta_bancaria TYPE VARCHAR(100) COLLATE pg_catalog."default";
-
-/***********************************F-SCP-RAC-TES-0-25/09/2014***************************************/
-
-/***********************************I-SCP-JRR-TES-0-26/09/2014***************************************/
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN conformidad TEXT;
-  
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN fecha_conformidad DATE;
-
-/***********************************F-SCP-JRR-TES-0-26/09/2014***************************************/
-
-
-/***********************************I-SCP-RAC-TES-0-02/10/2014***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ALTER COLUMN nro_cheque DROP DEFAULT;
-  
-/***********************************F-SCP-RAC-TES-0-02/10/2014***************************************/
-
-
-
-/***********************************I-SCP-RAC-TES-0-21/10/2014***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN monto_ajuste_ag NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tplan_pago.monto_ajuste_ag
-IS 'monto de ajuste anterior gestion, (se usa en anticipos parciales). Si sobro dinero de un anticipo en la anterior gestion se utuliza este campo para ajustar contra ese sobrante';
-
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN monto_ajuste_siguiente_pago NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tplan_pago.monto_ajuste_siguiente_pago
-IS 'Se utiliza par la aplicacion de anticipos totales,  si falta dinero para cubrir la aplicacion en este monto,  en este campo ponemos el monto a cubrir con el siguiente anticipo';
-
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN ajuste_anticipo NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tobligacion_pago.ajuste_anticipo
-IS 'Ajuste de anticipo se utuliza para cuaadrar y poder cerrar el proceso de obligacion de pago cuando de falta en el monto anticipado. Se tiene un monto aplicado mayor que el monto aplicado';
-
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN ajuste_aplicado NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tobligacion_pago.ajuste_aplicado
-IS 'Se utiliza para hacer cuadrad el monto anticipado total con el monto aplicado, se utilia cuando el monto anticipado total sobrepasa el monto aplicado';
-
-
-/***********************************F-SCP-RAC-TES-0-21/10/2014***************************************/
-
-
 
 
 
@@ -743,97 +517,17 @@ CREATE TABLE tes.tfinalidad (
   nombre_finalidad VARCHAR(200), 
   color VARCHAR(50), 
   estado VARCHAR(20), 
+  tipo VARCHAR,
+  sw_tipo_interfaz VARCHAR(50)[],
   CONSTRAINT pk_tfinalidad__id_finalidad PRIMARY KEY(id_finalidad)
 ) INHERITS (pxp.tbase)
 
 WITH (oids = false);
 
+
+COMMENT ON COLUMN tes.tfinalidad.tipo
+IS 'ingreso o egreso';
 /***********************************F-SCP-GSS-TES-0-27/10/2014***************************************/
-
-/***********************************I-SCP-RAC-TES-0-27/10/2014***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN monto_anticipo NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tplan_pago.monto_anticipo
-IS 'monto anticipar que puede ser aplicado con otro comprobante  o puede ser llevado al gasto en la siguiente gestion,  si este valor es mayor a cero al cerrar la obligacion de pagos y no a sido totalmente aplicado, debe crearce una obligacion de pago extentida  para la siguiente gestion con un plan de pagos del tipo anticipo en estado anticipado por la suma de estos valores en registors activos';
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN monto_estimado_sg NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tobligacion_pago.monto_estimado_sg
-IS 'monto estimado para ser pagado en la siguiente gestion , este campo afecta la validacion del total por pagar';
-
-/***********************************F-SCP-RAC-TES-0-27/10/2014***************************************/
-
-
-/***********************************I-SCP-RAC-TES-0-28/10/2014***************************************/
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN id_obligacion_pago_extendida INTEGER;
-
-COMMENT ON COLUMN tes.tobligacion_pago.id_obligacion_pago_extendida
-IS 'Este campo sirve para relacionar la obligacion que se extiende a la siguiente gestion por tener un saldo anticipado';
-
-
-/***********************************F-SCP-RAC-TES-0-28/10/2014***************************************/
-
-
-/***********************************I-SCP-RAC-TES-0-06/11/2014***************************************/
-
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN monto_ajuste_ret_garantia_ga NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tobligacion_pago.monto_ajuste_ret_garantia_ga
-IS 'Este campo almacena en obligaciones extendidas saldo de retenciones de garantia por devolver';
-
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN monto_ajuste_ret_anticipo_par_ga NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tobligacion_pago.monto_ajuste_ret_anticipo_par_ga
-IS 'este campo almacena en obligaciones entendidas el saldo de anticipo parcial por retener de la gestion anterior';
-/***********************************F-SCP-RAC-TES-0-06/11/2014***************************************/
-
-
-
-
-/***********************************I-SCP-RAC-TES-0-10/11/2014***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ALTER COLUMN porc_descuento_ley TYPE NUMERIC;
-  
-/***********************************F-SCP-RAC-TES-0-10/11/2014***************************************/
-
-/***********************************I-SCP-JRR-TES-0-18/11/2014***************************************/
-
-ALTER TABLE tes.tobligacion_pago
-  ALTER COLUMN id_proveedor DROP NOT NULL;
-/***********************************F-SCP-JRR-TES-0-18/11/2014***************************************/
-
-/***********************************I-SCP-GSS-TES-0-24/11/2014***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tcuenta_bancaria
-  ADD COLUMN id_finalidad INTEGER[];
-
-COMMENT ON COLUMN tes.tcuenta_bancaria.id_finalidad
-IS 'arreglo que almacena los ids de la tabla finalidad al cual corresponde la cuenta bancaria';
-
-/***********************************F-SCP-GSS-TES-0-24/11/2014***************************************/
 
 /***********************************I-SCP-GSS-TES-0-27/11/2014***************************************/
 
@@ -850,113 +544,6 @@ CREATE TABLE tes.tusuario_cuenta_banc (
 
 /***********************************F-SCP-GSS-TES-0-27/11/2014***************************************/
 
-
-/***********************************I-SCP-RAC-TES-0-03/12/2014***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN fecha_costo_ini DATE;
-
-COMMENT ON COLUMN tes.tplan_pago.fecha_costo_ini
-IS 'Cuando un concepto de gasto es del tipo servicio, esta fecha indica el inico del costo';
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN fecha_costo_fin DATE;
-
-COMMENT ON COLUMN tes.tplan_pago.fecha_costo_fin
-IS 'Cuando un concepto de gasto es del tipo servicio, esta fecha indica el fin del costo';
-
---------------- SQL ---------------
-
-COMMENT ON COLUMN tes.tplan_pago.tipo
-IS 'det_rendicion, dev_garantia, ant_aplicado , pagado_rrh, pagado, ant_parcial, anticipo, rendicion, devengado_rrhh, devengado, devengado_pagado_1c, devengado_pagado';
-
-/***********************************F-SCP-RAC-TES-0-03/12/2014***************************************/
-
-/***********************************I-SCP-RAC-TES-0-09/01/2015***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN id_contrato INTEGER;
-
-COMMENT ON COLUMN tes.tobligacion_pago.id_contrato
-IS 'si la obligacion tiene un contrato de referencia';
-
-
-/***********************************F-SCP-RAC-TES-0-09/01/2015***************************************/
-
-
-/***********************************I-SCP-RAC-TES-0-14/01/2015***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN obs_presupuestos VARCHAR;
-
-COMMENT ON COLUMN tes.tobligacion_pago.obs_presupuestos
-IS 'para inotrducir obs en el area de presupuestos';
-
-
-/***********************************F-SCP-RAC-TES-0-14/01/2015***************************************/
-
-
-
-/***********************************I-SCP-RAC-TES-0-19/02/2015***************************************/
-
- -- object recreation
-ALTER TABLE tes.tobligacion_pago
-  DROP CONSTRAINT chk_tobligacion_pago__tipo_obligacion RESTRICT;
-
-ALTER TABLE tes.tobligacion_pago
-  ADD CONSTRAINT chk_tobligacion_pago__tipo_obligacion CHECK ((tipo_obligacion)::text = ANY (ARRAY[('adquisiciones'::character varying)::text, ('pago_unico'::character varying)::text, ('caja_chica'::character varying)::text, ('viaticos'::character varying)::text, ('fondos_en_avance'::character varying)::text, ('pago_directo'::character varying)::text, ('rrhh'::character varying)::text]));
-
-/***********************************F-SCP-RAC-TES-0-19/02/2015***************************************/
-
-
-/***********************************I-SCP-RAC-TES-0-02/03/2015***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN tiene_form500 VARCHAR(13) DEFAULT 'no' NOT NULL;
-
-COMMENT ON COLUMN tes.tplan_pago.tiene_form500
-IS 'esta bander indica que el formulario 500 ya ue registrado';
-
-/***********************************F-SCP-RAC-TES-0-02/03/2015***************************************/
-
-
-
-/***********************************I-SCP-RAC-TES-0-03/03/2015***************************************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN id_depto_lb INTEGER;
-
-COMMENT ON COLUMN tes.tplan_pago.id_depto_lb
-IS 'identifica el libro de pango con el que se paga el cheque, sirve apra filtrar las cuentas bancarias que se peudne seleccionar';
-
-
-/***********************************F-SCP-RAC-TES-0-03/03/2015***************************************/
-
-
-/***********************************I-SCP-RAC-TES-0-25/03/2015***************************************/
-
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN ultima_cuota_dev NUMERIC;
-
-COMMENT ON COLUMN tes.tobligacion_pago.ultima_cuota_dev
-IS 'identifica la ultima cuota  del tipo devengado para alertar sobre ultimo pago, sellena atravez de un triguer en la tabla de plan de pagos';
-
-/***********************************F-SCP-RAC-TES-0-25/03/2015***************************************/
 
 /***********************************I-SCP-GSS-TES-0-23/04/2015***************************************/
 
@@ -985,15 +572,24 @@ CREATE TABLE tes.tts_libro_bancos (
   id_depto INTEGER, 
   sistema_origen VARCHAR(30), 
   comprobante_sigma VARCHAR(50), 
-  CONSTRAINT tts_libro_bancos_pkey PRIMARY KEY(id_libro_bancos)
+  id_int_comprobante INTEGER,
+  nro_deposito BIGINT NULL,
+  fondo_devolucion_retencion VARCHAR(2),
+  columna_pk VARCHAR(100),
+  columna_pk_valor INTEGER,
+  tabla VARCHAR(255),
+  id_proveedor INTEGER,
+  correo VARCHAR(100),
+  tabla_correo VARCHAR(200),
+  columna_correo VARCHAR(100),
+  id_columna_correo INTEGER,
+  CONSTRAINT tts_libro_bancos_pkey PRIMARY KEY(id_libro_bancos),
+  CONSTRAINT tts_libro_bancos_nro_deposito_key UNIQUE (nro_deposito)
 ) INHERITS (pxp.tbase)
 WITH (oids = false);
-
-ALTER TABLE tes.tts_libro_bancos
-  ADD COLUMN id_int_comprobante INTEGER;
-
 COMMENT ON COLUMN tes.tts_libro_bancos.id_int_comprobante
 IS 'comprobante de pago que corresponde al cheque';
+
 
 CREATE TABLE tes.tdepto_cuenta_bancaria (
   id_depto_cuenta_bancaria SERIAL, 
@@ -1005,54 +601,6 @@ CREATE TABLE tes.tdepto_cuenta_bancaria (
 WITH (oids = false);
 
 /***********************************F-SCP-GSS-TES-0-23/04/2015***************************************/
-
-/*****************************I-SCP-RCM-TES-0-17/04/2015*************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN id_depto_conta INTEGER;
-
-COMMENT ON COLUMN tes.tplan_pago.id_depto_conta
-IS 'define el depto de conta que contabiliza el pago, ...  no consideramos ep, cc (antes solo lo teneiamos en la obligacion de pago)';
-
-
-/*****************************F-SCP-RCM-TES-0-17/04/2015*************/
-
-
-
-
-
-/*****************************I-SCP-RAC-TES-0-12/05/2015*************/
-
-
---------------- SQL ---------------
-
--- object recreation
-ALTER TABLE tes.tobligacion_pago
-  DROP CONSTRAINT chk_tobligacion_pago__estado RESTRICT;
-
-ALTER TABLE tes.tobligacion_pago
-  ADD CONSTRAINT chk_tobligacion_pago__estado CHECK ((estado)::text = ANY (ARRAY[('borrador'::character varying)::text, ('registrado'::character varying)::text, ('en_pago'::character varying)::text, ('finalizado'::character varying)::text, ('vbpoa'::character varying)::text, ('vbpresupuestos'::character varying)::text, ('anulado'::character varying)::text]));
- 
- 
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN codigo_poa VARCHAR;
-
-COMMENT ON COLUMN tes.tobligacion_pago.codigo_poa
-IS 'Codigo de actividad POA';
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN obs_poa VARCHAR;
-
-COMMENT ON COLUMN tes.tobligacion_pago.obs_poa
-IS 'par ainsertar al guna observacion de POA';
-
-/*****************************F-SCP-RAC-TES-0-12/05/2015*************/
 
 
 /*****************************I-SCP-RAC-TES-0-12/06/2015*************/
@@ -1066,67 +614,16 @@ CREATE TABLE tes.tconcepto_excepcion (
   PRIMARY KEY(id_concepto_excepcion)
 ) INHERITS (pxp.tbase)
 ;
-
 ALTER TABLE tes.tconcepto_excepcion
   OWNER TO postgres;
 
 ALTER TABLE tes.tconcepto_excepcion
   ALTER COLUMN id_uo SET STATISTICS 0;
 
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN uo_ex VARCHAR(4) DEFAULT 'no' NOT NULL;
-
-COMMENT ON COLUMN tes.tobligacion_pago.uo_ex
-IS 'cuando la uo que aprueba se selecciona de la tabla de excepcion queda marcado como si';
 /*****************************F-SCP-RAC-TES-0-12/06/2015*************/
-
-/*****************************I-SCP-RAC-TES-0-1/07/2015*************/
-
---------------- SQL ---------------
-
- -- object recreation
-ALTER TABLE tes.tobligacion_pago
-  DROP CONSTRAINT chk_tobligacion_pago__tipo_obligacion RESTRICT;
-
-ALTER TABLE tes.tobligacion_pago
-  ADD CONSTRAINT chk_tobligacion_pago__tipo_obligacion CHECK ((tipo_obligacion)::text = ANY (ARRAY[('adquisiciones'::character varying)::text, ('pago_unico'::character varying)::text, ('pago_especial'::character varying)::text,('caja_chica'::character varying)::text, ('viaticos'::character varying)::text, ('fondos_en_avance'::character varying)::text, ('pago_directo'::character varying)::text, ('rrhh'::character varying)::text]));
-  
-/*****************************F-SCP-RAC-TES-0-1/07/2015*************/
-
-
 
 
 /*****************************I-SCP-JRR-TES-0-10/08/2015*************/
-
-ALTER TABLE tes.tcajero
-  ADD COLUMN fecha_inicio DATE NOT NULL;
-
-ALTER TABLE tes.tcajero
-  ADD COLUMN fecha_fin DATE;
- 
-ALTER TABLE tes.tcaja
-  DROP COLUMN importe_maximo;
-  
-ALTER TABLE tes.tcaja
-  DROP COLUMN porcentaje_compra;
-  
-ALTER TABLE tes.tcaja
-  DROP COLUMN codigo;
-  
-ALTER TABLE tes.tcaja
-  ADD COLUMN nombre VARCHAR(255) NOT NULL;
-  
-ALTER TABLE tes.tcaja
-  ADD COLUMN monto_fondo NUMERIC(18,2) NOT NULL;
-  
-ALTER TABLE tes.tcaja
-  ADD COLUMN monto_maximo_compra NUMERIC(18,2) NOT NULL;
-
-ALTER TABLE tes.tcaja
-  ADD COLUMN tipo_ejecucion VARCHAR(40) NOT NULL;
 
 CREATE TABLE tes.tsolicitud_efectivo (
   id_solicitud_efectivo SERIAL, 
@@ -1139,9 +636,52 @@ CREATE TABLE tes.tsolicitud_efectivo (
   nro_tramite VARCHAR(50) NOT NULL, 
   fecha DATE NOT NULL,
   monto NUMERIC(18,2), 
+  id_solicitud_efectivo_fk INTEGER,
+  id_funcionario_jefe_aprobador INTEGER,
+  id_gestion INTEGER,
+  fecha_entrega DATE,
+  ingreso_extra VARCHAR(4) DEFAULT 'no' NOT NULL,
+  id_tipo_solicitud INTEGER,
+  id_proceso_caja_repo INTEGER,
+  id_funcionario_finanzas INTEGER,
+  observaciones VARCHAR(1000),
+  id_proceso_caja_rend INTEGER,
+  ingreso_cd VARCHAR(4) DEFAULT 'no'::character varying NOT NULL,
+  fecha_ult_mov DATE,
+  fecha_entregado_ult DATE,
+  fecha_mod_bk DATE,
   CONSTRAINT pk_tsolicitud_efectivo__id_solicitud_efectivo PRIMARY KEY(id_solicitud_efectivo)
 ) INHERITS (pxp.tbase)
 WITHOUT OIDS;
+COMMENT ON COLUMN tes.tsolicitud_efectivo.id_funcionario_jefe_aprobador
+IS 'id del jefe que aprobo la solicitud de efectivo del solicitante';
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.fecha_entrega
+IS 'fecha de entrega del efectivo';
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.ingreso_extra
+IS 'indica si es un ingreso extraa la reposicion de caja, sollo valido para solicitudes de  tipo INGEFE,  cuando el valor es si, significa que viene deviaticos o cuenta docuemntada, o por ajuste';
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.id_proceso_caja_repo
+IS 'Indica el id_proceso_caja de tipo reposicion donde fue considerado el ingreso_extra = si, para solicitudes de  tipo INGEFE';
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.id_funcionario_finanzas
+IS 'id del funcionario de finanzas';
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.id_proceso_caja_repo
+IS 'Indica el id_proceso_caja de tipo reposicion donde fue considerado el ingreso_extra = si,';
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.id_proceso_caja_rend
+IS 'SOLO para ingresos identifica el proceso de caja donde se incluye la rendicion del ingreso de efectivo';
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.ingreso_cd
+IS 'Para marcar las solicitudes de Ingreso generadas desde sistema de cuenta documentada';
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.fecha_ult_mov
+IS 'fecha de ultimo omivimeitno se carga a travez de un triguer las pasar por ciertos estados';
+
+COMMENT ON COLUMN tes.tsolicitud_efectivo.fecha_entregado_ult
+IS 'fecha de ultimo entregado';
 
 CREATE TABLE tes.tsolicitud_efectivo_det (
   id_solicitud_efectivo_det SERIAL, 
@@ -1157,8 +697,7 @@ WITHOUT OIDS;
 
 CREATE TABLE tes.tproceso_caja (
   id_proceso_caja SERIAL, 
-  id_comprobante_diario INTEGER,
-  id_comprobante_pago INTEGER,
+  id_int_comprobante INTEGER,
   id_proceso_wf INTEGER NOT NULL,
   id_estado_wf INTEGER NOT NULL,
   id_caja INTEGER NOT NULL, 
@@ -1168,10 +707,43 @@ CREATE TABLE tes.tproceso_caja (
   fecha DATE NOT NULL,
   monto_reposicion NUMERIC(18,2), 
   tipo VARCHAR(50) NOT NULL, 
+  fecha_inicio DATE,
+  fecha_fin DATE,
+  id_depto_conta INTEGER,
+  id_gestion INTEGER,
+  id_tipo_proceso_caja INTEGER,
+  id_proceso_caja_fk INTEGER,
+  id_solicitud_efectivo_rel INTEGER,
+  id_proceso_caja_repo INTEGER,
+  id_cuenta_bancaria INTEGER,
+  id_cuenta_bancaria_mov INTEGER,
+  num_memo VARCHAR,
+  monto NUMERIC(18,2),
+  monto_ren_ingreso NUMERIC DEFAULT 0 NOT NULL,
   CONSTRAINT pk_tproceso_caja__id_proceso_caja PRIMARY KEY(id_proceso_caja)
 ) INHERITS (pxp.tbase)
 WITHOUT OIDS;
   
+  COMMENT ON COLUMN tes.tproceso_caja.id_depto_conta
+IS 'hace referencia donde  se contabiliza el proceso';
+
+COMMENT ON COLUMN tes.tproceso_caja.id_gestion
+IS 'gestion del proceso';
+
+COMMENT ON COLUMN tes.tproceso_caja.id_tipo_proceso_caja
+IS 'hace referencia al tipo de proceso de caja';
+
+COMMENT ON COLUMN tes.tproceso_caja.id_proceso_caja_fk
+IS 'hace referencia al proceso de caja origen';
+
+COMMENT ON COLUMN tes.tproceso_caja.id_solicitud_efectivo_rel
+IS 'en lso procesos de  apertura, reposición o cierre se inserta un registro en solicitud efectivo para facilitar el arqueo de caja';
+
+COMMENT ON COLUMN tes.tproceso_caja.id_proceso_caja_repo
+IS 'id del proceso de caja que identifica el proceso con el que se repone la rendiciones sueltas';
+
+COMMENT ON COLUMN tes.tproceso_caja.monto_ren_ingreso
+IS 'monto acumulado de recibo de ingreso a caja que deben ser contabilizados, hecho para rendiciones de fondos o viaticos';
 /*****************************F-SCP-JRR-TES-0-10/08/2015*************/
 
 
@@ -1201,21 +773,6 @@ WITHOUT OIDS;
 
 /*****************************F-SCP-JRR-TES-0-25/08/2015*************/
 
-
-/*****************************I-SCP-RAC-TES-0-11/08/2015*************/
-
-
---------------- SQL ---------------
-
-DROP VIEW IF EXISTS tes.vcomp_devtesprov_plan_pago;
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ALTER COLUMN tipo_cambio_conv TYPE NUMERIC;
-  
-  
-/*****************************F-SCP-RAC-TES-0-22/08/2015*************/
-
 /*****************************I-SCP-GSS-TES-0-20/11/2016*************/
 CREATE TABLE tes.tsolicitud_rendicion_det (
   id_solicitud_rendicion_det SERIAL, 
@@ -1230,158 +787,6 @@ WITHOUT OIDS;;
 
 /*****************************F-SCP-GSS-TES-0-20/11/2016*************/
 
-/*****************************I-SCP-GSS-TES-0-21/01/2016*************/
-ALTER TABLE tes.tcaja
-  ADD COLUMN id_cuenta_bancaria INTEGER;
-  
-ALTER TABLE tes.tcaja
-  RENAME COLUMN nombre TO codigo;
-
-ALTER TABLE tes.tcaja
-  ALTER COLUMN codigo TYPE VARCHAR(20);
-  
-ALTER TABLE tes.tcaja
-  ALTER COLUMN estado SET DEFAULT 'cerrado';
-  
-ALTER TABLE tes.tcaja
-  RENAME COLUMN monto_fondo TO importe_maximo;
-  
-ALTER TABLE tes.tcaja
-  RENAME COLUMN monto_maximo_compra TO porcentaje_compra;
-
-ALTER TABLE tes.tcaja
-  ALTER COLUMN porcentaje_compra TYPE NUMERIC(6,2);
-
-ALTER TABLE tes.tcaja
-  ALTER COLUMN tipo_ejecucion TYPE VARCHAR(25);
-  
-/*****************************F-SCP-GSS-TES-0-21/01/2016*************/
-
-/*****************************I-SCP-GSS-TES-0-29/01/2016*************/
-
-ALTER TABLE tes.tproceso_caja
-  ADD COLUMN fecha_inicio DATE;
-
-ALTER TABLE tes.tproceso_caja
-  ADD COLUMN fecha_fin DATE;
-  
-ALTER TABLE tes.tsolicitud_efectivo_det
-  ALTER COLUMN id_partida_ejecucion DROP NOT NULL;
-  
-/*****************************F-SCP-GSS-TES-0-29/01/2016*************/
-
-
-  
-/*****************************I-SCP-RAC-TES-0-22/03/2016*************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tproceso_caja
-  ADD COLUMN id_depto_conta INTEGER;
-
-COMMENT ON COLUMN tes.tproceso_caja.id_depto_conta
-IS 'hace referencia donde  se contabiliza el proceso';
-
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tproceso_caja
-  ADD COLUMN id_gestion INTEGER;
-
-COMMENT ON COLUMN tes.tproceso_caja.id_gestion
-IS 'gestion del proceso';
-
-
-/*****************************F-SCP-RAC-TES-0-22/03/2016*************/
-
-/*****************************I-SCP-GSS-TES-0-28/03/2016*************/
-
-ALTER TABLE tes.tproceso_caja
-  RENAME COLUMN id_comprobante_pago TO id_int_comprobante;
-
-ALTER TABLE tes.tproceso_caja
-  DROP COLUMN id_comprobante_diario;
-
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tcaja
-  ADD COLUMN fecha_apertura DATE;
-
-COMMENT ON COLUMN tes.tcaja.fecha_apertura
-IS 'ultima fecha de apertura de caja';
-
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tcaja
-  ADD COLUMN fecha_cierre DATE;
-
-COMMENT ON COLUMN tes.tcaja.fecha_cierre
-IS 'ultima fecha de cierre de caja';
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tproceso_caja
-  ADD COLUMN id_tipo_proceso_caja INTEGER;
-
-COMMENT ON COLUMN tes.tproceso_caja.id_tipo_proceso_caja
-IS 'hace referencia al tipo de proceso de caja';
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tproceso_caja
-  ADD COLUMN id_proceso_caja_fk INTEGER;
-
-COMMENT ON COLUMN tes.tproceso_caja.id_proceso_caja_fk
-IS 'hace referencia al proceso de caja origen';
-
--------------- SQL -------------------
-
-ALTER TABLE tes.tcaja
-  ADD UNIQUE (codigo);
-
---------------- SQL ------------------
-
-
-ALTER TABLE tes.tsolicitud_efectivo
-  ADD COLUMN id_solicitud_efectivo_fk INTEGER;
-  
-  --------------- SQL ---------------
-
-ALTER TABLE tes.tproceso_caja
-  ADD COLUMN id_solicitud_efectivo_rel INTEGER;
-
-COMMENT ON COLUMN tes.tproceso_caja.id_solicitud_efectivo_rel
-IS 'en lso procesos de  apertura, reposición o cierre se inserta un registro en solicitud efectivo para facilitar el arqueo de caja';
-  
-/*****************************F-SCP-GSS-TES-0-28/03/2016*************/
-
-
-/*****************************I-SCP-GSS-TES-0-28/04/2016*************/
-
-  --------------- SQL ---------------
-ALTER TABLE tes.tsolicitud_efectivo
-ADD COLUMN id_funcionario_jefe_aprobador INTEGER;
-
-COMMENT ON COLUMN tes.tsolicitud_efectivo.id_funcionario_jefe_aprobador
-IS 'id del jefe que aprobo la solicitud de efectivo del solicitante';
-  
-/*****************************F-SCP-GSS-TES-0-28/04/2016*************/
-
-
-
-/*****************************I-SCP-RAC-TES-0-04/05/2016*************/
---------------- SQL ---------------
-
-ALTER TABLE tes.tproceso_caja
-  ADD COLUMN id_proceso_caja_repo INTEGER;
-
-COMMENT ON COLUMN tes.tproceso_caja.id_proceso_caja_repo
-IS 'id del proceso de caja que identifica el proceso con el que se repone la rendiciones sueltas';
-
-
-/*****************************F-SCP-RAC-TES-0-04/05/2016*************/
 
 /*****************************I-SCP-GSS-TES-0-05/05/2016*************/
 ---------------- SQL ---------------
@@ -1396,68 +801,10 @@ CREATE TABLE tes.ttipo_solicitud (
 
 WITH (oids = false);
 
-ALTER TABLE tes.tproceso_caja
-  ADD COLUMN id_cuenta_bancaria INTEGER;
 
-ALTER TABLE tes.tproceso_caja
-  ADD COLUMN id_cuenta_bancaria_mov INTEGER;
 
 /*****************************F-SCP-GSS-TES-0-05/05/2016*************/
 
-
-/*****************************I-SCP-GSS-TES-0-24/05/2016*************/
-
----------------- SQL ---------------
-ALTER TABLE tes.tfinalidad
-  ADD COLUMN tipo VARCHAR;
-
-COMMENT ON COLUMN tes.tfinalidad.tipo
-IS 'ingreso o egreso';
- 
-/*****************************F-SCP-GSS-TES-0-24/05/2016*************/
-
-
-/*****************************I-SCP-GSS-TES-0-30/05/2016*************/
-
----------------- SQL ---------------
-ALTER TABLE tes.tfinalidad
-  ADD COLUMN sw_tipo_interfaz VARCHAR(50)[];
- 
-/*****************************F-SCP-GSS-TES-0-30/05/2016*************/
-
-/*****************************I-SCP-GSS-TES-0-08/06/2016*************/
-
-  --------------- SQL ---------------
-ALTER TABLE tes.tsolicitud_efectivo
-ADD COLUMN id_gestion INTEGER;
-
-  --------------- SQL ---------------
-ALTER TABLE tes.tsolicitud_efectivo
-ADD COLUMN id_tipo_solicitud INTEGER;
-
-  --------------- SQL ---------------
-ALTER TABLE tes.tsolicitud_efectivo
-ADD COLUMN fecha_entrega DATE;
-
-COMMENT ON COLUMN tes.tsolicitud_efectivo.fecha_entrega
-IS 'fecha de entrega del efectivo';
-
-  --------------- SQL ---------------
-ALTER TABLE tes.tproceso_caja
-ADD COLUMN num_memo VARCHAR;
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tcaja
-  ADD COLUMN id_depto_lb INTEGER;
-
-ALTER TABLE tes.tcaja
-  RENAME COLUMN importe_maximo TO importe_maximo_caja;
- 
-ALTER TABLE tes.tcaja
-  RENAME COLUMN porcentaje_compra TO importe_maximo_item;
-
-/*****************************F-SCP-GSS-TES-0-08/06/2016*************/
 
 /*****************************I-SCP-GSS-TES-0-15/06/2016*************/
 
@@ -1477,41 +824,6 @@ WITHOUT OIDS;
 
 /*****************************F-SCP-GSS-TES-0-15/06/2016*************/
 
-/*****************************I-SCP-GSS-TES-0-23/06/2016*************/
-
-ALTER TABLE tes.tcaja
-  ADD COLUMN dias_maximo_rendicion INTEGER;
- 
-ALTER TABLE tes.tts_libro_bancos
-  ADD COLUMN nro_deposito INTEGER UNIQUE;
-  
-/*****************************F-SCP-GSS-TES-0-23/06/2016*************/
-
-
-/*****************************I-SCP-GSS-TES-0-22/08/2016*************/
-
-
-
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tts_libro_bancos
-  ADD COLUMN fondo_devolucion_retencion VARCHAR(2);
-  
-  --------------- SQL ---------------
-
-ALTER TABLE tes.tts_libro_bancos
-  ADD COLUMN columna_pk VARCHAR(100);
-  
-  
-  --------------- SQL ---------------
-
-ALTER TABLE tes.tts_libro_bancos
-  ADD COLUMN columna_pk_valor INTEGER;
-
-
-
-/*****************************F-SCP-GSS-TES-0-22/08/2016*************/
 
 /*****************************I-SCP-GSS-TES-0-16/12/2016*************/
 
@@ -1541,37 +853,6 @@ WITH (oids = false);
 /*****************************F-SCP-GSS-TES-0-15/03/2017*************/
 
 
-
-/*****************************I-SCP-RAC-TES-0-26/07/2017*************/
-
- -- object recreation
-ALTER TABLE tes.tobligacion_pago
-  DROP CONSTRAINT chk_tobligacion_pago__tipo_obligacion RESTRICT;
-
-ALTER TABLE tes.tobligacion_pago
-  ADD CONSTRAINT chk_tobligacion_pago__tipo_obligacion CHECK ((tipo_obligacion)::text = ANY (ARRAY[ ('adquisiciones'::character varying)::text, ('pago_unico'::character varying)::text, ('pago_especial'::character varying)::text, ('caja_chica'::character varying)::text, ('viaticos'::character varying)::text, ('fondos_en_avance'::character varying)::text, ('pago_directo'::character varying)::text, ('rrhh'::character varying)::text]));
-
-
-/*****************************F-SCP-RAC-TES-0-26/07/2017*************/
-
-
-
-
-
-/*****************************I-SCP-RAC-TES-0-09/08/2017*************/
-
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN id_funcionario_responsable INTEGER;
-  
- 
-/*****************************F-SCP-RAC-TES-0-09/08/2017*************/
-
-
-
-
 /*****************************I-SCP-RAC-TES-0-18/08/2017*************/
 
 
@@ -1598,33 +879,6 @@ IS 'depto de libro de bancos';
   
   
   
-/*****************************I-SCP-RAC-TES-0-05/12/2017*************/
-  
-  --------------- SQL ---------------  esta columnas se aumenta para considerar en la reposicon los ignresos de caja extra
-
-ALTER TABLE tes.tsolicitud_efectivo
-  ADD COLUMN ingreso_extra VARCHAR(4) DEFAULT 'no' NOT NULL;
-
-COMMENT ON COLUMN tes.tsolicitud_efectivo.ingreso_extra
-IS 'indica si es un ingreso extraa la reposicion de caja, sollo valido para solicitudes de  tipo INGEFE,  cuando el valor es si, significa que viene deviaticos o cuenta docuemntada, o por ajuste';
-
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tsolicitud_efectivo
-  ADD COLUMN id_proceso_caja_repo INTEGER;
-
-COMMENT ON COLUMN tes.tsolicitud_efectivo.id_proceso_caja_repo
-IS 'Indica el id_proceso_caja de tipo reposicion donde fue considerado el ingreso_extra = si, para solicitudes de  tipo INGEFE';
-
-  
-/*************************F-SCP-RAC-TES-0-05/12/2017*************/
- 
-
-
-
-
-
 /*************************I-SCP-RAC-TES-0-25/01/2018*************/
 
 CREATE TABLE tes.tplan_pago_doc_compra (
@@ -1638,27 +892,7 @@ WITH (
     OIDS = FALSE
 );
 
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN fin_forzado VARCHAR(2) DEFAULT 'no' NOT NULL;
-
-COMMENT ON COLUMN tes.tobligacion_pago.fin_forzado
-IS 'si o no, se marca como si si es que la obligacion fue forzada a finalizar con anticpos o retenciones  o pagos pendientes';
-
-
-
 /*************************F-SCP-RAC-TES-0-25/01/2018*************/
-
-
-/*************************I-SCP-JUAN-TES-0-26/01/2018*************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tts_libro_bancos
-  ADD COLUMN tabla VARCHAR(255);
-
-/*************************F-SCP-JUAN-TES-0-26/10/2018*************/ 
 
 
 /*************************I-SCP-RAC-TES-0-01/12/2018*************/
@@ -1708,277 +942,8 @@ CREATE TABLE tes.tsolicitud_transferencia (
 WITH (oids = false);
 
 
-COMMENT ON COLUMN tes.tobligacion_pago.id_funcionario_responsable
-IS 'Funcionario que esta a cargo del plan de pagos cuando el solicitante original designa por alguna razon deja sus funciones o esta de vacion asigna a otro funcionario para que este continue con los pagos pendientes.';
-
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN monto_total_adjudicado NUMERIC(19,2);
-
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN total_anticipo NUMERIC(19,2);
-
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN pedido_sap VARCHAR(100);
-
-
-
-ALTER TABLE tes.ttipo_plan_pago
-  ADD COLUMN tipo_ejecucion VARCHAR(20);
-
-COMMENT ON COLUMN tes.ttipo_plan_pago.tipo_ejecucion
-IS 'bandera que permite marcar cuales devengan, pagan o no ejecutan para ser considerados en el reporte de gary';
-
-ALTER TABLE tes.tcaja
-  ALTER COLUMN importe_maximo_item TYPE NUMERIC(18,2);
-
-
-ALTER TABLE tes.tplan_pago
-  ALTER COLUMN nro_cheque SET DEFAULT 0;
-  
-  ALTER TABLE tes.tplan_pago
-  ADD COLUMN monto_anticipar_sg NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tplan_pago.monto_anticipar_sg
-IS 'monto anticipar que puede ser aplicado con otro comprobante  o puede ser llevado al gasto en la siguiente gestion,  si este valor es mayor a cero al cerrar la obligacion de pagos y no a sido totalmente aplicado, debe crearce una obligacion de pago extentida  para la siguiente gestion con un plan de pagos del tipo anticipo en estado anticipado por la suma de estos valores en registors activos';
-
-  
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN observaciones_pago TEXT;
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN es_ultima_cuota BOOLEAN;
-
-COMMENT ON COLUMN tes.tplan_pago.es_ultima_cuota
-IS 'Campo que nos sirve para verificar si es la ultima cuota de pago.';
-
-ALTER TABLE tes.tplan_pago
-  ADD COLUMN pago_borrador VARCHAR(50) DEFAULT 'no'::character varying NOT NULL;
-
-
-
-ALTER TABLE tes.tproceso_caja
-  ADD COLUMN monto NUMERIC(18,2);
-
-
-ALTER TABLE tes.tproceso_caja
-  ADD COLUMN monto_ren_ingreso NUMERIC DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tproceso_caja.monto_ren_ingreso
-IS 'monto acumulado de recibo de ingreso a caja que deben ser contabilizados, hecho para rendiciones de fondos o viaticos';
-
-
-ALTER TABLE tes.tsolicitud_efectivo
-  ADD COLUMN id_funcionario_finanzas INTEGER;
-
-COMMENT ON COLUMN tes.tsolicitud_efectivo.id_funcionario_finanzas
-IS 'id del funcionario de finanzas';
-
-COMMENT ON COLUMN tes.tsolicitud_efectivo.id_proceso_caja_repo
-IS 'Indica el id_proceso_caja de tipo reposicion donde fue considerado el ingreso_extra = si,';
-
-ALTER TABLE tes.tsolicitud_efectivo
-  ADD COLUMN observaciones VARCHAR(1000);
-
-
-ALTER TABLE tes.tsolicitud_efectivo
-  ADD COLUMN id_proceso_caja_rend INTEGER;
-
-COMMENT ON COLUMN tes.tsolicitud_efectivo.id_proceso_caja_rend
-IS 'SOLO para ingresos identifica el proceso de caja donde se incluye la rendicion del ingreso de efectivo';
-
-ALTER TABLE tes.tsolicitud_efectivo
-  ADD COLUMN ingreso_cd VARCHAR(4) DEFAULT 'no'::character varying NOT NULL;
-
-COMMENT ON COLUMN tes.tsolicitud_efectivo.ingreso_cd
-IS 'Para marcar las solicitudes de Ingreso generadas desde sistema de cuenta documentada';
-
-
-ALTER TABLE tes.tsolicitud_efectivo
-  ADD COLUMN fecha_ult_mov DATE;
-
-COMMENT ON COLUMN tes.tsolicitud_efectivo.fecha_ult_mov
-IS 'fecha de ultimo omivimeitno se carga a travez de un triguer las pasar por ciertos estados';
-
-
-ALTER TABLE tes.tsolicitud_efectivo
-  ADD COLUMN fecha_entregado_ult DATE;
-
-COMMENT ON COLUMN tes.tsolicitud_efectivo.fecha_entregado_ult
-IS 'fecha de ultimo entregado';
-
-
-ALTER TABLE tes.tsolicitud_efectivo
-  ADD COLUMN fecha_mod_bk DATE;
-
-ALTER TABLE tes.tsolicitud_efectivo_det
-  ALTER COLUMN id_partida_ejecucion SET NOT NULL;
-
-
-ALTER TABLE tes.tts_libro_bancos
-  ADD CONSTRAINT tts_libro_bancos_fk FOREIGN KEY (id_libro_bancos_fk)
-    REFERENCES tes.tts_libro_bancos(id_libro_bancos)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
- 
-
-
-ALTER TABLE tes.tsolicitud_efectivo
-  ADD CONSTRAINT tsolicitud_efectivo__id_proceso_caja_red_fk FOREIGN KEY (id_proceso_caja_repo)
-    REFERENCES tes.tproceso_caja(id_proceso_caja)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-ALTER TABLE tes.tplan_pago
-  ADD CONSTRAINT fk_tplan_pago__id_cuenta_bancaria_mov FOREIGN KEY (id_cuenta_bancaria_mov)
-    REFERENCES tes.tts_libro_bancos(id_libro_bancos)
-    MATCH FULL
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-
-
-ALTER TABLE tes.tcaja_funcionario
-  ADD CONSTRAINT fk_tcaja_usuario__id_caja FOREIGN KEY (id_caja)
-    REFERENCES tes.tcaja(id_caja)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-    NOT DEFERRABLE;
-
-
--- object recreation
-ALTER TABLE tes.tobligacion_pago
-  DROP CONSTRAINT chk_tobligacion_pago__estado RESTRICT;
-
-ALTER TABLE tes.tobligacion_pago
-  ADD CONSTRAINT chk_tobligacion_pago__estado CHECK ((estado)::text = ANY (ARRAY[('liberacion'::character varying)::text, ('borrador'::character varying)::text, ('registrado'::character varying)::text, ('en_pago'::character varying)::text, ('finalizado'::character varying)::text, ('vbpoa'::character varying)::text, ('vbpresupuestos'::character varying)::text, ('anulado'::character varying)::text]));
-
-
-
-ALTER TABLE tes.tobligacion_pago
-  DROP CONSTRAINT chk_tobligacion_pago__tipo_obligacion RESTRICT;
-
-ALTER TABLE tes.tobligacion_pago
-  ADD CONSTRAINT chk_tobligacion_pago__tipo_obligacion CHECK ((tipo_obligacion)::text = ANY (ARRAY[('adquisiciones'::character varying)::text, ('pago_unico'::character varying)::text, ('pago_especial'::character varying)::text, ('caja_chica'::character varying)::text, ('viaticos'::character varying)::text, ('fondos_en_avance'::character varying)::text, ('pago_directo'::character varying)::text, ('rrhh'::character varying)::text]));
-
 
 
 
 /*************************F-SCP-RAC-TES-0-01/12/2018*************/
 
-
-/*************************I-SCP-CAP-TES-0-06/12/2018*************/
-
-ALTER TABLE tes.tobligacion_pago
-  ALTER COLUMN monto_ajuste_ret_garantia_ga DROP NOT NULL;
-
-ALTER TABLE tes.tobligacion_pago
-  ALTER COLUMN monto_ajuste_ret_anticipo_par_ga DROP NOT NULL;
-
-
-/*************************F-SCP-CAP-TES-0-06/12/2018*************/
-
-
-
-/*************************I-SCP-CAP-TES-7890-13/12/2018*************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN monto_sg_mo NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tobligacion_pago.monto_sg_mo
-IS 'monto para ser pagado en la sigueinbte gestion,  este monto no sera comprometido,  se prorrate entr_monto_sg_mo en la tabla obligacion_det';
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_det
-  ADD COLUMN monto_pago_sg_mo NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tobligacion_det.monto_pago_sg_mo
-IS 'monto a pagar siguiente gestion en moneda original, este monto no comprometera presupuesto';
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_det
-  ADD COLUMN monto_pago_sg_mb NUMERIC(19,2) DEFAULT 0 NOT NULL;
-
-COMMENT ON COLUMN tes.tobligacion_det.monto_pago_sg_mb
-IS 'monto para la siguiente gestion en moenda base, este monto no comprometera presupuestos';
-
-/*************************F-SCP-CAP-TES-7890-13/12/2018*************/
-
-
-
-/*************************I-SCP-RAC-TES-12-13/12/2018*************/
-
---------------- SQL ---------------
-
-ALTER TABLE tes.tobligacion_pago
-  ADD COLUMN comprometer_iva VARCHAR(2) DEFAULT 'si' NOT NULL;
-
-COMMENT ON COLUMN tes.tobligacion_pago.comprometer_iva
-IS 'si esta bandera esta habilita le resta el 13% del iva al momento de comproemter la obligacion de pago,   solo es validao para los que nacen en tesoreria, no considerado para lso que vienes de adquisiciones';
-
-
-/*************************F-SCP-RAC-TES-12-13/12/2018*************/
-
-/*************************I-SCP-VAN-TES-13-06/12/2019*************/
-alter table tes.tplan_pago
-	add codigo_tipo_anticipo varchar(50) default null;
-/*************************F-SCP-VAN-TES-13-06/12/2019*************/
-
-/*************************I-SCP-JUAN-TES-13-30/01/2020*************/
-ALTER TABLE tes.tobligacion_pago--#48
-  ADD COLUMN cod_tipo_relacion VARCHAR(50);--#48
-/*************************F-SCP-JUAN-TES-13-30/01/2020*************/
-
-
-/*************************I-SCP-MZM-TES-67-17/08/2020*************/
-ALTER TABLE tes.tts_libro_bancos
-  ADD COLUMN id_proveedor INTEGER;
-/*************************F-SCP-MZM-TES-67-17/08/2020*************/
-
-/*************************I-SCP-MZM-TES-67-02/09/2020*************/
-ALTER TABLE tes.tts_libro_bancos
-  ADD COLUMN correo VARCHAR(100);
-  
-ALTER TABLE tes.tts_libro_bancos
-  ADD COLUMN tabla_correo VARCHAR(200);
-  
-ALTER TABLE tes.tts_libro_bancos
-  ADD COLUMN columna_correo VARCHAR(100);
-  
-ALTER TABLE tes.tts_libro_bancos
-  ADD COLUMN id_columna_correo INTEGER;  
-  
-/*************************F-SCP-MZM-TES-67-02/09/2020*************/
-/*************************I-SCP-EGS-TES-1-24/11/2020*************/
-ALTER TABLE tes.tplan_pago
-    ADD COLUMN fecha_documento DATE;
-ALTER TABLE tes.tplan_pago
-    ADD COLUMN fecha_derivacion DATE;
-ALTER TABLE tes.tplan_pago
-    ADD COLUMN "dias_limite" INTEGER;
-
-COMMENT ON COLUMN tes.tplan_pago."dias_limite"
-    IS 'Dias habiles limite para el pago contractual';
-/*************************F-SCP-EGS-TES-1-24/11/2020*************/
-/*************************I-SCP-EGS-TES-ETR-1914-03/12/2020*************/
-
-ALTER TABLE tes.tplan_pago
-    ADD COLUMN fecha_vencimiento DATE;
-/*************************F-SCP-EGS-TES-ETR-1914-03/12/2020*************/
-
-/*************************I-SCP-YMR-TES-ETR-4227-11/06/2021*************/
-
-alter table tes.tobligacion_pago
- add column id_funcionario_gestor integer;
-
-/*************************F-SCP-YMR-TES-ETR-4227-11/06/2021*************/

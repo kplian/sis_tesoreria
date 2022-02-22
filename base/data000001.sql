@@ -498,7 +498,7 @@ INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")VALUES
 
 /***********************************I-DAT-RAC-TES-7890-19/11/2017*****************************************/
 
-select wf.f_import_ttipo_proceso_origen ('insert','CON','LEGAL','TOPD','finalizado','manual','');
+/*select wf.f_import_ttipo_proceso_origen ('insert','CON','LEGAL','TOPD','finalizado','manual','');*/
 select wf.f_import_ttipo_proceso_origen ('insert','TOPD','TES-PD','CON','finalizado','manual','');
 select wf.f_import_ttipo_proceso_origen ('insert','TOPD','TES-PD','TOPD','finalizado','manual','');
 
